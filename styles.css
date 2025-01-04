@@ -1,0 +1,137 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+header {
+    background-color: white;
+    color: #004080;
+    text-align: center;
+    padding: 10px 0;
+    height: 150px;
+    position: relative;
+    border-bottom: 4px solid #004080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+header img {
+    height: 130px;
+}
+
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.filter-input {
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.filter-select {
+    padding: 10px;
+    flex: 1;
+    box-sizing: border-box;
+}
+
+.slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.slider-row label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider-row input[type="range"] {
+    flex: 1;
+    width: 100%; /* Make the slider span the full width of its container */
+}
+
+.slider-row span {
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+
+.section {
+    margin-bottom: 40px;
+}
+
+h2 {
+    background-color: #004080;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* General table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    word-wrap: break-word; /* Ensure long content breaks within cells */
+    overflow-wrap: break-word; /* Browser compatibility for word wrapping */
+    hyphens: auto; /* Add hyphenation for better wrapping (optional) */
+}
+
+/* Table header styling */
+th {
+    background-color: #004080; /* Blue background for table headers */
+    color: white;             /* White text for contrast */
+    font-weight: bold;        /* Emphasize the header */
+    white-space: normal;      /* Allow wrapping in headers */
+}
+
+/* Consistent column widths across all tables */
+table thead tr th, table tbody tr td {
+    white-space: normal; /* Allow content to wrap in both headers and cells */
+}
+
+/* Prevent text overflow */
+td {
+    max-width: 1px; /* Forces word wrapping to occur when necessary */
+    overflow: hidden; /* Ensures content doesn’t spill out of cells */
+}
+
+
+
+
+/* table colgroup col:nth-child(1) { width: 5%; } /* Example: ID column */
+/* table colgroup col:nth-child(2) { width: 20%; } /* Example: Treatment */
+/* table colgroup col:nth-child(3) { width: 15%; } /* Example: Nutzen */
+/* table colgroup col:nth-child(4) { width: 15%; } /* Example: Wirkgeschwindigkeit */
+/* table colgroup col:nth-child(5) { width: 15%; } /* Example: Aufwand */
+/* table colgroup col:nth-child(6) { width: 15%; } /* Example: Kosten min */
+/* table colgroup col:nth-child(7) { width: 15%; } /* Example: Kosten max */
+/* table colgroup col:nth-child(8) { width: auto; } /* Example: Crashrisiko */
+
+
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin: 20px 0;
+}

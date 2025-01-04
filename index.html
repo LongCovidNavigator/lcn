@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Covid Navigator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <img src="assets/images/Logo_v001.png" alt="Long Covid Navigator Logo" onerror="showError('Logo file (Logo_v001.png) ist nicht verfügbar oder nicht zugänglich!')">
+    </header>
+    <div class="container">
+        <div class="controls">
+			<input type="text" id="search-input" class="filter-input" placeholder="Suche in der Tabelle...">
+			<select id="nutzen-filter" class="filter-select">
+				<option value="">Filtere nach Nutzen...</option>
+				<option value="sehr hoch">sehr hoch</option>
+				<option value="hoch">hoch</option>
+				<option value="mittel">mittel</option>
+				<option value="gering">gering</option>
+			</select>
+			<select id="wirkgeschwindigkeit-filter" class="filter-select">
+				<option value="">Filtere nach Wirkgeschwindigkeit...</option>
+				<option value="sofort">sofort</option>
+				<option value="schnell">schnell</option>
+				<option value="mittel">mittel</option>
+				<option value="langsam">langsam</option>
+				<option value="unbekannt">unbekannt</option>
+			</select>
+			<select id="crashrisiko-filter" class="filter-select">
+				<option value="">Filtere nach Crashrisiko...</option>
+				<option value="gering">gering</option>
+				<option value="mittel">mittel</option>
+				<option value="hoch">hoch</option>
+				<option value="sehr hoch">sehr hoch</option>
+			</select>
+		</div>
+		<div class="slider-row">
+			<label>Max Kosten min: 
+				<input type="range" id="kosten-min-slider" min="0" max="dynamic" value="0">
+			</label>
+			<span id="kosten-min-value">0</span>
+			<label>Max Kosten max: 
+				<input type="range" id="kosten-max-slider" min="0" max="dynamic" value="100">
+			</label>
+			<span id="kosten-max-value">100</span>
+		</div>
+
+        <div id="sections-container">
+            <!-- Dynamically loaded sections -->
+        </div>
+        <div id="error-log" class="error-message"></div>
+    </div>
+    <script src="scripts/filters.js"></script>
+    <script src="scripts/data.js"></script>
+</body>
+</html>
