@@ -3,34 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Long Covid Navigator</title>
+    <title>Long Covid Navigator - LCN-Protokoll</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Hide the main content initially */
-        #content {
-            display: none;
-        }
-        #password-prompt {
-            text-align: center;
-            margin-top: 100px;
-        }
-    </style>
 </head>
 <body>
-    <!-- Password Prompt -->
-    <div id="password-prompt">
-        <h1>Passwort erforderlich</h1>
-        <input type="password" id="password-input" placeholder="Passwort eingeben">
-        <button onclick="checkPassword()">Bestätigen</button>
-        <p id="error-message" style="color: red; display: none;">Falsches Passwort. Bitte versuchen Sie es erneut.</p>
-    </div>
+    <header>
+        <img src="assets/images/Logo_v001.png" alt="Long Covid Navigator Logo" onerror="showError('Logo file (Logo_v001.png) ist nicht verfügbar oder nicht zugänglich!')">
+    </header>
+	
+    <nav>
+		<ul>
+			<li><a href="index.html">LCN-Protokoll</a></li>
+			<li><a href="uebersicht.html">Übersicht</a></li>
+		</ul>
+	</nav>
+	
+    <div class="container">
 
-    <!-- Main Content -->
-    <div id="content">
-        <header>
-            <img src="assets/images/Logo_v001.png" alt="Long Covid Navigator Logo" onerror="showError('Logo file (Logo_v001.png) ist nicht verfügbar oder nicht zugänglich!')">
-        </header>
-        <div class="container">
+
             <div class="controls">
                 <input type="text" id="search-input" class="filter-input" placeholder="Suche in der Tabelle...">
                 <select id="nutzen-filter" class="filter-select">

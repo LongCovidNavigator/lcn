@@ -21,6 +21,48 @@ header {
 header img {
     height: 130px;
 }
+/* Navigation menu */
+nav {
+    background-color: #004080; /* Blue background */
+    padding: 10px 0; /* Add padding around the menu */
+    border-bottom: 2px solid #002050; /* Dividing line */
+}
+
+nav ul {
+    list-style: none; /* Remove bullet points */
+    margin: 0;
+    padding: 0;
+    display: flex; /* Arrange items in a row */
+    justify-content: center; /* Center the menu items */
+    gap: 15px; /* Add spacing between menu items */
+}
+
+nav ul li {
+    display: inline-block; /* Ensure buttons are inline */
+}
+
+nav ul li a {
+    display: inline-block; /* Make the link behave like a button */
+    color: white; /* White text */
+    text-decoration: none; /* Remove underline */
+    font-size: 18px; /* Adjust font size */
+    font-weight: bold; /* Make text bold */
+    background-color: #0066cc; /* Button background color */
+    padding: 10px 20px; /* Padding inside the button */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+nav ul li a:hover {
+    background-color: #003366; /* Darker shade on hover */
+}
+
+/* Optional: Add margin between the menu and body */
+.container {
+    margin-top: 20px;
+}
+
+
 
 .container {
     padding: 20px;
