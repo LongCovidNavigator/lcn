@@ -11,6 +11,8 @@ function applyFilters() {
         // Define hierarchies
         const nutzenHierarchy = ["sehr hoch", "hoch", "mittel", "gering"];
         const wirkgeschwindigkeitHierarchy = ["sofort", "schnell", "mittel", "langsam", "unbekannt"];
+        const crashrisikoHierarchy = ["gering", "mittel", "hoch", "sehr hoch"];
+
 
         // Get all tables in the sections container
         const tables = document.querySelectorAll("#sections-container table");
@@ -61,14 +63,25 @@ function applyFilters() {
                 const kostenMaxCell = parseFloat(row.querySelector("td:nth-child(7)")?.textContent || 0);
                 const kostenMaxMatches = !isNaN(kostenMaxCell) ? kostenMaxCell <= kostenMax : true;
 
-                // Crashrisiko filter logic
-                const crashrisikoCell = row.querySelector("td:nth-child(8)");
+
+				// Crashrisiko filter logic
+				const crashrisikoCell = row.querySelector("td:nth-child(8)");
                 const crashrisikoValue = crashrisikoCell
                     ? crashrisikoCell.textContent.toLowerCase()
                     : "unbekannt";
+                const crashrisikoIndex = crashrisikoHierarchy.indexOf(
+                    crashrisikoValue
+                );
+                const crashrisikoFilterIndex = crashrisikoHierarchy.indexOf(
+                    crashrisikoFilter
+                );
                 const crashrisikoMatches = crashrisikoFilter
-                    ? crashrisikoValue === crashrisikoFilter
+                    ? crashrisikoIndex !== -1 &&
+                      crashrisikoIndex <= crashrisikoFilterIndex
                     : true;
+
+
+
 
                 // Show or hide the row based on all filters
                 const isVisible =
