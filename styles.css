@@ -1,3 +1,6 @@
+/* ------------------------------
+   General Page Styling
+------------------------------ */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -5,6 +8,9 @@ body {
     background-color: #f8f9fa;
 }
 
+/* ------------------------------
+   Header Styling
+------------------------------ */
 header {
     background-color: white;
     color: #004080;
@@ -21,7 +27,10 @@ header {
 header img {
     height: 130px;
 }
-/* Navigation menu */
+
+/* ------------------------------
+   Navigation Menu Styling
+------------------------------ */
 nav {
     background-color: #004080; /* Blue background */
     padding: 10px 0; /* Add padding around the menu */
@@ -70,6 +79,10 @@ nav ul li a:hover {
     margin: auto;
 }
 
+
+/* ------------------------------
+   Filter Styling
+------------------------------ */
 .controls {
     display: flex;
     flex-wrap: wrap;
@@ -124,54 +137,60 @@ h2 {
     border-radius: 5px;
 }
 
-/* General table styling */
+
+/* ------------------------------
+   General Table Styling
+------------------------------ */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
 }
 
-th, td {
+/* Table Header Styling (Default for All Tables) */
+table:not(.uebersicht-table) th {
+    background-color: #004080; /* Blue background for headers */
+    color: white; /* White text for contrast */
+    font-weight: bold; /* Emphasize the header */
+    white-space: normal; /* Allow wrapping in headers */
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* Table Cell Styling */
+td {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
     word-wrap: break-word; /* Ensure long content breaks within cells */
     overflow-wrap: break-word; /* Browser compatibility for word wrapping */
-    hyphens: auto; /* Add hyphenation for better wrapping (optional) */
+    hyphens: auto; /* Add hyphenation for better wrapping */
 }
 
-/* Table header styling */
-th {
-    background-color: #004080; /* Blue background for table headers */
-    color: white;             /* White text for contrast */
-    font-weight: bold;        /* Emphasize the header */
-    white-space: normal;      /* Allow wrapping in headers */
-}
-
-/* Consistent column widths across all tables */
-table thead tr th, table tbody tr td {
-    white-space: normal; /* Allow content to wrap in both headers and cells */
-}
-
-/* Prevent text overflow */
+/* Prevent Text Overflow in Cells */
 td {
     max-width: 1px; /* Forces word wrapping to occur when necessary */
     overflow: hidden; /* Ensures content doesn’t spill out of cells */
 }
 
+/* ------------------------------
+   Specific Styling for Übersicht Table
+------------------------------ */
+table.uebersicht-table thead {
+    background-color: #d3d3d3 !important; /* Light gray background */
+    color: black !important; /* Black text for contrast */
+}
 
+table.uebersicht-table thead th {
+    font-weight: bold;
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
 
-
-/* table colgroup col:nth-child(1) { width: 5%; } /* Example: ID column */
-/* table colgroup col:nth-child(2) { width: 20%; } /* Example: Treatment */
-/* table colgroup col:nth-child(3) { width: 15%; } /* Example: Nutzen */
-/* table colgroup col:nth-child(4) { width: 15%; } /* Example: Wirkgeschwindigkeit */
-/* table colgroup col:nth-child(5) { width: 15%; } /* Example: Aufwand */
-/* table colgroup col:nth-child(6) { width: 15%; } /* Example: Kosten min */
-/* table colgroup col:nth-child(7) { width: 15%; } /* Example: Kosten max */
-/* table colgroup col:nth-child(8) { width: auto; } /* Example: Crashrisiko */
-
-
+/* ------------------------------
+   Error Messages
+------------------------------ */
 .error-message {
     color: red;
     font-weight: bold;

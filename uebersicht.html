@@ -10,20 +10,33 @@
     <header>
         <img src="assets/images/Logo_v001.png" alt="Long Covid Navigator Logo" onerror="showError('Logo file (Logo_v001.png) ist nicht verfügbar oder nicht zugänglich!')">
     </header>
-	
-	
     <nav>
-		<ul>
-			<li><a href="index.html">LCN-Protokoll</a></li>
-			<li><a href="uebersicht.html">Übersicht</a></li>
-		</ul>
-	</nav>
-	
-	
+        <ul>
+            <li><a href="index.html">LCN-Protokoll</a></li>
+            <li><a href="uebersicht.html">Übersicht</a></li>
+        </ul>
+    </nav>
     <div class="container">
-        <!-- Empty body for now -->
         <h1>Übersicht</h1>
-        <p>Diese Seite ist noch leer.</p>
+        <table class="uebersicht-table">
+			<thead>
+				<tr>
+					<th data-column-index="0" style="cursor: pointer;">#</th>
+					<th data-column-index="1" style="cursor: pointer;">Behandlungsoptionen</th>
+					<th data-column-index="2" style="cursor: pointer;">Nutzen</th>
+					<th data-column-index="3" style="cursor: pointer;">Wirkgeschwindigkeit</th>
+					<th data-column-index="4" style="cursor: pointer;">Aufwand</th>
+					<th data-column-index="5" style="cursor: pointer;">Kosten min</th>
+					<th data-column-index="6" style="cursor: pointer;">Kosten max</th>
+					<th data-column-index="7" style="cursor: pointer;">Crashrisiko</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- Dynamically loaded data -->
+			</tbody>
+		</table>
+
     </div>
+    <script src="scripts/uebersicht.js"></script>
 </body>
 </html>
