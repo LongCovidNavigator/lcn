@@ -15,12 +15,11 @@ async function loadUebersichtData() {
  * @param {Array} treatments - Array of treatment objects.
  */
 function renderUebersichtTable(treatments) {
-    const table = document.querySelector(".uebersicht-table");
-    table.classList.add("uebersicht-table"); // Ensure the class is applied
-    const tableBody = table.querySelector("tbody");
+    const tableBody = document.querySelector(".uebersicht-table tbody");
     tableBody.innerHTML = ""; // Clear existing content
 
     treatments.forEach((item, index) => {
+        const votes = parseInt(localStorage.getItem(item.Behandlung) || 0, 10); // Get stored votes
         const row = document.createElement("tr");
 
         row.innerHTML = `
@@ -32,10 +31,35 @@ function renderUebersichtTable(treatments) {
             <td>${item["Kosten min"] || "-"}</td>
             <td>${item["Kosten max"] || "-"}</td>
             <td>${item.Crashrisiko || "-"}</td>
+            <td>
+                <button class="upvote-button" data-treatment="${item.Behandlung}">
+                    👍 <span class="vote-count">${votes}</span>
+                </button>
+            </td>
         `;
 
         tableBody.appendChild(row);
     });
+
+    // Add event listeners for upvote buttons
+    document.querySelectorAll(".upvote-button").forEach(button => {
+        button.addEventListener("click", handleUpvote);
+    });
+}
+
+function handleUpvote(event) {
+    const button = event.target.closest(".upvote-button");
+    const treatment = button.getAttribute("data-treatment");
+    const voteCountSpan = button.querySelector(".vote-count");
+
+    let currentVotes = parseInt(localStorage.getItem(treatment) || 0, 10);
+    currentVotes += 1; // Increment vote count
+
+    // Update UI
+    voteCountSpan.textContent = currentVotes;
+
+    // Save to local storage
+    localStorage.setItem(treatment, currentVotes);
 }
 
 

@@ -188,6 +188,35 @@ table.uebersicht-table thead th {
     border: 1px solid #ddd;
 }
 
+
+/* Styles for the upvote button */
+.upvote-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #28a745; /* Green background */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.upvote-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+.upvote-button .vote-count {
+    margin-left: 5px;
+    font-weight: bold;
+    color: #fff;
+}
+
+
+
 /* ------------------------------
    Error Messages
 ------------------------------ */
