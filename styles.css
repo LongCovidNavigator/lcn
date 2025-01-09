@@ -215,6 +215,45 @@ table.uebersicht-table thead th {
     color: #fff;
 }
 
+/* Ensure clickable headers have the correct cursor */
+table.uebersicht-table thead th {
+    cursor: pointer; /* Changes the cursor to a hand symbol */
+    transition: background-color 0.3s ease; /* Optional: Add hover effect */
+}
+
+table.uebersicht-table thead th:hover {
+    background-color: #e0e0e0; /* Highlight column on hover (optional) */
+}
+
+/* Add space between header text and arrow */
+table.uebersicht-table thead th {
+    position: relative; /* Position for adding pseudo-elements */
+    cursor: pointer; /* Hand icon for clickable headers */
+    padding-right: 20px; /* Space for arrow */
+}
+
+/* Ascending sort arrow */
+table.uebersicht-table thead th.sorted-asc::after {
+    content: "▲"; /* Up arrow */
+    position: absolute;
+    right: 10px; /* Position the arrow */
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%);
+    font-size: 12px; /* Adjust size */
+    color: #333; /* Arrow color */
+}
+
+/* Descending sort arrow */
+table.uebersicht-table thead th.sorted-desc::after {
+    content: "▼"; /* Down arrow */
+    position: absolute;
+    right: 10px; /* Position the arrow */
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%);
+    font-size: 12px; /* Adjust size */
+    color: #333; /* Arrow color */
+}
+
 
 
 /* ------------------------------
