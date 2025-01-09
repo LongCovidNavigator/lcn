@@ -60,48 +60,77 @@ const nutzenHierarchy = ["sehr hoch", "hoch", "mittel", "gering"];
 const wirkgeschwindigkeitHierarchy = ["sofort", "schnell", "mittel", "langsam", "unbekannt"];
 const crashrisikoHierarchy = ["gering", "mittel", "hoch", "sehr hoch"];
 
- function sortTableByColumn(columnIndex) {
+function sortTableByColumn(columnIndex) {
+	// console.log("sortTableByColumn called with columnIndex:", columnIndex);
+
     const tableBody = document.querySelector(".uebersicht-table tbody");
     const rows = Array.from(tableBody.querySelectorAll("tr"));
 
     // Determine the sort order: ascending or descending
-    const isAscending = tableBody.getAttribute(`data-sort-order-${columnIndex}`) !== "asc";
+    const currentSortOrder = tableBody.getAttribute(`data-sort-order-${columnIndex}`);
+    const isAscending = currentSortOrder !== "asc"; // Toggle sort order
     tableBody.setAttribute(`data-sort-order-${columnIndex}`, isAscending ? "asc" : "desc");
+
+	console.log("Order:", isAscending," ",columnIndex);
+    // Log column and sort order
+    // console.log("Column Index:", columnIndex); // console.log("Current Sort Order:", currentSortOrder);
+    // console.log("Current Sort Order:", currentSortOrder);
+
+    // Define the hierarchies
+    const nutzenHierarchy = ["sehr hoch", "hoch", "mittel", "gering"];
+    const wirkgeschwindigkeitHierarchy = ["sofort", "schnell", "mittel", "langsam", "unbekannt"];
+    const crashrisikoHierarchy = ["gering", "mittel", "hoch", "sehr hoch"];
 
     // Sort rows based on the specified column
     rows.sort((rowA, rowB) => {
-        const cellA = rowA.querySelector(`td:nth-child(${columnIndex + 1})`).textContent.trim().toLowerCase();
-        const cellB = rowB.querySelector(`td:nth-child(${columnIndex + 1})`).textContent.trim().toLowerCase();
+        const cellA = rowA.querySelector(`td:nth-child(${columnIndex + 1})`).textContent.toLowerCase().trim();
+        const cellB = rowB.querySelector(`td:nth-child(${columnIndex + 1})`).textContent.toLowerCase().trim();
 
-        function getHierarchyIndex(value, hierarchy, isAscending) {
-			// Find the first hierarchy value that matches the beginning of the string
-			const index = hierarchy.findIndex(h => value.startsWith(h));
-			return index === -1 ? hierarchy.length + (isAscending ? 0 : 1) : index; // Place unmatched values at the end
-		}
+        let indexA, indexB;
 
-
-        if (columnIndex === 2) {
+        // Handle hierarchical sorting
+        if (columnIndex === 1) {
+            // Behandlungsoptionen column (alphabetical sort)
+            return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+        } else if (columnIndex === 2) {
             // Nutzen column
-            const indexA = getHierarchyIndex(cellA, nutzenHierarchy, isAscending);
-            const indexB = getHierarchyIndex(cellB, nutzenHierarchy, isAscending);
-            return indexA - indexB;
+            indexA = nutzenHierarchy.findIndex(h => cellA.startsWith(h));
+            indexB = nutzenHierarchy.findIndex(h => cellB.startsWith(h));
         } else if (columnIndex === 3) {
             // Wirkgeschwindigkeit column
-            const indexA = getHierarchyIndex(cellA, wirkgeschwindigkeitHierarchy, isAscending);
-            const indexB = getHierarchyIndex(cellB, wirkgeschwindigkeitHierarchy, isAscending);
-            return indexA - indexB;
+            indexA = wirkgeschwindigkeitHierarchy.findIndex(h => cellA.startsWith(h));
+            indexB = wirkgeschwindigkeitHierarchy.findIndex(h => cellB.startsWith(h));
         } else if (columnIndex === 7) {
             // Crashrisiko column
-            const indexA = getHierarchyIndex(cellA, crashrisikoHierarchy, isAscending);
-            const indexB = getHierarchyIndex(cellB, crashrisikoHierarchy, isAscending);
-            return indexA - indexB;
-        } else if (!isNaN(cellA) && !isNaN(cellB)) {
-            // Numeric sort for numerical columns
-            return isAscending ? cellA - cellB : cellB - cellA;
+            indexA = crashrisikoHierarchy.findIndex(h => cellA.startsWith(h));
+            indexB = crashrisikoHierarchy.findIndex(h => cellB.startsWith(h));
+        } else if (columnIndex === 4 || columnIndex === 5 || columnIndex === 6) {
+            // Parse numbers and handle non-numeric values
+			const numA = parseFloat(cellA);
+			const numB = parseFloat(cellB);
+
+			// Assign Infinity for non-numeric values to place them at the end
+			const indexA = isNaN(numA) ? (isAscending ? Infinity : -Infinity) : numA;
+			const indexB = isNaN(numB) ? (isAscending ? Infinity : -Infinity) : numB;
+
+
+    // Perform numerical comparison
+    return isAscending ? indexA - indexB : indexB - indexA;
         } else {
-            // Alphabetical sort for text columns
+            // Fallback (alphabetical sort for unexpected cases)
             return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
         }
+
+        // Log values being compared and their hierarchy indices
+        // console.log("Cell A:", cellA, "Index A:", indexA);
+        // console.log("Cell B:", cellB, "Index B:", indexB);
+
+        // Handle missing values in hierarchy
+		if (indexA === -1) indexA = isAscending ? Infinity : -Infinity; // Always place non-matching values at the end
+		if (indexB === -1) indexB = isAscending ? Infinity : -Infinity; // Always place non-matching values at the end
+
+
+        return isAscending ? indexA - indexB : indexB - indexA;
     });
 
     // Append the sorted rows back to the table
