@@ -151,6 +151,8 @@ table {
 table:not(.uebersicht-table) th {
     background-color: #004080; /* Blue background for headers */
     color: white; /* White text for contrast */
+}	
+th {
     font-weight: bold; /* Emphasize the header */
     white-space: normal; /* Allow wrapping in headers */
     padding: 10px;
@@ -189,31 +191,51 @@ table.uebersicht-table thead th {
 }
 
 
-/* Styles for the upvote button */
-.upvote-button {
+/* General styles for voting buttons */
+.vote-buttons {
+    display: flex; /* Arrange buttons in a row */
+    gap: 5px; /* Add spacing between buttons */
+    justify-content: center; /* Center align buttons */
+    align-items: center; /* Vertically center buttons */
+}
+
+.vote-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 5px 10px;
+    padding: 5px 8px;
     font-size: 14px;
     font-weight: bold;
-    color: #fff;
-    background-color: #28a745; /* Green background */
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
-.upvote-button:hover {
-    background-color: #218838; /* Darker green on hover */
+/* Specific styles for each vote type */
+.vote-button[data-type="hilft"] {
+    background-color: #28a745; /* Green for "Hilft" */
 }
 
-.upvote-button .vote-count {
-    margin-left: 5px;
-    font-weight: bold;
-    color: #fff;
+.vote-button[data-type="gleich"] {
+    background-color: #ffc107; /* Yellow for "Gleich" */
 }
+
+.vote-button[data-type="verschlechterung"] {
+    background-color: #dc3545; /* Red for "Verschlechterung" */
+}
+
+.vote-button:hover {
+    opacity: 0.9; /* Slight hover effect */
+}
+
+/* Symbol-specific styles */
+.vote-button span {
+    margin-left: 4px; /* Space between symbol and count */
+}
+
+
 
 /* Ensure clickable headers have the correct cursor */
 table.uebersicht-table thead th {
@@ -253,6 +275,23 @@ table.uebersicht-table thead th.sorted-desc::after {
     font-size: 12px; /* Adjust size */
     color: #333; /* Arrow color */
 }
+
+
+/* Set consistent width for the vote-buttons column */
+table.uebersicht-table th:nth-child(9),
+table.uebersicht-table td:nth-child(9) {
+    min-width: 200px; /* Allow width to expand if necessary */
+    text-align: center; /* Center-align the buttons */
+    vertical-align: middle; /* Ensure consistent alignment */
+}
+
+
+/* Prevent overly narrow columns */
+/* td { */
+    /* max-width: none; /* Remove width restriction */ 
+    /* word-wrap: break-word; /* Ensure content wraps if too long */ 
+    /* overflow-wrap: break-word; /* Cross-browser compatibility */ 
+/* } 	 */
 
 
 

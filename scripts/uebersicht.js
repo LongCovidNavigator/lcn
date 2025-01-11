@@ -10,16 +10,29 @@ async function loadUebersichtData() {
     }
 }
 
-/**
- * Renders a flat table with all treatments.
- * @param {Array} treatments - Array of treatment objects.
- */
 function renderUebersichtTable(treatments) {
     const tableBody = document.querySelector(".uebersicht-table tbody");
     tableBody.innerHTML = ""; // Clear existing content
 
     treatments.forEach((item, index) => {
-        const votes = parseInt(localStorage.getItem(item.Behandlung) || 0, 10); // Get stored votes
+        // Get stored votes or initialize with random values
+        let votes = localStorage.getItem(item.Behandlung);
+        if (!votes) {
+            votes = {
+                hilft: Math.floor(Math.random() * 101), // Random between 0 and 100
+                gleich: Math.floor(Math.random() * 101),
+                verschlechterung: Math.floor(Math.random() * 101),
+            };
+            localStorage.setItem(item.Behandlung, JSON.stringify(votes));
+        } else {
+            votes = JSON.parse(votes);
+        }
+
+        // Calculate ratios
+        const totalVotes = votes.hilft + votes.gleich + votes.verschlechterung;
+        const improvementRatio = totalVotes > 0 ? ((votes.hilft / totalVotes) * 100).toFixed(2) : "0.00";
+        const worseningRatio = totalVotes > 0 ? ((votes.verschlechterung / totalVotes) * 100).toFixed(2) : "0.00";
+
         const row = document.createElement("tr");
 
         row.innerHTML = `
@@ -31,36 +44,67 @@ function renderUebersichtTable(treatments) {
             <td>${item["Kosten min"] || "-"}</td>
             <td>${item["Kosten max"] || "-"}</td>
             <td>${item.Crashrisiko || "-"}</td>
-            <td>
-                <button class="upvote-button" data-treatment="${item.Behandlung}">
-                    👍 <span class="vote-count">${votes}</span>
+            <td class="vote-buttons">
+                <button class="vote-button" data-treatment="${item.Behandlung}" data-type="hilft">
+                    ↗ (<span class="vote-count">${votes.hilft}</span>)
+                </button>
+                <button class="vote-button" data-treatment="${item.Behandlung}" data-type="gleich">
+                    = (<span class="vote-count">${votes.gleich}</span>)
+                </button>
+                <button class="vote-button" data-treatment="${item.Behandlung}" data-type="verschlechterung">
+                    ↘ (<span class="vote-count">${votes.verschlechterung}</span>)
                 </button>
             </td>
+            <td>${improvementRatio}%</td>
+            <td>${worseningRatio}%</td> <!-- New column -->
         `;
 
         tableBody.appendChild(row);
     });
 
-    // Add event listeners for upvote buttons
-    document.querySelectorAll(".upvote-button").forEach(button => {
-        button.addEventListener("click", handleUpvote);
+    // Add event listeners for voting buttons
+    document.querySelectorAll(".vote-button").forEach(button => {
+        button.addEventListener("click", handleVote);
     });
 }
 
-function handleUpvote(event) {
-    const button = event.target.closest(".upvote-button");
+
+
+
+
+
+
+function handleVote(event) {
+    const button = event.target.closest(".vote-button");
     const treatment = button.getAttribute("data-treatment");
+    const voteType = button.getAttribute("data-type");
+
+    // Get stored votes or initialize
+    const votes = JSON.parse(localStorage.getItem(treatment) || '{"hilft": 0, "gleich": 0, "verschlechterung": 0}');
+    
+    // Increment the vote count for the selected type
+    votes[voteType] += 1;
+
+    // Update local storage
+    localStorage.setItem(treatment, JSON.stringify(votes));
+
+    // Update the UI
     const voteCountSpan = button.querySelector(".vote-count");
+    voteCountSpan.textContent = votes[voteType];
 
-    let currentVotes = parseInt(localStorage.getItem(treatment) || 0, 10);
-    currentVotes += 1; // Increment vote count
+    // Recalculate ratios
+    const totalVotes = votes.hilft + votes.gleich + votes.verschlechterung;
+    const improvementRatio = totalVotes > 0 ? ((votes.hilft / totalVotes) * 100).toFixed(2) : "0.00";
+    const worseningRatio = totalVotes > 0 ? ((votes.verschlechterung / totalVotes) * 100).toFixed(2) : "0.00";
 
-    // Update UI
-    voteCountSpan.textContent = currentVotes;
-
-    // Save to local storage
-    localStorage.setItem(treatment, currentVotes);
+    // Update the respective cells
+    const row = button.closest("tr");
+    row.querySelector("td:nth-last-child(2)").textContent = `${improvementRatio}%`; // "Verbesserung"
+    row.querySelector("td:last-child").textContent = `${worseningRatio}%`; // "Verschlechterung"
 }
+
+
+
 
 
 // Load the data when the page loads
