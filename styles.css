@@ -148,10 +148,12 @@ table {
 }
 
 /* Table Header Styling (Default for All Tables) */
-table:not(.uebersicht-table) th {
+table:not(.uebersicht-table) th,
+table:not(.bewertung-table) th{
     background-color: #004080; /* Blue background for headers */
     color: white; /* White text for contrast */
 }	
+
 th {
     font-weight: bold; /* Emphasize the header */
     white-space: normal; /* Allow wrapping in headers */
@@ -189,6 +191,7 @@ table.uebersicht-table thead th {
     text-align: left;
     border: 1px solid #ddd;
 }
+
 
 
 /* General styles for voting buttons */
@@ -286,13 +289,22 @@ table.uebersicht-table td:nth-child(9) {
 }
 
 
-/* Prevent overly narrow columns */
-/* td { */
-    /* max-width: none; /* Remove width restriction */ 
-    /* word-wrap: break-word; /* Ensure content wraps if too long */ 
-    /* overflow-wrap: break-word; /* Cross-browser compatibility */ 
-/* } 	 */
+/* Specific styles for Bewertung table */
+table.bewertung-table th, table.bewertung-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
 
+
+
+/* table.bewertung-table th:hover { */
+    /* background-color: #e0e0e0; */
+/* } */
+
+.vote-buttons button {
+    margin: 0 5px;
+}
 
 
 /* ------------------------------
@@ -302,4 +314,32 @@ table.uebersicht-table td:nth-child(9) {
     color: red;
     font-weight: bold;
     margin: 20px 0;
+}
+
+/* Set consistent width for the vote-buttons column */
+table.bewertung-table th:nth-child(3),
+table.bewertung-table td:nth-child(3) {
+    min-width: 200px; /* Allow width to expand if necessary */
+    text-align: center; /* Center-align the buttons */
+    vertical-align: middle; /* Ensure consistent alignment */
+}
+
+
+/* ------------------------------
+   Specific Styling for BEWERTUNG Table
+------------------------------ */
+table.bewertung-table thead {
+    background-color: #40E0D0 !important;
+    color: black !important; /* Black text for contrast */
+}
+
+table.bewertung-table thead th {
+    font-weight: bold;
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+table.bewertung-table th:hover {
+    background-color: #e0e0e0;
 }

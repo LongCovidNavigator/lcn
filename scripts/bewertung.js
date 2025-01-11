@@ -1,17 +1,17 @@
-async function loadUebersichtData() {
+async function loadBewertungData() {
     try {
         const response = await fetch("assets/data/long_covid_treatments_corrected.json");
         if (!response.ok) throw new Error(`Error loading JSON file: ${response.status} ${response.statusText}`);
 
         const treatments = await response.json();
-        renderUebersichtTable(treatments); // Render the table using the adapted function
+        renderBewertungTable(treatments); // Render the table using the adapted function
     } catch (error) {
         console.error("Error loading data:", error.message);
     }
 }
 
-function renderUebersichtTable(treatments) {
-    const tableBody = document.querySelector(".uebersicht-table tbody");
+function renderBewertungTable(treatments) {
+    const tableBody = document.querySelector(".bewertung-table tbody");
     tableBody.innerHTML = ""; // Clear existing content
 
     treatments.forEach((item, index) => {
@@ -30,20 +30,28 @@ function renderUebersichtTable(treatments) {
 
         // Calculate ratios
         const totalVotes = votes.hilft + votes.gleich + votes.verschlechterung;
-        const improvementRatio = totalVotes > 0 ? ((votes.hilft / totalVotes) * 100).toFixed(2) : "0.00";
-        const worseningRatio = totalVotes > 0 ? ((votes.verschlechterung / totalVotes) * 100).toFixed(2) : "0.00";
+        const improvementRatio = totalVotes > 0 ? Math.round((votes.hilft / totalVotes) * 100) : 0;
+		const worseningRatio = totalVotes > 0 ? Math.round((votes.verschlechterung / totalVotes) * 100) : 0;
+
 
         const row = document.createElement("tr");
 
         row.innerHTML = `
             <td>${index + 1}</td>
             <td>${item.Behandlung || "-"}</td>
-            <td>${item.Nutzen || "-"}</td>
-            <td>${item.Wirkgeschwindigkeit || "-"}</td>
-            <td>${item.Aufwand || "-"}</td>
-            <td>${item["Kosten min"] || "-"}</td>
-            <td>${item["Kosten max"] || "-"}</td>
-            <td>${item.Crashrisiko || "-"}</td>
+            <td class="vote-buttons">
+                <button class="vote-button" data-treatment="${item.Behandlung}" data-type="hilft">
+                    ↗ (<span class="vote-count">${votes.hilft}</span>)
+                </button>
+                <button class="vote-button" data-treatment="${item.Behandlung}" data-type="gleich">
+                    = (<span class="vote-count">${votes.gleich}</span>)
+                </button>
+                <button class="vote-button" data-treatment="${item.Behandlung}" data-type="verschlechterung">
+                    ↘ (<span class="vote-count">${votes.verschlechterung}</span>)
+                </button>
+            </td>
+            <td>${improvementRatio}%</td>
+            <td>${worseningRatio}%</td> <!-- New column -->
         `;
 
         tableBody.appendChild(row);
@@ -61,7 +69,34 @@ function renderUebersichtTable(treatments) {
 
 
 
+function handleVote(event) {
+    const button = event.target.closest(".vote-button");
+    const treatment = button.getAttribute("data-treatment");
+    const voteType = button.getAttribute("data-type");
 
+    // Get stored votes or initialize
+    const votes = JSON.parse(localStorage.getItem(treatment) || '{"hilft": 0, "gleich": 0, "verschlechterung": 0}');
+    
+    // Increment the vote count for the selected type
+    votes[voteType] += 1;
+
+    // Update local storage
+    localStorage.setItem(treatment, JSON.stringify(votes));
+
+    // Update the UI
+    const voteCountSpan = button.querySelector(".vote-count");
+    voteCountSpan.textContent = votes[voteType];
+
+    // Recalculate ratios
+    const totalVotes = votes.hilft + votes.gleich + votes.verschlechterung;
+    const improvementRatio = totalVotes > 0 ? ((votes.hilft / totalVotes) * 100).toFixed(2) : "0.00";
+    const worseningRatio = totalVotes > 0 ? ((votes.verschlechterung / totalVotes) * 100).toFixed(2) : "0.00";
+
+    // Update the respective cells
+    const row = button.closest("tr");
+    row.querySelector("td:nth-last-child(2)").textContent = `${improvementRatio}%`; // "Verbesserung"
+    row.querySelector("td:last-child").textContent = `${worseningRatio}%`; // "Verschlechterung"
+}
 
 
 
@@ -69,10 +104,10 @@ function renderUebersichtTable(treatments) {
 
 // Load the data when the page loads
 document.addEventListener("DOMContentLoaded", () => {
-    loadUebersichtData();
+    loadBewertungData();
 
     // Attach event listeners to all table headers
-    const tableHeaders = document.querySelectorAll(".uebersicht-table thead th");
+    const tableHeaders = document.querySelectorAll(".bewertung-table thead th");
     tableHeaders.forEach((header, index) => {
         header.addEventListener("click", () => sortTableByColumn(index));
     });
@@ -91,7 +126,7 @@ const crashrisikoHierarchy = ["gering", "mittel", "hoch", "sehr hoch"];
 function sortTableByColumn(columnIndex) {
 	// console.log("sortTableByColumn called with columnIndex:", columnIndex);
 
-    const tableBody = document.querySelector(".uebersicht-table tbody");
+    const tableBody = document.querySelector(".bewertung-table tbody");
     const rows = Array.from(tableBody.querySelectorAll("tr"));
 
     // Determine the sort order: ascending or descending
@@ -120,19 +155,8 @@ function sortTableByColumn(columnIndex) {
         if (columnIndex === 1) {
             // Behandlungsoptionen column (alphabetical sort)
             return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
-        } else if (columnIndex === 2) {
-            // Nutzen column
-            indexA = nutzenHierarchy.findIndex(h => cellA.startsWith(h));
-            indexB = nutzenHierarchy.findIndex(h => cellB.startsWith(h));
-        } else if (columnIndex === 3) {
-            // Wirkgeschwindigkeit column
-            indexA = wirkgeschwindigkeitHierarchy.findIndex(h => cellA.startsWith(h));
-            indexB = wirkgeschwindigkeitHierarchy.findIndex(h => cellB.startsWith(h));
-        } else if (columnIndex === 7) {
-            // Crashrisiko column
-            indexA = crashrisikoHierarchy.findIndex(h => cellA.startsWith(h));
-            indexB = crashrisikoHierarchy.findIndex(h => cellB.startsWith(h));
-        } else if (columnIndex === 4 || columnIndex === 5 || columnIndex === 6) {
+
+        } else {
             // Parse numbers and handle non-numeric values
 			const numA = parseFloat(cellA);
 			const numB = parseFloat(cellB);
@@ -144,9 +168,6 @@ function sortTableByColumn(columnIndex) {
 
 			// Perform numerical comparison
 			return isAscending ? indexA - indexB : indexB - indexA;
-        } else {
-            // Fallback (alphabetical sort for unexpected cases)
-            return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
         }
 
         // Log values being compared and their hierarchy indices
@@ -165,8 +186,8 @@ function sortTableByColumn(columnIndex) {
     rows.forEach(row => tableBody.appendChild(row));
 
     // Update header to indicate sort direction
-    const headers = document.querySelectorAll(".uebersicht-table thead th");
+    const headers = document.querySelectorAll(".bewertung-table thead th");
     headers.forEach(header => header.classList.remove("sorted-asc", "sorted-desc")); // Reset classes
-    const sortedHeader = document.querySelector(`.uebersicht-table thead th:nth-child(${columnIndex + 1})`);
+    const sortedHeader = document.querySelector(`.bewertung-table thead th:nth-child(${columnIndex + 1})`);
     sortedHeader.classList.add(isAscending ? "sorted-asc" : "sorted-desc");
 }
