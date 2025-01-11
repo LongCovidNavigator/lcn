@@ -1,0 +1,38 @@
+/* ------------------------------
+   General Table Styling
+------------------------------ */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+/* Table Header Styling (Default for All Tables) */
+table:not(.uebersicht-table) th,
+table:not(.bewertung-table) th{
+    background-color: #004080; /* Blue background for headers */
+    color: white; /* White text for contrast */
+}	
+
+th {
+    font-weight: bold; /* Emphasize the header */
+    white-space: normal; /* Allow wrapping in headers */
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* Table Cell Styling */
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    word-wrap: break-word; /* Ensure long content breaks within cells */
+    overflow-wrap: break-word; /* Browser compatibility for word wrapping */
+    hyphens: auto; /* Add hyphenation for better wrapping */
+}
+
+/* Prevent Text Overflow in Cells */
+td {
+    max-width: 1px; /* Forces word wrapping to occur when necessary */
+    overflow: hidden; /* Ensures content doesn’t spill out of cells */
+}

@@ -1,0 +1,51 @@
+/* ------------------------------
+   General Page Styling
+------------------------------ */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+/* ------------------------------
+   Header Styling
+------------------------------ */
+header {
+    background-color: white;
+    color: #004080;
+    text-align: center;
+    padding: 10px 0;
+    height: 150px;
+    position: relative;
+    border-bottom: 4px solid #004080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+header img {
+    height: 130px;
+}
+
+/* Optional: Add margin between the menu and body */
+.container {
+    margin-top: 20px;
+}
+
+
+
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* ------------------------------
+   Error Messages
+------------------------------ */
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin: 20px 0;
+}
