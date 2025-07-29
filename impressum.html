@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>Impressum</title>
   <link rel="stylesheet" href="styles/general.css">
+  <link rel="stylesheet" href="styles/footer-style.css">
+
+
 </head>
 <body>
   <header>
@@ -19,7 +22,9 @@
       Deutschland
     </p>
 
-    <p>E-Mail: <a href="mailto:Willi.cramer@googlemail.com">Willi.cramer@googlemail.com</a></p>
+    <!-- <p>E-Mail: <a href="mailto:Willi.cramer@googlemail.com">Willi.cramer@googlemail.com</a></p> -->
+	<p>E-Mail: Willi.cramer [at] googlemail [punkt] com</p>
+
 
     <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
     <p>
@@ -34,12 +39,15 @@
     </p>
   </main>
 
-  <footer>
-    <p>© 2025 Long Covid Navigator</p>
-    <nav>
-      <a href="index.html">Startseite</a> |
-      <a href="datenschutz.html">Datenschutz</a>
-    </nav>
-  </footer>
+  <div id="footer-placeholder"></div>
+
+	  <script>
+		fetch("components/footer.html")
+		  .then(response => response.text())
+		  .then(data => {
+			document.getElementById("footer-placeholder").innerHTML = data;
+		  });
+	  </script>
+	  
 </body>
 </html>
