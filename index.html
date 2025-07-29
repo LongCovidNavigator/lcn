@@ -9,6 +9,17 @@
     <link rel="stylesheet" href="styles/homepage.css">
 </head>
 <body>
+	<script>
+	  const password = prompt("Zugangscode erforderlich:");
+	  const allowedPassword = "123";
+
+	  if (password !== allowedPassword) {
+		document.body.innerHTML = "<h1>Zugriff verweigert</h1><p>Falscher Zugangscode.</p>";
+		// Optional: Umleiten
+		// window.location.href = "https://example.com";
+	  }
+	</script>
+
     <!-- Header Section -->
     <header>
         <img src="assets/images/Logo_v001.png" alt="Long Covid Navigator Logo">
