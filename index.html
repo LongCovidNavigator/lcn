@@ -7,18 +7,25 @@
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css">
     <link rel="stylesheet" href="styles/homepage.css">
+	
+	<style>
+	  body { display: none; }
+	</style>
+
 </head>
 <body>
 	<script>
 	  const password = prompt("Zugangscode erforderlich:");
 	  const allowedPassword = "123";
 
-	  if (password !== allowedPassword) {
+	  if (password === allowedPassword) {
+		document.body.style.display = "block";
+	  } else {
+		
 		document.body.innerHTML = "<h1>Zugriff verweigert</h1><p>Falscher Zugangscode.</p>";
-		// Optional: Umleiten
-		// window.location.href = "https://example.com";
 	  }
 	</script>
+
 
     <!-- Header Section -->
     <header>
