@@ -88,13 +88,25 @@
     </section>
 
     <!-- Footer -->
-    <footer>
-        <p>© 2023 Long Covid Navigator. Alle Rechte vorbehalten.</p>
-        <nav>
-            <a href="index.html">Startseite</a> |
-            <a href="uebersicht.html">Übersicht</a> |
-            <a href="bewertung.html">Bewertung</a>
-        </nav>
-    </footer>
+    <!-- <footer> -->
+        <!-- <p>© 2023 Long Covid Navigator. Alle Rechte vorbehalten.</p> -->
+        <!-- <nav> -->
+            <!-- <a href="index.html">Startseite</a> | -->
+            <!-- <a href="uebersicht.html">Übersicht</a> | -->
+            <!-- <a href="bewertung.html">Bewertung</a> | -->
+			<!-- <a href="impressum.html">Impressum</a> | -->
+			<!-- <a href="datenschutz.html">Datenschutz</a> -->
+        <!-- </nav> -->
+    <!-- </footer> -->
+	
+	<div id="footer-placeholder"></div>
+
+	  <script>
+		fetch("components/footer.html")
+		  .then(response => response.text())
+		  .then(data => {
+			document.getElementById("footer-placeholder").innerHTML = data;
+		  });
+	  </script>
 </body>
 </html>

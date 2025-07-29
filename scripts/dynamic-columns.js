@@ -36,6 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         document.head.appendChild(style);
     } else {
-        console.error("Bewertung column not found in Übersicht table!");
+        console.warn("Bewertung column not found in Übersicht table!");
     }
 });

@@ -74,7 +74,7 @@
         <script src="scripts/data.js"></script>
 		<script src="scripts/dynamic-columns.js"></script>
 
-    </div>
+    <!-- </div> -->
 
     <script>
         const PASSWORD = "bc007who?"; // Replace with your desired password
@@ -93,5 +93,16 @@
             }
         }
     </script>
+	
+	<div id="footer-placeholder"></div>
+
+	  <script>
+		fetch("components/footer.html")
+		  .then(response => response.text())
+		  .then(data => {
+			document.getElementById("footer-placeholder").innerHTML = data;
+		  });
+	  </script>
+	  
 </body>
 </html>
