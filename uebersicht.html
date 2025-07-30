@@ -12,17 +12,19 @@
 	<link rel="stylesheet" href="styles/bewertung_table.css">
 </head>
 <body>
-    <header>
-        <img src="assets/images/Logo_v001.png" alt="Long Covid Navigator Logo" onerror="showError('Logo file (Logo_v001.png) ist nicht verfügbar oder nicht zugänglich!')">
-    </header>
-    <nav>
-		<ul>
-			<li><a href="index.html">Startseite</a></li>
-			<li><a href="lcnprotocol.html">LCN-Protokoll</a></li>
-			<li><a href="uebersicht.html">Übersicht</a></li>
-			<li><a href="bewertung.html">Bewertung</a></li>
-		</ul>
-	</nav>
+    <!-- <header> -->
+        <!-- <img src="assets/images/Logo_v001.png" alt="Long Covid Navigator Logo" onerror="showError('Logo file (Logo_v001.png) ist nicht verfügbar oder nicht zugänglich!')"> -->
+    <!-- </header> -->
+    <!-- <nav> -->
+		<!-- <ul> -->
+			<!-- <li><a href="index.html">Startseite</a></li> -->
+			<!-- <li><a href="lcnprotocol.html">LCN-Protokoll</a></li> -->
+			<!-- <li><a href="uebersicht.html">Übersicht</a></li> -->
+			<!-- <li><a href="bewertung.html">Bewertung</a></li> -->
+		<!-- </ul> -->
+	<!-- </nav> -->
+
+	<div id="header-placeholder"></div>
 
     <div class="container">
         <h1>Übersicht</h1>
@@ -60,6 +62,14 @@
 			document.getElementById("footer-placeholder").innerHTML = data;
 		  });
 	  </script>
+	  
+	  <script>
+	  fetch("components/header.html")
+		.then(response => response.text())
+		.then(data => {
+		  document.getElementById("header-placeholder").innerHTML = data;
+		});
+	</script>
 	  
 </body>
 </html>

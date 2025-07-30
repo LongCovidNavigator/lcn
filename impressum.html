@@ -5,16 +5,20 @@
   <title>Impressum</title>
   <link rel="stylesheet" href="styles/general.css">
   <link rel="stylesheet" href="styles/footer-style.css">
+  <link rel="stylesheet" href="styles/navigation.css">
+  <link rel="stylesheet" href="styles/homepage.css">
 
 
 </head>
 <body>
-  <header>
-    <h1>Impressum</h1>
-  </header>
+  <!-- <header> -->
+    
+  <!-- </header> -->
+  <div id="header-placeholder"></div>
 
   <main>
-    <p>Angaben gemäß § 5 TMG</p>
+    <h1>Impressum</h1>
+	<p>Angaben gemäß § 5 TMG</p>
     <p>
       Wilhelm Cramer<br>
       Am Duffesbach 10<br>
@@ -48,6 +52,15 @@
 			document.getElementById("footer-placeholder").innerHTML = data;
 		  });
 	  </script>
+	  
+	  <script>
+	  fetch("components/header.html")
+		.then(response => response.text())
+		.then(data => {
+		  document.getElementById("header-placeholder").innerHTML = data;
+		});
+	</script>
+	
 	  
 </body>
 </html>

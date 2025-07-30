@@ -11,22 +11,57 @@ body {
 /* ------------------------------
    Header Styling
 ------------------------------ */
-header {
-    background-color: white;
-    color: #004080;
-    text-align: center;
-    padding: 10px 0;
-    height: 150px;
-    position: relative;
-    border-bottom: 4px solid #004080;
+/* header { */
+    /* background-color: white; */
+    /* color: #004080; */
+    /* text-align: center; */
+    /* padding: 10px 0; */
+    /* height: 150px; */
+    /* position: relative; */
+    /* border-bottom: 4px solid #004080; */
+    /* display: flex; */
+    /* align-items: center; */
+    /* justify-content: center; */
+/* } */
+
+/* header img { */
+    /* height: 130px; */
+/* } */
+
+/* ------------------------------
+   Header Logo + Titel Styling
+------------------------------ */
+.site-header {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: white; /* Oder #f8f8f8 für leichtes Grau */
+    border-bottom: 2px solid #002050;
 }
 
-header img {
-    height: 130px;
+.logo-wrapper {
+    flex: 0 0 auto;
 }
+
+.logo {
+    max-height: 60px;
+    width: auto;
+}
+
+.mirrored {
+    transform: scaleX(-1);
+}
+
+.site-title {
+    flex: 1;
+    text-align: center;
+    font-size: 1.8rem;
+    font-family: 'Nunito Sans', 'Open Sans', 'Segoe UI', sans-serif;
+    font-weight: 700;
+    color: #1E73BE;
+}
+
 
 /* Optional: Add margin between the menu and body */
 .container {
