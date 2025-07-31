@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Therapien aus dem Wiki</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    .therapy {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .therapy h2 {
+      margin-top: 0;
+    }
+    .meta {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Therapien & Behandlungen (aus dem Wiki)</h1>
+  <div id="therapien-container">
+    <p>Lade Inhalte...</p>
+  </div>
+
+  <script>
+    fetch('api/get_therapien.php')
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('therapien-container');
+        container.innerHTML = '';
+
+        data.forEach(entry => {
+          const div = document.createElement('div');
+          div.className = 'therapy';
+          div.innerHTML = `
+            <h2>${entry.title}</h2>
+            <div class="meta">Slug: <code>${entry.slug}</code></div>
+            <div class="meta">Zuletzt aktualisiert: ${new Date(entry.updated_at).toLocaleDateString('de-DE')}</div>
+          `;
+          container.appendChild(div);
+        });
+      })
+      .catch(err => {
+        document.getElementById('therapien-container').innerHTML =
+          '<p style="color: red;">Fehler beim Laden der Wiki-Inhalte.</p>';
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
