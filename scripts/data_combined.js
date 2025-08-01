@@ -1,55 +1,47 @@
-/**
- * Loads treatment data and initializes filters and table rendering.
- */
-/**
- * Loads treatment data and initializes filters and table rendering.
- */
 async function loadData() {
     try {
-        const dataUrl = document.getElementById('data-config')?.dataset?.url;
-        if (!dataUrl) throw new Error("Keine Datenquelle definiert.");
+        const urlsAttr = document.getElementById('data-config')?.dataset?.urls;
+        if (!urlsAttr) throw new Error("Keine Datenquellen definiert.");
+        const urls = JSON.parse(urlsAttr);
 
-        const response = await fetch(dataUrl);
-        if (!response.ok) throw new Error(`Fehler beim Laden der JSON-Datei: ${response.status} ${response.statusText}`);
+        const results = await Promise.all(urls.map(async (url) => {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`Fehler bei ${url}: ${res.status}`);
+            return res.json();
+        }));
 
-        const treatments = await response.json();
-        if (!Array.isArray(treatments)) throw new Error("Ungültige JSON-Struktur. Erwartetes Format: Array.");
+        const allTreatments = results.flat();
 
-        // Determine max value for costs
-        const maxCost = treatments.reduce((max, item) => {
+        const maxCost = allTreatments.reduce((max, item) => {
             const costMax = parseFloat(item["Kosten max"]) || 0;
             return Math.max(max, costMax);
         }, 0);
 
-        // Update slider attributes dynamically
         const kostenMinSlider = document.getElementById("kosten-min-slider");
         const kostenMaxSlider = document.getElementById("kosten-max-slider");
 
         kostenMinSlider.max = maxCost;
         kostenMaxSlider.max = maxCost;
-		
-		// Set the default value to max
         kostenMinSlider.value = maxCost;
         kostenMaxSlider.value = maxCost;
 
-        // Update slider display values
-        document.getElementById("kosten-min-value").textContent = kostenMinSlider.value;
-        document.getElementById("kosten-max-value").textContent = kostenMaxSlider.value;
+        document.getElementById("kosten-min-value").textContent = maxCost;
+        document.getElementById("kosten-max-value").textContent = maxCost;
 
-        renderSections(treatments);
+        renderSections(allTreatments);
 
-        // Add event listeners for filters
         document.getElementById("search-input").addEventListener("input", applyFilters);
         document.getElementById("nutzen-filter").addEventListener("change", applyFilters);
         document.getElementById("wirkgeschwindigkeit-filter").addEventListener("change", applyFilters);
+        document.getElementById("crashrisiko-filter").addEventListener("change", applyFilters);
         kostenMinSlider.addEventListener("input", applyFilters);
         kostenMaxSlider.addEventListener("input", applyFilters);
-        document.getElementById("crashrisiko-filter").addEventListener("change", applyFilters);
-    } catch (error) {
-        document.getElementById("error-log").textContent = error.message;
-        console.error(error.message);
+    } catch (err) {
+        console.error(err);
+        document.getElementById("error-log").textContent = err.message;
     }
 }
+
 
 
 /**
@@ -112,3 +104,4 @@ function renderSections(treatments) {
 
 // Start loading data on page load
 loadData();
+

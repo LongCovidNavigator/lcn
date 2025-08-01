@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Wiki-Link-Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 2rem; }
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 0.5rem; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Verlinkte Behandlungen aus dem Wiki</h1>
+    <ul id="link-list"></ul>
+
+    <script>
+        fetch("api/get_content.php")
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById("link-list");
+                data.forEach(entry => {
+                    if (entry.slug && entry.title) {
+                        const li = document.createElement("li");
+                        const a = document.createElement("a");
+                        a.href = `http://http://wiki.localhost:8080/page/${entry.slug}`;
+                        a.textContent = entry.title;
+                        a.target = "_blank";
+                        li.appendChild(a);
+                        list.appendChild(li);
+                    }
+                });
+            })
+            .catch(err => {
+                document.body.innerHTML += `<p style="color:red;">Fehler beim Laden: ${err.message}</p>`;
+                console.error(err);
+            });
+    </script>
+</body>
+</html>
