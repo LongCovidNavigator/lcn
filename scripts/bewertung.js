@@ -1,14 +1,37 @@
 async function loadBewertungData() {
     try {
-        const response = await fetch("assets/data/long_covid_treatments_corrected.json");
-        if (!response.ok) throw new Error(`Error loading JSON file: ${response.status} ${response.statusText}`);
+        const [jsonRes, wikiRes] = await Promise.all([
+            fetch("assets/data/long_covid_treatments_corrected.json"),
+            fetch("api/get_therapien.php")
+        ]);
 
-        const treatments = await response.json();
-        renderBewertungTable(treatments); // Render the table using the adapted function
-    } catch (error) {
-        console.error("Error loading data:", error.message);
+        if (!jsonRes.ok || !wikiRes.ok) {
+            throw new Error("Fehler beim Laden der Datenquellen");
+        }
+
+        const json = await jsonRes.json();
+        const wiki = await wikiRes.json();
+
+        const gesamt = mergeBehandlungen(json, wiki);
+        renderBewertungTable(gesamt);
+    } catch (err) {
+        console.error("Fehler beim Laden der Daten:", err.message);
     }
 }
+
+function mergeBehandlungen(jsonList, wikiList) {
+    const behandlungsNamen = new Set(jsonList.map(e => e.Behandlung.toLowerCase()));
+
+    const gefilterteWiki = wikiList
+        .filter(e => !behandlungsNamen.has((e.Behandlung || e.title || "").toLowerCase()))
+        .map(e => ({
+            Behandlung: e.Behandlung || e.title,
+            id: e.id || e.slug
+        }));
+
+    return [...jsonList, ...gefilterteWiki];
+}
+
 
 function renderBewertungTable(treatments) {
     const tableBody = document.querySelector(".bewertung-table tbody");

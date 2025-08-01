@@ -40,7 +40,7 @@
 
 
     <div class="container">
-        <h1>Übersicht</h1>
+        <h1>Bewertung Wiki</h1>
         <table class="bewertung-table">
 			<thead>
 				<tr>
@@ -57,22 +57,21 @@
 				<!-- Rows populated dynamically -->
 			</tbody>
 		</table>
+
+
     </div>
 	
+	<script>
+	  window.LCN_DATENQUELLE = "api/get_therapien.php";
+	</script>
 	
-	<!-- Chose data source -->
-	<!-- <script> -->
-		<!-- window.LCN_DATENQUELLE = "assets/data/long_covid_treatments_corrected.json"; -->
-	<!-- </script> -->
-	
+	<script src="scripts/bewertung.js"></script>
 
-	<!-- run assesment functions -->
+	
     <script src="scripts/bewertung.js"></script>
 	<script src="scripts/dynamic-columns.js"></script>
 
-
-
-	<!-- Footer -->
+	
 	<div id="footer-placeholder"></div>
 
 	  <script>
@@ -84,8 +83,6 @@
 	  </script>
 	  
 	  
-	  
-	  <!-- Header -->
 	  <script>
 	  fetch("components/header.html")
 		.then(response => response.text())
