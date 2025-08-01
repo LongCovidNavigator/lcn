@@ -30,6 +30,8 @@ FROM
     pages p
 WHERE
     p.chapter_id = :chapter_id
+	AND p.template = 0
+	
 ORDER BY p.name ASC
 ";
 
