@@ -3,6 +3,9 @@
 $json = file_get_contents('http://localhost/lcn/api/get_content.php');
 $pages = json_decode($json, true);
 
+// Basis-URL statisch definieren
+$bookstackBaseUrl = "http://localhost:8080";
+
 // Ergebnisstruktur vorbereiten
 $structured = [];
 
@@ -10,12 +13,18 @@ foreach ($pages as $page) {
     $markdown = $page['freitextRohversion'];
     $title = $page['title'];
 
-    $structured[] = parseSchnellueberblick($markdown, $title);
+    $entry = parseSchnellueberblick($markdown, $title);
+
+    // Link zur Wiki-Seite über Shortlink /link/<id>
+    $entry['url'] = !empty($page['id']) ? "$bookstackBaseUrl/link/{$page['id']}" : null;
+
+    $structured[] = $entry;
 }
 
 // Ausgabe
 header('Content-Type: application/json');
-echo json_encode($structured, JSON_PRETTY_PRINT);
+echo json_encode($structured, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
 
 // ------------------------------------------------------------
 // Funktion zur Extraktion der Schnellübersicht

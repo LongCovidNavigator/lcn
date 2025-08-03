@@ -2,7 +2,7 @@ async function loadBewertungData() {
     try {
         const [jsonRes, wikiRes] = await Promise.all([
             fetch("assets/data/long_covid_treatments_corrected.json"),
-            fetch("api/get_therapien.php")
+            fetch("api/structure_content.php")
         ]);
 
         if (!jsonRes.ok || !wikiRes.ok) {
@@ -25,9 +25,11 @@ function mergeBehandlungen(jsonList, wikiList) {
     const gefilterteWiki = wikiList
         .filter(e => !behandlungsNamen.has((e.Behandlung || e.title || "").toLowerCase()))
         .map(e => ({
-            Behandlung: e.Behandlung || e.title,
-            id: e.id || e.slug
-        }));
+			Behandlung: e.Behandlung || e.title,
+			id: e.id || e.slug,
+			url: e.url || null
+		}));
+
 
     return [...jsonList, ...gefilterteWiki];
 }
@@ -61,7 +63,14 @@ function renderBewertungTable(treatments) {
 
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td>${item.Behandlung || "-"}</td>
+            
+			<td>
+			  ${item.url
+				? `<a href="${item.url}" target="_blank">${item.Behandlung}</a>`
+				: item.Behandlung || "-"}
+			</td>
+
+
             <td class="vote-buttons">
                 <button class="vote-button" data-treatment="${item.Behandlung}" data-type="hilft">
                     ↗ (<span class="vote-count">${votes.hilft}</span>)

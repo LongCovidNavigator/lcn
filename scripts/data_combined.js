@@ -85,7 +85,15 @@ function renderSections(treatments) {
                         (item, idx) => `
                         <tr>
                             <td>${idx + 1}</td>
-                            <td>${item.Behandlung || "-"}</td>
+
+							
+							<td>
+							  ${item.url
+								? `<a href="${item.url}" target="_blank">${item.Behandlung}</a>`
+								: item.Behandlung || "-"}
+							</td>
+
+
                             <td>${item.Nutzen || "-"}</td>
                             <td>${item.Wirkgeschwindigkeit || "-"}</td>
                             <td>${item.Aufwand || "-"}</td>
