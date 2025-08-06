@@ -1,3 +1,4 @@
+
 import json
 import requests
 import sys
@@ -12,6 +13,13 @@ CHAPTER_ID = 1  # ❗ Hier deine Kapitel-ID eintragen
 JSON_FILE = "C:/xampp/htdocs/lcn/assets/data/long_covid_treatments_corrected.json"
 DRY_RUN = "--dry-run" in sys.argv
 # =====================================
+
+
+def auth_headers():
+    return {
+        "Authorization": f"Token {BOOKSTACK_API_TOKEN_ID}:{BOOKSTACK_API_TOKEN_SECRET}",
+        "Content-Type": "application/json"
+    }
 
 
 def lade_daten():
@@ -101,33 +109,36 @@ def generiere_markdown(e):
     return markdown
 
 
-def auth_headers():
-    return {
-        "Authorization": f"Token {BOOKSTACK_API_TOKEN_ID}:{BOOKSTACK_API_TOKEN_SECRET}",
-        "Content-Type": "application/json"
-    }
-
-
 def lade_existierende_seiten():
     existing_titles = set()
+    page = 1
 
-    response = requests.get(
-        f"{BOOKSTACK_API_URL}/pages",
-        headers=auth_headers(),
-        params={"count": 1000}
-    )
+    while True:
+        response = requests.get(
+            f"{BOOKSTACK_API_URL}/pages",
+            headers=auth_headers(),
+            params={"count": 100, "page": page}
+        )
 
-    if response.status_code != 200:
-        print(f"❌ Fehler beim Laden existierender Seiten – Code: {response.status_code}")
-        sys.exit(1)
+        if response.status_code == 404:
+            print(f"❌ Abbruch: Endpoint nicht gefunden (Seite {page})")
+            sys.exit(1)
 
-    data = response.json().get("data", [])
-    for p in data:
-        name = p.get("name", "").strip().lower()
-        if name:
-            existing_titles.add(name)
+        if response.status_code != 200:
+            print(f"⚠️ Fehler beim Laden existierender Seiten (Seite {page}) – Code: {response.status_code}")
+            sys.exit(1)
 
-    print(f"📄 {len(existing_titles)} Seiten geladen")
+        data = response.json().get("data", [])
+        if not data:
+            break
+
+        for p in data:
+            name = p.get("name", "").strip().lower()
+            if name:
+                existing_titles.add(name)
+
+        page += 1
+
     return existing_titles
 
 
@@ -138,6 +149,7 @@ def erstelle_bookstack_seite(title, markdown):
         "name": title,
         "markdown": markdown
     }
+
     response = requests.post(
         f"{BOOKSTACK_API_URL}/pages",
         json=payload,
@@ -171,14 +183,13 @@ def main():
             if code in (200, 201):
                 print(f"✅ Erstellt: {title}")
                 neu += 1
-                existierende.add(title_key)  # wichtig für spätere Einträge
+                existierende.add(title_key)
             else:
                 print(f"❌ Fehler bei {title}: {code} – {msg}")
 
     print("\n🧾 Zusammenfassung:")
     print(f"Neu erstellt: {neu}")
     print(f"Übersprungen (existierte schon): {übersprungen}")
-
 
 
 if __name__ == "__main__":
