@@ -1,7 +1,10 @@
 import requests
 
-token_id = "sCNy32LeFf9e281hUs3uKyqc3KZ51UdV"
-token_secret = "9actS01XklxfTI312rUTSwjWS1Gw5xrM"
+from bs_credentials import (
+    BOOKSTACK_API_URL,
+    BOOKSTACK_API_TOKEN_ID,
+    BOOKSTACK_API_TOKEN_SECRET
+)
 
 headers = {
     "Authorization": f"Token {token_id}:{token_secret}",
