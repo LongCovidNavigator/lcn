@@ -1,6 +1,6 @@
 import requests
 
-from bs_credentials import (
+from bs_token import (
     BOOKSTACK_API_URL,
     BOOKSTACK_API_TOKEN_ID,
     BOOKSTACK_API_TOKEN_SECRET

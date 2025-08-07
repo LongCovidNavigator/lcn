@@ -2,14 +2,14 @@ import requests
 import json
 
 # === KONFIGURATION ===================
-from bs_credentials import (
+from bs_token import (
     BOOKSTACK_API_URL,
     BOOKSTACK_API_TOKEN_ID,
     BOOKSTACK_API_TOKEN_SECRET
 )
 
-# BEWERTUNGSDATEI = "C:/xampp/htdocs/lcn/assets/data/bewertung_static.json"
-BEWERTUNGSDATEI = "http://lcn.localhost.test:8080/scripts/export/bewertung_export.php"
+BEWERTUNGSDATEI = "C:/xampp/htdocs/lcn/assets/data/votes.json"
+# BEWERTUNGSDATEI = "http://lcn.localhost.test:8080/scripts/export/bewertung_export.php"
 
 ZIELE = ["Kortison", "HBO strong", "HELP Apherese"]
 # =====================================
@@ -30,7 +30,7 @@ def lade_bewertungen():
             return json.load(f)
 
 
-def generiere_bewertungsblock(eintrag):
+# def generiere_bewertungsblock(eintrag):
     return f"""<!-- LCN-BEWERTUNG-START -->
 > 🗳 **Nutzer-Bewertung:**  
 > 👍 {eintrag['pro']} Verbesserungen  
@@ -39,6 +39,27 @@ def generiere_bewertungsblock(eintrag):
 
 > [Zur Bewertung]({eintrag['bewertung_url']}) | [Im Protokoll anzeigen]({eintrag['protokoll_url']})
 <!-- LCN-BEWERTUNG-END -->"""
+
+def generiere_bewertungsblock(eintrag):
+    name = eintrag["Behandlung"]
+    pro = eintrag.get("pro", 0)
+    neutral = eintrag.get("neutral", 0)
+    contra = eintrag.get("contra", 0)
+
+    name_encoded = name.replace(" ", "%20")
+
+    bewertung_url = f"http://lcn.localhost.test:8080/bewertung.html#{name_encoded}"
+    protokoll_url = f"http://lcn.localhost.test:8080/lcnprotocol.html#{name_encoded}"
+
+    return f"""<!-- LCN-BEWERTUNG-START -->
+> 🗳 **Nutzer-Bewertung:**  
+> 👍 {pro} Verbesserungen  
+> 😐 {neutral} neutral  
+> 👎 {contra} Verschlechterungen  
+
+> [Zur Bewertung]({bewertung_url}) | [Im Protokoll anzeigen]({protokoll_url})
+<!-- LCN-BEWERTUNG-END -->
+"""
 
 def finde_page_id_by_title(title):
     res = requests.get(f"{BOOKSTACK_API_URL}/pages?count=1000", headers=auth_headers())
