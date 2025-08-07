@@ -10,7 +10,9 @@ async function loadData() {
             return res.json();
         }));
 
-        const allTreatments = results.flat();
+        const [jsonList, wikiList] = results;
+		const allTreatments = combineWithWiki(jsonList, wikiList);
+
 
         const maxCost = allTreatments.reduce((max, item) => {
             const costMax = parseFloat(item["Kosten max"]) || 0;
@@ -42,6 +44,27 @@ async function loadData() {
     }
 }
 
+function combineWithWiki(jsonList, wikiList) {
+    const wikiMap = new Map(
+        wikiList.map(e => [ (e.Behandlung || e.title || "").toLowerCase(), e ])
+    );
+
+    const combined = jsonList.map(json => {
+        const key = json.Behandlung?.toLowerCase();
+        const wikiEntry = wikiMap.get(key);
+
+        return {
+            ...json,
+            url: wikiEntry?.url || null
+        };
+    });
+
+    // Optionale Ergänzung: Nur-Wiki-Einträge (nicht nötig wenn du nur JSON zeigen willst)
+    // const extraWiki = wikiList.filter(w => !jsonList.find(j => j.Behandlung?.toLowerCase() === (w.Behandlung || w.title || "").toLowerCase()));
+    // return [...combined, ...extraWiki];
+
+    return combined;
+}
 
 
 /**

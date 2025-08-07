@@ -20,18 +20,29 @@ async function loadBewertungData() {
 }
 
 function mergeBehandlungen(jsonList, wikiList) {
-    const behandlungsNamen = new Set(jsonList.map(e => e.Behandlung.toLowerCase()));
+    const wikiMap = new Map(
+        wikiList.map(e => [ (e.Behandlung || e.title || "").toLowerCase(), e ])
+    );
 
-    const gefilterteWiki = wikiList
-        .filter(e => !behandlungsNamen.has((e.Behandlung || e.title || "").toLowerCase()))
+    const merged = jsonList.map(json => {
+        const key = json.Behandlung.toLowerCase();
+        const wikiMatch = wikiMap.get(key);
+
+        return {
+            ...json,
+            url: wikiMatch ? wikiMatch.url : null
+        };
+    });
+
+    const jsonKeys = new Set(jsonList.map(e => e.Behandlung.toLowerCase()));
+    const extraWiki = wikiList
+        .filter(e => !jsonKeys.has((e.Behandlung || e.title || "").toLowerCase()))
         .map(e => ({
-			Behandlung: e.Behandlung || e.title,
-			id: e.id || e.slug,
-			url: e.url || null
-		}));
+            Behandlung: e.Behandlung || e.title,
+            url: e.url
+        }));
 
-
-    return [...jsonList, ...gefilterteWiki];
+    return [...merged, ...extraWiki];
 }
 
 
