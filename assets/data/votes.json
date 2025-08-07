@@ -1,0 +1,26 @@
+[
+    {
+        "Behandlung": "Ernähung (kein Alkohol, Zucker, Koffein oder Histamin)",
+        "pro": 46,
+        "neutral": 18,
+        "contra": 23
+    },
+    {
+        "Behandlung": "Pro- Prebiotikum",
+        "pro": 25,
+        "neutral": 39,
+        "contra": 23
+    },
+    {
+        "Behandlung": "Kortison",
+        "pro": 28,
+        "neutral": 88,
+        "contra": 68
+    },
+    {
+        "Behandlung": "HBO strong",
+        "pro": 16,
+        "neutral": 38,
+        "contra": 27
+    }
+]

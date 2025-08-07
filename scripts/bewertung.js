@@ -139,7 +139,20 @@ function handleVote(event) {
     const row = button.closest("tr");
     row.querySelector("td:nth-last-child(2)").textContent = `${improvementRatio}%`; // "Verbesserung"
     row.querySelector("td:last-child").textContent = `${worseningRatio}%`; // "Verschlechterung"
+	
+	 fetch("/scripts/export/vote_save.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            treatment: treatment,
+            votes: votes
+        })
+    })
+    .then(res => res.json())
+    .then(res => console.log("✅ Vote gespeichert:", res))
+    .catch(err => console.error("❌ Fehler beim Speichern der Votes:", err));
 }
+
 
 
 

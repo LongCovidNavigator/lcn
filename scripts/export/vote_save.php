@@ -1,44 +1,45 @@
 <?php
-header('Content-Type: application/json');
+header("Content-Type: application/json");
 
-$save_path = '../../assets/data/bewertung_static.json';
-
-// Nur POST zulassen
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(["error" => "Only POST allowed"]);
-    exit;
-}
-
-// Rohdaten einlesen
-$input = file_get_contents("php://input");
-$data = json_decode($input, true);
-
-if (!is_array($data)) {
+$data = json_decode(file_get_contents("php://input"), true);
+if (!$data || !isset($data["treatment"]) || !isset($data["votes"])) {
     http_response_code(400);
-    echo json_encode(["error" => "Invalid JSON"]);
+    echo json_encode(["error" => "Invalid input"]);
     exit;
 }
 
-// Vorhandene Daten einlesen
-$existing = file_exists($save_path) ? json_decode(file_get_contents($save_path), true) : [];
+$file = __DIR__ . "/../../assets/data/votes.json";
 
-// Vorhandene Daten mit neuen überschreiben/ergänzen
-foreach ($data as $item) {
-    $name = $item["Behandlung"] ?? null;
-    if (!$name) continue;
+// Bestehende Einträge laden
+$existing = [];
+if (file_exists($file)) {
+    $json = file_get_contents($file);
+    $existing = json_decode($json, true) ?? [];
+}
 
-    $existing[$name] = [
-        "Behandlung" => $name,
-        "pro" => (int) ($item["pro"] ?? 0),
-        "neutral" => (int) ($item["neutral"] ?? 0),
-        "contra" => (int) ($item["contra"] ?? 0),
-        "bewertung_url" => $item["bewertung_url"] ?? "",
-        "protokoll_url" => $item["protokoll_url"] ?? ""
+// Behandlung aktualisieren oder hinzufügen
+$found = false;
+foreach ($existing as &$entry) {
+    if (strtolower($entry["Behandlung"]) === strtolower($data["treatment"])) {
+        $entry["pro"] = $data["votes"]["hilft"] ?? 0;
+        $entry["neutral"] = $data["votes"]["gleich"] ?? 0;
+        $entry["contra"] = $data["votes"]["verschlechterung"] ?? 0;
+        $found = true;
+        break;
+    }
+}
+unset($entry);
+
+if (!$found) {
+    $existing[] = [
+        "Behandlung" => $data["treatment"],
+        "pro" => $data["votes"]["hilft"] ?? 0,
+        "neutral" => $data["votes"]["gleich"] ?? 0,
+        "contra" => $data["votes"]["verschlechterung"] ?? 0
     ];
 }
 
-// Speichern
-file_put_contents($save_path, json_encode(array_values($existing), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+// Neue Datei schreiben
+file_put_contents($file, json_encode($existing, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-echo json_encode(["success" => true, "count" => count($data)]);
+echo json_encode(["success" => true]);
