@@ -1,26 +1,362 @@
 [
     {
         "Behandlung": "Ernähung (kein Alkohol, Zucker, Koffein oder Histamin)",
-        "pro": 46,
+        "pro": 48,
         "neutral": 18,
         "contra": 23
     },
     {
+        "Behandlung": "viel Trinken",
+        "pro": 8,
+        "neutral": 29,
+        "contra": 2
+    },
+    {
         "Behandlung": "Pro- Prebiotikum",
-        "pro": 25,
+        "pro": 27,
         "neutral": 39,
-        "contra": 23
+        "contra": 24
+    },
+    {
+        "Behandlung": "Atemübungen",
+        "pro": 20,
+        "neutral": 88,
+        "contra": 15
+    },
+    {
+        "Behandlung": "Mehrere Mahlzeiten",
+        "pro": 6,
+        "neutral": 23,
+        "contra": 73
+    },
+    {
+        "Behandlung": "Kortison fürs Herz",
+        "pro": 94,
+        "neutral": 32,
+        "contra": 54
+    },
+    {
+        "Behandlung": "Codein",
+        "pro": 25,
+        "neutral": 81,
+        "contra": 12
+    },
+    {
+        "Behandlung": "Betablocker",
+        "pro": 2,
+        "neutral": 56,
+        "contra": 94
+    },
+    {
+        "Behandlung": "Ivabradin",
+        "pro": 47,
+        "neutral": 64,
+        "contra": 10
+    },
+    {
+        "Behandlung": "Melatolin",
+        "pro": 19,
+        "neutral": 80,
+        "contra": 55
+    },
+    {
+        "Behandlung": "Jordiance oder Lavantan (Herz)",
+        "pro": 40,
+        "neutral": 1,
+        "contra": 99
+    },
+    {
+        "Behandlung": "Schmerzmittel",
+        "pro": 42,
+        "neutral": 46,
+        "contra": 82
+    },
+    {
+        "Behandlung": "Kry: kalt Duschen",
+        "pro": 64,
+        "neutral": 39,
+        "contra": 21
+    },
+    {
+        "Behandlung": "Darmreinigung zu Hause",
+        "pro": 21,
+        "neutral": 79,
+        "contra": 84
+    },
+    {
+        "Behandlung": "Zink Chlorid",
+        "pro": 1,
+        "neutral": 68,
+        "contra": 39
+    },
+    {
+        "Behandlung": "Antikoalationstherapie (Nattokinase)",
+        "pro": 34,
+        "neutral": 62,
+        "contra": 61
+    },
+    {
+        "Behandlung": "Sauerstoffflaschen über Amazon?",
+        "pro": 10,
+        "neutral": 7,
+        "contra": 27
+    },
+    {
+        "Behandlung": "NEM",
+        "pro": 32,
+        "neutral": 46,
+        "contra": 98
+    },
+    {
+        "Behandlung": "Entgiftung (über den Mund)",
+        "pro": 27,
+        "neutral": 85,
+        "contra": 77
+    },
+    {
+        "Behandlung": "Physio (zu Hause; digital)",
+        "pro": 12,
+        "neutral": 24,
+        "contra": 20
+    },
+    {
+        "Behandlung": "Entgiftung (Fußbad)",
+        "pro": 66,
+        "neutral": 36,
+        "contra": 22
+    },
+    {
+        "Behandlung": "Ergotherapie (zu Hause; digital)",
+        "pro": 25,
+        "neutral": 26,
+        "contra": 31
+    },
+    {
+        "Behandlung": "Massage (Entspannung)",
+        "pro": 69,
+        "neutral": 9,
+        "contra": 8
+    },
+    {
+        "Behandlung": "Darmreinigng\/ sanierung beim Heilpraktiker",
+        "pro": 54,
+        "neutral": 69,
+        "contra": 90
+    },
+    {
+        "Behandlung": "Kryo: Sauna, Kammer oder Eistonne",
+        "pro": 11,
+        "neutral": 86,
+        "contra": 29
+    },
+    {
+        "Behandlung": "Sauerstoffgerät",
+        "pro": 29,
+        "neutral": 5,
+        "contra": 42
+    },
+    {
+        "Behandlung": "Stallatumblockade",
+        "pro": 58,
+        "neutral": 87,
+        "contra": 49
+    },
+    {
+        "Behandlung": "(Infrarot)Sauna",
+        "pro": 81,
+        "neutral": 33,
+        "contra": 40
+    },
+    {
+        "Behandlung": "HBO mild",
+        "pro": 52,
+        "neutral": 73,
+        "contra": 64
+    },
+    {
+        "Behandlung": "IHHT",
+        "pro": 22,
+        "neutral": 36,
+        "contra": 24
+    },
+    {
+        "Behandlung": "Antihistaminikum",
+        "pro": 62,
+        "neutral": 89,
+        "contra": 79
+    },
+    {
+        "Behandlung": "Truvado\/ Miraviroc etc...",
+        "pro": 74,
+        "neutral": 72,
+        "contra": 52
     },
     {
         "Behandlung": "Kortison",
-        "pro": 28,
+        "pro": 30,
         "neutral": 88,
         "contra": 68
     },
     {
+        "Behandlung": "Antibiotikum",
+        "pro": 65,
+        "neutral": 83,
+        "contra": 53
+    },
+    {
+        "Behandlung": "Antikoalationstherapie (Tripple Therapie: ASS; Clopidogrel & Heparin oder Elequis oder Co)",
+        "pro": 10,
+        "neutral": 29,
+        "contra": 29
+    },
+    {
+        "Behandlung": "Bindung von Spikes (Heparin)",
+        "pro": 76,
+        "neutral": 87,
+        "contra": 86
+    },
+    {
+        "Behandlung": "Statin",
+        "pro": 3,
+        "neutral": 32,
+        "contra": 95
+    },
+    {
+        "Behandlung": "(Statin und) Satan?",
+        "pro": 16,
+        "neutral": 31,
+        "contra": 50
+    },
+    {
+        "Behandlung": "Low Dose Naltrexon (LDN)",
+        "pro": 69,
+        "neutral": 13,
+        "contra": 31
+    },
+    {
+        "Behandlung": "LDA",
+        "pro": 89,
+        "neutral": 49,
+        "contra": 47
+    },
+    {
+        "Behandlung": "Ivermectin (mit Privatrezept)",
+        "pro": 97,
+        "neutral": 24,
+        "contra": 33
+    },
+    {
+        "Behandlung": "Ivermectin (online & ohne Rezept)",
+        "pro": 15,
+        "neutral": 15,
+        "contra": 70
+    },
+    {
+        "Behandlung": "HELP Apherese",
+        "pro": 15,
+        "neutral": 45,
+        "contra": 69
+    },
+    {
         "Behandlung": "HBO strong",
-        "pro": 23,
+        "pro": 24,
         "neutral": 38,
         "contra": 27
+    },
+    {
+        "Behandlung": "Immunadsorbtion",
+        "pro": 6,
+        "neutral": 69,
+        "contra": 36
+    },
+    {
+        "Behandlung": "Immungloboline",
+        "pro": 25,
+        "neutral": 21,
+        "contra": 28
+    },
+    {
+        "Behandlung": "Impfung",
+        "pro": 8,
+        "neutral": 47,
+        "contra": 91
+    },
+    {
+        "Behandlung": "Magnesiuminfusion",
+        "pro": 5,
+        "neutral": 59,
+        "contra": 5
+    },
+    {
+        "Behandlung": "IV-Therapien",
+        "pro": 17,
+        "neutral": 85,
+        "contra": 57
+    },
+    {
+        "Behandlung": "Ozon (anal)",
+        "pro": 69,
+        "neutral": 59,
+        "contra": 88
+    },
+    {
+        "Behandlung": "Ozon (IV)",
+        "pro": 8,
+        "neutral": 82,
+        "contra": 37
+    },
+    {
+        "Behandlung": "Ozon (Eigenblut)",
+        "pro": 80,
+        "neutral": 79,
+        "contra": 89
+    },
+    {
+        "Behandlung": "Entgiftung (Ausleitung?)",
+        "pro": 60,
+        "neutral": 53,
+        "contra": 14
+    },
+    {
+        "Behandlung": "Physio (in Praxis)",
+        "pro": 98,
+        "neutral": 36,
+        "contra": 10
+    },
+    {
+        "Behandlung": "Steigerungstraining",
+        "pro": 36,
+        "neutral": 3,
+        "contra": 74
+    },
+    {
+        "Behandlung": "Pacing",
+        "pro": 99,
+        "neutral": 78,
+        "contra": 80
+    },
+    {
+        "Behandlung": "Mind-St-Programme (Brain Retraining)",
+        "pro": 26,
+        "neutral": 38,
+        "contra": 44
+    },
+    {
+        "Behandlung": "Antidepressiva",
+        "pro": 84,
+        "neutral": 41,
+        "contra": 42
+    },
+    {
+        "Behandlung": "AAA_Test",
+        "pro": 34,
+        "neutral": 95,
+        "contra": 22
+    },
+    {
+        "Behandlung": "BBB_2",
+        "pro": 33,
+        "neutral": 92,
+        "contra": 50
     }
 ]

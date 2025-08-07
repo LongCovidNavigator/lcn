@@ -64,6 +64,9 @@ function renderBewertungTable(treatments) {
             votes = JSON.parse(votes);
         }
 
+
+
+
         // Calculate ratios
         const totalVotes = votes.hilft + votes.gleich + votes.verschlechterung;
         const improvementRatio = totalVotes > 0 ? Math.round((votes.hilft / totalVotes) * 100) : 0;
@@ -104,6 +107,9 @@ function renderBewertungTable(treatments) {
     document.querySelectorAll(".vote-button").forEach(button => {
         button.addEventListener("click", handleVote);
     });
+	
+	
+
 }
 
 

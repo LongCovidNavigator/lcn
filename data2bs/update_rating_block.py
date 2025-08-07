@@ -40,6 +40,8 @@ def lade_bewertungen():
 > [Zur Bewertung]({eintrag['bewertung_url']}) | [Im Protokoll anzeigen]({eintrag['protokoll_url']})
 <!-- LCN-BEWERTUNG-END -->"""
 
+# <div class="lcn-rating-widget" data-name="HBO strong"></div>
+
 def generiere_bewertungsblock(eintrag):
     name = eintrag["Behandlung"]
     pro = eintrag.get("pro", 0)
