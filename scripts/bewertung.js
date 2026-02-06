@@ -1,8 +1,9 @@
 async function loadBewertungData() {
     try {
         const [jsonRes, wikiRes] = await Promise.all([
-            fetch("assets/data/long_covid_treatments_corrected.json"),
-            fetch("api/structure_content.php")
+            /* fetch("assets/data/long_covid_treatments_corrected.json"), */
+            fetch("api/treatments_from_db.php"),
+			fetch("api/structure_content.php")
         ]);
 
         if (!jsonRes.ok || !wikiRes.ok) {

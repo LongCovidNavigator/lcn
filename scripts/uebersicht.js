@@ -1,6 +1,8 @@
 async function loadUebersichtData() {
     try {
-        const response = await fetch("assets/data/long_covid_treatments_corrected.json");
+        /* const response = await fetch("assets/data/long_covid_treatments_corrected.json"); */
+		const response = await fetch("api/treatments_from_db.php", { cache: "no-store" });
+
         if (!response.ok) throw new Error(`Error loading JSON file: ${response.status} ${response.statusText}`);
 
         const treatments = await response.json();
@@ -54,18 +56,6 @@ function renderUebersichtTable(treatments) {
         button.addEventListener("click", handleVote);
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Load the data when the page loads
 document.addEventListener("DOMContentLoaded", () => {
