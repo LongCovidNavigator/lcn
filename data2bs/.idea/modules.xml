@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/data2bs.iml" filepath="$PROJECT_DIR$/.idea/data2bs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/data_transfer.iml" filepath="$PROJECT_DIR$/.idea/data_transfer.iml" />
     </modules>
   </component>
 </project>
