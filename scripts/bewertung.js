@@ -1,256 +1,172 @@
+// =========================
+// DB-backed Bewertung (no localStorage)
+// =========================
+
 async function loadBewertungData() {
-    try {
-        const [jsonRes, wikiRes] = await Promise.all([
-            /* fetch("assets/data/long_covid_treatments_corrected.json"), */
-            fetch("api/treatments_from_db.php"),
-			fetch("api/structure_content.php")
-        ]);
+  try {
+    const [jsonRes, wikiRes, votesRes] = await Promise.all([
+      fetch("/api/treatments_from_db.php"),
+      fetch("/api/structure_content.php"),
+      fetch("/api/get_votes_db.php"),
+    ]);
 
-        if (!jsonRes.ok || !wikiRes.ok) {
-            throw new Error("Fehler beim Laden der Datenquellen");
-        }
-
-        const json = await jsonRes.json();
-        const wiki = await wikiRes.json();
-
-        const gesamt = mergeBehandlungen(json, wiki);
-        renderBewertungTable(gesamt);
-    } catch (err) {
-        console.error("Fehler beim Laden der Daten:", err.message);
+    if (!jsonRes.ok || !wikiRes.ok || !votesRes.ok) {
+      throw new Error("Fehler beim Laden der Datenquellen");
     }
+
+    const json = await jsonRes.json();
+    const wiki = await wikiRes.json();
+    const votesRaw = await votesRes.json();
+
+    // Map: Behandlung(lower) -> {Behandlung, pro, neutral, contra}
+    const votesMap = new Map(
+      (votesRaw || [])
+        .filter(v => v && v.Behandlung)
+        .map(v => [String(v.Behandlung).toLowerCase(), v])
+    );
+
+    const gesamt = mergeBehandlungen(json, wiki);
+    renderBewertungTable(gesamt, votesMap);
+
+  } catch (err) {
+    console.error("Fehler beim Laden der Daten:", err.message);
+  }
 }
 
 function mergeBehandlungen(jsonList, wikiList) {
-    const wikiMap = new Map(
-        wikiList.map(e => [ (e.Behandlung || e.title || "").toLowerCase(), e ])
+  const wikiMap = new Map(
+    (wikiList || []).map(e => [String(e.Behandlung || e.title || "").toLowerCase(), e])
+  );
+
+  const merged = (jsonList || []).map(j => {
+    const key = String(j.Behandlung || "").toLowerCase();
+    const wikiMatch = wikiMap.get(key);
+    return { ...j, url: wikiMatch ? wikiMatch.url : null };
+  });
+
+  const jsonKeys = new Set((jsonList || []).map(e => String(e.Behandlung || "").toLowerCase()));
+  const extraWiki = (wikiList || [])
+    .filter(e => !jsonKeys.has(String(e.Behandlung || e.title || "").toLowerCase()))
+    .map(e => ({
+      Behandlung: e.Behandlung || e.title,
+      url: e.url
+    }));
+
+  return [...merged, ...extraWiki];
+}
+
+function renderBewertungTable(treatments, votesMap) {
+  const tableBody = document.querySelector(".bewertung-table tbody");
+  tableBody.innerHTML = "";
+
+  treatments.forEach((item, index) => {
+    const key = String(item.Behandlung || "").toLowerCase();
+    const dbVote = votesMap?.get(key);
+
+    const votes = dbVote ? {
+      hilft: Number(dbVote.pro ?? 0),
+      gleich: Number(dbVote.neutral ?? 0),
+      verschlechterung: Number(dbVote.contra ?? 0),
+    } : { hilft: 0, gleich: 0, verschlechterung: 0 };
+
+    const totalVotes = votes.hilft + votes.gleich + votes.verschlechterung;
+    const improvementRatio = totalVotes > 0 ? Math.round((votes.hilft / totalVotes) * 100) : 0;
+    const worseningRatio = totalVotes > 0 ? Math.round((votes.verschlechterung / totalVotes) * 100) : 0;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>
+        ${item.url
+          ? `<a href="${item.url}" target="_blank">${item.Behandlung}</a>`
+          : (item.Behandlung || "-")}
+      </td>
+      <td class="vote-buttons">
+        <button class="vote-button" data-treatment="${item.Behandlung}" data-type="hilft">
+          ↗ (<span class="vote-count">${votes.hilft}</span>)
+        </button>
+        <button class="vote-button" data-treatment="${item.Behandlung}" data-type="gleich">
+          = (<span class="vote-count">${votes.gleich}</span>)
+        </button>
+        <button class="vote-button" data-treatment="${item.Behandlung}" data-type="verschlechterung">
+          ↘ (<span class="vote-count">${votes.verschlechterung}</span>)
+        </button>
+      </td>
+      <td>${improvementRatio}%</td>
+      <td>${worseningRatio}%</td>
+    `;
+    tableBody.appendChild(row);
+  });
+
+  document.querySelectorAll(".vote-button").forEach(btn => {
+    btn.addEventListener("click", handleVote);
+  });
+}
+
+async function handleVote(event) {
+  const button = event.target.closest(".vote-button");
+  const treatment = button.getAttribute("data-treatment");
+  const voteType = button.getAttribute("data-type");
+
+  try {
+    const res = await fetch("/api/inc_votes_db.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ treatment, type: voteType })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data?.ok) {
+      throw new Error(data?.error || "Vote increment failed");
+    }
+
+    // Nach dem Increment: komplette Vote-Liste neu laden (Single Source of Truth)
+    const votesRes = await fetch("/api/get_votes_db.php");
+    if (!votesRes.ok) throw new Error("get_votes_db failed");
+    const votesRaw = await votesRes.json();
+
+    const votesMap = new Map(
+      (votesRaw || [])
+        .filter(v => v && v.Behandlung)
+        .map(v => [String(v.Behandlung).toLowerCase(), v])
     );
 
-    const merged = jsonList.map(json => {
-        const key = json.Behandlung.toLowerCase();
-        const wikiMatch = wikiMap.get(key);
+    const key = String(treatment || "").toLowerCase();
+    const dbVote = votesMap.get(key);
+    const votes = dbVote ? {
+      hilft: Number(dbVote.pro ?? 0),
+      gleich: Number(dbVote.neutral ?? 0),
+      verschlechterung: Number(dbVote.contra ?? 0),
+    } : { hilft: 0, gleich: 0, verschlechterung: 0 };
 
-        return {
-            ...json,
-            url: wikiMatch ? wikiMatch.url : null
-        };
+    // Update nur diese Zeile
+    const row = button.closest("tr");
+    row.querySelectorAll(".vote-button").forEach(btn => {
+      const t = btn.getAttribute("data-type");
+      const span = btn.querySelector(".vote-count");
+      if (!span) return;
+      if (t === "hilft") span.textContent = votes.hilft;
+      if (t === "gleich") span.textContent = votes.gleich;
+      if (t === "verschlechterung") span.textContent = votes.verschlechterung;
     });
 
-    const jsonKeys = new Set(jsonList.map(e => e.Behandlung.toLowerCase()));
-    const extraWiki = wikiList
-        .filter(e => !jsonKeys.has((e.Behandlung || e.title || "").toLowerCase()))
-        .map(e => ({
-            Behandlung: e.Behandlung || e.title,
-            url: e.url
-        }));
-
-    return [...merged, ...extraWiki];
-}
-
-
-function renderBewertungTable(treatments) {
-    const tableBody = document.querySelector(".bewertung-table tbody");
-    tableBody.innerHTML = ""; // Clear existing content
-
-    treatments.forEach((item, index) => {
-        // Get stored votes or initialize with random values
-        let votes = localStorage.getItem(item.Behandlung);
-        if (!votes) {
-            votes = {
-                hilft: Math.floor(Math.random() * 101), // Random between 0 and 100
-                gleich: Math.floor(Math.random() * 101),
-                verschlechterung: Math.floor(Math.random() * 101),
-            };
-            localStorage.setItem(item.Behandlung, JSON.stringify(votes));
-        } else {
-            votes = JSON.parse(votes);
-        }
-
-
-
-
-        // Calculate ratios
-        const totalVotes = votes.hilft + votes.gleich + votes.verschlechterung;
-        const improvementRatio = totalVotes > 0 ? Math.round((votes.hilft / totalVotes) * 100) : 0;
-		const worseningRatio = totalVotes > 0 ? Math.round((votes.verschlechterung / totalVotes) * 100) : 0;
-
-
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            
-			<td>
-			  ${item.url
-				? `<a href="${item.url}" target="_blank">${item.Behandlung}</a>`
-				: item.Behandlung || "-"}
-			</td>
-
-
-            <td class="vote-buttons">
-                <button class="vote-button" data-treatment="${item.Behandlung}" data-type="hilft">
-                    ↗ (<span class="vote-count">${votes.hilft}</span>)
-                </button>
-                <button class="vote-button" data-treatment="${item.Behandlung}" data-type="gleich">
-                    = (<span class="vote-count">${votes.gleich}</span>)
-                </button>
-                <button class="vote-button" data-treatment="${item.Behandlung}" data-type="verschlechterung">
-                    ↘ (<span class="vote-count">${votes.verschlechterung}</span>)
-                </button>
-            </td>
-            <td>${improvementRatio}%</td>
-            <td>${worseningRatio}%</td> <!-- New column -->
-        `;
-
-        tableBody.appendChild(row);
-    });
-
-    // Add event listeners for voting buttons
-    document.querySelectorAll(".vote-button").forEach(button => {
-        button.addEventListener("click", handleVote);
-    });
-	
-	
-
-}
-
-
-
-
-
-
-
-function handleVote(event) {
-    const button = event.target.closest(".vote-button");
-    const treatment = button.getAttribute("data-treatment");
-    const voteType = button.getAttribute("data-type");
-
-    // Get stored votes or initialize
-    const votes = JSON.parse(localStorage.getItem(treatment) || '{"hilft": 0, "gleich": 0, "verschlechterung": 0}');
-    
-    // Increment the vote count for the selected type
-    votes[voteType] += 1;
-
-    // Update local storage
-    localStorage.setItem(treatment, JSON.stringify(votes));
-
-    // Update the UI
-    const voteCountSpan = button.querySelector(".vote-count");
-    voteCountSpan.textContent = votes[voteType];
-
-    // Recalculate ratios
     const totalVotes = votes.hilft + votes.gleich + votes.verschlechterung;
     const improvementRatio = totalVotes > 0 ? ((votes.hilft / totalVotes) * 100).toFixed(2) : "0.00";
     const worseningRatio = totalVotes > 0 ? ((votes.verschlechterung / totalVotes) * 100).toFixed(2) : "0.00";
 
-    // Update the respective cells
-    const row = button.closest("tr");
-    row.querySelector("td:nth-last-child(2)").textContent = `${improvementRatio}%`; // "Verbesserung"
-    row.querySelector("td:last-child").textContent = `${worseningRatio}%`; // "Verschlechterung"
-	
-	 fetch("/scripts/export/vote_save.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            treatment: treatment,
-            votes: votes
-        })
-    })
-    .then(res => res.json())
-    .then(res => console.log("✅ Vote gespeichert:", res))
-    .catch(err => console.error("❌ Fehler beim Speichern der Votes:", err));
+    row.querySelector("td:nth-last-child(2)").textContent = `${improvementRatio}%`;
+    row.querySelector("td:last-child").textContent = `${worseningRatio}%`;
+
+  } catch (err) {
+    console.error("❌ Vote Fehler:", err.message);
+  }
 }
 
-
-
-
-
-
-// Load the data when the page loads
 document.addEventListener("DOMContentLoaded", () => {
-    loadBewertungData();
+  loadBewertungData();
 
-    // Attach event listeners to all table headers
-    const tableHeaders = document.querySelectorAll(".bewertung-table thead th");
-    tableHeaders.forEach((header, index) => {
-        header.addEventListener("click", () => sortTableByColumn(index));
-    });
+  const tableHeaders = document.querySelectorAll(".bewertung-table thead th");
+  tableHeaders.forEach((header, index) => {
+    header.addEventListener("click", () => sortTableByColumn(index));
+  });
 });
-
-/*
- * Sorts the Übersicht table by a specific column.
- * @param {number} columnIndex - The index of the column to sort by (0-based).
- */
- 
- // Hierarchies for sorting
-const nutzenHierarchy = ["sehr hoch", "hoch", "mittel", "gering"];
-const wirkgeschwindigkeitHierarchy = ["sofort", "schnell", "mittel", "langsam", "unbekannt"];
-const crashrisikoHierarchy = ["gering", "mittel", "hoch", "sehr hoch"];
-
-function sortTableByColumn(columnIndex) {
-	// console.log("sortTableByColumn called with columnIndex:", columnIndex);
-
-    const tableBody = document.querySelector(".bewertung-table tbody");
-    const rows = Array.from(tableBody.querySelectorAll("tr"));
-
-    // Determine the sort order: ascending or descending
-    const currentSortOrder = tableBody.getAttribute(`data-sort-order-${columnIndex}`);
-    const isAscending = currentSortOrder !== "asc"; // Toggle sort order
-    tableBody.setAttribute(`data-sort-order-${columnIndex}`, isAscending ? "asc" : "desc");
-
-	console.log("Order:", isAscending," ",columnIndex);
-    // Log column and sort order
-    // console.log("Column Index:", columnIndex); // console.log("Current Sort Order:", currentSortOrder);
-    // console.log("Current Sort Order:", currentSortOrder);
-
-    // Define the hierarchies
-    const nutzenHierarchy = ["sehr hoch", "hoch", "mittel", "gering"];
-    const wirkgeschwindigkeitHierarchy = ["sofort", "schnell", "mittel", "langsam", "unbekannt"];
-    const crashrisikoHierarchy = ["gering", "mittel", "hoch", "sehr hoch"];
-
-    // Sort rows based on the specified column
-    rows.sort((rowA, rowB) => {
-        const cellA = rowA.querySelector(`td:nth-child(${columnIndex + 1})`).textContent.toLowerCase().trim();
-        const cellB = rowB.querySelector(`td:nth-child(${columnIndex + 1})`).textContent.toLowerCase().trim();
-
-        let indexA, indexB;
-
-        // Handle hierarchical sorting
-        if (columnIndex === 1) {
-            // Behandlungsoptionen column (alphabetical sort)
-            return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
-
-        } else {
-            // Parse numbers and handle non-numeric values
-			const numA = parseFloat(cellA);
-			const numB = parseFloat(cellB);
-
-			// Assign Infinity for non-numeric values to place them at the end
-			const indexA = isNaN(numA) ? (isAscending ? Infinity : -Infinity) : numA;
-			const indexB = isNaN(numB) ? (isAscending ? Infinity : -Infinity) : numB;
-
-
-			// Perform numerical comparison
-			return isAscending ? indexA - indexB : indexB - indexA;
-        }
-
-        // Log values being compared and their hierarchy indices
-        // console.log("Cell A:", cellA, "Index A:", indexA);
-        // console.log("Cell B:", cellB, "Index B:", indexB);
-
-        // Handle missing values in hierarchy
-		if (indexA === -1) indexA = isAscending ? Infinity : -Infinity; // Always place non-matching values at the end
-		if (indexB === -1) indexB = isAscending ? Infinity : -Infinity; // Always place non-matching values at the end
-
-
-        return isAscending ? indexA - indexB : indexB - indexA;
-    });
-
-    // Append the sorted rows back to the table
-    rows.forEach(row => tableBody.appendChild(row));
-
-    // Update header to indicate sort direction
-    const headers = document.querySelectorAll(".bewertung-table thead th");
-    headers.forEach(header => header.classList.remove("sorted-asc", "sorted-desc")); // Reset classes
-    const sortedHeader = document.querySelector(`.bewertung-table thead th:nth-child(${columnIndex + 1})`);
-    sortedHeader.classList.add(isAscending ? "sorted-asc" : "sorted-desc");
-}

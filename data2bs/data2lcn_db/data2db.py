@@ -11,12 +11,18 @@ import mysql.connector
 # =========================
 # HARD-CODE SETTINGS
 # =========================
-JSON_PATH = "C:/xampp/htdocs/lcn/assets/data/long_covid_treatments_corrected.json"          # <-- anpassen falls nötig
+# JSON_PATH = "C:/xampp/htdocs/lcn/assets/data/long_covid_treatments_corrected.json"          # <-- anpassen falls nötig
+# TABLE_NAME = "lcn_raw_wiki"                                       # <-- wie die neue Tabelle heißen soll
+# SOURCE_LABEL = "wiki.json"                                        # <-- frei wählbares Label
+
+JSON_PATH = r"C:\xampp\htdocs\lcn\assets\data\votes.json"
+TABLE_NAME = "lcn_raw_votes"
+SOURCE_LABEL = "votes.json"
+
+
 # .env liegt im gleichen Ordner wie dieses Script (data2db.py)
 SCRIPT_DIR = Path(__file__).resolve().parent
 ENV_PATH = SCRIPT_DIR / ".env"
-TABLE_NAME = "lcn_raw_wiki"                                       # <-- wie die neue Tabelle heißen soll
-SOURCE_LABEL = "wiki.json"                                        # <-- frei wählbares Label
 
 from dotenv import load_dotenv
 

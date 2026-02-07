@@ -1,15 +1,15 @@
 [
     {
         "Behandlung": "Ernähung (kein Alkohol, Zucker, Koffein oder Histamin)",
-        "pro": 48,
-        "neutral": 18,
-        "contra": 23
+        "pro": 32,
+        "neutral": 47,
+        "contra": 45
     },
     {
         "Behandlung": "viel Trinken",
-        "pro": 8,
-        "neutral": 29,
-        "contra": 2
+        "pro": 29,
+        "neutral": 8,
+        "contra": 59
     },
     {
         "Behandlung": "Pro- Prebiotikum",
