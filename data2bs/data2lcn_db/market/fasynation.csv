@@ -1,0 +1,116 @@
+Nr,Dr,Vorname,Nachname,PLZ,Land,Link,Fernberatung,Fachrichtung
+1,ja,Michael,Stingl,1090,AT,www.neurostingl.at,ja,
+2,ja,Dominik,Vogel,2500,AT,www.internist-baden.at,nein,
+3,ja,,Wunder,8051,AT,www.praxiswunder.at,nein,
+4,ja,Paolo,Contin,4102,CH,www.contin.ch,nein,
+5,ja,Florian,Strasser,8200,CH,www.onkologie-schaffhausen.ch,nein,Onkologie (Hinweis: behandelt auch andere Fatigue)
+6,ja,Mei-Lin,Blum-Jacot,8274,CH,www.pflanzberg.ch,nein,
+7,ja,Anja,Oelke,06108,DE,www.anvayapraxis.com.de,nein,
+8,nein,,Schmerzzentrum Berlin,10435,DE,www.schmerzmedizin.berlin,nein,Schmerz (bei Schmerzen)
+9,ja,Ralf,Heinrich,10719,DE,theraklinik.de,nein,
+10,nein,Lydia,Nickoleit,01157,DE,naturheilpraxis-nickoleit.de,nein,Heilpraktikerin (HP)
+11,ja,Christian,Gogoll,13086,DE,www.johannesstift-diakonie.de,nein,
+12,ja,Anke,Risse,13465,DE,curamed-frohnau.de,nein,
+13,ja,Josephine,Reiche,13467,DE,drreiche.de,nein,
+14,ja,Jansen,Rossek,14169,DE,symmed.de,nein,
+15,ja,Diego,Schmidt,14169,DE,www.drmeddiegoschmidt.com,nein,
+16,ja,Julia,Möbius,14473,DE,www.diamedikum-potsdam.de,nein,
+17,ja,Désirée,Schaumburg,14480,DE,neuzeitaerztin.de,nein,
+18,nein,Sieglinde,Bast,15837,DE,www.praxis-bast.de,nein,Neurologie (Neurologin)
+19,ja,Bodo,Kuklinski,18055,DE,www.dr-kuklinski.info,ja,
+20,ja,,Stark,20144,DE,prof-stark.de,nein,Professor
+21,ja,Henning,Berger,20253,DE,www.kvhh.net,nein,Neurologie (Neurologe)
+22,nein,Ralph,Gadow,20354,DE,www.heilpraktikerpraxis-hamburg.de,nein,Heilpraktiker (HP)
+23,ja,,Schnakenberg / IPGD,20095,DE,ipgd-labore.de,nein,
+24,ja,Anke,Dixon,22089,DE,www.allgemeinmedizineilbek.de,nein,
+25,ja,Lukas,Mayerhoff,22391,DE,www.dr-mayerhoff.hamburg,nein,
+26,nein,Tanja,Adam,23701,DE,www.mitomedic.de,nein,Heilpraktikerin (HP)
+27,ja,,Bückendorf,24113,DE,www.praxis-bueckendorf.de,nein,
+28,ja,,Wolfgang Ries,24983,DE,www.dasoertliche.de,nein,
+29,nein,,Gemeinschaftspraxis Sterup,24996,DE,www.praxis-sterup.de,nein,
+30,ja,Sylke,Schuster,26122,DE,www.praxis-osterstrasse.de,nein,
+31,ja,Gudrun,Albrecht,27777,DE,gudrun-albrecht.de,nein,
+32,nein,Matthias,Badzun,27798,DE,www.badzun.de,nein,Heilpraktiker (HP)
+33,nein,,Hausarztpraxis Dufayet,28207,DE,juliendufayet.de,nein,Hausarztpraxis
+34,ja,Michael,Wittke,29221,DE,privatpraxis-drwittke.de,nein,
+35,nein,,Medissimo Arztpraxis,30177,DE,www.medissimo-hannover.de,nein,Arztpraxis
+36,ja,Volker,Böhme,33330,DE,www.fachaerzte-neurologie-psychiatrie.de,nein,
+37,ja,Jürgen,Mogck,34127,DE,www.heilhaus.org,nein,
+38,nein,,Habichtswaldklinik,34134,DE,habichtswaldklinik.de,nein,Klinik
+39,ja,Constanze,Discher,34587,DE,www.praxis-felsberg.de,nein,
+40,nein,Cora,Albach,35423,DE,www.albach-praxis.de,nein,
+41,nein,Tobias,Duven,40212,DE,www.naturheilpraxis-duven.de,nein,Heilpraktiker (HP)
+42,nein,Isabel,Komischke,40221,DE,fzn-duesseldorf.de,nein,Neuropsychologie (Neuropsychologin)
+43,ja,,Zillgens / Praganzmed-Praxis,40545,DE,praganzmed.de,nein,
+44,ja,Ruth,Biallowons,40547,DE,www.ganzheitliche-medizin-oberkassel.de,nein,
+45,nein,,Naturheilzentrum Breidenbach,42103,DE,naturheilzentrum-breidenbach.de,nein,Naturheilzentrum
+46,ja,Ralph,Ihlas,44139,DE,dr-ihlas.de,nein,
+47,nein,Kristine,Fredriksson,45259,DE,www.natuerliche-therapie.de,ja,Online-Beratung
+48,ja,,Schrieck,48149,DE,dr-schriek.de,nein,(zZ keine neuen Patienten)
+49,ja,Michael,Kacik,48159,DE,www.pro-vascular.de,ja,
+50,nein,Ulrike,Lübke,48163,DE,www.ulrike-luerbke.de,nein,Heilpraktikerin (HP)
+51,ja,,M. Hechler,49080,DE,www.dr-hechler.info,nein,
+52,ja,Matthias,Salewski,50667,DE,www.internist-am-dom.de,nein,Innere Medizin (Internist)
+53,ja,Yavuz,Sahin,50667,DE,dr-sahin.de,nein,
+54,ja,Oliver,Röderer,50672,DE,health-prime.de,nein,
+55,ja,,Klaus Schmidt-Thomé,50931,DE,www.stadtwaldpraxis-koeln.de,nein,
+56,nein,Annette,Gude,50933,DE,www.heilpraktiker-tcm-koeln.de,nein,Heilpraktikerin (HP), TCM
+57,ja,Kai,Störring,50935,DE,www.longcovid-cfs-genesung.de,ja,LC- und ME/CFS Experte (NUR ONLINE)
+58,ja,Volker Anselm,Brenn,50968,DE,mvz-brenn.de,nein,
+59,ja,Andrea,Meuser,51069,DE,www.jameda.de,nein,
+60,ja,Leo,Habets,52086,DE,habets-aachen.com,nein,
+61,nein,Lorenz,Geßwein,53129,DE,www.hp-gesswein.de,nein,Heilpraktiker (HP)
+62,ja,Reinhard,Müller-Schmidt,53604,DE,www.praxis-im-kurpark.com,nein,
+63,ja,,Lembens & Lembens,55116,DE,hausaerzte-mainz.de,ja,Hausärzte
+64,nein,,Uniklinik Mainz,55131,DE,www.unimedizin-mainz.de,nein,Uniklinik
+65,ja,Isabelle,Greber,56154,DE,www.praxis-dr-greber.de,nein,
+66,ja,Hamid,Kermadi,57234,DE,kermani-james.de,nein,
+67,nein,Carina,Keil,57482,DE,heilpraktikerin-keil.de,nein,Heilpraktikerin (HP)
+68,ja,,Couckuyt,59368,DE,www.praxis-am-fuerstenhof.de,nein,
+69,ja,Harald,Heiskel,60313,DE,www.praxisgemeinschaft-waldschmidtstrasse.de,nein,
+70,ja,Tim,Krieger,60386,DE,www.praxiskrieger.com,nein,
+71,ja,Bettina,Müller,60487,DE,www.ganzheitliche-neurologie-frankfurt.de,nein,Neurologie
+72,ja,Heike,Türke,63741,DE,www.hausaerzte-nilkheim.com,nein,Hausärztin/Hausärzte
+73,ja,Thomas,Peter,64625,DE,www.anuvindati.de,nein,
+74,ja,,Hellstern bei Medivitum,65185,DE,www.medivitum-wiesbaden.de,nein,
+75,ja,Saskia,Rittirsch,65191,DE,www.parkside-medical.de,nein,
+76,nein,Dirk-Rüdiger,Noschinski,65812,DE,www.der-naturheilpraktiker.de,ja,Heilpraktiker (Fernberatung markiert)
+77,ja,Michael,Jelden,66424,DE,www.hausarzt-homburg.de,nein,Hausarzt
+78,ja,Rainer,Mutschler,67346,DE,biomedical-center.de,ja,
+79,nein,Alexandra,von Zitzewitz,68165,DE,www.hpu-praxis.de,nein,Heilpraktikerin (HP)
+80,ja,Sabine,Knochenhauer,68165,DE,www.hnc-mannheim.de,nein,Dr + (HP im Namen)
+81,nein,,Gesundheitszentrum Striller,68519,DE,gesundheit-striller.de,nein,Gesundheitszentrum
+82,ja,Aidan,Hogan,69123,DE,chiropraktikheidelberg.de,nein,Chiropraktik
+83,ja,Markus,Heinemann,70178,DE,www.rotebuehlpraxis.de,nein,
+84,ja,Sven-Eric,Paluch,70374,DE,www.neumann-paluch.de,nein,
+85,nein,Annette,Johnson,72108,DE,www.annette-johnson.de,nein,Fachärztin (+Naturheilverfahren)
+86,ja,Monika,Häufle,72622,DE,www.dr-haeufle.de,ja,
+87,nein,Olaf,Görke,73340,DE,www.thebodyconcept.com,nein,Heilpraktiker (HP)
+88,nein,Martina,Hartmann,76332,DE,martina-hartmann.de,nein,Fachärztin
+89,ja,Thomas & Simon,Kohler,77855,DE,www.gemeinschaftspraxis-achern.de,nein,
+90,nein,David,Ruf,78224,DE,wm-singen.de,nein,Heilpraktiker (HP) (bei Schmerzen)
+91,nein,Susanne,Mattke,78250,DE,www.hausderbalance.de,nein,Heilpraktikerin (HP)
+92,nein,Guido,Klöpper,78351,DE,naturomed-praxis.de,nein,Heilpraktiker (HP)
+93,nein,Tamara,Zormeier,78462,DE,www.arztpraxis-zormeier.de,nein,Fachärztin
+94,ja,Stefan,Pieper,78464,DE,Praxisdrpieper.de,nein,
+95,ja,Antonie M.,Haas,79117,DE,www.jameda.de,nein,
+96,nein,,Rehaklinik Glotterbad,79286,DE,www.rehaklinik-glotterbad.de,nein,Rehaklinik
+97,ja,Wilfried,Bieger,80333,DE,Dr-bieger.de,nein,
+98,ja,Susanne,Gänßbauer,80333,DE,www.praxis-gaenssbauer.com,nein,Neurologie (Neurologin – Hinweis im Text)
+99,ja,Esther,Ripphoff,80336,DE,www.praxis-ripphoff.de,nein,
+100,ja,Sophia,Wachner,80637,DE,www.sophiawachner.de,nein,
+101,ja,Moritz,Hempen,80801,DE,www.hempen.de,nein,TCM
+102,ja,,B. Luchting (Leitung),80804,DE,www.muenchen-klinik.de,nein,Klinik/Leitung
+103,nein,Sebastian,Weber,82110,DE,www.weber-heilpraktiker-germering.de,nein,Heilpraktiker (HP)
+104,ja,Reinhard,Schiller,84144,DE,www.dr-schiller.de,nein,
+105,ja,Michael,Bommer,85354,DE,www.drbommer.de,nein,
+106,ja,Petra,Gerheuser,86150,DE,www.tcm-praxis-gerheuser.de,nein,TCM
+107,ja,,Blehe und Team,86153,DE,www.alviasana.com,nein,Team/Praxis
+108,ja,Renate,Weber,86163,DE,weremed.de,nein,
+109,ja,Werner,Bader,88339,DE,www.praxis-dr-bader.de,ja,
+110,ja,Christina,Lang,89081,DE,www.aerzte.de,ja,
+111,ja,Carina,Petrasek,90469,DE,individuellegesundheit.de,nein,
+112,ja,Stefan,Springer,93049,DE,praxis-springer.de,nein,
+113,nein,,Spezialklinik Neukirchen,93453,DE,www.spezialklinik-neukirchen.de,nein,Spezialklinik
+114,ja,Martin,Schnitze,94315,DE,www.alternatives-kopfschmerzzentrum.de,nein,Kopfschmerz (Zentrum)
+115,nein,Thomas,Gries,96047,DE,www.heilpraxis-gries.de,nein,Heilpraktiker (HP)

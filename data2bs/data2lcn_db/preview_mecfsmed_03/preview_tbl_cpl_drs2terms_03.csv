@@ -1,0 +1,87 @@
+﻿dr_id;term_id;source_id;confidence;created_at;term_type;term_code;term_label
+773;900000;46;high;;badge;expertise-in-postvac;Expertise in PostVac
+773;40;46;high;;badge;provides-mecfs-diagnosis;Stellt die Diagnose für ME/CFS (G93.3)
+773;34;46;high;;badge;mecfs-knowledgeable;Kennt sich mit ME/CFS aus
+773;28;46;high;;badge;accepts-mecfs-diagnosis;Akzeptiert die Diagnose ME/CFS
+773;41;46;high;;badge;treats-mecfs-offlabel;Behandelt ME/CFS (z. B. off-label)
+773;39;46;high;;badge;provides-attestations;Stellt Gutachten bzw. Atteste aus
+773;36;46;high;;badge;patients-feel-heard;Ich habe mich ernstgenommen gefühlt
+773;31;46;high;;badge;long-covid-expertise;Expertise in Long/Post Covid
+774;36;46;high;;badge;patients-feel-heard;Ich habe mich ernstgenommen gefühlt
+774;31;46;high;;badge;long-covid-expertise;Expertise in Long/Post Covid
+774;45;46;high;;accessibility;infection-control-protocols;In der Praxis wird auf Infektionsschutz geachtet (z. B. Maske tragen)
+774;900001;46;high;;accessibility;es-gibt-parkplaetze-direkt-vor-oder-sehr-nahe-der-praxis;Es gibt Parkplätze direkt vor oder sehr nahe der Praxis
+775;40;46;high;;badge;provides-mecfs-diagnosis;Stellt die Diagnose für ME/CFS (G93.3)
+775;35;46;high;;badge;offers-immunodiagnostics;Macht Immundiagnostik
+775;900002;46;high;;badge;arbeitet-mit-imd;Arbeitet mit IMD
+775;38;46;high;;badge;pots-expertise;Kennt sich mit POTS/Dysautonomien aus
+775;34;46;high;;badge;mecfs-knowledgeable;Kennt sich mit ME/CFS aus
+775;28;46;high;;badge;accepts-mecfs-diagnosis;Akzeptiert die Diagnose ME/CFS
+775;41;46;high;;badge;treats-mecfs-offlabel;Behandelt ME/CFS (z. B. off-label)
+775;39;46;high;;badge;provides-attestations;Stellt Gutachten bzw. Atteste aus
+775;36;46;high;;badge;patients-feel-heard;Ich habe mich ernstgenommen gefühlt
+775;31;46;high;;badge;long-covid-expertise;Expertise in Long/Post Covid
+775;900003;46;high;;accessibility;step-free-access;Die Praxis ist stufenlos erreichbar
+775;900001;46;high;;accessibility;es-gibt-parkplaetze-direkt-vor-oder-sehr-nahe-der-praxis;Es gibt Parkplätze direkt vor oder sehr nahe der Praxis
+775;43;46;high;;accessibility;email-contact;Kontakt per E-Mail möglich
+775;900004;46;high;;accessibility;bietet-telefontermine-an;Bietet Telefontermine an
+775;900005;46;high;;accessibility;bietet-videosprechstunde-an;Bietet Videosprechstunde an
+776;900000;46;high;;badge;expertise-in-postvac;Expertise in PostVac
+776;40;46;high;;badge;provides-mecfs-diagnosis;Stellt die Diagnose für ME/CFS (G93.3)
+776;900006;46;high;;badge;behandelt-auch-kinder;Behandelt auch Kinder
+776;34;46;high;;badge;mecfs-knowledgeable;Kennt sich mit ME/CFS aus
+776;33;46;high;;badge;mecfs-aware;Hat von ME/CFS schon einmal gehört
+776;28;46;high;;badge;accepts-mecfs-diagnosis;Akzeptiert die Diagnose ME/CFS
+776;41;46;high;;badge;treats-mecfs-offlabel;Behandelt ME/CFS (z. B. off-label)
+776;31;46;high;;badge;long-covid-expertise;Expertise in Long/Post Covid
+777;29;46;high;;badge;gender-sensitive;Gendersensibel
+777;30;46;high;;badge;lgbtq-friendly;Queer-/transfreundlich
+777;40;46;high;;badge;provides-mecfs-diagnosis;Stellt die Diagnose für ME/CFS (G93.3)
+777;38;46;high;;badge;pots-expertise;Kennt sich mit POTS/Dysautonomien aus
+777;34;46;high;;badge;mecfs-knowledgeable;Kennt sich mit ME/CFS aus
+777;28;46;high;;badge;accepts-mecfs-diagnosis;Akzeptiert die Diagnose ME/CFS
+777;41;46;high;;badge;treats-mecfs-offlabel;Behandelt ME/CFS (z. B. off-label)
+777;39;46;high;;badge;provides-attestations;Stellt Gutachten bzw. Atteste aus
+777;36;46;high;;badge;patients-feel-heard;Ich habe mich ernstgenommen gefühlt
+777;31;46;high;;badge;long-covid-expertise;Expertise in Long/Post Covid
+777;900003;46;high;;accessibility;step-free-access;Die Praxis ist stufenlos erreichbar
+777;42;46;high;;accessibility;automatic-doors;Es gibt automatische Türen
+777;900007;46;high;;accessibility;air-conditioning;Praxis hat eine Klimaanlage
+777;43;46;high;;accessibility;email-contact;Kontakt per E-Mail möglich
+778;34;46;high;;badge;mecfs-knowledgeable;Kennt sich mit ME/CFS aus
+778;41;46;high;;badge;treats-mecfs-offlabel;Behandelt ME/CFS (z. B. off-label)
+778;36;46;high;;badge;patients-feel-heard;Ich habe mich ernstgenommen gefühlt
+778;31;46;high;;badge;long-covid-expertise;Expertise in Long/Post Covid
+778;900001;46;high;;accessibility;es-gibt-parkplaetze-direkt-vor-oder-sehr-nahe-der-praxis;Es gibt Parkplätze direkt vor oder sehr nahe der Praxis
+778;625;46;high;;accessibility;low-stimulation-environment;Die Praxis ist reizarm
+778;620;46;high;;accessibility;online-scheduling;Online-Terminvereinbarung möglich
+778;900004;46;high;;accessibility;bietet-telefontermine-an;Bietet Telefontermine an
+778;900005;46;high;;accessibility;bietet-videosprechstunde-an;Bietet Videosprechstunde an
+779;900008;46;high;;badge;macht-keine-me-cfs-diagnostik;Macht keine ME/CFS-Diagnostik
+779;34;46;high;;badge;mecfs-knowledgeable;Kennt sich mit ME/CFS aus
+779;33;46;high;;badge;mecfs-aware;Hat von ME/CFS schon einmal gehört
+779;28;46;high;;badge;accepts-mecfs-diagnosis;Akzeptiert die Diagnose ME/CFS
+779;31;46;high;;badge;long-covid-expertise;Expertise in Long/Post Covid
+780;29;46;high;;badge;gender-sensitive;Gendersensibel
+780;30;46;high;;badge;lgbtq-friendly;Queer-/transfreundlich
+780;34;46;high;;badge;mecfs-knowledgeable;Kennt sich mit ME/CFS aus
+780;33;46;high;;badge;mecfs-aware;Hat von ME/CFS schon einmal gehört
+780;28;46;high;;badge;accepts-mecfs-diagnosis;Akzeptiert die Diagnose ME/CFS
+780;41;46;high;;badge;treats-mecfs-offlabel;Behandelt ME/CFS (z. B. off-label)
+780;39;46;high;;badge;provides-attestations;Stellt Gutachten bzw. Atteste aus
+780;36;46;high;;badge;patients-feel-heard;Ich habe mich ernstgenommen gefühlt
+780;31;46;high;;badge;long-covid-expertise;Expertise in Long/Post Covid
+780;45;46;high;;accessibility;infection-control-protocols;In der Praxis wird auf Infektionsschutz geachtet (z. B. Maske tragen)
+780;43;46;high;;accessibility;email-contact;Kontakt per E-Mail möglich
+781;900000;46;high;;badge;expertise-in-postvac;Expertise in PostVac
+781;34;46;high;;badge;mecfs-knowledgeable;Kennt sich mit ME/CFS aus
+781;28;46;high;;badge;accepts-mecfs-diagnosis;Akzeptiert die Diagnose ME/CFS
+781;36;46;high;;badge;patients-feel-heard;Ich habe mich ernstgenommen gefühlt
+781;31;46;high;;badge;long-covid-expertise;Expertise in Long/Post Covid
+781;900009;46;high;;badge;verordnet-keine-off-label-medikamente;Verordnet KEINE Off-label-Medikamente
+781;900003;46;high;;accessibility;step-free-access;Die Praxis ist stufenlos erreichbar
+781;42;46;high;;accessibility;automatic-doors;Es gibt automatische Türen
+781;900010;46;high;;accessibility;es-gibt-in-der-praxis-moeglichkeiten-sich-hinzulegen;Es gibt in der Praxis Möglichkeiten, sich hinzulegen
+781;900001;46;high;;accessibility;es-gibt-parkplaetze-direkt-vor-oder-sehr-nahe-der-praxis;Es gibt Parkplätze direkt vor oder sehr nahe der Praxis
+781;620;46;high;;accessibility;online-scheduling;Online-Terminvereinbarung möglich
+781;43;46;high;;accessibility;email-contact;Kontakt per E-Mail möglich

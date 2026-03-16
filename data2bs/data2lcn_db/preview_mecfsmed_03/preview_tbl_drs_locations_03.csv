@@ -1,0 +1,10 @@
+﻿loc_id;dr_id;loc_label;loc_is_primary;loc_country;loc_plz;loc_city;loc_street;loc_housenumber;loc_phone;loc_email;loc_website;loc_lat;loc_lng;loc_address_visibility;loc_geo_type;created_at
+;773;;1;DE;20148;Hamburg;Mittelweg;123;+49 40 2100 668 1;hallo@hamburgerlungenpraxis.de;https://hamburgerlungenpraxis.de;53.5718057;9.994844299999999;full;;
+;774;;1;DE;73430;Aalen;Alfred-Delp-Straße;2;+49 7361 68466;praxis@dr-thomas-vogel.de;https://dr-thomas-vogel.de;48.8376419;10.0875482;full;;
+;775;;1;DE;13465;Berlin;Zeltinger Straße;3;+49 30 4011 445;info@allgemeinarzt-berlin.net;https://allgemeinarzt-berlin.net;52.6347979;13.291286;full;;
+;776;;1;DE;77654;Offenburg;Ebertplatz;12;;kinderarztpraxis-offenburg@ortenau-mvz.de;https://ortenau-mvz.de/standorte/offenburg-ebertplatz/paediatrie;48.4762661;7.9560849;full;;
+;777;;1;DE;50667;Köln;Neumarkt;8–10;+49 221 2727 700;mail@praxis-nau.de;https://praxis-nau.de;50.9368506;6.948293;full;;
+;778;;1;DE;81375;München;Würmtalstr.;48;+49 89 892 23 642;praxis@ganzmed-muc.de;https://ganzmed-muc.de;48.11347;11.4904869;full;;
+;779;;1;DE;79100;Freiburg;Konrad-Goldmann-Str.;5B;+49 761 88892253;info@angio-schwarz.de;https://angio-schwarz.de;47.9869107;7.8342398;full;;
+;780;;1;DE;06108;Halle (Saale);Alter Markt;14;+49 345 2028856;praxis@allgemeinmedizin-seliger.de;https://allgemeinmedizin-seliger.de;51.4801201;11.9678798;full;;
+;781;;1;DE;70565;Stuttgart;Schulze-Delitzsch-Str.;38;+49 711 40795002;info@umi-stuttgart.de;https://umi-stuttgart.de;48.72033219999999;9.127075699999999;full;;

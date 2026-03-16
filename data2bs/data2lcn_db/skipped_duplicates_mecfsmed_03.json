@@ -1,0 +1,4802 @@
+[
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christiane|wohlrab",
+    "winner_dr_id": 592,
+    "skipped_ext_id": "121",
+    "slug": "christiane-wohlrab-729969",
+    "name": "Dr. med. Christiane Wohlrab"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "peter|baader",
+    "winner_dr_id": 637,
+    "skipped_ext_id": "96",
+    "slug": "peter-baader-791004",
+    "name": "Dr. Peter Baader"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|jelden",
+    "winner_dr_id": 612,
+    "skipped_ext_id": "84",
+    "slug": "michael-jelden-342641",
+    "name": "Dr. med. Michael Jelden"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "tobias|meis",
+    "winner_dr_id": 620,
+    "skipped_ext_id": "97",
+    "slug": "tobias-meis-550801",
+    "name": "Dr. med. Tobias Meis"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|pollex",
+    "winner_dr_id": 598,
+    "skipped_ext_id": "104",
+    "slug": "dirk-pollex-375559",
+    "name": "Dr. med. Dirk Pollex"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "arnd|zum winkel",
+    "winner_dr_id": 596,
+    "skipped_ext_id": "157",
+    "slug": "arnd-zum-winkel-465871",
+    "name": "Dr. med. dent. Arnd zum Winkel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "valentina o.|puntmann",
+    "winner_dr_id": 673,
+    "skipped_ext_id": "101",
+    "slug": "valentina-o-puntmann-617370",
+    "name": "Priv.-Doz. Dr. Dr. Valentina O. Puntmann"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "rainer willy|hauck",
+    "winner_dr_id": 684,
+    "skipped_ext_id": "99",
+    "slug": "rainer-willy-hauck-550802",
+    "name": "Prof. Dr. med. Rainer Willy Hauck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "karsten|erdfelder",
+    "winner_dr_id": 671,
+    "skipped_ext_id": "159",
+    "slug": "karsten-erdfeld-694440",
+    "name": "Karsten Erdfelder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "diego|schmidt",
+    "winner_dr_id": 597,
+    "skipped_ext_id": "102",
+    "slug": "diego-schmidt-334556",
+    "name": "Dr. med. Diego Schmidt"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "matthias robert|kress",
+    "winner_dr_id": 672,
+    "skipped_ext_id": "103",
+    "slug": "matthias-robert-kress-319345",
+    "name": "Matthias Robert Kress"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "sebastian|szardien",
+    "winner_dr_id": 643,
+    "skipped_ext_id": "88",
+    "slug": "sebastian-szardien-512374",
+    "name": "Dr. Sebastian Szardien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|stingl",
+    "winner_dr_id": 627,
+    "skipped_ext_id": "105",
+    "slug": "michael-stingl-858496",
+    "name": "Dr. Michael Stingl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "julia|moebius",
+    "winner_dr_id": 607,
+    "skipped_ext_id": "112",
+    "slug": "julia-moebius-478845",
+    "name": "Dr. med. Julia Möbius"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|czesnik",
+    "winner_dr_id": 553,
+    "skipped_ext_id": "124",
+    "slug": "dirk-czesnik-227841",
+    "name": "Dr. Dirk Czesnik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cornelia|werner",
+    "winner_dr_id": 595,
+    "skipped_ext_id": "113",
+    "slug": "cornelia-werner-697516",
+    "name": "Dr. med. Cornelia Werner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|mueller-bock",
+    "winner_dr_id": 621,
+    "skipped_ext_id": "119",
+    "slug": "vera-mueller-bock-327405",
+    "name": "Dr. med. Vera Müller-Bock"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|kacik",
+    "winner_dr_id": 613,
+    "skipped_ext_id": "87",
+    "slug": "michael-kacik-611159",
+    "name": "Dr. med. Michael Kacik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "alexander|grimm",
+    "winner_dr_id": 675,
+    "skipped_ext_id": "114",
+    "slug": "alexander-grimm-253139",
+    "name": "Prof. Dr. Alexander Grimm"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "eva|fritsching",
+    "winner_dr_id": 558,
+    "skipped_ext_id": "93",
+    "slug": "eva-fritsching-34738",
+    "name": "Dr. Eva Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benedikt|fritsching",
+    "winner_dr_id": 677,
+    "skipped_ext_id": "94",
+    "slug": "benedikt-fritsching-28291",
+    "name": "Prof. Dr. Benedikt Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerdis|frommhold",
+    "winner_dr_id": 605,
+    "skipped_ext_id": "116",
+    "slug": "joerdis-frommhold-853277",
+    "name": "Dr. med. Jördis Frommhold"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "johannes|schneeweiss",
+    "winner_dr_id": 572,
+    "skipped_ext_id": "117",
+    "slug": "johannes-schneeweiss-549622",
+    "name": "Dr. Johannes Schneeweiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|reichert",
+    "winner_dr_id": 626,
+    "skipped_ext_id": "118",
+    "slug": "michael-reichert-579204",
+    "name": "Dr. Michael Reichert"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "henning|berger",
+    "winner_dr_id": 601,
+    "skipped_ext_id": "111",
+    "slug": "henning-berger-887695",
+    "name": "Dr. med. Henning Berger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "reinhard|koeller",
+    "winner_dr_id": 691,
+    "skipped_ext_id": "160",
+    "slug": "reinhard-koeller-516531",
+    "name": "Reinhard Köller"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "astrid|weber",
+    "winner_dr_id": 589,
+    "skipped_ext_id": "120",
+    "slug": "astrid-weber-316306",
+    "name": "Dr. med. Astrid Weber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cordula|koerner-rettberg",
+    "winner_dr_id": 594,
+    "skipped_ext_id": "161",
+    "slug": "cordula-koerner-rettberg-219340",
+    "name": "Dr. med. Cordula Koerner-Rettberg"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "susanne|froehlich",
+    "winner_dr_id": 617,
+    "skipped_ext_id": "166",
+    "slug": "susanne-froehlich-710065",
+    "name": "Dr. med. Susanne Fröhlich"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christian|gogoll",
+    "winner_dr_id": 2,
+    "skipped_ext_id": "153",
+    "slug": "christian-gogoll-594970",
+    "name": "Dr. med. Christian Gogoll"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "pamina|binder",
+    "winner_dr_id": 634,
+    "skipped_ext_id": "173",
+    "slug": "pamina-binder-768023",
+    "name": "Dr. Pamina Binder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stavroula|angelidaki-walter",
+    "winner_dr_id": 695,
+    "skipped_ext_id": "186",
+    "slug": "stavroula-angelidaki-walter-348450",
+    "name": "Stavroula Angelidaki-Walter"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "leo|habets",
+    "winner_ext_id": "179",
+    "skipped_ext_id": "177",
+    "slug": "leo-habets-389319",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "leo|habets",
+    "winner_dr_id": 578,
+    "skipped_ext_id": "179",
+    "slug": "leo-habets-389311",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "steven|gardner",
+    "winner_dr_id": 696,
+    "skipped_ext_id": "164",
+    "slug": "steven-gardner-138388",
+    "name": "Steven Gardner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "doerte|bertram",
+    "winner_dr_id": 526,
+    "skipped_ext_id": "206",
+    "slug": "doerte-bertram-979729",
+    "name": "Dörte Bertram"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andrej|piovarci",
+    "winner_dr_id": 533,
+    "skipped_ext_id": "196",
+    "slug": "andrej-piovarci-859303",
+    "name": "Dr. Andrej Piovarci"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "harald|burgard",
+    "winner_dr_id": 600,
+    "skipped_ext_id": "197",
+    "slug": "harald-burgard-702806",
+    "name": "Dr. med. Harald Burgard"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "holger|seidel",
+    "winner_dr_id": 602,
+    "skipped_ext_id": "126",
+    "slug": "holger-seidel-609619",
+    "name": "Dr. med. Holger Seidel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|heindl",
+    "winner_dr_id": 616,
+    "skipped_ext_id": "146",
+    "slug": "stefan-heindl-654977",
+    "name": "Dr. med. Stefan Heindl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joanna|dietzel",
+    "winner_dr_id": 604,
+    "skipped_ext_id": "129",
+    "slug": "joanna-dietzel-527485",
+    "name": "Dr. med. Joanna Dietzel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andré|schino",
+    "winner_dr_id": 531,
+    "skipped_ext_id": "140",
+    "slug": "andr-schino-579603",
+    "name": "Dr. André Schino"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "isabelle|greber",
+    "winner_dr_id": 603,
+    "skipped_ext_id": "133",
+    "slug": "isabelle-greber-462312",
+    "name": "Dr. med. Isabelle Greber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "frank-chris|schoebel",
+    "winner_dr_id": 674,
+    "skipped_ext_id": "135",
+    "slug": "frank-chris-schoebel-104483",
+    "name": "Priv.-Doz. Dr. med. Frank-Chris Schoebel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "georg|haerter",
+    "winner_dr_id": 599,
+    "skipped_ext_id": "138",
+    "slug": "georg-haerter-839019",
+    "name": "Dr. med. Georg Härter"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nina|kollmar",
+    "winner_dr_id": 614,
+    "skipped_ext_id": "142",
+    "slug": "nina-kollmar-638199",
+    "name": "Dr. med. Nina Kollmar"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "uta|behrends",
+    "winner_dr_id": 690,
+    "skipped_ext_id": "144",
+    "slug": "prof-dr-uta-behrends-181772",
+    "name": "Prof. Dr. Uta Behrends"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "monika|haeufle",
+    "winner_ext_id": "180",
+    "skipped_ext_id": "149",
+    "slug": "monika-haeufle-282392",
+    "name": "Dr. med. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ronja|ramien",
+    "winner_dr_id": 693,
+    "skipped_ext_id": "151",
+    "slug": "ronja-ramien-812060",
+    "name": "Ronja Ramien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "werner|rieker",
+    "winner_dr_id": 623,
+    "skipped_ext_id": "152",
+    "slug": "werner-rieker-524900",
+    "name": "Dr. med. Werner Rieker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kristina|schultheiss",
+    "winner_dr_id": 609,
+    "skipped_ext_id": "155",
+    "slug": "kristina-schultheiss-973239",
+    "name": "Dr. med. Kristina Schultheiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "roberto|fernandes branco",
+    "winner_dr_id": 692,
+    "skipped_ext_id": "167",
+    "slug": "roberto-fernandes-branco-882862",
+    "name": "Roberto Fernandes Branco"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "patrick|gebetsroither",
+    "winner_dr_id": 635,
+    "skipped_ext_id": "158",
+    "slug": "patrick-gebetsroither-608277",
+    "name": "Dr. Patrick Gebetsroither"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "carsten|schriek",
+    "winner_dr_id": 591,
+    "skipped_ext_id": "163",
+    "slug": "carsten-schriek-589618",
+    "name": "Dr. med. Carsten Schriek"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "robin|satanovskij",
+    "winner_dr_id": 641,
+    "skipped_ext_id": "174",
+    "slug": "robin-satanovskij-877729",
+    "name": "Dr. Robin Satanovskij"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benjamin|fruehling",
+    "winner_dr_id": 590,
+    "skipped_ext_id": "165",
+    "slug": "benjamin-fruehling-967745",
+    "name": "Dr. med. Benjamin Frühling"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maximilian|kallenbach",
+    "winner_dr_id": 610,
+    "skipped_ext_id": "172",
+    "slug": "maximilian-kallenbach-617040",
+    "name": "Dr. med. Maximilian Kallenbach"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "juergen michael|steinacker",
+    "winner_dr_id": 697,
+    "skipped_ext_id": "175",
+    "slug": "juergen-michael-steinacker-82327",
+    "name": "Univ.-Prof. Dr. med. Dr. h. c. Jürgen Michael Steinacker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "meike|koeppel",
+    "winner_dr_id": 611,
+    "skipped_ext_id": "181",
+    "slug": "meike-koeppel-519491",
+    "name": "Dr. med. Meike Köppel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "monika|haeufle",
+    "winner_dr_id": 629,
+    "skipped_ext_id": "180",
+    "slug": "monika-haeufle-868153",
+    "name": "Dr. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ruth|biallowons",
+    "winner_dr_id": 694,
+    "skipped_ext_id": "187",
+    "slug": "ruth-biallowons-556844",
+    "name": "Ruth Biallowons"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "phillipp|brodbeck",
+    "winner_dr_id": 615,
+    "skipped_ext_id": "195",
+    "slug": "phillipp-brodbeck-321023",
+    "name": "Dr. med. Phillipp Brodbeck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maja|strasser",
+    "winner_dr_id": 581,
+    "skipped_ext_id": "224",
+    "slug": "maja-strasser-378054",
+    "name": "Dr. med. Maja Strasser"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "volker anselm|brenn",
+    "winner_dr_id": 662,
+    "skipped_ext_id": "130",
+    "slug": "volker-anselm-brenn--551419",
+    "name": "Dr. Volker Anselm Brenn"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kai|stoerring",
+    "winner_dr_id": 608,
+    "skipped_ext_id": "200",
+    "slug": "kai-stoerring-923335",
+    "name": "Dr. med. Kai Störring"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "zerabruke|gebremariam",
+    "winner_dr_id": 698,
+    "skipped_ext_id": "209",
+    "slug": "zerabruke-gebremariam-188009",
+    "name": "Zerabruke Gebremariam"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "suzan|goekmen sepetcigil",
+    "winner_dr_id": 618,
+    "skipped_ext_id": "204",
+    "slug": "suzan-goekmen-sepetcigil-946357",
+    "name": "Dr. med. Suzan Gökmen Sepetcigil"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "claus|muss",
+    "winner_dr_id": 682,
+    "skipped_ext_id": "205",
+    "slug": "claus-muss-375519",
+    "name": "Prof. Dr. Dr. med. Claus Muss"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "till|treutler",
+    "winner_dr_id": 619,
+    "skipped_ext_id": "208",
+    "slug": "till-treutler-942940",
+    "name": "Dr. med. Till Treutler"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nicole|ploog",
+    "winner_dr_id": 630,
+    "skipped_ext_id": "231",
+    "slug": "nicole-ploog-174604",
+    "name": "Dr. med. Nicole Ploog"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "beate|jaeger",
+    "winner_dr_id": 542,
+    "skipped_ext_id": "226",
+    "slug": "beate-jaeger-210800",
+    "name": "Dr. med. Beate Jäger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|springer",
+    "winner_dr_id": 647,
+    "skipped_ext_id": "227",
+    "slug": "stefan-springer-110333",
+    "name": "Dr. med. Stefan Springer"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|schneider",
+    "winner_dr_id": 622,
+    "skipped_ext_id": "210",
+    "slug": "vera-schneider-273823",
+    "name": "Dr. med. Vera Schneider"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christine|kupprion-simon",
+    "winner_dr_id": 593,
+    "skipped_ext_id": "217",
+    "slug": "christine-kupprion-simon-607716",
+    "name": "Dr. med. Christine Kupprion-Simon"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerg|lohse",
+    "winner_dr_id": 606,
+    "skipped_ext_id": "215",
+    "slug": "joerg-lohse-991192",
+    "name": "Dr. med. Jörg Lohse"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christiane|wohlrab",
+    "winner_dr_id": 592,
+    "skipped_ext_id": "121",
+    "slug": "christiane-wohlrab-729969",
+    "name": "Dr. med. Christiane Wohlrab"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "peter|baader",
+    "winner_dr_id": 637,
+    "skipped_ext_id": "96",
+    "slug": "peter-baader-791004",
+    "name": "Dr. Peter Baader"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|jelden",
+    "winner_dr_id": 612,
+    "skipped_ext_id": "84",
+    "slug": "michael-jelden-342641",
+    "name": "Dr. med. Michael Jelden"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "tobias|meis",
+    "winner_dr_id": 620,
+    "skipped_ext_id": "97",
+    "slug": "tobias-meis-550801",
+    "name": "Dr. med. Tobias Meis"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|pollex",
+    "winner_dr_id": 598,
+    "skipped_ext_id": "104",
+    "slug": "dirk-pollex-375559",
+    "name": "Dr. med. Dirk Pollex"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "arnd|zum winkel",
+    "winner_dr_id": 596,
+    "skipped_ext_id": "157",
+    "slug": "arnd-zum-winkel-465871",
+    "name": "Dr. med. dent. Arnd zum Winkel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "valentina o.|puntmann",
+    "winner_dr_id": 673,
+    "skipped_ext_id": "101",
+    "slug": "valentina-o-puntmann-617370",
+    "name": "Priv.-Doz. Dr. Dr. Valentina O. Puntmann"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "rainer willy|hauck",
+    "winner_dr_id": 684,
+    "skipped_ext_id": "99",
+    "slug": "rainer-willy-hauck-550802",
+    "name": "Prof. Dr. med. Rainer Willy Hauck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "karsten|erdfelder",
+    "winner_dr_id": 671,
+    "skipped_ext_id": "159",
+    "slug": "karsten-erdfeld-694440",
+    "name": "Karsten Erdfelder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "diego|schmidt",
+    "winner_dr_id": 597,
+    "skipped_ext_id": "102",
+    "slug": "diego-schmidt-334556",
+    "name": "Dr. med. Diego Schmidt"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "matthias robert|kress",
+    "winner_dr_id": 672,
+    "skipped_ext_id": "103",
+    "slug": "matthias-robert-kress-319345",
+    "name": "Matthias Robert Kress"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "sebastian|szardien",
+    "winner_dr_id": 643,
+    "skipped_ext_id": "88",
+    "slug": "sebastian-szardien-512374",
+    "name": "Dr. Sebastian Szardien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|stingl",
+    "winner_dr_id": 627,
+    "skipped_ext_id": "105",
+    "slug": "michael-stingl-858496",
+    "name": "Dr. Michael Stingl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "julia|moebius",
+    "winner_dr_id": 607,
+    "skipped_ext_id": "112",
+    "slug": "julia-moebius-478845",
+    "name": "Dr. med. Julia Möbius"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|czesnik",
+    "winner_dr_id": 553,
+    "skipped_ext_id": "124",
+    "slug": "dirk-czesnik-227841",
+    "name": "Dr. Dirk Czesnik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cornelia|werner",
+    "winner_dr_id": 595,
+    "skipped_ext_id": "113",
+    "slug": "cornelia-werner-697516",
+    "name": "Dr. med. Cornelia Werner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|mueller-bock",
+    "winner_dr_id": 621,
+    "skipped_ext_id": "119",
+    "slug": "vera-mueller-bock-327405",
+    "name": "Dr. med. Vera Müller-Bock"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|kacik",
+    "winner_dr_id": 613,
+    "skipped_ext_id": "87",
+    "slug": "michael-kacik-611159",
+    "name": "Dr. med. Michael Kacik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "alexander|grimm",
+    "winner_dr_id": 675,
+    "skipped_ext_id": "114",
+    "slug": "alexander-grimm-253139",
+    "name": "Prof. Dr. Alexander Grimm"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "eva|fritsching",
+    "winner_dr_id": 558,
+    "skipped_ext_id": "93",
+    "slug": "eva-fritsching-34738",
+    "name": "Dr. Eva Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benedikt|fritsching",
+    "winner_dr_id": 677,
+    "skipped_ext_id": "94",
+    "slug": "benedikt-fritsching-28291",
+    "name": "Prof. Dr. Benedikt Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerdis|frommhold",
+    "winner_dr_id": 605,
+    "skipped_ext_id": "116",
+    "slug": "joerdis-frommhold-853277",
+    "name": "Dr. med. Jördis Frommhold"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "johannes|schneeweiss",
+    "winner_dr_id": 572,
+    "skipped_ext_id": "117",
+    "slug": "johannes-schneeweiss-549622",
+    "name": "Dr. Johannes Schneeweiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|reichert",
+    "winner_dr_id": 626,
+    "skipped_ext_id": "118",
+    "slug": "michael-reichert-579204",
+    "name": "Dr. Michael Reichert"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "henning|berger",
+    "winner_dr_id": 601,
+    "skipped_ext_id": "111",
+    "slug": "henning-berger-887695",
+    "name": "Dr. med. Henning Berger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "reinhard|koeller",
+    "winner_dr_id": 691,
+    "skipped_ext_id": "160",
+    "slug": "reinhard-koeller-516531",
+    "name": "Reinhard Köller"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "astrid|weber",
+    "winner_dr_id": 589,
+    "skipped_ext_id": "120",
+    "slug": "astrid-weber-316306",
+    "name": "Dr. med. Astrid Weber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cordula|koerner-rettberg",
+    "winner_dr_id": 594,
+    "skipped_ext_id": "161",
+    "slug": "cordula-koerner-rettberg-219340",
+    "name": "Dr. med. Cordula Koerner-Rettberg"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "susanne|froehlich",
+    "winner_dr_id": 617,
+    "skipped_ext_id": "166",
+    "slug": "susanne-froehlich-710065",
+    "name": "Dr. med. Susanne Fröhlich"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christian|gogoll",
+    "winner_dr_id": 2,
+    "skipped_ext_id": "153",
+    "slug": "christian-gogoll-594970",
+    "name": "Dr. med. Christian Gogoll"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "pamina|binder",
+    "winner_dr_id": 634,
+    "skipped_ext_id": "173",
+    "slug": "pamina-binder-768023",
+    "name": "Dr. Pamina Binder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stavroula|angelidaki-walter",
+    "winner_dr_id": 695,
+    "skipped_ext_id": "186",
+    "slug": "stavroula-angelidaki-walter-348450",
+    "name": "Stavroula Angelidaki-Walter"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "leo|habets",
+    "winner_ext_id": "179",
+    "skipped_ext_id": "177",
+    "slug": "leo-habets-389319",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "leo|habets",
+    "winner_dr_id": 578,
+    "skipped_ext_id": "179",
+    "slug": "leo-habets-389311",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "steven|gardner",
+    "winner_dr_id": 696,
+    "skipped_ext_id": "164",
+    "slug": "steven-gardner-138388",
+    "name": "Steven Gardner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "doerte|bertram",
+    "winner_dr_id": 526,
+    "skipped_ext_id": "206",
+    "slug": "doerte-bertram-979729",
+    "name": "Dörte Bertram"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andrej|piovarci",
+    "winner_dr_id": 533,
+    "skipped_ext_id": "196",
+    "slug": "andrej-piovarci-859303",
+    "name": "Dr. Andrej Piovarci"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "harald|burgard",
+    "winner_dr_id": 600,
+    "skipped_ext_id": "197",
+    "slug": "harald-burgard-702806",
+    "name": "Dr. med. Harald Burgard"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "holger|seidel",
+    "winner_dr_id": 602,
+    "skipped_ext_id": "126",
+    "slug": "holger-seidel-609619",
+    "name": "Dr. med. Holger Seidel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|heindl",
+    "winner_dr_id": 616,
+    "skipped_ext_id": "146",
+    "slug": "stefan-heindl-654977",
+    "name": "Dr. med. Stefan Heindl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joanna|dietzel",
+    "winner_dr_id": 604,
+    "skipped_ext_id": "129",
+    "slug": "joanna-dietzel-527485",
+    "name": "Dr. med. Joanna Dietzel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andré|schino",
+    "winner_dr_id": 531,
+    "skipped_ext_id": "140",
+    "slug": "andr-schino-579603",
+    "name": "Dr. André Schino"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "isabelle|greber",
+    "winner_dr_id": 603,
+    "skipped_ext_id": "133",
+    "slug": "isabelle-greber-462312",
+    "name": "Dr. med. Isabelle Greber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "frank-chris|schoebel",
+    "winner_dr_id": 674,
+    "skipped_ext_id": "135",
+    "slug": "frank-chris-schoebel-104483",
+    "name": "Priv.-Doz. Dr. med. Frank-Chris Schoebel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "georg|haerter",
+    "winner_dr_id": 599,
+    "skipped_ext_id": "138",
+    "slug": "georg-haerter-839019",
+    "name": "Dr. med. Georg Härter"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nina|kollmar",
+    "winner_dr_id": 614,
+    "skipped_ext_id": "142",
+    "slug": "nina-kollmar-638199",
+    "name": "Dr. med. Nina Kollmar"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "uta|behrends",
+    "winner_dr_id": 690,
+    "skipped_ext_id": "144",
+    "slug": "prof-dr-uta-behrends-181772",
+    "name": "Prof. Dr. Uta Behrends"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "monika|haeufle",
+    "winner_ext_id": "180",
+    "skipped_ext_id": "149",
+    "slug": "monika-haeufle-282392",
+    "name": "Dr. med. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ronja|ramien",
+    "winner_dr_id": 693,
+    "skipped_ext_id": "151",
+    "slug": "ronja-ramien-812060",
+    "name": "Ronja Ramien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "werner|rieker",
+    "winner_dr_id": 623,
+    "skipped_ext_id": "152",
+    "slug": "werner-rieker-524900",
+    "name": "Dr. med. Werner Rieker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kristina|schultheiss",
+    "winner_dr_id": 609,
+    "skipped_ext_id": "155",
+    "slug": "kristina-schultheiss-973239",
+    "name": "Dr. med. Kristina Schultheiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "roberto|fernandes branco",
+    "winner_dr_id": 692,
+    "skipped_ext_id": "167",
+    "slug": "roberto-fernandes-branco-882862",
+    "name": "Roberto Fernandes Branco"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "patrick|gebetsroither",
+    "winner_dr_id": 635,
+    "skipped_ext_id": "158",
+    "slug": "patrick-gebetsroither-608277",
+    "name": "Dr. Patrick Gebetsroither"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "carsten|schriek",
+    "winner_dr_id": 591,
+    "skipped_ext_id": "163",
+    "slug": "carsten-schriek-589618",
+    "name": "Dr. med. Carsten Schriek"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "robin|satanovskij",
+    "winner_dr_id": 641,
+    "skipped_ext_id": "174",
+    "slug": "robin-satanovskij-877729",
+    "name": "Dr. Robin Satanovskij"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benjamin|fruehling",
+    "winner_dr_id": 590,
+    "skipped_ext_id": "165",
+    "slug": "benjamin-fruehling-967745",
+    "name": "Dr. med. Benjamin Frühling"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maximilian|kallenbach",
+    "winner_dr_id": 610,
+    "skipped_ext_id": "172",
+    "slug": "maximilian-kallenbach-617040",
+    "name": "Dr. med. Maximilian Kallenbach"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "juergen michael|steinacker",
+    "winner_dr_id": 697,
+    "skipped_ext_id": "175",
+    "slug": "juergen-michael-steinacker-82327",
+    "name": "Univ.-Prof. Dr. med. Dr. h. c. Jürgen Michael Steinacker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "meike|koeppel",
+    "winner_dr_id": 611,
+    "skipped_ext_id": "181",
+    "slug": "meike-koeppel-519491",
+    "name": "Dr. med. Meike Köppel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "monika|haeufle",
+    "winner_dr_id": 629,
+    "skipped_ext_id": "180",
+    "slug": "monika-haeufle-868153",
+    "name": "Dr. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ruth|biallowons",
+    "winner_dr_id": 694,
+    "skipped_ext_id": "187",
+    "slug": "ruth-biallowons-556844",
+    "name": "Ruth Biallowons"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "phillipp|brodbeck",
+    "winner_dr_id": 615,
+    "skipped_ext_id": "195",
+    "slug": "phillipp-brodbeck-321023",
+    "name": "Dr. med. Phillipp Brodbeck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maja|strasser",
+    "winner_dr_id": 581,
+    "skipped_ext_id": "224",
+    "slug": "maja-strasser-378054",
+    "name": "Dr. med. Maja Strasser"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "volker anselm|brenn",
+    "winner_dr_id": 662,
+    "skipped_ext_id": "130",
+    "slug": "volker-anselm-brenn--551419",
+    "name": "Dr. Volker Anselm Brenn"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kai|stoerring",
+    "winner_dr_id": 608,
+    "skipped_ext_id": "200",
+    "slug": "kai-stoerring-923335",
+    "name": "Dr. med. Kai Störring"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "zerabruke|gebremariam",
+    "winner_dr_id": 698,
+    "skipped_ext_id": "209",
+    "slug": "zerabruke-gebremariam-188009",
+    "name": "Zerabruke Gebremariam"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "suzan|goekmen sepetcigil",
+    "winner_dr_id": 618,
+    "skipped_ext_id": "204",
+    "slug": "suzan-goekmen-sepetcigil-946357",
+    "name": "Dr. med. Suzan Gökmen Sepetcigil"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "claus|muss",
+    "winner_dr_id": 682,
+    "skipped_ext_id": "205",
+    "slug": "claus-muss-375519",
+    "name": "Prof. Dr. Dr. med. Claus Muss"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "till|treutler",
+    "winner_dr_id": 619,
+    "skipped_ext_id": "208",
+    "slug": "till-treutler-942940",
+    "name": "Dr. med. Till Treutler"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nicole|ploog",
+    "winner_dr_id": 630,
+    "skipped_ext_id": "231",
+    "slug": "nicole-ploog-174604",
+    "name": "Dr. med. Nicole Ploog"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "beate|jaeger",
+    "winner_dr_id": 542,
+    "skipped_ext_id": "226",
+    "slug": "beate-jaeger-210800",
+    "name": "Dr. med. Beate Jäger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|springer",
+    "winner_dr_id": 647,
+    "skipped_ext_id": "227",
+    "slug": "stefan-springer-110333",
+    "name": "Dr. med. Stefan Springer"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|schneider",
+    "winner_dr_id": 622,
+    "skipped_ext_id": "210",
+    "slug": "vera-schneider-273823",
+    "name": "Dr. med. Vera Schneider"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christine|kupprion-simon",
+    "winner_dr_id": 593,
+    "skipped_ext_id": "217",
+    "slug": "christine-kupprion-simon-607716",
+    "name": "Dr. med. Christine Kupprion-Simon"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerg|lohse",
+    "winner_dr_id": 606,
+    "skipped_ext_id": "215",
+    "slug": "joerg-lohse-991192",
+    "name": "Dr. med. Jörg Lohse"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christiane|wohlrab",
+    "winner_dr_id": 592,
+    "skipped_ext_id": "121",
+    "slug": "christiane-wohlrab-729969",
+    "name": "Dr. med. Christiane Wohlrab"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "peter|baader",
+    "winner_dr_id": 637,
+    "skipped_ext_id": "96",
+    "slug": "peter-baader-791004",
+    "name": "Dr. Peter Baader"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|jelden",
+    "winner_dr_id": 612,
+    "skipped_ext_id": "84",
+    "slug": "michael-jelden-342641",
+    "name": "Dr. med. Michael Jelden"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "tobias|meis",
+    "winner_dr_id": 620,
+    "skipped_ext_id": "97",
+    "slug": "tobias-meis-550801",
+    "name": "Dr. med. Tobias Meis"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|pollex",
+    "winner_dr_id": 598,
+    "skipped_ext_id": "104",
+    "slug": "dirk-pollex-375559",
+    "name": "Dr. med. Dirk Pollex"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "arnd|zum winkel",
+    "winner_dr_id": 596,
+    "skipped_ext_id": "157",
+    "slug": "arnd-zum-winkel-465871",
+    "name": "Dr. med. dent. Arnd zum Winkel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "valentina o.|puntmann",
+    "winner_dr_id": 673,
+    "skipped_ext_id": "101",
+    "slug": "valentina-o-puntmann-617370",
+    "name": "Priv.-Doz. Dr. Dr. Valentina O. Puntmann"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "rainer willy|hauck",
+    "winner_dr_id": 684,
+    "skipped_ext_id": "99",
+    "slug": "rainer-willy-hauck-550802",
+    "name": "Prof. Dr. med. Rainer Willy Hauck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "karsten|erdfelder",
+    "winner_dr_id": 671,
+    "skipped_ext_id": "159",
+    "slug": "karsten-erdfeld-694440",
+    "name": "Karsten Erdfelder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "diego|schmidt",
+    "winner_dr_id": 597,
+    "skipped_ext_id": "102",
+    "slug": "diego-schmidt-334556",
+    "name": "Dr. med. Diego Schmidt"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "matthias robert|kress",
+    "winner_dr_id": 672,
+    "skipped_ext_id": "103",
+    "slug": "matthias-robert-kress-319345",
+    "name": "Matthias Robert Kress"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "sebastian|szardien",
+    "winner_dr_id": 643,
+    "skipped_ext_id": "88",
+    "slug": "sebastian-szardien-512374",
+    "name": "Dr. Sebastian Szardien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|stingl",
+    "winner_dr_id": 627,
+    "skipped_ext_id": "105",
+    "slug": "michael-stingl-858496",
+    "name": "Dr. Michael Stingl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "julia|moebius",
+    "winner_dr_id": 607,
+    "skipped_ext_id": "112",
+    "slug": "julia-moebius-478845",
+    "name": "Dr. med. Julia Möbius"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|czesnik",
+    "winner_dr_id": 553,
+    "skipped_ext_id": "124",
+    "slug": "dirk-czesnik-227841",
+    "name": "Dr. Dirk Czesnik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cornelia|werner",
+    "winner_dr_id": 595,
+    "skipped_ext_id": "113",
+    "slug": "cornelia-werner-697516",
+    "name": "Dr. med. Cornelia Werner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|mueller-bock",
+    "winner_dr_id": 621,
+    "skipped_ext_id": "119",
+    "slug": "vera-mueller-bock-327405",
+    "name": "Dr. med. Vera Müller-Bock"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|kacik",
+    "winner_dr_id": 613,
+    "skipped_ext_id": "87",
+    "slug": "michael-kacik-611159",
+    "name": "Dr. med. Michael Kacik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "alexander|grimm",
+    "winner_dr_id": 675,
+    "skipped_ext_id": "114",
+    "slug": "alexander-grimm-253139",
+    "name": "Prof. Dr. Alexander Grimm"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "eva|fritsching",
+    "winner_dr_id": 558,
+    "skipped_ext_id": "93",
+    "slug": "eva-fritsching-34738",
+    "name": "Dr. Eva Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benedikt|fritsching",
+    "winner_dr_id": 677,
+    "skipped_ext_id": "94",
+    "slug": "benedikt-fritsching-28291",
+    "name": "Prof. Dr. Benedikt Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerdis|frommhold",
+    "winner_dr_id": 605,
+    "skipped_ext_id": "116",
+    "slug": "joerdis-frommhold-853277",
+    "name": "Dr. med. Jördis Frommhold"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "johannes|schneeweiss",
+    "winner_dr_id": 572,
+    "skipped_ext_id": "117",
+    "slug": "johannes-schneeweiss-549622",
+    "name": "Dr. Johannes Schneeweiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|reichert",
+    "winner_dr_id": 626,
+    "skipped_ext_id": "118",
+    "slug": "michael-reichert-579204",
+    "name": "Dr. Michael Reichert"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "henning|berger",
+    "winner_dr_id": 601,
+    "skipped_ext_id": "111",
+    "slug": "henning-berger-887695",
+    "name": "Dr. med. Henning Berger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "reinhard|koeller",
+    "winner_dr_id": 691,
+    "skipped_ext_id": "160",
+    "slug": "reinhard-koeller-516531",
+    "name": "Reinhard Köller"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "astrid|weber",
+    "winner_dr_id": 589,
+    "skipped_ext_id": "120",
+    "slug": "astrid-weber-316306",
+    "name": "Dr. med. Astrid Weber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cordula|koerner-rettberg",
+    "winner_dr_id": 594,
+    "skipped_ext_id": "161",
+    "slug": "cordula-koerner-rettberg-219340",
+    "name": "Dr. med. Cordula Koerner-Rettberg"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "susanne|froehlich",
+    "winner_dr_id": 617,
+    "skipped_ext_id": "166",
+    "slug": "susanne-froehlich-710065",
+    "name": "Dr. med. Susanne Fröhlich"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christian|gogoll",
+    "winner_dr_id": 2,
+    "skipped_ext_id": "153",
+    "slug": "christian-gogoll-594970",
+    "name": "Dr. med. Christian Gogoll"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "pamina|binder",
+    "winner_dr_id": 634,
+    "skipped_ext_id": "173",
+    "slug": "pamina-binder-768023",
+    "name": "Dr. Pamina Binder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stavroula|angelidaki-walter",
+    "winner_dr_id": 695,
+    "skipped_ext_id": "186",
+    "slug": "stavroula-angelidaki-walter-348450",
+    "name": "Stavroula Angelidaki-Walter"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "leo|habets",
+    "winner_ext_id": "179",
+    "skipped_ext_id": "177",
+    "slug": "leo-habets-389319",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "leo|habets",
+    "winner_dr_id": 578,
+    "skipped_ext_id": "179",
+    "slug": "leo-habets-389311",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "steven|gardner",
+    "winner_dr_id": 696,
+    "skipped_ext_id": "164",
+    "slug": "steven-gardner-138388",
+    "name": "Steven Gardner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "doerte|bertram",
+    "winner_dr_id": 526,
+    "skipped_ext_id": "206",
+    "slug": "doerte-bertram-979729",
+    "name": "Dörte Bertram"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andrej|piovarci",
+    "winner_dr_id": 533,
+    "skipped_ext_id": "196",
+    "slug": "andrej-piovarci-859303",
+    "name": "Dr. Andrej Piovarci"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "harald|burgard",
+    "winner_dr_id": 600,
+    "skipped_ext_id": "197",
+    "slug": "harald-burgard-702806",
+    "name": "Dr. med. Harald Burgard"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "holger|seidel",
+    "winner_dr_id": 602,
+    "skipped_ext_id": "126",
+    "slug": "holger-seidel-609619",
+    "name": "Dr. med. Holger Seidel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|heindl",
+    "winner_dr_id": 616,
+    "skipped_ext_id": "146",
+    "slug": "stefan-heindl-654977",
+    "name": "Dr. med. Stefan Heindl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joanna|dietzel",
+    "winner_dr_id": 604,
+    "skipped_ext_id": "129",
+    "slug": "joanna-dietzel-527485",
+    "name": "Dr. med. Joanna Dietzel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andré|schino",
+    "winner_dr_id": 531,
+    "skipped_ext_id": "140",
+    "slug": "andr-schino-579603",
+    "name": "Dr. André Schino"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "isabelle|greber",
+    "winner_dr_id": 603,
+    "skipped_ext_id": "133",
+    "slug": "isabelle-greber-462312",
+    "name": "Dr. med. Isabelle Greber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "frank-chris|schoebel",
+    "winner_dr_id": 674,
+    "skipped_ext_id": "135",
+    "slug": "frank-chris-schoebel-104483",
+    "name": "Priv.-Doz. Dr. med. Frank-Chris Schoebel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "georg|haerter",
+    "winner_dr_id": 599,
+    "skipped_ext_id": "138",
+    "slug": "georg-haerter-839019",
+    "name": "Dr. med. Georg Härter"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nina|kollmar",
+    "winner_dr_id": 614,
+    "skipped_ext_id": "142",
+    "slug": "nina-kollmar-638199",
+    "name": "Dr. med. Nina Kollmar"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "uta|behrends",
+    "winner_dr_id": 690,
+    "skipped_ext_id": "144",
+    "slug": "prof-dr-uta-behrends-181772",
+    "name": "Prof. Dr. Uta Behrends"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "monika|haeufle",
+    "winner_ext_id": "180",
+    "skipped_ext_id": "149",
+    "slug": "monika-haeufle-282392",
+    "name": "Dr. med. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ronja|ramien",
+    "winner_dr_id": 693,
+    "skipped_ext_id": "151",
+    "slug": "ronja-ramien-812060",
+    "name": "Ronja Ramien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "werner|rieker",
+    "winner_dr_id": 623,
+    "skipped_ext_id": "152",
+    "slug": "werner-rieker-524900",
+    "name": "Dr. med. Werner Rieker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kristina|schultheiss",
+    "winner_dr_id": 609,
+    "skipped_ext_id": "155",
+    "slug": "kristina-schultheiss-973239",
+    "name": "Dr. med. Kristina Schultheiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "roberto|fernandes branco",
+    "winner_dr_id": 692,
+    "skipped_ext_id": "167",
+    "slug": "roberto-fernandes-branco-882862",
+    "name": "Roberto Fernandes Branco"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "patrick|gebetsroither",
+    "winner_dr_id": 635,
+    "skipped_ext_id": "158",
+    "slug": "patrick-gebetsroither-608277",
+    "name": "Dr. Patrick Gebetsroither"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "carsten|schriek",
+    "winner_dr_id": 591,
+    "skipped_ext_id": "163",
+    "slug": "carsten-schriek-589618",
+    "name": "Dr. med. Carsten Schriek"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "robin|satanovskij",
+    "winner_dr_id": 641,
+    "skipped_ext_id": "174",
+    "slug": "robin-satanovskij-877729",
+    "name": "Dr. Robin Satanovskij"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benjamin|fruehling",
+    "winner_dr_id": 590,
+    "skipped_ext_id": "165",
+    "slug": "benjamin-fruehling-967745",
+    "name": "Dr. med. Benjamin Frühling"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maximilian|kallenbach",
+    "winner_dr_id": 610,
+    "skipped_ext_id": "172",
+    "slug": "maximilian-kallenbach-617040",
+    "name": "Dr. med. Maximilian Kallenbach"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "juergen michael|steinacker",
+    "winner_dr_id": 697,
+    "skipped_ext_id": "175",
+    "slug": "juergen-michael-steinacker-82327",
+    "name": "Univ.-Prof. Dr. med. Dr. h. c. Jürgen Michael Steinacker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "meike|koeppel",
+    "winner_dr_id": 611,
+    "skipped_ext_id": "181",
+    "slug": "meike-koeppel-519491",
+    "name": "Dr. med. Meike Köppel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "monika|haeufle",
+    "winner_dr_id": 629,
+    "skipped_ext_id": "180",
+    "slug": "monika-haeufle-868153",
+    "name": "Dr. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ruth|biallowons",
+    "winner_dr_id": 694,
+    "skipped_ext_id": "187",
+    "slug": "ruth-biallowons-556844",
+    "name": "Ruth Biallowons"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "phillipp|brodbeck",
+    "winner_dr_id": 615,
+    "skipped_ext_id": "195",
+    "slug": "phillipp-brodbeck-321023",
+    "name": "Dr. med. Phillipp Brodbeck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maja|strasser",
+    "winner_dr_id": 581,
+    "skipped_ext_id": "224",
+    "slug": "maja-strasser-378054",
+    "name": "Dr. med. Maja Strasser"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "volker anselm|brenn",
+    "winner_dr_id": 662,
+    "skipped_ext_id": "130",
+    "slug": "volker-anselm-brenn--551419",
+    "name": "Dr. Volker Anselm Brenn"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kai|stoerring",
+    "winner_dr_id": 608,
+    "skipped_ext_id": "200",
+    "slug": "kai-stoerring-923335",
+    "name": "Dr. med. Kai Störring"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "zerabruke|gebremariam",
+    "winner_dr_id": 698,
+    "skipped_ext_id": "209",
+    "slug": "zerabruke-gebremariam-188009",
+    "name": "Zerabruke Gebremariam"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "suzan|goekmen sepetcigil",
+    "winner_dr_id": 618,
+    "skipped_ext_id": "204",
+    "slug": "suzan-goekmen-sepetcigil-946357",
+    "name": "Dr. med. Suzan Gökmen Sepetcigil"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "claus|muss",
+    "winner_dr_id": 682,
+    "skipped_ext_id": "205",
+    "slug": "claus-muss-375519",
+    "name": "Prof. Dr. Dr. med. Claus Muss"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "till|treutler",
+    "winner_dr_id": 619,
+    "skipped_ext_id": "208",
+    "slug": "till-treutler-942940",
+    "name": "Dr. med. Till Treutler"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nicole|ploog",
+    "winner_dr_id": 630,
+    "skipped_ext_id": "231",
+    "slug": "nicole-ploog-174604",
+    "name": "Dr. med. Nicole Ploog"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "beate|jaeger",
+    "winner_dr_id": 542,
+    "skipped_ext_id": "226",
+    "slug": "beate-jaeger-210800",
+    "name": "Dr. med. Beate Jäger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|springer",
+    "winner_dr_id": 647,
+    "skipped_ext_id": "227",
+    "slug": "stefan-springer-110333",
+    "name": "Dr. med. Stefan Springer"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|schneider",
+    "winner_dr_id": 622,
+    "skipped_ext_id": "210",
+    "slug": "vera-schneider-273823",
+    "name": "Dr. med. Vera Schneider"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christine|kupprion-simon",
+    "winner_dr_id": 593,
+    "skipped_ext_id": "217",
+    "slug": "christine-kupprion-simon-607716",
+    "name": "Dr. med. Christine Kupprion-Simon"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerg|lohse",
+    "winner_dr_id": 606,
+    "skipped_ext_id": "215",
+    "slug": "joerg-lohse-991192",
+    "name": "Dr. med. Jörg Lohse"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christiane|wohlrab",
+    "winner_dr_id": 592,
+    "skipped_ext_id": "121",
+    "slug": "christiane-wohlrab-729969",
+    "name": "Dr. med. Christiane Wohlrab"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "peter|baader",
+    "winner_dr_id": 637,
+    "skipped_ext_id": "96",
+    "slug": "peter-baader-791004",
+    "name": "Dr. Peter Baader"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|jelden",
+    "winner_dr_id": 612,
+    "skipped_ext_id": "84",
+    "slug": "michael-jelden-342641",
+    "name": "Dr. med. Michael Jelden"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "tobias|meis",
+    "winner_dr_id": 620,
+    "skipped_ext_id": "97",
+    "slug": "tobias-meis-550801",
+    "name": "Dr. med. Tobias Meis"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|pollex",
+    "winner_dr_id": 598,
+    "skipped_ext_id": "104",
+    "slug": "dirk-pollex-375559",
+    "name": "Dr. med. Dirk Pollex"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "arnd|zum winkel",
+    "winner_dr_id": 596,
+    "skipped_ext_id": "157",
+    "slug": "arnd-zum-winkel-465871",
+    "name": "Dr. med. dent. Arnd zum Winkel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "valentina o.|puntmann",
+    "winner_dr_id": 673,
+    "skipped_ext_id": "101",
+    "slug": "valentina-o-puntmann-617370",
+    "name": "Priv.-Doz. Dr. Dr. Valentina O. Puntmann"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "rainer willy|hauck",
+    "winner_dr_id": 684,
+    "skipped_ext_id": "99",
+    "slug": "rainer-willy-hauck-550802",
+    "name": "Prof. Dr. med. Rainer Willy Hauck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "karsten|erdfelder",
+    "winner_dr_id": 671,
+    "skipped_ext_id": "159",
+    "slug": "karsten-erdfeld-694440",
+    "name": "Karsten Erdfelder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "diego|schmidt",
+    "winner_dr_id": 597,
+    "skipped_ext_id": "102",
+    "slug": "diego-schmidt-334556",
+    "name": "Dr. med. Diego Schmidt"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "matthias robert|kress",
+    "winner_dr_id": 672,
+    "skipped_ext_id": "103",
+    "slug": "matthias-robert-kress-319345",
+    "name": "Matthias Robert Kress"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "sebastian|szardien",
+    "winner_dr_id": 643,
+    "skipped_ext_id": "88",
+    "slug": "sebastian-szardien-512374",
+    "name": "Dr. Sebastian Szardien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|stingl",
+    "winner_dr_id": 627,
+    "skipped_ext_id": "105",
+    "slug": "michael-stingl-858496",
+    "name": "Dr. Michael Stingl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "julia|moebius",
+    "winner_dr_id": 607,
+    "skipped_ext_id": "112",
+    "slug": "julia-moebius-478845",
+    "name": "Dr. med. Julia Möbius"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|czesnik",
+    "winner_dr_id": 553,
+    "skipped_ext_id": "124",
+    "slug": "dirk-czesnik-227841",
+    "name": "Dr. Dirk Czesnik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cornelia|werner",
+    "winner_dr_id": 595,
+    "skipped_ext_id": "113",
+    "slug": "cornelia-werner-697516",
+    "name": "Dr. med. Cornelia Werner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|mueller-bock",
+    "winner_dr_id": 621,
+    "skipped_ext_id": "119",
+    "slug": "vera-mueller-bock-327405",
+    "name": "Dr. med. Vera Müller-Bock"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|kacik",
+    "winner_dr_id": 613,
+    "skipped_ext_id": "87",
+    "slug": "michael-kacik-611159",
+    "name": "Dr. med. Michael Kacik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "alexander|grimm",
+    "winner_dr_id": 675,
+    "skipped_ext_id": "114",
+    "slug": "alexander-grimm-253139",
+    "name": "Prof. Dr. Alexander Grimm"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "eva|fritsching",
+    "winner_dr_id": 558,
+    "skipped_ext_id": "93",
+    "slug": "eva-fritsching-34738",
+    "name": "Dr. Eva Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benedikt|fritsching",
+    "winner_dr_id": 677,
+    "skipped_ext_id": "94",
+    "slug": "benedikt-fritsching-28291",
+    "name": "Prof. Dr. Benedikt Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerdis|frommhold",
+    "winner_dr_id": 605,
+    "skipped_ext_id": "116",
+    "slug": "joerdis-frommhold-853277",
+    "name": "Dr. med. Jördis Frommhold"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "johannes|schneeweiss",
+    "winner_dr_id": 572,
+    "skipped_ext_id": "117",
+    "slug": "johannes-schneeweiss-549622",
+    "name": "Dr. Johannes Schneeweiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|reichert",
+    "winner_dr_id": 626,
+    "skipped_ext_id": "118",
+    "slug": "michael-reichert-579204",
+    "name": "Dr. Michael Reichert"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "henning|berger",
+    "winner_dr_id": 601,
+    "skipped_ext_id": "111",
+    "slug": "henning-berger-887695",
+    "name": "Dr. med. Henning Berger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "reinhard|koeller",
+    "winner_dr_id": 691,
+    "skipped_ext_id": "160",
+    "slug": "reinhard-koeller-516531",
+    "name": "Reinhard Köller"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "astrid|weber",
+    "winner_dr_id": 589,
+    "skipped_ext_id": "120",
+    "slug": "astrid-weber-316306",
+    "name": "Dr. med. Astrid Weber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cordula|koerner-rettberg",
+    "winner_dr_id": 594,
+    "skipped_ext_id": "161",
+    "slug": "cordula-koerner-rettberg-219340",
+    "name": "Dr. med. Cordula Koerner-Rettberg"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "susanne|froehlich",
+    "winner_dr_id": 617,
+    "skipped_ext_id": "166",
+    "slug": "susanne-froehlich-710065",
+    "name": "Dr. med. Susanne Fröhlich"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christian|gogoll",
+    "winner_dr_id": 2,
+    "skipped_ext_id": "153",
+    "slug": "christian-gogoll-594970",
+    "name": "Dr. med. Christian Gogoll"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "pamina|binder",
+    "winner_dr_id": 634,
+    "skipped_ext_id": "173",
+    "slug": "pamina-binder-768023",
+    "name": "Dr. Pamina Binder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stavroula|angelidaki-walter",
+    "winner_dr_id": 695,
+    "skipped_ext_id": "186",
+    "slug": "stavroula-angelidaki-walter-348450",
+    "name": "Stavroula Angelidaki-Walter"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "leo|habets",
+    "winner_ext_id": "179",
+    "skipped_ext_id": "177",
+    "slug": "leo-habets-389319",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "leo|habets",
+    "winner_dr_id": 578,
+    "skipped_ext_id": "179",
+    "slug": "leo-habets-389311",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "steven|gardner",
+    "winner_dr_id": 696,
+    "skipped_ext_id": "164",
+    "slug": "steven-gardner-138388",
+    "name": "Steven Gardner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "doerte|bertram",
+    "winner_dr_id": 526,
+    "skipped_ext_id": "206",
+    "slug": "doerte-bertram-979729",
+    "name": "Dörte Bertram"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andrej|piovarci",
+    "winner_dr_id": 533,
+    "skipped_ext_id": "196",
+    "slug": "andrej-piovarci-859303",
+    "name": "Dr. Andrej Piovarci"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "harald|burgard",
+    "winner_dr_id": 600,
+    "skipped_ext_id": "197",
+    "slug": "harald-burgard-702806",
+    "name": "Dr. med. Harald Burgard"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "holger|seidel",
+    "winner_dr_id": 602,
+    "skipped_ext_id": "126",
+    "slug": "holger-seidel-609619",
+    "name": "Dr. med. Holger Seidel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|heindl",
+    "winner_dr_id": 616,
+    "skipped_ext_id": "146",
+    "slug": "stefan-heindl-654977",
+    "name": "Dr. med. Stefan Heindl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joanna|dietzel",
+    "winner_dr_id": 604,
+    "skipped_ext_id": "129",
+    "slug": "joanna-dietzel-527485",
+    "name": "Dr. med. Joanna Dietzel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andré|schino",
+    "winner_dr_id": 531,
+    "skipped_ext_id": "140",
+    "slug": "andr-schino-579603",
+    "name": "Dr. André Schino"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "isabelle|greber",
+    "winner_dr_id": 603,
+    "skipped_ext_id": "133",
+    "slug": "isabelle-greber-462312",
+    "name": "Dr. med. Isabelle Greber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "frank-chris|schoebel",
+    "winner_dr_id": 674,
+    "skipped_ext_id": "135",
+    "slug": "frank-chris-schoebel-104483",
+    "name": "Priv.-Doz. Dr. med. Frank-Chris Schoebel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "georg|haerter",
+    "winner_dr_id": 599,
+    "skipped_ext_id": "138",
+    "slug": "georg-haerter-839019",
+    "name": "Dr. med. Georg Härter"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nina|kollmar",
+    "winner_dr_id": 614,
+    "skipped_ext_id": "142",
+    "slug": "nina-kollmar-638199",
+    "name": "Dr. med. Nina Kollmar"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "uta|behrends",
+    "winner_dr_id": 690,
+    "skipped_ext_id": "144",
+    "slug": "prof-dr-uta-behrends-181772",
+    "name": "Prof. Dr. Uta Behrends"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "monika|haeufle",
+    "winner_ext_id": "180",
+    "skipped_ext_id": "149",
+    "slug": "monika-haeufle-282392",
+    "name": "Dr. med. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ronja|ramien",
+    "winner_dr_id": 693,
+    "skipped_ext_id": "151",
+    "slug": "ronja-ramien-812060",
+    "name": "Ronja Ramien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "werner|rieker",
+    "winner_dr_id": 623,
+    "skipped_ext_id": "152",
+    "slug": "werner-rieker-524900",
+    "name": "Dr. med. Werner Rieker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kristina|schultheiss",
+    "winner_dr_id": 609,
+    "skipped_ext_id": "155",
+    "slug": "kristina-schultheiss-973239",
+    "name": "Dr. med. Kristina Schultheiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "roberto|fernandes branco",
+    "winner_dr_id": 692,
+    "skipped_ext_id": "167",
+    "slug": "roberto-fernandes-branco-882862",
+    "name": "Roberto Fernandes Branco"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "patrick|gebetsroither",
+    "winner_dr_id": 635,
+    "skipped_ext_id": "158",
+    "slug": "patrick-gebetsroither-608277",
+    "name": "Dr. Patrick Gebetsroither"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "carsten|schriek",
+    "winner_dr_id": 591,
+    "skipped_ext_id": "163",
+    "slug": "carsten-schriek-589618",
+    "name": "Dr. med. Carsten Schriek"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "robin|satanovskij",
+    "winner_dr_id": 641,
+    "skipped_ext_id": "174",
+    "slug": "robin-satanovskij-877729",
+    "name": "Dr. Robin Satanovskij"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benjamin|fruehling",
+    "winner_dr_id": 590,
+    "skipped_ext_id": "165",
+    "slug": "benjamin-fruehling-967745",
+    "name": "Dr. med. Benjamin Frühling"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maximilian|kallenbach",
+    "winner_dr_id": 610,
+    "skipped_ext_id": "172",
+    "slug": "maximilian-kallenbach-617040",
+    "name": "Dr. med. Maximilian Kallenbach"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "juergen michael|steinacker",
+    "winner_dr_id": 697,
+    "skipped_ext_id": "175",
+    "slug": "juergen-michael-steinacker-82327",
+    "name": "Univ.-Prof. Dr. med. Dr. h. c. Jürgen Michael Steinacker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "meike|koeppel",
+    "winner_dr_id": 611,
+    "skipped_ext_id": "181",
+    "slug": "meike-koeppel-519491",
+    "name": "Dr. med. Meike Köppel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "monika|haeufle",
+    "winner_dr_id": 629,
+    "skipped_ext_id": "180",
+    "slug": "monika-haeufle-868153",
+    "name": "Dr. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ruth|biallowons",
+    "winner_dr_id": 694,
+    "skipped_ext_id": "187",
+    "slug": "ruth-biallowons-556844",
+    "name": "Ruth Biallowons"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "phillipp|brodbeck",
+    "winner_dr_id": 615,
+    "skipped_ext_id": "195",
+    "slug": "phillipp-brodbeck-321023",
+    "name": "Dr. med. Phillipp Brodbeck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maja|strasser",
+    "winner_dr_id": 581,
+    "skipped_ext_id": "224",
+    "slug": "maja-strasser-378054",
+    "name": "Dr. med. Maja Strasser"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "volker anselm|brenn",
+    "winner_dr_id": 662,
+    "skipped_ext_id": "130",
+    "slug": "volker-anselm-brenn--551419",
+    "name": "Dr. Volker Anselm Brenn"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kai|stoerring",
+    "winner_dr_id": 608,
+    "skipped_ext_id": "200",
+    "slug": "kai-stoerring-923335",
+    "name": "Dr. med. Kai Störring"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "zerabruke|gebremariam",
+    "winner_dr_id": 698,
+    "skipped_ext_id": "209",
+    "slug": "zerabruke-gebremariam-188009",
+    "name": "Zerabruke Gebremariam"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "suzan|goekmen sepetcigil",
+    "winner_dr_id": 618,
+    "skipped_ext_id": "204",
+    "slug": "suzan-goekmen-sepetcigil-946357",
+    "name": "Dr. med. Suzan Gökmen Sepetcigil"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "claus|muss",
+    "winner_dr_id": 682,
+    "skipped_ext_id": "205",
+    "slug": "claus-muss-375519",
+    "name": "Prof. Dr. Dr. med. Claus Muss"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "till|treutler",
+    "winner_dr_id": 619,
+    "skipped_ext_id": "208",
+    "slug": "till-treutler-942940",
+    "name": "Dr. med. Till Treutler"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nicole|ploog",
+    "winner_dr_id": 630,
+    "skipped_ext_id": "231",
+    "slug": "nicole-ploog-174604",
+    "name": "Dr. med. Nicole Ploog"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "beate|jaeger",
+    "winner_dr_id": 542,
+    "skipped_ext_id": "226",
+    "slug": "beate-jaeger-210800",
+    "name": "Dr. med. Beate Jäger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|springer",
+    "winner_dr_id": 647,
+    "skipped_ext_id": "227",
+    "slug": "stefan-springer-110333",
+    "name": "Dr. med. Stefan Springer"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|schneider",
+    "winner_dr_id": 622,
+    "skipped_ext_id": "210",
+    "slug": "vera-schneider-273823",
+    "name": "Dr. med. Vera Schneider"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christine|kupprion-simon",
+    "winner_dr_id": 593,
+    "skipped_ext_id": "217",
+    "slug": "christine-kupprion-simon-607716",
+    "name": "Dr. med. Christine Kupprion-Simon"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerg|lohse",
+    "winner_dr_id": 606,
+    "skipped_ext_id": "215",
+    "slug": "joerg-lohse-991192",
+    "name": "Dr. med. Jörg Lohse"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christiane|wohlrab",
+    "winner_dr_id": 592,
+    "skipped_ext_id": "121",
+    "slug": "christiane-wohlrab-729969",
+    "name": "Dr. med. Christiane Wohlrab"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "peter|baader",
+    "winner_dr_id": 637,
+    "skipped_ext_id": "96",
+    "slug": "peter-baader-791004",
+    "name": "Dr. Peter Baader"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|jelden",
+    "winner_dr_id": 612,
+    "skipped_ext_id": "84",
+    "slug": "michael-jelden-342641",
+    "name": "Dr. med. Michael Jelden"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "tobias|meis",
+    "winner_dr_id": 620,
+    "skipped_ext_id": "97",
+    "slug": "tobias-meis-550801",
+    "name": "Dr. med. Tobias Meis"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|pollex",
+    "winner_dr_id": 598,
+    "skipped_ext_id": "104",
+    "slug": "dirk-pollex-375559",
+    "name": "Dr. med. Dirk Pollex"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "arnd|zum winkel",
+    "winner_dr_id": 596,
+    "skipped_ext_id": "157",
+    "slug": "arnd-zum-winkel-465871",
+    "name": "Dr. med. dent. Arnd zum Winkel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "valentina o.|puntmann",
+    "winner_dr_id": 673,
+    "skipped_ext_id": "101",
+    "slug": "valentina-o-puntmann-617370",
+    "name": "Priv.-Doz. Dr. Dr. Valentina O. Puntmann"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "rainer willy|hauck",
+    "winner_dr_id": 684,
+    "skipped_ext_id": "99",
+    "slug": "rainer-willy-hauck-550802",
+    "name": "Prof. Dr. med. Rainer Willy Hauck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "karsten|erdfelder",
+    "winner_dr_id": 671,
+    "skipped_ext_id": "159",
+    "slug": "karsten-erdfeld-694440",
+    "name": "Karsten Erdfelder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "diego|schmidt",
+    "winner_dr_id": 597,
+    "skipped_ext_id": "102",
+    "slug": "diego-schmidt-334556",
+    "name": "Dr. med. Diego Schmidt"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "matthias robert|kress",
+    "winner_dr_id": 672,
+    "skipped_ext_id": "103",
+    "slug": "matthias-robert-kress-319345",
+    "name": "Matthias Robert Kress"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "sebastian|szardien",
+    "winner_dr_id": 643,
+    "skipped_ext_id": "88",
+    "slug": "sebastian-szardien-512374",
+    "name": "Dr. Sebastian Szardien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|stingl",
+    "winner_dr_id": 627,
+    "skipped_ext_id": "105",
+    "slug": "michael-stingl-858496",
+    "name": "Dr. Michael Stingl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "julia|moebius",
+    "winner_dr_id": 607,
+    "skipped_ext_id": "112",
+    "slug": "julia-moebius-478845",
+    "name": "Dr. med. Julia Möbius"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|czesnik",
+    "winner_dr_id": 553,
+    "skipped_ext_id": "124",
+    "slug": "dirk-czesnik-227841",
+    "name": "Dr. Dirk Czesnik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cornelia|werner",
+    "winner_dr_id": 595,
+    "skipped_ext_id": "113",
+    "slug": "cornelia-werner-697516",
+    "name": "Dr. med. Cornelia Werner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|mueller-bock",
+    "winner_dr_id": 621,
+    "skipped_ext_id": "119",
+    "slug": "vera-mueller-bock-327405",
+    "name": "Dr. med. Vera Müller-Bock"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|kacik",
+    "winner_dr_id": 613,
+    "skipped_ext_id": "87",
+    "slug": "michael-kacik-611159",
+    "name": "Dr. med. Michael Kacik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "alexander|grimm",
+    "winner_dr_id": 675,
+    "skipped_ext_id": "114",
+    "slug": "alexander-grimm-253139",
+    "name": "Prof. Dr. Alexander Grimm"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "eva|fritsching",
+    "winner_dr_id": 558,
+    "skipped_ext_id": "93",
+    "slug": "eva-fritsching-34738",
+    "name": "Dr. Eva Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benedikt|fritsching",
+    "winner_dr_id": 677,
+    "skipped_ext_id": "94",
+    "slug": "benedikt-fritsching-28291",
+    "name": "Prof. Dr. Benedikt Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerdis|frommhold",
+    "winner_dr_id": 605,
+    "skipped_ext_id": "116",
+    "slug": "joerdis-frommhold-853277",
+    "name": "Dr. med. Jördis Frommhold"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "johannes|schneeweiss",
+    "winner_dr_id": 572,
+    "skipped_ext_id": "117",
+    "slug": "johannes-schneeweiss-549622",
+    "name": "Dr. Johannes Schneeweiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|reichert",
+    "winner_dr_id": 626,
+    "skipped_ext_id": "118",
+    "slug": "michael-reichert-579204",
+    "name": "Dr. Michael Reichert"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "henning|berger",
+    "winner_dr_id": 601,
+    "skipped_ext_id": "111",
+    "slug": "henning-berger-887695",
+    "name": "Dr. med. Henning Berger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "reinhard|koeller",
+    "winner_dr_id": 691,
+    "skipped_ext_id": "160",
+    "slug": "reinhard-koeller-516531",
+    "name": "Reinhard Köller"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "astrid|weber",
+    "winner_dr_id": 589,
+    "skipped_ext_id": "120",
+    "slug": "astrid-weber-316306",
+    "name": "Dr. med. Astrid Weber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cordula|koerner-rettberg",
+    "winner_dr_id": 594,
+    "skipped_ext_id": "161",
+    "slug": "cordula-koerner-rettberg-219340",
+    "name": "Dr. med. Cordula Koerner-Rettberg"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "susanne|froehlich",
+    "winner_dr_id": 617,
+    "skipped_ext_id": "166",
+    "slug": "susanne-froehlich-710065",
+    "name": "Dr. med. Susanne Fröhlich"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christian|gogoll",
+    "winner_dr_id": 2,
+    "skipped_ext_id": "153",
+    "slug": "christian-gogoll-594970",
+    "name": "Dr. med. Christian Gogoll"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "pamina|binder",
+    "winner_dr_id": 634,
+    "skipped_ext_id": "173",
+    "slug": "pamina-binder-768023",
+    "name": "Dr. Pamina Binder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stavroula|angelidaki-walter",
+    "winner_dr_id": 695,
+    "skipped_ext_id": "186",
+    "slug": "stavroula-angelidaki-walter-348450",
+    "name": "Stavroula Angelidaki-Walter"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "leo|habets",
+    "winner_ext_id": "179",
+    "skipped_ext_id": "177",
+    "slug": "leo-habets-389319",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "leo|habets",
+    "winner_dr_id": 578,
+    "skipped_ext_id": "179",
+    "slug": "leo-habets-389311",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "steven|gardner",
+    "winner_dr_id": 696,
+    "skipped_ext_id": "164",
+    "slug": "steven-gardner-138388",
+    "name": "Steven Gardner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "doerte|bertram",
+    "winner_dr_id": 526,
+    "skipped_ext_id": "206",
+    "slug": "doerte-bertram-979729",
+    "name": "Dörte Bertram"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andrej|piovarci",
+    "winner_dr_id": 533,
+    "skipped_ext_id": "196",
+    "slug": "andrej-piovarci-859303",
+    "name": "Dr. Andrej Piovarci"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "harald|burgard",
+    "winner_dr_id": 600,
+    "skipped_ext_id": "197",
+    "slug": "harald-burgard-702806",
+    "name": "Dr. med. Harald Burgard"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "holger|seidel",
+    "winner_dr_id": 602,
+    "skipped_ext_id": "126",
+    "slug": "holger-seidel-609619",
+    "name": "Dr. med. Holger Seidel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|heindl",
+    "winner_dr_id": 616,
+    "skipped_ext_id": "146",
+    "slug": "stefan-heindl-654977",
+    "name": "Dr. med. Stefan Heindl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joanna|dietzel",
+    "winner_dr_id": 604,
+    "skipped_ext_id": "129",
+    "slug": "joanna-dietzel-527485",
+    "name": "Dr. med. Joanna Dietzel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andré|schino",
+    "winner_dr_id": 531,
+    "skipped_ext_id": "140",
+    "slug": "andr-schino-579603",
+    "name": "Dr. André Schino"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "isabelle|greber",
+    "winner_dr_id": 603,
+    "skipped_ext_id": "133",
+    "slug": "isabelle-greber-462312",
+    "name": "Dr. med. Isabelle Greber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "frank-chris|schoebel",
+    "winner_dr_id": 674,
+    "skipped_ext_id": "135",
+    "slug": "frank-chris-schoebel-104483",
+    "name": "Priv.-Doz. Dr. med. Frank-Chris Schoebel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "georg|haerter",
+    "winner_dr_id": 599,
+    "skipped_ext_id": "138",
+    "slug": "georg-haerter-839019",
+    "name": "Dr. med. Georg Härter"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nina|kollmar",
+    "winner_dr_id": 614,
+    "skipped_ext_id": "142",
+    "slug": "nina-kollmar-638199",
+    "name": "Dr. med. Nina Kollmar"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "uta|behrends",
+    "winner_dr_id": 690,
+    "skipped_ext_id": "144",
+    "slug": "prof-dr-uta-behrends-181772",
+    "name": "Prof. Dr. Uta Behrends"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "monika|haeufle",
+    "winner_ext_id": "180",
+    "skipped_ext_id": "149",
+    "slug": "monika-haeufle-282392",
+    "name": "Dr. med. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ronja|ramien",
+    "winner_dr_id": 693,
+    "skipped_ext_id": "151",
+    "slug": "ronja-ramien-812060",
+    "name": "Ronja Ramien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "werner|rieker",
+    "winner_dr_id": 623,
+    "skipped_ext_id": "152",
+    "slug": "werner-rieker-524900",
+    "name": "Dr. med. Werner Rieker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kristina|schultheiss",
+    "winner_dr_id": 609,
+    "skipped_ext_id": "155",
+    "slug": "kristina-schultheiss-973239",
+    "name": "Dr. med. Kristina Schultheiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "roberto|fernandes branco",
+    "winner_dr_id": 692,
+    "skipped_ext_id": "167",
+    "slug": "roberto-fernandes-branco-882862",
+    "name": "Roberto Fernandes Branco"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "patrick|gebetsroither",
+    "winner_dr_id": 635,
+    "skipped_ext_id": "158",
+    "slug": "patrick-gebetsroither-608277",
+    "name": "Dr. Patrick Gebetsroither"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "carsten|schriek",
+    "winner_dr_id": 591,
+    "skipped_ext_id": "163",
+    "slug": "carsten-schriek-589618",
+    "name": "Dr. med. Carsten Schriek"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "robin|satanovskij",
+    "winner_dr_id": 641,
+    "skipped_ext_id": "174",
+    "slug": "robin-satanovskij-877729",
+    "name": "Dr. Robin Satanovskij"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benjamin|fruehling",
+    "winner_dr_id": 590,
+    "skipped_ext_id": "165",
+    "slug": "benjamin-fruehling-967745",
+    "name": "Dr. med. Benjamin Frühling"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maximilian|kallenbach",
+    "winner_dr_id": 610,
+    "skipped_ext_id": "172",
+    "slug": "maximilian-kallenbach-617040",
+    "name": "Dr. med. Maximilian Kallenbach"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "juergen michael|steinacker",
+    "winner_dr_id": 697,
+    "skipped_ext_id": "175",
+    "slug": "juergen-michael-steinacker-82327",
+    "name": "Univ.-Prof. Dr. med. Dr. h. c. Jürgen Michael Steinacker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "meike|koeppel",
+    "winner_dr_id": 611,
+    "skipped_ext_id": "181",
+    "slug": "meike-koeppel-519491",
+    "name": "Dr. med. Meike Köppel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "monika|haeufle",
+    "winner_dr_id": 629,
+    "skipped_ext_id": "180",
+    "slug": "monika-haeufle-868153",
+    "name": "Dr. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ruth|biallowons",
+    "winner_dr_id": 694,
+    "skipped_ext_id": "187",
+    "slug": "ruth-biallowons-556844",
+    "name": "Ruth Biallowons"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "phillipp|brodbeck",
+    "winner_dr_id": 615,
+    "skipped_ext_id": "195",
+    "slug": "phillipp-brodbeck-321023",
+    "name": "Dr. med. Phillipp Brodbeck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maja|strasser",
+    "winner_dr_id": 581,
+    "skipped_ext_id": "224",
+    "slug": "maja-strasser-378054",
+    "name": "Dr. med. Maja Strasser"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "volker anselm|brenn",
+    "winner_dr_id": 662,
+    "skipped_ext_id": "130",
+    "slug": "volker-anselm-brenn--551419",
+    "name": "Dr. Volker Anselm Brenn"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kai|stoerring",
+    "winner_dr_id": 608,
+    "skipped_ext_id": "200",
+    "slug": "kai-stoerring-923335",
+    "name": "Dr. med. Kai Störring"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "zerabruke|gebremariam",
+    "winner_dr_id": 698,
+    "skipped_ext_id": "209",
+    "slug": "zerabruke-gebremariam-188009",
+    "name": "Zerabruke Gebremariam"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "suzan|goekmen sepetcigil",
+    "winner_dr_id": 618,
+    "skipped_ext_id": "204",
+    "slug": "suzan-goekmen-sepetcigil-946357",
+    "name": "Dr. med. Suzan Gökmen Sepetcigil"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "claus|muss",
+    "winner_dr_id": 682,
+    "skipped_ext_id": "205",
+    "slug": "claus-muss-375519",
+    "name": "Prof. Dr. Dr. med. Claus Muss"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "till|treutler",
+    "winner_dr_id": 619,
+    "skipped_ext_id": "208",
+    "slug": "till-treutler-942940",
+    "name": "Dr. med. Till Treutler"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nicole|ploog",
+    "winner_dr_id": 630,
+    "skipped_ext_id": "231",
+    "slug": "nicole-ploog-174604",
+    "name": "Dr. med. Nicole Ploog"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "beate|jaeger",
+    "winner_dr_id": 542,
+    "skipped_ext_id": "226",
+    "slug": "beate-jaeger-210800",
+    "name": "Dr. med. Beate Jäger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|springer",
+    "winner_dr_id": 647,
+    "skipped_ext_id": "227",
+    "slug": "stefan-springer-110333",
+    "name": "Dr. med. Stefan Springer"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|schneider",
+    "winner_dr_id": 622,
+    "skipped_ext_id": "210",
+    "slug": "vera-schneider-273823",
+    "name": "Dr. med. Vera Schneider"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christine|kupprion-simon",
+    "winner_dr_id": 593,
+    "skipped_ext_id": "217",
+    "slug": "christine-kupprion-simon-607716",
+    "name": "Dr. med. Christine Kupprion-Simon"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerg|lohse",
+    "winner_dr_id": 606,
+    "skipped_ext_id": "215",
+    "slug": "joerg-lohse-991192",
+    "name": "Dr. med. Jörg Lohse"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christiane|wohlrab",
+    "winner_dr_id": 592,
+    "skipped_ext_id": "121",
+    "slug": "christiane-wohlrab-729969",
+    "name": "Dr. med. Christiane Wohlrab"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "peter|baader",
+    "winner_dr_id": 637,
+    "skipped_ext_id": "96",
+    "slug": "peter-baader-791004",
+    "name": "Dr. Peter Baader"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|jelden",
+    "winner_dr_id": 612,
+    "skipped_ext_id": "84",
+    "slug": "michael-jelden-342641",
+    "name": "Dr. med. Michael Jelden"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "tobias|meis",
+    "winner_dr_id": 620,
+    "skipped_ext_id": "97",
+    "slug": "tobias-meis-550801",
+    "name": "Dr. med. Tobias Meis"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|pollex",
+    "winner_dr_id": 598,
+    "skipped_ext_id": "104",
+    "slug": "dirk-pollex-375559",
+    "name": "Dr. med. Dirk Pollex"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "arnd|zum winkel",
+    "winner_dr_id": 596,
+    "skipped_ext_id": "157",
+    "slug": "arnd-zum-winkel-465871",
+    "name": "Dr. med. dent. Arnd zum Winkel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "valentina o.|puntmann",
+    "winner_dr_id": 673,
+    "skipped_ext_id": "101",
+    "slug": "valentina-o-puntmann-617370",
+    "name": "Priv.-Doz. Dr. Dr. Valentina O. Puntmann"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "rainer willy|hauck",
+    "winner_dr_id": 684,
+    "skipped_ext_id": "99",
+    "slug": "rainer-willy-hauck-550802",
+    "name": "Prof. Dr. med. Rainer Willy Hauck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "karsten|erdfelder",
+    "winner_dr_id": 671,
+    "skipped_ext_id": "159",
+    "slug": "karsten-erdfeld-694440",
+    "name": "Karsten Erdfelder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "diego|schmidt",
+    "winner_dr_id": 597,
+    "skipped_ext_id": "102",
+    "slug": "diego-schmidt-334556",
+    "name": "Dr. med. Diego Schmidt"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "matthias robert|kress",
+    "winner_dr_id": 672,
+    "skipped_ext_id": "103",
+    "slug": "matthias-robert-kress-319345",
+    "name": "Matthias Robert Kress"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "sebastian|szardien",
+    "winner_dr_id": 643,
+    "skipped_ext_id": "88",
+    "slug": "sebastian-szardien-512374",
+    "name": "Dr. Sebastian Szardien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|stingl",
+    "winner_dr_id": 627,
+    "skipped_ext_id": "105",
+    "slug": "michael-stingl-858496",
+    "name": "Dr. Michael Stingl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "julia|moebius",
+    "winner_dr_id": 607,
+    "skipped_ext_id": "112",
+    "slug": "julia-moebius-478845",
+    "name": "Dr. med. Julia Möbius"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|czesnik",
+    "winner_dr_id": 553,
+    "skipped_ext_id": "124",
+    "slug": "dirk-czesnik-227841",
+    "name": "Dr. Dirk Czesnik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cornelia|werner",
+    "winner_dr_id": 595,
+    "skipped_ext_id": "113",
+    "slug": "cornelia-werner-697516",
+    "name": "Dr. med. Cornelia Werner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|mueller-bock",
+    "winner_dr_id": 621,
+    "skipped_ext_id": "119",
+    "slug": "vera-mueller-bock-327405",
+    "name": "Dr. med. Vera Müller-Bock"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|kacik",
+    "winner_dr_id": 613,
+    "skipped_ext_id": "87",
+    "slug": "michael-kacik-611159",
+    "name": "Dr. med. Michael Kacik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "alexander|grimm",
+    "winner_dr_id": 675,
+    "skipped_ext_id": "114",
+    "slug": "alexander-grimm-253139",
+    "name": "Prof. Dr. Alexander Grimm"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "eva|fritsching",
+    "winner_dr_id": 558,
+    "skipped_ext_id": "93",
+    "slug": "eva-fritsching-34738",
+    "name": "Dr. Eva Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benedikt|fritsching",
+    "winner_dr_id": 677,
+    "skipped_ext_id": "94",
+    "slug": "benedikt-fritsching-28291",
+    "name": "Prof. Dr. Benedikt Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerdis|frommhold",
+    "winner_dr_id": 605,
+    "skipped_ext_id": "116",
+    "slug": "joerdis-frommhold-853277",
+    "name": "Dr. med. Jördis Frommhold"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "johannes|schneeweiss",
+    "winner_dr_id": 572,
+    "skipped_ext_id": "117",
+    "slug": "johannes-schneeweiss-549622",
+    "name": "Dr. Johannes Schneeweiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|reichert",
+    "winner_dr_id": 626,
+    "skipped_ext_id": "118",
+    "slug": "michael-reichert-579204",
+    "name": "Dr. Michael Reichert"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "henning|berger",
+    "winner_dr_id": 601,
+    "skipped_ext_id": "111",
+    "slug": "henning-berger-887695",
+    "name": "Dr. med. Henning Berger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "reinhard|koeller",
+    "winner_dr_id": 691,
+    "skipped_ext_id": "160",
+    "slug": "reinhard-koeller-516531",
+    "name": "Reinhard Köller"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "astrid|weber",
+    "winner_dr_id": 589,
+    "skipped_ext_id": "120",
+    "slug": "astrid-weber-316306",
+    "name": "Dr. med. Astrid Weber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cordula|koerner-rettberg",
+    "winner_dr_id": 594,
+    "skipped_ext_id": "161",
+    "slug": "cordula-koerner-rettberg-219340",
+    "name": "Dr. med. Cordula Koerner-Rettberg"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "susanne|froehlich",
+    "winner_dr_id": 617,
+    "skipped_ext_id": "166",
+    "slug": "susanne-froehlich-710065",
+    "name": "Dr. med. Susanne Fröhlich"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christian|gogoll",
+    "winner_dr_id": 2,
+    "skipped_ext_id": "153",
+    "slug": "christian-gogoll-594970",
+    "name": "Dr. med. Christian Gogoll"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "pamina|binder",
+    "winner_dr_id": 634,
+    "skipped_ext_id": "173",
+    "slug": "pamina-binder-768023",
+    "name": "Dr. Pamina Binder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stavroula|angelidaki-walter",
+    "winner_dr_id": 695,
+    "skipped_ext_id": "186",
+    "slug": "stavroula-angelidaki-walter-348450",
+    "name": "Stavroula Angelidaki-Walter"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "leo|habets",
+    "winner_ext_id": "179",
+    "skipped_ext_id": "177",
+    "slug": "leo-habets-389319",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "leo|habets",
+    "winner_dr_id": 578,
+    "skipped_ext_id": "179",
+    "slug": "leo-habets-389311",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "steven|gardner",
+    "winner_dr_id": 696,
+    "skipped_ext_id": "164",
+    "slug": "steven-gardner-138388",
+    "name": "Steven Gardner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "doerte|bertram",
+    "winner_dr_id": 526,
+    "skipped_ext_id": "206",
+    "slug": "doerte-bertram-979729",
+    "name": "Dörte Bertram"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andrej|piovarci",
+    "winner_dr_id": 533,
+    "skipped_ext_id": "196",
+    "slug": "andrej-piovarci-859303",
+    "name": "Dr. Andrej Piovarci"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "harald|burgard",
+    "winner_dr_id": 600,
+    "skipped_ext_id": "197",
+    "slug": "harald-burgard-702806",
+    "name": "Dr. med. Harald Burgard"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "holger|seidel",
+    "winner_dr_id": 602,
+    "skipped_ext_id": "126",
+    "slug": "holger-seidel-609619",
+    "name": "Dr. med. Holger Seidel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|heindl",
+    "winner_dr_id": 616,
+    "skipped_ext_id": "146",
+    "slug": "stefan-heindl-654977",
+    "name": "Dr. med. Stefan Heindl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joanna|dietzel",
+    "winner_dr_id": 604,
+    "skipped_ext_id": "129",
+    "slug": "joanna-dietzel-527485",
+    "name": "Dr. med. Joanna Dietzel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andré|schino",
+    "winner_dr_id": 531,
+    "skipped_ext_id": "140",
+    "slug": "andr-schino-579603",
+    "name": "Dr. André Schino"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "isabelle|greber",
+    "winner_dr_id": 603,
+    "skipped_ext_id": "133",
+    "slug": "isabelle-greber-462312",
+    "name": "Dr. med. Isabelle Greber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "frank-chris|schoebel",
+    "winner_dr_id": 674,
+    "skipped_ext_id": "135",
+    "slug": "frank-chris-schoebel-104483",
+    "name": "Priv.-Doz. Dr. med. Frank-Chris Schoebel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "georg|haerter",
+    "winner_dr_id": 599,
+    "skipped_ext_id": "138",
+    "slug": "georg-haerter-839019",
+    "name": "Dr. med. Georg Härter"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nina|kollmar",
+    "winner_dr_id": 614,
+    "skipped_ext_id": "142",
+    "slug": "nina-kollmar-638199",
+    "name": "Dr. med. Nina Kollmar"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "uta|behrends",
+    "winner_dr_id": 690,
+    "skipped_ext_id": "144",
+    "slug": "prof-dr-uta-behrends-181772",
+    "name": "Prof. Dr. Uta Behrends"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "monika|haeufle",
+    "winner_ext_id": "180",
+    "skipped_ext_id": "149",
+    "slug": "monika-haeufle-282392",
+    "name": "Dr. med. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ronja|ramien",
+    "winner_dr_id": 693,
+    "skipped_ext_id": "151",
+    "slug": "ronja-ramien-812060",
+    "name": "Ronja Ramien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "werner|rieker",
+    "winner_dr_id": 623,
+    "skipped_ext_id": "152",
+    "slug": "werner-rieker-524900",
+    "name": "Dr. med. Werner Rieker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kristina|schultheiss",
+    "winner_dr_id": 609,
+    "skipped_ext_id": "155",
+    "slug": "kristina-schultheiss-973239",
+    "name": "Dr. med. Kristina Schultheiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "roberto|fernandes branco",
+    "winner_dr_id": 692,
+    "skipped_ext_id": "167",
+    "slug": "roberto-fernandes-branco-882862",
+    "name": "Roberto Fernandes Branco"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "patrick|gebetsroither",
+    "winner_dr_id": 635,
+    "skipped_ext_id": "158",
+    "slug": "patrick-gebetsroither-608277",
+    "name": "Dr. Patrick Gebetsroither"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "carsten|schriek",
+    "winner_dr_id": 591,
+    "skipped_ext_id": "163",
+    "slug": "carsten-schriek-589618",
+    "name": "Dr. med. Carsten Schriek"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "robin|satanovskij",
+    "winner_dr_id": 641,
+    "skipped_ext_id": "174",
+    "slug": "robin-satanovskij-877729",
+    "name": "Dr. Robin Satanovskij"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benjamin|fruehling",
+    "winner_dr_id": 590,
+    "skipped_ext_id": "165",
+    "slug": "benjamin-fruehling-967745",
+    "name": "Dr. med. Benjamin Frühling"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maximilian|kallenbach",
+    "winner_dr_id": 610,
+    "skipped_ext_id": "172",
+    "slug": "maximilian-kallenbach-617040",
+    "name": "Dr. med. Maximilian Kallenbach"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "juergen michael|steinacker",
+    "winner_dr_id": 697,
+    "skipped_ext_id": "175",
+    "slug": "juergen-michael-steinacker-82327",
+    "name": "Univ.-Prof. Dr. med. Dr. h. c. Jürgen Michael Steinacker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "meike|koeppel",
+    "winner_dr_id": 611,
+    "skipped_ext_id": "181",
+    "slug": "meike-koeppel-519491",
+    "name": "Dr. med. Meike Köppel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "monika|haeufle",
+    "winner_dr_id": 629,
+    "skipped_ext_id": "180",
+    "slug": "monika-haeufle-868153",
+    "name": "Dr. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ruth|biallowons",
+    "winner_dr_id": 694,
+    "skipped_ext_id": "187",
+    "slug": "ruth-biallowons-556844",
+    "name": "Ruth Biallowons"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "phillipp|brodbeck",
+    "winner_dr_id": 615,
+    "skipped_ext_id": "195",
+    "slug": "phillipp-brodbeck-321023",
+    "name": "Dr. med. Phillipp Brodbeck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maja|strasser",
+    "winner_dr_id": 581,
+    "skipped_ext_id": "224",
+    "slug": "maja-strasser-378054",
+    "name": "Dr. med. Maja Strasser"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "volker anselm|brenn",
+    "winner_dr_id": 662,
+    "skipped_ext_id": "130",
+    "slug": "volker-anselm-brenn--551419",
+    "name": "Dr. Volker Anselm Brenn"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kai|stoerring",
+    "winner_dr_id": 608,
+    "skipped_ext_id": "200",
+    "slug": "kai-stoerring-923335",
+    "name": "Dr. med. Kai Störring"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "zerabruke|gebremariam",
+    "winner_dr_id": 698,
+    "skipped_ext_id": "209",
+    "slug": "zerabruke-gebremariam-188009",
+    "name": "Zerabruke Gebremariam"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "suzan|goekmen sepetcigil",
+    "winner_dr_id": 618,
+    "skipped_ext_id": "204",
+    "slug": "suzan-goekmen-sepetcigil-946357",
+    "name": "Dr. med. Suzan Gökmen Sepetcigil"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "claus|muss",
+    "winner_dr_id": 682,
+    "skipped_ext_id": "205",
+    "slug": "claus-muss-375519",
+    "name": "Prof. Dr. Dr. med. Claus Muss"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "till|treutler",
+    "winner_dr_id": 619,
+    "skipped_ext_id": "208",
+    "slug": "till-treutler-942940",
+    "name": "Dr. med. Till Treutler"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nicole|ploog",
+    "winner_dr_id": 630,
+    "skipped_ext_id": "231",
+    "slug": "nicole-ploog-174604",
+    "name": "Dr. med. Nicole Ploog"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "beate|jaeger",
+    "winner_dr_id": 542,
+    "skipped_ext_id": "226",
+    "slug": "beate-jaeger-210800",
+    "name": "Dr. med. Beate Jäger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|springer",
+    "winner_dr_id": 647,
+    "skipped_ext_id": "227",
+    "slug": "stefan-springer-110333",
+    "name": "Dr. med. Stefan Springer"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|schneider",
+    "winner_dr_id": 622,
+    "skipped_ext_id": "210",
+    "slug": "vera-schneider-273823",
+    "name": "Dr. med. Vera Schneider"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christine|kupprion-simon",
+    "winner_dr_id": 593,
+    "skipped_ext_id": "217",
+    "slug": "christine-kupprion-simon-607716",
+    "name": "Dr. med. Christine Kupprion-Simon"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerg|lohse",
+    "winner_dr_id": 606,
+    "skipped_ext_id": "215",
+    "slug": "joerg-lohse-991192",
+    "name": "Dr. med. Jörg Lohse"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christiane|wohlrab",
+    "winner_dr_id": 592,
+    "skipped_ext_id": "121",
+    "slug": "christiane-wohlrab-729969",
+    "name": "Dr. med. Christiane Wohlrab"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "peter|baader",
+    "winner_dr_id": 637,
+    "skipped_ext_id": "96",
+    "slug": "peter-baader-791004",
+    "name": "Dr. Peter Baader"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|jelden",
+    "winner_dr_id": 612,
+    "skipped_ext_id": "84",
+    "slug": "michael-jelden-342641",
+    "name": "Dr. med. Michael Jelden"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "tobias|meis",
+    "winner_dr_id": 620,
+    "skipped_ext_id": "97",
+    "slug": "tobias-meis-550801",
+    "name": "Dr. med. Tobias Meis"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|pollex",
+    "winner_dr_id": 598,
+    "skipped_ext_id": "104",
+    "slug": "dirk-pollex-375559",
+    "name": "Dr. med. Dirk Pollex"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "arnd|zum winkel",
+    "winner_dr_id": 596,
+    "skipped_ext_id": "157",
+    "slug": "arnd-zum-winkel-465871",
+    "name": "Dr. med. dent. Arnd zum Winkel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "valentina o.|puntmann",
+    "winner_dr_id": 673,
+    "skipped_ext_id": "101",
+    "slug": "valentina-o-puntmann-617370",
+    "name": "Priv.-Doz. Dr. Dr. Valentina O. Puntmann"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "rainer willy|hauck",
+    "winner_dr_id": 684,
+    "skipped_ext_id": "99",
+    "slug": "rainer-willy-hauck-550802",
+    "name": "Prof. Dr. med. Rainer Willy Hauck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "karsten|erdfelder",
+    "winner_dr_id": 671,
+    "skipped_ext_id": "159",
+    "slug": "karsten-erdfeld-694440",
+    "name": "Karsten Erdfelder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "diego|schmidt",
+    "winner_dr_id": 597,
+    "skipped_ext_id": "102",
+    "slug": "diego-schmidt-334556",
+    "name": "Dr. med. Diego Schmidt"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "matthias robert|kress",
+    "winner_dr_id": 672,
+    "skipped_ext_id": "103",
+    "slug": "matthias-robert-kress-319345",
+    "name": "Matthias Robert Kress"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "sebastian|szardien",
+    "winner_dr_id": 643,
+    "skipped_ext_id": "88",
+    "slug": "sebastian-szardien-512374",
+    "name": "Dr. Sebastian Szardien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|stingl",
+    "winner_dr_id": 627,
+    "skipped_ext_id": "105",
+    "slug": "michael-stingl-858496",
+    "name": "Dr. Michael Stingl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "julia|moebius",
+    "winner_dr_id": 607,
+    "skipped_ext_id": "112",
+    "slug": "julia-moebius-478845",
+    "name": "Dr. med. Julia Möbius"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|czesnik",
+    "winner_dr_id": 553,
+    "skipped_ext_id": "124",
+    "slug": "dirk-czesnik-227841",
+    "name": "Dr. Dirk Czesnik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cornelia|werner",
+    "winner_dr_id": 595,
+    "skipped_ext_id": "113",
+    "slug": "cornelia-werner-697516",
+    "name": "Dr. med. Cornelia Werner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|mueller-bock",
+    "winner_dr_id": 621,
+    "skipped_ext_id": "119",
+    "slug": "vera-mueller-bock-327405",
+    "name": "Dr. med. Vera Müller-Bock"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|kacik",
+    "winner_dr_id": 613,
+    "skipped_ext_id": "87",
+    "slug": "michael-kacik-611159",
+    "name": "Dr. med. Michael Kacik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "alexander|grimm",
+    "winner_dr_id": 675,
+    "skipped_ext_id": "114",
+    "slug": "alexander-grimm-253139",
+    "name": "Prof. Dr. Alexander Grimm"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "eva|fritsching",
+    "winner_dr_id": 558,
+    "skipped_ext_id": "93",
+    "slug": "eva-fritsching-34738",
+    "name": "Dr. Eva Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benedikt|fritsching",
+    "winner_dr_id": 677,
+    "skipped_ext_id": "94",
+    "slug": "benedikt-fritsching-28291",
+    "name": "Prof. Dr. Benedikt Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerdis|frommhold",
+    "winner_dr_id": 605,
+    "skipped_ext_id": "116",
+    "slug": "joerdis-frommhold-853277",
+    "name": "Dr. med. Jördis Frommhold"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "johannes|schneeweiss",
+    "winner_dr_id": 572,
+    "skipped_ext_id": "117",
+    "slug": "johannes-schneeweiss-549622",
+    "name": "Dr. Johannes Schneeweiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|reichert",
+    "winner_dr_id": 626,
+    "skipped_ext_id": "118",
+    "slug": "michael-reichert-579204",
+    "name": "Dr. Michael Reichert"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "henning|berger",
+    "winner_dr_id": 601,
+    "skipped_ext_id": "111",
+    "slug": "henning-berger-887695",
+    "name": "Dr. med. Henning Berger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "reinhard|koeller",
+    "winner_dr_id": 691,
+    "skipped_ext_id": "160",
+    "slug": "reinhard-koeller-516531",
+    "name": "Reinhard Köller"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "astrid|weber",
+    "winner_dr_id": 589,
+    "skipped_ext_id": "120",
+    "slug": "astrid-weber-316306",
+    "name": "Dr. med. Astrid Weber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cordula|koerner-rettberg",
+    "winner_dr_id": 594,
+    "skipped_ext_id": "161",
+    "slug": "cordula-koerner-rettberg-219340",
+    "name": "Dr. med. Cordula Koerner-Rettberg"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "susanne|froehlich",
+    "winner_dr_id": 617,
+    "skipped_ext_id": "166",
+    "slug": "susanne-froehlich-710065",
+    "name": "Dr. med. Susanne Fröhlich"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christian|gogoll",
+    "winner_dr_id": 2,
+    "skipped_ext_id": "153",
+    "slug": "christian-gogoll-594970",
+    "name": "Dr. med. Christian Gogoll"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "pamina|binder",
+    "winner_dr_id": 634,
+    "skipped_ext_id": "173",
+    "slug": "pamina-binder-768023",
+    "name": "Dr. Pamina Binder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stavroula|angelidaki-walter",
+    "winner_dr_id": 695,
+    "skipped_ext_id": "186",
+    "slug": "stavroula-angelidaki-walter-348450",
+    "name": "Stavroula Angelidaki-Walter"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "leo|habets",
+    "winner_ext_id": "179",
+    "skipped_ext_id": "177",
+    "slug": "leo-habets-389319",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "leo|habets",
+    "winner_dr_id": 578,
+    "skipped_ext_id": "179",
+    "slug": "leo-habets-389311",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "steven|gardner",
+    "winner_dr_id": 696,
+    "skipped_ext_id": "164",
+    "slug": "steven-gardner-138388",
+    "name": "Steven Gardner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "doerte|bertram",
+    "winner_dr_id": 526,
+    "skipped_ext_id": "206",
+    "slug": "doerte-bertram-979729",
+    "name": "Dörte Bertram"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andrej|piovarci",
+    "winner_dr_id": 533,
+    "skipped_ext_id": "196",
+    "slug": "andrej-piovarci-859303",
+    "name": "Dr. Andrej Piovarci"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "harald|burgard",
+    "winner_dr_id": 600,
+    "skipped_ext_id": "197",
+    "slug": "harald-burgard-702806",
+    "name": "Dr. med. Harald Burgard"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "holger|seidel",
+    "winner_dr_id": 602,
+    "skipped_ext_id": "126",
+    "slug": "holger-seidel-609619",
+    "name": "Dr. med. Holger Seidel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|heindl",
+    "winner_dr_id": 616,
+    "skipped_ext_id": "146",
+    "slug": "stefan-heindl-654977",
+    "name": "Dr. med. Stefan Heindl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joanna|dietzel",
+    "winner_dr_id": 604,
+    "skipped_ext_id": "129",
+    "slug": "joanna-dietzel-527485",
+    "name": "Dr. med. Joanna Dietzel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andré|schino",
+    "winner_dr_id": 531,
+    "skipped_ext_id": "140",
+    "slug": "andr-schino-579603",
+    "name": "Dr. André Schino"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "isabelle|greber",
+    "winner_dr_id": 603,
+    "skipped_ext_id": "133",
+    "slug": "isabelle-greber-462312",
+    "name": "Dr. med. Isabelle Greber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "frank-chris|schoebel",
+    "winner_dr_id": 674,
+    "skipped_ext_id": "135",
+    "slug": "frank-chris-schoebel-104483",
+    "name": "Priv.-Doz. Dr. med. Frank-Chris Schoebel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "georg|haerter",
+    "winner_dr_id": 599,
+    "skipped_ext_id": "138",
+    "slug": "georg-haerter-839019",
+    "name": "Dr. med. Georg Härter"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nina|kollmar",
+    "winner_dr_id": 614,
+    "skipped_ext_id": "142",
+    "slug": "nina-kollmar-638199",
+    "name": "Dr. med. Nina Kollmar"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "uta|behrends",
+    "winner_dr_id": 690,
+    "skipped_ext_id": "144",
+    "slug": "prof-dr-uta-behrends-181772",
+    "name": "Prof. Dr. Uta Behrends"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "monika|haeufle",
+    "winner_ext_id": "180",
+    "skipped_ext_id": "149",
+    "slug": "monika-haeufle-282392",
+    "name": "Dr. med. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ronja|ramien",
+    "winner_dr_id": 693,
+    "skipped_ext_id": "151",
+    "slug": "ronja-ramien-812060",
+    "name": "Ronja Ramien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "werner|rieker",
+    "winner_dr_id": 623,
+    "skipped_ext_id": "152",
+    "slug": "werner-rieker-524900",
+    "name": "Dr. med. Werner Rieker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kristina|schultheiss",
+    "winner_dr_id": 609,
+    "skipped_ext_id": "155",
+    "slug": "kristina-schultheiss-973239",
+    "name": "Dr. med. Kristina Schultheiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "roberto|fernandes branco",
+    "winner_dr_id": 692,
+    "skipped_ext_id": "167",
+    "slug": "roberto-fernandes-branco-882862",
+    "name": "Roberto Fernandes Branco"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "patrick|gebetsroither",
+    "winner_dr_id": 635,
+    "skipped_ext_id": "158",
+    "slug": "patrick-gebetsroither-608277",
+    "name": "Dr. Patrick Gebetsroither"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "carsten|schriek",
+    "winner_dr_id": 591,
+    "skipped_ext_id": "163",
+    "slug": "carsten-schriek-589618",
+    "name": "Dr. med. Carsten Schriek"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "robin|satanovskij",
+    "winner_dr_id": 641,
+    "skipped_ext_id": "174",
+    "slug": "robin-satanovskij-877729",
+    "name": "Dr. Robin Satanovskij"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benjamin|fruehling",
+    "winner_dr_id": 590,
+    "skipped_ext_id": "165",
+    "slug": "benjamin-fruehling-967745",
+    "name": "Dr. med. Benjamin Frühling"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maximilian|kallenbach",
+    "winner_dr_id": 610,
+    "skipped_ext_id": "172",
+    "slug": "maximilian-kallenbach-617040",
+    "name": "Dr. med. Maximilian Kallenbach"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "juergen michael|steinacker",
+    "winner_dr_id": 697,
+    "skipped_ext_id": "175",
+    "slug": "juergen-michael-steinacker-82327",
+    "name": "Univ.-Prof. Dr. med. Dr. h. c. Jürgen Michael Steinacker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "meike|koeppel",
+    "winner_dr_id": 611,
+    "skipped_ext_id": "181",
+    "slug": "meike-koeppel-519491",
+    "name": "Dr. med. Meike Köppel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "monika|haeufle",
+    "winner_dr_id": 629,
+    "skipped_ext_id": "180",
+    "slug": "monika-haeufle-868153",
+    "name": "Dr. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ruth|biallowons",
+    "winner_dr_id": 694,
+    "skipped_ext_id": "187",
+    "slug": "ruth-biallowons-556844",
+    "name": "Ruth Biallowons"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "phillipp|brodbeck",
+    "winner_dr_id": 615,
+    "skipped_ext_id": "195",
+    "slug": "phillipp-brodbeck-321023",
+    "name": "Dr. med. Phillipp Brodbeck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maja|strasser",
+    "winner_dr_id": 581,
+    "skipped_ext_id": "224",
+    "slug": "maja-strasser-378054",
+    "name": "Dr. med. Maja Strasser"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "volker anselm|brenn",
+    "winner_dr_id": 662,
+    "skipped_ext_id": "130",
+    "slug": "volker-anselm-brenn--551419",
+    "name": "Dr. Volker Anselm Brenn"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kai|stoerring",
+    "winner_dr_id": 608,
+    "skipped_ext_id": "200",
+    "slug": "kai-stoerring-923335",
+    "name": "Dr. med. Kai Störring"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "zerabruke|gebremariam",
+    "winner_dr_id": 698,
+    "skipped_ext_id": "209",
+    "slug": "zerabruke-gebremariam-188009",
+    "name": "Zerabruke Gebremariam"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "suzan|goekmen sepetcigil",
+    "winner_dr_id": 618,
+    "skipped_ext_id": "204",
+    "slug": "suzan-goekmen-sepetcigil-946357",
+    "name": "Dr. med. Suzan Gökmen Sepetcigil"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "claus|muss",
+    "winner_dr_id": 682,
+    "skipped_ext_id": "205",
+    "slug": "claus-muss-375519",
+    "name": "Prof. Dr. Dr. med. Claus Muss"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "till|treutler",
+    "winner_dr_id": 619,
+    "skipped_ext_id": "208",
+    "slug": "till-treutler-942940",
+    "name": "Dr. med. Till Treutler"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nicole|ploog",
+    "winner_dr_id": 630,
+    "skipped_ext_id": "231",
+    "slug": "nicole-ploog-174604",
+    "name": "Dr. med. Nicole Ploog"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "beate|jaeger",
+    "winner_dr_id": 542,
+    "skipped_ext_id": "226",
+    "slug": "beate-jaeger-210800",
+    "name": "Dr. med. Beate Jäger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|springer",
+    "winner_dr_id": 647,
+    "skipped_ext_id": "227",
+    "slug": "stefan-springer-110333",
+    "name": "Dr. med. Stefan Springer"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|schneider",
+    "winner_dr_id": 622,
+    "skipped_ext_id": "210",
+    "slug": "vera-schneider-273823",
+    "name": "Dr. med. Vera Schneider"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christine|kupprion-simon",
+    "winner_dr_id": 593,
+    "skipped_ext_id": "217",
+    "slug": "christine-kupprion-simon-607716",
+    "name": "Dr. med. Christine Kupprion-Simon"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerg|lohse",
+    "winner_dr_id": 606,
+    "skipped_ext_id": "215",
+    "slug": "joerg-lohse-991192",
+    "name": "Dr. med. Jörg Lohse"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christiane|wohlrab",
+    "winner_dr_id": 592,
+    "skipped_ext_id": "121",
+    "slug": "christiane-wohlrab-729969",
+    "name": "Dr. med. Christiane Wohlrab"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "peter|baader",
+    "winner_dr_id": 637,
+    "skipped_ext_id": "96",
+    "slug": "peter-baader-791004",
+    "name": "Dr. Peter Baader"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|jelden",
+    "winner_dr_id": 612,
+    "skipped_ext_id": "84",
+    "slug": "michael-jelden-342641",
+    "name": "Dr. med. Michael Jelden"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "tobias|meis",
+    "winner_dr_id": 620,
+    "skipped_ext_id": "97",
+    "slug": "tobias-meis-550801",
+    "name": "Dr. med. Tobias Meis"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|pollex",
+    "winner_dr_id": 598,
+    "skipped_ext_id": "104",
+    "slug": "dirk-pollex-375559",
+    "name": "Dr. med. Dirk Pollex"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "arnd|zum winkel",
+    "winner_dr_id": 596,
+    "skipped_ext_id": "157",
+    "slug": "arnd-zum-winkel-465871",
+    "name": "Dr. med. dent. Arnd zum Winkel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "valentina o.|puntmann",
+    "winner_dr_id": 673,
+    "skipped_ext_id": "101",
+    "slug": "valentina-o-puntmann-617370",
+    "name": "Priv.-Doz. Dr. Dr. Valentina O. Puntmann"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "rainer willy|hauck",
+    "winner_dr_id": 684,
+    "skipped_ext_id": "99",
+    "slug": "rainer-willy-hauck-550802",
+    "name": "Prof. Dr. med. Rainer Willy Hauck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "karsten|erdfelder",
+    "winner_dr_id": 671,
+    "skipped_ext_id": "159",
+    "slug": "karsten-erdfeld-694440",
+    "name": "Karsten Erdfelder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "diego|schmidt",
+    "winner_dr_id": 597,
+    "skipped_ext_id": "102",
+    "slug": "diego-schmidt-334556",
+    "name": "Dr. med. Diego Schmidt"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "matthias robert|kress",
+    "winner_dr_id": 672,
+    "skipped_ext_id": "103",
+    "slug": "matthias-robert-kress-319345",
+    "name": "Matthias Robert Kress"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "sebastian|szardien",
+    "winner_dr_id": 643,
+    "skipped_ext_id": "88",
+    "slug": "sebastian-szardien-512374",
+    "name": "Dr. Sebastian Szardien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|stingl",
+    "winner_dr_id": 627,
+    "skipped_ext_id": "105",
+    "slug": "michael-stingl-858496",
+    "name": "Dr. Michael Stingl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "julia|moebius",
+    "winner_dr_id": 607,
+    "skipped_ext_id": "112",
+    "slug": "julia-moebius-478845",
+    "name": "Dr. med. Julia Möbius"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "dirk|czesnik",
+    "winner_dr_id": 553,
+    "skipped_ext_id": "124",
+    "slug": "dirk-czesnik-227841",
+    "name": "Dr. Dirk Czesnik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cornelia|werner",
+    "winner_dr_id": 595,
+    "skipped_ext_id": "113",
+    "slug": "cornelia-werner-697516",
+    "name": "Dr. med. Cornelia Werner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|mueller-bock",
+    "winner_dr_id": 621,
+    "skipped_ext_id": "119",
+    "slug": "vera-mueller-bock-327405",
+    "name": "Dr. med. Vera Müller-Bock"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|kacik",
+    "winner_dr_id": 613,
+    "skipped_ext_id": "87",
+    "slug": "michael-kacik-611159",
+    "name": "Dr. med. Michael Kacik"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "alexander|grimm",
+    "winner_dr_id": 675,
+    "skipped_ext_id": "114",
+    "slug": "alexander-grimm-253139",
+    "name": "Prof. Dr. Alexander Grimm"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "eva|fritsching",
+    "winner_dr_id": 558,
+    "skipped_ext_id": "93",
+    "slug": "eva-fritsching-34738",
+    "name": "Dr. Eva Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benedikt|fritsching",
+    "winner_dr_id": 677,
+    "skipped_ext_id": "94",
+    "slug": "benedikt-fritsching-28291",
+    "name": "Prof. Dr. Benedikt Fritsching"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerdis|frommhold",
+    "winner_dr_id": 605,
+    "skipped_ext_id": "116",
+    "slug": "joerdis-frommhold-853277",
+    "name": "Dr. med. Jördis Frommhold"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "johannes|schneeweiss",
+    "winner_dr_id": 572,
+    "skipped_ext_id": "117",
+    "slug": "johannes-schneeweiss-549622",
+    "name": "Dr. Johannes Schneeweiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "michael|reichert",
+    "winner_dr_id": 626,
+    "skipped_ext_id": "118",
+    "slug": "michael-reichert-579204",
+    "name": "Dr. Michael Reichert"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "henning|berger",
+    "winner_dr_id": 601,
+    "skipped_ext_id": "111",
+    "slug": "henning-berger-887695",
+    "name": "Dr. med. Henning Berger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "reinhard|koeller",
+    "winner_dr_id": 691,
+    "skipped_ext_id": "160",
+    "slug": "reinhard-koeller-516531",
+    "name": "Reinhard Köller"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "astrid|weber",
+    "winner_dr_id": 589,
+    "skipped_ext_id": "120",
+    "slug": "astrid-weber-316306",
+    "name": "Dr. med. Astrid Weber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "cordula|koerner-rettberg",
+    "winner_dr_id": 594,
+    "skipped_ext_id": "161",
+    "slug": "cordula-koerner-rettberg-219340",
+    "name": "Dr. med. Cordula Koerner-Rettberg"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "susanne|froehlich",
+    "winner_dr_id": 617,
+    "skipped_ext_id": "166",
+    "slug": "susanne-froehlich-710065",
+    "name": "Dr. med. Susanne Fröhlich"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christian|gogoll",
+    "winner_dr_id": 2,
+    "skipped_ext_id": "153",
+    "slug": "christian-gogoll-594970",
+    "name": "Dr. med. Christian Gogoll"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "pamina|binder",
+    "winner_dr_id": 634,
+    "skipped_ext_id": "173",
+    "slug": "pamina-binder-768023",
+    "name": "Dr. Pamina Binder"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stavroula|angelidaki-walter",
+    "winner_dr_id": 695,
+    "skipped_ext_id": "186",
+    "slug": "stavroula-angelidaki-walter-348450",
+    "name": "Stavroula Angelidaki-Walter"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "leo|habets",
+    "winner_ext_id": "179",
+    "skipped_ext_id": "177",
+    "slug": "leo-habets-389319",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "leo|habets",
+    "winner_dr_id": 578,
+    "skipped_ext_id": "179",
+    "slug": "leo-habets-389311",
+    "name": "Dr. Leo Habets"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "steven|gardner",
+    "winner_dr_id": 696,
+    "skipped_ext_id": "164",
+    "slug": "steven-gardner-138388",
+    "name": "Steven Gardner"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "doerte|bertram",
+    "winner_dr_id": 526,
+    "skipped_ext_id": "206",
+    "slug": "doerte-bertram-979729",
+    "name": "Dörte Bertram"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andrej|piovarci",
+    "winner_dr_id": 533,
+    "skipped_ext_id": "196",
+    "slug": "andrej-piovarci-859303",
+    "name": "Dr. Andrej Piovarci"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "harald|burgard",
+    "winner_dr_id": 600,
+    "skipped_ext_id": "197",
+    "slug": "harald-burgard-702806",
+    "name": "Dr. med. Harald Burgard"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "holger|seidel",
+    "winner_dr_id": 602,
+    "skipped_ext_id": "126",
+    "slug": "holger-seidel-609619",
+    "name": "Dr. med. Holger Seidel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|heindl",
+    "winner_dr_id": 616,
+    "skipped_ext_id": "146",
+    "slug": "stefan-heindl-654977",
+    "name": "Dr. med. Stefan Heindl"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joanna|dietzel",
+    "winner_dr_id": 604,
+    "skipped_ext_id": "129",
+    "slug": "joanna-dietzel-527485",
+    "name": "Dr. med. Joanna Dietzel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "andré|schino",
+    "winner_dr_id": 531,
+    "skipped_ext_id": "140",
+    "slug": "andr-schino-579603",
+    "name": "Dr. André Schino"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "isabelle|greber",
+    "winner_dr_id": 603,
+    "skipped_ext_id": "133",
+    "slug": "isabelle-greber-462312",
+    "name": "Dr. med. Isabelle Greber"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "frank-chris|schoebel",
+    "winner_dr_id": 674,
+    "skipped_ext_id": "135",
+    "slug": "frank-chris-schoebel-104483",
+    "name": "Priv.-Doz. Dr. med. Frank-Chris Schoebel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "georg|haerter",
+    "winner_dr_id": 599,
+    "skipped_ext_id": "138",
+    "slug": "georg-haerter-839019",
+    "name": "Dr. med. Georg Härter"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nina|kollmar",
+    "winner_dr_id": 614,
+    "skipped_ext_id": "142",
+    "slug": "nina-kollmar-638199",
+    "name": "Dr. med. Nina Kollmar"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "uta|behrends",
+    "winner_dr_id": 690,
+    "skipped_ext_id": "144",
+    "slug": "prof-dr-uta-behrends-181772",
+    "name": "Prof. Dr. Uta Behrends"
+  },
+  {
+    "reason": "duplicate_loser_in_sourcefile",
+    "dupe_key": "monika|haeufle",
+    "winner_ext_id": "180",
+    "skipped_ext_id": "149",
+    "slug": "monika-haeufle-282392",
+    "name": "Dr. med. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ronja|ramien",
+    "winner_dr_id": 693,
+    "skipped_ext_id": "151",
+    "slug": "ronja-ramien-812060",
+    "name": "Ronja Ramien"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "werner|rieker",
+    "winner_dr_id": 623,
+    "skipped_ext_id": "152",
+    "slug": "werner-rieker-524900",
+    "name": "Dr. med. Werner Rieker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kristina|schultheiss",
+    "winner_dr_id": 609,
+    "skipped_ext_id": "155",
+    "slug": "kristina-schultheiss-973239",
+    "name": "Dr. med. Kristina Schultheiß"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "roberto|fernandes branco",
+    "winner_dr_id": 692,
+    "skipped_ext_id": "167",
+    "slug": "roberto-fernandes-branco-882862",
+    "name": "Roberto Fernandes Branco"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "patrick|gebetsroither",
+    "winner_dr_id": 635,
+    "skipped_ext_id": "158",
+    "slug": "patrick-gebetsroither-608277",
+    "name": "Dr. Patrick Gebetsroither"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "carsten|schriek",
+    "winner_dr_id": 591,
+    "skipped_ext_id": "163",
+    "slug": "carsten-schriek-589618",
+    "name": "Dr. med. Carsten Schriek"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "robin|satanovskij",
+    "winner_dr_id": 641,
+    "skipped_ext_id": "174",
+    "slug": "robin-satanovskij-877729",
+    "name": "Dr. Robin Satanovskij"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "benjamin|fruehling",
+    "winner_dr_id": 590,
+    "skipped_ext_id": "165",
+    "slug": "benjamin-fruehling-967745",
+    "name": "Dr. med. Benjamin Frühling"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maximilian|kallenbach",
+    "winner_dr_id": 610,
+    "skipped_ext_id": "172",
+    "slug": "maximilian-kallenbach-617040",
+    "name": "Dr. med. Maximilian Kallenbach"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "juergen michael|steinacker",
+    "winner_dr_id": 697,
+    "skipped_ext_id": "175",
+    "slug": "juergen-michael-steinacker-82327",
+    "name": "Univ.-Prof. Dr. med. Dr. h. c. Jürgen Michael Steinacker"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "meike|koeppel",
+    "winner_dr_id": 611,
+    "skipped_ext_id": "181",
+    "slug": "meike-koeppel-519491",
+    "name": "Dr. med. Meike Köppel"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "monika|haeufle",
+    "winner_dr_id": 629,
+    "skipped_ext_id": "180",
+    "slug": "monika-haeufle-868153",
+    "name": "Dr. Monika Häufle"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "ruth|biallowons",
+    "winner_dr_id": 694,
+    "skipped_ext_id": "187",
+    "slug": "ruth-biallowons-556844",
+    "name": "Ruth Biallowons"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "phillipp|brodbeck",
+    "winner_dr_id": 615,
+    "skipped_ext_id": "195",
+    "slug": "phillipp-brodbeck-321023",
+    "name": "Dr. med. Phillipp Brodbeck"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "maja|strasser",
+    "winner_dr_id": 581,
+    "skipped_ext_id": "224",
+    "slug": "maja-strasser-378054",
+    "name": "Dr. med. Maja Strasser"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "volker anselm|brenn",
+    "winner_dr_id": 662,
+    "skipped_ext_id": "130",
+    "slug": "volker-anselm-brenn--551419",
+    "name": "Dr. Volker Anselm Brenn"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "kai|stoerring",
+    "winner_dr_id": 608,
+    "skipped_ext_id": "200",
+    "slug": "kai-stoerring-923335",
+    "name": "Dr. med. Kai Störring"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "zerabruke|gebremariam",
+    "winner_dr_id": 698,
+    "skipped_ext_id": "209",
+    "slug": "zerabruke-gebremariam-188009",
+    "name": "Zerabruke Gebremariam"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "suzan|goekmen sepetcigil",
+    "winner_dr_id": 618,
+    "skipped_ext_id": "204",
+    "slug": "suzan-goekmen-sepetcigil-946357",
+    "name": "Dr. med. Suzan Gökmen Sepetcigil"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "claus|muss",
+    "winner_dr_id": 682,
+    "skipped_ext_id": "205",
+    "slug": "claus-muss-375519",
+    "name": "Prof. Dr. Dr. med. Claus Muss"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "till|treutler",
+    "winner_dr_id": 619,
+    "skipped_ext_id": "208",
+    "slug": "till-treutler-942940",
+    "name": "Dr. med. Till Treutler"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "nicole|ploog",
+    "winner_dr_id": 630,
+    "skipped_ext_id": "231",
+    "slug": "nicole-ploog-174604",
+    "name": "Dr. med. Nicole Ploog"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "beate|jaeger",
+    "winner_dr_id": 542,
+    "skipped_ext_id": "226",
+    "slug": "beate-jaeger-210800",
+    "name": "Dr. med. Beate Jäger"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "stefan|springer",
+    "winner_dr_id": 647,
+    "skipped_ext_id": "227",
+    "slug": "stefan-springer-110333",
+    "name": "Dr. med. Stefan Springer"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "vera|schneider",
+    "winner_dr_id": 622,
+    "skipped_ext_id": "210",
+    "slug": "vera-schneider-273823",
+    "name": "Dr. med. Vera Schneider"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "christine|kupprion-simon",
+    "winner_dr_id": 593,
+    "skipped_ext_id": "217",
+    "slug": "christine-kupprion-simon-607716",
+    "name": "Dr. med. Christine Kupprion-Simon"
+  },
+  {
+    "reason": "duplicate_winner_already_in_db",
+    "dupe_key": "joerg|lohse",
+    "winner_dr_id": 606,
+    "skipped_ext_id": "215",
+    "slug": "joerg-lohse-991192",
+    "name": "Dr. med. Jörg Lohse"
+  }
+]
