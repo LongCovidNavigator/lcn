@@ -37,7 +37,7 @@ import pymysql
 
 INPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\001_mapping_drs2treat_stingl_matched.csv"
 PREVIEW_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\001_mapping_drs2treat_stingl_import_preview.csv"
-ENV_PATH = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\.env"
+ENV_PATH = r"/data2lcn_db/.env"
 
 TARGET_TABLE = "tbl_cpl_drs2treatments_03"
 TBL_DRS = "tbl_drs_03"

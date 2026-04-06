@@ -131,54 +131,69 @@ Zusatzregel:
   `alias_name` und `alias_type` dokumentiert werden.
 
 ## recommendation_type
-Das Feld `recommendation_type` dient der fachlich sichtbaren Einordnung von Maßnahmenarten
-innerhalb der Batch-Datei. Es darf nicht nur implizit in `notes` abgebildet werden.
+Das Feld `recommendation_type` wird in der Batch-Datei sichtbar geführt und dient weiterhin der
+fachlich nachvollziehbaren Einordnung, **was für eine Art Treatment / Maßnahme** der jeweilige
+Eintrag beschreibt.
 
-Aktueller Standard:
-- `direct_treatment`
-- `supportive_recommendation`
-- `lifestyle_recommendation`
-- `household_recommendation`
-- `diagnostic_measure`
+Wichtig:
+- Das Feld bleibt Bestandteil der operativen Datei.
 
-Grundprinzipien:
-- `recommendation_type` ersetzt nicht die Kernregel für Kopplungen.
-- Auch supportive, lifestylebezogene, haushaltsbezogene oder diagnostische Maßnahmen dürfen
-  nur dann als Doctor↔Treatment-Eintrag geführt werden, wenn die Quelle einen hinreichend
-  klaren Praxisbezug zeigt.
-- `recommendation_type` dient der sichtbaren Trennung innerhalb des Behandlungsspektrums.
-- Grenzfälle sollen nicht in `notes` versteckt, sondern möglichst über `recommendation_type`
-  und saubere Evidenz dokumentiert werden.
+### Grundsatz
+`recommendation_type` soll aus der **Treatment-Typisierung** befüllt werden, wie sie
+in der Datenbank über `tbl_treatments_03.typ` geführt wird.
 
-Kurzdefinitionen mit Beispielen:
-- `direct_treatment`
-  - konkrete therapeutische oder medikamentöse Maßnahme
-  - Beispiele: Ivabradin, Mestinon, Low Dose Naltrexon, Prednisolon, Montelukast
+Das bedeutet:
+- Die Einordnung beschreibt die **Art des Treatments / der Maßnahme**.
+- Es soll **keine freie Parallel-Terminologie** neben den bereits etablierten Typen entstehen.
+- Primär sollen die **bereits vorhandenen Werte aus `tbl_treatments_03.typ`** verwendet werden.
 
-- `supportive_recommendation`
-  - supportive, ergänzende oder symptomorientierte Maßnahme mit erkennbarem Behandlungsbezug
-  - Beispiele: Physiotherapie, Ergotherapie, Atemphysiotherapie, Ernährungsberatung,
-    strukturiertes Riechtraining
+### Zulässige Werte
+- Standard sind die bereits in `tbl_treatments_03.typ` vorhandenen Einträge.
+- Diese bilden die primäre Referenz für die Befüllung von `recommendation_type`.
+- Neue Werte sind grundsätzlich möglich, sollen aber **nicht eigenständig eingeführt** werden.
+- Wenn ein neuer Wert fachlich sinnvoll erscheint, ist dies **vorher mit dem Nutzer abzustimmen**.
 
-- `lifestyle_recommendation`
-  - verhaltens- oder alltagsbezogene Empfehlung
-  - Beispiele: Pacing, langsames Aufstehen, Verzicht auf Alkohol, wenig Kaffee,
-    mehrere kleine Mahlzeiten
+Aktuell vorhandene Werte in `tbl_treatments_03.typ` sind insbesondere:
+- `Behandlung`
+- `Diagnose`
+- `Diätmaßnahme`
+- `Elementares Hilfsmittel`
+- `experimenteller Wirkstoff / Aptamer`
+- `Gerät/Prozedur`
+- `Hausmittel`
+- `Hilfsmittel`
+- `Infusion`
+- `Infusion/Immuntherapie`
+- `Kombination`
+- `Komplementärer Ansatz`
+- `Lifestyleanpassung`
+- `Lokaltherapie`
+- `Lokaltherapie / Antiseptikum`
+- `Maßnahme`
+- `Maßnahme/Drink`
+- `Medikament`
+- `Medikament / experimenteller Versuch`
+- `Medikament / Injektion`
+- `Medikament / komplementärer Ansatz`
+- `Medikament / lokal`
+- `Medikament/Biologikum`
+- `Medikamentenklasse`
+- `Medikamentenkombi`
 
-- `household_recommendation`
-  - haushalts-/umfeldbezogene oder alltagspraktische Maßnahme
-  - Beispiele: Elektrolytlösung/Bouillon, Luftfilter, regelmäßiges Lüften,
-    konkrete Trink- und Salzlösungen für den Alltag
+### Operative Regel
+- Bei bereits bekannten oder gematchten Treatments soll sich `recommendation_type` an dem
+  vorhandenen Typ-Eintrag orientieren.
+- Bei noch offenen oder noch nicht gematchten Fällen soll nach Möglichkeit ein bereits
+  vorhandener Typ verwendet werden, sofern dieser fachlich sauber passt.
+- Es sollen **nicht vorschnell neue Begriffe oder Sammelkategorien** eingeführt werden.
+- Wenn keine belastbare Zuordnung zu einem vorhandenen Typ möglich ist, bleibt der Fall offen
+  und wird zur Abstimmung markiert.
 
-- `diagnostic_measure`
-  - diagnostische Maßnahme, Abklärung oder Untersuchung, die im Behandlungsspektrum
-    mitgeführt wird
-  - Beispiele: passiver Stehtest, EKG, Laborabklärung, MRT Schädel, VQ-SPECT/CT,
-    neuropsychologische Abklärung
-
-Hinweis:
-- Die Beispiele sind Orientierungen, keine starre Positivliste.
-- Maßgeblich bleibt immer die Formulierung und der Praxisbezug in der konkreten Quelle.
+### Ziel
+Diese Regel dient dazu, dass:
+- lokale Batch-Dateien und Datenbank fachlich konsistent bleiben,
+- dieselbe Maßnahme nicht mit wechselnder Terminologie beschrieben wird,
+- und neue Typen nur kontrolliert und bewusst ergänzt werden.
 
 ## Abgrenzung von Diagnostik, Behandlung und Empfehlung
 Für die fachliche Einordnung gilt:
@@ -255,3 +270,6 @@ Voraussetzungen:
 - die Unterpunkte sind hinreichend konkret
 - es handelt sich nicht nur um allgemeine Information, reine Theorie oder allgemeines
   Leistungsspektrum ohne solchen Kontext
+
+Wenn eine Website in einem klar krankheits- oder versorgungsbezogenen Abschnitt bzw. auf einer klar krankheitsbezogenen Unterseite konkrete Therapieformen, Therapierichtungen, Behandlungsverfahren oder supportiv-integrative Maßnahmen als Teil der tatsächlichen Versorgung aufführt, dürfen diese auch dann als eigene 4.1-Zeilen aufgenommen werden, wenn sie begrifflich breiter sind als klassische Einzelmaßnahmen.
+Voraussetzung ist, dass aus dem Seitenkontext hervorgeht, dass sie praktisch angeboten bzw. eingesetzt werden und nicht nur allgemein erläutert werden.

@@ -47,7 +47,7 @@ import pymysql
 
 INPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\001_mapping_drs2treat_stingl.csv"
 OUTPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\001_mapping_drs2treat_stingl_matched.csv"
-ENV_PATH = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\.env"
+ENV_PATH = r"/data2lcn_db/.env"
 
 TBL_TREATMENTS = "tbl_treatments_03"
 VW_TREATMENT_ALIASES = "vw_treatments2aliases_03"

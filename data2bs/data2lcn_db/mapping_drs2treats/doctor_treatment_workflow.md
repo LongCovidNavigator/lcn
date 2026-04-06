@@ -414,6 +414,7 @@ Jeder zukünftige Prompt soll am Ende zusätzlich verlangen:
 2. Welche Infos fehlen dir?
 3. Wo gibt es Widersprüche oder Unklarheiten?
 4. Welche Punkte sollten künftig standardmäßig in diesen Prompt-Typ aufgenommen werden?
+5. Bitte Sequentielle Abarbeitung aller Tasks und Teilschritte und nicht alles Parallel. Spezielle der nächste Prompt, soll erst ganz am Ende erstellt werden. 
 
 ### Mini-Template für Prompt-Verankerung im Workflow
 Dieser Baustein soll in zukünftigen workflowbezogenen Prompts sinngemäß mitgeführt werden:
@@ -432,7 +433,6 @@ Dieser Baustein soll in zukünftigen Prompts sinngemäß mitgeführt werden:
 > 1. Was brauchst du noch von mir?
 > 2. Welche Infos fehlen dir?
 > 3. Wo gibt es Widersprüche oder Unklarheiten?
-> 4. Welche Punkte sollten künftig standardmäßig in diesen Prompt-Typ aufgenommen werden?
 
 ### Zweck dieser Regeln
 Diese Prompt-Regeln dienen dazu,

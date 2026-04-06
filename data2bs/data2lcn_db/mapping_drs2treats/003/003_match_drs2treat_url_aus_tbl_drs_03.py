@@ -2,29 +2,36 @@
 # -*- coding: utf-8 -*-
 
 """
-Match batch CSV rows (doctor -> treatment mapping batch) against LCN DB treatments.
+003_match_drs2treat_url_aus_tbl_drs_03.py
 
 Purpose:
-- Read prepared Strasser batch CSV
-- Load treatments + aliases from DB
-- Match rows conservatively
+- Read the operative batch CSV for source 003
+- Load treatments + aliases from LCN DB
+- Match rows conservatively in this order:
+    1) exact main-name match
+    2) exact existing alias match
+    3) exact match via manually curated new aliases for this batch
 - Enrich CSV with:
     - treat_id
     - treat_match_status
     - match_notes
+    - review_matching
+    - review_matching_notes
+    - alias_name
+    - alias_type
 - Write a new output CSV
-- Do NOT import into coupling table
-- Do NOT create new treatments
-- Do NOT change source_id/dr_id
-- Do NOT match rows with decision = 0
-- Preserve existing treat_id values
+
+Important for THIS 003 workflow:
+- decision is intentionally ignored
+- all rows are considered matchable
+- existing treat_id values are preserved by default
+- no treatments are created
+- no DB import is performed
+- open cases remain visible
 
 Requirements:
 - python-dotenv
 - pymysql
-
-Example:
-    python match_drs2treat_batch.py
 """
 
 from __future__ import annotations
@@ -40,13 +47,12 @@ from typing import Dict, List, Set, Tuple, Optional
 from dotenv import load_dotenv
 import pymysql
 
-
 # ---------------------------------------------------------------------------
 # CONFIG
 # ---------------------------------------------------------------------------
 
-INPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\002_mapping_drs2treat_strasser.csv"
-OUTPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\002_mapping_drs2treat_strasser_matched.csv"
+INPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\003_mapping_drs2treat_url_aus_tbl_drs_03.csv"
+OUTPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\003_mapping_drs2treat_url_aus_tbl_drs_03__4_3_matched.csv"
 ENV_PATH = r"/data2lcn_db/.env"
 
 TBL_TREATMENTS = "tbl_treatments_03"
@@ -55,21 +61,54 @@ VW_TREATMENT_ALIASES = "vw_treatments2aliases_03"
 CSV_ENCODING = "utf-8-sig"
 CSV_DELIMITER = ","
 
-TARGET_STATUS_VALUES = {
-    "matched_exact",
-    "matched_alias",
-    "review",
-    "missing",
-}
+# For this chat/workflow variant: ignore decision completely.
+IGNORE_DECISION_FIELD = True
 
-SKIP_DECISION_VALUES = {"0"}  # rows with decision=0 are not matched
-
-# Existing statuses treated as "editable placeholders"
+# If a row already has a treat_id, preserve it by default.
+PRESERVE_EXISTING_TREAT_ID = True
 OVERWRITABLE_EMPTYISH_STATUSES = {"", "pending"}
 
-# If a row already has a treat_id, it is preserved no matter what.
-PRESERVE_EXISTING_TREAT_ID = True
+STATUS_MATCHED_EXACT = "matched_exact"
+STATUS_MATCHED_ALIAS = "matched_alias"
+STATUS_MATCHED_NEW_ALIAS = "matched_new_alias"
+STATUS_REVIEW = "review"
+STATUS_MISSING = "missing"
 
+# Manually curated new aliases for THIS batch.
+# Only include mappings that were explicitly reviewed as technically acceptable.
+# normalized alias -> metadata
+MANUAL_NEW_ALIASES: Dict[str, Dict[str, object]] = {
+    "low dose naltrexon": {
+        "treat_id": 1,
+        "canonical_name": "LDN",
+        "alias_name": "Low Dose Naltrexon",
+        "alias_type": "long_name",
+    },
+    "oxalacetat": {
+        "treat_id": 60,
+        "canonical_name": "Oxaloacetat",
+        "alias_name": "Oxalacetat",
+        "alias_type": "spelling_variant",
+    },
+    "low dose nicotine patches": {
+        "treat_id": 21,
+        "canonical_name": "Nicotin-Pflaster",
+        "alias_name": "Low Dose Nicotine Patches",
+        "alias_type": "english_variant",
+    },
+    "nikotin / nikotinpflaster": {
+        "treat_id": 21,
+        "canonical_name": "Nicotin-Pflaster",
+        "alias_name": "Nikotin / Nikotinpflaster",
+        "alias_type": "spelling_variant",
+    },
+    "energiemanagement und aktivitätsdosierung": {
+        "treat_id": 2,
+        "canonical_name": "Pacing",
+        "alias_name": "Energiemanagement und Aktivitätsdosierung",
+        "alias_type": "extended_phrase",
+    },
+}
 
 # ---------------------------------------------------------------------------
 # DATA STRUCTURES
@@ -86,6 +125,7 @@ class AliasRecord:
     treat_id: int
     alias: str
     behandlung: str
+    alias_type: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -93,18 +133,6 @@ class AliasRecord:
 # ---------------------------------------------------------------------------
 
 def normalize_for_match(value: Optional[str]) -> str:
-    """
-    Conservative normalization for exact matching only.
-    Internal comparison only; original CSV values remain unchanged.
-
-    Rules:
-    - None -> ""
-    - strip
-    - Unicode normalize
-    - lowercase
-    - unify common dash variants to "-"
-    - collapse whitespace
-    """
     if value is None:
         return ""
 
@@ -113,7 +141,7 @@ def normalize_for_match(value: Optional[str]) -> str:
         return ""
 
     s = unicodedata.normalize("NFKC", s)
-    s = s.replace("–", "-").replace("—", "-").replace("-", "-").replace("−", "-")
+    s = s.replace("–", "-").replace("—", "-").replace("−", "-")
     s = s.lower()
     s = re.sub(r"\s+", " ", s).strip()
     return s
@@ -123,10 +151,6 @@ def clean_cell(value: Optional[str]) -> str:
     if value is None:
         return ""
     return str(value).strip()
-
-
-def is_blank(value: Optional[str]) -> bool:
-    return clean_cell(value) == ""
 
 
 def safe_int_str(value: Optional[str]) -> str:
@@ -185,9 +209,7 @@ def get_db_connection():
 
 def load_treatments(conn) -> List[TreatmentRecord]:
     sql = f"""
-        SELECT
-            treat_id,
-            behandlung
+        SELECT treat_id, behandlung
         FROM {TBL_TREATMENTS}
         WHERE treat_id IS NOT NULL
           AND behandlung IS NOT NULL
@@ -198,23 +220,19 @@ def load_treatments(conn) -> List[TreatmentRecord]:
         cur.execute(sql)
         rows = cur.fetchall()
 
-    result: List[TreatmentRecord] = []
-    for row in rows:
-        result.append(
-            TreatmentRecord(
-                treat_id=int(row["treat_id"]),
-                behandlung=str(row["behandlung"]).strip(),
-            )
+    return [
+        TreatmentRecord(
+            treat_id=int(row["treat_id"]),
+            behandlung=str(row["behandlung"]).strip(),
         )
-    return result
+        for row in rows
+    ]
 
 
 def load_aliases(conn) -> List[AliasRecord]:
+    # alias_type is optional depending on view structure
     sql = f"""
-        SELECT
-            treat_id,
-            alias,
-            behandlung
+        SELECT treat_id, alias, behandlung
         FROM {VW_TREATMENT_ALIASES}
         WHERE treat_id IS NOT NULL
           AND alias IS NOT NULL
@@ -232,6 +250,7 @@ def load_aliases(conn) -> List[AliasRecord]:
                 treat_id=int(row["treat_id"]),
                 alias=str(row["alias"]).strip(),
                 behandlung=clean_cell(row.get("behandlung")),
+                alias_type=clean_cell(row.get("alias_type")),
             )
         )
     return result
@@ -244,38 +263,32 @@ def load_aliases(conn) -> List[AliasRecord]:
 def build_main_name_index(
     treatments: List[TreatmentRecord],
 ) -> Tuple[Dict[str, Set[int]], Dict[int, str]]:
-    """
-    normalized main-name -> set(treat_id)
-    treat_id -> main name
-    """
     main_index: Dict[str, Set[int]] = {}
     treat_name_by_id: Dict[int, str] = {}
 
     for t in treatments:
         treat_name_by_id[t.treat_id] = t.behandlung
         key = normalize_for_match(t.behandlung)
-        if not key:
-            continue
-        main_index.setdefault(key, set()).add(t.treat_id)
+        if key:
+            main_index.setdefault(key, set()).add(t.treat_id)
 
     return main_index, treat_name_by_id
 
 
 def build_alias_index(
     aliases: List[AliasRecord],
-) -> Dict[str, Set[int]]:
-    """
-    normalized alias -> set(treat_id)
-    """
+) -> Tuple[Dict[str, Set[int]], Dict[Tuple[str, int], AliasRecord]]:
     alias_index: Dict[str, Set[int]] = {}
+    alias_meta: Dict[Tuple[str, int], AliasRecord] = {}
 
     for a in aliases:
         key = normalize_for_match(a.alias)
         if not key:
             continue
         alias_index.setdefault(key, set()).add(a.treat_id)
+        alias_meta[(key, a.treat_id)] = a
 
-    return alias_index
+    return alias_index, alias_meta
 
 
 # ---------------------------------------------------------------------------
@@ -289,10 +302,7 @@ def read_csv_rows(path: str) -> Tuple[List[str], List[Dict[str, str]]]:
     with open(path, "r", encoding=CSV_ENCODING, newline="") as f:
         reader = csv.DictReader(f, delimiter=CSV_DELIMITER)
         headers = list(reader.fieldnames or [])
-        rows = []
-        for row in reader:
-            normalized_row = {k: (v if v is not None else "") for k, v in row.items()}
-            rows.append(normalized_row)
+        rows = [{k: (v if v is not None else "") for k, v in row.items()} for row in reader]
 
     if not headers:
         raise RuntimeError("CSV appears to have no header row.")
@@ -300,19 +310,21 @@ def read_csv_rows(path: str) -> Tuple[List[str], List[Dict[str, str]]]:
     return headers, rows
 
 
-def ensure_match_notes_column(headers: List[str]) -> List[str]:
-    if "match_notes" in headers:
-        return headers[:]
-
-    if "treat_match_status" in headers:
-        new_headers = []
-        for h in headers:
-            new_headers.append(h)
-            if h == "treat_match_status":
-                new_headers.append("match_notes")
-        return new_headers
-
-    return headers + ["match_notes"]
+def ensure_output_headers(headers: List[str]) -> List[str]:
+    needed = [
+        "treat_id",
+        "treat_match_status",
+        "match_notes",
+        "review_matching",
+        "review_matching_notes",
+        "alias_name",
+        "alias_type",
+    ]
+    out = headers[:]
+    for col in needed:
+        if col not in out:
+            out.append(col)
+    return out
 
 
 def write_csv_rows(path: str, headers: List[str], rows: List[Dict[str, str]]) -> None:
@@ -330,22 +342,14 @@ def write_csv_rows(path: str, headers: List[str], rows: List[Dict[str, str]]) ->
         )
         writer.writeheader()
         for row in rows:
-            safe_row = {h: row.get(h, "") for h in headers}
-            writer.writerow(safe_row)
+            writer.writerow({h: row.get(h, "") for h in headers})
 
 
 # ---------------------------------------------------------------------------
-# MATCHING
+# MATCH HELPERS
 # ---------------------------------------------------------------------------
 
 def choose_input_name(row: Dict[str, str]) -> Tuple[str, str]:
-    """
-    Returns:
-        (selected_original_value, source_field_name)
-    Priority:
-        1) treatment_name_normalized
-        2) treatment_name_raw
-    """
     normalized_val = clean_cell(row.get("treatment_name_normalized"))
     raw_val = clean_cell(row.get("treatment_name_raw"))
 
@@ -362,79 +366,49 @@ def can_update_status(current_status: str, existing_treat_id: str) -> bool:
 
     if existing_treat_id and PRESERVE_EXISTING_TREAT_ID:
         return current_status in OVERWRITABLE_EMPTYISH_STATUSES
-
     return True
 
 
-def preserve_existing_mapping(
-    row: Dict[str, str],
-    counters: Dict[str, int],
-) -> Dict[str, str]:
-    """
-    Existing treat_id wins.
-    Do not overwrite it.
-    """
+def apply_preserved_existing(row: Dict[str, str], counters: Dict[str, int]) -> Dict[str, str]:
     new_row = dict(row)
     existing_treat_id = safe_int_str(new_row.get("treat_id"))
     current_status = clean_cell(new_row.get("treat_match_status"))
 
     new_row["treat_id"] = existing_treat_id
-
     if can_update_status(current_status, existing_treat_id):
-        new_row["treat_match_status"] = "review"
+        new_row["treat_match_status"] = STATUS_REVIEW
     else:
         new_row["treat_match_status"] = current_status
 
-    new_row["match_notes"] = (
-        f'preserved existing treat_id={existing_treat_id}; row not rematched automatically'
-    )
+    new_row["match_notes"] = f"preserved existing treat_id={existing_treat_id}; row not rematched automatically"
+    new_row["review_matching"] = "1"
+    new_row["review_matching_notes"] = "existing treat_id preserved automatically"
 
     counters["preserved_existing_treat_id"] += 1
     return new_row
 
 
-def skip_decision_zero(
-    row: Dict[str, str],
-    counters: Dict[str, int],
-) -> Dict[str, str]:
-    """
-    Rows with decision=0 are intentionally not matched.
-    Existing manual treat_id is still preserved by earlier logic.
-    """
-    new_row = dict(row)
-    new_row["match_notes"] = 'skipped because decision=0'
-
-    current_status = clean_cell(new_row.get("treat_match_status"))
-    if current_status in OVERWRITABLE_EMPTYISH_STATUSES:
-        new_row["treat_match_status"] = ""
-
-    counters["skipped_decision_0"] += 1
-    return new_row
-
-
-def apply_missing(
-    row: Dict[str, str],
-    counters: Dict[str, int],
-    reason: str,
-) -> Dict[str, str]:
+def apply_missing(row: Dict[str, str], counters: Dict[str, int], reason: str) -> Dict[str, str]:
     new_row = dict(row)
     new_row["treat_id"] = ""
-    new_row["treat_match_status"] = "missing"
+    new_row["treat_match_status"] = STATUS_MISSING
     new_row["match_notes"] = reason
+    new_row["review_matching"] = "1"
+    new_row["review_matching_notes"] = reason
+    new_row["alias_name"] = clean_cell(new_row.get("alias_name"))
+    new_row["alias_type"] = clean_cell(new_row.get("alias_type"))
     counters["missing"] += 1
     return new_row
 
 
-def apply_review(
-    row: Dict[str, str],
-    counters: Dict[str, int],
-    candidate_ids: Set[int],
-    reason: str,
-) -> Dict[str, str]:
+def apply_review(row: Dict[str, str], counters: Dict[str, int], candidate_ids: Set[int], reason: str) -> Dict[str, str]:
     new_row = dict(row)
+    text = f"{reason}: {', '.join(str(x) for x in sorted(candidate_ids))}"
     new_row["treat_id"] = ""
-    new_row["treat_match_status"] = "review"
-    new_row["match_notes"] = f"{reason}: {', '.join(str(x) for x in sorted(candidate_ids))}"
+    new_row["treat_match_status"] = STATUS_REVIEW
+    new_row["match_notes"] = text
+    new_row["review_matching"] = "1"
+    new_row["review_matching_notes"] = text
     counters["review"] += 1
     return new_row
 
@@ -445,57 +419,46 @@ def apply_match(
     treat_id: int,
     status: str,
     reason: str,
+    alias_name: str = "",
+    alias_type: str = "",
 ) -> Dict[str, str]:
     new_row = dict(row)
     new_row["treat_id"] = str(treat_id)
     new_row["treat_match_status"] = status
     new_row["match_notes"] = reason
+    new_row["review_matching"] = "0"
+    new_row["review_matching_notes"] = ""
+    new_row["alias_name"] = alias_name
+    new_row["alias_type"] = alias_type
     counters[status] += 1
     return new_row
 
+
+# ---------------------------------------------------------------------------
+# MATCHING
+# ---------------------------------------------------------------------------
 
 def match_row(
     row: Dict[str, str],
     main_index: Dict[str, Set[int]],
     alias_index: Dict[str, Set[int]],
+    alias_meta: Dict[Tuple[str, int], AliasRecord],
     treat_name_by_id: Dict[int, str],
     counters: Dict[str, int],
 ) -> Dict[str, str]:
-    """
-    Matching priority:
-    1) preserve existing treat_id
-    2) skip decision=0
-    3) choose matching input name
-    4) exact main-name match
-    5) exact alias match
-    6) review if multiple candidate treat_ids
-    7) missing otherwise
-    """
     existing_treat_id = safe_int_str(row.get("treat_id"))
     if existing_treat_id and PRESERVE_EXISTING_TREAT_ID:
-        return preserve_existing_mapping(row, counters)
-
-    decision_val = clean_cell(row.get("decision"))
-    if decision_val in SKIP_DECISION_VALUES:
-        return skip_decision_zero(row, counters)
+        return apply_preserved_existing(row, counters)
 
     selected_value, source_field = choose_input_name(row)
     if not selected_value:
-        return apply_missing(
-            row,
-            counters,
-            "no usable matching input in treatment_name_normalized or treatment_name_raw",
-        )
+        return apply_missing(row, counters, "no usable matching input in treatment_name_normalized or treatment_name_raw")
 
     key = normalize_for_match(selected_value)
     if not key:
-        return apply_missing(
-            row,
-            counters,
-            f'normalized matching key is empty after cleanup ({source_field})',
-        )
+        return apply_missing(row, counters, f"normalized matching key is empty after cleanup ({source_field})")
 
-    # 1) Main-name match
+    # 1) exact main-name match
     main_candidates = main_index.get(key, set())
     if len(main_candidates) == 1:
         treat_id = next(iter(main_candidates))
@@ -504,41 +467,49 @@ def match_row(
             row,
             counters,
             treat_id=treat_id,
-            status="matched_exact",
+            status=STATUS_MATCHED_EXACT,
             reason=f'exact main-name match via {source_field}: "{selected_value}" -> treat_id={treat_id} ({main_name})',
         )
     if len(main_candidates) > 1:
-        return apply_review(
-            row,
-            counters,
-            candidate_ids=main_candidates,
-            reason=f'multiple main-name candidates via {source_field} for "{selected_value}"',
-        )
+        return apply_review(row, counters, main_candidates, f'multiple main-name candidates via {source_field} for "{selected_value}"')
 
-    # 2) Alias match
+    # 2) exact existing alias match
     alias_candidates = alias_index.get(key, set())
     if len(alias_candidates) == 1:
         treat_id = next(iter(alias_candidates))
         main_name = treat_name_by_id.get(treat_id, "")
+        meta = alias_meta.get((key, treat_id))
         return apply_match(
             row,
             counters,
             treat_id=treat_id,
-            status="matched_alias",
+            status=STATUS_MATCHED_ALIAS,
             reason=f'exact alias match via {source_field}: "{selected_value}" -> treat_id={treat_id} ({main_name})',
+            alias_name=(meta.alias if meta else selected_value),
+            alias_type=(meta.alias_type if meta else "existing_alias"),
         )
     if len(alias_candidates) > 1:
-        return apply_review(
+        return apply_review(row, counters, alias_candidates, f'multiple alias candidates via {source_field} for "{selected_value}"')
+
+    # 3) manually curated new aliases for this batch
+    manual = MANUAL_NEW_ALIASES.get(key)
+    if manual:
+        treat_id = int(manual["treat_id"])
+        canonical_name = str(manual["canonical_name"])
+        return apply_match(
             row,
             counters,
-            candidate_ids=alias_candidates,
-            reason=f'multiple alias candidates via {source_field} for "{selected_value}"',
+            treat_id=treat_id,
+            status=STATUS_MATCHED_NEW_ALIAS,
+            reason=f'manual new-alias match via {source_field}: "{selected_value}" -> treat_id={treat_id} ({canonical_name})',
+            alias_name=str(manual["alias_name"]),
+            alias_type=str(manual["alias_type"]),
         )
 
     return apply_missing(
         row,
         counters,
-        f'no exact match found via main-name or alias for "{selected_value}" ({source_field})',
+        f'no exact match found via main-name, existing alias, or manual new alias for "{selected_value}" ({source_field})',
     )
 
 
@@ -549,11 +520,11 @@ def match_row(
 def init_counters() -> Dict[str, int]:
     return {
         "total_rows": 0,
-        "matched_exact": 0,
-        "matched_alias": 0,
+        STATUS_MATCHED_EXACT: 0,
+        STATUS_MATCHED_ALIAS: 0,
+        STATUS_MATCHED_NEW_ALIAS: 0,
         "review": 0,
         "missing": 0,
-        "skipped_decision_0": 0,
         "preserved_existing_treat_id": 0,
     }
 
@@ -569,7 +540,7 @@ def print_summary(
     alias_count: int,
     counters: Dict[str, int],
 ) -> None:
-    print("\n=== DRS -> TREAT BATCH MATCH SUMMARY ===")
+    print("\n=== DRS -> TREAT BATCH MATCH SUMMARY (003) ===")
     print(f"Input CSV               : {input_csv}")
     print(f"Output CSV              : {output_csv}")
     print(f"Headers before          : {len(headers_before)}")
@@ -580,18 +551,19 @@ def print_summary(
     print(f"Aliases loaded          : {alias_count}")
     print("-" * 60)
     print(f"Total processed rows    : {counters['total_rows']}")
-    print(f"matched_exact           : {counters['matched_exact']}")
-    print(f"matched_alias           : {counters['matched_alias']}")
+    print(f"matched_exact           : {counters[STATUS_MATCHED_EXACT]}")
+    print(f"matched_alias           : {counters[STATUS_MATCHED_ALIAS]}")
+    print(f"matched_new_alias       : {counters[STATUS_MATCHED_NEW_ALIAS]}")
     print(f"review                  : {counters['review']}")
     print(f"missing                 : {counters['missing']}")
-    print(f"skipped_decision_0      : {counters['skipped_decision_0']}")
     print(f"preserved existing id   : {counters['preserved_existing_treat_id']}")
     print("-" * 60)
     print("Status semantics:")
-    print("  matched_exact  = exact match against tbl_treatments_03.behandlung")
-    print("  matched_alias  = exact match against vw_treatments2aliases_03.alias")
-    print("  review         = multiple plausible treat_id candidates OR preserved manual treat_id")
-    print("  missing        = no exact main-name / alias match")
+    print("  matched_exact      = exact match against tbl_treatments_03.behandlung")
+    print("  matched_alias      = exact match against vw_treatments2aliases_03.alias")
+    print("  matched_new_alias  = exact match against manually curated new aliases for batch 003")
+    print("  review             = multiple plausible candidates OR preserved manual treat_id")
+    print("  missing            = no exact match on any allowed layer")
     print("=== END ===\n")
 
 
@@ -601,43 +573,45 @@ def print_summary(
 
 def main() -> int:
     try:
-        print("=== DRS -> TREAT BATCH MATCH ===")
+        print("=== DRS -> TREAT BATCH MATCH (003) ===")
         print(f"ENV      : {ENV_PATH}")
         print(f"INPUT    : {INPUT_CSV}")
         print(f"OUTPUT   : {OUTPUT_CSV}")
+        print(f"IGNORE_DECISION_FIELD: {IGNORE_DECISION_FIELD}")
 
         load_env(ENV_PATH)
-
         headers_before, rows = read_csv_rows(INPUT_CSV)
-        headers_after = ensure_match_notes_column(headers_before)
+        headers_after = ensure_output_headers(headers_before)
 
         with get_db_connection() as conn:
             treatments = load_treatments(conn)
             aliases = load_aliases(conn)
 
         main_index, treat_name_by_id = build_main_name_index(treatments)
-        alias_index = build_alias_index(aliases)
+        alias_index, alias_meta = build_alias_index(aliases)
 
         counters = init_counters()
         matched_rows: List[Dict[str, str]] = []
 
         for row in rows:
             counters["total_rows"] += 1
-
             working_row = dict(row)
-
-            # Ensure output keys exist
-            if "match_notes" not in working_row:
-                working_row["match_notes"] = ""
-            if "treat_match_status" not in working_row:
-                working_row["treat_match_status"] = ""
-            if "treat_id" not in working_row:
-                working_row["treat_id"] = ""
+            for key in [
+                "match_notes",
+                "treat_match_status",
+                "treat_id",
+                "review_matching",
+                "review_matching_notes",
+                "alias_name",
+                "alias_type",
+            ]:
+                working_row.setdefault(key, "")
 
             result_row = match_row(
                 row=working_row,
                 main_index=main_index,
                 alias_index=alias_index,
+                alias_meta=alias_meta,
                 treat_name_by_id=treat_name_by_id,
                 counters=counters,
             )
@@ -656,13 +630,11 @@ def main() -> int:
             alias_count=len(aliases),
             counters=counters,
         )
-
         return 0
 
     except KeyboardInterrupt:
         print("\nAborted by user.")
         return 130
-
     except Exception as exc:
         print("\nERROR:")
         print(str(exc))

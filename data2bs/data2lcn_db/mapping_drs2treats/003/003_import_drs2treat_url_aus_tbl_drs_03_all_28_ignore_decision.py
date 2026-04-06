@@ -35,8 +35,8 @@ import pymysql
 # CONFIG
 # ---------------------------------------------------------------------------
 
-INPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\002_mapping_drs2treat_strasser_matched.csv"
-PREVIEW_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\002_mapping_drs2treat_strasser_import_preview.csv"
+INPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\003_mapping_drs2treat_url_aus_tbl_drs_03.csv"
+PREVIEW_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\003_mapping_drs2treat_url_aus_tbl_drs_03_import_preview.csv"
 ENV_PATH = r"/data2lcn_db/.env"
 
 TARGET_TABLE = "tbl_cpl_drs2treatments_03"
@@ -46,7 +46,7 @@ TBL_TREATMENTS = "tbl_treatments_03"
 CSV_ENCODING = "utf-8-sig"
 CSV_DELIMITER = ","
 
-ALLOWED_MATCH_STATUSES = {"matched_exact", "matched_alias"}
+ALLOWED_MATCH_STATUSES = {"matched_exact", "matched_alias", "matched_new_alias"}
 SKIP_DECISION_VALUES = {"0"}
 
 
@@ -71,10 +71,8 @@ def safe_int(value: Optional[str]) -> Optional[int]:
 
 
 def is_truthy_nonzero_decision(value: Optional[str]) -> bool:
-    v = clean_cell(value)
-    if not v:
-        return True
-    return v not in SKIP_DECISION_VALUES
+    # Batch 003 override: decision is intentionally ignored for import gating.
+    return True
 
 
 def load_env(env_path: str) -> None:
