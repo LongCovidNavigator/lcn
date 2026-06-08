@@ -59,7 +59,7 @@ $user = getenv('LCN_DB_USERNAME') ?: (getenv('DB_USERNAME') ?: 'root');
 $pass = getenv('LCN_DB_PASSWORD') ?: (getenv('DB_PASSWORD') ?: '');
 
 // 3) Tabelle (du nutzt aktuell TABLE_NAME="lcn_raw_wiki" im Import)
-$table = 'lcn_raw_wiki';
+$table = 'tbl_treatments_03';
 
 // 4) DB connect
 $dsn = "mysql:host=$host;port=$port;dbname=$dbName;charset=utf8mb4";
@@ -106,6 +106,12 @@ if (!$dataCols) {
 
 // Select bauen mit Backticks (wegen Sonderzeichen in JSON-Keys)
 $selectList = implode(", ", array_map(fn($c) => "`" . str_replace("`","``",$c) . "`", $dataCols));
+
+// Falls die Tabelle eine Spalte "behandlung" hat, zusätzlich als "Behandlung" ausgeben,
+// damit bewertung.js weiterhin item.Behandlung findet.
+if (in_array('behandlung', $dataCols, true) && !in_array('Behandlung', $dataCols, true)) {
+    $selectList .= ", `behandlung` AS `Behandlung`";
+}
 
 try {
     $rows = $pdo->query("SELECT $selectList FROM `$table`")->fetchAll();
