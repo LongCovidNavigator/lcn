@@ -1,0 +1,150 @@
+/* ------------------------------
+   Ärztekarte - MVP Testseite
+------------------------------ */
+
+.doctor-map-intro {
+    margin-bottom: 16px;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.doctor-map-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px 0;
+    flex-wrap: wrap;
+}
+
+.doctor-location-filter-wrapper,
+.doctor-radius-filter-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.doctor-location-filter-button,
+.doctor-radius-filter-button,
+.doctor-location-apply-button,
+.doctor-radius-apply-button {
+    background-color: #f3f3f3;
+    color: #222;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.doctor-location-filter-button,
+.doctor-radius-filter-button {
+    padding: 8px 12px;
+    min-width: 105px;
+}
+
+.doctor-location-apply-button,
+.doctor-radius-apply-button {
+    padding: 7px 10px;
+}
+
+.doctor-location-filter-button:hover,
+.doctor-radius-filter-button:hover,
+.doctor-location-apply-button:hover,
+.doctor-radius-apply-button:hover {
+    background-color: #e8e8e8;
+}
+
+.doctor-location-filter-menu,
+.doctor-radius-filter-menu {
+    display: none;
+    position: absolute;
+    top: 42px;
+    left: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+    z-index: 1000;
+    padding: 12px;
+}
+
+.doctor-location-filter-menu {
+    min-width: 340px;
+}
+
+.doctor-radius-filter-menu {
+    min-width: 230px;
+}
+
+.doctor-location-filter-menu.show,
+.doctor-radius-filter-menu.show {
+    display: block;
+}
+
+.doctor-location-filter-menu label,
+.doctor-radius-filter-menu label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.doctor-location-row,
+.doctor-radius-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.doctor-location-input {
+    width: 220px;
+    max-width: 100%;
+    padding: 7px 8px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.doctor-radius-input {
+    width: 70px;
+    padding: 7px 8px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.doctor-map-count {
+    font-size: 14px;
+    color: #555;
+}
+
+.doctor-map-status {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: #555;
+}
+
+#doctor-map {
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.doctor-map-toggle-button {
+    background-color: #f3f3f3;
+    color: #222;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 135px;
+}
+
+.doctor-map-toggle-button:hover {
+    background-color: #e8e8e8;
+}
+
+.doctor-map-section.is-hidden {
+    display: none;
+}

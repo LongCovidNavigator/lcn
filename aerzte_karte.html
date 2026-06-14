@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Covid Navigator - Ärztekarte</title>
+
+    <link rel="stylesheet" href="styles/general.css">
+    <link rel="stylesheet" href="styles/navigation.css">
+    <link rel="stylesheet" href="styles/footer-style.css">
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link rel="stylesheet" href="styles/aerzte_karte.css">
+</head>
+
+<script>
+    function toggleMobileMenu() {
+        const navList = document.querySelector('.main-nav ul');
+        navList.classList.toggle('show');
+    }
+</script>
+
+<body class="doctor-map-page">
+
+    <div id="header-placeholder"></div>
+
+    <div class="container">
+        <h1>Ärztekarte</h1>
+
+        <p class="doctor-map-intro">
+            Testansicht für die spätere Ärztekarte. Standortsuche per Geoapify, Entfernung als Luftlinie.
+        </p>
+
+        <div class="doctor-map-controls">
+            <div class="doctor-location-filter-wrapper">
+                <button id="doctor-location-filter-button" class="doctor-location-filter-button" type="button">
+                    Standort ▾
+                </button>
+
+                <div id="doctor-location-filter-menu" class="doctor-location-filter-menu">
+                    <label for="doctor-location-input">PLZ, Ort oder Adresse</label>
+
+                    <div class="doctor-location-row">
+                        <input
+                            id="doctor-location-input"
+                            class="doctor-location-input"
+                            type="text"
+                            value="50677 Köln"
+                            placeholder="PLZ, Ort oder Adresse"
+                        >
+
+                        <button id="doctor-location-button" class="doctor-location-apply-button" type="button">
+                            Suchen
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doctor-radius-filter-wrapper">
+                <button id="doctor-radius-filter-button" class="doctor-radius-filter-button" type="button">
+                    Radius ▾
+                </button>
+
+                <div id="doctor-radius-filter-menu" class="doctor-radius-filter-menu">
+                    <label for="doctor-radius-input">Radius in km</label>
+
+                    <div class="doctor-radius-row">
+                        <input
+                            id="doctor-radius-input"
+                            class="doctor-radius-input"
+                            type="number"
+                            min="1"
+                            max="500"
+                            step="1"
+                            value="100"
+                        >
+
+                        <button id="doctor-radius-button" class="doctor-radius-apply-button" type="button">
+                            Anwenden
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <span id="doctor-map-count" class="doctor-map-count">
+                -
+            </span>
+        </div>
+
+        <p id="doctor-map-status" class="doctor-map-status">
+            Entfernung wird als Luftlinie berechnet.
+        </p>
+
+        <div id="doctor-map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="scripts/aerzte_karte.js"></script>
+
+    <div id="footer-placeholder"></div>
+
+    <script>
+        fetch("components/footer.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("footer-placeholder").innerHTML = data;
+            });
+    </script>
+
+    <script>
+        fetch("components/header.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("header-placeholder").innerHTML = data;
+            });
+    </script>
+
+</body>
+</html>

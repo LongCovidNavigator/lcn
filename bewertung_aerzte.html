@@ -12,6 +12,16 @@
     <link rel="stylesheet" href="styles/uebersicht_table.css">
     <link rel="stylesheet" href="styles/bewertung_table.css">
     <link rel="stylesheet" href="styles/footer-style.css">
+	<link rel="stylesheet" href="styles/aerzte_karte.css">
+
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <!-- Karten-CSS -->
+    <link rel="stylesheet" href="styles/aerzte_karte.css">
 </head>
 
 <script>
@@ -28,55 +38,71 @@
     <div class="container">
         <h1>Ärztebewertung</h1>
 
-			<div class="rating-controls">
-				<div class="doctor-sort-wrapper">
-					<button id="doctor-sort-button" class="doctor-sort-button" type="button">
-						Sortieren ▾
-					</button>
+        <div class="rating-controls">
+            <div class="doctor-sort-wrapper">
+                <button id="doctor-sort-button" class="doctor-sort-button" type="button">
+                    Sortieren ▾
+                </button>
 
-					<div id="doctor-sort-menu" class="doctor-sort-menu">
-						<button type="button" data-sort-key="name">Name</button>
-						<button type="button" data-sort-key="positive_ratio">Positive Erfahrungen [%]</button>
-						<button type="button" data-sort-key="negative_ratio">Negative Erfahrungen [%]</button>
-						<button type="button" data-sort-key="total_votes">Anzahl Bewertungen</button>
-					</div>
-				</div>
+                <div id="doctor-sort-menu" class="doctor-sort-menu">
+                    <button type="button" data-sort-key="name">Name</button>
+                    <button type="button" data-sort-key="positive_ratio">Positive Erfahrungen [%]</button>
+                    <button type="button" data-sort-key="negative_ratio">Negative Erfahrungen [%]</button>
+                    <button type="button" data-sort-key="total_votes">Anzahl Bewertungen</button>
+                </div>
+            </div>
 
-				<div class="doctor-filter-wrapper">
-					<button id="doctor-filter-button" class="doctor-filter-button" type="button">
-						Filter ▾
-					</button>
+            <div class="doctor-filter-wrapper">
+                <button id="doctor-filter-button" class="doctor-filter-button" type="button">
+                    Filter ▾
+                </button>
 
-					<div id="doctor-filter-menu" class="doctor-filter-menu">
-						<label for="doctor-min-votes-input">Min. Bewertungen</label>
+                <div id="doctor-filter-menu" class="doctor-filter-menu">
+                    <label for="doctor-min-votes-input">Min. Bewertungen</label>
 
-						<div class="min-votes-row">
-							<input
-								id="doctor-min-votes-input"
-								class="doctor-min-votes-input"
-								type="number"
-								min="0"
-								step="1"
-								value="0"
-							>
-							<span id="doctor-max-votes-display" class="max-votes-display">
-								Höchstwert: -
-							</span>
-						</div>
-					</div>
-				</div>
-			</div>
+                    <div class="min-votes-row">
+                        <input
+                            id="doctor-min-votes-input"
+                            class="doctor-min-votes-input"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value="0"
+                        >
+                        <span id="doctor-max-votes-display" class="max-votes-display">
+                            Höchstwert: -
+                        </span>
+                    </div>
+                </div>
+            </div>
+			
+			<button id="doctor-map-toggle-button" class="doctor-map-toggle-button" type="button">
+				Karte ausblenden
+			</button>
+		
+        </div>
+		
+		
 
-			<table class="bewertung-table">
+
+        <div id="doctor-map-section" class="doctor-map-section">
+            <h2>Ärztekarte</h2>
+            <p class="doctor-map-status">
+                Testkarte. Die Verknüpfung mit Standort, Radius und Tabellenfiltern folgt im nächsten Schritt.
+            </p>
+            <div id="doctor-map"></div>
+        </div>
+
+        <table class="bewertung-table">
             <thead>
                 <tr>
-					<th>#</th>
-					<th>Arzt / Ärztin</th>
-					<th>Bewertung</th>
-					<th>Anzahl Bewertungen</th>
-					<th>Positive Erfahrungen in [%]</th>
-					<th>Negative Erfahrungen in [%]</th>
-				</tr>
+                    <th>#</th>
+                    <th>Arzt / Ärztin</th>
+                    <th>Bewertung</th>
+                    <th>Anzahl Bewertungen</th>
+                    <th>Positive Erfahrungen in [%]</th>
+                    <th>Negative Erfahrungen in [%]</th>
+                </tr>
             </thead>
 
             <tbody>
@@ -85,6 +111,13 @@
         </table>
     </div>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Plain Kartenlogik für Ärztebewertungsseite -->
+    <script src="scripts/bewertung_aerzte_map.js"></script>
+
+    <!-- Bestehende Bewertungstabellenlogik -->
     <script src="scripts/bewertung_aerzte.js"></script>
 
     <div id="footer-placeholder"></div>
