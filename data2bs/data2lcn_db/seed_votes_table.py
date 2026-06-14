@@ -14,7 +14,7 @@ BOOKSTACK_ENV_PATH = r"C:\xampp\htdocs\bookstack\.env"
 
 # Quelle der Behandlungen:
 # Option A (empfohlen): aus deiner Treatments-DB-Tabelle (die du schon nutzt)
-TREATMENTS_SOURCE_TABLE = "lcn_raw_wiki"  # <- die Tabelle, aus der dein treatments_from_db.php aktuell liest
+TREATMENTS_SOURCE_TABLE = "tbl_treatments_03"  # <- die Tabelle, aus der dein treatments_from_db.php aktuell liest
 
 # Option B: alternativ direkt aus dem JSON file (falls du lieber willst)
 # JSON_PATH = r"C:\xampp\htdocs\lcn\assets\data\long_covid_treatments_corrected.json"
@@ -70,7 +70,7 @@ def load_treatments_from_db(cur):
     # Achtung: in der Source-Tabelle kann es Zusatzzeilen geben.
     # Wir nehmen DISTINCT Behandlung und filtern NULL/leer.
     cur.execute(f"""
-        SELECT DISTINCT `Behandlung`
+        SELECT DISTINCT `behandlung`
         FROM `{TREATMENTS_SOURCE_TABLE}`
         WHERE `Behandlung` IS NOT NULL AND TRIM(`Behandlung`) <> ''
         ORDER BY `Behandlung` ASC

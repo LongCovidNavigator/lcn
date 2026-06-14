@@ -4,96 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long Covid Navigator - Bewertung</title>
-	
+
     <link rel="stylesheet" href="styles/general.css">
-	<link rel="stylesheet" href="styles/navigation.css">
-	<link rel="stylesheet" href="styles/filter.css">
-	<link rel="stylesheet" href="styles/lcnprotocol_table.css">
-	<link rel="stylesheet" href="styles/uebersicht_table.css">
-	<link rel="stylesheet" href="styles/bewertung_table.css">
-	<link rel="stylesheet" href="styles/footer-style.css">
-
-
+    <link rel="stylesheet" href="styles/navigation.css">
+    <link rel="stylesheet" href="styles/filter.css">
+    <link rel="stylesheet" href="styles/lcnprotocol_table.css">
+    <link rel="stylesheet" href="styles/uebersicht_table.css">
+    <link rel="stylesheet" href="styles/bewertung_table.css">
+    <link rel="stylesheet" href="styles/footer-style.css">
 </head>
 
 <script>
-	function toggleMobileMenu() {
-	  const navList = document.querySelector('.main-nav ul');
-	  navList.classList.toggle('show');
-	}
+    function toggleMobileMenu() {
+        const navList = document.querySelector('.main-nav ul');
+        navList.classList.toggle('show');
+    }
 </script>
 
-<body>
-    <!-- <header> -->
-        <!-- <img src="assets/images/Logo_v001.png" alt="Long Covid Navigator Logo" onerror="showError('Logo file (Logo_v001.png) ist nicht verfügbar oder nicht zugänglich!')"> -->
-    <!-- </header> -->
-    <!-- <nav> -->
-		<!-- <ul> -->
-			<!-- <li><a href="index.html">Startseite</a></li> -->
-			<!-- <li><a href="lcnprotocol.html">LCN-Protokoll</a></li> -->
-			<!-- <li><a href="uebersicht.html">Übersicht</a></li> -->
-			<!-- <li><a href="bewertung.html">Bewertung</a></li> -->
-		<!-- </ul> -->
-	<!-- </nav> -->
-	
-	<div id="header-placeholder"></div>
+<body class="treatment-rating-page">
 
+    <div id="header-placeholder"></div>
 
     <div class="container">
         <h1>Übersicht</h1>
+
+        <div class="rating-controls">
+			<div class="treatment-sort-wrapper">
+				<button id="treatment-sort-button" class="treatment-sort-button" type="button">
+					Sortieren ▾
+				</button>
+
+				<div id="treatment-sort-menu" class="treatment-sort-menu">
+					<button type="button" data-sort-key="name">Name</button>
+					<button type="button" data-sort-key="positive_ratio">Verbesserung [%]</button>
+					<button type="button" data-sort-key="negative_ratio">Verschlechterung [%]</button>
+					<button type="button" data-sort-key="total_votes">Anzahl Bewertungen</button>
+				</div>
+			</div>
+
+			<div class="treatment-filter-wrapper">
+				<button id="treatment-filter-button" class="treatment-filter-button" type="button">
+					Filter ▾
+				</button>
+
+				<div id="treatment-filter-menu" class="treatment-filter-menu">
+					<label for="treatment-min-votes-input">Min. Bewertungen</label>
+
+					<div class="min-votes-row">
+						<input
+							id="treatment-min-votes-input"
+							class="treatment-min-votes-input"
+							type="number"
+							min="0"
+							step="1"
+							value="0"
+						>
+						<span id="treatment-max-votes-display" class="max-votes-display">
+							Höchstwert: -
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
         <table class="bewertung-table">
-			<thead>
-				<tr>
-					<th>#</th>
-					<th>Behandlungsoption</th>
-					<th>Bewertung</th>
-					<th>Verbesserung in [%]</th>
-					<th>Verschlechterung in [%]</th> <!-- New column -->
-				</tr>
-			</thead>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Behandlungsoption</th>
+                    <th>Bewertung</th>
+                    <th>Anzahl Bewertungen</th>
+                    <th>Verbesserung in [%]</th>
+                    <th>Verschlechterung in [%]</th>
+                </tr>
+            </thead>
 
-
-			<tbody>
-				<!-- Rows populated dynamically -->
-			</tbody>
-		</table>
+            <tbody>
+                <!-- Rows populated dynamically -->
+            </tbody>
+        </table>
     </div>
-	
-	
-	<!-- Chose data source -->
-	<!-- <script> -->
-		<!-- window.LCN_DATENQUELLE = "assets/data/long_covid_treatments_corrected.json"; -->
-	<!-- </script> -->
-	
 
-	<!-- run assesment functions -->
     <script src="scripts/bewertung.js"></script>
-	<script src="scripts/dynamic-columns.js"></script>
+    <script src="scripts/dynamic-columns.js"></script>
 
+    <div id="footer-placeholder"></div>
 
+    <script>
+        fetch("components/footer.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("footer-placeholder").innerHTML = data;
+            });
+    </script>
 
-	<!-- Footer -->
-	<div id="footer-placeholder"></div>
+    <script>
+        fetch("components/header.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("header-placeholder").innerHTML = data;
+            });
+    </script>
 
-	  <script>
-		fetch("components/footer.html")
-		  .then(response => response.text())
-		  .then(data => {
-			document.getElementById("footer-placeholder").innerHTML = data;
-		  });
-	  </script>
-	  
-	  
-	  
-	  <!-- Header -->
-	  <script>
-	  fetch("components/header.html")
-		.then(response => response.text())
-		.then(data => {
-		  document.getElementById("header-placeholder").innerHTML = data;
-		});
-	</script>
-	
-	
 </body>
 </html>

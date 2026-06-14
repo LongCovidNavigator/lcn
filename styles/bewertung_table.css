@@ -1,27 +1,33 @@
+/* ------------------------------
+   Bewertung Table: Basis
+------------------------------ */
 
-/* Specific styles for Bewertung table */
-table.bewertung-table th, table.bewertung-table td {
+table.bewertung-table th,
+table.bewertung-table td {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
 }
 
-
-/* Set consistent width for the vote-buttons column */
+/* Button-Spalte */
 table.bewertung-table th:nth-child(3),
 table.bewertung-table td:nth-child(3) {
-    min-width: 200px; /* Allow width to expand if necessary */
-    text-align: center; /* Center-align the buttons */
-    vertical-align: middle; /* Ensure consistent alignment */
+    min-width: 200px;
+    text-align: center;
+    vertical-align: middle;
 }
 
+/* Anzahl-Bewertungen-Spalte */
+table.bewertung-table th:nth-child(4),
+table.bewertung-table td:nth-child(4) {
+    text-align: center;
+    white-space: nowrap;
+}
 
-/* ------------------------------
-   Specific Styling for BEWERTUNG Table
------------------------------- */
+/* Tabellenkopf */
 table.bewertung-table thead {
     background-color: #40E0D0 !important;
-    color: black !important; /* Black text for contrast */
+    color: black !important;
 }
 
 table.bewertung-table thead th {
@@ -36,21 +42,19 @@ table.bewertung-table th:hover {
 }
 
 
-/* table.bewertung-table th:hover { */
-    /* background-color: #e0e0e0; */
-/* } */
+/* ------------------------------
+   Vote Buttons: Basis
+------------------------------ */
+
+.vote-buttons {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}
 
 .vote-buttons button {
     margin: 0 5px;
-}
-
-
-/* General styles for voting buttons */
-.vote-buttons {
-    display: flex; /* Arrange buttons in a row */
-    gap: 5px; /* Add spacing between buttons */
-    justify-content: center; /* Center align buttons */
-    align-items: center; /* Vertically center buttons */
 }
 
 .vote-button {
@@ -67,24 +71,191 @@ table.bewertung-table th:hover {
     transition: background-color 0.3s ease;
 }
 
-/* Specific styles for each vote type */
-.vote-button[data-type="hilft"] {
-    background-color: #28a745; /* Green for "Hilft" */
-}
-
-.vote-button[data-type="gleich"] {
-    background-color: #ffc107; /* Yellow for "Gleich" */
-}
-
-.vote-button[data-type="verschlechterung"] {
-    background-color: #dc3545; /* Red for "Verschlechterung" */
+.vote-button span {
+    margin-left: 4px;
 }
 
 .vote-button:hover {
-    opacity: 0.9; /* Slight hover effect */
+    opacity: 0.9;
 }
 
-/* Symbol-specific styles */
-.vote-button span {
-    margin-left: 4px; /* Space between symbol and count */
+/* Therapie-Bewertung: klassische Farben */
+.treatment-rating-page .vote-button[data-type="hilft"],
+.vote-button[data-type="hilft"] {
+    background-color: #28a745;
+}
+
+.treatment-rating-page .vote-button[data-type="gleich"],
+.vote-button[data-type="gleich"] {
+    background-color: #ffc107;
+    color: #2f2f2f;
+}
+
+.treatment-rating-page .vote-button[data-type="verschlechterung"],
+.vote-button[data-type="verschlechterung"] {
+    background-color: #dc3545;
+}
+
+/* Ärztebewertung: gedecktere Farben */
+.doctor-rating-page .vote-button[data-type="pro"] {
+    background-color: #6f9f73;
+    color: white;
+    border: 1px solid #5f8b62;
+}
+
+.doctor-rating-page .vote-button[data-type="neutral"] {
+    background-color: #d6b85f;
+    color: #2f2f2f;
+    border: 1px solid #bfa24f;
+}
+
+.doctor-rating-page .vote-button[data-type="contra"] {
+    background-color: #b96b66;
+    color: white;
+    border: 1px solid #a45d58;
+}
+
+.doctor-rating-page .vote-button {
+    opacity: 1;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.doctor-rating-page .vote-button:hover {
+    filter: brightness(0.95);
+}
+
+.doctor-rating-page .vote-button:active {
+    transform: scale(0.98);
+}
+
+
+/* ------------------------------
+   Rating Controls: Sortieren + Filter
+------------------------------ */
+
+.rating-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 15px 0;
+    flex-wrap: wrap;
+}
+
+.doctor-sort-wrapper,
+.treatment-sort-wrapper,
+.doctor-filter-wrapper,
+.treatment-filter-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.doctor-sort-button,
+.treatment-sort-button,
+.doctor-filter-button,
+.treatment-filter-button {
+    background-color: #f3f3f3;
+    color: #222;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 105px;
+}
+
+.doctor-sort-button:hover,
+.treatment-sort-button:hover,
+.doctor-filter-button:hover,
+.treatment-filter-button:hover {
+    background-color: #e8e8e8;
+}
+
+
+/* ------------------------------
+   Dropdown Menüs
+------------------------------ */
+
+.doctor-sort-menu,
+.treatment-sort-menu,
+.doctor-filter-menu,
+.treatment-filter-menu {
+    display: none;
+    position: absolute;
+    top: 42px;
+    left: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.doctor-sort-menu.show,
+.treatment-sort-menu.show,
+.doctor-filter-menu.show,
+.treatment-filter-menu.show {
+    display: block;
+}
+
+/* Sortiermenüs */
+.doctor-sort-menu,
+.treatment-sort-menu {
+    min-width: 240px;
+}
+
+.doctor-sort-menu button,
+.treatment-sort-menu button {
+    display: block;
+    width: 100%;
+    padding: 9px 12px;
+    border: none;
+    background: white;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.doctor-sort-menu button:hover,
+.treatment-sort-menu button:hover {
+    background-color: #f0f0f0;
+}
+
+/* Filtermenüs */
+.doctor-filter-menu,
+.treatment-filter-menu {
+    min-width: 210px;
+    padding: 12px;
+}
+
+.doctor-filter-menu label,
+.treatment-filter-menu label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.min-votes-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.doctor-min-votes-input,
+.treatment-min-votes-input {
+    width: 56px;
+    padding: 7px 8px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.max-votes-display {
+    font-size: 13px;
+    color: #555;
+    white-space: nowrap;
 }
