@@ -184,8 +184,8 @@
 }
 
 #doctor-map {
-    width: 80%;
-    height: 460px;
+    width: 100%;
+    height: 345px;
     border: 1px solid #ddd;
     border-radius: 8px;
     overflow: hidden;
@@ -946,4 +946,1324 @@
     font-size: 0.62rem;
     font-weight: 600;
     color: #3f5575;
+}
+
+/* ------------------------------
+   Bewertungsfilter Ärztekarte
+------------------------------ */
+
+.doctor-filter-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.doctor-filter-button {
+    background-color: #f3f3f3;
+    color: #222;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 105px;
+}
+
+.doctor-filter-button:hover {
+    background-color: #e8e8e8;
+}
+
+.doctor-filter-menu {
+    display: none !important;
+    position: absolute;
+    top: 42px;
+    left: 0;
+    min-width: 290px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+    z-index: 2000;
+    padding: 12px;
+}
+
+.doctor-filter-menu.show {
+    display: block !important;
+}
+
+.doctor-filter-menu label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.doctor-filter-input {
+    width: 90px;
+    padding: 7px 8px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.doctor-filter-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.doctor-filter-actions button {
+    padding: 7px 10px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    background: #f3f3f3;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.doctor-filter-actions button:hover {
+    background: #e8e8e8;
+}
+
+.doctor-filter-checkbox-group {
+    margin: 2px 0 12px 0;
+    padding-top: 4px;
+    border-top: 1px solid #eee;
+}
+
+.doctor-filter-checkbox-row {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0 !important;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.doctor-filter-checkbox-row input {
+    margin: 0;
+}
+
+.doctor-filter-city-group {
+    margin: 2px 0 12px 0;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.doctor-city-input {
+    width: 180px;
+}
+
+.doctor-filter-hint {
+    margin-top: -4px;
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+/* ------------------------------
+   Neue Navigation / Filtermaske
+   Layout: Vorschlag 5 kompakt
+   Top: Sortierung / Versicherung / Kontakt
+   Bottom: Bewertung / Ort-Radius
+------------------------------ */
+
+.doctor-navigation-panel {
+    margin: 14px 0 18px 0;
+    border: 1px solid #d8e0ea;
+    border-radius: 12px;
+    overflow: visible;
+    background: #ffffff;
+    box-shadow: 0 3px 14px rgba(0, 32, 80, 0.10);
+}
+
+.doctor-navigation-header {
+    width: 100%;
+    border: none;
+    background: #003878;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 18px;
+    font-size: 0.98rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.doctor-navigation-header-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.doctor-navigation-header-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.doctor-navigation-chevron {
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: transform 0.18s ease;
+}
+
+.doctor-navigation-header.is-collapsed .doctor-navigation-chevron {
+    transform: rotate(180deg);
+}
+
+.doctor-navigation-content {
+    padding: 14px 16px 12px 16px;
+}
+
+.doctor-navigation-content.is-collapsed {
+    display: none;
+}
+
+/* Vorschlag 5: oben 3 Karten, unten 2 Karten */
+.doctor-navigation-grid {
+    display: grid;
+    grid-template-columns: 0.78fr 0.78fr 0.78fr;
+    grid-template-areas:
+        "sort insurance contact"
+        "rating location location";
+    gap: 12px;
+    align-items: stretch;
+}
+
+/* Karten statt langer Spalten */
+.doctor-nav-section {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid #d8e0ea;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 32, 80, 0.04);
+}
+
+.doctor-nav-section:first-child,
+.doctor-nav-section-sort,
+.doctor-nav-section-sort + .doctor-nav-section {
+    border-left: 1px solid #d8e0ea;
+    border-right: 1px solid #d8e0ea;
+}
+
+/* Positionierung trotz HTML-Reihenfolge */
+.doctor-nav-section-sort {
+    grid-area: sort;
+}
+
+.doctor-nav-section-rating {
+    grid-area: rating;
+}
+
+.doctor-navigation-grid > .doctor-nav-section:nth-child(3) {
+    grid-area: insurance;
+}
+
+.doctor-navigation-grid > .doctor-nav-section:nth-child(4) {
+    grid-area: contact;
+}
+
+.doctor-nav-section-location {
+    grid-area: location;
+}
+
+/* Überschriften */
+.doctor-nav-heading {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0 0 10px 0;
+    color: #003878;
+    font-size: 0.86rem;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.doctor-nav-info {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border: 1px solid #60718e;
+    border-radius: 50%;
+    color: #60718e;
+    font-size: 0.62rem;
+    font-weight: 800;
+    line-height: 1;
+    cursor: help;
+    outline: none;
+}
+
+.doctor-nav-info::before,
+.doctor-nav-info::after {
+    position: absolute;
+    left: 50%;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+}
+
+.doctor-nav-info::before {
+    content: attr(data-tooltip);
+    bottom: calc(100% + 9px);
+    width: min(280px, calc(100vw - 32px));
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: #07152f;
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 32, 80, 0.22);
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+    z-index: 5000;
+    transform: translate(-50%, 4px);
+}
+
+.doctor-nav-info::after {
+    content: "";
+    bottom: calc(100% + 3px);
+    border-width: 6px 6px 0 6px;
+    border-style: solid;
+    border-color: #07152f transparent transparent transparent;
+    z-index: 5001;
+    transform: translate(-50%, 4px);
+}
+
+.doctor-nav-info:hover,
+.doctor-nav-info:focus-visible {
+    border-color: #003878;
+    color: #003878;
+    background: #f2f5f9;
+}
+
+.doctor-nav-info:hover::before,
+.doctor-nav-info:hover::after,
+.doctor-nav-info:focus-visible::before,
+.doctor-nav-info:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+.doctor-nav-label {
+    display: block;
+    margin: 0 0 5px 0;
+    color: #344766;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+/* Inputs */
+.doctor-nav-select,
+.doctor-nav-text-input,
+.doctor-nav-number {
+    box-sizing: border-box;
+    border: 1px solid #c6d0df;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #07152f;
+    font-size: 0.8rem;
+}
+
+.doctor-nav-select,
+.doctor-nav-text-input {
+    width: 100%;
+    padding: 7px 9px;
+}
+
+.doctor-nav-select {
+    cursor: pointer;
+}
+
+.doctor-nav-number {
+    width: 56px;
+    padding: 7px 6px;
+    text-align: center;
+}
+
+.doctor-nav-text-input.is-disabled,
+.doctor-nav-number.is-disabled,
+.doctor-nav-select.is-disabled,
+.doctor-radius-input.is-disabled {
+    opacity: 0.45;
+    background: #f4f6f9;
+}
+
+/* Checkboxen */
+.doctor-nav-checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0 0 9px 0;
+    color: #07152f;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.22;
+}
+
+.doctor-nav-checkbox-row:last-child {
+    margin-bottom: 0;
+}
+
+.doctor-nav-checkbox-row input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: #003878;
+    flex: 0 0 auto;
+    transform: translateY(1px);
+}
+
+/* Top-Karten etwas niedriger halten */
+.doctor-nav-section-sort,
+.doctor-navigation-grid > .doctor-nav-section:nth-child(3),
+.doctor-navigation-grid > .doctor-nav-section:nth-child(4) {
+    min-height: 140px;
+}
+
+/* Bewertung: kompakt und effizient */
+.doctor-nav-section-rating {
+    min-height: 190px;
+}
+
+.doctor-rating-control {
+    margin-bottom: 14px;
+}
+
+.doctor-rating-control:last-child {
+    margin-bottom: 0;
+}
+
+.doctor-nav-section-rating .doctor-nav-label {
+    font-size: 0.76rem;
+}
+
+.doctor-range-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) 56px 14px;
+    gap: 8px;
+    align-items: center;
+}
+
+.doctor-range-wrap {
+    min-width: 0;
+}
+
+.doctor-nav-range {
+    width: 100%;
+    height: 15px;
+    accent-color: #003878;
+}
+
+.doctor-range-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0;
+    color: #60718e;
+    font-size: 0.68rem;
+}
+
+.doctor-percent-label {
+    position: static;
+    display: inline-block;
+    color: #003878;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+/* Ort / Radius & Standort: zweite Checkbox links, Radius rechts */
+.doctor-nav-section-location {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    column-gap: 18px;
+    row-gap: 6px;
+    align-content: start;
+    min-height: 190px;
+}
+
+.doctor-nav-section-location .doctor-nav-heading {
+    grid-column: 1 / -1;
+    margin-bottom: 6px;
+}
+
+.doctor-location-mode-switch {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 6px;
+    border: 1px solid #c6d0df;
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.doctor-location-mode-button {
+    border: none;
+    background: #ffffff;
+    color: #445575;
+    padding: 7px 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.doctor-location-mode-button + .doctor-location-mode-button {
+    border-left: 1px solid #c6d0df;
+}
+
+.doctor-location-mode-button.is-active {
+    background: #ffffff;
+    color: #003878;
+    box-shadow: inset 0 0 0 2px #003878;
+}
+
+.doctor-nav-section-location .doctor-nav-label {
+    margin-top: 1px;
+    margin-bottom: 3px;
+    font-size: 0.74rem;
+}
+
+.doctor-nav-section-location .doctor-nav-text-input {
+    padding: 7px 9px;
+    margin-bottom: 1px;
+    font-size: 0.78rem;
+}
+
+.doctor-nav-section-location .doctor-nav-checkbox-row {
+    gap: 7px;
+    margin-bottom: 4px;
+    font-size: 0.76rem;
+    line-height: 1.15;
+}
+
+.doctor-nav-section-location .doctor-nav-info {
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    font-size: 0.6rem;
+}
+
+/* Stadt links */
+.doctor-nav-section-location label[for="doctor-city-input"] {
+    grid-column: 1;
+    grid-row: 3;
+}
+
+#doctor-city-input {
+    grid-column: 1;
+    grid-row: 4;
+}
+
+/* Standort rechts */
+.doctor-nav-section-location label[for="doctor-location-input"] {
+    grid-column: 2;
+    grid-row: 3;
+}
+
+#doctor-location-input {
+    grid-column: 2;
+    grid-row: 4;
+}
+
+/* Beide Checkboxen links */
+.doctor-nav-section-location label[for="doctor-radius-enabled-input"] {
+    grid-column: 1;
+    grid-row: 5;
+    margin-top: 5px;
+}
+
+.doctor-nav-section-location label[for="doctor-include-no-coords-input"] {
+    grid-column: 1;
+    grid-row: 6;
+    margin-top: 0;
+}
+
+/* Radius rechts */
+.doctor-nav-section-location label[for="doctor-radius-input"] {
+    grid-column: 2;
+    grid-row: 5;
+    margin-top: 5px;
+}
+
+#doctor-radius-input {
+    grid-column: 2;
+    grid-row: 6;
+    width: 100%;
+    padding: 7px 9px;
+    text-align: left;
+    font-size: 0.78rem;
+}
+
+/* Buttons */
+.doctor-navigation-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #d8e0ea;
+}
+
+.doctor-navigation-apply-button,
+.doctor-navigation-reset-button {
+    min-width: 155px;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 0.86rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.doctor-navigation-apply-button {
+    border: 1px solid #003878;
+    background: #003878;
+    color: #ffffff;
+}
+
+.doctor-navigation-apply-button:hover {
+    background: #002e63;
+}
+
+.doctor-navigation-reset-button {
+    border: 1px solid #8091ad;
+    background: #ffffff;
+    color: #003878;
+}
+
+.doctor-navigation-reset-button:hover {
+    background: #f2f5f9;
+}
+
+.doctor-map-secondary-controls {
+    justify-content: flex-start;
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
+
+/* Splitscreen / schmaler Desktop:
+   weiterhin Vorschlag 5, nicht gestapelte Monsterblöcke */
+@media (min-width: 761px) and (max-width: 1100px) {
+    .doctor-navigation-content {
+        padding: 12px 14px 12px 14px;
+    }
+
+    .doctor-navigation-grid {
+        grid-template-columns: 1fr 1fr 1fr !important;
+        grid-template-areas:
+            "sort insurance contact"
+            "rating location location" !important;
+        gap: 10px !important;
+        align-items: stretch;
+    }
+
+    .doctor-nav-section {
+        padding: 10px 12px !important;
+    }
+
+    .doctor-nav-heading {
+        margin-bottom: 8px;
+        font-size: 0.78rem;
+    }
+
+	.doctor-nav-info {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 16px;
+		height: 16px;
+		min-width: 16px;
+		border: 1px solid #60718e;
+		border-radius: 50%;
+		color: #60718e;
+		font-size: 0.62rem;
+		font-weight: 800;
+		line-height: 1;
+		cursor: help;
+		outline: none;
+	}
+
+	.doctor-nav-info::before,
+	.doctor-nav-info::after {
+		position: absolute;
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+		transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+	}
+
+	.doctor-nav-info::before {
+		content: attr(data-tooltip);
+		left: 0;
+		bottom: calc(100% + 9px);
+		width: min(300px, calc(100vw - 40px));
+		padding: 9px 11px;
+		border: 1px solid #c6d0df;
+		border-radius: 8px;
+		background: #ffffff;
+		color: #07152f;
+		box-shadow: 0 8px 20px rgba(0, 32, 80, 0.18);
+		font-size: 0.74rem;
+		font-weight: 600;
+		line-height: 1.35;
+		text-align: left;
+		white-space: normal;
+		z-index: 5000;
+		transform: translateY(4px);
+	}
+
+	.doctor-nav-info::after {
+		content: "";
+		left: 4px;
+		bottom: calc(100% + 3px);
+		border-width: 6px 6px 0 6px;
+		border-style: solid;
+		border-color: #ffffff transparent transparent transparent;
+		filter: drop-shadow(0 2px 1px rgba(0, 32, 80, 0.12));
+		z-index: 5001;
+		transform: translateY(4px);
+	}
+
+	.doctor-nav-info:hover,
+	.doctor-nav-info:focus-visible {
+		border-color: #003878;
+		color: #003878;
+		background: #f2f5f9;
+	}
+
+	.doctor-nav-info:hover::before,
+	.doctor-nav-info:hover::after,
+	.doctor-nav-info:focus-visible::before,
+	.doctor-nav-info:focus-visible::after {
+		opacity: 1;
+		visibility: visible;
+		transform: translateY(0);
+	}
+
+	/* Rechte Navigationsbereiche: Tooltip nach links öffnen,
+	   damit er im Splitscreen nicht aus dem Fenster läuft */
+	.doctor-navigation-grid > .doctor-nav-section:nth-child(4) .doctor-nav-info::before,
+	.doctor-nav-section-location .doctor-nav-heading .doctor-nav-info::before {
+		left: auto;
+		right: 0;
+	}
+
+	.doctor-navigation-grid > .doctor-nav-section:nth-child(4) .doctor-nav-info::after,
+	.doctor-nav-section-location .doctor-nav-heading .doctor-nav-info::after {
+		left: auto;
+		right: 4px;
+	}
+
+	/* Tooltip bei der langen Checkbox in der Ortskarte kompakter nach oben/rechts öffnen */
+	.doctor-nav-checkbox-row .doctor-nav-info::before {
+		left: auto;
+		right: 0;
+		width: min(280px, calc(100vw - 40px));
+	}
+
+	.doctor-nav-checkbox-row .doctor-nav-info::after {
+		left: auto;
+		right: 4px;
+	}
+
+    .doctor-nav-label {
+        font-size: 0.68rem;
+    }
+
+    .doctor-nav-select,
+    .doctor-nav-text-input,
+    .doctor-nav-number {
+        font-size: 0.72rem;
+    }
+
+    .doctor-nav-checkbox-row {
+        font-size: 0.72rem;
+        gap: 6px;
+        margin-bottom: 7px;
+    }
+
+    .doctor-nav-checkbox-row input {
+        width: 14px;
+        height: 14px;
+    }
+
+    .doctor-nav-section-sort,
+    .doctor-navigation-grid > .doctor-nav-section:nth-child(3),
+    .doctor-navigation-grid > .doctor-nav-section:nth-child(4) {
+        min-height: 122px;
+    }
+
+    .doctor-nav-section-rating {
+        min-height: 170px;
+    }
+
+    .doctor-range-row {
+        grid-template-columns: minmax(90px, 1fr) 50px 14px !important;
+        gap: 6px;
+    }
+
+    .doctor-nav-number {
+        width: 50px !important;
+        padding: 6px 5px;
+    }
+
+    .doctor-range-scale {
+        font-size: 0.62rem;
+    }
+
+    .doctor-percent-label {
+        font-size: 0.72rem;
+    }
+
+    .doctor-nav-section-location {
+        grid-template-columns: 1.1fr 0.9fr;
+        column-gap: 14px;
+        row-gap: 5px;
+        min-height: 170px;
+    }
+
+    .doctor-location-mode-button {
+        padding: 6px 7px;
+        font-size: 0.72rem;
+    }
+
+    .doctor-nav-section-location .doctor-nav-label,
+    .doctor-nav-section-location .doctor-nav-checkbox-row,
+    .doctor-nav-section-location .doctor-nav-text-input,
+    #doctor-radius-input {
+        font-size: 0.7rem;
+    }
+
+    .doctor-navigation-actions {
+        margin-top: 12px;
+        padding-top: 12px;
+    }
+
+    .doctor-navigation-apply-button,
+    .doctor-navigation-reset-button {
+        min-width: 145px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+    }
+}
+
+/* Mobil */
+@media (max-width: 760px) {
+    .doctor-navigation-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "sort"
+            "insurance"
+            "contact"
+            "rating"
+            "location";
+    }
+
+    .doctor-nav-section {
+        padding: 12px 14px;
+    }
+
+    .doctor-nav-section-location {
+        grid-template-columns: 1fr;
+    }
+
+    .doctor-nav-section-location .doctor-nav-heading,
+    .doctor-location-mode-switch,
+    .doctor-nav-section-location label[for="doctor-city-input"],
+    #doctor-city-input,
+    .doctor-nav-section-location label[for="doctor-location-input"],
+    #doctor-location-input,
+    .doctor-nav-section-location label[for="doctor-radius-enabled-input"],
+    .doctor-nav-section-location label[for="doctor-include-no-coords-input"],
+    .doctor-nav-section-location label[for="doctor-radius-input"],
+    #doctor-radius-input {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .doctor-range-row {
+        grid-template-columns: minmax(120px, 1fr) 58px 18px;
+    }
+
+    .doctor-nav-number {
+        width: 58px;
+    }
+
+    .doctor-navigation-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .doctor-navigation-apply-button,
+    .doctor-navigation-reset-button {
+        width: 100%;
+    }
+}
+/* ------------------------------
+   Feinschliff Bewertungskarte:
+   Überschrift bleibt oben, Reglerblock wird vertikal zentriert
+------------------------------ */
+
+.doctor-nav-section-rating {
+    display: flex;
+    flex-direction: column;
+}
+
+.doctor-nav-section-rating .doctor-nav-heading {
+    flex: 0 0 auto;
+}
+
+.doctor-nav-section-rating .doctor-rating-control:first-of-type {
+    margin-top: auto;
+}
+
+.doctor-nav-section-rating .doctor-rating-control:last-of-type {
+    margin-bottom: auto;
+}
+
+@media (max-width: 760px) {
+    .doctor-nav-info::before {
+        width: min(240px, calc(100vw - 28px));
+        font-size: 0.72rem;
+    }
+}
+
+/* ------------------------------
+   Kartenbalken wie Navigation,
+   aber ohne weiße Panel-Box um die Karte
+------------------------------ */
+
+.doctor-map-heading {
+    display: none;
+}
+
+.doctor-map-panel {
+    margin: 54px 0 0 0;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+}
+
+.doctor-map-header {
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    background: #003878;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 18px;
+    font-size: 0.98rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.doctor-map-header:hover {
+    background: #002e63;
+}
+
+.doctor-map-header-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.doctor-map-header-icon {
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.doctor-map-chevron {
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: transform 0.18s ease;
+}
+
+.doctor-map-header.is-collapsed .doctor-map-chevron {
+    transform: rotate(180deg);
+}
+
+.doctor-map-content {
+    padding: 12px 0 0 0;
+    background: transparent;
+}
+
+.doctor-map-content.is-collapsed {
+    display: none;
+}
+
+.doctor-map-panel .doctor-map-status {
+    margin: 10px 0 0 0;
+}
+
+.doctor-map-panel .doctor-map-section {
+    margin-top: 0;
+}
+
+.doctor-results-view-row {
+    margin-top: 28px;
+    margin-bottom: 18px;
+}
+
+/* ------------------------------
+   Ergebniszahl in Navigation links
+   + Hinweis bei geänderten Filtern
+------------------------------ */
+
+.doctor-navigation-actions {
+    justify-content: flex-start;
+}
+
+.doctor-navigation-actions .doctor-map-count {
+    margin-right: auto;
+}
+
+/* ------------------------------
+   Ergebnisbereich als Banner:
+   Ärzt:innen + Umschalter Kacheln/Tabelle
+------------------------------ */
+
+.doctor-results-panel {
+    margin: 44px 0 0 0;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+}
+
+.doctor-results-header {
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    background: #003878;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 18px;
+    box-sizing: border-box;
+}
+
+.doctor-results-header-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.98rem;
+    font-weight: 800;
+}
+
+.doctor-results-header-icon {
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.doctor-view-switch-in-header {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    border-radius: 6px;
+}
+
+.doctor-view-switch-in-header .doctor-view-switch-button {
+    min-width: 82px;
+    padding: 6px 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.65);
+    background: transparent;
+    color: #ffffff;
+    font-size: 0.82rem;
+}
+
+.doctor-view-switch-in-header .doctor-view-switch-button:last-child {
+    border-right: none;
+}
+
+.doctor-view-switch-in-header .doctor-view-switch-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.doctor-view-switch-in-header .doctor-view-switch-button.is-active {
+    background: #ffffff;
+    color: #003878;
+}
+
+.doctor-view-switch-in-header .doctor-view-switch-button.is-active:hover {
+    background: #f2f5f9;
+    color: #003878;
+}
+
+.doctor-card-results-section {
+    margin-top: 12px;
+}
+
+.doctor-map-results-section {
+    margin-top: 12px;
+}
+
+.doctor-card-results-section h2,
+.doctor-map-results-section h2 {
+    display: none;
+}
+
+@media (max-width: 760px) {
+    .doctor-results-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .doctor-view-switch-in-header {
+        width: 100%;
+    }
+
+    .doctor-view-switch-in-header .doctor-view-switch-button {
+        flex: 1;
+        width: 50%;
+    }
+}
+
+
+/* ------------------------------
+   Ergebnis-Tabelle V2: kompakte Vergleichsansicht
+   Variante 10: Rang | Ärzt:in | Standort | Erfahrung | Versorgung | Kontakt
+   Splitscreen-optimiert
+------------------------------ */
+
+.doctor-map-results-section {
+    overflow-x: visible;
+}
+
+.doctor-map-results-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+}
+
+.doctor-map-results-table th,
+.doctor-map-results-table td {
+    vertical-align: middle;
+    padding: 6px 7px;
+    font-size: 0.74rem;
+    line-height: 1.15;
+}
+
+.doctor-map-results-table th {
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.doctor-map-results-table td {
+    font-weight: 400;
+}
+
+.doctor-map-results-table th:nth-child(1),
+.doctor-map-results-table td:nth-child(1) {
+    width: 4%;
+    text-align: center;
+    white-space: nowrap;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.doctor-map-results-table th:nth-child(2),
+.doctor-map-results-table td:nth-child(2) {
+    width: 29%;
+}
+
+.doctor-map-results-table th:nth-child(3),
+.doctor-map-results-table td:nth-child(3) {
+    width: 19%;
+}
+
+.doctor-map-results-table th:nth-child(4),
+.doctor-map-results-table td:nth-child(4) {
+    width: 22%;
+}
+
+.doctor-map-results-table th:nth-child(5),
+.doctor-map-results-table td:nth-child(5) {
+    width: 13%;
+}
+
+.doctor-map-results-table th:nth-child(6),
+.doctor-map-results-table td:nth-child(6) {
+    width: 12%;
+}
+
+.doctor-table-rank {
+    color: #003878;
+    font-weight: 500;
+    font-size: 0.7rem;
+}
+
+.doctor-table-name {
+    color: #07152f;
+    font-weight: 500;
+    font-size: 0.74rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.doctor-table-stacked-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.doctor-table-main-value {
+    color: #07152f;
+    font-weight: 600;
+    font-size: 0.73rem;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.doctor-table-main-value-muted {
+    font-weight: 400;
+    color: #66758f;
+}
+
+.doctor-table-sub-value,
+.doctor-table-muted {
+    color: #66758f;
+    font-size: 0.66rem;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.doctor-table-badge-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.doctor-table-badge-row-compact {
+    flex-wrap: wrap;
+}
+
+.doctor-table-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 17px;
+    padding: 1px 5px;
+    border: 1px solid #d8e0ea;
+    border-radius: 999px;
+    background: #eef3f8;
+    color: #38547a;
+    font-size: 0.63rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.doctor-table-badge-positive {
+    border-color: #bfe7d1;
+    background: #f1fbf6;
+    color: #008c54;
+}
+
+.doctor-table-badge-negative {
+    border-color: #f3c3c7;
+    background: #fff4f5;
+    color: #c9333e;
+}
+
+.doctor-table-badge-neutral {
+    border-color: #c8dcf2;
+    background: #f3f8ff;
+    color: #005fa8;
+}
+
+.doctor-map-results-table a.doctor-table-badge-link {
+    color: #006b60;
+    text-decoration: none;
+}
+
+.doctor-map-results-table a.doctor-table-badge-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 760px) {
+    .doctor-map-results-section {
+        overflow-x: auto;
+    }
+
+    .doctor-map-results-table {
+        min-width: 620px;
+    }
+
+    .doctor-map-results-table th,
+    .doctor-map-results-table td {
+        padding: 6px 6px;
+        font-size: 0.7rem;
+    }
+
+    .doctor-map-results-table th {
+        font-size: 0.68rem;
+    }
+
+    .doctor-table-name,
+    .doctor-table-main-value {
+        font-size: 0.7rem;
+    }
+
+    .doctor-table-sub-value,
+    .doctor-table-muted {
+        font-size: 0.62rem;
+    }
+
+    .doctor-table-badge {
+        min-height: 16px;
+        padding: 1px 4px;
+        font-size: 0.6rem;
+    }
+}
+
+.doctor-table-header-note {
+    font-size: 0.68rem;
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+.doctor-table-experience-grid {
+    display: grid;
+    grid-template-columns: 42px 42px 42px auto;
+    align-items: center;
+    column-gap: 4px;
+    white-space: nowrap;
+}
+
+.doctor-table-experience-value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 17px;
+    padding: 1px 4px;
+    border: 1px solid #d8e0ea;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.doctor-table-vote-count {
+    color: #66758f;
+    font-size: 0.64rem;
+    font-weight: 400;
+    line-height: 1;
 }

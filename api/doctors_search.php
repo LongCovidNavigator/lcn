@@ -41,9 +41,66 @@ function getFloatParam($name, $min, $max) {
     return (float)$value;
 }
 
+function getOptionalFloatParam($name, $default, $min, $max) {
+    if (!isset($_GET[$name]) || $_GET[$name] === '') {
+        return (float)$default;
+    }
+
+    $value = filter_var($_GET[$name], FILTER_VALIDATE_FLOAT);
+
+    if ($value === false) {
+        throw new InvalidArgumentException("Parameter ist keine gültige Zahl: " . $name);
+    }
+
+    if ($value < $min || $value > $max) {
+        throw new InvalidArgumentException("Parameter außerhalb des erlaubten Bereichs: " . $name);
+    }
+
+    return (float)$value;
+}
+
+function getOptionalBoolParam($name) {
+    if (!isset($_GET[$name]) || $_GET[$name] === '') {
+        return false;
+    }
+
+    return in_array((string)$_GET[$name], ['1', 'true', 'yes', 'on'], true);
+}
+
+function getOptionalStringParam($name, $maxLength = 80) {
+    if (!isset($_GET[$name])) {
+        return '';
+    }
+
+    $value = trim((string)$_GET[$name]);
+
+    if ($value === '') {
+        return '';
+    }
+
+    if (mb_strlen($value, 'UTF-8') > $maxLength) {
+        throw new InvalidArgumentException("Parameter ist zu lang: " . $name);
+    }
+
+    return $value;
+}
+
 try {
     $lat = getFloatParam('lat', -90, 90);
     $lng = getFloatParam('lng', -180, 180);
+
+    $minPositiveRatio = getOptionalFloatParam('minPositiveRatio', 0, 0, 100);
+    $maxNegativeRatio = getOptionalFloatParam('maxNegativeRatio', 100, 0, 100);
+
+    $acceptsGkv = getOptionalBoolParam('acceptsGkv');
+    $acceptsPkv = getOptionalBoolParam('acceptsPkv');
+    $includeNoCoords = getOptionalBoolParam('includeNoCoords');
+
+    $hasWebsite = getOptionalBoolParam('hasWebsite');
+    $hasEmail = getOptionalBoolParam('hasEmail');
+    $hasPhone = getOptionalBoolParam('hasPhone');
+
+    $city = getOptionalStringParam('city', 80);
 
     $radiusRaw = $_GET['radiusKm'] ?? '100';
     $radiusEnabled = true;
@@ -59,6 +116,10 @@ try {
         }
 
         $radiusKm = (float)$radiusKm;
+    }
+
+    if ($radiusEnabled && $city !== '') {
+        throw new InvalidArgumentException("Bitte entweder Radiusfilter oder Stadtfilter verwenden, nicht beides gleichzeitig.");
     }
 
     $envPath = __DIR__ . '/../data2bs/data2lcn_db/.env';
@@ -77,66 +138,176 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     ]);
 
-    $whereRadius = $radiusEnabled ? "WHERE distance_km <= :radiusKm" : "";
+    $whereParts = [];
+
+    if ($radiusEnabled) {
+        if ($includeNoCoords) {
+            $whereParts[] = "(distance_km <= :radiusKm OR has_coordinates = 0)";
+        } else {
+            $whereParts[] = "distance_km <= :radiusKm";
+        }
+    }
+
+    $whereParts[] = "positive_ratio >= :minPositiveRatio";
+    $whereParts[] = "negative_ratio <= :maxNegativeRatio";
+
+    if ($acceptsGkv && $acceptsPkv) {
+        $whereParts[] = "(dr_accepts_gkv = 'yes' OR dr_accepts_pkv = 'yes')";
+    } elseif ($acceptsGkv) {
+        $whereParts[] = "dr_accepts_gkv = 'yes'";
+    } elseif ($acceptsPkv) {
+        $whereParts[] = "dr_accepts_pkv = 'yes'";
+    }
+
+    if ($hasWebsite) {
+        $whereParts[] = "(
+            (loc_website IS NOT NULL AND loc_website <> '')
+            OR (dr_website IS NOT NULL AND dr_website <> '')
+        )";
+    }
+
+    if ($hasEmail) {
+        $whereParts[] = "(
+            (loc_email IS NOT NULL AND loc_email <> '')
+            OR (dr_email IS NOT NULL AND dr_email <> '')
+        )";
+    }
+
+    if ($hasPhone) {
+        $whereParts[] = "(loc_phone IS NOT NULL AND loc_phone <> '')";
+    }
+
+    if ($city !== '') {
+        $whereParts[] = "loc_city LIKE :city";
+    }
+
+    $whereSql = count($whereParts) > 0
+        ? "WHERE " . implode(" AND ", $whereParts)
+        : "";
 
     $sql = "
         SELECT *
         FROM (
             SELECT
-                d.dr_id,
-                d.dr_display_name,
-                d.dr_type,
-                d.dr_is_dr,
-                d.dr_title_raw,
-                d.dr_firstname,
-                d.dr_lastname,
-                d.dr_org_name,
-                d.dr_website AS dr_website,
-                d.dr_email AS dr_email,
-                d.dr_accepts_gkv,
-                d.dr_accepts_pkv,
+                base.*,
 
-                l.loc_id,
-                l.loc_label,
-                l.loc_is_primary,
-                l.loc_country,
-                l.loc_plz,
-                l.loc_city,
-                l.loc_street,
-                l.loc_housenumber,
-                l.loc_phone,
-                l.loc_email,
-                l.loc_website,
-                l.loc_lat,
-                l.loc_lng,
-                l.loc_address_visibility,
-                l.loc_geo_type,
+                CASE
+                    WHEN base.total_votes > 0
+                    THEN ROUND((base.pro / base.total_votes) * 100)
+                    ELSE 0
+                END AS positive_ratio,
 
-                (
-                    6371 * ACOS(
-                        LEAST(
-                            1,
-                            COS(RADIANS(:lat1))
-                            * COS(RADIANS(l.loc_lat))
-                            * COS(RADIANS(l.loc_lng) - RADIANS(:lng1))
-                            + SIN(RADIANS(:lat2))
-                            * SIN(RADIANS(l.loc_lat))
+                CASE
+                    WHEN base.total_votes > 0
+                    THEN ROUND((base.neutral / base.total_votes) * 100)
+                    ELSE 0
+                END AS neutral_ratio,
+
+                CASE
+                    WHEN base.total_votes > 0
+                    THEN ROUND((base.contra / base.total_votes) * 100)
+                    ELSE 0
+                END AS negative_ratio
+
+            FROM (
+                SELECT
+                    d.dr_id,
+                    d.dr_display_name,
+                    d.dr_type,
+                    d.dr_is_dr,
+                    d.dr_title_raw,
+                    d.dr_firstname,
+                    d.dr_lastname,
+                    d.dr_org_name,
+                    d.dr_website AS dr_website,
+                    d.dr_email AS dr_email,
+                    d.dr_accepts_gkv,
+                    d.dr_accepts_pkv,
+
+                    l.loc_id,
+                    l.loc_label,
+                    l.loc_is_primary,
+                    l.loc_country,
+                    l.loc_plz,
+                    l.loc_city,
+                    l.loc_street,
+                    l.loc_housenumber,
+                    l.loc_phone,
+                    l.loc_email,
+                    l.loc_website,
+                    l.loc_lat,
+                    l.loc_lng,
+                    l.loc_address_visibility,
+                    l.loc_geo_type,
+
+                    CASE
+                        WHEN l.loc_lat IS NOT NULL
+                         AND l.loc_lng IS NOT NULL
+                         AND l.loc_lat <> ''
+                         AND l.loc_lng <> ''
+                        THEN 1
+                        ELSE 0
+                    END AS has_coordinates,
+
+                    CASE
+                        WHEN l.loc_lat IS NOT NULL
+                         AND l.loc_lng IS NOT NULL
+                         AND l.loc_lat <> ''
+                         AND l.loc_lng <> ''
+                        THEN (
+                            6371 * ACOS(
+                                LEAST(
+                                    1,
+                                    COS(RADIANS(:lat1))
+                                    * COS(RADIANS(l.loc_lat))
+                                    * COS(RADIANS(l.loc_lng) - RADIANS(:lng1))
+                                    + SIN(RADIANS(:lat2))
+                                    * SIN(RADIANS(l.loc_lat))
+                                )
+                            )
                         )
-                    )
-                ) AS distance_km
+                        ELSE NULL
+                    END AS distance_km,
 
-            FROM tbl_drs_locations_03 l
-            INNER JOIN tbl_drs_03 d
-                ON d.dr_id = l.dr_id
+                    (
+                        COALESCE(rv.pro, 0)
+                        + COALESCE(wv.vote_improved, 0)
+                    ) AS pro,
 
-            WHERE l.loc_is_primary = 1
-              AND l.loc_lat IS NOT NULL
-              AND l.loc_lng IS NOT NULL
-              AND l.loc_lat <> ''
-              AND l.loc_lng <> ''
+                    (
+                        COALESCE(rv.neutral, 0)
+                        + COALESCE(wv.vote_neutral, 0)
+                    ) AS neutral,
+
+                    (
+                        COALESCE(rv.contra, 0)
+                        + COALESCE(wv.vote_worsened, 0)
+                    ) AS contra,
+
+                    (
+                        COALESCE(rv.pro, 0)
+                        + COALESCE(wv.vote_improved, 0)
+                        + COALESCE(rv.neutral, 0)
+                        + COALESCE(wv.vote_neutral, 0)
+                        + COALESCE(rv.contra, 0)
+                        + COALESCE(wv.vote_worsened, 0)
+                    ) AS total_votes
+
+                FROM tbl_drs_03 d
+
+                LEFT JOIN tbl_drs_locations_03 l
+                    ON d.dr_id = l.dr_id
+                   AND l.loc_is_primary = 1
+
+                LEFT JOIN lcn_raw_doctor_votes rv
+                    ON d.dr_id = rv.dr_id
+
+                LEFT JOIN tbl_drs_votes_03 wv
+                    ON d.dr_id = wv.dr_id
+            ) AS base
         ) AS results
-        {$whereRadius}
-        ORDER BY distance_km ASC, dr_display_name ASC
+        {$whereSql}
+        ORDER BY has_coordinates DESC, distance_km ASC, dr_display_name ASC
     ";
 
     $stmt = $pdo->prepare($sql);
@@ -144,9 +315,15 @@ try {
     $stmt->bindValue(':lat1', $lat);
     $stmt->bindValue(':lat2', $lat);
     $stmt->bindValue(':lng1', $lng);
+    $stmt->bindValue(':minPositiveRatio', $minPositiveRatio);
+    $stmt->bindValue(':maxNegativeRatio', $maxNegativeRatio);
 
     if ($radiusEnabled) {
         $stmt->bindValue(':radiusKm', $radiusKm);
+    }
+
+    if ($city !== '') {
+        $stmt->bindValue(':city', '%' . $city . '%');
     }
 
     $stmt->execute();
@@ -154,15 +331,38 @@ try {
     $items = $stmt->fetchAll();
 
     foreach ($items as &$item) {
-        $distanceKm = (float)$item['distance_km'];
+        $hasCoordinates = (int)$item['has_coordinates'] === 1;
 
         $item['dr_id'] = (int)$item['dr_id'];
-        $item['loc_id'] = (int)$item['loc_id'];
-        $item['loc_is_primary'] = (int)$item['loc_is_primary'];
-        $item['loc_lat'] = (float)$item['loc_lat'];
-        $item['loc_lng'] = (float)$item['loc_lng'];
-        $item['distance_km'] = round($distanceKm, 2);
-        $item['distance_meters'] = (int)round($distanceKm * 1000);
+        $item['dr_is_dr'] = (int)$item['dr_is_dr'];
+
+        $item['loc_id'] = $item['loc_id'] !== null ? (int)$item['loc_id'] : null;
+        $item['loc_is_primary'] = $item['loc_is_primary'] !== null ? (int)$item['loc_is_primary'] : null;
+
+        $item['has_coordinates'] = $hasCoordinates;
+
+        if ($hasCoordinates) {
+            $distanceKm = (float)$item['distance_km'];
+
+            $item['loc_lat'] = (float)$item['loc_lat'];
+            $item['loc_lng'] = (float)$item['loc_lng'];
+            $item['distance_km'] = round($distanceKm, 2);
+            $item['distance_meters'] = (int)round($distanceKm * 1000);
+        } else {
+            $item['loc_lat'] = null;
+            $item['loc_lng'] = null;
+            $item['distance_km'] = null;
+            $item['distance_meters'] = null;
+        }
+
+        $item['pro'] = (int)$item['pro'];
+        $item['neutral'] = (int)$item['neutral'];
+        $item['contra'] = (int)$item['contra'];
+        $item['total_votes'] = (int)$item['total_votes'];
+
+        $item['positive_ratio'] = (int)$item['positive_ratio'];
+        $item['neutral_ratio'] = (int)$item['neutral_ratio'];
+        $item['negative_ratio'] = (int)$item['negative_ratio'];
     }
     unset($item);
 
@@ -174,6 +374,17 @@ try {
         ],
         'radiusEnabled' => $radiusEnabled,
         'radiusKm' => $radiusEnabled ? $radiusKm : null,
+        'filters' => [
+            'minPositiveRatio' => $minPositiveRatio,
+            'maxNegativeRatio' => $maxNegativeRatio,
+            'acceptsGkv' => $acceptsGkv,
+            'acceptsPkv' => $acceptsPkv,
+            'city' => $city,
+            'includeNoCoords' => $includeNoCoords,
+            'hasWebsite' => $hasWebsite,
+            'hasEmail' => $hasEmail,
+            'hasPhone' => $hasPhone,
+        ],
         'distanceType' => 'air_line',
         'distanceLabel' => 'Luftlinie',
         'count' => count($items),
