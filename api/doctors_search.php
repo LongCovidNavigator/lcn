@@ -1,4 +1,3 @@
-
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
@@ -45,7 +44,22 @@ function getFloatParam($name, $min, $max) {
 try {
     $lat = getFloatParam('lat', -90, 90);
     $lng = getFloatParam('lng', -180, 180);
-    $radiusKm = getFloatParam('radiusKm', 1, 500);
+
+    $radiusRaw = $_GET['radiusKm'] ?? '100';
+    $radiusEnabled = true;
+    $radiusKm = null;
+
+    if ($radiusRaw === 'all') {
+        $radiusEnabled = false;
+    } else {
+        $radiusKm = filter_var($radiusRaw, FILTER_VALIDATE_FLOAT);
+
+        if ($radiusKm === false || $radiusKm < 1 || $radiusKm > 500) {
+            throw new InvalidArgumentException("radiusKm muss zwischen 1 und 500 liegen oder 'all' sein.");
+        }
+
+        $radiusKm = (float)$radiusKm;
+    }
 
     $envPath = __DIR__ . '/../data2bs/data2lcn_db/.env';
     loadEnv($envPath);
@@ -63,12 +77,8 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     ]);
 
-    /*
-        Distanzberechnung:
-        - 6371 = mittlerer Erdradius in km
-        - Ergebnis ist Luftlinie, keine Fahrstrecke
-        - LEAST(1, ...) verhindert seltene Rundungsfehler bei ACOS()
-    */
+    $whereRadius = $radiusEnabled ? "WHERE distance_km <= :radiusKm" : "";
+
     $sql = "
         SELECT *
         FROM (
@@ -125,7 +135,7 @@ try {
               AND l.loc_lat <> ''
               AND l.loc_lng <> ''
         ) AS results
-        WHERE distance_km <= :radiusKm
+        {$whereRadius}
         ORDER BY distance_km ASC, dr_display_name ASC
     ";
 
@@ -134,7 +144,10 @@ try {
     $stmt->bindValue(':lat1', $lat);
     $stmt->bindValue(':lat2', $lat);
     $stmt->bindValue(':lng1', $lng);
-    $stmt->bindValue(':radiusKm', $radiusKm);
+
+    if ($radiusEnabled) {
+        $stmt->bindValue(':radiusKm', $radiusKm);
+    }
 
     $stmt->execute();
 
@@ -146,10 +159,8 @@ try {
         $item['dr_id'] = (int)$item['dr_id'];
         $item['loc_id'] = (int)$item['loc_id'];
         $item['loc_is_primary'] = (int)$item['loc_is_primary'];
-
         $item['loc_lat'] = (float)$item['loc_lat'];
         $item['loc_lng'] = (float)$item['loc_lng'];
-
         $item['distance_km'] = round($distanceKm, 2);
         $item['distance_meters'] = (int)round($distanceKm * 1000);
     }
@@ -161,7 +172,8 @@ try {
             'lat' => $lat,
             'lng' => $lng,
         ],
-        'radiusKm' => $radiusKm,
+        'radiusEnabled' => $radiusEnabled,
+        'radiusKm' => $radiusEnabled ? $radiusKm : null,
         'distanceType' => 'air_line',
         'distanceLabel' => 'Luftlinie',
         'count' => count($items),

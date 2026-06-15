@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css">
     <link rel="stylesheet" href="styles/footer-style.css">
+    <link rel="stylesheet" href="styles/lcnprotocol_table.css">
 
     <link
         rel="stylesheet"
@@ -36,12 +37,26 @@
         </p>
 
         <div class="doctor-map-controls">
-            <div class="doctor-location-filter-wrapper">
-                <button id="doctor-location-filter-button" class="doctor-location-filter-button" type="button">
-                    Standort ▾
+            <div class="doctor-radius-filter-wrapper">
+                <div class="doctor-sort-wrapper">
+					<button id="doctor-sort-button" class="doctor-sort-button" type="button">
+						Sortieren: Name A–Z ▾
+					</button>
+
+					<div id="doctor-sort-menu" class="doctor-sort-menu">
+						<button type="button" data-sort-key="distance">Entfernung</button>
+						<button type="button" data-sort-key="name">Name</button>
+						<button type="button" data-sort-key="positive_ratio">Positive Erfahrungen [%]</button>
+						<button type="button" data-sort-key="negative_ratio">Negative Erfahrungen [%]</button>
+						<button type="button" data-sort-key="total_votes">Anzahl Bewertungen</button>
+					</div>
+				</div>
+
+				<button id="doctor-radius-filter-button" class="doctor-radius-filter-button" type="button">
+                    Radius ▾
                 </button>
 
-                <div id="doctor-location-filter-menu" class="doctor-location-filter-menu">
+                <div id="doctor-radius-filter-menu" class="doctor-radius-filter-menu">
                     <label for="doctor-location-input">PLZ, Ort oder Adresse</label>
 
                     <div class="doctor-location-row">
@@ -49,23 +64,19 @@
                             id="doctor-location-input"
                             class="doctor-location-input"
                             type="text"
-                            value="50677 Köln"
-                            placeholder="PLZ, Ort oder Adresse"
+                            value=""
+                            placeholder="z. B. 50677 Köln"
                         >
-
-                        <button id="doctor-location-button" class="doctor-location-apply-button" type="button">
-                            Suchen
-                        </button>
                     </div>
-                </div>
-            </div>
 
-            <div class="doctor-radius-filter-wrapper">
-                <button id="doctor-radius-filter-button" class="doctor-radius-filter-button" type="button">
-                    Radius ▾
-                </button>
+                    <label for="doctor-radius-enabled-input" class="doctor-radius-toggle-row">
+                        <input
+                            id="doctor-radius-enabled-input"
+                            type="checkbox"
+                        >
+                        Radiusbegrenzung aktiv
+                    </label>
 
-                <div id="doctor-radius-filter-menu" class="doctor-radius-filter-menu">
                     <label for="doctor-radius-input">Radius in km</label>
 
                     <div class="doctor-radius-row">
@@ -86,16 +97,74 @@
                 </div>
             </div>
 
+            <button id="doctor-map-toggle-button" class="doctor-map-toggle-button" type="button">
+                Karte ausblenden
+            </button>
+
             <span id="doctor-map-count" class="doctor-map-count">
                 -
             </span>
         </div>
 
         <p id="doctor-map-status" class="doctor-map-status">
-            Entfernung wird als Luftlinie berechnet.
+            Bitte Standort und Radius eingeben oder Radiusbegrenzung deaktivieren.
         </p>
 
-        <div id="doctor-map"></div>
+        <section id="doctor-map-section" class="doctor-map-section">
+            <div id="doctor-map"></div>
+        </section>
+
+        <div class="doctor-results-view-row">
+            <div class="doctor-view-switch" aria-label="Ansicht wechseln">
+                <button
+                    id="doctor-card-view-button"
+                    class="doctor-view-switch-button is-active"
+                    type="button"
+                    data-view="cards"
+                >
+                    Kacheln
+                </button>
+
+                <button
+                    id="doctor-table-view-button"
+                    class="doctor-view-switch-button"
+                    type="button"
+                    data-view="table"
+                >
+                    Tabelle
+                </button>
+            </div>
+        </div>
+
+        <section id="doctor-card-results-section" class="doctor-card-results-section">
+            <h2>Ärztinnen und Ärzte als Kacheln</h2>
+
+            <div id="doctor-card-results" class="doctor-card-grid">
+                <p class="doctor-empty-state">Noch keine Ergebnisse geladen.</p>
+            </div>
+        </section>
+
+        <section id="doctor-table-results-section" class="doctor-map-results-section is-hidden">
+            <h2>Gefundene Ärztinnen und Ärzte als Tabelle</h2>
+
+            <table class="doctor-map-results-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Arzt / Ärztin</th>
+                        <th>Ort</th>
+                        <th>Entfernung</th>
+                        <th>Website</th>
+                    </tr>
+                </thead>
+
+                <tbody id="doctor-map-results-body">
+                    <tr>
+                        <td colspan="5">Noch keine Ergebnisse geladen.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
