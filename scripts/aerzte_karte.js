@@ -1197,9 +1197,9 @@ function renderDoctorCards(doctors) {
                 </section>
 
                 <div class="doctor-card-footer">
-                    <span class="doctor-card-muted">Mehr Details später</span>
-                    ${websiteHtml}
-                </div>
+					<a class="doctor-card-link" href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">Mehr Details</a>
+					${websiteHtml}
+				</div>
             </article>
         `;
     }).join("");
@@ -1286,7 +1286,7 @@ function renderDoctorResultsTable(doctors) {
         return `
             <tr>
                 <td class="doctor-table-rank">${index + 1}</td>
-                <td class="doctor-table-name">${name}</td>
+                <td class="doctor-table-name"><a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a></td>
                 <td>${locationHtml}</td>
                 <td>${experienceHtml}</td>
                 <td>${insuranceHtml}</td>
@@ -1529,7 +1529,8 @@ function buildDoctorPopupHtml(doctor) {
 
     const website = doctor.loc_website || doctor.dr_website || "";
     let websiteHtml = "";
-
+	const detailHtml = `<br><a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">Mehr Details</a>`;
+	
     if (website) {
         const safeWebsite = escapeHtml(website);
         websiteHtml = `<br><a href="${safeWebsite}" target="_blank" rel="noopener noreferrer">Website öffnen</a>`;
@@ -1543,7 +1544,8 @@ function buildDoctorPopupHtml(doctor) {
             ${plz} ${city}<br>
             <em>${distanceText}</em><br>
             <span>⭐ ${ratingText}</span>
-            ${websiteHtml}
+			${detailHtml}
+			${websiteHtml}
         </div>
     `;
 }

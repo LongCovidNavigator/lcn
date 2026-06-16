@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Covid Navigator - Arzt-Steckbrief</title>
+
+    <link rel="stylesheet" href="styles/general.css">
+    <link rel="stylesheet" href="styles/navigation.css">
+    <link rel="stylesheet" href="styles/footer-style.css">
+    <link rel="stylesheet" href="styles/aerzte_karte.css">
+    <link rel="stylesheet" href="styles/arzt_detail.css">
+</head>
+
+<script>
+    function toggleMobileMenu() {
+        const navList = document.querySelector('.main-nav ul');
+        navList.classList.toggle('show');
+    }
+</script>
+
+<body class="doctor-map-page doctor-detail-page">
+
+    <div id="header-placeholder"></div>
+
+    <main class="doctor-detail-page-shell">
+        <section class="doctor-detail-top-panel">
+            <a class="doctor-detail-back-link" href="aerzte_karte.html">← Zurück zur Ärzt:innen-Suche</a>
+        </section>
+
+        <section id="doctor-detail-status" class="doctor-detail-status">
+            Lade Arzt-Steckbrief …
+        </section>
+
+        <section id="doctor-detail-content" class="doctor-detail-content is-hidden">
+
+            <nav class="doctor-detail-sticky-header" aria-label="Arzt-Steckbrief und Schnellaktionen">
+                <div class="doctor-detail-sticky-profile">
+                    <div class="doctor-detail-avatar" id="doctor-detail-avatar">DR</div>
+
+                    <div class="doctor-detail-sticky-profile-main">
+                        <h1 id="doctor-detail-title">Ärzt:in wird geladen …</h1>
+                        <p id="doctor-detail-subtitle" class="doctor-detail-subtitle">Bitte kurz warten.</p>
+
+                        <h2 id="doctor-detail-name" class="doctor-detail-hidden-name">-</h2>
+
+                        <div id="doctor-detail-tags" class="doctor-detail-tag-row"></div>
+                        <div id="doctor-detail-city-badge" class="doctor-detail-city-badge"></div>
+                    </div>
+                </div>
+
+                <div class="doctor-detail-action-links">
+                    <a id="doctor-detail-action-website" class="doctor-detail-action-link is-disabled" href="#" target="_blank" rel="noopener noreferrer">
+                        <span class="doctor-detail-action-icon">◎</span>
+                        <span>Website</span>
+                    </a>
+
+                    <a id="doctor-detail-action-email" class="doctor-detail-action-link is-disabled" href="#">
+                        <span class="doctor-detail-action-icon">✉</span>
+                        <span>E-Mail</span>
+                    </a>
+
+                    <a id="doctor-detail-action-phone" class="doctor-detail-action-link is-disabled" href="#">
+                        <span class="doctor-detail-action-icon">☎</span>
+                        <span>Telefon</span>
+                    </a>
+
+                    <a id="doctor-detail-action-route" class="doctor-detail-action-link is-disabled" href="#" target="_blank" rel="noopener noreferrer">
+                        <span class="doctor-detail-action-icon">⌖</span>
+                        <span>Route</span>
+                    </a>
+                </div>
+
+                <div class="doctor-detail-action-votes" aria-label="Diese Praxis bewerten">
+                    <span>Bewerten:</span>
+
+                    <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-positive" data-type="pro">
+                        Positiv
+                    </button>
+
+                    <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-neutral" data-type="neutral">
+                        Neutral
+                    </button>
+
+                    <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-negative" data-type="contra">
+                        Negativ
+                    </button>
+                </div>
+            </nav>
+
+            <section class="doctor-detail-guided-section">
+                <aside class="doctor-detail-question-intro">
+                    <div class="doctor-detail-question-number">1</div>
+                    <div>
+                        <h2>Passt die Praxis zu mir?</h2>
+                        <p>Erfahrung, Bewertungen und wichtige Eckdaten.</p>
+                    </div>
+                </aside>
+
+                <div class="doctor-detail-question-content doctor-detail-fit-grid">
+                    <article class="doctor-detail-info-card doctor-detail-rating-card">
+                        <h3>Bewertungen <span id="doctor-detail-rating-card-total">(0 insgesamt)</span></h3>
+                        <div id="doctor-detail-rating"></div>
+                    </article>
+
+                    <article class="doctor-detail-info-card">
+                        <h3>Fachrichtungen</h3>
+                        <div id="doctor-detail-specialties" class="doctor-detail-term-list"></div>
+                    </article>
+
+                    <article class="doctor-detail-info-card">
+                        <h3>Erfahrung &amp; Versorgung</h3>
+                        <div id="doctor-detail-badges" class="doctor-detail-term-list"></div>
+                    </article>
+
+                    <article class="doctor-detail-info-card">
+                        <h3>Kassen</h3>
+                        <div id="doctor-detail-care" class="doctor-detail-tag-row"></div>
+                    </article>
+
+                    <article class="doctor-detail-info-card">
+                        <h3>Zugänglichkeit</h3>
+                        <div id="doctor-detail-accessibility" class="doctor-detail-term-list"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="doctor-detail-guided-section">
+                <aside class="doctor-detail-question-intro">
+                    <div class="doctor-detail-question-number">2</div>
+                    <div>
+                        <h2>Was behandelt sie?</h2>
+                        <p>Ein Überblick über das Behandlungsspektrum.</p>
+                    </div>
+                </aside>
+
+                <div class="doctor-detail-question-content">
+                    <article class="doctor-detail-treatment-panel">
+                        <div class="doctor-detail-treatment-heading-row">
+                            <div>
+                                <h3>Behandlungsspektrum</h3>
+                                <p id="doctor-detail-treatment-summary">Behandlungen werden geladen …</p>
+                            </div>
+                        </div>
+
+                        <div id="doctor-detail-treatment-categories" class="doctor-detail-treatment-categories"></div>
+
+                        <div id="doctor-detail-treatments" class="doctor-detail-treatment-list"></div>
+
+                        <button id="doctor-detail-treatment-toggle" class="doctor-detail-treatment-toggle is-hidden" type="button">
+                            Alle Details anzeigen
+                        </button>
+                    </article>
+                </div>
+            </section>
+
+        </section>
+    </main>
+
+    <script src="scripts/arzt_detail.js"></script>
+
+    <div id="footer-placeholder"></div>
+
+    <script>
+        fetch("components/footer.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("footer-placeholder").innerHTML = data;
+            });
+    </script>
+
+    <script>
+        fetch("components/header.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("header-placeholder").innerHTML = data;
+            });
+    </script>
+
+</body>
+</html>
