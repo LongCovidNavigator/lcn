@@ -212,17 +212,55 @@ try {
             FROM (
                 SELECT
                     d.dr_id,
-                    d.dr_display_name,
-                    d.dr_type,
-                    d.dr_is_dr,
-                    d.dr_title_raw,
-                    d.dr_firstname,
-                    d.dr_lastname,
-                    d.dr_org_name,
-                    d.dr_website AS dr_website,
-                    d.dr_email AS dr_email,
-                    d.dr_accepts_gkv,
-                    d.dr_accepts_pkv,
+					d.dr_display_name,
+					d.dr_type,
+					d.dr_is_dr,
+					d.dr_title_raw,
+					d.dr_firstname,
+					d.dr_lastname,
+					CASE
+						WHEN d.dr_lastname IS NOT NULL
+						 AND TRIM(d.dr_lastname) <> ''
+						THEN
+							CASE
+								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'von %'
+								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+
+								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'vom %'
+								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+
+								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'van %'
+								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+
+								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'zu %'
+								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 4))
+
+								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'zum %'
+								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+
+								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'zur %'
+								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+
+								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'de %'
+								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 4))
+
+								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'der %'
+								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+
+								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'den %'
+								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+
+								ELSE TRIM(d.dr_lastname)
+							END
+
+						WHEN d.dr_org_name IS NOT NULL
+						 AND TRIM(d.dr_org_name) <> ''
+						THEN TRIM(d.dr_org_name)
+
+						ELSE TRIM(d.dr_display_name)
+					END AS dr_sort_lastname,
+					d.dr_org_name,
+					d.dr_website AS dr_website,
 
                     l.loc_id,
                     l.loc_label,

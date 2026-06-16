@@ -497,18 +497,37 @@ function sortDoctors(doctors, sortKey, direction) {
         } else if (sortKey === "total_votes") {
             result = statsA.totalVotes - statsB.totalVotes;
         } else {
-            result = String(a.dr_display_name || "").localeCompare(
-                String(b.dr_display_name || ""),
-                "de",
-                { sensitivity: "base" }
-            );
-        }
+			result = getDoctorNameSortKey(a).localeCompare(
+				getDoctorNameSortKey(b),
+				"de",
+				{ sensitivity: "base" }
+			);
+
+			if (result === 0) {
+				result = String(a.dr_display_name || "").localeCompare(
+					String(b.dr_display_name || ""),
+					"de",
+					{ sensitivity: "base" }
+				);
+			}
+		}
 
         return direction === "desc" ? -result : result;
     });
 
     return doctorsCopy;
 }
+
+function getDoctorNameSortKey(doctor) {
+    return String(
+        doctor.dr_sort_lastname ||
+        doctor.dr_lastname ||
+        doctor.dr_org_name ||
+        doctor.dr_display_name ||
+        ""
+    ).trim();
+}
+
 
 function setResultsView(viewName) {
     const cardSection = document.getElementById("doctor-card-results-section");
