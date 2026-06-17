@@ -552,6 +552,70 @@ function setResultsView(viewName) {
     if (tableButton) {
         tableButton.classList.toggle("is-active", !showCards);
     }
+
+    renderCurrentDoctorResultsView();
+}
+
+function getCurrentDoctorResultsView() {
+    const tableSection = document.getElementById("doctor-table-results-section");
+
+    if (tableSection && !tableSection.classList.contains("is-hidden")) {
+        return "table";
+    }
+
+    return "cards";
+}
+
+function renderCurrentDoctorResultsView() {
+    const currentView = getCurrentDoctorResultsView();
+    const cardContainer = document.getElementById("doctor-card-results");
+    const tableBody = document.getElementById("doctor-map-results-body");
+
+    if (currentView === "cards") {
+        if (tableBody) {
+            tableBody.innerHTML = "";
+        }
+
+        renderDoctorCards(currentDoctors);
+        return;
+    }
+
+    if (cardContainer) {
+        cardContainer.innerHTML = "";
+    }
+
+    renderDoctorResultsTable(currentDoctors);
+}
+
+function getCurrentDoctorResultsView() {
+    const tableSection = document.getElementById("doctor-table-results-section");
+
+    if (tableSection && !tableSection.classList.contains("is-hidden")) {
+        return "table";
+    }
+
+    return "cards";
+}
+
+function renderCurrentDoctorResultsView() {
+    const currentView = getCurrentDoctorResultsView();
+    const cardContainer = document.getElementById("doctor-card-results");
+    const tableBody = document.getElementById("doctor-map-results-body");
+
+    if (currentView === "cards") {
+        if (tableBody) {
+            tableBody.innerHTML = "";
+        }
+
+        renderDoctorCards(currentDoctors);
+        return;
+    }
+
+    if (cardContainer) {
+        cardContainer.innerHTML = "";
+    }
+
+    renderDoctorResultsTable(currentDoctors);
 }
 
 function updateRadiusInputState() {
@@ -848,14 +912,13 @@ async function loadDoctorsFromSearchApi(settings) {
     }
 
     currentDoctors = sortDoctors(
-        apiDoctors,
-        currentDoctorSortKey,
-        currentDoctorSortDirection
-    );
+		apiDoctors,
+		currentDoctorSortKey,
+		currentDoctorSortDirection
+	);
 
-    renderDoctorMarkers(currentDoctors);
-    renderDoctorCards(currentDoctors);
-    renderDoctorResultsTable(currentDoctors);
+	renderDoctorMarkers(currentDoctors);
+	renderCurrentDoctorResultsView();
 
     if (countElement) {
 		countElement.textContent = `Gefundene Ärzte: ${currentDoctors.length}`;
@@ -939,8 +1002,15 @@ async function handleDoctorCardVote(event) {
         return;
     }
 
-    button.disabled = true;
-    button.classList.add("is-saving");
+    const cardElement = button.closest(".doctor-card");
+    const buttonsInCard = cardElement
+        ? cardElement.querySelectorAll(".doctor-card-vote-button")
+        : [button];
+
+    buttonsInCard.forEach(function (cardButton) {
+        cardButton.disabled = true;
+        cardButton.classList.add("is-saving");
+    });
 
     try {
         const response = await fetch("api/inc_doctor_votes.php", {
@@ -960,44 +1030,76 @@ async function handleDoctorCardVote(event) {
             throw new Error(data.error || "Vote konnte nicht gespeichert werden.");
         }
 
-        currentDoctors = currentDoctors.map(function (doctor) {
-            if (Number(doctor.dr_id) !== drId) {
-                return doctor;
-            }
-
-            return {
-                ...doctor,
-                pro: Number(doctor.pro ?? 0) + (voteType === "pro" ? 1 : 0),
-                neutral: Number(doctor.neutral ?? 0) + (voteType === "neutral" ? 1 : 0),
-                contra: Number(doctor.contra ?? 0) + (voteType === "contra" ? 1 : 0)
-            };
-        });
-
-        currentDoctors = currentDoctors
-            .filter(doctorPassesCurrentRatingFilter)
-            .map(recalculateDoctorVoteFields);
-
-        currentDoctors = sortDoctors(
-            currentDoctors,
-            currentDoctorSortKey,
-            currentDoctorSortDirection
-        );
-
-        renderDoctorCards(currentDoctors);
-        renderDoctorResultsTable(currentDoctors);
-        renderDoctorMarkers(currentDoctors);
-
-        const countElement = document.getElementById("doctor-map-count");
-        if (countElement) {
-            countElement.textContent = `${currentDoctors.length} Ärzte`;
-        }
+        await refreshSingleDoctor(drId);
 
     } catch (error) {
         console.error("Fehler beim Speichern der Ärztebewertung:", error);
         alert("Die Bewertung konnte nicht gespeichert werden. Details stehen in der Konsole.");
 
-        button.disabled = false;
-        button.classList.remove("is-saving");
+        buttonsInCard.forEach(function (cardButton) {
+            cardButton.disabled = false;
+            cardButton.classList.remove("is-saving");
+        });
+    }
+}
+
+async function refreshSingleDoctor(drId) {
+    const centerForApi = currentLocation || defaultMapCenter;
+
+    const response = await fetch(
+        `api/doctors_search.php?lat=${encodeURIComponent(centerForApi.lat)}` +
+        `&lng=${encodeURIComponent(centerForApi.lng)}` +
+        `&radiusKm=all` +
+        `&dr_id=${encodeURIComponent(drId)}`
+    );
+
+    if (!response.ok) {
+        throw new Error("Einzelner Arzt konnte nicht neu geladen werden.");
+    }
+
+    const data = await response.json();
+
+    if (!data.ok || !Array.isArray(data.items) || data.items.length !== 1) {
+        throw new Error("Unerwartetes API-Format beim Einzelladen.");
+    }
+
+    let updatedDoctor = data.items[0];
+
+    if (!currentLocation) {
+        updatedDoctor = {
+            ...updatedDoctor,
+            distance_km: null,
+            distance_meters: null
+        };
+    }
+
+    const index = currentDoctors.findIndex(function (doctor) {
+        return Number(doctor.dr_id) === Number(drId);
+    });
+
+    if (index === -1) {
+        return;
+    }
+
+    currentDoctors[index] = updatedDoctor;
+    replaceSingleDoctorDom(updatedDoctor, index);
+}
+
+function replaceSingleDoctorDom(doctor, index) {
+    if (getCurrentDoctorResultsView() === "cards") {
+        const oldCard = document.querySelector(`.doctor-card[data-dr-id="${doctor.dr_id}"]`);
+
+        if (oldCard) {
+            oldCard.outerHTML = buildDoctorCardHtml(doctor, index);
+        }
+
+        return;
+    }
+
+    const oldRow = document.querySelector(`tr[data-dr-id="${doctor.dr_id}"]`);
+
+    if (oldRow) {
+        oldRow.outerHTML = buildDoctorTableRowHtml(doctor, index);
     }
 }
 
@@ -1086,124 +1188,129 @@ function renderDoctorCards(doctors) {
     }
 
     cardContainer.innerHTML = doctors.map(function (doctor, index) {
-        const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
-        const label = escapeHtml(doctor.loc_label || "");
-        const plz = escapeHtml(doctor.loc_plz || "");
-        const city = escapeHtml(doctor.loc_city || "");
-        const street = escapeHtml(doctor.loc_street || "");
-        const houseNumber = escapeHtml(doctor.loc_housenumber || "");
+        return buildDoctorCardHtml(doctor, index);
+    }).join("");
+}
 
-        const distance = getDoctorDistanceText(doctor);
+function buildDoctorCardHtml(doctor, index) {
+    const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
+    const label = escapeHtml(doctor.loc_label || "");
+    const plz = escapeHtml(doctor.loc_plz || "");
+    const city = escapeHtml(doctor.loc_city || "");
+    const street = escapeHtml(doctor.loc_street || "");
+    const houseNumber = escapeHtml(doctor.loc_housenumber || "");
 
-        const website = doctor.loc_website || doctor.dr_website || "";
-        const websiteHtml = website
-            ? `<a class="doctor-card-link" href="${escapeHtml(website)}" target="_blank" rel="noopener noreferrer">Website</a>`
-            : `<span class="doctor-card-muted">Keine Website</span>`;
+    const distance = getDoctorDistanceText(doctor);
 
-        const gkvText = doctor.dr_accepts_gkv === "yes" ? "GKV" : "";
-        const pkvText = doctor.dr_accepts_pkv === "yes" ? "PKV" : "";
+    const website = doctor.loc_website || doctor.dr_website || "";
+    const websiteHtml = website
+        ? `<a class="doctor-card-link" href="${escapeHtml(website)}" target="_blank" rel="noopener noreferrer">Website</a>`
+        : `<span class="doctor-card-muted">Keine Website</span>`;
 
-        const insuranceTags = [gkvText, pkvText]
-            .filter(Boolean)
-            .map(value => `<span class="doctor-card-tag">${escapeHtml(value)}</span>`)
-            .join("");
+    const gkvText = doctor.dr_accepts_gkv === "yes" ? "GKV" : "";
+    const pkvText = doctor.dr_accepts_pkv === "yes" ? "PKV" : "";
 
-        const ratingStats = getDoctorVoteStats(doctor);
-        const ratingHtml = buildDoctorCardRatingHtml(doctor);
+    const insuranceTags = [gkvText, pkvText]
+        .filter(Boolean)
+        .map(value => `<span class="doctor-card-tag">${escapeHtml(value)}</span>`)
+        .join("");
 
-        return `
-            <article class="doctor-card doctor-card-v2">
-                <div class="doctor-card-accent"></div>
+    const ratingStats = getDoctorVoteStats(doctor);
+    const ratingHtml = buildDoctorCardRatingHtml(doctor);
 
-                <div class="doctor-card-main-header">
-                    <div class="doctor-card-rank-large" aria-label="Platzierung">
-                        <strong>#${index + 1}</strong>
-                        <span>(${getDoctorSortShortLabel()})</span>
-                    </div>
+    return `
+        <article class="doctor-card doctor-card-v2" data-dr-id="${doctor.dr_id}">
+            <div class="doctor-card-accent"></div>
 
-                    <div class="doctor-card-title-area">
-                        <h3 class="doctor-card-title">${name}</h3>
-
-                        <div class="doctor-card-meta">
-                            ${label ? `<span class="doctor-card-tag">🏥 ${label}</span>` : ""}
-                            ${insuranceTags || `<span class="doctor-card-tag">Versicherung k. A.</span>`}
-                        </div>
-                    </div>
-
-                    ${city ? `<span class="doctor-card-city-badge">⌖ ${city}</span>` : ""}
+            <div class="doctor-card-main-header">
+                <div class="doctor-card-rank-large" aria-label="Platzierung">
+                    <strong>#${index + 1}</strong>
+                    <span>(${getDoctorSortShortLabel()})</span>
                 </div>
 
-                <div class="doctor-card-content-grid">
-                    <section class="doctor-card-info-panel doctor-card-location-panel">
-                        <h4 class="doctor-card-section-heading">⌖ Standort & Entfernung</h4>
+                <div class="doctor-card-title-area">
+                    <h3 class="doctor-card-title">${name}</h3>
 
-                        <div class="doctor-card-location-block">
-                            <div class="doctor-card-mini-label">Adresse</div>
-                            <div class="doctor-card-main-text">
-                                ${street || houseNumber ? `${street} ${houseNumber}, ` : ""}${plz} ${city}
-                            </div>
-                        </div>
-
-                        <div class="doctor-card-location-block">
-                            <div class="doctor-card-mini-label">Entfernung</div>
-                            <div class="doctor-card-main-text">
-                                ${distance}
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="doctor-card-info-panel doctor-card-rating-panel">
-                        <h4 class="doctor-card-section-heading">
-                            ⭐ Bewertung
-                            <span class="doctor-card-section-count">(${ratingStats.totalVotes} Bewertungen)</span>
-                        </h4>
-                        ${ratingHtml}
-                    </section>
+                    <div class="doctor-card-meta">
+                        ${label ? `<span class="doctor-card-tag">🏥 ${label}</span>` : ""}
+                        ${insuranceTags || `<span class="doctor-card-tag">Versicherung k. A.</span>`}
+                    </div>
                 </div>
 
-                <section class="doctor-card-own-rating">
-                    <div class="doctor-card-own-rating-header">
-                        <h4 class="doctor-card-section-heading">✎ Deine Bewertung</h4>
+                ${city ? `<span class="doctor-card-city-badge">⌖ ${city}</span>` : ""}
+            </div>
+
+            <div class="doctor-card-content-grid">
+                <section class="doctor-card-info-panel doctor-card-location-panel">
+                    <h4 class="doctor-card-section-heading">⌖ Standort & Entfernung</h4>
+
+                    <div class="doctor-card-location-block">
+                        <div class="doctor-card-mini-label">Adresse</div>
+                        <div class="doctor-card-main-text">
+                            ${street || houseNumber ? `${street} ${houseNumber}, ` : ""}${plz} ${city}
+                        </div>
                     </div>
 
-                    <div class="doctor-card-vote-buttons-placeholder">
-                        <button
-                            type="button"
-                            class="doctor-card-vote-placeholder-button doctor-card-vote-positive doctor-card-vote-button"
-                            data-dr-id="${doctor.dr_id}"
-                            data-type="pro"
-                        >
-                            Positiv
-                        </button>
-
-                        <button
-                            type="button"
-                            class="doctor-card-vote-placeholder-button doctor-card-vote-neutral doctor-card-vote-button"
-                            data-dr-id="${doctor.dr_id}"
-                            data-type="neutral"
-                        >
-                            Neutral
-                        </button>
-
-                        <button
-                            type="button"
-                            class="doctor-card-vote-placeholder-button doctor-card-vote-negative doctor-card-vote-button"
-                            data-dr-id="${doctor.dr_id}"
-                            data-type="contra"
-                        >
-                            Negativ
-                        </button>
+                    <div class="doctor-card-location-block">
+                        <div class="doctor-card-mini-label">Entfernung</div>
+                        <div class="doctor-card-main-text">
+                            ${distance}
+                        </div>
                     </div>
                 </section>
 
-                <div class="doctor-card-footer">
-					<a class="doctor-card-link" href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">Mehr Details</a>
-					${websiteHtml}
-				</div>
-            </article>
-        `;
-    }).join("");
+                <section class="doctor-card-info-panel doctor-card-rating-panel">
+                    <h4 class="doctor-card-section-heading">
+                        ⭐ Bewertung
+                        <span class="doctor-card-section-count">(${ratingStats.totalVotes} Bewertungen)</span>
+                    </h4>
+                    ${ratingHtml}
+                </section>
+            </div>
+
+            <section class="doctor-card-own-rating">
+                <div class="doctor-card-own-rating-header">
+                    <h4 class="doctor-card-section-heading">✎ Deine Bewertung</h4>
+                </div>
+
+                <div class="doctor-card-vote-buttons-placeholder">
+                    <button
+                        type="button"
+                        class="doctor-card-vote-placeholder-button doctor-card-vote-positive doctor-card-vote-button"
+                        data-dr-id="${doctor.dr_id}"
+                        data-type="pro"
+                    >
+                        Positiv
+                    </button>
+
+                    <button
+                        type="button"
+                        class="doctor-card-vote-placeholder-button doctor-card-vote-neutral doctor-card-vote-button"
+                        data-dr-id="${doctor.dr_id}"
+                        data-type="neutral"
+                    >
+                        Neutral
+                    </button>
+
+                    <button
+                        type="button"
+                        class="doctor-card-vote-placeholder-button doctor-card-vote-negative doctor-card-vote-button"
+                        data-dr-id="${doctor.dr_id}"
+                        data-type="contra"
+                    >
+                        Negativ
+                    </button>
+                </div>
+            </section>
+
+            <div class="doctor-card-footer">
+                <a class="doctor-card-link" href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">Mehr Details</a>
+                ${websiteHtml}
+            </div>
+        </article>
+    `;
 }
+
 
 function buildDoctorCardRatingHtml(doctor) {
     const stats = getDoctorVoteStats(doctor);
@@ -1277,23 +1384,27 @@ function renderDoctorResultsTable(doctors) {
     }
 
     tableBody.innerHTML = doctors.map(function (doctor, index) {
-        const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
-        const locationHtml = buildDoctorTableLocationHtml(doctor);
-        const experienceHtml = buildDoctorTableExperienceHtml(doctor);
-        const insuranceHtml = buildDoctorTableInsuranceHtml(doctor);
-        const contactHtml = buildDoctorTableContactHtml(doctor);
-
-        return `
-            <tr>
-                <td class="doctor-table-rank">${index + 1}</td>
-                <td class="doctor-table-name"><a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a></td>
-                <td>${locationHtml}</td>
-                <td>${experienceHtml}</td>
-                <td>${insuranceHtml}</td>
-                <td>${contactHtml}</td>
-            </tr>
-        `;
+        return buildDoctorTableRowHtml(doctor, index);
     }).join("");
+}
+
+function buildDoctorTableRowHtml(doctor, index) {
+    const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
+    const locationHtml = buildDoctorTableLocationHtml(doctor);
+    const experienceHtml = buildDoctorTableExperienceHtml(doctor);
+    const insuranceHtml = buildDoctorTableInsuranceHtml(doctor);
+    const contactHtml = buildDoctorTableContactHtml(doctor);
+
+    return `
+        <tr data-dr-id="${doctor.dr_id}">
+            <td class="doctor-table-rank">${index + 1}</td>
+            <td class="doctor-table-name"><a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a></td>
+            <td>${locationHtml}</td>
+            <td>${experienceHtml}</td>
+            <td>${insuranceHtml}</td>
+            <td>${contactHtml}</td>
+        </tr>
+    `;
 }
 
 function updateDoctorTableRankHeader() {

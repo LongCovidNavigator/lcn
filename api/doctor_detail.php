@@ -241,23 +241,102 @@ try {
 
     $treatmentsSql = "
         SELECT
-            c.treat_id,
-            c.sort_order,
-            t.slug,
-            t.behandlung,
-            t.typ,
-            t.wiki_url_path
-        FROM tbl_cpl_drs2treatments_03 c
-        INNER JOIN tbl_treatments_03 t
-            ON c.treat_id = t.treat_id
-        WHERE c.dr_id = :id
+            calculated.*,
+
+            CASE
+                WHEN calculated.total_votes > 0
+                THEN ROUND((calculated.pro / calculated.total_votes) * 100)
+                ELSE 0
+            END AS positive_ratio,
+
+            CASE
+                WHEN calculated.total_votes > 0
+                THEN ROUND((calculated.neutral / calculated.total_votes) * 100)
+                ELSE 0
+            END AS neutral_ratio,
+
+            CASE
+                WHEN calculated.total_votes > 0
+                THEN ROUND((calculated.contra / calculated.total_votes) * 100)
+                ELSE 0
+            END AS negative_ratio
+
+        FROM (
+            SELECT
+                c.treat_id,
+                c.sort_order,
+                t.slug,
+                t.behandlung,
+                t.typ,
+                t.wiki_url_path,
+
+                (
+                    COALESCE(lv.pro, 0)
+                    + COALESCE(rv.pro, 0)
+                ) AS pro,
+
+                (
+                    COALESCE(lv.neutral, 0)
+                    + COALESCE(rv.neutral, 0)
+                ) AS neutral,
+
+                (
+                    COALESCE(lv.contra, 0)
+                    + COALESCE(rv.contra, 0)
+                ) AS contra,
+
+                (
+                    COALESCE(lv.pro, 0)
+                    + COALESCE(rv.pro, 0)
+                    + COALESCE(lv.neutral, 0)
+                    + COALESCE(rv.neutral, 0)
+                    + COALESCE(lv.contra, 0)
+                    + COALESCE(rv.contra, 0)
+                ) AS total_votes
+
+            FROM tbl_cpl_drs2treatments_03 c
+
+            INNER JOIN tbl_treatments_03 t
+                ON c.treat_id = t.treat_id
+
+            LEFT JOIN (
+                SELECT
+                    TRIM(Behandlung) AS behandlung_key,
+                    SUM(COALESCE(pro, 0)) AS pro,
+                    SUM(COALESCE(neutral, 0)) AS neutral,
+                    SUM(COALESCE(contra, 0)) AS contra
+                FROM lcn_votes
+                WHERE Behandlung IS NOT NULL
+                  AND TRIM(Behandlung) <> ''
+                GROUP BY TRIM(Behandlung)
+            ) lv
+                ON LOWER(TRIM(t.behandlung)) COLLATE utf8mb4_unicode_ci
+                 = LOWER(lv.behandlung_key) COLLATE utf8mb4_unicode_ci
+
+            LEFT JOIN (
+                SELECT
+                    TRIM(Behandlung) AS behandlung_key,
+                    SUM(COALESCE(pro, 0)) AS pro,
+                    SUM(COALESCE(neutral, 0)) AS neutral,
+                    SUM(COALESCE(contra, 0)) AS contra
+                FROM lcn_raw_votes
+                WHERE Behandlung IS NOT NULL
+                  AND TRIM(Behandlung) <> ''
+                GROUP BY TRIM(Behandlung)
+            ) rv
+                ON LOWER(TRIM(t.behandlung)) COLLATE utf8mb4_unicode_ci
+                 = LOWER(rv.behandlung_key) COLLATE utf8mb4_unicode_ci
+
+            WHERE c.dr_id = :id
+        ) AS calculated
+
         ORDER BY
             CASE
-                WHEN c.sort_order IS NULL OR c.sort_order = 0 THEN 999999
-                ELSE c.sort_order
+                WHEN calculated.sort_order IS NULL OR calculated.sort_order = 0 THEN 999999
+                ELSE calculated.sort_order
             END ASC,
-            t.typ ASC,
-            t.behandlung ASC
+            calculated.typ ASC,
+            calculated.behandlung ASC
     ";
 
     $treatmentsStmt = $pdo->prepare($treatmentsSql);
@@ -297,6 +376,13 @@ try {
     foreach ($treatments as &$treatment) {
         $treatment['treat_id'] = (int)$treatment['treat_id'];
         $treatment['sort_order'] = $treatment['sort_order'] !== null ? (int)$treatment['sort_order'] : null;
+        $treatment['pro'] = (int)$treatment['pro'];
+        $treatment['neutral'] = (int)$treatment['neutral'];
+        $treatment['contra'] = (int)$treatment['contra'];
+        $treatment['total_votes'] = (int)$treatment['total_votes'];
+        $treatment['positive_ratio'] = (int)$treatment['positive_ratio'];
+        $treatment['neutral_ratio'] = (int)$treatment['neutral_ratio'];
+        $treatment['negative_ratio'] = (int)$treatment['negative_ratio'];
     }
     unset($treatment);
 

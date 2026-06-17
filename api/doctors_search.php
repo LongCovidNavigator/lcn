@@ -85,9 +85,28 @@ function getOptionalStringParam($name, $maxLength = 80) {
     return $value;
 }
 
+function getOptionalIntParam($name, $default, $min, $max) {
+    if (!isset($_GET[$name]) || $_GET[$name] === '') {
+        return (int)$default;
+    }
+
+    $value = filter_var($_GET[$name], FILTER_VALIDATE_INT);
+
+    if ($value === false) {
+        throw new InvalidArgumentException("Parameter ist keine gültige Ganzzahl: " . $name);
+    }
+
+    if ($value < $min || $value > $max) {
+        throw new InvalidArgumentException("Parameter außerhalb des erlaubten Bereichs: " . $name);
+    }
+
+    return (int)$value;
+}
+
 try {
     $lat = getFloatParam('lat', -90, 90);
     $lng = getFloatParam('lng', -180, 180);
+    $drId = getOptionalIntParam('dr_id', 0, 0, 999999);
 
     $minPositiveRatio = getOptionalFloatParam('minPositiveRatio', 0, 0, 100);
     $maxNegativeRatio = getOptionalFloatParam('maxNegativeRatio', 100, 0, 100);
@@ -140,45 +159,49 @@ try {
 
     $whereParts = [];
 
-    if ($radiusEnabled) {
-        if ($includeNoCoords) {
-            $whereParts[] = "(distance_km <= :radiusKm OR has_coordinates = 0)";
-        } else {
-            $whereParts[] = "distance_km <= :radiusKm";
+    if ($drId > 0) {
+        $whereParts[] = "dr_id = :dr_id";
+    } else {
+        if ($radiusEnabled) {
+            if ($includeNoCoords) {
+                $whereParts[] = "(distance_km <= :radiusKm OR has_coordinates = 0)";
+            } else {
+                $whereParts[] = "distance_km <= :radiusKm";
+            }
         }
-    }
 
-    $whereParts[] = "positive_ratio >= :minPositiveRatio";
-    $whereParts[] = "negative_ratio <= :maxNegativeRatio";
+        $whereParts[] = "positive_ratio >= :minPositiveRatio";
+        $whereParts[] = "negative_ratio <= :maxNegativeRatio";
 
-    if ($acceptsGkv && $acceptsPkv) {
-        $whereParts[] = "(dr_accepts_gkv = 'yes' OR dr_accepts_pkv = 'yes')";
-    } elseif ($acceptsGkv) {
-        $whereParts[] = "dr_accepts_gkv = 'yes'";
-    } elseif ($acceptsPkv) {
-        $whereParts[] = "dr_accepts_pkv = 'yes'";
-    }
+        if ($acceptsGkv && $acceptsPkv) {
+            $whereParts[] = "(dr_accepts_gkv = 'yes' OR dr_accepts_pkv = 'yes')";
+        } elseif ($acceptsGkv) {
+            $whereParts[] = "dr_accepts_gkv = 'yes'";
+        } elseif ($acceptsPkv) {
+            $whereParts[] = "dr_accepts_pkv = 'yes'";
+        }
 
-    if ($hasWebsite) {
-        $whereParts[] = "(
-            (loc_website IS NOT NULL AND loc_website <> '')
-            OR (dr_website IS NOT NULL AND dr_website <> '')
-        )";
-    }
+        if ($hasWebsite) {
+            $whereParts[] = "(
+                (loc_website IS NOT NULL AND loc_website <> '')
+                OR (dr_website IS NOT NULL AND dr_website <> '')
+            )";
+        }
 
-    if ($hasEmail) {
-        $whereParts[] = "(
-            (loc_email IS NOT NULL AND loc_email <> '')
-            OR (dr_email IS NOT NULL AND dr_email <> '')
-        )";
-    }
+        if ($hasEmail) {
+            $whereParts[] = "(
+                (loc_email IS NOT NULL AND loc_email <> '')
+                OR (dr_email IS NOT NULL AND dr_email <> '')
+            )";
+        }
 
-    if ($hasPhone) {
-        $whereParts[] = "(loc_phone IS NOT NULL AND loc_phone <> '')";
-    }
+        if ($hasPhone) {
+            $whereParts[] = "(loc_phone IS NOT NULL AND loc_phone <> '')";
+        }
 
-    if ($city !== '') {
-        $whereParts[] = "loc_city LIKE :city";
+        if ($city !== '') {
+            $whereParts[] = "loc_city LIKE :city";
+        }
     }
 
     $whereSql = count($whereParts) > 0
@@ -212,55 +235,44 @@ try {
             FROM (
                 SELECT
                     d.dr_id,
-					d.dr_display_name,
-					d.dr_type,
-					d.dr_is_dr,
-					d.dr_title_raw,
-					d.dr_firstname,
-					d.dr_lastname,
-					CASE
-						WHEN d.dr_lastname IS NOT NULL
-						 AND TRIM(d.dr_lastname) <> ''
-						THEN
-							CASE
-								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'von %'
-								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
-
-								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'vom %'
-								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
-
-								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'van %'
-								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
-
-								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'zu %'
-								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 4))
-
-								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'zum %'
-								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
-
-								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'zur %'
-								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
-
-								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'de %'
-								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 4))
-
-								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'der %'
-								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
-
-								WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'den %'
-								THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
-
-								ELSE TRIM(d.dr_lastname)
-							END
-
-						WHEN d.dr_org_name IS NOT NULL
-						 AND TRIM(d.dr_org_name) <> ''
-						THEN TRIM(d.dr_org_name)
-
-						ELSE TRIM(d.dr_display_name)
-					END AS dr_sort_lastname,
-					d.dr_org_name,
-					d.dr_website AS dr_website,
+                    d.dr_display_name,
+                    d.dr_type,
+                    d.dr_is_dr,
+                    d.dr_title_raw,
+                    d.dr_firstname,
+                    d.dr_lastname,
+                    CASE
+                        WHEN d.dr_lastname IS NOT NULL
+                         AND TRIM(d.dr_lastname) <> ''
+                        THEN
+                            CASE
+                                WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'von %'
+                                THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+                                WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'vom %'
+                                THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+                                WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'van %'
+                                THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+                                WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'zu %'
+                                THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 4))
+                                WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'zum %'
+                                THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+                                WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'zur %'
+                                THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+                                WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'de %'
+                                THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 4))
+                                WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'der %'
+                                THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+                                WHEN LOWER(TRIM(d.dr_lastname)) LIKE 'den %'
+                                THEN TRIM(SUBSTRING(TRIM(d.dr_lastname), 5))
+                                ELSE TRIM(d.dr_lastname)
+                            END
+                        WHEN d.dr_org_name IS NOT NULL
+                         AND TRIM(d.dr_org_name) <> ''
+                        THEN TRIM(d.dr_org_name)
+                        ELSE TRIM(d.dr_display_name)
+                    END AS dr_sort_lastname,
+                    d.dr_org_name,
+                    d.dr_website AS dr_website,
 
                     l.loc_id,
                     l.loc_label,
@@ -353,15 +365,20 @@ try {
     $stmt->bindValue(':lat1', $lat);
     $stmt->bindValue(':lat2', $lat);
     $stmt->bindValue(':lng1', $lng);
-    $stmt->bindValue(':minPositiveRatio', $minPositiveRatio);
-    $stmt->bindValue(':maxNegativeRatio', $maxNegativeRatio);
 
-    if ($radiusEnabled) {
-        $stmt->bindValue(':radiusKm', $radiusKm);
-    }
+    if ($drId > 0) {
+        $stmt->bindValue(':dr_id', $drId);
+    } else {
+        $stmt->bindValue(':minPositiveRatio', $minPositiveRatio);
+        $stmt->bindValue(':maxNegativeRatio', $maxNegativeRatio);
 
-    if ($city !== '') {
-        $stmt->bindValue(':city', '%' . $city . '%');
+        if ($radiusEnabled) {
+            $stmt->bindValue(':radiusKm', $radiusKm);
+        }
+
+        if ($city !== '') {
+            $stmt->bindValue(':city', '%' . $city . '%');
+        }
     }
 
     $stmt->execute();
@@ -413,6 +430,7 @@ try {
         'radiusEnabled' => $radiusEnabled,
         'radiusKm' => $radiusEnabled ? $radiusKm : null,
         'filters' => [
+            'dr_id' => $drId,
             'minPositiveRatio' => $minPositiveRatio,
             'maxNegativeRatio' => $maxNegativeRatio,
             'acceptsGkv' => $acceptsGkv,

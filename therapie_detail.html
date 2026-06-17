@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Covid Navigator - Therapie-Steckbrief</title>
+
+    <link rel="stylesheet" href="styles/general.css">
+    <link rel="stylesheet" href="styles/navigation.css">
+    <link rel="stylesheet" href="styles/footer-style.css">
+    <link rel="stylesheet" href="styles/therapien_karte.css">
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link rel="stylesheet" href="styles/therapie_detail.css">
+</head>
+
+<script>
+    function toggleMobileMenu() {
+        const navList = document.querySelector('.main-nav ul');
+        navList.classList.toggle('show');
+    }
+</script>
+
+<body class="treatment-map-page treatment-detail-page">
+
+    <div id="header-placeholder"></div>
+
+    <main class="treatment-detail-page-shell">
+        <section class="treatment-detail-top-panel">
+            <a class="treatment-detail-back-link" href="therapien_karte.html">← Zurück zur Therapiesuche</a>
+        </section>
+
+        <section id="treatment-detail-status" class="treatment-detail-status">
+            Lade Therapie-Steckbrief …
+        </section>
+
+        <section id="treatment-detail-content" class="treatment-detail-content is-hidden">
+
+            <nav class="treatment-detail-sticky-header" aria-label="Therapie-Steckbrief und Schnellaktionen">
+                <div class="treatment-detail-sticky-profile">
+                    <div class="treatment-detail-avatar" id="treatment-detail-avatar">TH</div>
+
+                    <div class="treatment-detail-sticky-profile-main">
+                        <h1 id="treatment-detail-title">Therapie wird geladen …</h1>
+                        <p id="treatment-detail-subtitle" class="treatment-detail-subtitle">Bitte kurz warten.</p>
+
+                        <div id="treatment-detail-tags" class="treatment-detail-tag-row"></div>
+                    </div>
+                </div>
+
+                <div class="treatment-detail-action-summary">
+                    <div class="treatment-detail-action-summary-item">
+                        <span class="treatment-detail-action-label">Anbieter</span>
+                        <strong id="treatment-detail-provider-count">0</strong>
+                    </div>
+
+                    <div class="treatment-detail-action-summary-item">
+                        <span class="treatment-detail-action-label">Bewertungen</span>
+                        <strong id="treatment-detail-total-votes">0</strong>
+                    </div>
+                </div>
+
+                <div class="treatment-detail-action-votes" aria-label="Diese Therapie bewerten">
+                    <span>Bewerten:</span>
+
+                    <button
+                        type="button"
+                        class="treatment-detail-vote-button treatment-detail-action-vote treatment-detail-action-vote-positive"
+                        data-vote-type="hilft"
+                    >
+                        Positiv
+                    </button>
+
+                    <button
+                        type="button"
+                        class="treatment-detail-vote-button treatment-detail-action-vote treatment-detail-action-vote-neutral"
+                        data-vote-type="gleich"
+                    >
+                        Neutral
+                    </button>
+
+                    <button
+                        type="button"
+                        class="treatment-detail-vote-button treatment-detail-action-vote treatment-detail-action-vote-negative"
+                        data-vote-type="verschlechterung"
+                    >
+                        Negativ
+                    </button>
+                </div>
+            </nav>
+
+            <section class="treatment-detail-guided-section">
+                <aside class="treatment-detail-question-intro">
+                    <div class="treatment-detail-question-number">1</div>
+                    <div>
+                        <h2>Kurzüberblick</h2>
+                        <p>Bewertungen, Anbieteranzahl und vorhandene Hinweise.</p>
+                    </div>
+                </aside>
+
+                <div class="treatment-detail-question-content treatment-detail-overview-grid">
+                    <article class="treatment-detail-info-card treatment-detail-rating-card">
+                        <h3>Bewertungen <span id="treatment-detail-rating-card-total">(0 insgesamt)</span></h3>
+                        <div id="treatment-detail-rating"></div>
+                    </article>
+
+                    <article class="treatment-detail-info-card">
+                        <h3>Kategorie / Typ</h3>
+                        <div id="treatment-detail-category" class="treatment-detail-main-text"></div>
+                    </article>
+
+                    <article class="treatment-detail-info-card">
+                        <h3>Anbieter</h3>
+                        <div id="treatment-detail-provider-card" class="treatment-detail-main-text"></div>
+                    </article>
+
+                    <article class="treatment-detail-info-card treatment-detail-note-card">
+                        <h3>Hinweis</h3>
+                        <div id="treatment-detail-note" class="treatment-detail-main-text"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="treatment-detail-guided-section">
+                <aside class="treatment-detail-question-intro">
+                    <div class="treatment-detail-question-number">2</div>
+                    <div>
+                        <h2>Anbieter / Ärzt:innen</h2>
+                        <p>Mit dieser Therapie verknüpfte Einträge aus der LCN-Datenbank.</p>
+                    </div>
+                </aside>
+
+                <div class="treatment-detail-question-content">
+                    <section id="treatment-detail-provider-map-panel" class="treatment-detail-provider-map-panel is-hidden" aria-label="Anbieterkarte">
+                        <div class="treatment-detail-provider-map-header">
+                            <span>Standorte auf der Karte</span>
+                            <span id="treatment-detail-provider-map-count" class="treatment-detail-provider-map-count"></span>
+                        </div>
+
+                        <div id="treatment-detail-provider-map" class="treatment-detail-provider-map"></div>
+                    </section>
+
+                    <div id="treatment-detail-providers" class="treatment-detail-provider-list"></div>
+                </div>
+            </section>
+
+            <section class="treatment-detail-guided-section">
+                <aside class="treatment-detail-question-intro">
+                    <div class="treatment-detail-question-number">3</div>
+                    <div>
+                        <h2>Quellen / Referenzen</h2>
+                        <p>In der Datenbank hinterlegte Referenzen. Keine medizinische Empfehlung.</p>
+                    </div>
+                </aside>
+
+                <div class="treatment-detail-question-content">
+                    <div id="treatment-detail-sources" class="treatment-detail-source-list"></div>
+                </div>
+            </section>
+
+            <section id="treatment-detail-alias-section" class="treatment-detail-guided-section is-hidden">
+                <aside class="treatment-detail-question-intro">
+                    <div class="treatment-detail-question-number">4</div>
+                    <div>
+                        <h2>Alternative Namen</h2>
+                        <p>Weitere Bezeichnungen oder Suchbegriffe für diese Therapie.</p>
+                    </div>
+                </aside>
+
+                <div class="treatment-detail-question-content">
+                    <div id="treatment-detail-aliases" class="treatment-detail-alias-list"></div>
+                </div>
+            </section>
+
+            <section class="treatment-detail-disclaimer" aria-label="Medizinischer Hinweis">
+                <strong>Wichtig:</strong>
+                Die Bewertungen zeigen Nutzererfahrungen im Long Covid Navigator.
+                Sie sind keine medizinische Empfehlung und ersetzen keine ärztliche Beratung.
+                Aus den Bewertungen wird keine medizinische Wirksamkeit abgeleitet.
+            </section>
+
+        </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="scripts/therapie_detail.js"></script>
+
+    <div id="footer-placeholder"></div>
+
+    <script>
+        fetch("components/footer.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("footer-placeholder").innerHTML = data;
+            });
+    </script>
+
+    <script>
+        fetch("components/header.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("header-placeholder").innerHTML = data;
+            });
+    </script>
+
+</body>
+</html>

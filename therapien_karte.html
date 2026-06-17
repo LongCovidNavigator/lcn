@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Covid Navigator - Therapien</title>
+
+    <link rel="stylesheet" href="styles/general.css">
+    <link rel="stylesheet" href="styles/navigation.css">
+    <link rel="stylesheet" href="styles/footer-style.css">
+    <link rel="stylesheet" href="styles/lcnprotocol_table.css">
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link rel="stylesheet" href="styles/therapien_karte.css">
+</head>
+
+<script>
+    function toggleMobileMenu() {
+        const navList = document.querySelector('.main-nav ul');
+        navList.classList.toggle('show');
+    }
+</script>
+
+<body class="treatment-map-page">
+
+    <div id="header-placeholder"></div>
+
+    <div class="container">
+        <section class="treatment-page-intro" aria-label="Einführung Therapiesuche">
+            <h1>Therapien &amp; Behandlungen</h1>
+
+            <p>
+                Übersicht über Behandlungsoptionen im Long Covid Navigator.
+                Die Bewertungen sind Nutzererfahrungen und keine medizinische Empfehlung.
+            </p>
+        </section>
+
+        <section class="treatment-navigation-panel" aria-label="Navigation für Therapiesuche">
+            <button
+                id="treatment-navigation-toggle-button"
+                class="treatment-navigation-header"
+                type="button"
+                aria-expanded="true"
+                aria-controls="treatment-navigation-content"
+            >
+                <span class="treatment-navigation-header-left">
+                    <span class="treatment-navigation-header-icon" aria-hidden="true">☷</span>
+                    <span>Navigation</span>
+                </span>
+                <span class="treatment-navigation-chevron" aria-hidden="true">⌃</span>
+            </button>
+
+            <div id="treatment-navigation-content" class="treatment-navigation-content">
+                <div class="treatment-navigation-grid">
+                    <section class="treatment-nav-section treatment-nav-section-sort">
+                        <h3 class="treatment-nav-heading">
+                            Sortierung
+                            <span class="treatment-nav-info" data-tooltip="Legt fest, in welcher Reihenfolge die Therapien angezeigt werden. Entfernung funktioniert, sobald ein Kartenstandort gesetzt ist." tabindex="0" aria-label="Info: Sortierung">i</span>
+                        </h3>
+
+                        <label class="treatment-nav-label" for="treatment-sort-select">Sortieren nach</label>
+                        <select id="treatment-sort-select" class="treatment-nav-select">
+                            <option value="name:asc">Name A–Z</option>
+                            <option value="name:desc">Name Z–A</option>
+                            <option value="positive_ratio:desc">Positive Erfahrungen [%] ↓</option>
+                            <option value="positive_ratio:asc">Positive Erfahrungen [%] ↑</option>
+                            <option value="negative_ratio:asc">Negative Erfahrungen [%] ↑</option>
+                            <option value="negative_ratio:desc">Negative Erfahrungen [%] ↓</option>
+                            <option value="total_votes:desc">Anzahl Bewertungen ↓</option>
+                            <option value="total_votes:asc">Anzahl Bewertungen ↑</option>
+                            <option value="provider_count:desc">Anbieteranzahl gesamt ↓</option>
+                            <option value="provider_count:asc">Anbieteranzahl gesamt ↑</option>
+                            <option value="matching_provider_count:desc">Anbieter im Suchgebiet ↓</option>
+                            <option value="matching_provider_count:asc">Anbieter im Suchgebiet ↑</option>
+                            <option value="distance:asc">Entfernung nächster Anbieter ↑</option>
+                            <option value="distance:desc">Entfernung nächster Anbieter ↓</option>
+                        </select>
+                    </section>
+
+                    <section class="treatment-nav-section treatment-nav-section-search">
+                        <h3 class="treatment-nav-heading">
+                            Suche
+                            <span class="treatment-nav-info" data-tooltip="Durchsucht den Namen und die Hinweise der Therapie." tabindex="0" aria-label="Info: Suche">i</span>
+                        </h3>
+
+                        <label class="treatment-nav-label" for="treatment-search-input">Suchbegriff</label>
+                        <input
+                            id="treatment-search-input"
+                            class="treatment-nav-text-input"
+                            type="text"
+                            placeholder="z. B. LDN, HBO, Akupunktur"
+                        >
+                    </section>
+
+                    <section class="treatment-nav-section treatment-nav-section-category">
+                        <h3 class="treatment-nav-heading">
+                            Kategorie
+                            <span class="treatment-nav-info" data-tooltip="Filtert nach dem Typ bzw. der Kategorie aus der Treatment-Tabelle." tabindex="0" aria-label="Info: Kategorie">i</span>
+                        </h3>
+
+                        <label class="treatment-nav-label" for="treatment-category-select">Kategorie</label>
+                        <select id="treatment-category-select" class="treatment-nav-select">
+                            <option value="">Alle Kategorien</option>
+                        </select>
+                    </section>
+
+                    <section class="treatment-nav-section treatment-nav-section-rating">
+                        <h3 class="treatment-nav-heading">
+                            Bewertung
+                            <span class="treatment-nav-info" data-tooltip="Filtert nach Nutzererfahrungen: positive Erfahrungen mindestens X %, negative Erfahrungen höchstens Y %." tabindex="0" aria-label="Info: Bewertung">i</span>
+                        </h3>
+
+                        <div class="treatment-rating-control">
+                            <label class="treatment-nav-label" for="treatment-min-positive-input">
+                                Positive Erfahrungen (mind.)
+                            </label>
+
+                            <div class="treatment-range-row">
+                                <div class="treatment-range-wrap">
+                                    <input
+                                        id="treatment-min-positive-range"
+                                        class="treatment-nav-range"
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        step="1"
+                                        value="0"
+                                    >
+                                    <div class="treatment-range-scale">
+                                        <span>0</span>
+                                        <span>50</span>
+                                        <span>100</span>
+                                    </div>
+                                </div>
+
+                                <input
+                                    id="treatment-min-positive-input"
+                                    class="treatment-nav-number"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    value="0"
+                                >
+                                <span class="treatment-percent-label">%</span>
+                            </div>
+                        </div>
+
+                        <div class="treatment-rating-control">
+                            <label class="treatment-nav-label" for="treatment-max-negative-input">
+                                Negative Erfahrungen (max.)
+                            </label>
+
+                            <div class="treatment-range-row">
+                                <div class="treatment-range-wrap">
+                                    <input
+                                        id="treatment-max-negative-range"
+                                        class="treatment-nav-range"
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        step="1"
+                                        value="100"
+                                    >
+                                    <div class="treatment-range-scale">
+                                        <span>0</span>
+                                        <span>50</span>
+                                        <span>100</span>
+                                    </div>
+                                </div>
+
+                                <input
+                                    id="treatment-max-negative-input"
+                                    class="treatment-nav-number"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    value="100"
+                                >
+                                <span class="treatment-percent-label">%</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="treatment-nav-section treatment-nav-section-provider">
+                        <h3 class="treatment-nav-heading">
+                            Anbieter
+                            <span class="treatment-nav-info" data-tooltip="Filtert danach, ob und wie viele Ärzt:innen oder Anbieter zu einer Therapie hinterlegt sind." tabindex="0" aria-label="Info: Anbieter">i</span>
+                        </h3>
+
+                        <label class="treatment-nav-label" for="treatment-min-provider-input">Mindestanzahl Anbieter</label>
+                        <input
+                            id="treatment-min-provider-input"
+                            class="treatment-nav-number treatment-provider-number"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value="0"
+                        >
+
+                        <label class="treatment-nav-checkbox-row" for="treatment-only-with-provider-input">
+                            <input
+                                id="treatment-only-with-provider-input"
+                                type="checkbox"
+                            >
+                            Nur Therapien mit Anbieter
+                        </label>
+                    </section>
+
+                    <section class="treatment-nav-section treatment-nav-section-location">
+                        <h3 class="treatment-nav-heading">
+                            Ort / Karte
+                            <span class="treatment-nav-info" data-tooltip="Setzt deinen Kartenstandort. Optional kannst du die Suche auf Anbieter in deiner Stadt oder in einem frei gewählten Radius beschränken." tabindex="0" aria-label="Info: Ort und Karte">i</span>
+                        </h3>
+
+                        <label class="treatment-nav-label" for="treatment-location-input">Kartenstandort / meine Position</label>
+                        <input
+                            id="treatment-location-input"
+                            class="treatment-nav-text-input"
+                            type="text"
+                            value=""
+                            placeholder="z. B. 50677 Köln"
+                        >
+
+                        <label class="treatment-nav-label" for="treatment-radius-input" style="margin-top: 10px;">Radius um meinen Standort in km</label>
+                        <input
+                            id="treatment-radius-input"
+                            class="treatment-nav-number treatment-provider-number"
+                            type="number"
+                            min="0"
+                            max="1000"
+                            step="1"
+                            value="0"
+                            placeholder="z. B. 25"
+                        >
+
+                        <label class="treatment-nav-checkbox-row" for="treatment-only-current-city-input" style="margin-top: 10px;">
+                            <input
+                                id="treatment-only-current-city-input"
+                                type="checkbox"
+                            >
+                            Nur in meiner Stadt suchen
+                        </label>
+
+                        <div class="treatment-location-button-row">
+                            <button id="treatment-location-apply-button" class="treatment-location-apply-button" type="button">
+                                Standort setzen
+                            </button>
+
+                            <button id="treatment-location-reset-button" class="treatment-location-reset-button" type="button">
+                                Standort zurücksetzen
+                            </button>
+                        </div>
+
+                        <p id="treatment-location-status" class="treatment-location-status">
+                            Kein Kartenstandort gesetzt.
+                        </p>
+                    </section>
+                </div>
+
+                <div class="treatment-navigation-actions">
+                    <span id="treatment-results-count" class="treatment-results-count">
+                        -
+                    </span>
+
+                    <div class="treatment-navigation-button-group">
+                        <button id="treatment-filter-apply-button" class="treatment-navigation-apply-button" type="button">
+                            Filter anwenden
+                        </button>
+
+                        <button id="treatment-filter-reset-button" class="treatment-navigation-reset-button" type="button">
+                            Filter zurücksetzen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="treatment-map-panel" aria-label="Karte">
+            <button
+                id="treatment-map-toggle-button"
+                class="treatment-map-header"
+                type="button"
+                aria-expanded="true"
+                aria-controls="treatment-map-content"
+            >
+                <span class="treatment-map-header-left">
+                    <span class="treatment-map-header-icon" aria-hidden="true">▦</span>
+                    <span>Karte</span>
+                </span>
+                <span class="treatment-map-chevron" aria-hidden="true">⌃</span>
+            </button>
+
+            <div id="treatment-map-content" class="treatment-map-content">
+                <section id="treatment-map-section" class="treatment-map-section">
+                    <div id="treatment-map"></div>
+                </section>
+
+                <p id="treatment-map-status" class="treatment-map-status">
+                    Bitte Kartenstandort setzen, um die nächsten Anbieterstandorte der gefundenen Therapien auf der Karte zu sehen.
+                </p>
+            </div>
+        </section>
+
+        <section class="treatment-results-panel" aria-label="Therapien und Behandlungen">
+            <div class="treatment-results-header">
+                <span class="treatment-results-header-left">
+                    <span class="treatment-results-header-icon" aria-hidden="true">▤</span>
+                    <span>Therapien</span>
+                </span>
+
+                <div class="treatment-view-switch treatment-view-switch-in-header" aria-label="Ansicht wechseln">
+                    <button
+                        id="treatment-card-view-button"
+                        class="treatment-view-switch-button is-active"
+                        type="button"
+                        data-view="cards"
+                    >
+                        Kacheln
+                    </button>
+
+                    <button
+                        id="treatment-table-view-button"
+                        class="treatment-view-switch-button"
+                        type="button"
+                        data-view="table"
+                    >
+                        Tabelle
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="treatment-card-results-section" class="treatment-card-results-section">
+            <div id="treatment-card-results" class="treatment-card-grid">
+                <p class="treatment-empty-state">Noch keine Ergebnisse geladen.</p>
+            </div>
+        </section>
+
+        <section id="treatment-table-results-section" class="treatment-table-results-section is-hidden">
+            <table class="treatment-results-table">
+                <thead>
+                    <tr>
+						<th id="treatment-table-rank-header" aria-label="Sortierreihenfolge">▲</th>
+						<th>Therapie</th>
+						<th>Kategorie</th>
+						<th>Erfahrung <span class="treatment-table-header-note">(n = Votes)</span></th>
+						<th>Anbieter</th>
+						<th>Entfernung / Ort</th>
+					</tr>
+                </thead>
+
+                <tbody id="treatment-results-body">
+                    <tr>
+                        <td colspan="6">Noch keine Ergebnisse geladen.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="scripts/therapien_karte.js"></script>
+
+    <div id="footer-placeholder"></div>
+
+    <script>
+        fetch("components/footer.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("footer-placeholder").innerHTML = data;
+            });
+    </script>
+
+    <script>
+        fetch("components/header.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("header-placeholder").innerHTML = data;
+            });
+    </script>
+
+</body>
+</html>
