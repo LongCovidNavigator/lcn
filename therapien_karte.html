@@ -342,9 +342,40 @@
                         </div>
                     </div>
 
-                    <p id="treatment-alias-smart-status" class="treatment-results-search-status">
+                                        <p id="treatment-alias-smart-status" class="treatment-results-search-status">
                         Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.
                     </p>
+
+                    <div class="treatment-results-mode-switch" aria-label="Ergebnisansicht wählen">
+                        <button
+                            id="treatment-results-hit-view-button"
+                            class="treatment-results-mode-button is-active"
+                            type="button"
+                        >
+                            Trefferansicht
+                        </button>
+
+                        <button
+                            id="treatment-compare-show-button"
+                            class="treatment-results-mode-button"
+                            type="button"
+                            disabled
+                        >
+                            Vergleichsansicht
+                        </button>
+                    </div>
+
+                    <div id="treatment-compare-selection" class="treatment-compare-selection is-hidden" aria-live="polite">
+                        <div class="treatment-compare-selection-topline">
+                            <span id="treatment-compare-status" class="treatment-compare-status"></span>
+
+                            <button id="treatment-compare-clear-button" class="treatment-compare-clear-button" type="button" disabled>
+                                Auswahl leeren
+                            </button>
+                        </div>
+
+                        <div id="treatment-compare-chips" class="treatment-compare-chips"></div>
+                    </div>
                 </div>
             </div>
         </section>

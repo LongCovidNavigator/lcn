@@ -10,6 +10,9 @@
 let currentTreatments = [];
 let currentCategories = [];
 let currentViewMode = "cards";
+let selectedTreatmentsForCompare = [];
+let showOnlyTreatmentCompareSelection = false;
+const treatmentCompareMaxItems = 5;
 
 let treatmentMap = null;
 let treatmentMarkerGroup = null;
@@ -17,7 +20,8 @@ let treatmentUserLocationMarker = null;
 let treatmentRadiusCircle = null;
 let treatmentUserLocationIcon = null;
 let currentTreatmentUserLocation = null;
-let currentTreatmentMapData = null;
+let currentTreatmentCompareMapData = null;
+let currentTreatmentCompareMapKey = "";
 let treatmentSmartSearchOverride = null;
 let treatmentAliasSmartSuggestController = null;
 let treatmentAliasSmartSuggestions = [];
@@ -44,8 +48,11 @@ async function initTreatmentPage() {
     initTreatmentMap();
     bindTreatmentNavigationEvents();
     bindTreatmentSmartSearchEvents();
+   
     bindTreatmentViewSwitchEvents();
+    bindTreatmentCompareControls();
     bindTreatmentCardContainerEvents();
+    bindTreatmentTableContainerEvents();
     bindTreatmentMapEvents();
     await loadTreatmentResults();
 }
@@ -68,21 +75,22 @@ async function loadTreatmentResults() {
             throw new Error("Unerwartetes API-Format.");
         }
 
-        currentTreatments = data.items.map(normalizeTreatment);
+        
+		currentTreatments = data.items.map(normalizeTreatment);
+        syncSelectedTreatmentsWithCurrentResults();
 		currentCategories = Array.isArray(data.categories) ? data.categories : [];
 		currentTreatmentMapData = data.map && typeof data.map === "object" ? data.map : null;
 
         applyClientSideTreatmentSort();
 
-        populateTreatmentCategorySelect(currentCategories);
-        renderCurrentTreatmentView();
+		populateTreatmentCategorySelect(currentCategories);
 
         updateTreatmentResultsCount(
             Number(data.count ?? currentTreatments.length),
             Number(data.total_count ?? currentTreatments.length)
         );
 
-        renderTreatmentMap(currentTreatments, currentTreatmentMapData);
+        refreshTreatmentDisplay();
 
     } catch (error) {
         console.error("Fehler beim Laden der Therapien:", error);
@@ -107,6 +115,7 @@ async function loadTreatmentResults() {
         updateTreatmentMapStatus("Die Kartendaten konnten nicht geladen werden.");
     }
 }
+
 
 function buildTreatmentSearchUrl() {
     const filters = getTreatmentFilters();
@@ -665,6 +674,55 @@ function bindTreatmentViewSwitchEvents() {
     }
 }
 
+
+function bindTreatmentCompareControls() {
+    const compareSelection = document.getElementById("treatment-compare-selection");
+    const hitViewButton = document.getElementById("treatment-results-hit-view-button");
+    const compareViewButton = document.getElementById("treatment-compare-show-button");
+    const clearButton = document.getElementById("treatment-compare-clear-button");
+
+    if (compareSelection) {
+        compareSelection.addEventListener("click", function (event) {
+            const removeButton = event.target.closest(".treatment-compare-chip-remove");
+
+            if (removeButton) {
+                removeTreatmentFromCompareSelection(Number(removeButton.getAttribute("data-treat-id")));
+            }
+        });
+    }
+
+    if (hitViewButton) {
+        hitViewButton.addEventListener("click", function () {
+            showOnlyTreatmentCompareSelection = false;
+            refreshTreatmentDisplay();
+        });
+    }
+
+    if (compareViewButton) {
+        compareViewButton.addEventListener("click", function () {
+            if (selectedTreatmentsForCompare.length === 0) {
+                return;
+            }
+
+            showOnlyTreatmentCompareSelection = true;
+            refreshTreatmentDisplay();
+        });
+    }
+
+    if (clearButton) {
+        clearButton.addEventListener("click", function () {
+            selectedTreatmentsForCompare = [];
+            showOnlyTreatmentCompareSelection = false;
+            currentTreatmentCompareMapData = null;
+            currentTreatmentCompareMapKey = "";
+            refreshTreatmentDisplay();
+        });
+    }
+
+    renderTreatmentCompareSelection();
+}
+
+
 function bindTreatmentCardContainerEvents() {
     const cardResults = document.getElementById("treatment-card-results");
 
@@ -673,6 +731,13 @@ function bindTreatmentCardContainerEvents() {
     }
 
     cardResults.addEventListener("click", function (event) {
+        const compareButton = event.target.closest(".treatment-compare-add-button");
+
+        if (compareButton) {
+            handleTreatmentCompareClick(compareButton);
+            return;
+        }
+
         const voteButton = event.target.closest(".treatment-card-vote-button");
 
         if (voteButton) {
@@ -695,6 +760,22 @@ function bindTreatmentCardContainerEvents() {
             }
 
             window.location.href = `therapie_detail.html?treat_id=${encodeURIComponent(treatId)}`;
+        }
+    });
+}
+
+function bindTreatmentTableContainerEvents() {
+    const tableBody = document.getElementById("treatment-results-body");
+
+    if (!tableBody) {
+        return;
+    }
+
+    tableBody.addEventListener("click", function (event) {
+        const compareButton = event.target.closest(".treatment-compare-add-button");
+
+        if (compareButton) {
+            handleTreatmentCompareClick(compareButton);
         }
     });
 }
@@ -726,16 +807,35 @@ function setTreatmentViewMode(viewMode) {
     renderCurrentTreatmentView();
 }
 
+function getDisplayedTreatments() {
+    return showOnlyTreatmentCompareSelection ? selectedTreatmentsForCompare : currentTreatments;
+}
+
+function refreshTreatmentDisplay() {
+    const displayedTreatments = getDisplayedTreatments();
+
+    renderCurrentTreatmentView();
+    renderTreatmentCompareSelection();
+
+    renderTreatmentMap(
+        displayedTreatments,
+        getTreatmentMapDataForCurrentView(displayedTreatments)
+    );
+
+    refreshTreatmentCompareMapDataIfNeeded(displayedTreatments);
+}
+
 function renderCurrentTreatmentView() {
     const tableBody = document.getElementById("treatment-results-body");
     const cardResults = document.getElementById("treatment-card-results");
+    const displayedTreatments = getDisplayedTreatments();
 
     if (currentViewMode === "cards") {
         if (tableBody) {
             tableBody.innerHTML = "";
         }
 
-        renderTreatmentCards(currentTreatments);
+        renderTreatmentCards(displayedTreatments);
         return;
     }
 
@@ -743,7 +843,7 @@ function renderCurrentTreatmentView() {
         cardResults.innerHTML = "";
     }
 
-    renderTreatmentResultsTable(currentTreatments);
+    renderTreatmentResultsTable(displayedTreatments);
 }
 
 function bindRangePair(rangeId, numberId, onChangeCallback) {
@@ -906,14 +1006,24 @@ function buildTreatmentTableRowHtml(treatment, index) {
     const experienceHtml = buildTreatmentExperienceHtml(treatment);
     const providerHtml = buildTreatmentProviderHtml(treatment);
     const distanceLocationHtml = buildTreatmentDistanceLocationHtml(treatment);
+    const isSelected = isTreatmentSelectedForCompare(treatment.treat_id);
 
     return `
         <tr data-treat-id="${treatment.treat_id}">
             <td class="treatment-table-rank">${index + 1}</td>
             <td class="treatment-table-name">
-                <a class="treatment-table-detail-link" href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">
-                    ${treatmentName}
-                </a>
+                <div class="treatment-table-name-stack">
+                    <a class="treatment-table-detail-link" href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">
+                        ${treatmentName}
+                    </a>
+                    <button
+                        type="button"
+                        class="treatment-compare-add-button treatment-compare-add-button-table ${isSelected ? "is-selected" : ""}"
+                        data-treat-id="${escapeHtml(treatment.treat_id)}"
+                    >
+                        ${isSelected ? "Ausgewählt" : "+ vergleichen"}
+                    </button>
+                </div>
             </td>
             <td>${categoryHtml}</td>
             <td>${experienceHtml}</td>
@@ -922,6 +1032,7 @@ function buildTreatmentTableRowHtml(treatment, index) {
         </tr>
     `;
 }
+
 
 function buildTreatmentDistanceLocationHtml(treatment) {
     const distanceText = treatment.nearest_provider_distance_km === null
@@ -1110,7 +1221,7 @@ function buildTreatmentCardHtml(treatment, index) {
                 </div>
             </section>
 
-            <footer class="treatment-card-footer">
+            <footer class="treatment-card-footer treatment-card-footer-with-compare">
                 <button
                     type="button"
                     class="treatment-card-detail-button"
@@ -1118,9 +1229,149 @@ function buildTreatmentCardHtml(treatment, index) {
                 >
                     Mehr Details
                 </button>
+
+                <button
+                    type="button"
+                    class="treatment-compare-add-button ${isTreatmentSelectedForCompare(treatment.treat_id) ? "is-selected" : ""}"
+                    data-treat-id="${escapeHtml(treatment.treat_id)}"
+                >
+                    ${isTreatmentSelectedForCompare(treatment.treat_id) ? "Ausgewählt" : "+ vergleichen"}
+                </button>
             </footer>
         </article>
     `;
+}
+
+function handleTreatmentCompareClick(button) {
+    const treatId = Number(button.getAttribute("data-treat-id"));
+
+    if (!treatId) {
+        return;
+    }
+
+    const treatment = currentTreatments.find(function (currentTreatment) {
+        return Number(currentTreatment.treat_id) === treatId;
+    }) || selectedTreatmentsForCompare.find(function (selectedTreatment) {
+        return Number(selectedTreatment.treat_id) === treatId;
+    });
+
+    if (treatment) {
+        addTreatmentToCompareSelection(treatment);
+    }
+}
+
+function addTreatmentToCompareSelection(treatment) {
+    const treatId = Number(treatment.treat_id);
+
+    if (!treatId) {
+        return;
+    }
+
+    if (!isTreatmentSelectedForCompare(treatId)) {
+        if (selectedTreatmentsForCompare.length >= treatmentCompareMaxItems) {
+            alert(`Du kannst maximal ${treatmentCompareMaxItems} Therapien gleichzeitig vergleichen.`);
+            return;
+        }
+
+        selectedTreatmentsForCompare.push({ ...treatment });
+		currentTreatmentCompareMapData = null;
+        currentTreatmentCompareMapKey = "";
+    }
+
+    renderTreatmentCompareSelection();
+    refreshTreatmentDisplay();
+}
+
+function removeTreatmentFromCompareSelection(treatId) {
+    selectedTreatmentsForCompare = selectedTreatmentsForCompare.filter(function (treatment) {
+        return Number(treatment.treat_id) !== Number(treatId);
+    });
+    
+	currentTreatmentCompareMapData = null;
+    currentTreatmentCompareMapKey = "";
+	
+    if (selectedTreatmentsForCompare.length === 0) {
+        showOnlyTreatmentCompareSelection = false;
+    }
+
+    refreshTreatmentDisplay();
+}
+
+function isTreatmentSelectedForCompare(treatId) {
+    return selectedTreatmentsForCompare.some(function (treatment) {
+        return Number(treatment.treat_id) === Number(treatId);
+    });
+}
+
+function syncSelectedTreatmentsWithCurrentResults() {
+    if (selectedTreatmentsForCompare.length === 0) {
+        showOnlyTreatmentCompareSelection = false;
+        return;
+    }
+
+    selectedTreatmentsForCompare = selectedTreatmentsForCompare.map(function (selectedTreatment) {
+        const freshTreatment = currentTreatments.find(function (currentTreatment) {
+            return Number(currentTreatment.treat_id) === Number(selectedTreatment.treat_id);
+        });
+
+        return freshTreatment ? { ...freshTreatment } : selectedTreatment;
+    });
+}
+
+function renderTreatmentCompareSelection() {
+    const container = document.getElementById("treatment-compare-selection");
+    const chipsContainer = document.getElementById("treatment-compare-chips");
+    const statusElement = document.getElementById("treatment-compare-status");
+    const hitViewButton = document.getElementById("treatment-results-hit-view-button");
+    const compareViewButton = document.getElementById("treatment-compare-show-button");
+    const clearButton = document.getElementById("treatment-compare-clear-button");
+
+    const hasSelection = selectedTreatmentsForCompare.length > 0;
+
+    if (container) {
+        container.classList.toggle("is-hidden", !hasSelection);
+    }
+
+    if (chipsContainer) {
+        chipsContainer.innerHTML = hasSelection
+            ? selectedTreatmentsForCompare.map(function (treatment) {
+                const name = treatment.behandlung || "Unbekannte Therapie";
+
+                return `
+                    <span class="treatment-compare-chip">
+                        <span class="treatment-compare-chip-name">${escapeHtml(name)}</span>
+                        <button
+                            type="button"
+                            class="treatment-compare-chip-remove"
+                            data-treat-id="${escapeHtml(treatment.treat_id)}"
+                            aria-label="${escapeHtml(name)} aus Vergleich entfernen"
+                        >
+                            ×
+                        </button>
+                    </span>
+                `;
+            }).join("")
+            : "";
+    }
+
+    if (statusElement) {
+        statusElement.textContent = hasSelection
+            ? `${selectedTreatmentsForCompare.length} von ${treatmentCompareMaxItems} Therapien ausgewählt.`
+            : "";
+    }
+
+    if (hitViewButton) {
+        hitViewButton.classList.toggle("is-active", !showOnlyTreatmentCompareSelection);
+    }
+
+    if (compareViewButton) {
+        compareViewButton.disabled = !hasSelection;
+        compareViewButton.classList.toggle("is-active", showOnlyTreatmentCompareSelection);
+    }
+
+    if (clearButton) {
+        clearButton.disabled = !hasSelection;
+    }
 }
 
 async function submitTreatmentVote(treatId, treatmentName, voteType, button) {
@@ -1214,9 +1465,13 @@ async function refreshSingleTreatment(treatId) {
     }
 
     currentTreatments[index] = updatedTreatment;
+
+    selectedTreatmentsForCompare = selectedTreatmentsForCompare.map(function (treatment) {
+        return Number(treatment.treat_id) === Number(treatId) ? updatedTreatment : treatment;
+    });
+
     applyClientSideTreatmentSort();
-    renderCurrentTreatmentView();
-    renderTreatmentMap(currentTreatments);
+    refreshTreatmentDisplay();
 }
 
 function buildTreatmentCategoryHtml(treatment) {
@@ -1425,6 +1680,190 @@ async function geocodeTreatmentLocation(query) {
     };
 }
 
+function getTreatmentMapDataForCurrentView(treatments) {
+    if (!showOnlyTreatmentCompareSelection) {
+        return currentTreatmentMapData;
+    }
+
+    const expectedKey = buildTreatmentCompareMapKey(treatments);
+
+    if (
+        currentTreatmentCompareMapData
+        && currentTreatmentCompareMapKey === expectedKey
+    ) {
+        return currentTreatmentCompareMapData;
+    }
+
+    return null;
+}
+
+function buildTreatmentCompareMapKey(treatments) {
+    const filters = getTreatmentFilters();
+
+    const treatmentIds = (treatments || [])
+        .map(function (treatment) {
+            return Number(treatment.treat_id || 0);
+        })
+        .filter(function (treatId) {
+            return treatId > 0;
+        })
+        .sort(function (a, b) {
+            return a - b;
+        })
+        .join(",");
+
+    const locationKey = currentTreatmentUserLocation
+        ? `${currentTreatmentUserLocation.lat},${currentTreatmentUserLocation.lng},${getCurrentTreatmentCity()}`
+        : "no-location";
+
+    return [
+        treatmentIds,
+        locationKey,
+        filters.onlyCurrentCity ? "city:1" : "city:0",
+        `radius:${filters.radiusKm}`
+    ].join("|");
+}
+
+async function refreshTreatmentCompareMapDataIfNeeded(treatments) {
+    if (!showOnlyTreatmentCompareSelection) {
+        return;
+    }
+
+    if (!currentTreatmentUserLocation) {
+        return;
+    }
+
+    if (!treatments || treatments.length === 0) {
+        currentTreatmentCompareMapData = null;
+        currentTreatmentCompareMapKey = "";
+        return;
+    }
+
+    const requestedKey = buildTreatmentCompareMapKey(treatments);
+
+    if (
+        currentTreatmentCompareMapData
+        && currentTreatmentCompareMapKey === requestedKey
+    ) {
+        return;
+    }
+
+    try {
+        const response = await fetch(buildTreatmentCompareMapUrl(treatments));
+
+        if (!response.ok) {
+            throw new Error("Vergleichs-Kartendaten konnten nicht geladen werden.");
+        }
+
+        const data = await response.json();
+
+        if (!data.ok) {
+            throw new Error("Unerwartetes API-Format für Vergleichs-Kartendaten.");
+        }
+
+        if (!showOnlyTreatmentCompareSelection) {
+            return;
+        }
+
+        if (buildTreatmentCompareMapKey(getDisplayedTreatments()) !== requestedKey) {
+            return;
+        }
+
+        currentTreatmentCompareMapData = data.map && typeof data.map === "object"
+            ? data.map
+            : null;
+
+        currentTreatmentCompareMapKey = requestedKey;
+
+        renderTreatmentMap(getDisplayedTreatments(), currentTreatmentCompareMapData);
+
+    } catch (error) {
+        console.warn("Vergleichs-Kartendaten konnten nicht aktualisiert werden:", error);
+    }
+}
+
+function buildTreatmentCompareMapUrl(treatments) {
+    const filters = getTreatmentFilters();
+    const params = new URLSearchParams();
+
+    const treatmentIds = (treatments || [])
+        .map(function (treatment) {
+            return Number(treatment.treat_id || 0);
+        })
+        .filter(function (treatId) {
+            return treatId > 0;
+        });
+
+    params.set("treat_ids", treatmentIds.length > 0 ? treatmentIds.join(",") : "0");
+
+    const currentCity = getCurrentTreatmentCity();
+
+    if (filters.onlyCurrentCity && currentCity !== "") {
+        params.set("provider_city", currentCity);
+    }
+
+    if (filters.radiusKm > 0 && currentTreatmentUserLocation) {
+        params.set("provider_lat", String(currentTreatmentUserLocation.lat));
+        params.set("provider_lng", String(currentTreatmentUserLocation.lng));
+        params.set("radius_km", String(filters.radiusKm));
+    }
+
+    params.set("min_positive", "0");
+    params.set("max_negative", "100");
+    params.set("min_provider", "0");
+    params.set("only_with_provider", "0");
+    params.set("sort", "name");
+    params.set("direction", "asc");
+
+    params.set("include_map", "1");
+    params.set("lat", String(currentTreatmentUserLocation.lat));
+    params.set("lng", String(currentTreatmentUserLocation.lng));
+
+    return `api/treatments_search.php?${params.toString()}`;
+}
+
+function filterTreatmentMapDataForTreatments(mapData, treatments) {
+    if (!mapData || typeof mapData !== "object") {
+        return null;
+    }
+
+    const treatmentIds = new Set(
+        (treatments || [])
+            .map(function (treatment) {
+                return Number(treatment.treat_id || 0);
+            })
+            .filter(function (treatId) {
+                return treatId > 0;
+            })
+    );
+
+    if (treatmentIds.size === 0) {
+        return {
+            ...mapData,
+            providers: [],
+            legend: []
+        };
+    }
+
+    const filteredProviders = Array.isArray(mapData.providers)
+        ? mapData.providers.filter(function (provider) {
+            return treatmentIds.has(Number(provider.treat_id || 0));
+        })
+        : [];
+
+    const filteredLegend = Array.isArray(mapData.legend)
+        ? mapData.legend.filter(function (item) {
+            return treatmentIds.has(Number(item.treat_id || 0));
+        })
+        : [];
+
+    return {
+        ...mapData,
+        providers: filteredProviders,
+        legend: filteredLegend
+    };
+}
+
 function renderTreatmentMap(treatments, mapData) {
     if (!treatmentMap) {
         return;
@@ -1440,39 +1879,42 @@ function renderTreatmentMap(treatments, mapData) {
         return;
     }
 
-    const activeMapData = mapData && typeof mapData === "object" ? mapData : currentTreatmentMapData;
+    const displayedTreatments = treatments || [];
+    const rawMapData = mapData && typeof mapData === "object" ? mapData : currentTreatmentMapData;
+    const activeMapData = filterTreatmentMapDataForTreatments(rawMapData, displayedTreatments);
+
     const useAllMatchingProviders = activeMapData
         && activeMapData.mode === "all_matching_providers"
         && Array.isArray(activeMapData.providers);
 
     const groups = useAllMatchingProviders
-        ? groupAllMatchingProvidersByLocation(activeMapData.providers, treatments || [])
-        : groupTreatmentsByNearestProviderLocation(treatments || []);
+        ? groupAllMatchingProvidersByLocation(activeMapData.providers, displayedTreatments)
+        : groupTreatmentsByNearestProviderLocation(displayedTreatments);
 
     const groupValues = Array.from(groups.values());
 
     if (groupValues.length === 0) {
-        updateTreatmentMapStatus("Für die aktuell gefundenen Therapien gibt es keine koordinierten Anbieterstandorte.");
+        updateTreatmentMapStatus("Für die aktuell angezeigten Therapien gibt es keine koordinierten Anbieterstandorte.");
         return;
     }
 
     treatmentMarkerGroup = L.featureGroup();
 
     groupValues.forEach(function (group) {
-		const markerOptions = useAllMatchingProviders
-			? { icon: createTreatmentColorMarkerIcon(group.colorIndex) }
-			: {};
+        const markerOptions = useAllMatchingProviders
+            ? { icon: createTreatmentColorMarkerIcon(group.colorIndex) }
+            : {};
 
-		const marker = L.marker([group.lat, group.lng], markerOptions);
+        const marker = L.marker([group.lat, group.lng], markerOptions);
 
-		marker.bindPopup(
-			useAllMatchingProviders
-				? buildAllMatchingProvidersPopupHtml(group)
-				: buildTreatmentMapPopupHtml(group)
-		);
+        marker.bindPopup(
+            useAllMatchingProviders
+                ? buildAllMatchingProvidersPopupHtml(group)
+                : buildTreatmentMapPopupHtml(group)
+        );
 
-		treatmentMarkerGroup.addLayer(marker);
-	});
+        treatmentMarkerGroup.addLayer(marker);
+    });
 
     treatmentMarkerGroup.addTo(treatmentMap);
 
@@ -1500,9 +1942,12 @@ function renderTreatmentMap(treatments, mapData) {
     const radiusPart = filters.radiusKm > 0
         ? ` im Radius von ${filters.radiusKm} km`
         : "";
+    const viewPart = showOnlyTreatmentCompareSelection
+        ? " in der Vergleichsansicht"
+        : "";
 
     if (useAllMatchingProviders) {
-        renderTreatmentMapLegend(activeMapData.legend || [], treatments || []);
+        renderTreatmentMapLegend([], displayedTreatments);
 
         const providerCount = groupValues.reduce(function (sum, group) {
             return sum + group.providers.length;
@@ -1511,7 +1956,7 @@ function renderTreatmentMap(treatments, mapData) {
         const treatmentCount = countUniqueTreatmentsInProviderGroups(groupValues);
 
         updateTreatmentMapStatus(
-            `${providerCount} Anbieterstandorte für ${treatmentCount} Therapien${cityPart}${radiusPart} auf der Karte. Farben zeigen die Therapie-Zuordnung.`
+            `${providerCount} Anbieterstandorte für ${treatmentCount} Therapien${viewPart}${cityPart}${radiusPart} auf der Karte. Farben zeigen die Therapie-Zuordnung.`
         );
         return;
     }
@@ -1521,7 +1966,7 @@ function renderTreatmentMap(treatments, mapData) {
     }, 0);
 
     updateTreatmentMapStatus(
-        `${treatmentCountOnMap} Therapien${cityPart}${radiusPart} mit nächstem Anbieterstandort auf der Karte. Mehrere Therapien am selben Standort werden in einem Popup gebündelt.`
+        `${treatmentCountOnMap} Therapien${viewPart}${cityPart}${radiusPart} mit nächstem Anbieterstandort auf der Karte. Mehrere Therapien am selben Standort werden in einem Popup gebündelt.`
     );
 }
 
@@ -1560,7 +2005,11 @@ function groupAllMatchingProvidersByLocation(providers, treatments) {
     const colorIndexByTreatId = buildTreatmentColorIndexMap(treatments);
 
     treatments.forEach(function (treatment) {
-        treatmentById.set(Number(treatment.treat_id), treatment);
+        const treatId = Number(treatment.treat_id || 0);
+
+        if (treatId > 0) {
+            treatmentById.set(treatId, treatment);
+        }
     });
 
     providers.forEach(function (provider) {
@@ -1568,11 +2017,16 @@ function groupAllMatchingProvidersByLocation(providers, treatments) {
             return;
         }
 
+        const treatId = Number(provider.treat_id || 0);
+
+        if (!treatmentById.has(treatId)) {
+            return;
+        }
+
         const lat = Number(provider.loc_lat);
         const lng = Number(provider.loc_lng);
         const drId = Number(provider.dr_id || 0);
         const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
-        const treatId = Number(provider.treat_id || 0);
         const colorIndex = colorIndexByTreatId.has(treatId)
             ? colorIndexByTreatId.get(treatId)
             : 0;
@@ -1602,11 +2056,7 @@ function groupAllMatchingProvidersByLocation(providers, treatments) {
             group.providers.push(providerEntry);
         }
 
-        const treatment = treatmentById.get(treatId) || {
-            treat_id: treatId,
-            behandlung: provider.treatment_name || "Unbekannte Therapie",
-            nearest_provider_distance_km: provider.distance_km ?? null
-        };
+        const treatment = treatmentById.get(treatId);
 
         group.providerMap.get(drId).treatments.push({
             treat_id: treatId,
@@ -1818,14 +2268,29 @@ function renderTreatmentMapLegend(legend, treatments) {
 }
 
 function buildTreatmentLegendItems(legend, treatments) {
+    const treatmentIds = new Set(
+        (treatments || [])
+            .map(function (treatment) {
+                return Number(treatment.treat_id || 0);
+            })
+            .filter(function (treatId) {
+                return treatId > 0;
+            })
+    );
+
     if (Array.isArray(legend) && legend.length > 0) {
-        return legend.slice(0, 5).map(function (item, index) {
-            return {
-                treat_id: Number(item.treat_id || 0),
-                treatment_name: item.treatment_name || "",
-                color_index: Number.isFinite(Number(item.color_index)) ? Number(item.color_index) : index
-            };
-        });
+        return legend
+            .filter(function (item) {
+                return treatmentIds.has(Number(item.treat_id || 0));
+            })
+            .slice(0, 5)
+            .map(function (item, index) {
+                return {
+                    treat_id: Number(item.treat_id || 0),
+                    treatment_name: item.treatment_name || "",
+                    color_index: Number.isFinite(Number(item.color_index)) ? Number(item.color_index) : index
+                };
+            });
     }
 
     return (treatments || []).slice(0, 5).map(function (treatment, index) {
@@ -2003,11 +2468,16 @@ function updateTreatmentResultsCount(filteredCount, totalCount) {
         ? ` · nur in meiner Stadt: ${currentCity}`
         : "";
 
-    const radiusSuffix = filters.radiusKm > 0
-        ? ` · Radius: ${filters.radiusKm} km`
-        : "";
+	const radiusSuffix = filters.radiusKm > 0
+		? ` · Radius: ${filters.radiusKm} km`
+		: "";
 
-    if (filteredCount === totalCount) {
+    if (showOnlyTreatmentCompareSelection) {
+        countElement.textContent = `${selectedTreatmentsForCompare.length} Therapien in der Vergleichsansicht${citySuffix}${radiusSuffix}`;
+        return;
+    }
+
+    if (filteredCount === totalCount) { 
         if (filteredCount === 1) {
             countElement.textContent = `1 Therapie gefunden${citySuffix}${radiusSuffix}`;
             return;
