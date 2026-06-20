@@ -81,21 +81,6 @@
                         </select>
                     </section>
 
-                    <section class="treatment-nav-section treatment-nav-section-search">
-                        <h3 class="treatment-nav-heading">
-                            Suche
-                            <span class="treatment-nav-info" data-tooltip="Durchsucht den Namen und die Hinweise der Therapie." tabindex="0" aria-label="Info: Suche">i</span>
-                        </h3>
-
-                        <label class="treatment-nav-label" for="treatment-search-input">Suchbegriff</label>
-                        <input
-                            id="treatment-search-input"
-                            class="treatment-nav-text-input"
-                            type="text"
-                            placeholder="z. B. LDN, HBO, Akupunktur"
-                        >
-                    </section>
-
                     <section class="treatment-nav-section treatment-nav-section-category">
                         <h3 class="treatment-nav-heading">
                             Kategorie
@@ -284,19 +269,19 @@
         <section class="treatment-map-panel" aria-label="Karte">
             <button
                 id="treatment-map-toggle-button"
-                class="treatment-map-header"
+                class="treatment-map-header is-collapsed"
                 type="button"
-                aria-expanded="true"
+                aria-expanded="false"
                 aria-controls="treatment-map-content"
             >
                 <span class="treatment-map-header-left">
                     <span class="treatment-map-header-icon" aria-hidden="true">▦</span>
                     <span>Karte</span>
                 </span>
-                <span class="treatment-map-chevron" aria-hidden="true">⌃</span>
+                <span class="treatment-map-chevron" aria-hidden="true">⌄</span>
             </button>
 
-            <div id="treatment-map-content" class="treatment-map-content">
+            <div id="treatment-map-content" class="treatment-map-content is-collapsed">
                 <section id="treatment-map-section" class="treatment-map-section">
                     <div id="treatment-map"></div>
                 </section>
@@ -334,6 +319,34 @@
                     </button>
                 </div>
             </div>
+
+            <div class="treatment-results-search-bar" aria-label="Therapien suchen">
+                <div class="treatment-alias-smart-panel treatment-results-search-panel">
+                    <div class="treatment-alias-smart-search-row">
+                        <div class="treatment-alias-smart-input-wrap">
+                            <label class="treatment-results-search-label" for="treatment-alias-smart-input">Therapie suchen</label>
+                            <input
+                                id="treatment-alias-smart-input"
+                                class="treatment-results-search-input"
+                                type="text"
+                                autocomplete="off"
+                                placeholder="z. B. HBO, Abilify, histamin, Triple Therapie"
+                            >
+
+                            <div
+                                id="treatment-alias-smart-suggestions"
+                                class="treatment-alias-smart-suggestions is-hidden"
+                                role="listbox"
+                                aria-label="Suchvorschläge"
+                            ></div>
+                        </div>
+                    </div>
+
+                    <p id="treatment-alias-smart-status" class="treatment-results-search-status">
+                        Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.
+                    </p>
+                </div>
+            </div>
         </section>
 
         <section id="treatment-card-results-section" class="treatment-card-results-section">
@@ -346,13 +359,13 @@
             <table class="treatment-results-table">
                 <thead>
                     <tr>
-						<th id="treatment-table-rank-header" aria-label="Sortierreihenfolge">▲</th>
-						<th>Therapie</th>
-						<th>Kategorie</th>
-						<th>Erfahrung <span class="treatment-table-header-note">(n = Votes)</span></th>
-						<th>Anbieter</th>
-						<th>Entfernung / Ort</th>
-					</tr>
+                        <th id="treatment-table-rank-header" aria-label="Sortierreihenfolge">▲</th>
+                        <th>Therapie</th>
+                        <th>Kategorie</th>
+                        <th>Erfahrung <span class="treatment-table-header-note">(n = Votes)</span></th>
+                        <th>Anbieter</th>
+                        <th>Entfernung / Ort</th>
+                    </tr>
                 </thead>
 
                 <tbody id="treatment-results-body">

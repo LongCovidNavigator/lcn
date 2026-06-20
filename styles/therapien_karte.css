@@ -80,49 +80,10 @@
     display: none;
 }
 
-/* ------------------------------
-   Navigation Grid
-   5/8 links + 3/8 rechts
------------------------------- */
-
 .treatment-navigation-grid {
     display: grid;
-    grid-template-columns: repeat(24, minmax(0, 1fr));
-    grid-template-areas: none;
     gap: 12px;
     align-items: stretch;
-}
-
-/* Oben: 5 + 5 + 5 + 9 = 24 */
-.treatment-nav-section-sort {
-    grid-column: 1 / span 5;
-    grid-row: 1;
-}
-
-.treatment-nav-section-search {
-    grid-column: 6 / span 5;
-    grid-row: 1;
-}
-
-.treatment-nav-section-category {
-    grid-column: 11 / span 5;
-    grid-row: 1;
-}
-
-.treatment-nav-section-provider {
-    grid-column: 16 / span 9;
-    grid-row: 1;
-}
-
-/* Unten: Ort/Karte 15/24 = 5/8, Bewertung 9/24 = 3/8 */
-.treatment-nav-section-location {
-    grid-column: 1 / span 15;
-    grid-row: 2;
-}
-
-.treatment-nav-section-rating {
-    grid-column: 16 / span 9;
-    grid-row: 2;
 }
 
 .treatment-nav-section {
@@ -279,15 +240,58 @@
 }
 
 /* ------------------------------
-   Anbieter kompakt:
-   Zahl links, Checkbox direkt rechts daneben
+   Navigation-Anordnung Desktop/Splitscreen
+   HTML-Reihenfolge:
+   1 Sortierung
+   2 Kategorie
+   3 Bewertung
+   4 Anbieter
+   5 Ort / Karte
+------------------------------ */
+
+@media (min-width: 761px) {
+    .treatment-navigation-grid {
+        grid-template-columns: 1fr 1fr 1.35fr;
+        grid-template-areas:
+            "sort category provider"
+            "rating location location";
+    }
+
+    .treatment-navigation-grid > .treatment-nav-section:nth-child(1) {
+        grid-area: sort;
+        min-height: 128px;
+    }
+
+    .treatment-navigation-grid > .treatment-nav-section:nth-child(2) {
+        grid-area: category;
+        min-height: 128px;
+    }
+
+    .treatment-navigation-grid > .treatment-nav-section:nth-child(3) {
+        grid-area: rating;
+        min-height: 186px;
+    }
+
+    .treatment-navigation-grid > .treatment-nav-section:nth-child(4) {
+        grid-area: provider;
+        min-height: 128px;
+    }
+
+    .treatment-navigation-grid > .treatment-nav-section:nth-child(5) {
+        grid-area: location;
+        min-height: 186px;
+    }
+}
+
+/* ------------------------------
+   Anbieter kompakt
 ------------------------------ */
 
 .treatment-nav-section-provider {
     display: grid;
-    grid-template-columns: 86px minmax(0, 1fr);
+    grid-template-columns: 78px minmax(0, 1fr);
     grid-template-rows: auto auto auto;
-    column-gap: 14px;
+    column-gap: 12px;
     row-gap: 8px;
     align-items: center;
 }
@@ -307,7 +311,7 @@
 .treatment-nav-section-provider #treatment-min-provider-input {
     grid-column: 1;
     grid-row: 3;
-    width: 86px;
+    width: 64px;
     margin-bottom: 0;
 }
 
@@ -337,7 +341,7 @@
 
 .treatment-range-row {
     display: grid;
-    grid-template-columns: minmax(150px, 1fr) 58px 16px;
+    grid-template-columns: minmax(110px, 1fr) 58px 16px;
     gap: 10px;
     align-items: center;
 }
@@ -375,15 +379,17 @@
 
 .treatment-nav-section-location {
     display: grid;
-    grid-template-columns: minmax(240px, 1fr) minmax(220px, 0.95fr);
-    column-gap: 34px;
-    row-gap: 10px;
-    align-items: end;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto auto auto;
+    column-gap: 14px;
+    row-gap: 8px;
+    align-items: start;
 }
 
 .treatment-nav-section-location .treatment-nav-heading {
     grid-column: 1 / -1;
-    margin-bottom: 6px;
+    grid-row: 1;
+    margin-bottom: 4px;
 }
 
 .treatment-nav-section-location label[for="treatment-location-input"] {
@@ -394,6 +400,7 @@
 .treatment-nav-section-location #treatment-location-input {
     grid-column: 1;
     grid-row: 3;
+    width: 100%;
 }
 
 .treatment-nav-section-location label[for="treatment-radius-input"] {
@@ -413,17 +420,19 @@
 .treatment-nav-section-location label[for="treatment-only-current-city-input"] {
     grid-column: 1;
     grid-row: 4;
-    margin-top: 10px !important;
+    margin-top: 12px !important;
     align-self: center;
 }
 
 .treatment-location-button-row {
     grid-column: 2;
     grid-row: 4;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: nowrap;
 }
 
 .treatment-location-status {
@@ -438,18 +447,21 @@
 
 .treatment-location-apply-button,
 .treatment-location-reset-button {
-    min-width: 0;
-    width: 100%;
-    min-height: 46px;
+    width: auto;
+    min-width: 136px;
+    min-height: 38px;
     border-radius: 8px;
-    padding: 8px 9px;
-    font-size: 0.76rem;
+    padding: 8px 10px;
+    font-size: 0.7rem;
     font-weight: 800;
-    line-height: 1.15;
+    line-height: 1.1;
     cursor: pointer;
-    white-space: normal;
-    overflow-wrap: normal;
+    white-space: nowrap;
     text-align: center;
+}
+
+.treatment-location-reset-button {
+    min-width: 154px;
 }
 
 .treatment-location-apply-button {
@@ -473,12 +485,12 @@
 }
 
 /* ------------------------------
-   Aktionszeile
+   Aktionszeile Navigation
 ------------------------------ */
 
 .treatment-navigation-actions {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     gap: 12px;
     margin-top: 16px;
@@ -491,6 +503,7 @@
 }
 
 .treatment-navigation-button-group {
+    margin-left: auto;
     display: flex;
     gap: 14px;
 }
@@ -651,7 +664,7 @@
 }
 
 /* ------------------------------
-   Ergebnisbereich als Banner
+   Ergebnisbereich / Therapien-Banner
 ------------------------------ */
 
 .treatment-results-panel {
@@ -690,7 +703,161 @@
     line-height: 1;
 }
 
-/* View Switch */
+/* ------------------------------
+   Suche im Therapien-Bereich
+   Bündig wie Ärzt:innen-Suche
+------------------------------ */
+
+.treatment-results-search-bar {
+    border: 1px solid #d8e0ea;
+    border-top: none;
+    background: #ffffff;
+    padding: 12px 14px;
+    box-shadow: 0 2px 8px rgba(0, 32, 80, 0.06);
+    box-sizing: border-box;
+}
+
+.treatment-results-search-panel {
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    box-sizing: border-box;
+}
+
+.treatment-alias-smart-search-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    width: 100%;
+}
+
+.treatment-alias-smart-input-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.treatment-results-search-label {
+    display: block;
+    margin: 0 0 6px 0;
+    color: #1d2d46;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.treatment-results-search-input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid #c6d0df;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #07152f;
+    font-size: 0.88rem;
+    padding: 9px 11px;
+}
+
+.treatment-results-search-input:focus {
+    border-color: #003878;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 56, 120, 0.12);
+}
+
+.treatment-results-search-status {
+    margin: 8px 0 0 0;
+    color: #60718e;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.treatment-alias-smart-suggestions {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 4000;
+    max-height: 420px;
+    overflow-y: auto;
+    border: 1px solid #c6d0df;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 10px 28px rgba(0, 32, 80, 0.18);
+    padding: 8px;
+}
+
+.treatment-alias-smart-group {
+    border: 1px solid #e1e7f0;
+    border-radius: 9px;
+    background: #fbfcfe;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.treatment-alias-smart-group:last-child {
+    margin-bottom: 0;
+}
+
+.treatment-alias-smart-group-button {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #e1e7f0;
+    background: #f2f6fb;
+    color: #003878;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+}
+
+.treatment-alias-smart-group-button:hover {
+    background: #e8f0fa;
+}
+
+.treatment-alias-smart-group-title {
+    min-width: 0;
+}
+
+.treatment-alias-smart-group-meta {
+    flex: 0 0 auto;
+    color: #60718e;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.treatment-alias-smart-list {
+    margin: 0;
+    padding: 7px 12px 8px 24px;
+    color: #07152f;
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.treatment-alias-smart-item {
+    margin: 3px 0;
+}
+
+.treatment-alias-smart-item-label {
+    font-weight: 600;
+}
+
+.treatment-alias-smart-item-empty {
+    color: #60718e;
+    font-style: italic;
+}
+
+/* ------------------------------
+   Ansichtswechsel
+------------------------------ */
+
 .treatment-view-switch {
     display: inline-flex;
     align-items: center;
@@ -975,7 +1142,9 @@
     font-size: 0.82rem;
 }
 
-/* Deine Bewertung */
+/* ------------------------------
+   Deine Bewertung
+------------------------------ */
 
 .treatment-card-own-rating {
     padding: 13px 20px;
@@ -1017,11 +1186,7 @@
     transform: scale(0.98);
 }
 
-.treatment-card-vote-button.is-saving {
-    opacity: 0.55;
-    cursor: wait;
-}
-
+.treatment-card-vote-button.is-saving,
 .treatment-card-vote-button:disabled {
     opacity: 0.55;
     cursor: wait;
@@ -1041,8 +1206,6 @@
     border: 1px solid #dc5661;
     color: #c9333e;
 }
-
-/* Footer / Dummy-Detail */
 
 .treatment-card-footer {
     display: flex;
@@ -1281,7 +1444,6 @@
 
 /* ------------------------------
    Tablet / Splitscreen
-   Bleibt 5/8 zu 3/8
 ------------------------------ */
 
 @media (min-width: 761px) and (max-width: 1100px) {
@@ -1290,40 +1452,8 @@
     }
 
     .treatment-navigation-grid {
-        grid-template-columns: repeat(24, minmax(0, 1fr));
-        grid-template-areas: none;
+        grid-template-columns: 1fr 1fr 1.35fr;
         gap: 10px;
-        align-items: stretch;
-    }
-
-    .treatment-nav-section-sort {
-        grid-column: 1 / span 5;
-        grid-row: 1;
-    }
-
-    .treatment-nav-section-search {
-        grid-column: 6 / span 5;
-        grid-row: 1;
-    }
-
-    .treatment-nav-section-category {
-        grid-column: 11 / span 5;
-        grid-row: 1;
-    }
-
-    .treatment-nav-section-provider {
-        grid-column: 16 / span 9;
-        grid-row: 1;
-    }
-
-    .treatment-nav-section-location {
-        grid-column: 1 / span 15;
-        grid-row: 2;
-    }
-
-    .treatment-nav-section-rating {
-        grid-column: 16 / span 9;
-        grid-row: 2;
     }
 
     .treatment-nav-section {
@@ -1366,7 +1496,7 @@
     }
 
     .treatment-range-row {
-        grid-template-columns: minmax(110px, 1fr) 50px 14px;
+        grid-template-columns: minmax(90px, 1fr) 50px 14px;
         gap: 7px;
     }
 
@@ -1375,71 +1505,24 @@
     }
 
     .treatment-nav-section-location {
-        display: grid;
-        grid-template-columns: minmax(170px, 1fr) minmax(130px, 0.8fr);
-        column-gap: 18px;
-        row-gap: 8px;
-    }
-
-    .treatment-nav-section-location .treatment-nav-heading {
-        grid-column: 1 / -1;
-        margin-bottom: 4px;
-    }
-
-    .treatment-nav-section-location label[for="treatment-location-input"] {
-        grid-column: 1;
-        grid-row: 2;
-    }
-
-    .treatment-nav-section-location #treatment-location-input {
-        grid-column: 1;
-        grid-row: 3;
-    }
-
-    .treatment-nav-section-location label[for="treatment-radius-input"] {
-        grid-column: 2;
-        grid-row: 2;
-        margin-top: 0 !important;
-    }
-
-    .treatment-nav-section-location #treatment-radius-input {
-        grid-column: 2;
-        grid-row: 3;
-        width: 100%;
-        max-width: none;
-    }
-
-    .treatment-nav-section-location label[for="treatment-only-current-city-input"] {
-        grid-column: 1;
-        grid-row: 4;
-        margin-top: 8px !important;
-        align-self: center;
+        column-gap: 12px;
+        row-gap: 7px;
     }
 
     .treatment-location-button-row {
-        grid-column: 2;
-        grid-row: 4;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-top: 8px;
+        gap: 7px;
     }
 
     .treatment-location-apply-button,
     .treatment-location-reset-button {
-        min-width: 0;
-        width: 100%;
-        min-height: 50px;
-        padding: 8px 7px;
-        font-size: 0.68rem;
-        line-height: 1.12;
-        white-space: normal;
-        text-align: center;
+        min-width: 120px;
+        min-height: 38px;
+        padding: 8px 8px;
+        font-size: 0.66rem;
     }
 
-    .treatment-location-status {
-        grid-column: 1 / -1;
-        grid-row: 5;
+    .treatment-location-reset-button {
+        min-width: 138px;
     }
 
     .treatment-navigation-apply-button,
@@ -1447,6 +1530,12 @@
         min-width: 145px;
         padding: 8px 12px;
         font-size: 0.78rem;
+    }
+
+    .treatment-results-search-input {
+        min-height: 36px;
+        font-size: 0.82rem;
+        padding: 8px 10px;
     }
 }
 
@@ -1459,21 +1548,30 @@
         grid-template-columns: 1fr;
         grid-template-areas:
             "sort"
-            "search"
             "category"
+            "rating"
             "provider"
-            "location"
-            "rating";
+            "location";
     }
 
-    .treatment-nav-section-sort,
-    .treatment-nav-section-search,
-    .treatment-nav-section-category,
-    .treatment-nav-section-provider,
-    .treatment-nav-section-location,
-    .treatment-nav-section-rating {
-        grid-column: auto;
-        grid-row: auto;
+    .treatment-navigation-grid > .treatment-nav-section:nth-child(1) {
+        grid-area: sort;
+    }
+
+    .treatment-navigation-grid > .treatment-nav-section:nth-child(2) {
+        grid-area: category;
+    }
+
+    .treatment-navigation-grid > .treatment-nav-section:nth-child(3) {
+        grid-area: rating;
+    }
+
+    .treatment-navigation-grid > .treatment-nav-section:nth-child(4) {
+        grid-area: provider;
+    }
+
+    .treatment-navigation-grid > .treatment-nav-section:nth-child(5) {
+        grid-area: location;
     }
 
     .treatment-nav-section-location {
@@ -1488,6 +1586,7 @@
         display: flex;
         justify-content: flex-start;
         flex-wrap: wrap;
+        margin-top: 12px;
     }
 
     .treatment-navigation-actions {
@@ -1532,6 +1631,26 @@
     .treatment-view-switch-in-header .treatment-view-switch-button {
         flex: 1;
         width: 50%;
+    }
+
+    .treatment-results-search-bar {
+        padding: 10px 12px;
+    }
+
+    .treatment-alias-smart-search-row {
+        display: block;
+    }
+
+    .treatment-alias-smart-suggestions {
+        position: static;
+        max-height: none;
+        margin-top: 8px;
+    }
+
+    .treatment-alias-smart-group-button {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 3px;
     }
 
     .treatment-card-main-header {
@@ -1595,174 +1714,5 @@
         min-height: 16px;
         padding: 1px 4px;
         font-size: 0.6rem;
-    }
-}
-
-/* --------------------------------------------------
-   FIX: Ort / Karte sauber ausrichten
-   - 5/8 Layout bleibt erhalten
-   - Checkbox höher
-   - Buttons breiter und einzeilig
--------------------------------------------------- */
-
-.treatment-nav-section-location {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: 18px;
-    row-gap: 8px;
-    align-items: start;
-}
-
-.treatment-nav-section-location .treatment-nav-heading {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    margin-bottom: 4px;
-}
-
-.treatment-nav-section-location label[for="treatment-location-input"] {
-    grid-column: 1 / span 6;
-    grid-row: 2;
-}
-
-.treatment-nav-section-location #treatment-location-input {
-    grid-column: 1 / span 6;
-    grid-row: 3;
-}
-
-.treatment-nav-section-location label[for="treatment-radius-input"] {
-    grid-column: 7 / span 6;
-    grid-row: 2;
-    margin-top: 0 !important;
-}
-
-.treatment-nav-section-location #treatment-radius-input {
-    grid-column: 7 / span 6;
-    grid-row: 3;
-    width: 100%;
-    max-width: none;
-    text-align: left;
-}
-
-/* Checkbox hochziehen und links sauber platzieren */
-.treatment-nav-section-location label[for="treatment-only-current-city-input"] {
-    grid-column: 1 / span 4;
-    grid-row: 4;
-    margin-top: 12px !important;
-    align-self: center;
-}
-
-/* Buttons bekommen mehr Platz: rechts über 8/12 der Box */
-.treatment-location-button-row {
-    grid-column: 5 / span 8;
-    grid-row: 4;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-    margin-top: 8px;
-    flex-wrap: nowrap;
-}
-
-.treatment-location-apply-button,
-.treatment-location-reset-button {
-    min-width: 150px;
-    width: auto;
-    min-height: 38px;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 0.76rem;
-    font-weight: 800;
-    line-height: 1.15;
-    cursor: pointer;
-    white-space: nowrap;
-    text-align: center;
-}
-
-.treatment-location-reset-button {
-    min-width: 170px;
-}
-
-.treatment-location-status {
-    grid-column: 1 / -1;
-    grid-row: 5;
-    margin-top: 0;
-}
-
-/* Splitscreen: gleiche Struktur, nur etwas enger */
-@media (min-width: 761px) and (max-width: 1100px) {
-    .treatment-nav-section-location {
-        display: grid;
-        grid-template-columns: repeat(12, minmax(0, 1fr));
-        column-gap: 14px;
-        row-gap: 7px;
-        align-items: start;
-    }
-
-    .treatment-nav-section-location .treatment-nav-heading {
-        grid-column: 1 / -1;
-        grid-row: 1;
-        margin-bottom: 3px;
-    }
-
-    .treatment-nav-section-location label[for="treatment-location-input"] {
-        grid-column: 1 / span 6;
-        grid-row: 2;
-    }
-
-    .treatment-nav-section-location #treatment-location-input {
-        grid-column: 1 / span 6;
-        grid-row: 3;
-    }
-
-    .treatment-nav-section-location label[for="treatment-radius-input"] {
-        grid-column: 7 / span 6;
-        grid-row: 2;
-        margin-top: 0 !important;
-    }
-
-    .treatment-nav-section-location #treatment-radius-input {
-        grid-column: 7 / span 6;
-        grid-row: 3;
-        width: 100%;
-        max-width: none;
-    }
-
-    .treatment-nav-section-location label[for="treatment-only-current-city-input"] {
-        grid-column: 1 / span 4;
-        grid-row: 4;
-        margin-top: 10px !important;
-        align-self: center;
-    }
-
-    .treatment-location-button-row {
-        grid-column: 5 / span 8;
-        grid-row: 4;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 8px;
-        margin-top: 7px;
-        flex-wrap: nowrap;
-    }
-
-    .treatment-location-apply-button,
-    .treatment-location-reset-button {
-        min-width: 132px;
-        width: auto;
-        min-height: 38px;
-        padding: 8px 10px;
-        font-size: 0.68rem;
-        line-height: 1.1;
-        white-space: nowrap;
-    }
-
-    .treatment-location-reset-button {
-        min-width: 152px;
-    }
-
-    .treatment-location-status {
-        grid-column: 1 / -1;
-        grid-row: 5;
-        margin-top: 0;
     }
 }

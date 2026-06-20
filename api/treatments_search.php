@@ -59,6 +59,29 @@ function getIntParam($name, $default, $min, $max) {
     return $value;
 }
 
+function getIntListParam($name) {
+    if (!isset($_GET[$name])) {
+        return [];
+    }
+
+    $raw = trim((string)$_GET[$name]);
+
+    if ($raw === '') {
+        return [];
+    }
+
+    $values = array_filter(array_map('trim', explode(',', $raw)), function ($value) {
+        return $value !== '' && is_numeric($value);
+    });
+
+    $ids = array_map('intval', $values);
+    $ids = array_filter($ids, function ($id) {
+        return $id > 0;
+    });
+
+    return array_values(array_unique($ids));
+}
+
 function getFloatParam($name, $default = null) {
     if (!isset($_GET[$name])) {
         return $default;
@@ -85,6 +108,20 @@ function getBoolParam($name, $default = false) {
     $value = strtolower(trim((string)$_GET[$name]));
 
     return in_array($value, ['1', 'true', 'yes', 'on'], true);
+}
+
+function getAllowedAliasDirectTypesSql() {
+    return "'abbreviation', 'spelling_variant', 'spelling_variant_en', 'language_variant_en', 'language_variant_de', 'alternate_name', 'long_form', 'long_form_en', 'long_name', 'generic_name', 'trade_name', 'synonym', 'active_ingredient', 'primary_name'";
+}
+
+function getAliasDirectSafetySql($aliasTableAlias = 'a', $cplTableAlias = 'cta') {
+    return "
+        {$aliasTableAlias}.alias_type IN (" . getAllowedAliasDirectTypesSql() . ")
+        AND COALESCE({$cplTableAlias}.note, '') NOT LIKE '%Kombitherapie-Alias%'
+        AND COALESCE({$cplTableAlias}.note, '') NOT LIKE '%combo_alias%'
+        AND COALESCE({$cplTableAlias}.note, '') NOT LIKE '%Sammelbegriff%'
+        AND COALESCE({$cplTableAlias}.note, '') NOT LIKE '%umbrella_term%'
+    ";
 }
 
 function hasValidCoordinates($lat, $lng) {
@@ -348,9 +385,20 @@ try {
     ]);
 
     $treatId = getIntParam('treat_id', 0, 0, 999999);
+    $treatIds = getIntListParam('treat_ids');
+    $hasTreatIdsParam = isset($_GET['treat_ids']);
 
     $search = getStringParam('search');
     $category = getStringParam('category');
+
+    $searchMode = getStringParam('search_mode', 'basic');
+
+    if (!in_array($searchMode, ['basic', 'alias_direct', 'alias_extended'], true)) {
+        $searchMode = 'basic';
+    }
+
+    $aliasSuggest = getStringParam('alias_suggest');
+    $aliasSuggestQuery = getStringParam('q');
 
     $providerCity = getStringParam('provider_city');
     $providerCity = preg_replace('/\s+/', ' ', $providerCity);
@@ -408,6 +456,223 @@ try {
 
     $orderColumn = $allowedSortColumns[$sort];
     $orderDirection = strtoupper($direction);
+
+    if ($aliasSuggest === '1') {
+        $suggestions = [];
+
+        if ($aliasSuggestQuery !== '') {
+            if ($searchMode === 'basic') {
+                $suggestStmt = $pdo->prepare("
+                    SELECT
+                        t.behandlung AS value,
+                        t.behandlung AS label,
+                        t.treat_id,
+                        t.typ,
+                        'basic' AS match_mode,
+                        'treatment_name' AS match_type
+                    FROM tbl_treatments_03 t
+                    WHERE t.behandlung COLLATE utf8mb4_unicode_ci LIKE :suggest_search
+                    ORDER BY t.behandlung ASC
+                    LIMIT 20
+                ");
+
+                $suggestStmt->bindValue(':suggest_search', '%' . $aliasSuggestQuery . '%');
+                $suggestStmt->execute();
+                $suggestions = $suggestStmt->fetchAll();
+            } else {
+                $aliasModeFilter = '';
+
+                if ($searchMode === 'alias_direct') {
+                    $aliasModeFilter = " AND (" . getAliasDirectSafetySql('a', 'cta') . ")";
+                }
+
+                $suggestStmt = $pdo->prepare("
+                    SELECT
+                        a.alias AS value,
+                        CONCAT(a.alias, ' → ', GROUP_CONCAT(DISTINCT t.behandlung ORDER BY t.behandlung SEPARATOR ' | ')) AS label,
+                        a.alias_id,
+                        a.alias_type,
+                        COUNT(DISTINCT cta.treat_id) AS treatment_count,
+                        GROUP_CONCAT(DISTINCT t.treat_id ORDER BY t.behandlung SEPARATOR ',') AS treat_ids,
+                        GROUP_CONCAT(DISTINCT t.behandlung ORDER BY t.behandlung SEPARATOR ' | ') AS treatments,
+                        :suggest_mode AS match_mode,
+                        'alias' AS match_type
+                    FROM tbl_aliases_03 a
+                    INNER JOIN tbl_cpl_treatments2aliases_03 cta
+                        ON cta.alias_id = a.alias_id
+                    INNER JOIN tbl_treatments_03 t
+                        ON t.treat_id = cta.treat_id
+                    WHERE a.alias COLLATE utf8mb4_unicode_ci LIKE :suggest_search
+                    {$aliasModeFilter}
+                    GROUP BY
+                        a.alias_id,
+                        a.alias,
+                        a.alias_type
+                    ORDER BY
+                        CASE WHEN a.alias COLLATE utf8mb4_unicode_ci = :suggest_exact THEN 0 ELSE 1 END,
+                        a.alias ASC
+                    LIMIT 20
+                ");
+
+                $suggestStmt->bindValue(':suggest_search', '%' . $aliasSuggestQuery . '%');
+                $suggestStmt->bindValue(':suggest_exact', $aliasSuggestQuery);
+                $suggestStmt->bindValue(':suggest_mode', $searchMode);
+                $suggestStmt->execute();
+                $suggestions = $suggestStmt->fetchAll();
+            }
+        }
+
+        echo json_encode([
+            'ok' => true,
+            'mode' => $searchMode,
+            'query' => $aliasSuggestQuery,
+            'suggestions' => $suggestions,
+        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        exit;
+    }
+
+    if ($aliasSuggest === 'smart') {
+        $suggestions = [];
+
+        if ($aliasSuggestQuery !== '') {
+            $directStmt = $pdo->prepare("
+                SELECT
+                    t.treat_id,
+                    t.behandlung,
+                    t.typ
+                FROM tbl_treatments_03 t
+                WHERE t.behandlung COLLATE utf8mb4_unicode_ci LIKE :suggest_search
+                ORDER BY
+                    CASE WHEN t.behandlung COLLATE utf8mb4_unicode_ci = :suggest_exact THEN 0 ELSE 1 END,
+                    t.behandlung ASC
+                LIMIT 30
+            ");
+
+            $directStmt->bindValue(':suggest_search', '%' . $aliasSuggestQuery . '%');
+            $directStmt->bindValue(':suggest_exact', $aliasSuggestQuery);
+            $directStmt->execute();
+
+            foreach ($directStmt->fetchAll() as $row) {
+                $suggestions[] = [
+                    'group_key' => 'direct',
+                    'group_label' => 'Direkte Treffer',
+                    'label' => $row['behandlung'],
+                    'description' => $row['typ'] ? 'Direkter Treatment-Name · Kategorie: ' . $row['typ'] : 'Direkter Treatment-Name',
+                    'badge' => 'Name',
+                    'search_mode' => 'basic',
+                    'search_value' => $row['behandlung'],
+                    'treat_id' => (int)$row['treat_id'],
+                ];
+            }
+
+            $aliasStmt = $pdo->prepare("
+                SELECT
+                    a.alias_id,
+                    a.alias,
+                    a.alias_type,
+                    c.treat_id,
+                    c.note,
+                    t.behandlung,
+                    t.typ
+                FROM tbl_aliases_03 a
+                INNER JOIN tbl_cpl_treatments2aliases_03 c
+                    ON c.alias_id = a.alias_id
+                INNER JOIN tbl_treatments_03 t
+                    ON t.treat_id = c.treat_id
+                WHERE a.alias COLLATE utf8mb4_unicode_ci LIKE :suggest_search
+                ORDER BY
+                    CASE WHEN a.alias COLLATE utf8mb4_unicode_ci = :suggest_exact THEN 0 ELSE 1 END,
+                    a.alias ASC,
+                    c.sort_order ASC,
+                    t.behandlung ASC
+                LIMIT 500
+            ");
+
+            $aliasStmt->bindValue(':suggest_search', '%' . $aliasSuggestQuery . '%');
+            $aliasStmt->bindValue(':suggest_exact', $aliasSuggestQuery);
+            $aliasStmt->execute();
+
+            $aliasGroups = [];
+
+            foreach ($aliasStmt->fetchAll() as $row) {
+                $aliasId = (int)$row['alias_id'];
+
+                if (!isset($aliasGroups[$aliasId])) {
+                    $aliasGroups[$aliasId] = [
+                        'alias_id' => $aliasId,
+                        'alias' => $row['alias'],
+                        'alias_type' => $row['alias_type'],
+                        'rows' => [],
+                    ];
+                }
+
+                $aliasGroups[$aliasId]['rows'][] = $row;
+            }
+
+            foreach ($aliasGroups as $group) {
+                $rows = $group['rows'];
+                $treatmentCount = count(array_unique(array_map(function ($row) {
+                    return (int)$row['treat_id'];
+                }, $rows)));
+
+                foreach ($rows as $row) {
+                    $note = (string)($row['note'] ?? '');
+                    $noteLower = mb_strtolower($note, 'UTF-8');
+                    $aliasType = (string)($row['alias_type'] ?? '');
+                    $aliasTypeLower = mb_strtolower($aliasType, 'UTF-8');
+
+                    $isSpecial = $treatmentCount > 1
+                        || $aliasTypeLower === 'umbrella_term'
+                        || str_contains($noteLower, 'kombitherapie-alias')
+                        || str_contains($noteLower, 'combo_alias')
+                        || str_contains($noteLower, 'sammelbegriff')
+                        || str_contains($noteLower, 'umbrella_term');
+
+                    $isCleanAliasTarget = !$isSpecial
+                        || $note === ''
+                        || $note === null
+                        || $note === $row['alias_type'];
+
+                    if ($isCleanAliasTarget) {
+                        $suggestions[] = [
+                            'group_key' => 'alias',
+                            'group_label' => 'Alias / Synonym',
+                            'label' => $row['alias'] . ' → ' . $row['behandlung'],
+                            'description' => $row['alias_type'] ? 'Alias-Typ: ' . $row['alias_type'] : 'Eindeutiger Alias-Treffer',
+                            'badge' => 'Alias',
+                            'search_mode' => 'alias_direct',
+                            'search_value' => $row['alias'],
+                            'alias_id' => (int)$row['alias_id'],
+                            'treat_id' => (int)$row['treat_id'],
+                        ];
+                    }
+
+                    if ($isSpecial) {
+                        $suggestions[] = [
+                            'group_key' => 'extended',
+                            'group_label' => 'Oberbegriff / Kombibegriff',
+                            'label' => $row['alias'] . ' → ' . $row['behandlung'],
+                            'description' => 'Erweiterte Suche über ' . $treatmentCount . ' verknüpfte Therapien.',
+                            'badge' => 'Erweitert',
+                            'search_mode' => 'alias_extended',
+                            'search_value' => $row['alias'],
+                            'alias_id' => (int)$row['alias_id'],
+                            'treat_id' => (int)$row['treat_id'],
+                        ];
+                    }
+                }
+            }
+        }
+
+        echo json_encode([
+            'ok' => true,
+            'query' => $aliasSuggestQuery,
+            'suggestions' => $suggestions,
+        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        exit;
+    }
 
     $baseSql = "
         FROM (
@@ -567,17 +832,55 @@ try {
         ':radius_km_for_count' => $hasProviderRadius ? (float)$radiusKm : 0,
     ];
 
-    if ($treatId > 0) {
+    if ($hasTreatIdsParam) {
+        if (empty($treatIds)) {
+            $whereParts[] = "1 = 0";
+        } else {
+            $treatIdPlaceholders = [];
+
+            foreach ($treatIds as $index => $currentTreatId) {
+                $placeholder = ':selected_treat_id_' . $index;
+                $treatIdPlaceholders[] = $placeholder;
+                $params[$placeholder] = $currentTreatId;
+            }
+
+            $whereParts[] = "results.treat_id IN (" . implode(', ', $treatIdPlaceholders) . ")";
+        }
+    } elseif ($treatId > 0) {
         $whereParts[] = "results.treat_id = :treat_id";
         $params[':treat_id'] = $treatId;
     } else {
         if ($search !== '') {
-            $whereParts[] = "(
+            $searchWhere = "
                 results.behandlung COLLATE utf8mb4_unicode_ci LIKE :search
-                OR results.typ COLLATE utf8mb4_unicode_ci LIKE :search
-                OR results.weitere_hinweise COLLATE utf8mb4_unicode_ci LIKE :search
-            )";
+            ";
 
+            if ($searchMode === 'alias_direct') {
+                $searchWhere .= "
+                    OR EXISTS (
+                        SELECT 1
+                        FROM tbl_cpl_treatments2aliases_03 cta
+                        INNER JOIN tbl_aliases_03 a
+                            ON a.alias_id = cta.alias_id
+                        WHERE cta.treat_id = results.treat_id
+                          AND a.alias COLLATE utf8mb4_unicode_ci LIKE :search
+                          AND (" . getAliasDirectSafetySql('a', 'cta') . ")
+                    )
+                ";
+            } elseif ($searchMode === 'alias_extended') {
+                $searchWhere .= "
+                    OR EXISTS (
+                        SELECT 1
+                        FROM tbl_cpl_treatments2aliases_03 cta
+                        INNER JOIN tbl_aliases_03 a
+                            ON a.alias_id = cta.alias_id
+                        WHERE cta.treat_id = results.treat_id
+                          AND a.alias COLLATE utf8mb4_unicode_ci LIKE :search
+                    )
+                ";
+            }
+
+            $whereParts[] = "({$searchWhere})";
             $params[':search'] = '%' . $search . '%';
         }
 
@@ -706,7 +1009,9 @@ try {
         'items' => $items,
         'filters' => [
             'treat_id' => $treatId,
+            'treat_ids' => $treatIds,
             'search' => $search,
+            'search_mode' => $searchMode,
             'category' => $category,
             'provider_city' => $providerCity,
             'provider_lat' => $hasProviderRadius ? (float)$providerLat : null,
