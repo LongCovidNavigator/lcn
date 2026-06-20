@@ -2267,3 +2267,601 @@
     font-weight: 400;
     line-height: 1;
 }
+
+/* =========================================================
+   Ergänzung: konkrete Ärzt:innen-/Anbieter-Suche
+   Suche als eigene Navigationskarte wie bei therapien_karte
+========================================================= */
+
+.doctor-navigation-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-areas:
+        "sort search insurance contact"
+        "rating rating location location";
+}
+
+.doctor-nav-section-sort {
+    grid-area: sort;
+}
+
+.doctor-nav-section-search {
+    grid-area: search;
+}
+
+.doctor-nav-section-rating {
+    grid-area: rating;
+}
+
+.doctor-nav-section-insurance {
+    grid-area: insurance;
+}
+
+.doctor-nav-section-contact {
+    grid-area: contact;
+}
+
+.doctor-nav-section-location {
+    grid-area: location;
+}
+
+.doctor-nav-section-search,
+.doctor-nav-section-sort,
+.doctor-nav-section-insurance,
+.doctor-nav-section-contact {
+    min-height: 140px;
+}
+
+.doctor-nav-section-search .doctor-nav-text-input {
+    margin-top: 1px;
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+    .doctor-navigation-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        grid-template-areas:
+            "sort search insurance contact"
+            "rating rating location location" !important;
+        gap: 10px !important;
+        align-items: stretch;
+    }
+
+    .doctor-nav-section-search,
+    .doctor-nav-section-sort,
+    .doctor-nav-section-insurance,
+    .doctor-nav-section-contact {
+        min-height: 122px;
+    }
+
+    .doctor-nav-section-search .doctor-nav-text-input {
+        padding: 7px 8px;
+    }
+
+    .doctor-nav-section-search .doctor-nav-info::before,
+    .doctor-nav-section-contact .doctor-nav-info::before,
+    .doctor-nav-section-location .doctor-nav-heading .doctor-nav-info::before {
+        left: auto;
+        right: 0;
+    }
+
+    .doctor-nav-section-search .doctor-nav-info::after,
+    .doctor-nav-section-contact .doctor-nav-info::after,
+    .doctor-nav-section-location .doctor-nav-heading .doctor-nav-info::after {
+        left: auto;
+        right: 4px;
+    }
+}
+
+@media (max-width: 760px) {
+    .doctor-navigation-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "sort"
+            "search"
+            "insurance"
+            "contact"
+            "rating"
+            "location";
+    }
+
+    .doctor-nav-section-search,
+    .doctor-nav-section-insurance,
+    .doctor-nav-section-contact {
+        min-height: 0;
+    }
+}
+/* =========================================================
+   Vergleichsauswahl / Merkliste Ärzt:innen
+   Chips unter der Suche + Vergleichsbuttons in Kacheln/Tabelle
+========================================================= */
+
+.doctor-compare-selection {
+    margin-top: 10px;
+    padding: 9px 10px;
+    border: 1px solid #d8e0ea;
+    border-radius: 9px;
+    background: #f8fbff;
+}
+
+.doctor-compare-selection-topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 7px;
+}
+
+.doctor-compare-status {
+    color: #344766;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.doctor-compare-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.doctor-compare-chip {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    min-height: 25px;
+    border: 1px solid #b9c8dc;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #07326f;
+    overflow: hidden;
+}
+
+.doctor-compare-chip-name {
+    min-width: 0;
+    padding: 4px 4px 4px 9px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.doctor-compare-chip-remove {
+    align-self: stretch;
+    border: none;
+    border-left: 1px solid #d8e0ea;
+    background: #ffffff;
+    color: #66758f;
+    padding: 0 8px;
+    font-size: 0.9rem;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.doctor-compare-chip-remove:hover {
+    background: #fff4f5;
+    color: #c9333e;
+}
+
+.doctor-compare-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.doctor-compare-action-button,
+.doctor-compare-add-button {
+    border: 1px solid #b9c8dc;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #07326f;
+    padding: 6px 9px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    line-height: 1.1;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.doctor-compare-action-button:hover,
+.doctor-compare-add-button:hover {
+    background: #eef4fb;
+}
+
+.doctor-compare-action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.doctor-compare-add-button.is-selected {
+    border-color: #30a46c;
+    background: #f1fbf6;
+    color: #008c54;
+}
+
+.doctor-compare-clear-button:hover {
+    border-color: #e17878;
+    background: #fff4f5;
+    color: #c9333e;
+}
+
+.doctor-card-footer-with-compare {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.doctor-table-name-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+}
+
+.doctor-compare-add-button-table {
+    padding: 3px 6px;
+    font-size: 0.62rem;
+}
+
+@media (max-width: 760px) {
+    .doctor-compare-actions {
+        flex-direction: column;
+    }
+
+    .doctor-compare-action-button {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   Suche + Vergleichsauswahl im Ärzt:innen-Ergebnisbereich
+========================================================= */
+
+.doctor-results-panel {
+    margin-bottom: 0;
+}
+
+.doctor-results-search-panel {
+    border: 1px solid #d8e0ea;
+    border-top: none;
+    background: #ffffff;
+    padding: 12px 14px;
+    box-shadow: 0 2px 8px rgba(0, 32, 80, 0.06);
+}
+
+.doctor-results-search-row {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) auto;
+    gap: 14px;
+    align-items: end;
+}
+
+.doctor-results-search-field {
+    min-width: 0;
+}
+
+.doctor-results-search-label {
+    display: block;
+    margin: 0 0 5px 0;
+    color: #344766;
+    font-size: 0.74rem;
+    font-weight: 800;
+}
+
+.doctor-results-search-input {
+    box-sizing: border-box;
+    width: 100%;
+    border: 1px solid #c6d0df;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #07152f;
+    padding: 8px 10px;
+    font-size: 0.82rem;
+}
+
+.doctor-results-mode-switch {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #b9c8dc;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.doctor-results-mode-button {
+    border: none;
+    border-right: 1px solid #b9c8dc;
+    background: #ffffff;
+    color: #07326f;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    font-weight: 900;
+    line-height: 1.1;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.doctor-results-mode-button:last-child {
+    border-right: none;
+}
+
+.doctor-results-mode-button:hover:not(:disabled) {
+    background: #eef4fb;
+}
+
+.doctor-results-mode-button.is-active {
+    background: #003878;
+    color: #ffffff;
+}
+
+.doctor-results-mode-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.doctor-compare-selection.is-hidden {
+    display: none;
+}
+
+.doctor-compare-selection {
+    margin-top: 10px;
+    padding: 9px 10px;
+    border: 1px solid #d8e0ea;
+    border-radius: 9px;
+    background: #f8fbff;
+}
+
+.doctor-compare-selection-topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 7px;
+}
+
+.doctor-compare-status {
+    color: #344766;
+    font-size: 0.74rem;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.doctor-compare-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.doctor-compare-chip {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    min-height: 25px;
+    border: 1px solid #b9c8dc;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #07326f;
+    overflow: hidden;
+}
+
+.doctor-compare-chip-name {
+    min-width: 0;
+    padding: 4px 4px 4px 9px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.doctor-compare-chip-remove {
+    align-self: stretch;
+    border: none;
+    border-left: 1px solid #d8e0ea;
+    background: #ffffff;
+    color: #66758f;
+    padding: 0 8px;
+    font-size: 0.9rem;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.doctor-compare-chip-remove:hover {
+    background: #fff4f5;
+    color: #c9333e;
+}
+
+.doctor-compare-clear-button,
+.doctor-compare-add-button {
+    border: 1px solid #b9c8dc;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #07326f;
+    padding: 6px 9px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    line-height: 1.1;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.doctor-compare-clear-button:hover,
+.doctor-compare-add-button:hover {
+    background: #eef4fb;
+}
+
+.doctor-compare-clear-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.doctor-compare-clear-button:hover:not(:disabled) {
+    border-color: #e17878;
+    background: #fff4f5;
+    color: #c9333e;
+}
+
+.doctor-compare-add-button.is-selected {
+    border-color: #30a46c;
+    background: #f1fbf6;
+    color: #008c54;
+}
+
+.doctor-card-footer-with-compare {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.doctor-table-name-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+}
+
+.doctor-compare-add-button-table {
+    padding: 3px 6px;
+    font-size: 0.62rem;
+}
+
+@media (max-width: 760px) {
+    .doctor-results-search-row {
+        grid-template-columns: 1fr;
+    }
+
+    .doctor-results-mode-switch {
+        width: 100%;
+    }
+
+    .doctor-results-mode-button {
+        flex: 1;
+        width: 50%;
+    }
+
+    .doctor-compare-selection-topline {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .doctor-compare-clear-button {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   FIX: Navigation nach Auslagerung der Suche
+   Suche ist jetzt im Ärzt:innen-Bereich, nicht mehr in Navigation
+========================================================= */
+
+.doctor-navigation-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-areas:
+        "sort insurance contact"
+        "rating location location" !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+}
+
+.doctor-nav-section-sort {
+    grid-area: sort !important;
+}
+
+.doctor-nav-section-rating {
+    grid-area: rating !important;
+}
+
+.doctor-nav-section-insurance {
+    grid-area: insurance !important;
+}
+
+.doctor-nav-section-contact {
+    grid-area: contact !important;
+}
+
+.doctor-nav-section-location {
+    grid-area: location !important;
+}
+
+.doctor-nav-section-sort,
+.doctor-nav-section-insurance,
+.doctor-nav-section-contact {
+    min-height: 122px !important;
+}
+
+.doctor-nav-section-rating,
+.doctor-nav-section-location {
+    min-height: 190px !important;
+}
+
+/* Bewertung wieder links unten, Ort rechts unten */
+.doctor-nav-section-rating {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.doctor-nav-section-rating .doctor-nav-heading {
+    flex: 0 0 auto;
+}
+
+.doctor-nav-section-rating .doctor-rating-control:first-of-type {
+    margin-top: auto;
+}
+
+.doctor-nav-section-rating .doctor-rating-control:last-of-type {
+    margin-bottom: auto;
+}
+
+/* Splitscreen / schmaler Desktop */
+@media (min-width: 761px) and (max-width: 1100px) {
+    .doctor-navigation-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        grid-template-areas:
+            "sort insurance contact"
+            "rating location location" !important;
+        gap: 10px !important;
+    }
+
+    .doctor-nav-section-sort,
+    .doctor-nav-section-insurance,
+    .doctor-nav-section-contact {
+        min-height: 122px !important;
+    }
+
+    .doctor-nav-section-rating,
+    .doctor-nav-section-location {
+        min-height: 170px !important;
+    }
+}
+
+/* Mobile */
+@media (max-width: 760px) {
+    .doctor-navigation-grid {
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+            "sort"
+            "insurance"
+            "contact"
+            "rating"
+            "location" !important;
+    }
+
+    .doctor-nav-section-sort,
+    .doctor-nav-section-insurance,
+    .doctor-nav-section-contact,
+    .doctor-nav-section-rating,
+    .doctor-nav-section-location {
+        min-height: 0 !important;
+    }
+}

@@ -241,23 +241,23 @@ try {
 
     $treatmentsSql = "
         SELECT
-            calculated.*,
+            results.*,
 
             CASE
-                WHEN calculated.total_votes > 0
-                THEN ROUND((calculated.pro / calculated.total_votes) * 100)
+                WHEN results.total_votes > 0
+                THEN ROUND((results.pro / results.total_votes) * 100)
                 ELSE 0
             END AS positive_ratio,
 
             CASE
-                WHEN calculated.total_votes > 0
-                THEN ROUND((calculated.neutral / calculated.total_votes) * 100)
+                WHEN results.total_votes > 0
+                THEN ROUND((results.neutral / results.total_votes) * 100)
                 ELSE 0
             END AS neutral_ratio,
 
             CASE
-                WHEN calculated.total_votes > 0
-                THEN ROUND((calculated.contra / calculated.total_votes) * 100)
+                WHEN results.total_votes > 0
+                THEN ROUND((results.contra / results.total_votes) * 100)
                 ELSE 0
             END AS negative_ratio
 
@@ -270,48 +270,21 @@ try {
                 t.typ,
                 t.wiki_url_path,
 
+                COALESCE(rv.pro, 0) AS pro,
+                COALESCE(rv.neutral, 0) AS neutral,
+                COALESCE(rv.contra, 0) AS contra,
                 (
-                    COALESCE(lv.pro, 0)
-                    + COALESCE(rv.pro, 0)
-                ) AS pro,
-
-                (
-                    COALESCE(lv.neutral, 0)
+                    COALESCE(rv.pro, 0)
                     + COALESCE(rv.neutral, 0)
-                ) AS neutral,
-
-                (
-                    COALESCE(lv.contra, 0)
                     + COALESCE(rv.contra, 0)
-                ) AS contra,
+                ) AS total_votes,
 
-                (
-                    COALESCE(lv.pro, 0)
-                    + COALESCE(rv.pro, 0)
-                    + COALESCE(lv.neutral, 0)
-                    + COALESCE(rv.neutral, 0)
-                    + COALESCE(lv.contra, 0)
-                    + COALESCE(rv.contra, 0)
-                ) AS total_votes
+                COALESCE(pc.provider_count, 0) AS provider_count
 
             FROM tbl_cpl_drs2treatments_03 c
 
             INNER JOIN tbl_treatments_03 t
                 ON c.treat_id = t.treat_id
-
-            LEFT JOIN (
-                SELECT
-                    TRIM(Behandlung) AS behandlung_key,
-                    SUM(COALESCE(pro, 0)) AS pro,
-                    SUM(COALESCE(neutral, 0)) AS neutral,
-                    SUM(COALESCE(contra, 0)) AS contra
-                FROM lcn_votes
-                WHERE Behandlung IS NOT NULL
-                  AND TRIM(Behandlung) <> ''
-                GROUP BY TRIM(Behandlung)
-            ) lv
-                ON LOWER(TRIM(t.behandlung)) COLLATE utf8mb4_unicode_ci
-                 = LOWER(lv.behandlung_key) COLLATE utf8mb4_unicode_ci
 
             LEFT JOIN (
                 SELECT
@@ -327,16 +300,26 @@ try {
                 ON LOWER(TRIM(t.behandlung)) COLLATE utf8mb4_unicode_ci
                  = LOWER(rv.behandlung_key) COLLATE utf8mb4_unicode_ci
 
-            WHERE c.dr_id = :id
-        ) AS calculated
+            LEFT JOIN (
+                SELECT
+                    treat_id,
+                    COUNT(DISTINCT dr_id) AS provider_count
+                FROM tbl_cpl_drs2treatments_03
+                WHERE treat_id IS NOT NULL
+                  AND dr_id IS NOT NULL
+                GROUP BY treat_id
+            ) pc
+                ON c.treat_id = pc.treat_id
 
+            WHERE c.dr_id = :id
+        ) AS results
         ORDER BY
             CASE
-                WHEN calculated.sort_order IS NULL OR calculated.sort_order = 0 THEN 999999
-                ELSE calculated.sort_order
+                WHEN results.sort_order IS NULL OR results.sort_order = 0 THEN 999999
+                ELSE results.sort_order
             END ASC,
-            calculated.typ ASC,
-            calculated.behandlung ASC
+            results.typ ASC,
+            results.behandlung ASC
     ";
 
     $treatmentsStmt = $pdo->prepare($treatmentsSql);
@@ -344,7 +327,6 @@ try {
     $treatmentsStmt->execute();
 
     $treatments = $treatmentsStmt->fetchAll();
-    $groupedTreatments = groupTreatmentsByType($treatments);
 
     $hasCoordinates = (int)$item['has_coordinates'] === 1;
 
@@ -383,8 +365,11 @@ try {
         $treatment['positive_ratio'] = (int)$treatment['positive_ratio'];
         $treatment['neutral_ratio'] = (int)$treatment['neutral_ratio'];
         $treatment['negative_ratio'] = (int)$treatment['negative_ratio'];
+        $treatment['provider_count'] = (int)$treatment['provider_count'];
     }
     unset($treatment);
+
+    $groupedTreatments = groupTreatmentsByType($treatments);
 
     sendJson([
         'ok' => true,

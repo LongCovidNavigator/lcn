@@ -9,6 +9,7 @@ let currentDoctorTerms = {
 let currentDoctorTreatmentsGrouped = {};
 let treatmentSpectrumExpanded = false;
 let selectedTreatmentCategorySlugs = new Set();
+let treatmentCategorySelectionMode = "all";
 
 let treatmentSearchQuery = "";
 let treatmentCategorySearchQuery = "";
@@ -19,10 +20,14 @@ let treatmentPositiveMin = 0;
 let treatmentNegativeMax = 100;
 let treatmentCategoryDropdownOpen = false;
 
+let currentTreatmentCategoryOptions = [];
+
+
 document.addEventListener("DOMContentLoaded", function () {
     loadDoctorDetail();
     setupDoctorDetailVoteButtons();
     setupTreatmentToggle();
+    setupTreatmentControlEvents();
 });
 
 async function loadDoctorDetail() {
@@ -45,18 +50,7 @@ async function loadDoctorDetail() {
         currentDoctorTerms = normalizeTermsObject(data.terms || {});
         currentDoctorTreatmentsGrouped = data.treatments_grouped || {};
 
-        treatmentSpectrumExpanded = false;
-        selectedTreatmentCategorySlugs = new Set();
-
-        treatmentSearchQuery = "";
-        treatmentCategorySearchQuery = "";
-        treatmentSortMode = "name_asc";
-        treatmentOnlyRated = false;
-        treatmentViewMode = "cards";
-        treatmentPositiveMin = 0;
-        treatmentNegativeMax = 100;
-        treatmentCategoryDropdownOpen = false;
-
+        resetTreatmentControlsState();
         renderDoctorDetail(currentDoctorDetail, currentDoctorTerms, currentDoctorTreatmentsGrouped);
         showDoctorDetailContent();
 
@@ -64,6 +58,21 @@ async function loadDoctorDetail() {
         console.error("Fehler beim Laden des Arzt-Steckbriefs:", error);
         showDoctorDetailError(error.message || "Der Arzt-Steckbrief konnte nicht geladen werden.");
     }
+}
+
+function resetTreatmentControlsState() {
+    treatmentSpectrumExpanded = false;
+    selectedTreatmentCategorySlugs = new Set();
+    treatmentCategorySelectionMode = "all";
+    treatmentSearchQuery = "";
+    treatmentCategorySearchQuery = "";
+    treatmentSortMode = "name_asc";
+    treatmentOnlyRated = false;
+    treatmentViewMode = "cards";
+    treatmentPositiveMin = 0;
+    treatmentNegativeMax = 100;
+    treatmentCategoryDropdownOpen = false;
+    currentTreatmentCategoryOptions = [];
 }
 
 function setupDoctorDetailVoteButtons() {
@@ -86,6 +95,158 @@ function setupTreatmentToggle() {
     toggleButton.addEventListener("click", function () {
         treatmentSpectrumExpanded = !treatmentSpectrumExpanded;
         renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+    });
+}
+
+function setupTreatmentControlEvents() {
+    const controlsElement = document.getElementById("doctor-detail-treatment-categories");
+
+    if (!controlsElement) {
+        return;
+    }
+
+    controlsElement.addEventListener("input", function (event) {
+        const target = event.target;
+
+        if (target.id === "doctor-detail-treatment-search") {
+            treatmentSearchQuery = target.value || "";
+            treatmentSpectrumExpanded = false;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+            focusInputAfterRender("doctor-detail-treatment-search");
+            return;
+        }
+
+        if (target.id === "doctor-detail-treatment-category-search") {
+            treatmentCategorySearchQuery = target.value || "";
+            treatmentCategoryDropdownOpen = true;
+            renderTreatmentCategoryDropdownOptions();
+            focusInputAfterRender("doctor-detail-treatment-category-search");
+            return;
+        }
+
+        if (target.matches("[data-treatment-positive-min]")) {
+            treatmentPositiveMin = clampPercentage(target.value);
+            syncTreatmentRangeInputs(controlsElement, "[data-treatment-positive-min]", treatmentPositiveMin);
+            return;
+        }
+
+        if (target.matches("[data-treatment-negative-max]")) {
+            treatmentNegativeMax = clampPercentage(target.value);
+            syncTreatmentRangeInputs(controlsElement, "[data-treatment-negative-max]", treatmentNegativeMax);
+        }
+    });
+
+    controlsElement.addEventListener("change", function (event) {
+        const target = event.target;
+
+        if (target.matches("[data-treatment-positive-min]")) {
+            treatmentPositiveMin = clampPercentage(target.value);
+            treatmentSpectrumExpanded = false;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+            return;
+        }
+
+        if (target.matches("[data-treatment-negative-max]")) {
+            treatmentNegativeMax = clampPercentage(target.value);
+            treatmentSpectrumExpanded = false;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+            return;
+        }
+
+        if (target.matches("[data-treatment-category-checkbox]")) {
+            const categorySlug = target.getAttribute("data-treatment-category-checkbox");
+
+            if (!categorySlug) {
+                return;
+            }
+
+            treatmentCategorySelectionMode = "custom";
+
+            if (target.checked) {
+                selectedTreatmentCategorySlugs.add(categorySlug);
+            } else {
+                selectedTreatmentCategorySlugs.delete(categorySlug);
+            }
+
+            treatmentSpectrumExpanded = false;
+            treatmentCategoryDropdownOpen = true;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+        }
+    });
+
+    controlsElement.addEventListener("click", function (event) {
+        const viewButton = event.target.closest("[data-treatment-view]");
+        const dropdownToggle = event.target.closest("[data-treatment-category-dropdown-toggle]");
+        const selectAllButton = event.target.closest("[data-treatment-category-select-all]");
+        const clearButton = event.target.closest("[data-treatment-category-clear]");
+        const onlyRatedButton = event.target.closest("[data-treatment-only-rated]");
+        const resetButton = event.target.closest("[data-treatment-reset-filters]");
+        const sortButton = event.target.closest("[data-treatment-sort]");
+
+        if (viewButton) {
+            treatmentViewMode = viewButton.getAttribute("data-treatment-view") || "cards";
+            treatmentSpectrumExpanded = false;
+            treatmentCategoryDropdownOpen = false;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+            return;
+        }
+
+        if (dropdownToggle) {
+            treatmentCategoryDropdownOpen = !treatmentCategoryDropdownOpen;
+            renderTreatmentControlsState();
+            return;
+        }
+
+        if (selectAllButton) {
+            treatmentCategorySelectionMode = "all";
+            selectedTreatmentCategorySlugs.clear();
+            treatmentCategorySearchQuery = "";
+            treatmentSpectrumExpanded = false;
+            treatmentCategoryDropdownOpen = true;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+            return;
+        }
+
+        if (clearButton) {
+            treatmentCategorySelectionMode = "custom";
+            selectedTreatmentCategorySlugs.clear();
+            treatmentSpectrumExpanded = false;
+            treatmentCategoryDropdownOpen = true;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+            return;
+        }
+
+        if (onlyRatedButton) {
+            treatmentOnlyRated = !treatmentOnlyRated;
+            treatmentSpectrumExpanded = false;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+            return;
+        }
+
+        if (resetButton) {
+            resetTreatmentControlsState();
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+            return;
+        }
+
+        if (sortButton) {
+            treatmentSortMode = sortButton.getAttribute("data-treatment-sort") || "name_asc";
+            treatmentSpectrumExpanded = false;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+        }
+    });
+
+    document.addEventListener("click", function (event) {
+        const dropdown = document.getElementById("doctor-detail-treatment-category-dropdown");
+
+        if (!dropdown || !treatmentCategoryDropdownOpen) {
+            return;
+        }
+
+        if (!dropdown.contains(event.target)) {
+            treatmentCategoryDropdownOpen = false;
+            renderTreatmentControlsState();
+        }
     });
 }
 
@@ -673,13 +834,8 @@ function renderTermGroup(elementId, terms, emptyText) {
         .join("");
 }
 
-/* =========================================================
-   Behandlungsspektrum
-========================================================= */
-
 function renderTreatmentSpectrum(treatmentsGrouped) {
     const listElement = document.getElementById("doctor-detail-treatments");
-    const categoriesElement = document.getElementById("doctor-detail-treatment-categories");
     const summaryElement = document.getElementById("doctor-detail-treatment-summary");
     const toggleButton = document.getElementById("doctor-detail-treatment-toggle");
 
@@ -692,11 +848,9 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
     const groups = getVisibleTreatmentGroups(treatmentsGrouped);
 
     if (groups.length === 0) {
+        currentTreatmentCategoryOptions = [];
         listElement.innerHTML = `<span class="doctor-detail-muted">Noch kein Behandlungsspektrum hinterlegt.</span>`;
-
-        if (categoriesElement) {
-            categoriesElement.innerHTML = "";
-        }
+        renderTreatmentControlsState();
 
         if (summaryElement) {
             summaryElement.textContent = "Noch keine Behandlungen hinterlegt.";
@@ -713,6 +867,14 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
         return sum + group.treatments.length;
     }, 0);
 
+    currentTreatmentCategoryOptions = groups.map(function (group) {
+        return {
+            slug: group.slug,
+            label: group.type,
+            count: group.treatments.length
+        };
+    });
+
     const allEntries = flattenTreatmentGroups(groups);
     const selectedEntries = getSelectedTreatmentEntries(allEntries);
     const visibleEntries = getFilteredAndSortedTreatmentEntries(selectedEntries).map(function (entry, index) {
@@ -725,7 +887,7 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
     const hasActiveFilter =
         treatmentSearchQuery.trim() !== "" ||
         treatmentOnlyRated ||
-        selectedTreatmentCategorySlugs.size > 0 ||
+        treatmentCategorySelectionMode === "custom" ||
         treatmentPositiveMin > 0 ||
         treatmentNegativeMax < 100;
 
@@ -737,7 +899,7 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
         }
     }
 
-    renderTreatmentControlsAndCategories(categoriesElement, groups, totalTreatments);
+    renderTreatmentControlsState(groups, totalTreatments);
 
     if (selectedEntries.length === 0) {
         listElement.innerHTML = `<span class="doctor-detail-muted">Keine Kategorie ausgewählt.</span>`;
@@ -815,208 +977,51 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
     }
 }
 
-function renderTreatmentControlsAndCategories(categoriesElement, groups, totalTreatments) {
-    if (!categoriesElement) {
+function renderTreatmentControlsState() {
+    setFormValue("doctor-detail-treatment-search", treatmentSearchQuery);
+    setFormValue("doctor-detail-treatment-category-search", treatmentCategorySearchQuery);
+    syncTreatmentRangeInputs(document, "[data-treatment-positive-min]", treatmentPositiveMin);
+    syncTreatmentRangeInputs(document, "[data-treatment-negative-max]", treatmentNegativeMax);
+
+    document.querySelectorAll("[data-treatment-view]").forEach(function (button) {
+        button.classList.toggle("is-active", button.getAttribute("data-treatment-view") === treatmentViewMode);
+    });
+
+    document.querySelectorAll("[data-treatment-sort]").forEach(function (button) {
+        button.classList.toggle("is-active", button.getAttribute("data-treatment-sort") === treatmentSortMode);
+    });
+
+    const onlyRatedButton = document.querySelector("[data-treatment-only-rated]");
+
+    if (onlyRatedButton) {
+        onlyRatedButton.classList.toggle("is-active", treatmentOnlyRated);
+    }
+
+    renderTreatmentCategoryDropdownOptions();
+}
+
+function renderTreatmentCategoryDropdownOptions() {
+    const dropdown = document.getElementById("doctor-detail-treatment-category-dropdown");
+    const button = document.getElementById("doctor-detail-treatment-category-dropdown-button");
+    const optionsElement = document.getElementById("doctor-detail-treatment-category-options");
+
+    if (!dropdown || !button || !optionsElement) {
         return;
     }
 
-    const categoryOptions = groups.map(function (group) {
-        return {
-            slug: group.slug,
-            label: group.type,
-            count: group.treatments.length
-        };
-    });
+    const selectedCount = treatmentCategorySelectionMode === "all"
+        ? 0
+        : selectedTreatmentCategorySlugs.size;
 
-    const isAllActive = selectedTreatmentCategorySlugs.size === 0;
+    button.textContent = selectedCount === 0 && treatmentCategorySelectionMode === "all"
+        ? "Alle Kategorien ▾"
+        : `${selectedCount} Kategorien ▾`;
 
-    const allChipHtml = `
-        <button
-            type="button"
-            class="doctor-detail-treatment-category-chip doctor-detail-treatment-category-all ${isAllActive ? "is-active" : ""}"
-            data-treatment-category="__all"
-        >
-            Alle
-            <span>${totalTreatments}</span>
-        </button>
-    `;
-
-    const categoryChipsHtml = categoryOptions
-        .map(function (category) {
-            const isActive = selectedTreatmentCategorySlugs.has(category.slug);
-
-            return `
-                <button
-                    type="button"
-                    class="doctor-detail-treatment-category-chip ${isActive ? "is-active" : ""}"
-                    data-treatment-category="${escapeHtml(category.slug)}"
-                >
-                    ${escapeHtml(category.label)}
-                    <span>${category.count}</span>
-                </button>
-            `;
-        })
-        .join("");
-
-    categoriesElement.innerHTML = `
-        <div class="doctor-detail-treatment-controls">
-            <div class="doctor-detail-treatment-control-card doctor-detail-treatment-control-card-view">
-                <h4>Ansicht</h4>
-
-                <div class="doctor-detail-treatment-view-row">
-                    <button
-                        type="button"
-                        class="doctor-detail-treatment-view-button ${treatmentViewMode === "cards" ? "is-active" : ""}"
-                        data-treatment-view="cards"
-                    >
-                        Kacheln
-                    </button>
-
-                    <button
-                        type="button"
-                        class="doctor-detail-treatment-view-button ${treatmentViewMode === "table" ? "is-active" : ""}"
-                        data-treatment-view="table"
-                    >
-                        Tabelle
-                    </button>
-                </div>
-            </div>
-
-            <div class="doctor-detail-treatment-control-card doctor-detail-treatment-control-card-search">
-                <h4>Filtern</h4>
-
-                <div class="doctor-detail-treatment-search-row">
-                    <input
-                        id="doctor-detail-treatment-search"
-                        class="doctor-detail-treatment-search-input"
-                        type="search"
-                        placeholder="Behandlung suchen …"
-                        value="${escapeHtml(treatmentSearchQuery)}"
-                    >
-
-                    ${buildTreatmentCategoryDropdownHtml(categoryOptions)}
-
-                    <button
-                        type="button"
-                        class="doctor-detail-treatment-filter-button ${treatmentOnlyRated ? "is-active" : ""}"
-                        data-treatment-only-rated="1"
-                    >
-                        Nur mit Bewertung
-                    </button>
-
-                    <button
-                        type="button"
-                        class="doctor-detail-treatment-filter-button"
-                        data-treatment-reset-filters="1"
-                    >
-                        Zurücksetzen
-                    </button>
-                </div>
-            </div>
-
-            <div class="doctor-detail-treatment-control-card doctor-detail-treatment-control-card-rating-filter">
-                <h4>Bewertung</h4>
-
-                <div class="doctor-detail-treatment-range-grid">
-                    <label class="doctor-detail-treatment-range-label">
-                        <span>Positive Erfahrungen (mind.)</span>
-
-                        <div class="doctor-detail-treatment-range-row">
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                step="1"
-                                value="${escapeHtml(treatmentPositiveMin)}"
-                                data-treatment-positive-min="1"
-                            >
-
-                            <div class="doctor-detail-treatment-percent-input">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    step="1"
-                                    value="${escapeHtml(treatmentPositiveMin)}"
-                                    data-treatment-positive-min="1"
-                                >
-                                <span>%</span>
-                            </div>
-                        </div>
-
-                        <div class="doctor-detail-treatment-range-scale">
-                            <span>0</span>
-                            <span>50</span>
-                            <span>100</span>
-                        </div>
-                    </label>
-
-                    <label class="doctor-detail-treatment-range-label">
-                        <span>Negative Erfahrungen (max.)</span>
-
-                        <div class="doctor-detail-treatment-range-row">
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                step="1"
-                                value="${escapeHtml(treatmentNegativeMax)}"
-                                data-treatment-negative-max="1"
-                            >
-
-                            <div class="doctor-detail-treatment-percent-input">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    step="1"
-                                    value="${escapeHtml(treatmentNegativeMax)}"
-                                    data-treatment-negative-max="1"
-                                >
-                                <span>%</span>
-                            </div>
-                        </div>
-
-                        <div class="doctor-detail-treatment-range-scale">
-                            <span>0</span>
-                            <span>50</span>
-                            <span>100</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <div class="doctor-detail-treatment-control-card doctor-detail-treatment-control-card-sort">
-                <h4>Sortieren</h4>
-
-                <div class="doctor-detail-treatment-sort-row">
-                    ${buildTreatmentSortButtonHtml("name_asc", "Name A–Z")}
-                    ${buildTreatmentSortButtonHtml("name_desc", "Name Z–A")}
-                    ${buildTreatmentSortButtonHtml("positive_desc", "Positiv ↓")}
-                    ${buildTreatmentSortButtonHtml("negative_desc", "Negativ ↓")}
-                    ${buildTreatmentSortButtonHtml("votes_desc", "Bewertungen ↓")}
-                </div>
-            </div>
-        </div>
-
-        <div class="doctor-detail-treatment-category-row ${treatmentViewMode === "table" ? "is-hidden" : ""}">
-            ${allChipHtml}
-            ${categoryChipsHtml}
-        </div>
-    `;
-
-    bindTreatmentControlEvents(categoriesElement);
-}
-
-function buildTreatmentCategoryDropdownHtml(categoryOptions) {
-    const selectedCount = selectedTreatmentCategorySlugs.size;
-    const buttonLabel = selectedCount === 0
-        ? "Alle Kategorien"
-        : `${selectedCount} Kategorien`;
+    button.classList.toggle("is-active", treatmentCategorySelectionMode === "custom");
+    dropdown.classList.toggle("is-open", treatmentCategoryDropdownOpen);
 
     const normalizedSearch = treatmentCategorySearchQuery.trim().toLowerCase();
-
-    const visibleOptions = categoryOptions.filter(function (category) {
+    const visibleOptions = currentTreatmentCategoryOptions.filter(function (category) {
         if (!normalizedSearch) {
             return true;
         }
@@ -1024,233 +1029,37 @@ function buildTreatmentCategoryDropdownHtml(categoryOptions) {
         return String(category.label || "").toLowerCase().includes(normalizedSearch);
     });
 
-    const optionsHtml = visibleOptions.length === 0
-        ? `<div class="doctor-detail-treatment-category-empty">Keine Kategorie gefunden.</div>`
-        : visibleOptions.map(function (category) {
-            const checked = selectedTreatmentCategorySlugs.has(category.slug);
+    if (visibleOptions.length === 0) {
+        optionsElement.innerHTML = `<div class="doctor-detail-treatment-category-empty">Keine Kategorie gefunden.</div>`;
+        return;
+    }
 
-            return `
-                <label class="doctor-detail-treatment-category-option">
-                    <input
-                        type="checkbox"
-                        ${checked ? "checked" : ""}
-                        data-treatment-category-checkbox="${escapeHtml(category.slug)}"
-                    >
+    optionsElement.innerHTML = visibleOptions.map(function (category) {
+        const checked = treatmentCategorySelectionMode === "all"
+            ? true
+            : selectedTreatmentCategorySlugs.has(category.slug);
 
-                    <span>${escapeHtml(category.label)}</span>
-                    <small>${category.count}</small>
-                </label>
-            `;
-        }).join("");
-
-    return `
-        <div class="doctor-detail-treatment-category-dropdown ${treatmentCategoryDropdownOpen ? "is-open" : ""}">
-            <button
-                type="button"
-                class="doctor-detail-treatment-category-dropdown-button ${selectedCount > 0 ? "is-active" : ""}"
-                data-treatment-category-dropdown-toggle="1"
-            >
-                ${escapeHtml(buttonLabel)} ▾
-            </button>
-
-            <div class="doctor-detail-treatment-category-dropdown-panel">
+        return `
+            <label class="doctor-detail-treatment-category-option">
                 <input
-                    id="doctor-detail-treatment-category-search"
-                    class="doctor-detail-treatment-category-search"
-                    type="search"
-                    placeholder="Kategorie suchen …"
-                    value="${escapeHtml(treatmentCategorySearchQuery)}"
+                    type="checkbox"
+                    ${checked ? "checked" : ""}
+                    data-treatment-category-checkbox="${escapeHtml(category.slug)}"
                 >
 
-                <div class="doctor-detail-treatment-category-dropdown-actions">
-                    <button type="button" data-treatment-category-select-all="1">Alle</button>
-                    <button type="button" data-treatment-category-clear="1">Keine</button>
-                </div>
-
-                <div class="doctor-detail-treatment-category-options">
-                    ${optionsHtml}
-                </div>
-            </div>
-        </div>
-    `;
+                <span>${escapeHtml(category.label)}</span>
+                <small>${category.count}</small>
+            </label>
+        `;
+    }).join("");
 }
 
-function buildTreatmentSortButtonHtml(sortMode, label) {
-    return `
-        <button
-            type="button"
-            class="doctor-detail-treatment-sort-button ${treatmentSortMode === sortMode ? "is-active" : ""}"
-            data-treatment-sort="${escapeHtml(sortMode)}"
-        >
-            ${escapeHtml(label)}
-        </button>
-    `;
-}
+function setFormValue(id, value) {
+    const element = document.getElementById(id);
 
-function bindTreatmentControlEvents(categoriesElement) {
-    const searchInput = categoriesElement.querySelector("#doctor-detail-treatment-search");
-
-    if (searchInput) {
-        searchInput.addEventListener("input", function () {
-            treatmentSearchQuery = searchInput.value || "";
-            treatmentSpectrumExpanded = false;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-
-            focusInputAfterRender("doctor-detail-treatment-search");
-        });
+    if (element && element.value !== String(value)) {
+        element.value = value;
     }
-
-    const categorySearchInput = categoriesElement.querySelector("#doctor-detail-treatment-category-search");
-
-    if (categorySearchInput) {
-        categorySearchInput.addEventListener("input", function () {
-            treatmentCategorySearchQuery = categorySearchInput.value || "";
-            treatmentCategoryDropdownOpen = true;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-
-            focusInputAfterRender("doctor-detail-treatment-category-search");
-        });
-    }
-
-    categoriesElement.querySelectorAll("[data-treatment-category-dropdown-toggle]").forEach(function (button) {
-        button.addEventListener("click", function () {
-            treatmentCategoryDropdownOpen = !treatmentCategoryDropdownOpen;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
-
-    categoriesElement.querySelectorAll("[data-treatment-category-checkbox]").forEach(function (checkbox) {
-        checkbox.addEventListener("change", function () {
-            const categorySlug = checkbox.getAttribute("data-treatment-category-checkbox");
-
-            if (!categorySlug) {
-                return;
-            }
-
-            if (checkbox.checked) {
-                selectedTreatmentCategorySlugs.add(categorySlug);
-            } else {
-                selectedTreatmentCategorySlugs.delete(categorySlug);
-            }
-
-            treatmentSpectrumExpanded = false;
-            treatmentCategoryDropdownOpen = true;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
-
-    categoriesElement.querySelectorAll("[data-treatment-category-select-all]").forEach(function (button) {
-        button.addEventListener("click", function () {
-            selectedTreatmentCategorySlugs.clear();
-            treatmentCategorySearchQuery = "";
-            treatmentSpectrumExpanded = false;
-            treatmentCategoryDropdownOpen = true;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
-
-    categoriesElement.querySelectorAll("[data-treatment-category-clear]").forEach(function (button) {
-        button.addEventListener("click", function () {
-            const groups = getVisibleTreatmentGroups(currentDoctorTreatmentsGrouped);
-
-            selectedTreatmentCategorySlugs = new Set(groups.map(function (group) {
-                return group.slug;
-            }));
-
-            treatmentSpectrumExpanded = false;
-            treatmentCategoryDropdownOpen = true;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
-
-    categoriesElement.querySelectorAll("[data-treatment-view]").forEach(function (button) {
-        button.addEventListener("click", function () {
-            treatmentViewMode = button.getAttribute("data-treatment-view") || "cards";
-            treatmentSpectrumExpanded = false;
-            treatmentCategoryDropdownOpen = false;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
-
-    categoriesElement.querySelectorAll("[data-treatment-sort]").forEach(function (button) {
-        button.addEventListener("click", function () {
-            treatmentSortMode = button.getAttribute("data-treatment-sort") || "name_asc";
-            treatmentSpectrumExpanded = false;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
-
-    categoriesElement.querySelectorAll("[data-treatment-only-rated]").forEach(function (button) {
-        button.addEventListener("click", function () {
-            treatmentOnlyRated = !treatmentOnlyRated;
-            treatmentSpectrumExpanded = false;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
-
-    categoriesElement.querySelectorAll("[data-treatment-positive-min]").forEach(function (input) {
-        input.addEventListener("input", function () {
-            treatmentPositiveMin = clampPercentage(input.value);
-            syncTreatmentRangeInputs(categoriesElement, "[data-treatment-positive-min]", treatmentPositiveMin);
-        });
-
-        input.addEventListener("change", function () {
-            treatmentPositiveMin = clampPercentage(input.value);
-            treatmentSpectrumExpanded = false;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
-
-    categoriesElement.querySelectorAll("[data-treatment-negative-max]").forEach(function (input) {
-        input.addEventListener("input", function () {
-            treatmentNegativeMax = clampPercentage(input.value);
-            syncTreatmentRangeInputs(categoriesElement, "[data-treatment-negative-max]", treatmentNegativeMax);
-        });
-
-        input.addEventListener("change", function () {
-            treatmentNegativeMax = clampPercentage(input.value);
-            treatmentSpectrumExpanded = false;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
-
-    categoriesElement.querySelectorAll("[data-treatment-reset-filters]").forEach(function (button) {
-        button.addEventListener("click", function () {
-            treatmentSearchQuery = "";
-            treatmentCategorySearchQuery = "";
-            treatmentOnlyRated = false;
-            treatmentSortMode = "name_asc";
-            treatmentViewMode = "cards";
-            treatmentPositiveMin = 0;
-            treatmentNegativeMax = 100;
-            selectedTreatmentCategorySlugs.clear();
-            treatmentCategoryDropdownOpen = false;
-            treatmentSpectrumExpanded = false;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
-
-    categoriesElement.querySelectorAll("[data-treatment-category]").forEach(function (button) {
-        button.addEventListener("click", function () {
-            const categorySlug = button.getAttribute("data-treatment-category");
-
-            if (categorySlug === "__all") {
-                selectedTreatmentCategorySlugs.clear();
-                treatmentSpectrumExpanded = false;
-                renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-                return;
-            }
-
-            if (selectedTreatmentCategorySlugs.has(categorySlug)) {
-                selectedTreatmentCategorySlugs.delete(categorySlug);
-            } else {
-                selectedTreatmentCategorySlugs.add(categorySlug);
-            }
-
-            treatmentSpectrumExpanded = false;
-            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
-        });
-    });
 }
 
 function focusInputAfterRender(id) {
@@ -1290,7 +1099,7 @@ function clampPercentage(value) {
 }
 
 function getSelectedTreatmentEntries(entries) {
-    if (selectedTreatmentCategorySlugs.size === 0) {
+    if (treatmentCategorySelectionMode === "all") {
         return entries;
     }
 

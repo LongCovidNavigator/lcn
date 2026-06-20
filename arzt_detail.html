@@ -143,7 +143,211 @@
                             </div>
                         </div>
 
-                        <div id="doctor-detail-treatment-categories" class="doctor-detail-treatment-categories"></div>
+                        <div id="doctor-detail-treatment-categories" class="doctor-detail-treatment-categories">
+                            <div class="doctor-detail-treatment-controls">
+                                <div class="doctor-detail-treatment-control-card doctor-detail-treatment-control-card-view">
+                                    <h4>Ansicht</h4>
+
+                                    <div class="doctor-detail-treatment-view-row">
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-view-button is-active"
+                                            data-treatment-view="cards"
+                                        >
+                                            Kacheln
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-view-button"
+                                            data-treatment-view="table"
+                                        >
+                                            Tabelle
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="doctor-detail-treatment-control-card doctor-detail-treatment-control-card-search">
+                                    <h4>Filtern</h4>
+
+                                    <div class="doctor-detail-treatment-search-row">
+                                        <input
+                                            id="doctor-detail-treatment-search"
+                                            class="doctor-detail-treatment-search-input"
+                                            type="search"
+                                            placeholder="Behandlung suchen …"
+                                        >
+
+                                        <div
+                                            id="doctor-detail-treatment-category-dropdown"
+                                            class="doctor-detail-treatment-category-dropdown"
+                                        >
+                                            <button
+                                                id="doctor-detail-treatment-category-dropdown-button"
+                                                type="button"
+                                                class="doctor-detail-treatment-category-dropdown-button"
+                                                data-treatment-category-dropdown-toggle="1"
+                                            >
+                                                Alle Kategorien ▾
+                                            </button>
+
+                                            <div class="doctor-detail-treatment-category-dropdown-panel">
+                                                <input
+                                                    id="doctor-detail-treatment-category-search"
+                                                    class="doctor-detail-treatment-category-search"
+                                                    type="search"
+                                                    placeholder="Kategorie suchen …"
+                                                >
+
+                                                <div class="doctor-detail-treatment-category-dropdown-actions">
+                                                    <button type="button" data-treatment-category-select-all="1">Alle</button>
+                                                    <button type="button" data-treatment-category-clear="1">Keine</button>
+                                                </div>
+
+                                                <div
+                                                    id="doctor-detail-treatment-category-options"
+                                                    class="doctor-detail-treatment-category-options"
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-filter-button"
+                                            data-treatment-only-rated="1"
+                                        >
+                                            Nur mit Bewertung
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-filter-button"
+                                            data-treatment-reset-filters="1"
+                                        >
+                                            Zurücksetzen
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="doctor-detail-treatment-control-card doctor-detail-treatment-control-card-rating-filter">
+                                    <h4>Bewertung</h4>
+
+                                    <div class="doctor-detail-treatment-range-grid">
+                                        <label class="doctor-detail-treatment-range-label">
+                                            <span>Positive Erfahrungen (mind.)</span>
+
+                                            <div class="doctor-detail-treatment-range-row">
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    step="1"
+                                                    value="0"
+                                                    data-treatment-positive-min="1"
+                                                >
+
+                                                <div class="doctor-detail-treatment-percent-input">
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        max="100"
+                                                        step="1"
+                                                        value="0"
+                                                        data-treatment-positive-min="1"
+                                                    >
+                                                    <span>%</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="doctor-detail-treatment-range-scale">
+                                                <span>0</span>
+                                                <span>50</span>
+                                                <span>100</span>
+                                            </div>
+                                        </label>
+
+                                        <label class="doctor-detail-treatment-range-label">
+                                            <span>Negative Erfahrungen (max.)</span>
+
+                                            <div class="doctor-detail-treatment-range-row">
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    step="1"
+                                                    value="100"
+                                                    data-treatment-negative-max="1"
+                                                >
+
+                                                <div class="doctor-detail-treatment-percent-input">
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        max="100"
+                                                        step="1"
+                                                        value="100"
+                                                        data-treatment-negative-max="1"
+                                                    >
+                                                    <span>%</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="doctor-detail-treatment-range-scale">
+                                                <span>0</span>
+                                                <span>50</span>
+                                                <span>100</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="doctor-detail-treatment-control-card doctor-detail-treatment-control-card-sort">
+                                    <h4>Sortieren</h4>
+
+                                    <div class="doctor-detail-treatment-sort-row">
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-sort-button is-active"
+                                            data-treatment-sort="name_asc"
+                                        >
+                                            Name A–Z
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-sort-button"
+                                            data-treatment-sort="name_desc"
+                                        >
+                                            Name Z–A
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-sort-button"
+                                            data-treatment-sort="positive_desc"
+                                        >
+                                            Positiv ↓
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-sort-button"
+                                            data-treatment-sort="negative_desc"
+                                        >
+                                            Negativ ↓
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-sort-button"
+                                            data-treatment-sort="votes_desc"
+                                        >
+                                            Bewertungen ↓
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div id="doctor-detail-treatments" class="doctor-detail-treatment-list"></div>
 

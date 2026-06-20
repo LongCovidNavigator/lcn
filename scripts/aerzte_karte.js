@@ -1,28 +1,28 @@
 let map;
-let radiusCircle;
-let doctorMarkerGroup;
-let userLocationMarker;
-let userLocationIcon;
+let radiusCircle = null;
+let doctorMarkerGroup = null;
+let userLocationMarker = null;
+let userLocationIcon = null;
+
 let currentDoctors = [];
+let selectedDoctorsForCompare = [];
+let showOnlyCompareSelection = false;
 
 let currentDoctorSortKey = "name";
 let currentDoctorSortDirection = "asc";
 
 let currentMinPositiveRatio = 0;
 let currentMaxNegativeRatio = 100;
-
 let currentAcceptsGkv = false;
 let currentAcceptsPkv = false;
-
 let currentHasWebsite = false;
 let currentHasEmail = false;
 let currentHasPhone = false;
-
 let currentCityFilter = "";
-
+let currentDoctorSearchTerm = "";
 let currentIncludeNoCoords = false;
-
 let currentLocation = null;
+let doctorSearchDebounceTimer = null;
 
 const defaultMapCenter = {
     lat: 51.1657,
@@ -32,14 +32,6 @@ const defaultMapCenter = {
 
 document.addEventListener("DOMContentLoaded", function () {
     const mapElement = document.getElementById("doctor-map");
-
-    const mapContent = document.getElementById("doctor-map-content");
-	const mapToggleButton = document.getElementById("doctor-map-toggle-button");
-
-    const cardViewButton = document.getElementById("doctor-card-view-button");
-    const tableViewButton = document.getElementById("doctor-table-view-button");
-
-    const cardResultsContainer = document.getElementById("doctor-card-results");
 
     if (!mapElement) {
         console.error("Kartencontainer #doctor-map wurde nicht gefunden.");
@@ -67,40 +59,16 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     setupDoctorNavigationPanel();
+    setupDoctorMapPanel();
+    setupDoctorViewSwitch();
     setupDoctorSortControl();
     setupDoctorRatingAndFilterControls();
     setupDoctorLocationModeControls();
+    setupDoctorCompareControls();
+    setupDoctorResultEventDelegation();
+    setupDoctorDirtyFilterHint();
+
     updateRadiusInputState();
-
-    if (mapToggleButton && mapContent) {
-		mapToggleButton.addEventListener("click", function () {
-			const isCollapsed = mapContent.classList.toggle("is-collapsed");
-
-			mapToggleButton.classList.toggle("is-collapsed", isCollapsed);
-			mapToggleButton.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
-
-			if (!isCollapsed && map) {
-				setTimeout(function () {
-					map.invalidateSize();
-				}, 50);
-			}
-		});
-	}
-
-    if (cardViewButton && tableViewButton) {
-        cardViewButton.addEventListener("click", function () {
-            setResultsView("cards");
-        });
-
-        tableViewButton.addEventListener("click", function () {
-            setResultsView("table");
-        });
-    }
-
-    if (cardResultsContainer) {
-        cardResultsContainer.addEventListener("click", handleDoctorCardVote);
-    }
-
     setResultsView("cards");
     renderDoctorCards([]);
     renderDoctorResultsTable([]);
@@ -117,10 +85,47 @@ function setupDoctorNavigationPanel() {
 
     toggleButton.addEventListener("click", function () {
         const isCollapsed = content.classList.toggle("is-collapsed");
-
         toggleButton.classList.toggle("is-collapsed", isCollapsed);
         toggleButton.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
     });
+}
+
+function setupDoctorMapPanel() {
+    const mapContent = document.getElementById("doctor-map-content");
+    const mapToggleButton = document.getElementById("doctor-map-toggle-button");
+
+    if (!mapToggleButton || !mapContent) {
+        return;
+    }
+
+    mapToggleButton.addEventListener("click", function () {
+        const isCollapsed = mapContent.classList.toggle("is-collapsed");
+        mapToggleButton.classList.toggle("is-collapsed", isCollapsed);
+        mapToggleButton.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+
+        if (!isCollapsed && map) {
+            setTimeout(function () {
+                map.invalidateSize();
+            }, 50);
+        }
+    });
+}
+
+function setupDoctorViewSwitch() {
+    const cardViewButton = document.getElementById("doctor-card-view-button");
+    const tableViewButton = document.getElementById("doctor-table-view-button");
+
+    if (cardViewButton) {
+        cardViewButton.addEventListener("click", function () {
+            setResultsView("cards");
+        });
+    }
+
+    if (tableViewButton) {
+        tableViewButton.addEventListener("click", function () {
+            setResultsView("table");
+        });
+    }
 }
 
 function setupDoctorSortControl() {
@@ -136,22 +141,14 @@ function setupDoctorSortControl() {
     sortSelect.addEventListener("change", function () {
         const previousKey = currentDoctorSortKey;
         const previousDirection = currentDoctorSortDirection;
-
         const settings = parseSortSelectValue(sortSelect.value);
 
         if (settings.key === "distance" && !currentLocation) {
             currentDoctorSortKey = previousKey;
             currentDoctorSortDirection = previousDirection;
             updateSortSelectValue();
-
             setLocationMode("radius");
-
-            const statusElement = document.getElementById("doctor-map-status");
-
-            if (statusElement) {
-                statusElement.textContent =
-                    "Für die Sortierung nach Entfernung bitte zuerst einen Standort eingeben.";
-            }
+            setMapStatus("Für die Sortierung nach Entfernung bitte zuerst einen Standort eingeben.");
 
             if (locationInput) {
                 setTimeout(function () {
@@ -164,16 +161,8 @@ function setupDoctorSortControl() {
 
         currentDoctorSortKey = settings.key;
         currentDoctorSortDirection = settings.direction;
-
-        currentDoctors = sortDoctors(
-            currentDoctors,
-            currentDoctorSortKey,
-            currentDoctorSortDirection
-        );
-
-        renderDoctorMarkers(currentDoctors);
-        renderDoctorCards(currentDoctors);
-        renderDoctorResultsTable(currentDoctors);
+        currentDoctors = sortDoctors(currentDoctors, currentDoctorSortKey, currentDoctorSortDirection);
+        refreshDoctorDisplay();
     });
 }
 
@@ -185,21 +174,21 @@ function setupDoctorRatingAndFilterControls() {
     const maxNegativeInput = document.getElementById("doctor-max-negative-input");
     const minPositiveRange = document.getElementById("doctor-min-positive-range");
     const maxNegativeRange = document.getElementById("doctor-max-negative-range");
-
-    const allInputs = [
-        minPositiveInput,
-        maxNegativeInput,
-        minPositiveRange,
-        maxNegativeRange,
-        document.getElementById("doctor-city-input"),
-        document.getElementById("doctor-location-input"),
-        document.getElementById("doctor-radius-input")
-    ].filter(Boolean);
+    const searchInput = document.getElementById("doctor-search-input");
 
     syncRangeAndNumber(minPositiveRange, minPositiveInput);
     syncRangeAndNumber(maxNegativeRange, maxNegativeInput);
 
-    allInputs.forEach(function (input) {
+    [
+        minPositiveInput,
+        maxNegativeInput,
+        minPositiveRange,
+        maxNegativeRange,
+        searchInput,
+        document.getElementById("doctor-city-input"),
+        document.getElementById("doctor-location-input"),
+        document.getElementById("doctor-radius-input")
+    ].filter(Boolean).forEach(function (input) {
         input.addEventListener("keydown", function (event) {
             if (event.key === "Enter" && applyButton) {
                 applyButton.click();
@@ -207,8 +196,19 @@ function setupDoctorRatingAndFilterControls() {
         });
     });
 
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            currentDoctorSearchTerm = searchInput.value.trim();
+            showOnlyCompareSelection = false;
+            renderDoctorCompareSelection();
+            scheduleDoctorLiveSearch();
+        });
+    }
+
     if (applyButton) {
         applyButton.addEventListener("click", function () {
+            clearDoctorSearchDebounce();
+
             const filterSettings = getRatingFilterSettingsFromControls();
 
             if (!filterSettings) {
@@ -223,13 +223,17 @@ function setupDoctorRatingAndFilterControls() {
             currentHasEmail = filterSettings.hasEmail;
             currentHasPhone = filterSettings.hasPhone;
             currentCityFilter = filterSettings.city;
+            currentDoctorSearchTerm = filterSettings.searchTerm;
+            showOnlyCompareSelection = false;
 
+            renderDoctorCompareSelection();
             applySearchFromControls();
         });
     }
 
     if (resetButton) {
         resetButton.addEventListener("click", function () {
+            clearDoctorSearchDebounce();
             resetDoctorNavigationControls();
             applySearchFromControls();
         });
@@ -271,6 +275,123 @@ function setupDoctorLocationModeControls() {
     }
 }
 
+function setupDoctorCompareControls() {
+    const compareSelection = document.getElementById("doctor-compare-selection");
+    const hitViewButton = document.getElementById("doctor-results-hit-view-button");
+    const compareViewButton = document.getElementById("doctor-compare-show-button");
+    const clearButton = document.getElementById("doctor-compare-clear-button");
+
+    if (compareSelection) {
+        compareSelection.addEventListener("click", function (event) {
+            const removeButton = event.target.closest(".doctor-compare-chip-remove");
+
+            if (removeButton) {
+                removeDoctorFromCompareSelection(Number(removeButton.getAttribute("data-dr-id")));
+            }
+        });
+    }
+
+    if (hitViewButton) {
+        hitViewButton.addEventListener("click", function () {
+            showOnlyCompareSelection = false;
+            refreshDoctorDisplay();
+        });
+    }
+
+    if (compareViewButton) {
+        compareViewButton.addEventListener("click", function () {
+            if (selectedDoctorsForCompare.length === 0) {
+                return;
+            }
+
+            showOnlyCompareSelection = true;
+            refreshDoctorDisplay();
+        });
+    }
+
+    if (clearButton) {
+        clearButton.addEventListener("click", function () {
+            selectedDoctorsForCompare = [];
+            showOnlyCompareSelection = false;
+            refreshDoctorDisplay();
+        });
+    }
+
+    renderDoctorCompareSelection();
+}
+
+function setupDoctorResultEventDelegation() {
+    const cardResultsContainer = document.getElementById("doctor-card-results");
+    const tableResultsBody = document.getElementById("doctor-map-results-body");
+
+    if (cardResultsContainer) {
+        cardResultsContainer.addEventListener("click", handleDoctorCompareClick);
+        cardResultsContainer.addEventListener("click", handleDoctorCardVote);
+    }
+
+    if (tableResultsBody) {
+        tableResultsBody.addEventListener("click", handleDoctorCompareClick);
+    }
+}
+
+function setupDoctorDirtyFilterHint() {
+    const dirtyFilterElements = [
+        document.getElementById("doctor-min-positive-input"),
+        document.getElementById("doctor-max-negative-input"),
+        document.getElementById("doctor-min-positive-range"),
+        document.getElementById("doctor-max-negative-range"),
+        document.getElementById("doctor-accepts-gkv-input"),
+        document.getElementById("doctor-accepts-pkv-input"),
+        document.getElementById("doctor-has-website-input"),
+        document.getElementById("doctor-has-email-input"),
+        document.getElementById("doctor-has-phone-input"),
+        document.getElementById("doctor-city-input"),
+        document.getElementById("doctor-location-input"),
+        document.getElementById("doctor-radius-enabled-input"),
+        document.getElementById("doctor-include-no-coords-input"),
+        document.getElementById("doctor-radius-input")
+    ].filter(Boolean);
+
+    const cityModeButton = document.getElementById("doctor-location-mode-city-button");
+    const radiusModeButton = document.getElementById("doctor-location-mode-radius-button");
+
+    dirtyFilterElements.forEach(function (element) {
+        element.addEventListener("input", markDoctorFiltersDirty);
+        element.addEventListener("change", markDoctorFiltersDirty);
+    });
+
+    if (cityModeButton) {
+        cityModeButton.addEventListener("click", markDoctorFiltersDirty);
+    }
+
+    if (radiusModeButton) {
+        radiusModeButton.addEventListener("click", markDoctorFiltersDirty);
+    }
+}
+
+function scheduleDoctorLiveSearch() {
+    const countElement = document.getElementById("doctor-map-count");
+
+    clearDoctorSearchDebounce();
+
+    if (countElement) {
+        countElement.textContent = "Suche läuft gleich …";
+        countElement.classList.remove("is-dirty");
+    }
+
+    doctorSearchDebounceTimer = setTimeout(function () {
+        doctorSearchDebounceTimer = null;
+        applySearchFromControls();
+    }, 350);
+}
+
+function clearDoctorSearchDebounce() {
+    if (doctorSearchDebounceTimer) {
+        clearTimeout(doctorSearchDebounceTimer);
+        doctorSearchDebounceTimer = null;
+    }
+}
+
 function syncRangeAndNumber(rangeInput, numberInput) {
     if (!rangeInput || !numberInput) {
         return;
@@ -282,7 +403,8 @@ function syncRangeAndNumber(rangeInput, numberInput) {
 
     numberInput.addEventListener("input", function () {
         const value = clampPercentValue(numberInput.value);
-        rangeInput.value = value;
+        numberInput.value = String(value);
+        rangeInput.value = String(value);
     });
 }
 
@@ -328,296 +450,6 @@ function setLocationMode(mode) {
     updateRadiusInputState();
 }
 
-function resetDoctorNavigationControls() {
-    const sortSelect = document.getElementById("doctor-sort-select");
-
-    const minPositiveInput = document.getElementById("doctor-min-positive-input");
-    const maxNegativeInput = document.getElementById("doctor-max-negative-input");
-    const minPositiveRange = document.getElementById("doctor-min-positive-range");
-    const maxNegativeRange = document.getElementById("doctor-max-negative-range");
-
-    const acceptsGkvInput = document.getElementById("doctor-accepts-gkv-input");
-    const acceptsPkvInput = document.getElementById("doctor-accepts-pkv-input");
-
-    const hasWebsiteInput = document.getElementById("doctor-has-website-input");
-    const hasEmailInput = document.getElementById("doctor-has-email-input");
-    const hasPhoneInput = document.getElementById("doctor-has-phone-input");
-
-    const cityInput = document.getElementById("doctor-city-input");
-    const locationInput = document.getElementById("doctor-location-input");
-    const radiusEnabledInput = document.getElementById("doctor-radius-enabled-input");
-    const includeNoCoordsInput = document.getElementById("doctor-include-no-coords-input");
-    const radiusInput = document.getElementById("doctor-radius-input");
-
-    currentDoctorSortKey = "name";
-    currentDoctorSortDirection = "asc";
-    currentMinPositiveRatio = 0;
-    currentMaxNegativeRatio = 100;
-    currentAcceptsGkv = false;
-    currentAcceptsPkv = false;
-    currentHasWebsite = false;
-    currentHasEmail = false;
-    currentHasPhone = false;
-    currentCityFilter = "";
-    currentIncludeNoCoords = false;
-    currentLocation = null;
-
-    if (sortSelect) {
-        sortSelect.value = "name:asc";
-    }
-
-    if (minPositiveInput) minPositiveInput.value = "0";
-    if (maxNegativeInput) maxNegativeInput.value = "100";
-    if (minPositiveRange) minPositiveRange.value = "0";
-    if (maxNegativeRange) maxNegativeRange.value = "100";
-
-    if (acceptsGkvInput) acceptsGkvInput.checked = false;
-    if (acceptsPkvInput) acceptsPkvInput.checked = false;
-
-    if (hasWebsiteInput) hasWebsiteInput.checked = false;
-    if (hasEmailInput) hasEmailInput.checked = false;
-    if (hasPhoneInput) hasPhoneInput.checked = false;
-
-    if (cityInput) cityInput.value = "";
-    if (locationInput) locationInput.value = "";
-    if (radiusEnabledInput) radiusEnabledInput.checked = false;
-    if (includeNoCoordsInput) includeNoCoordsInput.checked = false;
-    if (radiusInput) radiusInput.value = "100";
-
-    clearUserLocationMarker();
-    setLocationMode("city");
-    updateRadiusInputState();
-}
-
-function parseSortSelectValue(value) {
-    const [key, direction] = String(value || "name:asc").split(":");
-
-    return {
-        key: key || "name",
-        direction: direction || "asc"
-    };
-}
-
-function updateSortSelectValue() {
-    const sortSelect = document.getElementById("doctor-sort-select");
-
-    if (!sortSelect) {
-        return;
-    }
-
-    sortSelect.value = `${currentDoctorSortKey}:${currentDoctorSortDirection}`;
-}
-
-function getRatingFilterSettingsFromControls() {
-    const minPositiveInput = document.getElementById("doctor-min-positive-input");
-    const maxNegativeInput = document.getElementById("doctor-max-negative-input");
-    const acceptsGkvInput = document.getElementById("doctor-accepts-gkv-input");
-    const acceptsPkvInput = document.getElementById("doctor-accepts-pkv-input");
-    const hasWebsiteInput = document.getElementById("doctor-has-website-input");
-    const hasEmailInput = document.getElementById("doctor-has-email-input");
-    const hasPhoneInput = document.getElementById("doctor-has-phone-input");
-    const cityInput = document.getElementById("doctor-city-input");
-    const radiusEnabledInput = document.getElementById("doctor-radius-enabled-input");
-
-    const minPositiveRatio = Number(minPositiveInput ? minPositiveInput.value : 0);
-    const maxNegativeRatio = Number(maxNegativeInput ? maxNegativeInput.value : 100);
-    const city = cityInput && !cityInput.disabled ? cityInput.value.trim() : "";
-    const radiusEnabled = radiusEnabledInput ? radiusEnabledInput.checked : false;
-
-    if (Number.isNaN(minPositiveRatio) || minPositiveRatio < 0 || minPositiveRatio > 100) {
-        alert("Bitte bei positiven Erfahrungen einen Wert zwischen 0 und 100 eingeben.");
-        return null;
-    }
-
-    if (Number.isNaN(maxNegativeRatio) || maxNegativeRatio < 0 || maxNegativeRatio > 100) {
-        alert("Bitte bei negativen Erfahrungen einen Wert zwischen 0 und 100 eingeben.");
-        return null;
-    }
-
-    if (radiusEnabled && city !== "") {
-        alert("Bitte entweder Radiusfilter oder Stadtfilter verwenden, nicht beides gleichzeitig.");
-        return null;
-    }
-
-    return {
-        minPositiveRatio,
-        maxNegativeRatio,
-        acceptsGkv: acceptsGkvInput ? acceptsGkvInput.checked : false,
-        acceptsPkv: acceptsPkvInput ? acceptsPkvInput.checked : false,
-        hasWebsite: hasWebsiteInput ? hasWebsiteInput.checked : false,
-        hasEmail: hasEmailInput ? hasEmailInput.checked : false,
-        hasPhone: hasPhoneInput ? hasPhoneInput.checked : false,
-        city
-    };
-}
-
-function getDoctorSortShortLabel() {
-    if (currentDoctorSortKey === "distance") {
-        return "Entf.";
-    }
-
-    if (currentDoctorSortKey === "positive_ratio") {
-        return "Pos.%";
-    }
-
-    if (currentDoctorSortKey === "negative_ratio") {
-        return "Neg.%";
-    }
-
-    if (currentDoctorSortKey === "total_votes") {
-        return "Bew.";
-    }
-
-    return "Name";
-}
-
-function getDoctorSortDirectionLabel(sortKey, direction) {
-    if (sortKey === "name") {
-        return direction === "asc" ? "A–Z" : "Z–A";
-    }
-
-    return direction === "asc" ? "↑" : "↓";
-}
-
-function sortDoctors(doctors, sortKey, direction) {
-    const doctorsCopy = [...(doctors || [])];
-
-    doctorsCopy.sort(function (a, b) {
-        const statsA = getDoctorVoteStats(a);
-        const statsB = getDoctorVoteStats(b);
-
-        let result = 0;
-
-        if (sortKey === "distance") {
-            result = Number(a.distance_km ?? Infinity) - Number(b.distance_km ?? Infinity);
-        } else if (sortKey === "positive_ratio") {
-            result = statsA.proRatio - statsB.proRatio;
-        } else if (sortKey === "negative_ratio") {
-            result = statsA.contraRatio - statsB.contraRatio;
-        } else if (sortKey === "total_votes") {
-            result = statsA.totalVotes - statsB.totalVotes;
-        } else {
-			result = getDoctorNameSortKey(a).localeCompare(
-				getDoctorNameSortKey(b),
-				"de",
-				{ sensitivity: "base" }
-			);
-
-			if (result === 0) {
-				result = String(a.dr_display_name || "").localeCompare(
-					String(b.dr_display_name || ""),
-					"de",
-					{ sensitivity: "base" }
-				);
-			}
-		}
-
-        return direction === "desc" ? -result : result;
-    });
-
-    return doctorsCopy;
-}
-
-function getDoctorNameSortKey(doctor) {
-    return String(
-        doctor.dr_sort_lastname ||
-        doctor.dr_lastname ||
-        doctor.dr_org_name ||
-        doctor.dr_display_name ||
-        ""
-    ).trim();
-}
-
-
-function setResultsView(viewName) {
-    const cardSection = document.getElementById("doctor-card-results-section");
-    const tableSection = document.getElementById("doctor-table-results-section");
-    const cardButton = document.getElementById("doctor-card-view-button");
-    const tableButton = document.getElementById("doctor-table-view-button");
-
-    const showCards = viewName === "cards";
-
-    if (cardSection) {
-        cardSection.classList.toggle("is-hidden", !showCards);
-    }
-
-    if (tableSection) {
-        tableSection.classList.toggle("is-hidden", showCards);
-    }
-
-    if (cardButton) {
-        cardButton.classList.toggle("is-active", showCards);
-    }
-
-    if (tableButton) {
-        tableButton.classList.toggle("is-active", !showCards);
-    }
-
-    renderCurrentDoctorResultsView();
-}
-
-function getCurrentDoctorResultsView() {
-    const tableSection = document.getElementById("doctor-table-results-section");
-
-    if (tableSection && !tableSection.classList.contains("is-hidden")) {
-        return "table";
-    }
-
-    return "cards";
-}
-
-function renderCurrentDoctorResultsView() {
-    const currentView = getCurrentDoctorResultsView();
-    const cardContainer = document.getElementById("doctor-card-results");
-    const tableBody = document.getElementById("doctor-map-results-body");
-
-    if (currentView === "cards") {
-        if (tableBody) {
-            tableBody.innerHTML = "";
-        }
-
-        renderDoctorCards(currentDoctors);
-        return;
-    }
-
-    if (cardContainer) {
-        cardContainer.innerHTML = "";
-    }
-
-    renderDoctorResultsTable(currentDoctors);
-}
-
-function getCurrentDoctorResultsView() {
-    const tableSection = document.getElementById("doctor-table-results-section");
-
-    if (tableSection && !tableSection.classList.contains("is-hidden")) {
-        return "table";
-    }
-
-    return "cards";
-}
-
-function renderCurrentDoctorResultsView() {
-    const currentView = getCurrentDoctorResultsView();
-    const cardContainer = document.getElementById("doctor-card-results");
-    const tableBody = document.getElementById("doctor-map-results-body");
-
-    if (currentView === "cards") {
-        if (tableBody) {
-            tableBody.innerHTML = "";
-        }
-
-        renderDoctorCards(currentDoctors);
-        return;
-    }
-
-    if (cardContainer) {
-        cardContainer.innerHTML = "";
-    }
-
-    renderDoctorResultsTable(currentDoctors);
-}
-
 function updateRadiusInputState() {
     const locationModeCityButton = document.getElementById("doctor-location-mode-city-button");
     const radiusEnabledInput = document.getElementById("doctor-radius-enabled-input");
@@ -660,6 +492,125 @@ function updateRadiusInputState() {
     }
 }
 
+function resetDoctorNavigationControls() {
+    const sortSelect = document.getElementById("doctor-sort-select");
+    const minPositiveInput = document.getElementById("doctor-min-positive-input");
+    const maxNegativeInput = document.getElementById("doctor-max-negative-input");
+    const minPositiveRange = document.getElementById("doctor-min-positive-range");
+    const maxNegativeRange = document.getElementById("doctor-max-negative-range");
+    const acceptsGkvInput = document.getElementById("doctor-accepts-gkv-input");
+    const acceptsPkvInput = document.getElementById("doctor-accepts-pkv-input");
+    const hasWebsiteInput = document.getElementById("doctor-has-website-input");
+    const hasEmailInput = document.getElementById("doctor-has-email-input");
+    const hasPhoneInput = document.getElementById("doctor-has-phone-input");
+    const searchInput = document.getElementById("doctor-search-input");
+    const cityInput = document.getElementById("doctor-city-input");
+    const locationInput = document.getElementById("doctor-location-input");
+    const radiusEnabledInput = document.getElementById("doctor-radius-enabled-input");
+    const includeNoCoordsInput = document.getElementById("doctor-include-no-coords-input");
+    const radiusInput = document.getElementById("doctor-radius-input");
+
+    currentDoctorSortKey = "name";
+    currentDoctorSortDirection = "asc";
+    currentMinPositiveRatio = 0;
+    currentMaxNegativeRatio = 100;
+    currentAcceptsGkv = false;
+    currentAcceptsPkv = false;
+    currentHasWebsite = false;
+    currentHasEmail = false;
+    currentHasPhone = false;
+    currentCityFilter = "";
+    currentDoctorSearchTerm = "";
+    currentIncludeNoCoords = false;
+    currentLocation = null;
+    showOnlyCompareSelection = false;
+
+    if (sortSelect) sortSelect.value = "name:asc";
+    if (minPositiveInput) minPositiveInput.value = "0";
+    if (maxNegativeInput) maxNegativeInput.value = "100";
+    if (minPositiveRange) minPositiveRange.value = "0";
+    if (maxNegativeRange) maxNegativeRange.value = "100";
+    if (acceptsGkvInput) acceptsGkvInput.checked = false;
+    if (acceptsPkvInput) acceptsPkvInput.checked = false;
+    if (hasWebsiteInput) hasWebsiteInput.checked = false;
+    if (hasEmailInput) hasEmailInput.checked = false;
+    if (hasPhoneInput) hasPhoneInput.checked = false;
+    if (searchInput) searchInput.value = "";
+    if (cityInput) cityInput.value = "";
+    if (locationInput) locationInput.value = "";
+    if (radiusEnabledInput) radiusEnabledInput.checked = false;
+    if (includeNoCoordsInput) includeNoCoordsInput.checked = false;
+    if (radiusInput) radiusInput.value = "100";
+
+    clearUserLocationMarker();
+    setLocationMode("city");
+    updateRadiusInputState();
+    renderDoctorCompareSelection();
+}
+
+function parseSortSelectValue(value) {
+    const [key, direction] = String(value || "name:asc").split(":");
+
+    return {
+        key: key || "name",
+        direction: direction || "asc"
+    };
+}
+
+function updateSortSelectValue() {
+    const sortSelect = document.getElementById("doctor-sort-select");
+
+    if (sortSelect) {
+        sortSelect.value = `${currentDoctorSortKey}:${currentDoctorSortDirection}`;
+    }
+}
+
+function getRatingFilterSettingsFromControls() {
+    const minPositiveInput = document.getElementById("doctor-min-positive-input");
+    const maxNegativeInput = document.getElementById("doctor-max-negative-input");
+    const acceptsGkvInput = document.getElementById("doctor-accepts-gkv-input");
+    const acceptsPkvInput = document.getElementById("doctor-accepts-pkv-input");
+    const hasWebsiteInput = document.getElementById("doctor-has-website-input");
+    const hasEmailInput = document.getElementById("doctor-has-email-input");
+    const hasPhoneInput = document.getElementById("doctor-has-phone-input");
+    const searchInput = document.getElementById("doctor-search-input");
+    const cityInput = document.getElementById("doctor-city-input");
+    const radiusEnabledInput = document.getElementById("doctor-radius-enabled-input");
+
+    const minPositiveRatio = Number(minPositiveInput ? minPositiveInput.value : 0);
+    const maxNegativeRatio = Number(maxNegativeInput ? maxNegativeInput.value : 100);
+    const searchTerm = searchInput ? searchInput.value.trim() : "";
+    const city = cityInput && !cityInput.disabled ? cityInput.value.trim() : "";
+    const radiusEnabled = radiusEnabledInput ? radiusEnabledInput.checked : false;
+
+    if (Number.isNaN(minPositiveRatio) || minPositiveRatio < 0 || minPositiveRatio > 100) {
+        alert("Bitte bei positiven Erfahrungen einen Wert zwischen 0 und 100 eingeben.");
+        return null;
+    }
+
+    if (Number.isNaN(maxNegativeRatio) || maxNegativeRatio < 0 || maxNegativeRatio > 100) {
+        alert("Bitte bei negativen Erfahrungen einen Wert zwischen 0 und 100 eingeben.");
+        return null;
+    }
+
+    if (radiusEnabled && city !== "") {
+        alert("Bitte entweder Radiusfilter oder Stadtfilter verwenden, nicht beides gleichzeitig.");
+        return null;
+    }
+
+    return {
+        minPositiveRatio,
+        maxNegativeRatio,
+        acceptsGkv: acceptsGkvInput ? acceptsGkvInput.checked : false,
+        acceptsPkv: acceptsPkvInput ? acceptsPkvInput.checked : false,
+        hasWebsite: hasWebsiteInput ? hasWebsiteInput.checked : false,
+        hasEmail: hasEmailInput ? hasEmailInput.checked : false,
+        hasPhone: hasPhoneInput ? hasPhoneInput.checked : false,
+        city,
+        searchTerm
+    };
+}
+
 function getSearchSettingsFromControls() {
     const locationModeCityButton = document.getElementById("doctor-location-mode-city-button");
     const locationInput = document.getElementById("doctor-location-input");
@@ -671,18 +622,9 @@ function getSearchSettingsFromControls() {
         ? locationModeCityButton.classList.contains("is-active")
         : true;
 
-    const locationQuery = !isCityMode && locationInput
-        ? locationInput.value.trim()
-        : "";
-
-    const radiusEnabled = !isCityMode && radiusEnabledInput
-        ? radiusEnabledInput.checked
-        : false;
-
-    const includeNoCoords = !isCityMode && includeNoCoordsInput
-        ? includeNoCoordsInput.checked
-        : false;
-
+    const locationQuery = !isCityMode && locationInput ? locationInput.value.trim() : "";
+    const radiusEnabled = !isCityMode && radiusEnabledInput ? radiusEnabledInput.checked : false;
+    const includeNoCoords = !isCityMode && includeNoCoordsInput ? includeNoCoordsInput.checked : false;
     const radiusKm = Number(radiusInput ? radiusInput.value : 100);
 
     if (radiusEnabled && locationQuery === "") {
@@ -712,18 +654,10 @@ async function applySearchFromControls() {
         return;
     }
 
-    const statusElement = document.getElementById("doctor-map-status");
-    const countElement = document.getElementById("doctor-map-count");
     const locationInput = document.getElementById("doctor-location-input");
 
-    if (statusElement) {
-        statusElement.textContent = "Suche läuft ...";
-    }
-
-    if (countElement) {
-        countElement.textContent = "-";
-    }
-
+    setMapStatus("Suche läuft ...");
+    setCountText("-");
     clearMapSearchLayers();
     renderDoctorCards([]);
     renderDoctorResultsTable([]);
@@ -731,7 +665,6 @@ async function applySearchFromControls() {
     try {
         if (settings.locationQuery !== "") {
             const geocodedLocation = await geocodeLocation(settings.locationQuery);
-
             currentLocation = geocodedLocation;
 
             if (locationInput) {
@@ -746,14 +679,9 @@ async function applySearchFromControls() {
 
         drawRadiusIfNeeded(settings);
         await loadDoctorsFromSearchApi(settings);
-
     } catch (error) {
         console.error("Fehler bei der Suche:", error);
-
-        if (statusElement) {
-            statusElement.textContent = "Die Suche konnte nicht ausgeführt werden. Details stehen in der Konsole.";
-        }
-
+        setMapStatus("Die Suche konnte nicht ausgeführt werden. Details stehen in der Konsole.");
         alert("Die Suche konnte nicht ausgeführt werden.");
     }
 }
@@ -776,6 +704,142 @@ async function geocodeLocation(query) {
         lng: Number(data.result.lng),
         label: data.result.formatted || query
     };
+}
+
+async function loadDoctorsFromSearchApi(settings) {
+    const centerForApi = currentLocation || defaultMapCenter;
+
+    const radiusParam = settings.radiusEnabled
+        ? encodeURIComponent(settings.radiusKm)
+        : "all";
+
+    const cityParam = currentCityFilter !== ""
+        ? `&city=${encodeURIComponent(currentCityFilter)}`
+        : "";
+
+    const searchParam = currentDoctorSearchTerm !== ""
+        ? `&search=${encodeURIComponent(currentDoctorSearchTerm)}`
+        : "";
+
+    const url =
+        `api/doctors_search.php?lat=${encodeURIComponent(centerForApi.lat)}` +
+        `&lng=${encodeURIComponent(centerForApi.lng)}` +
+        `&radiusKm=${radiusParam}` +
+        `&minPositiveRatio=${encodeURIComponent(currentMinPositiveRatio)}` +
+        `&maxNegativeRatio=${encodeURIComponent(currentMaxNegativeRatio)}` +
+        `&acceptsGkv=${currentAcceptsGkv ? "1" : "0"}` +
+        `&acceptsPkv=${currentAcceptsPkv ? "1" : "0"}` +
+        `&includeNoCoords=${currentIncludeNoCoords ? "1" : "0"}` +
+        `&hasWebsite=${currentHasWebsite ? "1" : "0"}` +
+        `&hasEmail=${currentHasEmail ? "1" : "0"}` +
+        `&hasPhone=${currentHasPhone ? "1" : "0"}` +
+        cityParam +
+        searchParam;
+
+    const searchResponse = await fetch(url);
+
+    if (!searchResponse.ok) {
+        throw new Error(`HTTP-Fehler: ${searchResponse.status}`);
+    }
+
+    const data = await searchResponse.json();
+
+    if (!data.ok) {
+        throw new Error(data.message || "API-Antwort war nicht erfolgreich.");
+    }
+
+    let apiDoctors = data.items || [];
+
+    if (!currentLocation) {
+        apiDoctors = apiDoctors.map(function (doctor) {
+            return {
+                ...doctor,
+                distance_km: null,
+                distance_meters: null
+            };
+        });
+    }
+
+    if (!currentLocation && currentDoctorSortKey === "distance") {
+        currentDoctorSortKey = "name";
+        currentDoctorSortDirection = "asc";
+        updateSortSelectValue();
+    }
+
+    currentDoctors = sortDoctors(apiDoctors, currentDoctorSortKey, currentDoctorSortDirection);
+
+    if (showOnlyCompareSelection && selectedDoctorsForCompare.length === 0) {
+        showOnlyCompareSelection = false;
+    }
+
+    refreshDoctorDisplay();
+    setCountText(`Gefundene Ärzte: ${currentDoctors.length}`);
+    updateStatusAfterSearch(settings);
+}
+
+function updateStatusAfterSearch(settings) {
+    const filterText = buildActiveFilterStatusText();
+
+    if (showOnlyCompareSelection) {
+        setMapStatus(`${selectedDoctorsForCompare.length} ausgewählte Ärzt:innen in der Vergleichsansicht.${filterText}`);
+        return;
+    }
+
+    if (settings.radiusEnabled) {
+        const noCoordsText = currentIncludeNoCoords
+            ? " Einträge ohne Koordinaten werden zusätzlich angezeigt."
+            : "";
+
+        setMapStatus(`${currentDoctors.length} Ärzte im Umkreis von ${settings.radiusKm} km gefunden. Entfernung: Luftlinie.${noCoordsText}${filterText}`);
+        return;
+    }
+
+    if (currentLocation) {
+        setMapStatus(`${currentDoctors.length} Ärzte gefunden. Entfernung: Luftlinie zum Standort.${filterText}`);
+        return;
+    }
+
+    setMapStatus(`${currentDoctors.length} Ärzte gefunden. Kein Standort gesetzt.${filterText}`);
+}
+
+function buildActiveFilterStatusText() {
+    const parts = [];
+
+    if (currentDoctorSearchTerm !== "") parts.push(`Suche „${currentDoctorSearchTerm}“`);
+    if (showOnlyCompareSelection) parts.push("Vergleichsansicht");
+    if (currentMinPositiveRatio !== 0 || currentMaxNegativeRatio !== 100) parts.push(`positive Erfahrungen ≥ ${currentMinPositiveRatio} %, negative Erfahrungen ≤ ${currentMaxNegativeRatio} %`);
+    if (currentAcceptsGkv) parts.push("GKV");
+    if (currentAcceptsPkv) parts.push("PKV/Selbstzahler");
+    if (currentHasWebsite) parts.push("hat Website");
+    if (currentHasEmail) parts.push("hat E-Mail");
+    if (currentHasPhone) parts.push("hat Telefonnummer");
+    if (currentCityFilter !== "") parts.push(`Ort enthält „${currentCityFilter}“`);
+    if (currentIncludeNoCoords) parts.push("Einträge ohne Koordinaten werden zusätzlich angezeigt");
+
+    return parts.length > 0 ? ` Filter aktiv: ${parts.join(", ")}.` : "";
+}
+
+function drawRadiusIfNeeded(settings) {
+    if (settings.radiusEnabled && currentLocation) {
+        radiusCircle = L.circle([currentLocation.lat, currentLocation.lng], {
+            radius: settings.radiusKm * 1000,
+            fillOpacity: 0.08,
+            weight: 2
+        }).addTo(map);
+
+        map.fitBounds(radiusCircle.getBounds(), { padding: [30, 30] });
+        setMapStatus(`Suche Ärzte im Umkreis von ${settings.radiusKm} km. Entfernung: Luftlinie.`);
+        return;
+    }
+
+    if (currentLocation) {
+        map.setView([currentLocation.lat, currentLocation.lng], 6);
+        setMapStatus("Suche alle Ärzte mit Koordinaten. Entfernung wird als Luftlinie zum Standort berechnet.");
+        return;
+    }
+
+    map.setView([defaultMapCenter.lat, defaultMapCenter.lng], 6);
+    setMapStatus("Suche alle Ärzte. Kein Standort gesetzt.");
 }
 
 function clearMapSearchLayers() {
@@ -814,177 +878,494 @@ function updateUserLocationMarker() {
         .openPopup();
 }
 
-function drawRadiusIfNeeded(settings) {
-    const statusElement = document.getElementById("doctor-map-status");
+function setResultsView(viewName) {
+    const cardSection = document.getElementById("doctor-card-results-section");
+    const tableSection = document.getElementById("doctor-table-results-section");
+    const cardButton = document.getElementById("doctor-card-view-button");
+    const tableButton = document.getElementById("doctor-table-view-button");
 
-    if (settings.radiusEnabled && currentLocation) {
-        radiusCircle = L.circle([currentLocation.lat, currentLocation.lng], {
-            radius: settings.radiusKm * 1000,
-            fillOpacity: 0.08,
-            weight: 2
-        }).addTo(map);
+    const showCards = viewName === "cards";
 
-        map.fitBounds(radiusCircle.getBounds(), {
-            padding: [30, 30]
-        });
+    if (cardSection) cardSection.classList.toggle("is-hidden", !showCards);
+    if (tableSection) tableSection.classList.toggle("is-hidden", showCards);
+    if (cardButton) cardButton.classList.toggle("is-active", showCards);
+    if (tableButton) tableButton.classList.toggle("is-active", !showCards);
 
-        if (statusElement) {
-            statusElement.textContent = `Suche Ärzte im Umkreis von ${settings.radiusKm} km. Entfernung: Luftlinie.`;
-        }
+    renderCurrentDoctorResultsView();
+}
 
+function getCurrentDoctorResultsView() {
+    const tableSection = document.getElementById("doctor-table-results-section");
+
+    if (tableSection && !tableSection.classList.contains("is-hidden")) {
+        return "table";
+    }
+
+    return "cards";
+}
+
+function getDisplayedDoctors() {
+    return showOnlyCompareSelection ? selectedDoctorsForCompare : currentDoctors;
+}
+
+function refreshDoctorDisplay() {
+    const displayedDoctors = getDisplayedDoctors();
+
+    renderDoctorMarkers(displayedDoctors);
+    renderCurrentDoctorResultsView();
+    renderDoctorCompareSelection();
+}
+
+function renderCurrentDoctorResultsView() {
+    const currentView = getCurrentDoctorResultsView();
+    const displayedDoctors = getDisplayedDoctors();
+    const cardContainer = document.getElementById("doctor-card-results");
+    const tableBody = document.getElementById("doctor-map-results-body");
+
+    if (currentView === "cards") {
+        if (tableBody) tableBody.innerHTML = "";
+        renderDoctorCards(displayedDoctors);
         return;
     }
+
+    if (cardContainer) cardContainer.innerHTML = "";
+    renderDoctorResultsTable(displayedDoctors);
+}
+
+function renderDoctorMarkers(doctors) {
+    if (doctorMarkerGroup) {
+        map.removeLayer(doctorMarkerGroup);
+        doctorMarkerGroup = null;
+    }
+
+    doctorMarkerGroup = L.featureGroup();
+
+    (doctors || []).forEach(function (doctor) {
+        if (!doctor.has_coordinates || doctor.loc_lat === null || doctor.loc_lng === null || doctor.loc_lat === "" || doctor.loc_lng === "") {
+            return;
+        }
+
+        const lat = Number(doctor.loc_lat);
+        const lng = Number(doctor.loc_lng);
+
+        if (Number.isNaN(lat) || Number.isNaN(lng)) {
+            return;
+        }
+
+        L.marker([lat, lng])
+            .bindPopup(buildDoctorPopupHtml(doctor))
+            .addTo(doctorMarkerGroup);
+    });
+
+    doctorMarkerGroup.addTo(map);
+
+    const markerLayers = doctorMarkerGroup.getLayers();
+
+    if (markerLayers.length > 0) {
+        const bounds = L.latLngBounds([]);
+
+        markerLayers.forEach(function (layer) {
+            if (typeof layer.getLatLng === "function") {
+                bounds.extend(layer.getLatLng());
+            }
+        });
+
+        if (userLocationMarker && typeof userLocationMarker.getLatLng === "function") {
+            bounds.extend(userLocationMarker.getLatLng());
+        }
+
+        if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [30, 30] });
+        }
+    }
+}
+
+function renderDoctorCards(doctors) {
+    const cardContainer = document.getElementById("doctor-card-results");
+
+    if (!cardContainer) {
+        return;
+    }
+
+    if (!doctors || doctors.length === 0) {
+        cardContainer.innerHTML = `<p class="doctor-empty-state">Keine Ärztinnen oder Ärzte gefunden.</p>`;
+        return;
+    }
+
+    cardContainer.innerHTML = doctors.map(function (doctor, index) {
+        return buildDoctorCardHtml(doctor, index);
+    }).join("");
+}
+
+function buildDoctorCardHtml(doctor, index) {
+    const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
+    const label = escapeHtml(doctor.loc_label || "");
+    const plz = escapeHtml(doctor.loc_plz || "");
+    const city = escapeHtml(doctor.loc_city || "");
+    const street = escapeHtml(doctor.loc_street || "");
+    const houseNumber = escapeHtml(doctor.loc_housenumber || "");
+    const distance = getDoctorDistanceText(doctor);
+    const website = doctor.loc_website || doctor.dr_website || "";
+    const stats = getDoctorVoteStats(doctor);
+
+    const websiteHtml = website
+        ? `<a class="doctor-card-link" href="${escapeHtml(normalizeWebsiteUrl(website))}" target="_blank" rel="noopener noreferrer">Website</a>`
+        : `<span class="doctor-card-muted">Keine Website</span>`;
+
+    const insuranceTags = [
+        isTruthyFlag(doctor.dr_accepts_gkv) ? "GKV" : "",
+        isTruthyFlag(doctor.dr_accepts_pkv) ? "PKV" : ""
+    ].filter(Boolean).map(function (value) {
+        return `<span class="doctor-card-tag">${escapeHtml(value)}</span>`;
+    }).join("");
+
+    return `
+        <article class="doctor-card doctor-card-v2" data-dr-id="${escapeHtml(doctor.dr_id)}">
+            <div class="doctor-card-accent"></div>
+
+            <div class="doctor-card-main-header">
+                <div class="doctor-card-rank-large" aria-label="Platzierung">
+                    <strong>${index + 1}</strong>
+                    <span>${escapeHtml(getDoctorSortShortLabel())}</span>
+                </div>
+
+                <div class="doctor-card-title-area">
+                    <h3 class="doctor-card-title">${name}</h3>
+
+                    <div class="doctor-card-meta">
+                        ${label ? `<span class="doctor-card-tag">🏥 ${label}</span>` : ""}
+                        ${insuranceTags || `<span class="doctor-card-tag">Versicherung k. A.</span>`}
+                    </div>
+                </div>
+
+                ${city ? `<span class="doctor-card-city-badge">⌖ ${city}</span>` : ""}
+            </div>
+
+            <div class="doctor-card-content-grid">
+                <section class="doctor-card-info-panel doctor-card-location-panel">
+                    <h4 class="doctor-card-section-heading">⌖ Standort & Entfernung</h4>
+
+                    <div class="doctor-card-location-block">
+                        <div class="doctor-card-mini-label">Adresse</div>
+                        <div class="doctor-card-main-text">
+                            ${street || houseNumber ? `${street} ${houseNumber}, ` : ""}${plz} ${city}
+                        </div>
+                    </div>
+
+                    <div class="doctor-card-location-block">
+                        <div class="doctor-card-mini-label">Entfernung</div>
+                        <div class="doctor-card-main-text">${distance}</div>
+                    </div>
+                </section>
+
+                <section class="doctor-card-info-panel doctor-card-rating-panel">
+                    <h4 class="doctor-card-section-heading">
+                        ⭐ Bewertung
+                        <span class="doctor-card-section-count">(${stats.totalVotes} Bewertungen)</span>
+                    </h4>
+                    ${buildDoctorCardRatingHtml(doctor)}
+                </section>
+            </div>
+
+            <section class="doctor-card-own-rating">
+                <div class="doctor-card-own-rating-header">
+                    <h4 class="doctor-card-section-heading">✎ Deine Bewertung</h4>
+                </div>
+
+                <div class="doctor-card-vote-buttons-placeholder">
+                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-positive doctor-card-vote-button" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="pro">Positiv</button>
+                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-neutral doctor-card-vote-button" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="neutral">Neutral</button>
+                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-negative doctor-card-vote-button" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="contra">Negativ</button>
+                </div>
+            </section>
+
+            <div class="doctor-card-footer doctor-card-footer-with-compare">
+                <a class="doctor-card-link" href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">Mehr Details</a>
+                <button type="button" class="doctor-compare-add-button ${isDoctorSelectedForCompare(doctor.dr_id) ? "is-selected" : ""}" data-dr-id="${escapeHtml(doctor.dr_id)}">
+                    ${isDoctorSelectedForCompare(doctor.dr_id) ? "Ausgewählt" : "+ vergleichen"}
+                </button>
+                ${websiteHtml}
+            </div>
+        </article>
+    `;
+}
+
+function buildDoctorCardRatingHtml(doctor) {
+    const stats = getDoctorVoteStats(doctor);
+
+    if (stats.totalVotes === 0) {
+        return `<div class="doctor-card-rating-empty">Noch keine Bewertungen vorhanden.</div>`;
+    }
+
+    return `
+        <div class="doctor-card-rating-tiles">
+            <div class="doctor-card-rating-tile doctor-card-rating-positive">
+                <div class="doctor-card-rating-value">${stats.proRatio}%</div>
+                <div class="doctor-card-rating-label">Positive Erfahrungen</div>
+                <div class="doctor-card-rating-count">${stats.pro} positiv</div>
+            </div>
+            <div class="doctor-card-rating-tile doctor-card-rating-neutral">
+                <div class="doctor-card-rating-value">${stats.neutralRatio}%</div>
+                <div class="doctor-card-rating-label">Neutrale Erfahrungen</div>
+                <div class="doctor-card-rating-count">${stats.neutral} neutral</div>
+            </div>
+            <div class="doctor-card-rating-tile doctor-card-rating-negative">
+                <div class="doctor-card-rating-value">${stats.contraRatio}%</div>
+                <div class="doctor-card-rating-label">Negative Erfahrungen</div>
+                <div class="doctor-card-rating-count">${stats.contra} negativ</div>
+            </div>
+        </div>
+    `;
+}
+
+function renderDoctorResultsTable(doctors) {
+    const tableBody = document.getElementById("doctor-map-results-body");
+
+    updateDoctorTableRankHeader();
+
+    if (!tableBody) {
+        return;
+    }
+
+    if (!doctors || doctors.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6">Keine Ärztinnen oder Ärzte gefunden.</td></tr>`;
+        return;
+    }
+
+    tableBody.innerHTML = doctors.map(function (doctor, index) {
+        return buildDoctorTableRowHtml(doctor, index);
+    }).join("");
+}
+
+function buildDoctorTableRowHtml(doctor, index) {
+    const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
+
+    return `
+        <tr data-dr-id="${escapeHtml(doctor.dr_id)}">
+            <td class="doctor-table-rank">${index + 1}</td>
+            <td class="doctor-table-name">
+                <div class="doctor-table-name-stack">
+                    <a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>
+                    <button type="button" class="doctor-compare-add-button doctor-compare-add-button-table ${isDoctorSelectedForCompare(doctor.dr_id) ? "is-selected" : ""}" data-dr-id="${escapeHtml(doctor.dr_id)}">
+                        ${isDoctorSelectedForCompare(doctor.dr_id) ? "Ausgewählt" : "+ vergleichen"}
+                    </button>
+                </div>
+            </td>
+            <td>${buildDoctorTableLocationHtml(doctor)}</td>
+            <td>${buildDoctorTableExperienceHtml(doctor)}</td>
+            <td>${buildDoctorTableInsuranceHtml(doctor)}</td>
+            <td>${buildDoctorTableContactHtml(doctor)}</td>
+        </tr>
+    `;
+}
+
+function updateDoctorTableRankHeader() {
+    const rankHeader = document.getElementById("doctor-table-rank-header");
+
+    if (rankHeader) {
+        rankHeader.textContent = currentDoctorSortDirection === "desc" ? "▼" : "▲";
+    }
+}
+
+function buildDoctorTableLocationHtml(doctor) {
+    const city = String(doctor.loc_city || "").trim();
+    const plz = String(doctor.loc_plz || "").trim();
+    const distance = getDoctorDistanceText(doctor, true);
+    const hasDistance = distance !== "-";
+
+    let mainText = "";
+    let subText = "";
+    let mainClass = "doctor-table-main-value";
 
     if (currentLocation) {
-        map.setView([currentLocation.lat, currentLocation.lng], 6);
-
-        if (statusElement) {
-            statusElement.textContent = "Suche alle Ärzte mit Koordinaten. Entfernung wird als Luftlinie zum Standort berechnet.";
+        if (hasDistance) {
+            mainText = distance;
+            subText = city || (plz ? `PLZ: ${plz}` : "");
+        } else if (city) {
+            mainText = city;
+        } else if (plz) {
+            mainText = `PLZ: ${plz}`;
+            mainClass = "doctor-table-main-value doctor-table-main-value-muted";
+        } else {
+            mainText = "—";
         }
+    } else if (city) {
+        mainText = city;
+    } else if (plz) {
+        mainText = `PLZ: ${plz}`;
+        mainClass = "doctor-table-main-value doctor-table-main-value-muted";
+    } else {
+        mainText = "—";
+    }
 
+    return `
+        <div class="doctor-table-stacked-cell">
+            <span class="${mainClass}">${escapeHtml(mainText)}</span>
+            ${subText ? `<span class="doctor-table-sub-value">${escapeHtml(subText)}</span>` : ""}
+        </div>
+    `;
+}
+
+function buildDoctorTableExperienceHtml(doctor) {
+    const stats = getDoctorVoteStats(doctor);
+
+    if (stats.totalVotes === 0) {
+        return `<span class="doctor-table-muted">Noch keine Bewertungen</span>`;
+    }
+
+    return `
+        <div class="doctor-table-experience-grid">
+            <span class="doctor-table-experience-value doctor-table-badge-positive">+${stats.proRatio}%</span>
+            <span class="doctor-table-experience-value doctor-table-badge-neutral">=${stats.neutralRatio}%</span>
+            <span class="doctor-table-experience-value doctor-table-badge-negative">-${stats.contraRatio}%</span>
+            <span class="doctor-table-vote-count">(n=${stats.totalVotes})</span>
+        </div>
+    `;
+}
+
+function buildDoctorTableInsuranceHtml(doctor) {
+    const badges = [];
+
+    if (isTruthyFlag(doctor.dr_accepts_gkv)) {
+        badges.push(`<span class="doctor-table-badge">GKV</span>`);
+    }
+
+    if (isTruthyFlag(doctor.dr_accepts_pkv)) {
+        badges.push(`<span class="doctor-table-badge">PKV</span>`);
+    }
+
+    return badges.length > 0 ? `<div class="doctor-table-badge-row">${badges.join("")}</div>` : "";
+}
+
+function buildDoctorTableContactHtml(doctor) {
+    const website = doctor.loc_website || doctor.dr_website || "";
+    const email = getDoctorFirstFieldValue(doctor, ["loc_email", "dr_email", "email", "contact_email", "dr_contact_email"]);
+    const phone = getDoctorFirstFieldValue(doctor, ["loc_phone", "dr_phone", "phone", "telephone", "telefon", "loc_telephone", "dr_telephone"]);
+
+    const badges = [];
+
+    if (website) {
+        badges.push(`<a class="doctor-table-badge doctor-table-badge-link" href="${escapeHtml(normalizeWebsiteUrl(website))}" target="_blank" rel="noopener noreferrer" title="Website öffnen">Web</a>`);
+    }
+
+    if (email) {
+        badges.push(`<a class="doctor-table-badge doctor-table-badge-link" href="mailto:${escapeHtml(email)}" title="${escapeHtml(email)}">Mail</a>`);
+    } else if (hasDoctorFieldValue(doctor, ["has_email", "hasEmail"])) {
+        badges.push(`<span class="doctor-table-badge" title="E-Mail vorhanden, aber Adresse nicht im Datensatz">Mail</span>`);
+    }
+
+    if (phone) {
+        const phoneHref = String(phone).replace(/[^\d+]/g, "");
+        badges.push(`<a class="doctor-table-badge doctor-table-badge-link" href="tel:${escapeHtml(phoneHref)}" title="${escapeHtml(phone)}">Tel</a>`);
+    } else if (hasDoctorFieldValue(doctor, ["has_phone", "hasPhone"])) {
+        badges.push(`<span class="doctor-table-badge" title="Telefonnummer vorhanden, aber Nummer nicht im Datensatz">Tel</span>`);
+    }
+
+    return badges.length > 0 ? `<div class="doctor-table-badge-row">${badges.join("")}</div>` : "";
+}
+
+function handleDoctorCompareClick(event) {
+    const button = event.target.closest(".doctor-compare-add-button");
+
+    if (!button) {
         return;
     }
 
-    map.setView([defaultMapCenter.lat, defaultMapCenter.lng], 6);
+    const drId = Number(button.getAttribute("data-dr-id"));
 
-    if (statusElement) {
-        statusElement.textContent = "Suche alle Ärzte. Kein Standort gesetzt.";
+    if (!drId) {
+        return;
+    }
+
+    const doctor = currentDoctors.find(function (currentDoctor) {
+        return Number(currentDoctor.dr_id) === drId;
+    }) || selectedDoctorsForCompare.find(function (selectedDoctor) {
+        return Number(selectedDoctor.dr_id) === drId;
+    });
+
+    if (doctor) {
+        addDoctorToCompareSelection(doctor);
     }
 }
 
-async function loadDoctorsFromSearchApi(settings) {
-    const statusElement = document.getElementById("doctor-map-status");
-    const countElement = document.getElementById("doctor-map-count");
+function addDoctorToCompareSelection(doctor) {
+    const drId = Number(doctor.dr_id);
 
-    const centerForApi = currentLocation || defaultMapCenter;
-
-    const radiusParam = settings.radiusEnabled
-        ? encodeURIComponent(settings.radiusKm)
-        : "all";
-
-    const cityParam = currentCityFilter !== ""
-        ? `&city=${encodeURIComponent(currentCityFilter)}`
-        : "";
-
-    const url =
-        `api/doctors_search.php?lat=${encodeURIComponent(centerForApi.lat)}` +
-        `&lng=${encodeURIComponent(centerForApi.lng)}` +
-        `&radiusKm=${radiusParam}` +
-        `&minPositiveRatio=${encodeURIComponent(currentMinPositiveRatio)}` +
-        `&maxNegativeRatio=${encodeURIComponent(currentMaxNegativeRatio)}` +
-        `&acceptsGkv=${currentAcceptsGkv ? "1" : "0"}` +
-        `&acceptsPkv=${currentAcceptsPkv ? "1" : "0"}` +
-        `&includeNoCoords=${currentIncludeNoCoords ? "1" : "0"}` +
-        `&hasWebsite=${currentHasWebsite ? "1" : "0"}` +
-        `&hasEmail=${currentHasEmail ? "1" : "0"}` +
-        `&hasPhone=${currentHasPhone ? "1" : "0"}` +
-        cityParam;
-
-    const searchResponse = await fetch(url);
-
-    if (!searchResponse.ok) {
-        throw new Error(`HTTP-Fehler: ${searchResponse.status}`);
+    if (!drId) {
+        return;
     }
 
-    const data = await searchResponse.json();
-
-    if (!data.ok) {
-        throw new Error(data.message || "API-Antwort war nicht erfolgreich.");
+    if (!isDoctorSelectedForCompare(drId)) {
+        selectedDoctorsForCompare.push({ ...doctor });
     }
 
-    let apiDoctors = data.items || [];
-
-    if (!currentLocation) {
-        apiDoctors = apiDoctors.map(function (doctor) {
-            return {
-                ...doctor,
-                distance_km: null,
-                distance_meters: null
-            };
-        });
-    }
-
-    if (!currentLocation && currentDoctorSortKey === "distance") {
-        currentDoctorSortKey = "name";
-        currentDoctorSortDirection = "asc";
-
-        updateSortSelectValue();
-    }
-
-    currentDoctors = sortDoctors(
-		apiDoctors,
-		currentDoctorSortKey,
-		currentDoctorSortDirection
-	);
-
-	renderDoctorMarkers(currentDoctors);
-	renderCurrentDoctorResultsView();
-
-    if (countElement) {
-		countElement.textContent = `Gefundene Ärzte: ${currentDoctors.length}`;
-		countElement.classList.remove("is-dirty");
-	}
-
-    if (statusElement) {
-        const filterText = buildActiveFilterStatusText();
-
-        if (settings.radiusEnabled) {
-            const noCoordsText = currentIncludeNoCoords
-                ? " Einträge ohne Koordinaten werden zusätzlich angezeigt."
-                : "";
-
-            statusElement.textContent =
-                `${currentDoctors.length} Ärzte im Umkreis von ${settings.radiusKm} km gefunden. Entfernung: Luftlinie.${noCoordsText}${filterText}`;
-        } else if (currentLocation) {
-            statusElement.textContent =
-                `${currentDoctors.length} Ärzte gefunden. Entfernung: Luftlinie zum Standort.${filterText}`;
-        } else {
-            statusElement.textContent =
-                `${currentDoctors.length} Ärzte gefunden. Kein Standort gesetzt.${filterText}`;
-        }
-    }
+    renderDoctorCompareSelection();
+    refreshDoctorDisplay();
 }
 
-function buildActiveFilterStatusText() {
-    const parts = [];
+function removeDoctorFromCompareSelection(drId) {
+    selectedDoctorsForCompare = selectedDoctorsForCompare.filter(function (doctor) {
+        return Number(doctor.dr_id) !== Number(drId);
+    });
 
-    if (currentMinPositiveRatio !== 0 || currentMaxNegativeRatio !== 100) {
-        parts.push(`positive Erfahrungen ≥ ${currentMinPositiveRatio} %, negative Erfahrungen ≤ ${currentMaxNegativeRatio} %`);
+    if (selectedDoctorsForCompare.length === 0) {
+        showOnlyCompareSelection = false;
     }
 
-    if (currentAcceptsGkv) {
-        parts.push("GKV");
+    refreshDoctorDisplay();
+}
+
+function isDoctorSelectedForCompare(drId) {
+    return selectedDoctorsForCompare.some(function (doctor) {
+        return Number(doctor.dr_id) === Number(drId);
+    });
+}
+
+function renderDoctorCompareSelection() {
+    const container = document.getElementById("doctor-compare-selection");
+    const chipsContainer = document.getElementById("doctor-compare-chips");
+    const statusElement = document.getElementById("doctor-compare-status");
+    const hitViewButton = document.getElementById("doctor-results-hit-view-button");
+    const compareViewButton = document.getElementById("doctor-compare-show-button");
+    const clearButton = document.getElementById("doctor-compare-clear-button");
+
+    const hasSelection = selectedDoctorsForCompare.length > 0;
+
+    if (container) {
+        container.classList.toggle("is-hidden", !hasSelection);
     }
 
-    if (currentAcceptsPkv) {
-        parts.push("PKV/Selbstzahler");
+    if (chipsContainer) {
+        chipsContainer.innerHTML = hasSelection
+            ? selectedDoctorsForCompare.map(function (doctor) {
+                return `
+                    <span class="doctor-compare-chip">
+                        <span class="doctor-compare-chip-name">${escapeHtml(doctor.dr_display_name || "Unbekannt")}</span>
+                        <button type="button" class="doctor-compare-chip-remove" data-dr-id="${escapeHtml(doctor.dr_id)}" aria-label="${escapeHtml(doctor.dr_display_name || "Eintrag")} aus Vergleich entfernen">×</button>
+                    </span>
+                `;
+            }).join("")
+            : "";
     }
 
-    if (currentHasWebsite) {
-        parts.push("hat Website");
+    if (statusElement) {
+        statusElement.textContent = hasSelection
+            ? `${selectedDoctorsForCompare.length} Ärzt:innen ausgewählt.`
+            : "";
     }
 
-    if (currentHasEmail) {
-        parts.push("hat E-Mail");
+    if (hitViewButton) {
+        hitViewButton.classList.toggle("is-active", !showOnlyCompareSelection);
     }
 
-    if (currentHasPhone) {
-        parts.push("hat Telefonnummer");
+    if (compareViewButton) {
+        compareViewButton.disabled = !hasSelection;
+        compareViewButton.classList.toggle("is-active", showOnlyCompareSelection);
     }
 
-    if (currentCityFilter !== "") {
-        parts.push(`Ort enthält „${currentCityFilter}“`);
+    if (clearButton) {
+        clearButton.disabled = !hasSelection;
     }
-
-    if (currentIncludeNoCoords) {
-        parts.push("Einträge ohne Koordinaten werden zusätzlich angezeigt");
-    }
-
-    if (parts.length === 0) {
-        return "";
-    }
-
-    return ` Filter aktiv: ${parts.join(", ")}.`;
 }
 
 async function handleDoctorCardVote(event) {
@@ -1003,9 +1384,7 @@ async function handleDoctorCardVote(event) {
     }
 
     const cardElement = button.closest(".doctor-card");
-    const buttonsInCard = cardElement
-        ? cardElement.querySelectorAll(".doctor-card-vote-button")
-        : [button];
+    const buttonsInCard = cardElement ? cardElement.querySelectorAll(".doctor-card-vote-button") : [button];
 
     buttonsInCard.forEach(function (cardButton) {
         cardButton.disabled = true;
@@ -1024,14 +1403,15 @@ async function handleDoctorCardVote(event) {
             })
         });
 
-        const data = await response.json().catch(() => ({}));
+        const data = await response.json().catch(function () {
+            return {};
+        });
 
         if (!response.ok || !data.ok) {
             throw new Error(data.error || "Vote konnte nicht gespeichert werden.");
         }
 
         await refreshSingleDoctor(drId);
-
     } catch (error) {
         console.error("Fehler beim Speichern der Ärztebewertung:", error);
         alert("Die Bewertung konnte nicht gespeichert werden. Details stehen in der Konsole.");
@@ -1073,284 +1453,69 @@ async function refreshSingleDoctor(drId) {
         };
     }
 
-    const index = currentDoctors.findIndex(function (doctor) {
-        return Number(doctor.dr_id) === Number(drId);
+    currentDoctors = currentDoctors.map(function (doctor) {
+        return Number(doctor.dr_id) === Number(drId) ? updatedDoctor : doctor;
     });
 
-    if (index === -1) {
-        return;
-    }
-
-    currentDoctors[index] = updatedDoctor;
-    replaceSingleDoctorDom(updatedDoctor, index);
-}
-
-function replaceSingleDoctorDom(doctor, index) {
-    if (getCurrentDoctorResultsView() === "cards") {
-        const oldCard = document.querySelector(`.doctor-card[data-dr-id="${doctor.dr_id}"]`);
-
-        if (oldCard) {
-            oldCard.outerHTML = buildDoctorCardHtml(doctor, index);
-        }
-
-        return;
-    }
-
-    const oldRow = document.querySelector(`tr[data-dr-id="${doctor.dr_id}"]`);
-
-    if (oldRow) {
-        oldRow.outerHTML = buildDoctorTableRowHtml(doctor, index);
-    }
-}
-
-function doctorPassesCurrentRatingFilter(doctor) {
-    const stats = getDoctorVoteStats(doctor);
-
-    return (
-        stats.proRatio >= currentMinPositiveRatio &&
-        stats.contraRatio <= currentMaxNegativeRatio
-    );
-}
-
-function recalculateDoctorVoteFields(doctor) {
-    const stats = getDoctorVoteStats(doctor);
-
-    return {
-        ...doctor,
-        total_votes: stats.totalVotes,
-        positive_ratio: stats.proRatio,
-        neutral_ratio: stats.neutralRatio,
-        negative_ratio: stats.contraRatio
-    };
-}
-
-function renderDoctorMarkers(doctors) {
-    if (doctorMarkerGroup) {
-        map.removeLayer(doctorMarkerGroup);
-        doctorMarkerGroup = null;
-    }
-
-    doctorMarkerGroup = L.featureGroup();
-
-    doctors.forEach(function (doctor) {
-        if (!doctor.has_coordinates || doctor.loc_lat === null || doctor.loc_lng === null || doctor.loc_lat === "" || doctor.loc_lng === "") {
-            return;
-        }
-
-        const lat = Number(doctor.loc_lat);
-        const lng = Number(doctor.loc_lng);
-
-        if (Number.isNaN(lat) || Number.isNaN(lng)) {
-            return;
-        }
-
-        const marker = L.marker([lat, lng])
-            .bindPopup(buildDoctorPopupHtml(doctor));
-
-        doctorMarkerGroup.addLayer(marker);
+    selectedDoctorsForCompare = selectedDoctorsForCompare.map(function (doctor) {
+        return Number(doctor.dr_id) === Number(drId) ? updatedDoctor : doctor;
     });
 
-    doctorMarkerGroup.addTo(map);
+    refreshDoctorDisplay();
+}
 
-    const markerLayers = doctorMarkerGroup.getLayers();
+function sortDoctors(doctors, sortKey, direction) {
+    const doctorsCopy = [...(doctors || [])];
 
-    if (markerLayers.length > 0) {
-        const bounds = L.latLngBounds([]);
+    doctorsCopy.sort(function (a, b) {
+        const statsA = getDoctorVoteStats(a);
+        const statsB = getDoctorVoteStats(b);
+        let result = 0;
 
-        markerLayers.forEach(function (layer) {
-            if (typeof layer.getLatLng === "function") {
-                bounds.extend(layer.getLatLng());
+        if (sortKey === "distance") {
+            result = Number(a.distance_km ?? Infinity) - Number(b.distance_km ?? Infinity);
+        } else if (sortKey === "positive_ratio") {
+            result = statsA.proRatio - statsB.proRatio;
+        } else if (sortKey === "negative_ratio") {
+            result = statsA.contraRatio - statsB.contraRatio;
+        } else if (sortKey === "total_votes") {
+            result = statsA.totalVotes - statsB.totalVotes;
+        } else {
+            result = getDoctorNameSortKey(a).localeCompare(getDoctorNameSortKey(b), "de", { sensitivity: "base" });
+
+            if (result === 0) {
+                result = String(a.dr_display_name || "").localeCompare(String(b.dr_display_name || ""), "de", { sensitivity: "base" });
             }
-        });
-
-        if (userLocationMarker && typeof userLocationMarker.getLatLng === "function") {
-            bounds.extend(userLocationMarker.getLatLng());
         }
 
-        if (bounds.isValid()) {
-            map.fitBounds(bounds, {
-                padding: [30, 30]
-            });
-        }
-    }
+        return direction === "desc" ? -result : result;
+    });
+
+    return doctorsCopy;
 }
 
-function renderDoctorCards(doctors) {
-    const cardContainer = document.getElementById("doctor-card-results");
-
-    if (!cardContainer) {
-        return;
-    }
-
-    if (!doctors || doctors.length === 0) {
-        cardContainer.innerHTML = `<p class="doctor-empty-state">Keine Ärztinnen oder Ärzte gefunden.</p>`;
-        return;
-    }
-
-    cardContainer.innerHTML = doctors.map(function (doctor, index) {
-        return buildDoctorCardHtml(doctor, index);
-    }).join("");
+function getDoctorNameSortKey(doctor) {
+    return String(
+        doctor.dr_sort_lastname ||
+        doctor.dr_lastname ||
+        doctor.dr_org_name ||
+        doctor.dr_display_name ||
+        ""
+    ).trim();
 }
 
-function buildDoctorCardHtml(doctor, index) {
-    const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
-    const label = escapeHtml(doctor.loc_label || "");
-    const plz = escapeHtml(doctor.loc_plz || "");
-    const city = escapeHtml(doctor.loc_city || "");
-    const street = escapeHtml(doctor.loc_street || "");
-    const houseNumber = escapeHtml(doctor.loc_housenumber || "");
-
-    const distance = getDoctorDistanceText(doctor);
-
-    const website = doctor.loc_website || doctor.dr_website || "";
-    const websiteHtml = website
-        ? `<a class="doctor-card-link" href="${escapeHtml(website)}" target="_blank" rel="noopener noreferrer">Website</a>`
-        : `<span class="doctor-card-muted">Keine Website</span>`;
-
-    const gkvText = doctor.dr_accepts_gkv === "yes" ? "GKV" : "";
-    const pkvText = doctor.dr_accepts_pkv === "yes" ? "PKV" : "";
-
-    const insuranceTags = [gkvText, pkvText]
-        .filter(Boolean)
-        .map(value => `<span class="doctor-card-tag">${escapeHtml(value)}</span>`)
-        .join("");
-
-    const ratingStats = getDoctorVoteStats(doctor);
-    const ratingHtml = buildDoctorCardRatingHtml(doctor);
-
-    return `
-        <article class="doctor-card doctor-card-v2" data-dr-id="${doctor.dr_id}">
-            <div class="doctor-card-accent"></div>
-
-            <div class="doctor-card-main-header">
-                <div class="doctor-card-rank-large" aria-label="Platzierung">
-                    <strong>#${index + 1}</strong>
-                    <span>(${getDoctorSortShortLabel()})</span>
-                </div>
-
-                <div class="doctor-card-title-area">
-                    <h3 class="doctor-card-title">${name}</h3>
-
-                    <div class="doctor-card-meta">
-                        ${label ? `<span class="doctor-card-tag">🏥 ${label}</span>` : ""}
-                        ${insuranceTags || `<span class="doctor-card-tag">Versicherung k. A.</span>`}
-                    </div>
-                </div>
-
-                ${city ? `<span class="doctor-card-city-badge">⌖ ${city}</span>` : ""}
-            </div>
-
-            <div class="doctor-card-content-grid">
-                <section class="doctor-card-info-panel doctor-card-location-panel">
-                    <h4 class="doctor-card-section-heading">⌖ Standort & Entfernung</h4>
-
-                    <div class="doctor-card-location-block">
-                        <div class="doctor-card-mini-label">Adresse</div>
-                        <div class="doctor-card-main-text">
-                            ${street || houseNumber ? `${street} ${houseNumber}, ` : ""}${plz} ${city}
-                        </div>
-                    </div>
-
-                    <div class="doctor-card-location-block">
-                        <div class="doctor-card-mini-label">Entfernung</div>
-                        <div class="doctor-card-main-text">
-                            ${distance}
-                        </div>
-                    </div>
-                </section>
-
-                <section class="doctor-card-info-panel doctor-card-rating-panel">
-                    <h4 class="doctor-card-section-heading">
-                        ⭐ Bewertung
-                        <span class="doctor-card-section-count">(${ratingStats.totalVotes} Bewertungen)</span>
-                    </h4>
-                    ${ratingHtml}
-                </section>
-            </div>
-
-            <section class="doctor-card-own-rating">
-                <div class="doctor-card-own-rating-header">
-                    <h4 class="doctor-card-section-heading">✎ Deine Bewertung</h4>
-                </div>
-
-                <div class="doctor-card-vote-buttons-placeholder">
-                    <button
-                        type="button"
-                        class="doctor-card-vote-placeholder-button doctor-card-vote-positive doctor-card-vote-button"
-                        data-dr-id="${doctor.dr_id}"
-                        data-type="pro"
-                    >
-                        Positiv
-                    </button>
-
-                    <button
-                        type="button"
-                        class="doctor-card-vote-placeholder-button doctor-card-vote-neutral doctor-card-vote-button"
-                        data-dr-id="${doctor.dr_id}"
-                        data-type="neutral"
-                    >
-                        Neutral
-                    </button>
-
-                    <button
-                        type="button"
-                        class="doctor-card-vote-placeholder-button doctor-card-vote-negative doctor-card-vote-button"
-                        data-dr-id="${doctor.dr_id}"
-                        data-type="contra"
-                    >
-                        Negativ
-                    </button>
-                </div>
-            </section>
-
-            <div class="doctor-card-footer">
-                <a class="doctor-card-link" href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">Mehr Details</a>
-                ${websiteHtml}
-            </div>
-        </article>
-    `;
-}
-
-
-function buildDoctorCardRatingHtml(doctor) {
-    const stats = getDoctorVoteStats(doctor);
-
-    if (stats.totalVotes === 0) {
-        return `
-            <div class="doctor-card-rating-empty">
-                Noch keine Bewertungen vorhanden.
-            </div>
-        `;
-    }
-
-    return `
-        <div class="doctor-card-rating-tiles">
-            <div class="doctor-card-rating-tile doctor-card-rating-positive">
-                <div class="doctor-card-rating-value">${stats.proRatio}%</div>
-                <div class="doctor-card-rating-label">Positive Erfahrungen</div>
-                <div class="doctor-card-rating-count">${stats.pro} positiv</div>
-            </div>
-
-            <div class="doctor-card-rating-tile doctor-card-rating-neutral">
-                <div class="doctor-card-rating-value">${stats.neutralRatio}%</div>
-                <div class="doctor-card-rating-label">Neutrale Erfahrungen</div>
-                <div class="doctor-card-rating-count">${stats.neutral} neutral</div>
-            </div>
-
-            <div class="doctor-card-rating-tile doctor-card-rating-negative">
-                <div class="doctor-card-rating-value">${stats.contraRatio}%</div>
-                <div class="doctor-card-rating-label">Negative Erfahrungen</div>
-                <div class="doctor-card-rating-count">${stats.contra} negativ</div>
-            </div>
-        </div>
-    `;
+function getDoctorSortShortLabel() {
+    if (currentDoctorSortKey === "distance") return "Entf.";
+    if (currentDoctorSortKey === "positive_ratio") return "Pos.%";
+    if (currentDoctorSortKey === "negative_ratio") return "Neg.%";
+    if (currentDoctorSortKey === "total_votes") return "Bew.";
+    return "Name";
 }
 
 function getDoctorVoteStats(doctor) {
     const pro = Number(doctor.pro ?? 0);
     const neutral = Number(doctor.neutral ?? 0);
     const contra = Number(doctor.contra ?? 0);
-
     const totalVotes = pro + neutral + contra;
 
     return {
@@ -1364,265 +1529,6 @@ function getDoctorVoteStats(doctor) {
     };
 }
 
-
-function renderDoctorResultsTable(doctors) {
-    const tableBody = document.getElementById("doctor-map-results-body");
-
-    updateDoctorTableRankHeader();
-
-    if (!tableBody) {
-        return;
-    }
-
-    if (!doctors || doctors.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="6">Keine Ärztinnen oder Ärzte gefunden.</td>
-            </tr>
-        `;
-        return;
-    }
-
-    tableBody.innerHTML = doctors.map(function (doctor, index) {
-        return buildDoctorTableRowHtml(doctor, index);
-    }).join("");
-}
-
-function buildDoctorTableRowHtml(doctor, index) {
-    const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
-    const locationHtml = buildDoctorTableLocationHtml(doctor);
-    const experienceHtml = buildDoctorTableExperienceHtml(doctor);
-    const insuranceHtml = buildDoctorTableInsuranceHtml(doctor);
-    const contactHtml = buildDoctorTableContactHtml(doctor);
-
-    return `
-        <tr data-dr-id="${doctor.dr_id}">
-            <td class="doctor-table-rank">${index + 1}</td>
-            <td class="doctor-table-name"><a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a></td>
-            <td>${locationHtml}</td>
-            <td>${experienceHtml}</td>
-            <td>${insuranceHtml}</td>
-            <td>${contactHtml}</td>
-        </tr>
-    `;
-}
-
-function updateDoctorTableRankHeader() {
-    const rankHeader = document.getElementById("doctor-table-rank-header");
-
-    if (!rankHeader) {
-        return;
-    }
-
-    rankHeader.textContent = currentDoctorSortDirection === "desc" ? "▼" : "▲";
-}
-
-
-function buildDoctorTableLocationHtml(doctor) {
-    const city = String(doctor.loc_city || "").trim();
-    const plz = String(doctor.loc_plz || "").trim();
-    const distance = getDoctorDistanceText(doctor, true);
-    const hasDistance = distance !== "-";
-
-    let mainText = "";
-    let subText = "";
-    let mainClass = "doctor-table-main-value";
-
-    if (currentLocation) {
-        if (hasDistance) {
-            mainText = distance;
-
-            if (city) {
-                subText = city;
-            } else if (plz) {
-                subText = `PLZ: ${plz}`;
-            }
-        } else if (city) {
-            mainText = city;
-        } else if (plz) {
-            mainText = `PLZ: ${plz}`;
-            mainClass = "doctor-table-main-value doctor-table-main-value-muted";
-        } else {
-            mainText = "—";
-        }
-    } else {
-        if (city) {
-            mainText = city;
-        } else if (plz) {
-            mainText = `PLZ: ${plz}`;
-            mainClass = "doctor-table-main-value doctor-table-main-value-muted";
-        } else {
-            mainText = "—";
-        }
-    }
-
-    const safeMainText = escapeHtml(mainText);
-    const safeSubText = subText ? escapeHtml(subText) : "";
-
-    return `
-        <div class="doctor-table-stacked-cell">
-            <span class="${mainClass}">${safeMainText}</span>
-            ${safeSubText ? `<span class="doctor-table-sub-value">${safeSubText}</span>` : ""}
-        </div>
-    `;
-}
-
-function buildDoctorTableExperienceHtml(doctor) {
-    const stats = getDoctorVoteStats(doctor);
-
-    if (stats.totalVotes === 0) {
-        return `<span class="doctor-table-muted">Noch keine Bewertungen</span>`;
-    }
-
-    return `
-        <div class="doctor-table-experience-grid">
-            <span class="doctor-table-experience-value doctor-table-badge-positive">+${stats.proRatio}%</span>
-            <span class="doctor-table-experience-value doctor-table-badge-neutral">=${stats.neutralRatio}%</span>
-            <span class="doctor-table-experience-value doctor-table-badge-negative">-${stats.contraRatio}%</span>
-            <span class="doctor-table-vote-count">(n=${stats.totalVotes})</span>
-        </div>
-    `;
-}
-
-function buildDoctorTableInsuranceHtml(doctor) {
-    const acceptsGkv = isTruthyFlag(doctor.dr_accepts_gkv);
-    const acceptsPkv = isTruthyFlag(doctor.dr_accepts_pkv);
-
-    const badges = [];
-
-    if (acceptsGkv) {
-        badges.push(`<span class="doctor-table-badge">GKV</span>`);
-    }
-
-    if (acceptsPkv) {
-        badges.push(`<span class="doctor-table-badge">PKV</span>`);
-    }
-
-    return badges.length > 0
-        ? `<div class="doctor-table-badge-row">${badges.join("")}</div>`
-        : "";
-}
-
-
-function buildDoctorTableContactHtml(doctor) {
-    const website = doctor.loc_website || doctor.dr_website || "";
-
-    const email = getDoctorFirstFieldValue(doctor, [
-        "loc_email",
-        "dr_email",
-        "email",
-        "contact_email",
-        "dr_contact_email"
-    ]);
-
-    const phone = getDoctorFirstFieldValue(doctor, [
-        "loc_phone",
-        "dr_phone",
-        "phone",
-        "telephone",
-        "telefon",
-        "loc_telephone",
-        "dr_telephone"
-    ]);
-
-    const hasEmail = email || hasDoctorFieldValue(doctor, [
-        "has_email",
-        "hasEmail"
-    ]);
-
-    const hasPhone = phone || hasDoctorFieldValue(doctor, [
-        "has_phone",
-        "hasPhone"
-    ]);
-
-    const badges = [];
-
-    if (website) {
-        badges.push(`
-            <a
-                class="doctor-table-badge doctor-table-badge-link"
-                href="${escapeHtml(website)}"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Website öffnen"
-            >Web</a>
-        `);
-    }
-
-    if (email) {
-        badges.push(`
-            <a
-                class="doctor-table-badge doctor-table-badge-link"
-                href="mailto:${escapeHtml(email)}"
-                title="${escapeHtml(email)}"
-            >Mail</a>
-        `);
-    } else if (hasEmail) {
-        badges.push(`<span class="doctor-table-badge" title="E-Mail vorhanden, aber Adresse nicht im Datensatz">Mail</span>`);
-    }
-
-    if (phone) {
-        const phoneHref = String(phone).replace(/[^\d+]/g, "");
-
-        badges.push(`
-            <a
-                class="doctor-table-badge doctor-table-badge-link"
-                href="tel:${escapeHtml(phoneHref)}"
-                title="${escapeHtml(phone)}"
-            >Tel</a>
-        `);
-    } else if (hasPhone) {
-        badges.push(`<span class="doctor-table-badge" title="Telefonnummer vorhanden, aber Nummer nicht im Datensatz">Tel</span>`);
-    }
-
-    return badges.length > 0
-        ? `<div class="doctor-table-badge-row">${badges.join("")}</div>`
-        : "";
-}
-
-function getDoctorFirstFieldValue(doctor, fieldNames) {
-    for (const fieldName of fieldNames) {
-        const value = doctor[fieldName];
-
-        if (value === null || value === undefined) {
-            continue;
-        }
-
-        const normalizedValue = String(value).trim();
-
-        if (
-            normalizedValue !== "" &&
-            !["0", "false", "no", "nein", "n"].includes(normalizedValue.toLowerCase())
-        ) {
-            return normalizedValue;
-        }
-    }
-
-    return "";
-}
-
-function hasDoctorFieldValue(doctor, fieldNames) {
-    return fieldNames.some(function (fieldName) {
-        return isTruthyFlag(doctor[fieldName]);
-    });
-}
-
-function isTruthyFlag(value) {
-    if (value === true || value === 1) {
-        return true;
-    }
-
-    if (value === false || value === 0 || value === null || value === undefined) {
-        return false;
-    }
-
-    const normalizedValue = String(value).trim().toLowerCase();
-
-    return ["1", "true", "yes", "ja", "y", "j"].includes(normalizedValue) ||
-        (normalizedValue !== "" && !["0", "false", "no", "nein", "n"].includes(normalizedValue));
-}
-
-
 function buildDoctorPopupHtml(doctor) {
     const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
     const label = escapeHtml(doctor.loc_label || "");
@@ -1631,21 +1537,16 @@ function buildDoctorPopupHtml(doctor) {
     const street = escapeHtml(doctor.loc_street || "");
     const houseNumber = escapeHtml(doctor.loc_housenumber || "");
     const stats = getDoctorVoteStats(doctor);
-
     const distanceText = getDoctorDistanceText(doctor);
+    const website = doctor.loc_website || doctor.dr_website || "";
 
     const ratingText = stats.totalVotes > 0
         ? `${stats.proRatio}% positiv · ${stats.totalVotes} Bewertungen`
         : "Noch keine Bewertungen";
 
-    const website = doctor.loc_website || doctor.dr_website || "";
-    let websiteHtml = "";
-	const detailHtml = `<br><a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">Mehr Details</a>`;
-	
-    if (website) {
-        const safeWebsite = escapeHtml(website);
-        websiteHtml = `<br><a href="${safeWebsite}" target="_blank" rel="noopener noreferrer">Website öffnen</a>`;
-    }
+    const websiteHtml = website
+        ? `<br><a href="${escapeHtml(normalizeWebsiteUrl(website))}" target="_blank" rel="noopener noreferrer">Website öffnen</a>`
+        : "";
 
     return `
         <div class="doctor-map-popup">
@@ -1655,8 +1556,8 @@ function buildDoctorPopupHtml(doctor) {
             ${plz} ${city}<br>
             <em>${distanceText}</em><br>
             <span>⭐ ${ratingText}</span>
-			${detailHtml}
-			${websiteHtml}
+            <br><a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">Mehr Details</a>
+            ${websiteHtml}
         </div>
     `;
 }
@@ -1675,6 +1576,79 @@ function getDoctorDistanceText(doctor, shortText = false) {
         : `${escapeHtml(doctor.distance_km)} km Luftlinie`;
 }
 
+function getDoctorFirstFieldValue(doctor, fieldNames) {
+    for (const fieldName of fieldNames) {
+        const value = doctor[fieldName];
+
+        if (value === null || value === undefined) {
+            continue;
+        }
+
+        const normalizedValue = String(value).trim();
+
+        if (normalizedValue !== "" && !["0", "false", "no", "nein", "n"].includes(normalizedValue.toLowerCase())) {
+            return normalizedValue;
+        }
+    }
+
+    return "";
+}
+
+function hasDoctorFieldValue(doctor, fieldNames) {
+    return fieldNames.some(function (fieldName) {
+        return isTruthyFlag(doctor[fieldName]);
+    });
+}
+
+function isTruthyFlag(value) {
+    if (value === true || value === 1) return true;
+    if (value === false || value === 0 || value === null || value === undefined) return false;
+
+    const normalizedValue = String(value).trim().toLowerCase();
+
+    return ["1", "true", "yes", "ja", "y", "j"].includes(normalizedValue) ||
+        (normalizedValue !== "" && !["0", "false", "no", "nein", "n"].includes(normalizedValue));
+}
+
+function normalizeWebsiteUrl(value) {
+    const url = String(value || "").trim();
+
+    if (url === "") {
+        return "";
+    }
+
+    if (/^https?:\/\//i.test(url)) {
+        return url;
+    }
+
+    return `https://${url}`;
+}
+
+function setMapStatus(text) {
+    const statusElement = document.getElementById("doctor-map-status");
+
+    if (statusElement) {
+        statusElement.textContent = text;
+    }
+}
+
+function setCountText(text) {
+    const countElement = document.getElementById("doctor-map-count");
+
+    if (countElement) {
+        countElement.textContent = text;
+        countElement.classList.remove("is-dirty");
+    }
+}
+
+function markDoctorFiltersDirty() {
+    const countElement = document.getElementById("doctor-map-count");
+
+    if (countElement) {
+        countElement.textContent = "Bitte Filter erneut anwenden";
+    }
+}
+
 function escapeHtml(value) {
     if (value === null || value === undefined) {
         return "";
@@ -1686,55 +1660,4 @@ function escapeHtml(value) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
-}
-
-
-/* ------------------------------
-   Hinweis, wenn Filter geändert wurden,
-   aber noch nicht neu angewendet sind
------------------------------- */
-
-document.addEventListener("DOMContentLoaded", function () {
-    const dirtyFilterElements = [
-        document.getElementById("doctor-min-positive-input"),
-        document.getElementById("doctor-max-negative-input"),
-        document.getElementById("doctor-min-positive-range"),
-        document.getElementById("doctor-max-negative-range"),
-        document.getElementById("doctor-accepts-gkv-input"),
-        document.getElementById("doctor-accepts-pkv-input"),
-        document.getElementById("doctor-has-website-input"),
-        document.getElementById("doctor-has-email-input"),
-        document.getElementById("doctor-has-phone-input"),
-        document.getElementById("doctor-city-input"),
-        document.getElementById("doctor-location-input"),
-        document.getElementById("doctor-radius-enabled-input"),
-        document.getElementById("doctor-include-no-coords-input"),
-        document.getElementById("doctor-radius-input")
-    ].filter(Boolean);
-
-    const cityModeButton = document.getElementById("doctor-location-mode-city-button");
-    const radiusModeButton = document.getElementById("doctor-location-mode-radius-button");
-
-    dirtyFilterElements.forEach(function (element) {
-        element.addEventListener("input", markDoctorFiltersDirty);
-        element.addEventListener("change", markDoctorFiltersDirty);
-    });
-
-    if (cityModeButton) {
-        cityModeButton.addEventListener("click", markDoctorFiltersDirty);
-    }
-
-    if (radiusModeButton) {
-        radiusModeButton.addEventListener("click", markDoctorFiltersDirty);
-    }
-});
-
-function markDoctorFiltersDirty() {
-    const countElement = document.getElementById("doctor-map-count");
-
-    if (!countElement) {
-        return;
-    }
-
-    countElement.textContent = "Bitte Filter erneut anwenden";
 }

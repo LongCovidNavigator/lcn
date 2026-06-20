@@ -103,6 +103,22 @@ function getOptionalIntParam($name, $default, $min, $max) {
     return (int)$value;
 }
 
+function normalizeGermanSearchTerm($value) {
+    $value = trim((string)$value);
+
+    if ($value === '') {
+        return '';
+    }
+
+    $value = mb_strtolower($value, 'UTF-8');
+
+    return str_replace(
+        ['ä', 'ö', 'ü', 'ß'],
+        ['ae', 'oe', 'ue', 'ss'],
+        $value
+    );
+}
+
 try {
     $lat = getFloatParam('lat', -90, 90);
     $lng = getFloatParam('lng', -180, 180);
@@ -120,6 +136,8 @@ try {
     $hasPhone = getOptionalBoolParam('hasPhone');
 
     $city = getOptionalStringParam('city', 80);
+    $search = getOptionalStringParam('search', 120);
+    $searchNormalized = normalizeGermanSearchTerm($search);
 
     $radiusRaw = $_GET['radiusKm'] ?? '100';
     $radiusEnabled = true;
@@ -201,6 +219,53 @@ try {
 
         if ($city !== '') {
             $whereParts[] = "loc_city LIKE :city";
+        }
+
+        if ($search !== '') {
+            $whereParts[] = "(
+                dr_display_name LIKE :search
+                OR dr_firstname LIKE :search
+                OR dr_lastname LIKE :search
+                OR dr_title_raw LIKE :search
+                OR dr_type LIKE :search
+                OR CONCAT_WS(' ', dr_title_raw, dr_firstname, dr_lastname) LIKE :search
+                OR CONCAT_WS(' ', dr_firstname, dr_lastname) LIKE :search
+                OR LOWER(
+                    REPLACE(
+                        REPLACE(
+                            REPLACE(
+                                REPLACE(
+                                    REPLACE(
+                                        REPLACE(
+                                            REPLACE(
+                                                REPLACE(
+                                                    CONCAT_WS(' ',
+                                                        COALESCE(dr_display_name, ''),
+                                                        COALESCE(dr_firstname, ''),
+                                                        COALESCE(dr_lastname, ''),
+                                                        COALESCE(dr_title_raw, ''),
+                                                        COALESCE(dr_type, ''),
+                                                        CONCAT_WS(' ', COALESCE(dr_title_raw, ''), COALESCE(dr_firstname, ''), COALESCE(dr_lastname, '')),
+                                                        CONCAT_WS(' ', COALESCE(dr_firstname, ''), COALESCE(dr_lastname, ''))
+                                                    ),
+                                                    'ẞ', 'ss'
+                                                ),
+                                                'Ä', 'ae'
+                                            ),
+                                            'Ö', 'oe'
+                                        ),
+                                        'Ü', 'ue'
+                                    ),
+                                    'ä', 'ae'
+                                ),
+                                'ö', 'oe'
+                            ),
+                            'ü', 'ue'
+                        ),
+                        'ß', 'ss'
+                    )
+                ) LIKE :searchNormalized
+            )";
         }
     }
 
@@ -379,6 +444,11 @@ try {
         if ($city !== '') {
             $stmt->bindValue(':city', '%' . $city . '%');
         }
+
+        if ($search !== '') {
+            $stmt->bindValue(':search', '%' . $search . '%');
+            $stmt->bindValue(':searchNormalized', '%' . $searchNormalized . '%');
+        }
     }
 
     $stmt->execute();
@@ -436,6 +506,7 @@ try {
             'acceptsGkv' => $acceptsGkv,
             'acceptsPkv' => $acceptsPkv,
             'city' => $city,
+            'search' => $search,
             'includeNoCoords' => $includeNoCoords,
             'hasWebsite' => $hasWebsite,
             'hasEmail' => $hasEmail,

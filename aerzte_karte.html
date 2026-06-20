@@ -147,7 +147,7 @@
 						</div>
 					</section>
 
-					<section class="doctor-nav-section">
+					<section class="doctor-nav-section doctor-nav-section-insurance">
 						<h3 class="doctor-nav-heading">
 							Versicherung
 							<span class="doctor-nav-info" data-tooltip="Filtert nach Abrechnungsmöglichkeit: GKV für gesetzliche Krankenkasse, PKV / Selbstzahler für private Abrechnung oder Selbstzahlung." tabindex="0" aria-label="Info: Versicherung">i</span>
@@ -170,7 +170,7 @@
 						</label>
 					</section>
 
-					<section class="doctor-nav-section">
+					<section class="doctor-nav-section doctor-nav-section-contact">
 						<h3 class="doctor-nav-heading">
 							Kontakt
 							<span class="doctor-nav-info" data-tooltip="Filtert nach vorhandenen Kontaktinformationen wie Website, E-Mail-Adresse oder Telefonnummer." tabindex="0" aria-label="Info: Kontakt">i</span>
@@ -344,6 +344,51 @@
 					>
 						Tabelle
 					</button>
+				</div>
+			</div>
+
+			<div class="doctor-results-search-panel" aria-label="Ärztinnen und Ärzte suchen und vergleichen">
+				<div class="doctor-results-search-row">
+					<div class="doctor-results-search-field">
+						<label class="doctor-results-search-label" for="doctor-search-input">Ärzt:in / Anbieter suchen</label>
+						<input
+							id="doctor-search-input"
+							class="doctor-results-search-input"
+							type="text"
+							placeholder="z. B. Jäger, Kacik, Stingl"
+						>
+					</div>
+
+					<div class="doctor-results-mode-switch" aria-label="Ergebnisansicht wählen">
+						<button
+							id="doctor-results-hit-view-button"
+							class="doctor-results-mode-button is-active"
+							type="button"
+						>
+							Trefferansicht
+						</button>
+
+						<button
+							id="doctor-compare-show-button"
+							class="doctor-results-mode-button"
+							type="button"
+							disabled
+						>
+							Vergleichsansicht
+						</button>
+					</div>
+				</div>
+
+				<div id="doctor-compare-selection" class="doctor-compare-selection is-hidden" aria-live="polite">
+					<div class="doctor-compare-selection-topline">
+						<span id="doctor-compare-status" class="doctor-compare-status"></span>
+
+						<button id="doctor-compare-clear-button" class="doctor-compare-clear-button" type="button" disabled>
+							Auswahl leeren
+						</button>
+					</div>
+
+					<div id="doctor-compare-chips" class="doctor-compare-chips"></div>
 				</div>
 			</div>
 		</section>
