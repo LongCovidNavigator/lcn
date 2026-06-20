@@ -366,18 +366,31 @@ function bindTreatmentSmartSearchEvents() {
     const suggestionsBox = document.getElementById("treatment-alias-smart-suggestions");
 
     if (input) {
-        input.addEventListener("input", function () {
-            const query = String(input.value || "").trim();
+		input.addEventListener("input", function () {
+			const query = String(input.value || "").trim();
 
-            if (query.length < 2) {
-                treatmentAliasSmartSuggestions = [];
-                hideTreatmentAliasSmartSuggestions();
-                return;
-            }
+			if (query === "") {
+				treatmentSmartSearchOverride = null;
+				treatmentAliasSmartSuggestions = [];
+				hideTreatmentAliasSmartSuggestions();
+				setTreatmentAliasSmartStatus("Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
 
-            loadTreatmentAliasSmartSuggestions(query);
-        });
+				if (validateLocationDependentFilters()) {
+					loadTreatmentResults();
+				}
 
+				return;
+			}
+
+			if (query.length < 2) {
+				treatmentAliasSmartSuggestions = [];
+				hideTreatmentAliasSmartSuggestions();
+				return;
+			}
+
+			loadTreatmentAliasSmartSuggestions(query);
+		});
+	
         input.addEventListener("keydown", function (event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -1900,21 +1913,25 @@ function renderTreatmentMap(treatments, mapData) {
 
     treatmentMarkerGroup = L.featureGroup();
 
-    groupValues.forEach(function (group) {
-        const markerOptions = useAllMatchingProviders
-            ? { icon: createTreatmentColorMarkerIcon(group.colorIndex) }
-            : {};
+	groupValues.forEach(function (group) {
+		const treatmentCountAtLocation = group.treatmentIds instanceof Set
+			? group.treatmentIds.size
+			: 1;
 
-        const marker = L.marker([group.lat, group.lng], markerOptions);
+		const markerOptions = useAllMatchingProviders
+			? { icon: createTreatmentColorMarkerIcon(group.colorIndex, treatmentCountAtLocation) }
+			: {};
 
-        marker.bindPopup(
-            useAllMatchingProviders
-                ? buildAllMatchingProvidersPopupHtml(group)
-                : buildTreatmentMapPopupHtml(group)
-        );
+		const marker = L.marker([group.lat, group.lng], markerOptions);
 
-        treatmentMarkerGroup.addLayer(marker);
-    });
+		marker.bindPopup(
+			useAllMatchingProviders
+				? buildAllMatchingProvidersPopupHtml(group)
+				: buildTreatmentMapPopupHtml(group)
+		);
+
+		treatmentMarkerGroup.addLayer(marker);
+	});
 
     treatmentMarkerGroup.addTo(treatmentMap);
 
@@ -2101,16 +2118,18 @@ function countUniqueTreatmentsInProviderGroups(groups) {
     return ids.size;
 }
 
-function createTreatmentColorMarkerIcon(colorIndex) {
+function createTreatmentColorMarkerIcon(colorIndex, treatmentCountAtLocation = 1) {
     const safeIndex = Number.isFinite(Number(colorIndex)) ? Number(colorIndex) : 0;
     const color = treatmentMapMarkerColors[Math.abs(safeIndex) % treatmentMapMarkerColors.length];
+    const count = Number(treatmentCountAtLocation || 1);
+    const label = count > 1 ? String(count) : "";
 
     return L.divIcon({
         className: "treatment-colored-marker-wrapper",
-        html: `<span class="treatment-colored-marker" style="background:${escapeHtml(color)}"></span>`,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-        popupAnchor: [0, -12]
+        html: `<span class="treatment-colored-marker" style="background:${escapeHtml(color)}">${escapeHtml(label)}</span>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+        popupAnchor: [0, -13]
     });
 }
 
@@ -2249,20 +2268,23 @@ function renderTreatmentMapLegend(legend, treatments) {
     legendElement.className = "treatment-map-legend";
 
     legendElement.innerHTML = `
-        <div class="treatment-map-legend-title">Farblegende</div>
-        <div class="treatment-map-legend-list">
-            ${legendItems.map(function (item) {
-                const color = treatmentMapMarkerColors[Math.abs(Number(item.color_index || 0)) % treatmentMapMarkerColors.length];
+		<div class="treatment-map-legend-title">Farblegende</div>
+		<div class="treatment-map-legend-hint">
+			Zahl im Marker = Anzahl unterschiedlicher angezeigter Therapien an diesem Standort.
+		</div>
+		<div class="treatment-map-legend-list">
+			${legendItems.map(function (item) {
+				const color = treatmentMapMarkerColors[Math.abs(Number(item.color_index || 0)) % treatmentMapMarkerColors.length];
 
-                return `
-                    <div class="treatment-map-legend-item">
-                        <span class="treatment-map-legend-dot" style="background:${escapeHtml(color)}"></span>
-                        <span>${escapeHtml(item.treatment_name || "Unbekannte Therapie")}</span>
-                    </div>
-                `;
-            }).join("")}
-        </div>
-    `;
+				return `
+					<div class="treatment-map-legend-item">
+						<span class="treatment-map-legend-dot" style="background:${escapeHtml(color)}"></span>
+						<span>${escapeHtml(item.treatment_name || "Unbekannte Therapie")}</span>
+					</div>
+				`;
+			}).join("")}
+		</div>
+	`;
 
     mapContent.appendChild(legendElement);
 }
