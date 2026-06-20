@@ -20,6 +20,7 @@ let currentHasEmail = false;
 let currentHasPhone = false;
 let currentCityFilter = "";
 let currentDoctorSearchTerm = "";
+let currentSpecialtyTermId = 0;
 let currentIncludeNoCoords = false;
 let currentLocation = null;
 let doctorSearchDebounceTimer = null;
@@ -175,6 +176,7 @@ function setupDoctorRatingAndFilterControls() {
     const minPositiveRange = document.getElementById("doctor-min-positive-range");
     const maxNegativeRange = document.getElementById("doctor-max-negative-range");
     const searchInput = document.getElementById("doctor-search-input");
+    const specialtySelect = document.getElementById("doctor-specialty-select");
 
     syncRangeAndNumber(minPositiveRange, minPositiveInput);
     syncRangeAndNumber(maxNegativeRange, maxNegativeInput);
@@ -205,6 +207,12 @@ function setupDoctorRatingAndFilterControls() {
         });
     }
 
+    if (specialtySelect) {
+        specialtySelect.addEventListener("change", function () {
+            currentSpecialtyTermId = Number(specialtySelect.value || 0);
+        });
+    }
+
     if (applyButton) {
         applyButton.addEventListener("click", function () {
             clearDoctorSearchDebounce();
@@ -224,6 +232,7 @@ function setupDoctorRatingAndFilterControls() {
             currentHasPhone = filterSettings.hasPhone;
             currentCityFilter = filterSettings.city;
             currentDoctorSearchTerm = filterSettings.searchTerm;
+            currentSpecialtyTermId = filterSettings.specialtyTermId;
             showOnlyCompareSelection = false;
 
             renderDoctorCompareSelection();
@@ -343,9 +352,10 @@ function setupDoctorDirtyFilterHint() {
         document.getElementById("doctor-accepts-gkv-input"),
         document.getElementById("doctor-accepts-pkv-input"),
         document.getElementById("doctor-has-website-input"),
-        document.getElementById("doctor-has-email-input"),
-        document.getElementById("doctor-has-phone-input"),
-        document.getElementById("doctor-city-input"),
+		document.getElementById("doctor-has-email-input"),
+		document.getElementById("doctor-has-phone-input"),
+		document.getElementById("doctor-specialty-select"),
+		document.getElementById("doctor-city-input"),
         document.getElementById("doctor-location-input"),
         document.getElementById("doctor-radius-enabled-input"),
         document.getElementById("doctor-include-no-coords-input"),
@@ -503,6 +513,7 @@ function resetDoctorNavigationControls() {
     const hasWebsiteInput = document.getElementById("doctor-has-website-input");
     const hasEmailInput = document.getElementById("doctor-has-email-input");
     const hasPhoneInput = document.getElementById("doctor-has-phone-input");
+    const specialtySelect = document.getElementById("doctor-specialty-select");
     const searchInput = document.getElementById("doctor-search-input");
     const cityInput = document.getElementById("doctor-city-input");
     const locationInput = document.getElementById("doctor-location-input");
@@ -521,6 +532,7 @@ function resetDoctorNavigationControls() {
     currentHasPhone = false;
     currentCityFilter = "";
     currentDoctorSearchTerm = "";
+    currentSpecialtyTermId = 0;
     currentIncludeNoCoords = false;
     currentLocation = null;
     showOnlyCompareSelection = false;
@@ -535,6 +547,7 @@ function resetDoctorNavigationControls() {
     if (hasWebsiteInput) hasWebsiteInput.checked = false;
     if (hasEmailInput) hasEmailInput.checked = false;
     if (hasPhoneInput) hasPhoneInput.checked = false;
+    if (specialtySelect) specialtySelect.value = "0";
     if (searchInput) searchInput.value = "";
     if (cityInput) cityInput.value = "";
     if (locationInput) locationInput.value = "";
@@ -547,6 +560,7 @@ function resetDoctorNavigationControls() {
     updateRadiusInputState();
     renderDoctorCompareSelection();
 }
+
 
 function parseSortSelectValue(value) {
     const [key, direction] = String(value || "name:asc").split(":");
@@ -573,6 +587,7 @@ function getRatingFilterSettingsFromControls() {
     const hasWebsiteInput = document.getElementById("doctor-has-website-input");
     const hasEmailInput = document.getElementById("doctor-has-email-input");
     const hasPhoneInput = document.getElementById("doctor-has-phone-input");
+    const specialtySelect = document.getElementById("doctor-specialty-select");
     const searchInput = document.getElementById("doctor-search-input");
     const cityInput = document.getElementById("doctor-city-input");
     const radiusEnabledInput = document.getElementById("doctor-radius-enabled-input");
@@ -582,6 +597,7 @@ function getRatingFilterSettingsFromControls() {
     const searchTerm = searchInput ? searchInput.value.trim() : "";
     const city = cityInput && !cityInput.disabled ? cityInput.value.trim() : "";
     const radiusEnabled = radiusEnabledInput ? radiusEnabledInput.checked : false;
+    const specialtyTermId = Number(specialtySelect ? specialtySelect.value : 0);
 
     if (Number.isNaN(minPositiveRatio) || minPositiveRatio < 0 || minPositiveRatio > 100) {
         alert("Bitte bei positiven Erfahrungen einen Wert zwischen 0 und 100 eingeben.");
@@ -598,6 +614,11 @@ function getRatingFilterSettingsFromControls() {
         return null;
     }
 
+    if (Number.isNaN(specialtyTermId) || specialtyTermId < 0) {
+        alert("Bitte eine gültige Fachrichtung auswählen.");
+        return null;
+    }
+
     return {
         minPositiveRatio,
         maxNegativeRatio,
@@ -607,7 +628,8 @@ function getRatingFilterSettingsFromControls() {
         hasEmail: hasEmailInput ? hasEmailInput.checked : false,
         hasPhone: hasPhoneInput ? hasPhoneInput.checked : false,
         city,
-        searchTerm
+        searchTerm,
+        specialtyTermId
     };
 }
 
@@ -721,6 +743,10 @@ async function loadDoctorsFromSearchApi(settings) {
         ? `&search=${encodeURIComponent(currentDoctorSearchTerm)}`
         : "";
 
+    const specialtyParam = currentSpecialtyTermId > 0
+        ? `&specialtyTermId=${encodeURIComponent(currentSpecialtyTermId)}`
+        : "";
+
     const url =
         `api/doctors_search.php?lat=${encodeURIComponent(centerForApi.lat)}` +
         `&lng=${encodeURIComponent(centerForApi.lng)}` +
@@ -734,7 +760,8 @@ async function loadDoctorsFromSearchApi(settings) {
         `&hasEmail=${currentHasEmail ? "1" : "0"}` +
         `&hasPhone=${currentHasPhone ? "1" : "0"}` +
         cityParam +
-        searchParam;
+        searchParam +
+        specialtyParam;
 
     const searchResponse = await fetch(url);
 
@@ -747,6 +774,8 @@ async function loadDoctorsFromSearchApi(settings) {
     if (!data.ok) {
         throw new Error(data.message || "API-Antwort war nicht erfolgreich.");
     }
+
+    renderDoctorSpecialtySelect(data.specialties || []);
 
     let apiDoctors = data.items || [];
 
@@ -776,6 +805,31 @@ async function loadDoctorsFromSearchApi(settings) {
     setCountText(`Gefundene Ärzte: ${currentDoctors.length}`);
     updateStatusAfterSearch(settings);
 }
+
+function renderDoctorSpecialtySelect(specialties) {
+    const specialtySelect = document.getElementById("doctor-specialty-select");
+
+    if (!specialtySelect || !Array.isArray(specialties)) {
+        return;
+    }
+
+    const selectedValue = String(currentSpecialtyTermId || 0);
+
+    specialtySelect.innerHTML = [
+        `<option value="0">Alle Fachrichtungen</option>`,
+        ...specialties.map(function (specialty) {
+            const termId = String(specialty.term_id || 0);
+            const label = specialty.term_label || "Unbenannte Fachrichtung";
+            const selected = termId === selectedValue ? " selected" : "";
+
+            const count = Number(specialty.doctor_count || 0);
+			const countLabel = count > 0 ? ` (${count})` : "";
+
+			return `<option value="${escapeHtml(termId)}"${selected}>${escapeHtml(label + countLabel)}</option>`;
+        })
+    ].join("");
+}
+
 
 function updateStatusAfterSearch(settings) {
     const filterText = buildActiveFilterStatusText();
@@ -810,11 +864,17 @@ function buildActiveFilterStatusText() {
     if (currentMinPositiveRatio !== 0 || currentMaxNegativeRatio !== 100) parts.push(`positive Erfahrungen ≥ ${currentMinPositiveRatio} %, negative Erfahrungen ≤ ${currentMaxNegativeRatio} %`);
     if (currentAcceptsGkv) parts.push("GKV");
     if (currentAcceptsPkv) parts.push("PKV/Selbstzahler");
-    if (currentHasWebsite) parts.push("hat Website");
-    if (currentHasEmail) parts.push("hat E-Mail");
-    if (currentHasPhone) parts.push("hat Telefonnummer");
-    if (currentCityFilter !== "") parts.push(`Ort enthält „${currentCityFilter}“`);
-    if (currentIncludeNoCoords) parts.push("Einträge ohne Koordinaten werden zusätzlich angezeigt");
+	if (currentHasWebsite) parts.push("hat Website");
+	if (currentHasEmail) parts.push("hat E-Mail");
+	if (currentHasPhone) parts.push("hat Telefonnummer");
+	if (currentSpecialtyTermId > 0) {
+		const specialtySelect = document.getElementById("doctor-specialty-select");
+		const selectedOption = specialtySelect ? specialtySelect.options[specialtySelect.selectedIndex] : null;
+		const specialtyLabel = selectedOption ? selectedOption.textContent.trim() : "";
+		parts.push(specialtyLabel ? `Fachrichtung „${specialtyLabel}“` : "Fachrichtung aktiv");
+	}
+	if (currentCityFilter !== "") parts.push(`Ort enthält „${currentCityFilter}“`);
+	if (currentIncludeNoCoords) parts.push("Einträge ohne Koordinaten werden zusätzlich angezeigt");
 
     return parts.length > 0 ? ` Filter aktiv: ${parts.join(", ")}.` : "";
 }
@@ -1006,9 +1066,10 @@ function buildDoctorCardHtml(doctor, index) {
     const houseNumber = escapeHtml(doctor.loc_housenumber || "");
     const distance = getDoctorDistanceText(doctor);
     const website = doctor.loc_website || doctor.dr_website || "";
-    const stats = getDoctorVoteStats(doctor);
+	const stats = getDoctorVoteStats(doctor);
+	const specialtyChipsHtml = buildDoctorSpecialtyChipsHtml(doctor, "doctor-card-tag", 4);
 
-    const websiteHtml = website
+	const websiteHtml = website
         ? `<a class="doctor-card-link" href="${escapeHtml(normalizeWebsiteUrl(website))}" target="_blank" rel="noopener noreferrer">Website</a>`
         : `<span class="doctor-card-muted">Keine Website</span>`;
 
@@ -1034,7 +1095,8 @@ function buildDoctorCardHtml(doctor, index) {
 
                     <div class="doctor-card-meta">
                         ${label ? `<span class="doctor-card-tag">🏥 ${label}</span>` : ""}
-                        ${insuranceTags || `<span class="doctor-card-tag">Versicherung k. A.</span>`}
+						${specialtyChipsHtml}
+						${insuranceTags || `<span class="doctor-card-tag">Versicherung k. A.</span>`}
                     </div>
                 </div>
 
@@ -1053,9 +1115,9 @@ function buildDoctorCardHtml(doctor, index) {
                     </div>
 
                     <div class="doctor-card-location-block">
-                        <div class="doctor-card-mini-label">Entfernung</div>
-                        <div class="doctor-card-main-text">${distance}</div>
-                    </div>
+						<div class="doctor-card-mini-label">Entfernung</div>
+						<div class="doctor-card-main-text">${distance}</div>
+					</div>
                 </section>
 
                 <section class="doctor-card-info-panel doctor-card-rating-panel">
@@ -1118,6 +1180,80 @@ function buildDoctorCardRatingHtml(doctor) {
     `;
 }
 
+
+function getDoctorSpecialtyLabels(doctor) {
+    const rawTerms = Array.isArray(doctor.specialty_terms)
+        ? doctor.specialty_terms
+        : (Array.isArray(doctor.specialties) ? doctor.specialties : []);
+
+    const labels = [];
+
+    rawTerms.forEach(function (term) {
+        const label = typeof term === "string"
+            ? term
+            : (term.term_label || term.label || term.name || "");
+
+        const normalizedLabel = String(label || "").trim();
+
+        if (normalizedLabel !== "" && !labels.includes(normalizedLabel)) {
+            labels.push(normalizedLabel);
+        }
+    });
+
+    if (labels.length === 0 && doctor.specialty_labels) {
+        String(doctor.specialty_labels)
+            .split(",")
+            .map(function (label) {
+                return label.trim();
+            })
+            .filter(Boolean)
+            .forEach(function (label) {
+                if (!labels.includes(label)) {
+                    labels.push(label);
+                }
+            });
+    }
+
+    return labels;
+}
+
+function getDoctorSpecialtyPlainText(doctor, limit = null) {
+    const labels = getDoctorSpecialtyLabels(doctor);
+    const visibleLabels = limit ? labels.slice(0, limit) : labels;
+    const hiddenCount = limit && labels.length > limit ? labels.length - limit : 0;
+
+    if (visibleLabels.length === 0) {
+        return "";
+    }
+
+    return visibleLabels.join(", ") + (hiddenCount > 0 ? ` +${hiddenCount}` : "");
+}
+
+function buildDoctorSpecialtyChipsHtml(doctor, chipClassName = "doctor-card-tag", limit = null, wrapperClassName = "") {
+    const labels = getDoctorSpecialtyLabels(doctor);
+    const visibleLabels = limit ? labels.slice(0, limit) : labels;
+    const hiddenCount = limit && labels.length > limit ? labels.length - limit : 0;
+
+    if (visibleLabels.length === 0) {
+        return "";
+    }
+
+    const chipsHtml = visibleLabels.map(function (label) {
+        return `<span class="${escapeHtml(chipClassName)}">${escapeHtml(label)}</span>`;
+    }).join("");
+
+    const moreHtml = hiddenCount > 0
+        ? `<span class="${escapeHtml(chipClassName)}">+${hiddenCount}</span>`
+        : "";
+
+    if (wrapperClassName) {
+        return `<div class="${escapeHtml(wrapperClassName)}">${chipsHtml}${moreHtml}</div>`;
+    }
+
+    return chipsHtml + moreHtml;
+}
+
+
 function renderDoctorResultsTable(doctors) {
     const tableBody = document.getElementById("doctor-map-results-body");
 
@@ -1146,8 +1282,9 @@ function buildDoctorTableRowHtml(doctor, index) {
             <td class="doctor-table-name">
                 <div class="doctor-table-name-stack">
                     <a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>
-                    <button type="button" class="doctor-compare-add-button doctor-compare-add-button-table ${isDoctorSelectedForCompare(doctor.dr_id) ? "is-selected" : ""}" data-dr-id="${escapeHtml(doctor.dr_id)}">
-                        ${isDoctorSelectedForCompare(doctor.dr_id) ? "Ausgewählt" : "+ vergleichen"}
+					${buildDoctorSpecialtyChipsHtml(doctor, "doctor-table-specialty-badge", 3, "doctor-table-specialty-row")}
+					<button type="button" class="doctor-compare-add-button doctor-compare-add-button-table ${isDoctorSelectedForCompare(doctor.dr_id) ? "is-selected" : ""}" data-dr-id="${escapeHtml(doctor.dr_id)}">
+					${isDoctorSelectedForCompare(doctor.dr_id) ? "Ausgewählt" : "+ vergleichen"}
                     </button>
                 </div>
             </td>
@@ -1538,9 +1675,10 @@ function buildDoctorPopupHtml(doctor) {
     const houseNumber = escapeHtml(doctor.loc_housenumber || "");
     const stats = getDoctorVoteStats(doctor);
     const distanceText = getDoctorDistanceText(doctor);
-    const website = doctor.loc_website || doctor.dr_website || "";
+	const website = doctor.loc_website || doctor.dr_website || "";
+	const specialtyText = getDoctorSpecialtyPlainText(doctor, 4);
 
-    const ratingText = stats.totalVotes > 0
+	const ratingText = stats.totalVotes > 0
         ? `${stats.proRatio}% positiv · ${stats.totalVotes} Bewertungen`
         : "Noch keine Bewertungen";
 
@@ -1554,7 +1692,8 @@ function buildDoctorPopupHtml(doctor) {
             ${label ? `${label}<br>` : ""}
             ${street || houseNumber ? `${street} ${houseNumber}<br>` : ""}
             ${plz} ${city}<br>
-            <em>${distanceText}</em><br>
+			${specialtyText ? `<span class="doctor-popup-specialties">${escapeHtml(specialtyText)}</span><br>` : ""}
+			<em>${distanceText}</em><br>
             <span>⭐ ${ratingText}</span>
             <br><a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">Mehr Details</a>
             ${websiteHtml}

@@ -119,6 +119,127 @@ function normalizeGermanSearchTerm($value) {
     );
 }
 
+function attachSpecialtyTermsToDoctors($pdo, &$items) {
+    if (count($items) === 0) {
+        return;
+    }
+
+    $doctorIds = [];
+
+    foreach ($items as $item) {
+        $drId = (int)($item['dr_id'] ?? 0);
+
+        if ($drId > 0) {
+            $doctorIds[$drId] = $drId;
+        }
+    }
+
+    if (count($doctorIds) === 0) {
+        return;
+    }
+
+    $placeholders = [];
+    $params = [];
+
+    foreach (array_values($doctorIds) as $index => $drId) {
+        $placeholder = ':dr_id_' . $index;
+        $placeholders[] = $placeholder;
+        $params[$placeholder] = $drId;
+    }
+
+    $termsSql = "
+        SELECT DISTINCT
+            c.dr_id,
+            t.term_id,
+            t.term_type,
+            t.term_code,
+            t.term_label,
+            t.term_desc
+        FROM tbl_cpl_drs2terms_03 c
+        INNER JOIN tbl_terms_03 t
+            ON c.term_id = t.term_id
+        WHERE c.dr_id IN (" . implode(', ', $placeholders) . ")
+          AND t.term_type = 'specialty'
+        ORDER BY t.term_label ASC
+    ";
+
+    $termsStmt = $pdo->prepare($termsSql);
+
+    foreach ($params as $placeholder => $drId) {
+        $termsStmt->bindValue($placeholder, $drId, PDO::PARAM_INT);
+    }
+
+    $termsStmt->execute();
+
+    $termsByDoctor = [];
+
+    foreach ($termsStmt->fetchAll() as $term) {
+        $drId = (int)$term['dr_id'];
+
+        if (!array_key_exists($drId, $termsByDoctor)) {
+            $termsByDoctor[$drId] = [];
+        }
+
+        $termsByDoctor[$drId][] = [
+            'term_id' => (int)$term['term_id'],
+            'term_type' => (string)$term['term_type'],
+            'term_code' => (string)($term['term_code'] ?? ''),
+            'term_label' => (string)($term['term_label'] ?? ''),
+            'term_desc' => (string)($term['term_desc'] ?? ''),
+        ];
+    }
+
+    foreach ($items as &$item) {
+        $drId = (int)($item['dr_id'] ?? 0);
+        $specialtyTerms = $termsByDoctor[$drId] ?? [];
+
+        $item['specialty_terms'] = $specialtyTerms;
+        $item['specialty_labels'] = implode(', ', array_values(array_filter(array_map(function ($term) {
+            return trim((string)($term['term_label'] ?? ''));
+        }, $specialtyTerms))));
+    }
+    unset($item);
+}
+
+function getAllSpecialtyTerms($pdo) {
+    $sql = "
+        SELECT
+            t.term_id,
+            t.term_type,
+            t.term_code,
+            t.term_label,
+            t.term_desc,
+            COUNT(DISTINCT c.dr_id) AS doctor_count
+        FROM tbl_terms_03 t
+        INNER JOIN tbl_cpl_drs2terms_03 c
+            ON t.term_id = c.term_id
+        WHERE t.term_type = 'specialty'
+        GROUP BY
+            t.term_id,
+            t.term_type,
+            t.term_code,
+            t.term_label,
+            t.term_desc
+        ORDER BY t.term_label ASC
+    ";
+
+    $stmt = $pdo->query($sql);
+    $items = [];
+
+    foreach ($stmt->fetchAll() as $term) {
+        $items[] = [
+            'term_id' => (int)$term['term_id'],
+            'term_type' => (string)$term['term_type'],
+            'term_code' => (string)($term['term_code'] ?? ''),
+            'term_label' => (string)($term['term_label'] ?? ''),
+            'term_desc' => (string)($term['term_desc'] ?? ''),
+            'doctor_count' => (int)($term['doctor_count'] ?? 0),
+        ];
+    }
+
+    return $items;
+}
+
 try {
     $lat = getFloatParam('lat', -90, 90);
     $lng = getFloatParam('lng', -180, 180);
@@ -137,6 +258,7 @@ try {
 
     $city = getOptionalStringParam('city', 80);
     $search = getOptionalStringParam('search', 120);
+    $specialtyTermId = getOptionalIntParam('specialtyTermId', 0, 0, 999999);
     $searchNormalized = normalizeGermanSearchTerm($search);
 
     $radiusRaw = $_GET['radiusKm'] ?? '100';
@@ -221,6 +343,15 @@ try {
             $whereParts[] = "loc_city LIKE :city";
         }
 
+        if ($specialtyTermId > 0) {
+            $whereParts[] = "EXISTS (
+                SELECT 1
+                FROM tbl_cpl_drs2terms_03 cst
+                WHERE cst.dr_id = results.dr_id
+                  AND cst.term_id = :specialtyTermId
+            )";
+        }
+
         if ($search !== '') {
             $whereParts[] = "(
                 dr_display_name LIKE :search
@@ -248,13 +379,13 @@ try {
                                                         CONCAT_WS(' ', COALESCE(dr_title_raw, ''), COALESCE(dr_firstname, ''), COALESCE(dr_lastname, '')),
                                                         CONCAT_WS(' ', COALESCE(dr_firstname, ''), COALESCE(dr_lastname, ''))
                                                     ),
-                                                    'ẞ', 'ss'
+                                                    'Ä', 'Ae'
                                                 ),
-                                                'Ä', 'ae'
+                                                'Ö', 'Oe'
                                             ),
-                                            'Ö', 'oe'
+                                            'Ü', 'Ue'
                                         ),
-                                        'Ü', 'ue'
+                                        'ẞ', 'SS'
                                     ),
                                     'ä', 'ae'
                                 ),
@@ -338,6 +469,9 @@ try {
                     END AS dr_sort_lastname,
                     d.dr_org_name,
                     d.dr_website AS dr_website,
+                    d.dr_email AS dr_email,
+                    d.dr_accepts_gkv,
+                    d.dr_accepts_pkv,
 
                     l.loc_id,
                     l.loc_label,
@@ -445,6 +579,10 @@ try {
             $stmt->bindValue(':city', '%' . $city . '%');
         }
 
+        if ($specialtyTermId > 0) {
+            $stmt->bindValue(':specialtyTermId', $specialtyTermId, PDO::PARAM_INT);
+        }
+
         if ($search !== '') {
             $stmt->bindValue(':search', '%' . $search . '%');
             $stmt->bindValue(':searchNormalized', '%' . $searchNormalized . '%');
@@ -454,6 +592,9 @@ try {
     $stmt->execute();
 
     $items = $stmt->fetchAll();
+
+    attachSpecialtyTermsToDoctors($pdo, $items);
+    $specialties = getAllSpecialtyTerms($pdo);
 
     foreach ($items as &$item) {
         $hasCoordinates = (int)$item['has_coordinates'] === 1;
@@ -507,6 +648,7 @@ try {
             'acceptsPkv' => $acceptsPkv,
             'city' => $city,
             'search' => $search,
+            'specialtyTermId' => $specialtyTermId,
             'includeNoCoords' => $includeNoCoords,
             'hasWebsite' => $hasWebsite,
             'hasEmail' => $hasEmail,
@@ -515,6 +657,7 @@ try {
         'distanceType' => 'air_line',
         'distanceLabel' => 'Luftlinie',
         'count' => count($items),
+        'specialties' => $specialties,
         'items' => $items,
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 

@@ -2865,3 +2865,128 @@
         min-height: 0 !important;
     }
 }
+
+/* =========================================================
+   Fachrichtungen auf der Ärzt:innen-Karte
+   Kacheln, Tabelle und Karten-Popup
+========================================================= */
+
+.doctor-table-specialty-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 2px;
+}
+
+.doctor-table-specialty-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    min-height: 16px;
+    padding: 1px 5px;
+    border: 1px solid #d1deef;
+    border-radius: 999px;
+    background: #f4f8ff;
+    color: #064384;
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.doctor-popup-specialties {
+    color: #064384;
+    font-weight: 700;
+}
+
+/* =========================================================
+   Fachrichtungsfilter in der Ärzt:innen-Navigation
+   + Fachrichtungsanzeige in Kacheln, Tabelle und Popup
+========================================================= */
+
+.doctor-nav-section-specialty {
+    grid-area: specialty !important;
+}
+
+.doctor-navigation-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-areas:
+        "sort specialty insurance contact"
+        "rating rating location location" !important;
+}
+
+.doctor-nav-section-specialty,
+.doctor-nav-section-sort,
+.doctor-nav-section-insurance,
+.doctor-nav-section-contact {
+    min-height: 122px !important;
+}
+
+.doctor-table-specialty-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 2px;
+}
+
+.doctor-table-specialty-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    min-height: 16px;
+    padding: 1px 5px;
+    border: 1px solid #d1deef;
+    border-radius: 999px;
+    background: #f4f8ff;
+    color: #064384;
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.doctor-popup-specialties {
+    color: #064384;
+    font-weight: 700;
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+    .doctor-navigation-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        grid-template-areas:
+            "sort specialty insurance contact"
+            "rating rating location location" !important;
+        gap: 10px !important;
+    }
+
+    .doctor-nav-section-specialty,
+    .doctor-nav-section-sort,
+    .doctor-nav-section-insurance,
+    .doctor-nav-section-contact {
+        min-height: 122px !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .doctor-navigation-grid {
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+            "sort"
+            "specialty"
+            "insurance"
+            "contact"
+            "rating"
+            "location" !important;
+    }
+
+    .doctor-nav-section-specialty,
+    .doctor-nav-section-sort,
+    .doctor-nav-section-insurance,
+    .doctor-nav-section-contact,
+    .doctor-nav-section-rating,
+    .doctor-nav-section-location {
+        min-height: 0 !important;
+    }
+}
