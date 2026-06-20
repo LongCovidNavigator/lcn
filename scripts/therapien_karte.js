@@ -17,6 +17,7 @@ let treatmentUserLocationMarker = null;
 let treatmentRadiusCircle = null;
 let treatmentUserLocationIcon = null;
 let currentTreatmentUserLocation = null;
+let currentTreatmentMapData = null;
 let treatmentSmartSearchOverride = null;
 let treatmentAliasSmartSuggestController = null;
 let treatmentAliasSmartSuggestions = [];
@@ -26,6 +27,14 @@ const treatmentDefaultMapCenter = {
     lng: 10.4515,
     label: "Deutschland"
 };
+
+const treatmentMapMarkerColors = [
+    "#0072B2",
+    "#D55E00",
+    "#009E73",
+    "#CC79A7",
+    "#F0E442"
+];
 
 document.addEventListener("DOMContentLoaded", function () {
     initTreatmentPage();
@@ -60,7 +69,8 @@ async function loadTreatmentResults() {
         }
 
         currentTreatments = data.items.map(normalizeTreatment);
-        currentCategories = Array.isArray(data.categories) ? data.categories : [];
+		currentCategories = Array.isArray(data.categories) ? data.categories : [];
+		currentTreatmentMapData = data.map && typeof data.map === "object" ? data.map : null;
 
         applyClientSideTreatmentSort();
 
@@ -72,7 +82,7 @@ async function loadTreatmentResults() {
             Number(data.total_count ?? currentTreatments.length)
         );
 
-        renderTreatmentMap(currentTreatments);
+        renderTreatmentMap(currentTreatments, currentTreatmentMapData);
 
     } catch (error) {
         console.error("Fehler beim Laden der Therapien:", error);
@@ -91,8 +101,9 @@ async function loadTreatmentResults() {
             `;
         }
 
-        updateTreatmentResultsCount(0, 0);
-        renderTreatmentMap([]);
+        currentTreatmentMapData = null;
+		updateTreatmentResultsCount(0, 0);
+		renderTreatmentMap([], currentTreatmentMapData);
         updateTreatmentMapStatus("Die Kartendaten konnten nicht geladen werden.");
     }
 }
@@ -111,32 +122,12 @@ function buildTreatmentSearchUrl() {
             });
 
         params.set("treat_ids", treatIds.length > 0 ? treatIds.join(",") : "0");
-        params.set("sort", "name");
-        params.set("direction", "asc");
+    } else {
+        const activeSearchTerm = filters.searchTerm;
 
-        if (currentTreatmentUserLocation) {
-            params.set("include_map", "1");
-            params.set("lat", String(currentTreatmentUserLocation.lat));
-            params.set("lng", String(currentTreatmentUserLocation.lng));
+        if (activeSearchTerm !== "") {
+            params.set("search", activeSearchTerm);
         }
-
-        return `api/treatments_search.php?${params.toString()}`;
-    }
-
-    const activeSearchTerm = treatmentSmartSearchOverride
-        ? String(treatmentSmartSearchOverride.searchTerm || "").trim()
-        : filters.searchTerm;
-
-    const activeSearchMode = treatmentSmartSearchOverride
-        ? String(treatmentSmartSearchOverride.searchMode || "basic").trim()
-        : "basic";
-
-    if (activeSearchTerm !== "") {
-        params.set("search", activeSearchTerm);
-    }
-
-    if (activeSearchMode !== "basic") {
-        params.set("search_mode", activeSearchMode);
     }
 
     if (filters.category !== "") {
@@ -176,6 +167,7 @@ function buildTreatmentSearchUrl() {
 
     return `api/treatments_search.php?${params.toString()}`;
 }
+
 
 function normalizeTreatment(treatment) {
     return {
@@ -251,15 +243,14 @@ function bindTreatmentNavigationEvents() {
     const locationResetButton = document.getElementById("treatment-location-reset-button");
 
     if (applyButton) {
-        applyButton.addEventListener("click", function () {
-            treatmentSmartSearchOverride = null;
-            if (!validateLocationDependentFilters()) {
-                return;
-            }
+		applyButton.addEventListener("click", function () {
+			if (!validateLocationDependentFilters()) {
+				return;
+			}
 
-            loadTreatmentResults();
-        });
-    }
+			loadTreatmentResults();
+		});
+	}
 
     if (resetButton) {
         resetButton.addEventListener("click", resetTreatmentFilters);
@@ -1434,7 +1425,7 @@ async function geocodeTreatmentLocation(query) {
     };
 }
 
-function renderTreatmentMap(treatments) {
+function renderTreatmentMap(treatments, mapData) {
     if (!treatmentMap) {
         return;
     }
@@ -1442,13 +1433,22 @@ function renderTreatmentMap(treatments) {
     clearTreatmentProviderMarkers();
     updateTreatmentUserLocationMarker();
     updateTreatmentRadiusCircle();
+    clearTreatmentMapLegend();
 
     if (!currentTreatmentUserLocation) {
         updateTreatmentMapStatus("Bitte Kartenstandort setzen, um die nächsten Anbieterstandorte der gefundenen Therapien auf der Karte zu sehen.");
         return;
     }
 
-    const groups = groupTreatmentsByNearestProviderLocation(treatments || []);
+    const activeMapData = mapData && typeof mapData === "object" ? mapData : currentTreatmentMapData;
+    const useAllMatchingProviders = activeMapData
+        && activeMapData.mode === "all_matching_providers"
+        && Array.isArray(activeMapData.providers);
+
+    const groups = useAllMatchingProviders
+        ? groupAllMatchingProvidersByLocation(activeMapData.providers, treatments || [])
+        : groupTreatmentsByNearestProviderLocation(treatments || []);
+
     const groupValues = Array.from(groups.values());
 
     if (groupValues.length === 0) {
@@ -1459,10 +1459,20 @@ function renderTreatmentMap(treatments) {
     treatmentMarkerGroup = L.featureGroup();
 
     groupValues.forEach(function (group) {
-        const marker = L.marker([group.lat, group.lng]);
-        marker.bindPopup(buildTreatmentMapPopupHtml(group));
-        treatmentMarkerGroup.addLayer(marker);
-    });
+		const markerOptions = useAllMatchingProviders
+			? { icon: createTreatmentColorMarkerIcon(group.colorIndex) }
+			: {};
+
+		const marker = L.marker([group.lat, group.lng], markerOptions);
+
+		marker.bindPopup(
+			useAllMatchingProviders
+				? buildAllMatchingProvidersPopupHtml(group)
+				: buildTreatmentMapPopupHtml(group)
+		);
+
+		treatmentMarkerGroup.addLayer(marker);
+	});
 
     treatmentMarkerGroup.addTo(treatmentMap);
 
@@ -1483,10 +1493,6 @@ function renderTreatmentMap(treatments) {
         maxZoom: 10
     });
 
-    const treatmentCountOnMap = groupValues.reduce(function (sum, group) {
-        return sum + group.treatments.length;
-    }, 0);
-
     const filters = getTreatmentFilters();
     const cityPart = filters.onlyCurrentCity && getCurrentTreatmentCity()
         ? ` in deiner Stadt „${getCurrentTreatmentCity()}“`
@@ -1494,6 +1500,25 @@ function renderTreatmentMap(treatments) {
     const radiusPart = filters.radiusKm > 0
         ? ` im Radius von ${filters.radiusKm} km`
         : "";
+
+    if (useAllMatchingProviders) {
+        renderTreatmentMapLegend(activeMapData.legend || [], treatments || []);
+
+        const providerCount = groupValues.reduce(function (sum, group) {
+            return sum + group.providers.length;
+        }, 0);
+
+        const treatmentCount = countUniqueTreatmentsInProviderGroups(groupValues);
+
+        updateTreatmentMapStatus(
+            `${providerCount} Anbieterstandorte für ${treatmentCount} Therapien${cityPart}${radiusPart} auf der Karte. Farben zeigen die Therapie-Zuordnung.`
+        );
+        return;
+    }
+
+    const treatmentCountOnMap = groupValues.reduce(function (sum, group) {
+        return sum + group.treatments.length;
+    }, 0);
 
     updateTreatmentMapStatus(
         `${treatmentCountOnMap} Therapien${cityPart}${radiusPart} mit nächstem Anbieterstandort auf der Karte. Mehrere Therapien am selben Standort werden in einem Popup gebündelt.`
@@ -1527,6 +1552,116 @@ function groupTreatmentsByNearestProviderLocation(treatments) {
     });
 
     return groups;
+}
+
+function groupAllMatchingProvidersByLocation(providers, treatments) {
+    const groups = new Map();
+    const treatmentById = new Map();
+    const colorIndexByTreatId = buildTreatmentColorIndexMap(treatments);
+
+    treatments.forEach(function (treatment) {
+        treatmentById.set(Number(treatment.treat_id), treatment);
+    });
+
+    providers.forEach(function (provider) {
+        if (!provider || !hasValidCoordinates(provider.loc_lat, provider.loc_lng)) {
+            return;
+        }
+
+        const lat = Number(provider.loc_lat);
+        const lng = Number(provider.loc_lng);
+        const drId = Number(provider.dr_id || 0);
+        const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+        const treatId = Number(provider.treat_id || 0);
+        const colorIndex = colorIndexByTreatId.has(treatId)
+            ? colorIndexByTreatId.get(treatId)
+            : 0;
+
+        if (!groups.has(key)) {
+            groups.set(key, {
+                lat,
+                lng,
+                colorIndex,
+                providers: [],
+                providerMap: new Map(),
+                treatmentIds: new Set()
+            });
+        }
+
+        const group = groups.get(key);
+        group.colorIndex = Math.min(group.colorIndex, colorIndex);
+        group.treatmentIds.add(treatId);
+
+        if (!group.providerMap.has(drId)) {
+            const providerEntry = {
+                provider,
+                treatments: []
+            };
+
+            group.providerMap.set(drId, providerEntry);
+            group.providers.push(providerEntry);
+        }
+
+        const treatment = treatmentById.get(treatId) || {
+            treat_id: treatId,
+            behandlung: provider.treatment_name || "Unbekannte Therapie",
+            nearest_provider_distance_km: provider.distance_km ?? null
+        };
+
+        group.providerMap.get(drId).treatments.push({
+            treat_id: treatId,
+            behandlung: treatment.behandlung || provider.treatment_name || "Unbekannte Therapie",
+            distance_km: provider.distance_km ?? null,
+            color_index: colorIndex
+        });
+    });
+
+    groups.forEach(function (group) {
+        delete group.providerMap;
+    });
+
+    return groups;
+}
+
+function buildTreatmentColorIndexMap(treatments) {
+    const colorIndexByTreatId = new Map();
+
+    (treatments || []).slice(0, 5).forEach(function (treatment, index) {
+        const treatId = Number(treatment.treat_id || 0);
+
+        if (treatId > 0 && !colorIndexByTreatId.has(treatId)) {
+            colorIndexByTreatId.set(treatId, index);
+        }
+    });
+
+    return colorIndexByTreatId;
+}
+
+function countUniqueTreatmentsInProviderGroups(groups) {
+    const ids = new Set();
+
+    groups.forEach(function (group) {
+        group.treatmentIds.forEach(function (treatId) {
+            if (treatId > 0) {
+                ids.add(treatId);
+            }
+        });
+    });
+
+    return ids.size;
+}
+
+function createTreatmentColorMarkerIcon(colorIndex) {
+    const safeIndex = Number.isFinite(Number(colorIndex)) ? Number(colorIndex) : 0;
+    const color = treatmentMapMarkerColors[Math.abs(safeIndex) % treatmentMapMarkerColors.length];
+
+    return L.divIcon({
+        className: "treatment-colored-marker-wrapper",
+        html: `<span class="treatment-colored-marker" style="background:${escapeHtml(color)}"></span>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        popupAnchor: [0, -12]
+    });
 }
 
 function buildTreatmentMapPopupHtml(group) {
@@ -1579,6 +1714,137 @@ function buildTreatmentMapPopupHtml(group) {
     `;
 }
 
+function buildAllMatchingProvidersPopupHtml(group) {
+    const providerBlocksHtml = group.providers.map(function (providerEntry) {
+        const provider = providerEntry.provider;
+        const providerName = escapeHtml(provider.dr_display_name || "Anbieter");
+        const address = buildProviderAddressText(provider);
+        const doctorLink = provider.dr_id
+            ? `<a href="arzt_detail.html?id=${encodeURIComponent(provider.dr_id)}">Arzt-Steckbrief öffnen</a>`
+            : "";
+
+        const uniqueTreatments = dedupeProviderTreatments(providerEntry.treatments);
+        const treatmentListHtml = uniqueTreatments.map(function (treatment) {
+            const color = treatmentMapMarkerColors[Math.abs(Number(treatment.color_index || 0)) % treatmentMapMarkerColors.length];
+            const distance = treatment.distance_km === null || treatment.distance_km === undefined
+                ? ""
+                : ` <span class="treatment-map-popup-muted">(${escapeHtml(formatDistanceKm(treatment.distance_km))})</span>`;
+
+            return `
+                <li>
+                    <span class="treatment-map-popup-color-dot" style="background:${escapeHtml(color)}"></span>
+                    <a href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">
+                        ${escapeHtml(treatment.behandlung || "Unbekannte Therapie")}
+                    </a>${distance}
+                </li>
+            `;
+        }).join("");
+
+        return `
+            <div class="treatment-map-popup-provider-block">
+                <strong>${providerName}</strong>
+                ${address ? `<div class="treatment-map-popup-muted">${escapeHtml(address)}</div>` : ""}
+                <ul>
+                    ${treatmentListHtml}
+                </ul>
+                <div class="treatment-map-popup-actions">
+                    ${doctorLink}
+                </div>
+            </div>
+        `;
+    }).join("<hr>");
+
+    return `
+        <div class="treatment-map-popup treatment-map-popup-wide">
+            <div><strong>Anbieterstandort mit passenden Therapien</strong></div>
+            <hr>
+            ${providerBlocksHtml}
+        </div>
+    `;
+}
+
+function dedupeProviderTreatments(treatments) {
+    const byTreatId = new Map();
+
+    treatments.forEach(function (treatment) {
+        const treatId = Number(treatment.treat_id || 0);
+
+        if (treatId > 0 && !byTreatId.has(treatId)) {
+            byTreatId.set(treatId, treatment);
+        }
+    });
+
+    return Array.from(byTreatId.values()).sort(function (a, b) {
+        return String(a.behandlung || "").localeCompare(String(b.behandlung || ""), "de");
+    });
+}
+
+function renderTreatmentMapLegend(legend, treatments) {
+    clearTreatmentMapLegend();
+
+    const mapContent = document.getElementById("treatment-map-content");
+
+    if (!mapContent) {
+        return;
+    }
+
+    const legendItems = buildTreatmentLegendItems(legend, treatments);
+
+    if (legendItems.length === 0) {
+        return;
+    }
+
+    const legendElement = document.createElement("div");
+    legendElement.id = "treatment-map-legend";
+    legendElement.className = "treatment-map-legend";
+
+    legendElement.innerHTML = `
+        <div class="treatment-map-legend-title">Farblegende</div>
+        <div class="treatment-map-legend-list">
+            ${legendItems.map(function (item) {
+                const color = treatmentMapMarkerColors[Math.abs(Number(item.color_index || 0)) % treatmentMapMarkerColors.length];
+
+                return `
+                    <div class="treatment-map-legend-item">
+                        <span class="treatment-map-legend-dot" style="background:${escapeHtml(color)}"></span>
+                        <span>${escapeHtml(item.treatment_name || "Unbekannte Therapie")}</span>
+                    </div>
+                `;
+            }).join("")}
+        </div>
+    `;
+
+    mapContent.appendChild(legendElement);
+}
+
+function buildTreatmentLegendItems(legend, treatments) {
+    if (Array.isArray(legend) && legend.length > 0) {
+        return legend.slice(0, 5).map(function (item, index) {
+            return {
+                treat_id: Number(item.treat_id || 0),
+                treatment_name: item.treatment_name || "",
+                color_index: Number.isFinite(Number(item.color_index)) ? Number(item.color_index) : index
+            };
+        });
+    }
+
+    return (treatments || []).slice(0, 5).map(function (treatment, index) {
+        return {
+            treat_id: Number(treatment.treat_id || 0),
+            treatment_name: treatment.behandlung || "",
+            color_index: index
+        };
+    });
+}
+
+function clearTreatmentMapLegend() {
+    const existingLegend = document.getElementById("treatment-map-legend");
+
+    if (existingLegend) {
+        existingLegend.remove();
+    }
+}
+
 function buildProviderAddressText(provider) {
     const street = [provider.loc_street, provider.loc_housenumber]
         .filter(Boolean)
@@ -1592,6 +1858,7 @@ function buildProviderAddressText(provider) {
 
     return [street, city].filter(Boolean).join(", ");
 }
+
 
 function updateTreatmentUserLocationMarker() {
     if (!treatmentMap) {
@@ -1666,9 +1933,18 @@ function clearTreatmentProviderMarkers() {
 
 function updateTreatmentMapStatus(message) {
     const statusElement = document.getElementById("treatment-map-status");
+    const mapContent = document.getElementById("treatment-map-content");
+    const messageText = String(message || "");
 
     if (statusElement) {
-        statusElement.textContent = message;
+        statusElement.textContent = messageText;
+    }
+
+    if (mapContent) {
+        mapContent.classList.toggle(
+            "is-location-required",
+            messageText.startsWith("Bitte Kartenstandort setzen")
+        );
     }
 }
 

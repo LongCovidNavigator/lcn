@@ -171,27 +171,37 @@ function enrichItemsWithNearestProviders(
         return [
             'enabled' => true,
             'has_user_location' => true,
+            'mode' => 'nearest_provider_per_treatment',
             'providers_with_coordinates' => 0,
             'treatments_with_nearest_provider' => 0,
+            'providers' => [],
+            'legend' => [],
         ];
     }
 
     $treatIds = [];
+    $treatmentNamesById = [];
 
     foreach ($items as $item) {
         if (isset($item['treat_id']) && is_numeric($item['treat_id'])) {
-            $treatIds[] = (int)$item['treat_id'];
+            $treatId = (int)$item['treat_id'];
+            $treatIds[] = $treatId;
+            $treatmentNamesById[$treatId] = $item['behandlung'] ?? '';
         }
     }
 
     $treatIds = array_values(array_unique($treatIds));
+    $showAllMatchingProviders = count($treatIds) > 0 && count($treatIds) <= 5;
 
     if (empty($treatIds)) {
         return [
             'enabled' => true,
             'has_user_location' => true,
+            'mode' => 'nearest_provider_per_treatment',
             'providers_with_coordinates' => 0,
             'treatments_with_nearest_provider' => 0,
+            'providers' => [],
+            'legend' => [],
         ];
     }
 
@@ -284,6 +294,7 @@ function enrichItemsWithNearestProviders(
 
     $nearestByTreatId = [];
     $providersWithCoordinates = 0;
+    $allMatchingProviders = [];
 
     foreach ($providerRows as $row) {
         if (!hasValidCoordinates($row['loc_lat'], $row['loc_lng'])) {
@@ -299,6 +310,7 @@ function enrichItemsWithNearestProviders(
 
         $candidate = [
             'treat_id' => $treatId,
+            'treatment_name' => $treatmentNamesById[$treatId] ?? '',
             'dr_id' => (int)$row['dr_id'],
             'dr_display_name' => $row['dr_display_name'],
 
@@ -320,6 +332,12 @@ function enrichItemsWithNearestProviders(
             'distance_km' => round($distanceKm, 1),
             'distance_km_exact' => $distanceKm,
         ];
+
+        if ($showAllMatchingProviders) {
+            $providerForMap = $candidate;
+            unset($providerForMap['distance_km_exact']);
+            $allMatchingProviders[] = $providerForMap;
+        }
 
         if (
             !isset($nearestByTreatId[$treatId]) ||
@@ -349,11 +367,26 @@ function enrichItemsWithNearestProviders(
     }
     unset($item);
 
+    $legend = [];
+
+    if ($showAllMatchingProviders) {
+        foreach ($treatIds as $index => $treatId) {
+            $legend[] = [
+                'treat_id' => $treatId,
+                'treatment_name' => $treatmentNamesById[$treatId] ?? '',
+                'color_index' => $index,
+            ];
+        }
+    }
+
     return [
         'enabled' => true,
         'has_user_location' => true,
+        'mode' => $showAllMatchingProviders ? 'all_matching_providers' : 'nearest_provider_per_treatment',
         'providers_with_coordinates' => $providersWithCoordinates,
         'treatments_with_nearest_provider' => $treatmentsWithNearestProvider,
+        'providers' => $showAllMatchingProviders ? $allMatchingProviders : [],
+        'legend' => $legend,
     ];
 }
 
@@ -833,75 +866,76 @@ try {
     ];
 
     if ($hasTreatIdsParam) {
-        if (empty($treatIds)) {
-            $whereParts[] = "1 = 0";
-        } else {
-            $treatIdPlaceholders = [];
+		if (empty($treatIds)) {
+			$whereParts[] = "1 = 0";
+		} else {
+			$treatIdPlaceholders = [];
 
-            foreach ($treatIds as $index => $currentTreatId) {
-                $placeholder = ':selected_treat_id_' . $index;
-                $treatIdPlaceholders[] = $placeholder;
-                $params[$placeholder] = $currentTreatId;
-            }
+			foreach ($treatIds as $index => $currentTreatId) {
+				$placeholder = ':selected_treat_id_' . $index;
+				$treatIdPlaceholders[] = $placeholder;
+				$params[$placeholder] = $currentTreatId;
+			}
 
-            $whereParts[] = "results.treat_id IN (" . implode(', ', $treatIdPlaceholders) . ")";
-        }
-    } elseif ($treatId > 0) {
-        $whereParts[] = "results.treat_id = :treat_id";
-        $params[':treat_id'] = $treatId;
-    } else {
-        if ($search !== '') {
-            $searchWhere = "
-                results.behandlung COLLATE utf8mb4_unicode_ci LIKE :search
-            ";
+			$whereParts[] = "results.treat_id IN (" . implode(', ', $treatIdPlaceholders) . ")";
+		}
+	} elseif ($treatId > 0) {
+		$whereParts[] = "results.treat_id = :treat_id";
+	}
 
-            if ($searchMode === 'alias_direct') {
-                $searchWhere .= "
-                    OR EXISTS (
-                        SELECT 1
-                        FROM tbl_cpl_treatments2aliases_03 cta
-                        INNER JOIN tbl_aliases_03 a
-                            ON a.alias_id = cta.alias_id
-                        WHERE cta.treat_id = results.treat_id
-                          AND a.alias COLLATE utf8mb4_unicode_ci LIKE :search
-                          AND (" . getAliasDirectSafetySql('a', 'cta') . ")
-                    )
-                ";
-            } elseif ($searchMode === 'alias_extended') {
-                $searchWhere .= "
-                    OR EXISTS (
-                        SELECT 1
-                        FROM tbl_cpl_treatments2aliases_03 cta
-                        INNER JOIN tbl_aliases_03 a
-                            ON a.alias_id = cta.alias_id
-                        WHERE cta.treat_id = results.treat_id
-                          AND a.alias COLLATE utf8mb4_unicode_ci LIKE :search
-                    )
-                ";
-            }
+	if ($treatId <= 0) {
+		if (!$hasTreatIdsParam && $search !== '') {
+			$searchWhere = "
+				results.behandlung COLLATE utf8mb4_unicode_ci LIKE :search
+			";
 
-            $whereParts[] = "({$searchWhere})";
-            $params[':search'] = '%' . $search . '%';
-        }
+			if ($searchMode === 'alias_direct') {
+				$searchWhere .= "
+					OR EXISTS (
+						SELECT 1
+						FROM tbl_cpl_treatments2aliases_03 cta
+						INNER JOIN tbl_aliases_03 a
+							ON a.alias_id = cta.alias_id
+						WHERE cta.treat_id = results.treat_id
+						  AND a.alias COLLATE utf8mb4_unicode_ci LIKE :search
+						  AND (" . getAliasDirectSafetySql('a', 'cta') . ")
+					)
+				";
+			} elseif ($searchMode === 'alias_extended') {
+				$searchWhere .= "
+					OR EXISTS (
+						SELECT 1
+						FROM tbl_cpl_treatments2aliases_03 cta
+						INNER JOIN tbl_aliases_03 a
+							ON a.alias_id = cta.alias_id
+						WHERE cta.treat_id = results.treat_id
+						  AND a.alias COLLATE utf8mb4_unicode_ci LIKE :search
+					)
+				";
+			}
 
-        if ($category !== '') {
-            $whereParts[] = "results.typ COLLATE utf8mb4_unicode_ci = :category";
-            $params[':category'] = $category;
-        }
+			$whereParts[] = "({$searchWhere})";
+			$params[':search'] = '%' . $search . '%';
+		}
 
-        if ($providerCity !== '' || $hasProviderRadius) {
-            $whereParts[] = "results.matching_provider_count > 0";
-        }
+		if ($category !== '') {
+			$whereParts[] = "results.typ COLLATE utf8mb4_unicode_ci = :category";
+			$params[':category'] = $category;
+		}
 
-        $whereParts[] = "results.positive_ratio >= :min_positive";
-        $params[':min_positive'] = $minPositive;
+		if ($providerCity !== '' || $hasProviderRadius) {
+			$whereParts[] = "results.matching_provider_count > 0";
+		}
 
-        $whereParts[] = "results.negative_ratio <= :max_negative";
-        $params[':max_negative'] = $maxNegative;
+		$whereParts[] = "results.positive_ratio >= :min_positive";
+		$params[':min_positive'] = $minPositive;
 
-        $whereParts[] = "results.provider_count >= :min_provider";
-        $params[':min_provider'] = $minProvider;
-    }
+		$whereParts[] = "results.negative_ratio <= :max_negative";
+		$params[':max_negative'] = $maxNegative;
+
+		$whereParts[] = "results.provider_count >= :min_provider";
+		$params[':min_provider'] = $minProvider;
+	}
 
     $whereSql = '';
 
@@ -977,11 +1011,14 @@ try {
     unset($item);
 
     $map = [
-        'enabled' => $includeMap,
-        'has_user_location' => $hasUserLocationForMap,
-        'providers_with_coordinates' => 0,
-        'treatments_with_nearest_provider' => 0,
-    ];
+		'enabled' => $includeMap,
+		'has_user_location' => $hasUserLocationForMap,
+		'mode' => 'nearest_provider_per_treatment',
+		'providers_with_coordinates' => 0,
+		'treatments_with_nearest_provider' => 0,
+		'providers' => [],
+		'legend' => [],
+	];
 
     if ($includeMap && $hasUserLocationForMap) {
         $map = enrichItemsWithNearestProviders(
