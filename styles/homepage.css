@@ -5,6 +5,7 @@
 :root {
     --home-navy: #002244;
     --home-blue: #004080;
+    --home-teal: #24737c;
     --home-soft-blue: #edf6fb;
     --home-soft-mint: #edf8f6;
     --home-border: #d8e7ee;
@@ -18,7 +19,7 @@
 .home-page {
     min-height: 100vh;
     background:
-        radial-gradient(circle at top left, rgba(175, 238, 238, 0.22), transparent 34%),
+        radial-gradient(circle at top left, rgba(175, 238, 238, 0.20), transparent 34%),
         linear-gradient(180deg, #f8fbfc 0%, #f3f7f9 100%);
     color: var(--home-text);
 }
@@ -26,7 +27,7 @@
 .home-page section {
     max-width: 1120px;
     margin: 0 auto;
-    padding: 26px 20px;
+    padding: 24px 20px;
 }
 
 /* ------------------------------
@@ -35,7 +36,7 @@
 
 .home-hero {
     max-width: none !important;
-    padding: 54px 20px 38px !important;
+    padding: 46px 20px 36px !important;
     background:
         linear-gradient(135deg, rgba(0, 34, 68, 0.96), rgba(29, 116, 129, 0.88)),
         linear-gradient(90deg, #004080, #40e0d0);
@@ -66,24 +67,59 @@
     max-width: 780px;
     margin: 0 auto 14px;
     font-family: 'Nunito Sans', 'Open Sans', 'Segoe UI', sans-serif;
-    font-size: clamp(2.15rem, 4vw, 3.35rem);
+    font-size: clamp(2rem, 4vw, 3.25rem);
     line-height: 1.12;
     font-weight: 700;
 }
 
 .hero-lead {
-    max-width: 680px;
-    margin: 0 auto 24px;
-    font-size: 1.12rem;
+    max-width: 740px;
+    margin: 0 auto;
+    font-size: 1.08rem;
     line-height: 1.55;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.88);
 }
 
-.hero-actions {
+/* ------------------------------
+   Quick Start
+------------------------------ */
+
+.quick-start {
+    padding-top: 18px !important;
+    padding-bottom: 16px !important;
+}
+
+.quick-start-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 22px;
+    align-items: center;
+    padding: 22px 24px;
+    background-color: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--home-border);
+    border-radius: 20px;
+    box-shadow: var(--home-shadow);
+}
+
+.quick-start-text h2 {
+    margin: 0 0 8px;
+    font-family: 'Nunito Sans', 'Open Sans', 'Segoe UI', sans-serif;
+    color: var(--home-navy);
+    font-size: clamp(1.35rem, 2.3vw, 1.8rem);
+    line-height: 1.22;
+}
+
+.quick-start-text p {
+    margin: 0;
+    color: var(--home-muted);
+    line-height: 1.55;
+}
+
+.quick-start-actions {
     display: flex;
-    justify-content: center;
-    gap: 14px;
+    gap: 12px;
     flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 /* ------------------------------
@@ -108,23 +144,23 @@
 }
 
 .primary-button {
-    background-color: var(--home-white);
-    color: var(--home-blue);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+    background-color: var(--home-blue);
+    color: var(--home-white);
+    box-shadow: 0 8px 20px rgba(0, 64, 128, 0.16);
 }
 
 .primary-button:hover {
-    background-color: #f2fbff;
+    background-color: #002f5f;
 }
 
 .secondary-button {
-    background-color: rgba(255, 255, 255, 0.13);
-    color: var(--home-white);
-    border: 1px solid rgba(255, 255, 255, 0.55);
+    background-color: var(--home-soft-blue);
+    color: var(--home-blue);
+    border: 1px solid #bfd7e6;
 }
 
 .secondary-button:hover {
-    background-color: rgba(255, 255, 255, 0.22);
+    background-color: #ddeff8;
 }
 
 .card-button {
@@ -166,7 +202,7 @@
 }
 
 .section-kicker {
-    color: #24737c;
+    color: var(--home-teal);
 }
 
 .compact-heading {
@@ -174,77 +210,11 @@
 }
 
 /* ------------------------------
-   Main Path Cards
------------------------------- */
-
-.path-section {
-    padding-top: 34px !important;
-}
-
-.path-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-}
-
-.path-card {
-    display: flex;
-    flex-direction: column;
-    min-height: 350px;
-    padding: 24px;
-    background-color: rgba(255, 255, 255, 0.95);
-    border: 1px solid var(--home-border);
-    border-radius: 20px;
-    box-shadow: var(--home-shadow);
-}
-
-.path-card-label {
-    color: #24737c;
-}
-
-.path-card h3 {
-    margin: 0 0 10px;
-    color: var(--home-navy);
-    font-size: 1.45rem;
-}
-
-.path-card p {
-    margin: 0 0 16px;
-    color: var(--home-text);
-    line-height: 1.56;
-}
-
-.quiet-list {
-    margin: 0 0 20px;
-    padding: 0;
-    list-style: none;
-}
-
-.quiet-list li {
-    position: relative;
-    margin: 8px 0;
-    padding-left: 22px;
-    color: var(--home-muted);
-    line-height: 1.42;
-}
-
-.quiet-list li::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0.62em;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #7ccbc4;
-}
-
-/* ------------------------------
    Flow Section
 ------------------------------ */
 
 .simple-flow {
-    padding-top: 20px !important;
+    padding-top: 18px !important;
 }
 
 .flow-steps {
@@ -287,6 +257,55 @@
     color: var(--home-muted);
     line-height: 1.45;
     font-size: 0.96rem;
+}
+
+/* ------------------------------
+   Main Path Cards
+------------------------------ */
+
+.path-section {
+    padding-top: 22px !important;
+}
+
+.path-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.path-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 330px;
+    padding: 24px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--home-border);
+    border-radius: 20px;
+    box-shadow: var(--home-shadow);
+}
+
+.path-card-label {
+    color: var(--home-teal);
+}
+
+.path-card h3 {
+    margin: 0 0 10px;
+    color: var(--home-navy);
+    font-size: 1.45rem;
+}
+
+.path-card p {
+    margin: 0 0 14px;
+    color: var(--home-text);
+    line-height: 1.56;
+}
+
+.path-card-note {
+    padding: 14px 16px;
+    background-color: #f5fafb;
+    border: 1px solid #dcecee;
+    border-radius: 14px;
+    color: var(--home-muted) !important;
 }
 
 /* ------------------------------
@@ -346,26 +365,26 @@
 .notice-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
 }
 
 .notice-card {
-    padding: 16px 18px;
-    border-radius: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
     border: 1px solid var(--home-border);
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.86);
 }
 
 .notice-card h2 {
-    margin-bottom: 6px;
-    font-size: 1.08rem;
+    margin-bottom: 5px;
+    font-size: 1rem;
 }
 
 .notice-card p {
     margin: 0;
     color: var(--home-muted);
-    line-height: 1.5;
-    font-size: 0.94rem;
+    line-height: 1.48;
+    font-size: 0.9rem;
 }
 
 .mvp-notice {
@@ -373,13 +392,13 @@
 }
 
 .medical-notice {
-    background-color: rgba(255, 250, 241, 0.62);
+    background-color: rgba(255, 250, 241, 0.52);
     border-color: #eadfca;
-    opacity: 0.86;
+    opacity: 0.78;
 }
 
 .medical-notice h2 {
-    font-size: 1rem;
+    font-size: 0.96rem;
 }
 
 /* ------------------------------
@@ -388,7 +407,15 @@
 
 @media (max-width: 900px) {
     .home-page section {
-        padding: 24px 16px;
+        padding: 22px 16px;
+    }
+
+    .quick-start-card {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-start-actions {
+        justify-content: flex-start;
     }
 
     .path-grid,
@@ -403,14 +430,14 @@
 
 @media (max-width: 600px) {
     .home-hero {
-        padding: 40px 16px 30px !important;
+        padding: 38px 16px 30px !important;
     }
 
     .hero-lead {
         font-size: 1rem;
     }
 
-    .hero-actions {
+    .quick-start-actions {
         flex-direction: column;
         align-items: stretch;
     }
@@ -420,6 +447,7 @@
         box-sizing: border-box;
     }
 
+    .quick-start-card,
     .path-card,
     .project-card,
     .notice-card {
