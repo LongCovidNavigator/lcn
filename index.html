@@ -4,135 +4,225 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long Covid Navigator</title>
-	
-	<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
-	
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css">
     <link rel="stylesheet" href="styles/homepage.css">
-	<link rel="stylesheet" href="styles/footer-style.css">
+    <link rel="stylesheet" href="styles/footer-style.css">
 
-	
-	<style>
-	  body { display: none; }
-	</style>
-
+    <style>
+        body { display: none; }
+    </style>
 </head>
 
-<script>
-	function toggleMobileMenu() {
-	  const navList = document.querySelector('.main-nav ul');
-	  navList.classList.toggle('show');
-	}
-</script>
-
 <body>
-	<script>
-	  const password = prompt("Zugangscode erforderlich:");
-	  const allowedPassword = "123";
+    <script>
+        const password = prompt("Zugangscode erforderlich:");
+        const allowedPassword = "123";
 
-	  if (password === allowedPassword) {
-		document.body.style.display = "block";
-	  } else {
-		
-		document.body.innerHTML = "<h1>Zugriff verweigert</h1><p>Falscher Zugangscode.</p>";
-	  }
-	</script>
+        if (password === allowedPassword) {
+            document.body.style.display = "block";
+        } else {
+            document.body.style.display = "block";
+            document.body.innerHTML = "<h1>Zugriff verweigert</h1><p>Falscher Zugangscode.</p>";
+        }
+    </script>
 
+    <main class="home-page">
 
-	<div id="header-placeholder"></div>
+        <section class="home-hero">
+            <div class="home-hero-inner">
+                <p class="eyebrow">Long Covid Navigator</p>
 
-    <!-- Header Section -->
-    <!-- <header> -->
-        <!-- <img src="assets/images/Logo_v001.png" alt="Long Covid Navigator Logo"> -->
-    <!-- </header> -->
+                <h1>Wir helfen dir auf deinem Weg zur Genesung.</h1>
 
-    <!-- Navigation Menu -->
-    <!-- <nav> -->
-        <!-- <ul> -->
-            <!-- <li><a href="index.html">Startseite</a></li> -->
-			<!-- <li><a href="lcnprotocol.html">LCN-Protokoll</a></li> -->
-            <!-- <li><a href="uebersicht.html">Übersicht</a></li> -->
-            <!-- <li><a href="bewertung.html">Bewertung</a></li> -->
-        <!-- </ul> -->
-    <!-- </nav> -->
+                <p class="hero-lead">
+                    Wenn du schon weißt, was du suchst, starte hier.
+                    Alles Weitere findest du direkt hierunter.
+                </p>
 
-    <!-- Hero Section -->
-    <div class="hero">
-        <h1>Willkommen beim Long Covid Navigator</h1>
-        <p>Ihr Begleiter zur Navigation durch Behandlungsoptionen für Long Covid.</p>
-        <div class="cta-buttons">
-            <a href="uebersicht.html" class="button">Behandlungsoptionen entdecken</a>
-            <a href="bewertung.html" class="button">Erfahrungen teilen</a>
-        </div>
-    </div>
-
-    <!-- About Section -->
-    <section class="about">
-        <h2>Über uns</h2>
-        <p>Der Long Covid Navigator ist eine Plattform, die Ihnen hilft, Behandlungsoptionen für Long Covid zu erkunden, zu bewerten und Erfahrungen zu teilen. Unsere Mission ist es, eine vertrauenswürdige Ressource für die Community bereitzustellen.</p>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="how-it-works">
-        <h2>So funktioniert es</h2>
-        <div class="steps">
-            <div class="step">
-                <h3>1. Behandlungen entdecken</h3>
-                <p>Durchsuchen Sie eine umfassende Liste von Therapien und Interventionen.</p>
+                <div class="hero-actions" aria-label="Hauptbereiche">
+                    <a href="therapien_karte.html" class="home-button primary-button">Therapien suchen</a>
+                    <a href="aerzte_karte.html" class="home-button secondary-button">Ärzt:innen finden</a>
+                </div>
             </div>
-            <div class="step">
-                <h3>2. Bewerten & teilen</h3>
-                <p>Bewerten Sie Behandlungen und teilen Sie Ihre Erfahrungen.</p>
+        </section>
+
+		        <section class="simple-flow" aria-labelledby="flow-heading">
+            <div class="section-heading compact-heading">
+                <p class="section-kicker">Der Ablauf</p>
+                <h2 id="flow-heading">In drei einfachen Schritten.</h2>
             </div>
-            <div class="step">
-                <h3>3. Informierte Entscheidungen treffen</h3>
-                <p>Nutzen Sie Erkenntnisse der Community, um die besten Entscheidungen für Ihre Gesundheit zu treffen.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <span class="flow-number">1</span>
+                    <div>
+                        <h3>Auswahl</h3>
+                        <p>
+                            Entscheide zunächst, ob du nach Therapien oder lieber nach Ärzt:innen suchen willst.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <span class="flow-number">2</span>
+                    <div>
+                        <h3>Suche starten</h3>
+                        <p>
+                            Passe in der Navigation die Filterkriterien ganz individuell an deine Bedürfnisse
+                            und Herausforderungen an. Nutze Karte, Filter und Bewertung, um Einträge zu finden,
+                            die dir auf deinem Weg helfen können.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <span class="flow-number">3</span>
+                    <div>
+                        <h3>Detailseite öffnen</h3>
+                        <p>
+                            Du hast eine passende Option gefunden und willst mehr wissen?
+                            Öffne die passende Detailseite und finde hilfreiche Informationen und Details,
+                            mit denen du eine konkrete Behandlung besser planen kannst.
+                        </p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Community Insights Section -->
-    <section class="insights">
-        <h2>Community-Einblicke</h2>
-        <ul>
-            <li><strong>Meistbewertete Behandlungen:</strong> Behandlung A, Behandlung B</li>
-            <li><strong>Höchste Verbesserung:</strong> Behandlung C mit 87%</li>
-            <li><strong>Beliebteste Therapie:</strong> Behandlung D</li>
-        </ul>
-    </section>
-
-    <!-- Footer -->
-    <!-- <footer> -->
-        <!-- <p>© 2023 Long Covid Navigator. Alle Rechte vorbehalten.</p> -->
-        <!-- <nav> -->
-            <!-- <a href="index.html">Startseite</a> | -->
-            <!-- <a href="uebersicht.html">Übersicht</a> | -->
-            <!-- <a href="bewertung.html">Bewertung</a> | -->
-			<!-- <a href="impressum.html">Impressum</a> | -->
-			<!-- <a href="datenschutz.html">Datenschutz</a> -->
-        <!-- </nav> -->
-    <!-- </footer> -->
-	
-	<div id="footer-placeholder"></div>
-
-	  <script>
-		fetch("components/footer.html")
-		  .then(response => response.text())
-		  .then(data => {
-			document.getElementById("footer-placeholder").innerHTML = data;
-		  });
-	  </script>
-	  
-	  
-	  <script>
-	  fetch("components/header.html")
-		.then(response => response.text())
-		.then(data => {
-		  document.getElementById("header-placeholder").innerHTML = data;
-		});
-	</script>
+        </section>
 
 
+        <section class="path-section" aria-labelledby="path-heading">
+            <div class="section-heading">
+                <p class="section-kicker">Die Auswahl:</p>
+                <h2 id="path-heading">Starte mit Therapien oder mit Ärzt:innen.</h2>
+                <p>
+                    Du kannst über Therapien einsteigen oder über Ärzt:innen.
+                    Beide Wege sind mit vielen Filteroptionen ausgestattet, sodass du konkrete
+                    Therapien oder Ärzt:innen finden kannst, die zu deiner Situation passen.
+                    Sieh selbst:
+                </p>
+            </div>
+
+            <div class="path-grid">
+                <article class="path-card">
+                    <div class="path-card-label">Weg 1</div>
+                    <h3>Therapien suchen</h3>
+                    <p>
+                        Suche nach Therapien, Diagnostik, Hilfsmitteln und unterstützenden Maßnahmen.
+                        Du kannst Treffer filtern, Bewertungen anderer Nutzer:innen einsehen und dir
+                        auch ganz konkrete Ärzt:innen anzeigen lassen, die dich bei der Therapie in
+                        deiner Nähe unterstützen können.
+                    </p>
+
+                    <ul class="quiet-list">
+                        <li>Therapien, Diagnostik und Hilfsmittel gezielt filtern</li>
+                        <li>Bewertungen anderer Nutzer:innen einsehen</li>
+                        <li>Ärzt:innen in deiner Nähe anzeigen lassen</li>
+                    </ul>
+
+                    <a href="therapien_karte.html" class="home-button card-button">Therapien suchen</a>
+                </article>
+
+                <article class="path-card">
+                    <div class="path-card-label">Weg 2</div>
+                    <h3>Ärzt:innen finden</h3>
+                    <p>
+                        Suche nach Ärzt:innen in deiner Nähe, die dir weiterhelfen können.
+                        Du findest Bewertungen anderer Betroffener sowie konkrete Therapien,
+                        die die Ärzt:innen anbieten.
+                    </p>
+
+                    <ul class="quiet-list">
+                        <li>Ärzt:innen und Anlaufstellen in deiner Nähe suchen</li>
+                        <li>Bewertungen anderer Betroffener einsehen</li>
+                        <li>Konkrete angebotene Therapien prüfen</li>
+                    </ul>
+
+                    <a href="aerzte_karte.html" class="home-button card-button">Ärzt:innen finden</a>
+                </article>
+            </div>
+        </section>
+
+
+        <section class="project-intro" aria-labelledby="project-heading">
+            <div class="project-card">
+                <div class="project-header">
+                    <p class="section-kicker">Über das Projekt</p>
+                    <h2 id="project-heading">Warum es den Long Covid Navigator gibt</h2>
+                </div>
+
+                <div class="project-block">
+                    <h3>Die Herausforderung</h3>
+                    <p>
+                        Für Long Covid, ME/CFS, POTS und verwandte Beschwerdebilder sind inzwischen
+                        zahlreiche Therapien und auch Ärzt:innen bekannt, die Betroffenen weiterhelfen können.
+                        Leider sind diese Informationen oft tief in Foren, Gruppenchats, Erfahrungsberichten
+                        und einzelnen Webseiten vergraben und nur mit viel Aufwand zugänglich.
+                    </p>
+
+                    <p>
+                        Diese Hürde ist für viele Betroffene weiterhin zu hoch. Gerade wenn Energie,
+                        Konzentration und Belastbarkeit begrenzt sind, kann schon die Suche nach Orientierung
+                        überfordernd sein.
+                    </p>
+                </div>
+
+                <div class="project-block">
+                    <h3>Unsere Vision</h3>
+                    <p>
+                        Wir von LCN möchten eine Plattform aufbauen, auf der die Community Informationen
+                        gebündelt, strukturiert und leichter zugänglich zusammentragen kann.
+                        Ziel ist ein ruhiger Ort, der Orientierung gibt, ohne zu überfordern.
+                    </p>
+                </div>
+
+                <div class="project-block">
+                    <h3>Wo wir gerade stehen</h3>
+                    <p>
+                        Der Long Covid Navigator befindet sich aktuell im Aufbau und in der Erprobungsphase.
+                        Im Mittelpunkt stehen zunächst zwei Bereiche: Therapien und Ärzt:innen.
+                        Daten, Verknüpfungen, Bewertungen und Detailseiten werden schrittweise erweitert,
+                        geprüft und verbessert.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="notice-section" aria-label="Hinweise">
+            <div class="notice-grid">
+                <article class="notice-card mvp-notice">
+                    <h2>Projektstatus</h2>
+                    <p>
+                        Der Long Covid Navigator befindet sich im Aufbau. Die Grundfunktionen sind nutzbar,
+                        aber Inhalte, Design und Datenqualität werden weiterentwickelt.
+                    </p>
+                </article>
+
+                <article class="notice-card medical-notice">
+                    <h2>Medizinischer Hinweis</h2>
+                    <p>
+                        Die Inhalte dienen der Orientierung und ersetzen keine ärztliche Diagnose,
+                        Beratung oder Behandlung. Bewertungen sind Erfahrungswerte und keine
+                        medizinische Empfehlung. Bitte besprich medizinische Entscheidungen immer
+                        mit qualifizierten Behandler:innen.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script>
+        fetch("components/footer.html")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("footer-placeholder").innerHTML = data;
+            });
+    </script>
 </body>
 </html>

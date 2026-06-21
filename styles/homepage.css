@@ -1,58 +1,433 @@
+/* ------------------------------
+   Homepage / Landingpage
+------------------------------ */
 
-/* Hero Section */
-.hero {
-    background: linear-gradient(to right, #40E0D0, #AFEEEE);
-    color: #fff;
+:root {
+    --home-navy: #002244;
+    --home-blue: #004080;
+    --home-soft-blue: #edf6fb;
+    --home-soft-mint: #edf8f6;
+    --home-border: #d8e7ee;
+    --home-text: #1f2d3d;
+    --home-muted: #5f6f7c;
+    --home-white: #ffffff;
+    --home-warm: #fffaf1;
+    --home-shadow: 0 10px 28px rgba(0, 34, 68, 0.08);
+}
+
+.home-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, rgba(175, 238, 238, 0.22), transparent 34%),
+        linear-gradient(180deg, #f8fbfc 0%, #f3f7f9 100%);
+    color: var(--home-text);
+}
+
+.home-page section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 26px 20px;
+}
+
+/* ------------------------------
+   Hero
+------------------------------ */
+
+.home-hero {
+    max-width: none !important;
+    padding: 54px 20px 38px !important;
+    background:
+        linear-gradient(135deg, rgba(0, 34, 68, 0.96), rgba(29, 116, 129, 0.88)),
+        linear-gradient(90deg, #004080, #40e0d0);
+    color: var(--home-white);
+}
+
+.home-hero-inner {
+    max-width: 920px;
+    margin: 0 auto;
     text-align: center;
-    padding: 50px 20px;
 }
 
-.hero h1 {
-    font-size: 2.5em;
-    margin-bottom: 10px;
+.eyebrow,
+.section-kicker,
+.path-card-label {
+    margin: 0 0 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
-.hero p {
-    font-size: 1.2em;
-    margin-bottom: 20px;
+.eyebrow {
+    color: rgba(255, 255, 255, 0.76);
 }
 
-.hero .cta-buttons .button {
-    display: inline-block;
-    margin: 10px;
-    padding: 10px 20px;
-    background-color: #004080;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+.home-hero h1 {
+    max-width: 780px;
+    margin: 0 auto 14px;
+    font-family: 'Nunito Sans', 'Open Sans', 'Segoe UI', sans-serif;
+    font-size: clamp(2.15rem, 4vw, 3.35rem);
+    line-height: 1.12;
+    font-weight: 700;
 }
 
-.hero .cta-buttons .button:hover {
-    background-color: #002050;
+.hero-lead {
+    max-width: 680px;
+    margin: 0 auto 24px;
+    font-size: 1.12rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.9);
 }
 
-/* Section Styling */
-section {
-    padding: 40px 20px;
-    max-width: 1200px;
-    margin: auto;
-}
-
-section h2 {
-    text-align: center;
-    color: #004080;
-    margin-bottom: 20px;
-}
-
-.steps {
+.hero-actions {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    gap: 14px;
     flex-wrap: wrap;
 }
 
-.step {
-    width: 30%;
+/* ------------------------------
+   Buttons
+------------------------------ */
+
+.home-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 11px 20px;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    line-height: 1.2;
+    transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.home-button:hover {
+    transform: translateY(-1px);
+}
+
+.primary-button {
+    background-color: var(--home-white);
+    color: var(--home-blue);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+}
+
+.primary-button:hover {
+    background-color: #f2fbff;
+}
+
+.secondary-button {
+    background-color: rgba(255, 255, 255, 0.13);
+    color: var(--home-white);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.secondary-button:hover {
+    background-color: rgba(255, 255, 255, 0.22);
+}
+
+.card-button {
+    width: fit-content;
+    margin-top: auto;
+    background-color: var(--home-blue);
+    color: var(--home-white);
+}
+
+.card-button:hover {
+    background-color: #002f5f;
+}
+
+/* ------------------------------
+   Section Headings
+------------------------------ */
+
+.section-heading {
+    max-width: 820px;
+    margin: 0 auto 20px;
     text-align: center;
-    margin: 10px 0;
+}
+
+.section-heading h2,
+.project-card h2,
+.notice-card h2 {
+    margin: 0 0 10px;
+    font-family: 'Nunito Sans', 'Open Sans', 'Segoe UI', sans-serif;
+    color: var(--home-navy);
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1.22;
+}
+
+.section-heading p {
+    margin: 0;
+    color: var(--home-muted);
+    font-size: 1rem;
+    line-height: 1.58;
+}
+
+.section-kicker {
+    color: #24737c;
+}
+
+.compact-heading {
+    margin-bottom: 16px;
+}
+
+/* ------------------------------
+   Main Path Cards
+------------------------------ */
+
+.path-section {
+    padding-top: 34px !important;
+}
+
+.path-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.path-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 350px;
+    padding: 24px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--home-border);
+    border-radius: 20px;
+    box-shadow: var(--home-shadow);
+}
+
+.path-card-label {
+    color: #24737c;
+}
+
+.path-card h3 {
+    margin: 0 0 10px;
+    color: var(--home-navy);
+    font-size: 1.45rem;
+}
+
+.path-card p {
+    margin: 0 0 16px;
+    color: var(--home-text);
+    line-height: 1.56;
+}
+
+.quiet-list {
+    margin: 0 0 20px;
+    padding: 0;
+    list-style: none;
+}
+
+.quiet-list li {
+    position: relative;
+    margin: 8px 0;
+    padding-left: 22px;
+    color: var(--home-muted);
+    line-height: 1.42;
+}
+
+.quiet-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #7ccbc4;
+}
+
+/* ------------------------------
+   Flow Section
+------------------------------ */
+
+.simple-flow {
+    padding-top: 20px !important;
+}
+
+.flow-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.flow-step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 18px;
+    background-color: var(--home-soft-blue);
+    border: 1px solid var(--home-border);
+    border-radius: 16px;
+}
+
+.flow-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: var(--home-blue);
+    color: var(--home-white);
+    font-weight: 700;
+}
+
+.flow-step h3 {
+    margin: 0 0 6px;
+    color: var(--home-navy);
+    font-size: 1.05rem;
+}
+
+.flow-step p {
+    margin: 0;
+    color: var(--home-muted);
+    line-height: 1.45;
+    font-size: 0.96rem;
+}
+
+/* ------------------------------
+   Project Intro
+------------------------------ */
+
+.project-intro {
+    padding-top: 22px !important;
+}
+
+.project-card {
+    padding: 26px;
+    background-color: var(--home-soft-mint);
+    border: 1px solid #cfe7e2;
+    border-radius: 20px;
+    box-shadow: var(--home-shadow);
+}
+
+.project-header {
+    margin-bottom: 16px;
+}
+
+.project-block {
+    margin-top: 18px;
+}
+
+.project-block:first-of-type {
+    margin-top: 0;
+}
+
+.project-block h3 {
+    margin: 0 0 8px;
+    color: var(--home-navy);
+    font-size: 1.12rem;
+}
+
+.project-card p {
+    max-width: 940px;
+    margin: 0 0 12px;
+    color: var(--home-text);
+    line-height: 1.62;
+}
+
+.project-card p:last-child {
+    margin-bottom: 0;
+}
+
+/* ------------------------------
+   Notices
+------------------------------ */
+
+.notice-section {
+    padding-top: 18px !important;
+    padding-bottom: 38px !important;
+}
+
+.notice-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.notice-card {
+    padding: 16px 18px;
+    border-radius: 16px;
+    border: 1px solid var(--home-border);
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.notice-card h2 {
+    margin-bottom: 6px;
+    font-size: 1.08rem;
+}
+
+.notice-card p {
+    margin: 0;
+    color: var(--home-muted);
+    line-height: 1.5;
+    font-size: 0.94rem;
+}
+
+.mvp-notice {
+    background-color: #f4f9fb;
+}
+
+.medical-notice {
+    background-color: rgba(255, 250, 241, 0.62);
+    border-color: #eadfca;
+    opacity: 0.86;
+}
+
+.medical-notice h2 {
+    font-size: 1rem;
+}
+
+/* ------------------------------
+   Responsive
+------------------------------ */
+
+@media (max-width: 900px) {
+    .home-page section {
+        padding: 24px 16px;
+    }
+
+    .path-grid,
+    .flow-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .path-card {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .home-hero {
+        padding: 40px 16px 30px !important;
+    }
+
+    .hero-lead {
+        font-size: 1rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .home-button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .path-card,
+    .project-card,
+    .notice-card {
+        padding: 18px;
+        border-radius: 16px;
+    }
+
+    .flow-step {
+        padding: 16px;
+    }
 }
