@@ -5,30 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long Covid Navigator</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css">
     <link rel="stylesheet" href="styles/homepage.css">
     <link rel="stylesheet" href="styles/footer-style.css">
-
-    <style>
-        body { display: none; }
-    </style>
 </head>
 
 <body>
-    <script>
-        const password = prompt("Zugangscode erforderlich:");
-        const allowedPassword = "123";
+    <header class="home-header">
+        <a href="index.html" class="home-brand" aria-label="Long Covid Navigator Startseite">
+            <span class="home-brand-mark" aria-hidden="true"></span>
+            <span>Long Covid Navigator</span>
+        </a>
 
-        if (password === allowedPassword) {
-            document.body.style.display = "block";
-        } else {
-            document.body.style.display = "block";
-            document.body.innerHTML = "<h1>Zugriff verweigert</h1><p>Falscher Zugangscode.</p>";
-        }
-    </script>
+        <nav class="home-nav" aria-label="Hauptnavigation">
+            <a href="therapien_karte.html">Therapien suchen</a>
+            <a href="aerzte_karte.html">Ärzt:innen finden</a>
+            <a href="#projekt">Über das Projekt</a>
+            <a href="#ressourcen">Ressourcen</a>
+            <a href="#faq">FAQ</a>
+            <a href="#merkliste" class="home-nav-heart">♡ Merkliste</a>
+        </nav>
+    </header>
 
     <main class="home-page">
 
@@ -37,185 +37,291 @@
                 <p class="eyebrow">Long Covid Navigator</p>
 
                 <h1>Wir helfen dir auf deinem Weg zur Genesung.</h1>
+
+                <p class="hero-lead">
+                    Verständlich. Vertrauenswürdig. Für Menschen mit Long Covid,
+                    ME/CFS, POTS und verwandten Erkrankungen.
+                </p>
             </div>
         </section>
 
         <section class="quick-start" aria-label="Direkter Einstieg">
             <div class="quick-start-card">
+                <div class="quick-start-icon" aria-hidden="true"></div>
+
                 <div class="quick-start-text">
-                    <p class="section-kicker">Direkt starten</p>
                     <h2>Wenn du schon weißt, was du suchst, starte hier.</h2>
-                    <p>
-                        Du kannst direkt zur Therapien-Suche wechseln oder Ärzt:innen finden.
-                        Alles Weitere erklären wir dir Schritt für Schritt darunter.
-                    </p>
                 </div>
 
                 <div class="quick-start-actions">
-                    <a href="therapien_karte.html" class="home-button primary-button">Therapien suchen</a>
-                    <a href="aerzte_karte.html" class="home-button secondary-button">Ärzt:innen finden</a>
+                    <a href="therapien_karte.html" class="home-button primary-button">
+                        <span class="button-icon search-icon" aria-hidden="true"></span>
+                        Therapien suchen
+                    </a>
+
+                    <a href="aerzte_karte.html" class="home-button secondary-button">
+                        <span class="button-icon group-icon" aria-hidden="true"></span>
+                        Ärzt:innen finden
+                    </a>
                 </div>
             </div>
         </section>
 
         <section class="simple-flow" aria-labelledby="flow-heading">
             <div class="section-heading compact-heading">
-                <p class="section-kicker">So geht es</p>
-                <h2 id="flow-heading">In drei einfachen Schritten.</h2>
+                <h2 id="flow-heading">So geht es</h2>
             </div>
 
             <div class="flow-steps">
-                <div class="flow-step">
-                    <span class="flow-number">1</span>
-                    <div>
+
+                <article class="flow-card">
+                    <div class="flow-card-head">
+                        <span class="flow-number">1</span>
                         <h3>Auswahl</h3>
+                    </div>
+
+                    <div class="flow-photo flow-photo-choice" aria-hidden="true">
+                        <img src="assets/images/Auswahl_Landing_01.png" alt="">
+                        <span class="choice-photo-label choice-label-left">Therapien</span>
+                        <span class="choice-photo-label choice-label-right">Ärzt:innen</span>
+                    </div>
+
+                    <div class="flow-card-content">
                         <p>
-                            Entscheide zunächst, ob du nach Therapien oder lieber nach Ärzt:innen suchen möchtest.
+                            Wähle den passenden Weg: Therapien suchen oder Ärzt:innen finden.
                         </p>
                     </div>
-                </div>
+                </article>
 
-                <div class="flow-step">
-                    <span class="flow-number">2</span>
-                    <div>
+                <div class="flow-arrow" aria-hidden="true">→</div>
+
+                <article class="flow-card">
+                    <div class="flow-card-head">
+                        <span class="flow-number">2</span>
                         <h3>Suche starten</h3>
-                        <p>
-                            Passe die Filter an deine Situation an. Du kannst nach Standort, Bewertung,
-                            Entfernung und weiteren Kriterien suchen.
-                        </p>
                     </div>
-                </div>
 
-                <div class="flow-step">
-                    <span class="flow-number">3</span>
-                    <div>
-                        <h3>Detailseite öffnen</h3>
+                    <div class="flow-ui flow-search-ui" aria-hidden="true">
+                        <div class="search-ui-panel">
+                            <div class="search-ui-tabs">
+                                <span class="active">Therapien</span>
+                                <span>Ärzt:innen</span>
+                            </div>
+
+                            <label>
+                                Kategorie
+                                <span>Physiotherapie</span>
+                            </label>
+
+                            <label>
+                                Beschwerden
+                                <span>Fatigue</span>
+                            </label>
+
+                            <label>
+                                Standort
+                                <span>Köln, 20 km</span>
+                            </label>
+                        </div>
+
+                        <div class="search-ui-map">
+                            <span class="map-route route-one"></span>
+                            <span class="map-route route-two"></span>
+                            <span class="map-pin pin-a"></span>
+                            <span class="map-pin pin-b"></span>
+                            <span class="map-pin pin-c"></span>
+                            <span class="map-pin pin-d"></span>
+
+                            <div class="search-ui-result">
+                                <strong>Passende Treffer</strong>
+                                <small>in deiner Nähe finden</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-card-content">
                         <p>
-                            Wenn du eine passende Option gefunden hast, öffne die Detailseite.
-                            Dort findest du weitere Informationen zur Therapie oder zur jeweiligen Ärztin
-                            beziehungsweise zum jeweiligen Arzt.
+                            Nutze Filter und Kategorien, um passende Angebote oder Fachpersonen zu finden.
                         </p>
                     </div>
-                </div>
+                </article>
+
+                <div class="flow-arrow" aria-hidden="true">→</div>
+
+                <article class="flow-card">
+                    <div class="flow-card-head">
+                        <span class="flow-number">3</span>
+                        <h3>Detailseite öffnen</h3>
+                    </div>
+
+                    <div class="flow-ui flow-detail-ui" aria-hidden="true">
+                        <div class="detail-ui-head">
+                            <div class="detail-ui-avatar"></div>
+
+                            <div class="detail-ui-title">
+                                <strong>Praxis Lebensqualität</strong>
+                                <span>Physiotherapie · Köln</span>
+                                <small>★ ★ ★ ★ ★ 4,9</small>
+                            </div>
+                        </div>
+
+                        <div class="detail-ui-tabs">
+                            <span>Über uns</span>
+                            <span>Angebote</span>
+                            <span>Bewertungen</span>
+                            <span>Kontakt</span>
+                        </div>
+
+                        <div class="detail-ui-body">
+                            <ul>
+                                <li>Spezialisiert auf Long Covid</li>
+                                <li>Individuelle Therapiepläne</li>
+                                <li>Ganzheitlicher Ansatz</li>
+                            </ul>
+
+                            <div class="detail-ui-box">
+                                <strong>Öffnungszeiten</strong>
+                                <span>Mo – Fr</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-card-content">
+                        <p>
+                            Erfahre mehr, vergleiche und speichere, was für dich relevant ist.
+                        </p>
+                    </div>
+                </article>
+
             </div>
         </section>
 
         <section class="path-section" aria-labelledby="path-heading">
-            <div class="section-heading">
-                <p class="section-kicker">Die zwei Hauptbereiche</p>
-                <h2 id="path-heading">Starte über Therapien oder über Ärzt:innen.</h2>
-                <p>
-                    Beide Bereiche haben eigene Filteroptionen. So kannst du gezielt nach Therapien suchen
-                    oder Ärzt:innen finden, die zu deiner Frage und deinem Standort passen.
-                </p>
+            <div class="section-heading selection-heading">
+                <h2 id="path-heading">1. Auswahl</h2>
             </div>
 
             <div class="path-grid">
-                <article class="path-card">
-                    <div class="path-card-label">Bereich 1</div>
-                    <h3>Therapien suchen</h3>
-                    <p>
-                        Finde die richtigen Therapien für dich. Du kannst dir anzeigen lassen,
-                        welche Ärzt:innen in deiner Nähe dich bei der Durchführung unterstützen können.
-                        Außerdem kannst du Treffer filtern und Bewertungen anderer Nutzer:innen einsehen.
-                    </p>
+                <article class="path-card path-card-split therapy-card">
+                    <div class="path-card-media therapy-card-media" aria-hidden="true">
+                        <img src="assets/images/Therapie_Landing.png" alt="">
+                    </div>
 
-                    <p class="path-card-note">
-                        Das ist besonders hilfreich, wenn du zuerst wissen möchtest, welche Optionen es gibt
-                        und wer sie in deiner Nähe anbietet.
-                    </p>
+                    <div class="path-card-main">
+                        <div class="path-card-icon path-card-search-icon" aria-hidden="true"></div>
 
-                    <a href="therapien_karte.html" class="home-button card-button">Therapien suchen</a>
+                        <div class="path-card-content">
+                            <h3>Therapien suchen</h3>
+                            <p>
+                                Finde evidenzbasierte und unterstützende Therapieangebote,
+                                die zu deinen Bedürfnissen passen – von Pacing und Physiotherapie
+                                bis zu Coaching und mehr.
+                            </p>
+
+                            <a href="therapien_karte.html" class="home-button card-button">
+                                Therapien entdecken
+                                <span aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </div>
                 </article>
 
-                <article class="path-card">
-                    <div class="path-card-label">Bereich 2</div>
-                    <h3>Ärzt:innen finden</h3>
-                    <p>
-                        Suche nach Ärzt:innen in deiner Nähe, die dir weiterhelfen können.
-                        Du findest Bewertungen anderer Betroffener, siehst, welche konkreten Therapien
-                        dort angeboten werden, und kannst weitere Filtermöglichkeiten nutzen.
-                    </p>
+                <article class="path-card path-card-split doctor-card">
+                    <div class="path-card-main">
+                        <div class="path-card-icon path-card-group-icon" aria-hidden="true"></div>
 
-                    <p class="path-card-note">
-                        Das ist besonders hilfreich, wenn du zuerst eine passende Anlaufstelle suchst
-                        und anschließend das Behandlungsspektrum prüfen möchtest.
-                    </p>
+                        <div class="path-card-content">
+                            <h3>Ärzt:innen finden</h3>
+                            <p>
+                                Suche nach Ärzt:innen und Fachpersonen, die Erfahrung mit Long Covid,
+                                ME/CFS, POTS und verwandten Erkrankungen haben.
+                            </p>
 
-                    <a href="aerzte_karte.html" class="home-button card-button">Ärzt:innen finden</a>
+                            <a href="aerzte_karte.html" class="home-button card-button">
+                                Fachpersonen finden
+                                <span aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="path-card-media doctor-card-media" aria-hidden="true">
+                        <img src="assets/images/Drs_Landing_01.png" alt="">
+                    </div>
                 </article>
             </div>
         </section>
 
-        <section class="project-intro" aria-labelledby="project-heading">
-            <div class="project-card">
-                <div class="project-header">
-                    <p class="section-kicker">Über das Projekt</p>
-                    <h2 id="project-heading">Warum es den Long Covid Navigator gibt</h2>
-                </div>
+        <section class="project-intro" id="projekt" aria-labelledby="project-heading">
+            <div class="section-heading project-heading">
+                <h2 id="project-heading">Über das Projekt</h2>
+            </div>
 
-                <div class="project-block">
-                    <h3>Die Herausforderung</h3>
-                    <p>
-                        Für Long Covid, ME/CFS, POTS und verwandte Beschwerdebilder sind inzwischen
-                        zahlreiche Therapien und Ärzt:innen bekannt, die Betroffenen weiterhelfen können.
-                        Viele dieser Informationen sind jedoch tief in Foren, Gruppenchats,
-                        Erfahrungsberichten und einzelnen Webseiten vergraben.
-                    </p>
+            <div class="project-grid">
+                <article class="project-block">
+                    <div class="project-icon project-icon-challenge" aria-hidden="true"></div>
 
-                    <p>
-                        Dadurch bleibt die Suche für viele Betroffene sehr aufwendig.
-                        Gerade wenn Energie, Konzentration und Belastbarkeit begrenzt sind,
-                        kann diese Hürde zu hoch sein.
-                    </p>
-                </div>
+                    <div>
+                        <h3>Die Herausforderung</h3>
+                        <p>
+                            Long Covid, ME/CFS, POTS und verwandte Erkrankungen sind komplex
+                            und noch nicht ausreichend verstanden. Betroffene finden oft schwer
+                            verlässliche Informationen und passende Unterstützung.
+                        </p>
+                    </div>
+                </article>
 
-                <div class="project-block">
-                    <h3>Unsere Vision</h3>
-                    <p>
-                        Wir von LCN möchten eine Plattform aufbauen, auf der die Community diese Informationen
-                        gebündelt, strukturiert und leichter zugänglich zusammentragen kann.
-                        Ziel ist eine Übersicht, die Betroffene bei der Suche nach Therapien,
-                        Ärzt:innen und konkreten Anlaufstellen unterstützt.
-                    </p>
-                </div>
+                <article class="project-block">
+                    <div class="project-icon project-icon-heart" aria-hidden="true"></div>
 
-                <div class="project-block">
-                    <h3>Wo wir gerade stehen</h3>
-                    <p>
-                        Aktuell liegt unser Fokus darauf, erste Daten zu Therapien und Ärzt:innen
-                        aus den oben angesprochenen Quellen zusammenzutragen. Wir möchten konkret sichtbar machen,
-                        wo welche Behandlung angeboten wird, und euch die Möglichkeit geben,
-                        eure Erfahrungen in Form einer Bewertung zu teilen.
-                    </p>
+                    <div>
+                        <h3>Unsere Vision</h3>
+                        <p>
+                            Wir glauben an eine Zukunft, in der Betroffene die richtigen
+                            Informationen und Anlaufstellen leicht finden – und sich auf ihrem
+                            Weg zur Genesung nicht allein fühlen.
+                        </p>
+                    </div>
+                </article>
 
-                    <p>
-                        Der Long Covid Navigator befindet sich deshalb noch im Aufbau und in der Erprobungsphase.
-                        Daten, Verknüpfungen, Bewertungen und Detailseiten werden schrittweise erweitert,
-                        geprüft und verbessert.
-                    </p>
-                </div>
+                <article class="project-block">
+                    <div class="project-icon project-icon-community" aria-hidden="true"></div>
+
+                    <div>
+                        <h3>Wo wir gerade stehen</h3>
+                        <p>
+                            Long Covid Navigator ist eine unabhängige, gemeinnützige Plattform
+                            im Aufbau. Wir entwickeln Schritt für Schritt gemeinsam mit
+                            Betroffenen und Fachleuten.
+                        </p>
+                    </div>
+                </article>
             </div>
         </section>
 
         <section class="notice-section" aria-label="Hinweise">
             <div class="notice-grid">
                 <article class="notice-card mvp-notice">
-                    <h2>Projektstatus</h2>
-                    <p>
-                        Der Long Covid Navigator befindet sich im Aufbau. Die Grundfunktionen sind nutzbar,
-                        aber Inhalte, Design und Datenqualität werden weiterentwickelt.
-                    </p>
+                    <div class="notice-icon notice-check" aria-hidden="true"></div>
+
+                    <div>
+                        <h2>Projektstatus</h2>
+                        <p>
+                            Wir entwickeln die Plattform laufend weiter. Inhalte und Funktionen
+                            werden regelmäßig erweitert – mit Sorgfalt und auf Basis aktueller Erkenntnisse.
+                        </p>
+                    </div>
                 </article>
 
                 <article class="notice-card medical-notice">
-                    <h2>Medizinischer Hinweis</h2>
-                    <p>
-                        Die Inhalte dienen der Orientierung und ersetzen keine ärztliche Diagnose,
-                        Beratung oder Behandlung. Bewertungen sind Erfahrungswerte und keine
-                        medizinische Empfehlung. Bitte besprich medizinische Entscheidungen immer
-                        mit qualifizierten Behandler:innen.
-                    </p>
+                    <div class="notice-icon notice-info" aria-hidden="true"></div>
+
+                    <div>
+                        <h2>Medizinischer Hinweis</h2>
+                        <p>
+                            Die Inhalte dieser Plattform dienen der Information und ersetzen keine
+                            medizinische Beratung, Diagnose oder Behandlung.
+                        </p>
+                    </div>
                 </article>
             </div>
         </section>
