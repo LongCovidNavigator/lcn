@@ -1,0 +1,34 @@
+# Secrets / environment
+.env
+*.env
+/private/
+/data2bs/data2lcn_db/.env
+
+# Database dumps / exports
+*.sql
+*.sql.gz
+*.dump
+*.csv
+
+# Backups / archives
+/backups/
+*.bak
+*.backup
+*.zip
+*.rar
+*.7z
+
+# Caches
+__pycache__/
+*.pyc
+node_modules/
+
+# Logs
+/logs/
+*.log
+
+# Editor/OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
