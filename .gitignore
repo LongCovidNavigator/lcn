@@ -32,3 +32,8 @@ node_modules/
 Thumbs.db
 .vscode/
 .idea/
+
+
+# Server-specific auth files
+.htpasswd
+.htaccess
