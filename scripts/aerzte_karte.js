@@ -39,7 +39,20 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    map = L.map("doctor-map", { zoomControl: false }).setView([defaultMapCenter.lat, defaultMapCenter.lng], 6);
+    map = L.map("doctor-map", {
+		zoomControl: false,
+		scrollWheelZoom: false
+	}).setView([defaultMapCenter.lat, defaultMapCenter.lng], 6);
+
+	mapElement.addEventListener("click", function () {
+		map.scrollWheelZoom.enable();
+		mapElement.classList.add("is-scroll-zoom-active");
+	});
+
+	mapElement.addEventListener("mouseleave", function () {
+		map.scrollWheelZoom.disable();
+		mapElement.classList.remove("is-scroll-zoom-active");
+	});
 
     L.control.zoom({
         position: "topright"
@@ -1109,8 +1122,9 @@ function buildDoctorCardHtml(doctor, index) {
 
                     <div class="doctor-card-location-block">
                         <div class="doctor-card-mini-label">Adresse</div>
-                        <div class="doctor-card-main-text">
-                            ${street || houseNumber ? `${street} ${houseNumber}, ` : ""}${plz} ${city}
+                        <div class="doctor-card-main-text doctor-card-address">
+                            ${street || houseNumber ? `<span>${street} ${houseNumber},</span>` : ""}
+                            <span>${plz} ${city}</span>
                         </div>
                     </div>
 
@@ -1124,6 +1138,7 @@ function buildDoctorCardHtml(doctor, index) {
                     <h4 class="doctor-card-section-heading">
                         ⭐ Bewertung
                         <span class="doctor-card-section-count">(${stats.totalVotes} Bewertungen)</span>
+                        <a class="doctor-card-rating-link" href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">(Zur Bewertung)</a>
                     </h4>
                     ${buildDoctorCardRatingHtml(doctor)}
                 </section>
@@ -1681,6 +1696,18 @@ function buildDoctorPopupHtml(doctor) {
 	const ratingText = stats.totalVotes > 0
         ? `${stats.proRatio}% positiv · ${stats.totalVotes} Bewertungen`
         : "Noch keine Bewertungen";
+
+	if (window.matchMedia("(max-width: 760px)").matches) {
+		return `
+			<div class="doctor-map-popup">
+				<strong>${name}</strong><br>
+				${plz} ${city}<br>
+				${specialtyText ? `<span class="doctor-popup-specialties">${escapeHtml(specialtyText)}</span><br>` : ""}
+				<span>⭐ ${ratingText}</span>
+				<br><a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">Mehr Details</a>
+			</div>
+		`;
+	}
 
     const websiteHtml = website
         ? `<br><a href="${escapeHtml(normalizeWebsiteUrl(website))}" target="_blank" rel="noopener noreferrer">Website öffnen</a>`
