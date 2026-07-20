@@ -9,6 +9,26 @@
     line-height: 1.5;
 }
 
+@media (min-width: 761px) {
+    .doctor-nav-section-specialty,
+    .doctor-nav-section-sort,
+    .doctor-nav-section-insurance,
+    .doctor-nav-section-contact {
+        min-height: 110px !important;
+    }
+
+    #doctor-radius-input {
+        position: relative;
+        top: -4px;
+    }
+}
+
+@media (max-width: 760px) {
+    #doctor-radius-input {
+        margin-top: -3px;
+    }
+}
+
 .doctor-map-controls {
     display: flex;
     align-items: center;
@@ -1181,6 +1201,16 @@
     padding: 7px 9px;
     text-align: left;
     font-size: 0.78rem;
+    margin-top: -4px;
+}
+
+@media (min-width: 761px) {
+    .doctor-nav-section-specialty,
+    .doctor-nav-section-sort,
+    .doctor-nav-section-insurance,
+    .doctor-nav-section-contact {
+        min-height: 110px !important;
+    }
 }
 
 .doctor-navigation-apply-button, .doctor-navigation-reset-button {
@@ -2829,6 +2859,20 @@
 
     .doctor-card-section-heading .doctor-card-section-count {
         display: none;
+    }
+}
+
+@media (min-width: 761px) {
+    .doctor-nav-section-specialty,
+    .doctor-nav-section-sort,
+    .doctor-nav-section-insurance,
+    .doctor-nav-section-contact {
+        min-height: 110px !important;
+    }
+
+    #doctor-radius-input {
+        position: relative;
+        top: -4px;
     }
 }
 
