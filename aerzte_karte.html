@@ -14,8 +14,7 @@
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
-
-    <link rel="stylesheet" href="styles/aerzte_karte.css">
+    <link rel="stylesheet" href="styles/aerzte_karte.css?v=3">
 </head>
 
 <script>
@@ -193,7 +192,7 @@
 								id="doctor-has-website-input"
 								type="checkbox"
 							>
-							Hat Website
+							Website hinterlegt
 						</label>
 
 						<label class="doctor-nav-checkbox-row" for="doctor-has-email-input">
@@ -201,7 +200,7 @@
 								id="doctor-has-email-input"
 								type="checkbox"
 							>
-							Hat E-Mail
+							E-Mail hinterlegt
 						</label>
 
 						<label class="doctor-nav-checkbox-row" for="doctor-has-phone-input">
@@ -209,59 +208,50 @@
 								id="doctor-has-phone-input"
 								type="checkbox"
 							>
-							Hat Telefonnummer
+							Telefonnummer hinterlegt
 						</label>
 					</section>
 
 					<section class="doctor-nav-section doctor-nav-section-location">
 						<h3 class="doctor-nav-heading">
-							Ort / Radius &amp; Standort
-							<span class="doctor-nav-info" data-tooltip="Wähle Stadt für eine Ortssuche oder Radius für eine Suche um einen eingegebenen Standort." tabindex="0" aria-label="Info: Ort / Radius und Standort">i</span>
+							Standortsuche
+							<span class="doctor-nav-info" data-tooltip="Radius sucht im Umkreis einer Adresse oder eines Ortes. Ort filtert nach dem eingegebenen Ortsnamen." tabindex="0" aria-label="Info: Standortsuche">i</span>
 						</h3>
+
+						<label class="doctor-nav-label" for="doctor-location-input">Adresse oder Ort</label>
+						<div class="doctor-location-input-row">
+							<input
+								id="doctor-location-input"
+								class="doctor-nav-text-input"
+								type="text"
+								value=""
+								placeholder="z. B. Venloer Straße 123, Köln"
+							>
+							<button id="doctor-location-clear-button" class="doctor-location-clear-button is-hidden" type="button" aria-label="Gespeicherten Standort entfernen">×</button>
+						</div>
 
 						<div class="doctor-location-mode-switch" aria-label="Suchmodus">
 							<button
-								id="doctor-location-mode-city-button"
+								id="doctor-location-mode-radius-button"
 								class="doctor-location-mode-button is-active"
 								type="button"
 								aria-pressed="true"
 							>
-								Stadt
+								Radius
 							</button>
 
 							<button
-								id="doctor-location-mode-radius-button"
+								id="doctor-location-mode-city-button"
 								class="doctor-location-mode-button"
 								type="button"
 								aria-pressed="false"
 							>
-								Radius
+								Ort
 							</button>
 						</div>
 
-						<label class="doctor-nav-label" for="doctor-city-input">Stadt</label>
-						<input
-							id="doctor-city-input"
-							class="doctor-nav-text-input"
-							type="text"
-							value=""
-							placeholder="z. B. Köln"
-						>
-
-						<label class="doctor-nav-label" for="doctor-location-input">Standort</label>
-						<input
-							id="doctor-location-input"
-							class="doctor-nav-text-input"
-							type="text"
-							value=""
-							placeholder="z. B. 50677 Köln"
-						>
-
 						<label class="doctor-nav-checkbox-row" for="doctor-radius-enabled-input">
-							<input
-								id="doctor-radius-enabled-input"
-								type="checkbox"
-							>
+							<input id="doctor-radius-enabled-input" type="checkbox">
 							Radius aktivieren
 						</label>
 
@@ -293,10 +283,6 @@
 					</span>
 
 					<div class="doctor-navigation-button-group">
-						<button id="doctor-filter-apply-button" class="doctor-navigation-apply-button" type="button">
-							Filter anwenden
-						</button>
-
 						<button id="doctor-filter-reset-button" class="doctor-navigation-reset-button" type="button">
 							Filter zurücksetzen
 						</button>
@@ -371,36 +357,53 @@
 						>
 					</div>
 
-					<div class="doctor-results-mode-switch" aria-label="Ergebnisansicht wählen">
-						<button
-							id="doctor-results-hit-view-button"
-							class="doctor-results-mode-button is-active"
-							type="button"
-						>
-							Trefferansicht
-						</button>
-
-						<button
-							id="doctor-compare-show-button"
-							class="doctor-results-mode-button"
-							type="button"
-							disabled
-						>
-							Vergleichsansicht
-						</button>
+					<div class="doctor-results-sort-field">
+						<label class="doctor-results-search-label" for="doctor-results-sort-select">Sortieren nach</label>
+						<select id="doctor-results-sort-select" class="doctor-results-search-input doctor-results-sort-select">
+							<option value="name:asc">Name A–Z</option>
+							<option value="name:desc">Name Z–A</option>
+							<option value="distance:asc">Entfernung ↑</option>
+							<option value="distance:desc">Entfernung ↓</option>
+							<option value="positive_ratio:desc">Positive Erfahrungen [%] ↓</option>
+							<option value="positive_ratio:asc">Positive Erfahrungen [%] ↑</option>
+							<option value="negative_ratio:asc">Negative Erfahrungen [%] ↑</option>
+							<option value="negative_ratio:desc">Negative Erfahrungen [%] ↓</option>
+							<option value="total_votes:desc">Anzahl Bewertungen ↓</option>
+							<option value="total_votes:asc">Anzahl Bewertungen ↑</option>
+						</select>
 					</div>
+
 				</div>
 
 				<div id="doctor-compare-selection" class="doctor-compare-selection is-hidden" aria-live="polite">
 					<div class="doctor-compare-selection-topline">
 						<span id="doctor-compare-status" class="doctor-compare-status"></span>
 
-						<button id="doctor-compare-clear-button" class="doctor-compare-clear-button" type="button" disabled>
-							Auswahl leeren
-						</button>
+						<div class="doctor-results-mode-switch" aria-label="Ergebnisansicht wählen">
+							<button
+								id="doctor-results-hit-view-button"
+								class="doctor-results-mode-button is-active"
+								type="button"
+							>
+								Trefferansicht
+							</button>
+
+							<button
+								id="doctor-compare-show-button"
+								class="doctor-results-mode-button"
+								type="button"
+								disabled
+							>
+								Vergleichsansicht
+							</button>
+						</div>
 					</div>
 
 					<div id="doctor-compare-chips" class="doctor-compare-chips"></div>
+
+					<button id="doctor-compare-clear-button" class="doctor-compare-clear-button" type="button" disabled>
+						Auswahl leeren
+					</button>
 				</div>
 			</div>
 		</section>
@@ -417,12 +420,12 @@
             <table class="doctor-map-results-table">
 				<thead>
 					<tr>
-						<th id="doctor-table-rank-header" aria-label="Sortierreihenfolge">▲</th>
-						<th>Ärzt:in</th>
-						<th>Standort</th>
-						<th>Erfahrung <span class="doctor-table-header-note">(n = Votes)</span></th>
-						<th>Versorgung</th>
-						<th>Kontakt</th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="rank"><span class="table-rank-label-full">Platz</span><span class="table-rank-label-short">#</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="name">Ärzt:in <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="location">Standort <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="experience">Erfahrung <span class="doctor-table-header-note">(n = Votes)</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="insurance">Versorgung <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="contact">Kontakt <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 					</tr>
 				</thead>
 
@@ -436,7 +439,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="scripts/aerzte_karte.js"></script>
+    <script src="scripts/aerzte_karte.js?v=3"></script>
 
     <div id="footer-placeholder"></div>
 
