@@ -87,7 +87,7 @@ try {
         'https://api.geoapify.com/v1/geocode/search' .
         '?text=' . urlencode($query) .
         '&format=json' .
-        '&limit=1' .
+        '&limit=5' .
         '&filter=countrycode:de' .
         '&lang=de' .
         '&apiKey=' . urlencode($apiKey);
@@ -117,6 +117,17 @@ try {
         throw new Exception("Geoapify-Ergebnis enthält keine Koordinaten.");
     }
 
+    $normalizedResults = array_map(static function ($result) use ($query) {
+        return [
+            'lat' => (float)($result['lat'] ?? 0),
+            'lng' => (float)($result['lon'] ?? 0),
+            'formatted' => $result['formatted'] ?? $query,
+            'postcode' => $result['postcode'] ?? null,
+            'city' => $result['city'] ?? ($result['county'] ?? null),
+            'country' => $result['country'] ?? null,
+        ];
+    }, $results);
+
     echo json_encode([
         'ok' => true,
         'query' => $query,
@@ -129,6 +140,7 @@ try {
             'city' => $first['city'] ?? ($first['county'] ?? null),
             'country' => $first['country'] ?? null,
         ],
+        'results' => $normalizedResults,
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 } catch (InvalidArgumentException $e) {
