@@ -14,7 +14,7 @@
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
-    <link rel="stylesheet" href="styles/aerzte_karte.css?v=3">
+    <link rel="stylesheet" href="styles/aerzte_karte.css?v=4">
 </head>
 
 <script>
@@ -228,6 +228,7 @@
 								placeholder="z. B. Venloer Straße 123, Köln"
 							>
 							<button id="doctor-location-clear-button" class="doctor-location-clear-button is-hidden" type="button" aria-label="Gespeicherten Standort entfernen">×</button>
+							<div id="doctor-location-suggestions" class="location-suggestions is-hidden" role="listbox" aria-label="Standortvorschläge"></div>
 						</div>
 
 						<div class="doctor-location-mode-switch" aria-label="Suchmodus">
@@ -439,7 +440,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="scripts/aerzte_karte.js?v=3"></script>
+    <script src="scripts/aerzte_karte.js?v=4"></script>
 
     <div id="footer-placeholder"></div>
 

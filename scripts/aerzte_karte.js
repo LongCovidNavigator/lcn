@@ -26,6 +26,9 @@ let currentSpecialtyTermId = 0;
 let currentIncludeNoCoords = false;
 let currentLocation = null;
 let doctorSearchDebounceTimer = null;
+let doctorLocationSuggestionTimer = null;
+let doctorLocationSuggestionController = null;
+let doctorLocationSuggestions = [];
 
 const doctorLocationStorageKey = "lcn_doctor_location_preference";
 const sharedLocationStorageKey = "lcn_shared_location_preference";
@@ -313,8 +316,28 @@ function setupDoctorLocationModeControls() {
     }
 
     if (locationInput) {
-        locationInput.addEventListener("input", updateDoctorLocationClearButton);
-        locationInput.addEventListener("change", saveDoctorLocationPreference);
+        locationInput.addEventListener("input", function () {
+            updateDoctorLocationClearButton();
+            scheduleDoctorLocationSuggestions();
+        });
+
+        locationInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") hideDoctorLocationSuggestions();
+            if (event.key === "Escape") hideDoctorLocationSuggestions();
+        });
+    }
+
+    const suggestions = document.getElementById("doctor-location-suggestions");
+    if (suggestions) {
+        suggestions.addEventListener("click", function (event) {
+            const button = event.target.closest("[data-location-suggestion-index]");
+            if (!button) return;
+            const suggestion = doctorLocationSuggestions[Number(button.dataset.locationSuggestionIndex)];
+            if (!suggestion || !locationInput) return;
+            locationInput.value = suggestion.formatted;
+            hideDoctorLocationSuggestions();
+            applyDoctorFiltersFromControls();
+        });
     }
 
     if (clearButton) {
@@ -480,13 +503,52 @@ function setupDoctorAutoApplyControls() {
         });
     });
 
-    const locationInput = document.getElementById("doctor-location-input");
+}
 
-    if (locationInput) {
-        locationInput.addEventListener("input", function () {
-            scheduleDoctorAutoApply(700);
-        });
+function scheduleDoctorLocationSuggestions() {
+    clearTimeout(doctorLocationSuggestionTimer);
+    const input = document.getElementById("doctor-location-input");
+    const query = input ? input.value.trim() : "";
+
+    if (query.length < 3) {
+        hideDoctorLocationSuggestions();
+        return;
     }
+
+    doctorLocationSuggestionTimer = setTimeout(function () {
+        loadDoctorLocationSuggestions(query);
+    }, 300);
+}
+
+async function loadDoctorLocationSuggestions(query) {
+    if (doctorLocationSuggestionController) doctorLocationSuggestionController.abort();
+    doctorLocationSuggestionController = new AbortController();
+
+    try {
+        const response = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}`, {
+            signal: doctorLocationSuggestionController.signal
+        });
+        if (!response.ok) throw new Error("Standortvorschläge konnten nicht geladen werden.");
+        const data = await response.json();
+        doctorLocationSuggestions = Array.isArray(data.results) ? data.results : [];
+        renderDoctorLocationSuggestions();
+    } catch (error) {
+        if (error.name !== "AbortError") hideDoctorLocationSuggestions();
+    }
+}
+
+function renderDoctorLocationSuggestions() {
+    const box = document.getElementById("doctor-location-suggestions");
+    if (!box) return;
+    box.innerHTML = doctorLocationSuggestions.map(function (suggestion, index) {
+        return `<button class="location-suggestion-button" type="button" role="option" data-location-suggestion-index="${index}">${escapeHtml(suggestion.formatted || "")}</button>`;
+    }).join("");
+    box.classList.toggle("is-hidden", doctorLocationSuggestions.length === 0);
+}
+
+function hideDoctorLocationSuggestions() {
+    const box = document.getElementById("doctor-location-suggestions");
+    if (box) box.classList.add("is-hidden");
 }
 
 function scheduleDoctorAutoApply(delay = 350) {
