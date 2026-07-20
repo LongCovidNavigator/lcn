@@ -15,7 +15,7 @@
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
 
-    <link rel="stylesheet" href="styles/therapien_karte.css">
+    <link rel="stylesheet" href="styles/therapien_karte.css?v=25">
 </head>
 
 <script>
@@ -30,15 +30,6 @@
     <div id="header-placeholder"></div>
 
     <div class="container">
-        <section class="treatment-page-intro" aria-label="Einführung Therapiesuche">
-            <h1>Therapien &amp; Behandlungen</h1>
-
-            <p>
-                Übersicht über Behandlungsoptionen im Long Covid Navigator.
-                Die Bewertungen sind Nutzererfahrungen und keine medizinische Empfehlung.
-            </p>
-        </section>
-
         <section class="treatment-navigation-panel" aria-label="Navigation für Therapiesuche">
             <button
                 id="treatment-navigation-toggle-button"
@@ -181,66 +172,75 @@
                         <label class="treatment-nav-label" for="treatment-min-provider-input">Mindestanzahl Anbieter</label>
                         <input
                             id="treatment-min-provider-input"
-                            class="treatment-nav-number treatment-provider-number"
+                            class="treatment-nav-text-input treatment-radius-input"
                             type="number"
                             min="0"
                             step="1"
                             value="0"
                         >
 
-                        <label class="treatment-nav-checkbox-row" for="treatment-only-with-provider-input">
-                            <input
-                                id="treatment-only-with-provider-input"
-                                type="checkbox"
-                            >
-                            Nur Therapien mit Anbieter
-                        </label>
+                        <div class="treatment-provider-options">
+                            <label class="treatment-nav-checkbox-row" for="treatment-only-with-provider-input">
+                                <input id="treatment-only-with-provider-input" type="checkbox">
+                                Mit Anbieter
+                            </label>
+                            <label class="treatment-nav-checkbox-row" for="treatment-accepts-gkv-input">
+                                <input id="treatment-accepts-gkv-input" type="checkbox">
+                                GKV
+                            </label>
+                            <label class="treatment-nav-checkbox-row" for="treatment-mapped-providers-only-input">
+                                <input id="treatment-mapped-providers-only-input" type="checkbox">
+                                Nur kartierte Anbieter zählen
+                            </label>
+                        </div>
                     </section>
 
                     <section class="treatment-nav-section treatment-nav-section-location">
                         <h3 class="treatment-nav-heading">
-                            Ort / Karte
+                            Standortsuche
                             <span class="treatment-nav-info" data-tooltip="Setzt deinen Kartenstandort. Optional kannst du die Suche auf Anbieter in deiner Stadt oder in einem frei gewählten Radius beschränken." tabindex="0" aria-label="Info: Ort und Karte">i</span>
                         </h3>
 
-                        <label class="treatment-nav-label" for="treatment-location-input">Kartenstandort / meine Position</label>
-                        <input
-                            id="treatment-location-input"
-                            class="treatment-nav-text-input"
-                            type="text"
-                            value=""
-                            placeholder="z. B. 50677 Köln"
-                        >
+                        <label class="treatment-nav-label" for="treatment-location-input">Adresse oder Ort</label>
+                        <div class="treatment-location-input-row">
+                            <input
+                                id="treatment-location-input"
+                                class="treatment-nav-text-input"
+                                type="text"
+                                value=""
+                                placeholder="z. B. Venloer Straße 123, Köln"
+                            >
+                            <button id="treatment-location-clear-button" class="treatment-location-clear-button is-hidden" type="button" aria-label="Gespeicherten Standort entfernen">×</button>
+                            <div id="treatment-location-suggestions" class="location-suggestions is-hidden" role="listbox" aria-label="Standortvorschläge"></div>
+                        </div>
 
-                        <label class="treatment-nav-label" for="treatment-radius-input" style="margin-top: 10px;">Radius um meinen Standort in km</label>
+                        <div class="treatment-location-mode-switch" aria-label="Suchmodus">
+                            <button id="treatment-location-mode-radius-button" class="treatment-location-mode-button is-active" type="button" aria-pressed="true">Radius</button>
+                            <button id="treatment-location-mode-city-button" class="treatment-location-mode-button" type="button" aria-pressed="false">Ort</button>
+                        </div>
+
+                        <label class="treatment-nav-checkbox-row" for="treatment-radius-enabled-input">
+                            <input id="treatment-radius-enabled-input" type="checkbox">
+                            Radius aktivieren
+                        </label>
+
+                        <label class="treatment-nav-checkbox-row treatment-include-no-coords" for="treatment-include-no-coords-input">
+                            <input id="treatment-include-no-coords-input" type="checkbox" disabled>
+                            Einträge ohne Koordinaten einbeziehen
+                            <span class="treatment-nav-info" data-tooltip="Nimmt Therapien mit passenden Anbietern ohne berechenbare Kartenposition zusätzlich auf. Für diese Anbieter kann nicht geprüft werden, ob sie innerhalb des Radius liegen." tabindex="0" aria-label="Info: Einträge ohne Koordinaten einbeziehen">i</span>
+                        </label>
+
+                        <label class="treatment-nav-label" for="treatment-radius-input">Radius in km</label>
                         <input
                             id="treatment-radius-input"
-                            class="treatment-nav-number treatment-provider-number"
+                            class="treatment-nav-text-input treatment-radius-input"
                             type="number"
                             min="0"
                             max="1000"
                             step="1"
-                            value="0"
+                            value="100"
                             placeholder="z. B. 25"
                         >
-
-                        <label class="treatment-nav-checkbox-row" for="treatment-only-current-city-input" style="margin-top: 10px;">
-                            <input
-                                id="treatment-only-current-city-input"
-                                type="checkbox"
-                            >
-                            Nur in meiner Stadt suchen
-                        </label>
-
-                        <div class="treatment-location-button-row">
-                            <button id="treatment-location-apply-button" class="treatment-location-apply-button" type="button">
-                                Standort setzen
-                            </button>
-
-                            <button id="treatment-location-reset-button" class="treatment-location-reset-button" type="button">
-                                Standort zurücksetzen
-                            </button>
-                        </div>
 
                         <p id="treatment-location-status" class="treatment-location-status">
                             Kein Kartenstandort gesetzt.
@@ -254,10 +254,6 @@
                     </span>
 
                     <div class="treatment-navigation-button-group">
-                        <button id="treatment-filter-apply-button" class="treatment-navigation-apply-button" type="button">
-                            Filter anwenden
-                        </button>
-
                         <button id="treatment-filter-reset-button" class="treatment-navigation-reset-button" type="button">
                             Filter zurücksetzen
                         </button>
@@ -340,41 +336,47 @@
                                 aria-label="Suchvorschläge"
                             ></div>
                         </div>
+
+                        <div class="treatment-results-sort-field">
+                            <label class="treatment-results-search-label" for="treatment-results-sort-select">Sortieren nach</label>
+                            <select id="treatment-results-sort-select" class="treatment-results-search-input treatment-results-sort-select">
+                                <option value="name:asc">Name A–Z</option>
+                                <option value="name:desc">Name Z–A</option>
+                                <option value="positive_ratio:desc">Positive Erfahrungen [%] ↓</option>
+                                <option value="positive_ratio:asc">Positive Erfahrungen [%] ↑</option>
+                                <option value="negative_ratio:asc">Negative Erfahrungen [%] ↑</option>
+                                <option value="negative_ratio:desc">Negative Erfahrungen [%] ↓</option>
+                                <option value="total_votes:desc">Anzahl Bewertungen ↓</option>
+                                <option value="total_votes:asc">Anzahl Bewertungen ↑</option>
+                                <option value="provider_count:desc">Anbieteranzahl gesamt ↓</option>
+                                <option value="provider_count:asc">Anbieteranzahl gesamt ↑</option>
+                                <option value="matching_provider_count:desc">Anbieter im Suchgebiet ↓</option>
+                                <option value="matching_provider_count:asc">Anbieter im Suchgebiet ↑</option>
+                                <option value="distance:asc">Entfernung nächster Anbieter ↑</option>
+                                <option value="distance:desc">Entfernung nächster Anbieter ↓</option>
+                            </select>
+                        </div>
                     </div>
 
                                         <p id="treatment-alias-smart-status" class="treatment-results-search-status">
                         Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.
                     </p>
 
-                    <div class="treatment-results-mode-switch" aria-label="Ergebnisansicht wählen">
-                        <button
-                            id="treatment-results-hit-view-button"
-                            class="treatment-results-mode-button is-active"
-                            type="button"
-                        >
-                            Trefferansicht
-                        </button>
-
-                        <button
-                            id="treatment-compare-show-button"
-                            class="treatment-results-mode-button"
-                            type="button"
-                            disabled
-                        >
-                            Vergleichsansicht
-                        </button>
-                    </div>
-
                     <div id="treatment-compare-selection" class="treatment-compare-selection is-hidden" aria-live="polite">
                         <div class="treatment-compare-selection-topline">
                             <span id="treatment-compare-status" class="treatment-compare-status"></span>
 
-                            <button id="treatment-compare-clear-button" class="treatment-compare-clear-button" type="button" disabled>
-                                Auswahl leeren
-                            </button>
+                            <div class="treatment-results-mode-switch" aria-label="Ergebnisansicht wählen">
+                                <button id="treatment-results-hit-view-button" class="treatment-results-mode-button is-active" type="button">Trefferansicht</button>
+                                <button id="treatment-compare-show-button" class="treatment-results-mode-button" type="button" disabled>Vergleichsansicht</button>
+                            </div>
                         </div>
 
                         <div id="treatment-compare-chips" class="treatment-compare-chips"></div>
+
+                        <button id="treatment-compare-clear-button" class="treatment-compare-clear-button" type="button" disabled>
+                            Auswahl leeren
+                        </button>
                     </div>
                 </div>
             </div>
@@ -390,12 +392,12 @@
             <table class="treatment-results-table">
                 <thead>
                     <tr>
-                        <th id="treatment-table-rank-header" aria-label="Sortierreihenfolge">▲</th>
-                        <th>Therapie</th>
-                        <th>Kategorie</th>
-                        <th>Erfahrung <span class="treatment-table-header-note">(n = Votes)</span></th>
-                        <th>Anbieter</th>
-                        <th>Entfernung / Ort</th>
+                        <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="rank"><span class="table-rank-label-full">Platz</span><span class="table-rank-label-short">#</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
+                        <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="name">Therapie <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
+                        <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="category">Kategorie <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
+                        <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="experience">Erfahrung <span class="treatment-table-header-note">(n = Votes)</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
+                        <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="provider">Anbieter <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
+                        <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="location">Entfernung / Ort <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                     </tr>
                 </thead>
 
@@ -409,7 +411,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="scripts/therapien_karte.js"></script>
+    <script src="scripts/therapien_karte.js?v=23"></script>
 
     <div id="footer-placeholder"></div>
 

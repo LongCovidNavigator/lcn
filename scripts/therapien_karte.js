@@ -25,6 +25,18 @@ let currentTreatmentCompareMapKey = "";
 let treatmentSmartSearchOverride = null;
 let treatmentAliasSmartSuggestController = null;
 let treatmentAliasSmartSuggestions = [];
+let currentTreatmentLocationMode = "radius";
+let currentTreatmentTableSortKey = null;
+let currentTreatmentTableSortDirection = "asc";
+let treatmentAutoApplyTimer = null;
+let treatmentSearchRequestId = 0;
+let treatmentLocationSuggestionTimer = null;
+let treatmentLocationSuggestionController = null;
+let treatmentLocationSuggestions = [];
+
+const treatmentLocationStorageKey = "lcn_treatment_location_preference";
+const sharedLocationStorageKey = "lcn_shared_location_preference";
+const sharedLocationClearedStorageKey = "lcn_shared_location_cleared";
 
 const treatmentDefaultMapCenter = {
     lat: 51.1657,
@@ -41,6 +53,23 @@ const treatmentMapMarkerColors = [
 ];
 
 document.addEventListener("DOMContentLoaded", function () {
+    const radiusModeButton = document.getElementById("treatment-location-mode-radius-button");
+    const cityModeButton = document.getElementById("treatment-location-mode-city-button");
+
+    if (radiusModeButton) {
+        radiusModeButton.addEventListener("click", function () {
+            setTreatmentLocationMode("radius");
+            applyTreatmentFiltersFromControls();
+        });
+    }
+
+    if (cityModeButton) {
+        cityModeButton.addEventListener("click", function () {
+            setTreatmentLocationMode("city");
+            applyTreatmentFiltersFromControls();
+        });
+    }
+
     initTreatmentPage();
 });
 
@@ -54,10 +83,14 @@ async function initTreatmentPage() {
     bindTreatmentCardContainerEvents();
     bindTreatmentTableContainerEvents();
     bindTreatmentMapEvents();
+    setTreatmentLocationMode("radius");
+    await restoreTreatmentLocationPreference();
+    updateTreatmentRadiusInputState();
     await loadTreatmentResults();
 }
 
 async function loadTreatmentResults() {
+    const requestId = ++treatmentSearchRequestId;
     const tableBody = document.getElementById("treatment-results-body");
     const cardResults = document.getElementById("treatment-card-results");
 
@@ -70,6 +103,10 @@ async function loadTreatmentResults() {
         }
 
         const data = await response.json();
+
+        if (requestId !== treatmentSearchRequestId) {
+            return;
+        }
 
         if (!data.ok || !Array.isArray(data.items)) {
             throw new Error("Unerwartetes API-Format.");
@@ -159,6 +196,9 @@ function buildTreatmentSearchUrl() {
     params.set("max_negative", String(filters.maxNegativeRatio));
     params.set("min_provider", String(filters.minProviderCount));
     params.set("only_with_provider", filters.onlyWithProvider ? "1" : "0");
+    params.set("accepts_gkv", filters.acceptsGkv ? "1" : "0");
+    params.set("include_no_coords", filters.includeNoCoords ? "1" : "0");
+    params.set("mapped_providers_only", filters.mappedProvidersOnly ? "1" : "0");
 
     if (filters.sortKey === "distance") {
         params.set("sort", "name");
@@ -193,7 +233,9 @@ function normalizeTreatment(treatment) {
         neutral_ratio: Number(treatment.neutral_ratio ?? 0),
         negative_ratio: Number(treatment.negative_ratio ?? 0),
         provider_count: Number(treatment.provider_count ?? 0),
+        total_provider_count: Number(treatment.total_provider_count ?? treatment.provider_count ?? 0),
         matching_provider_count: Number(treatment.matching_provider_count ?? 0),
+        unlocated_provider_count: Number(treatment.unlocated_provider_count ?? 0),
         nearest_provider: normalizeNearestProvider(treatment.nearest_provider),
         nearest_provider_distance_km: treatment.nearest_provider_distance_km === null || treatment.nearest_provider_distance_km === undefined
             ? null
@@ -239,67 +281,52 @@ function bindTreatmentNavigationEvents() {
         });
     }
 
-    const applyButton = document.getElementById("treatment-filter-apply-button");
     const resetButton = document.getElementById("treatment-filter-reset-button");
-    const sortSelect = document.getElementById("treatment-sort-select");
+    const sortSelects = [
+        document.getElementById("treatment-sort-select"),
+        document.getElementById("treatment-results-sort-select")
+    ].filter(Boolean);
     const categorySelect = document.getElementById("treatment-category-select");
     const onlyWithProviderInput = document.getElementById("treatment-only-with-provider-input");
-    const onlyCurrentCityInput = document.getElementById("treatment-only-current-city-input");
+    const acceptsGkvInput = document.getElementById("treatment-accepts-gkv-input");
+    const mappedProvidersOnlyInput = document.getElementById("treatment-mapped-providers-only-input");
+    const radiusEnabledInput = document.getElementById("treatment-radius-enabled-input");
+    const includeNoCoordsInput = document.getElementById("treatment-include-no-coords-input");
     const radiusInput = document.getElementById("treatment-radius-input");
     const minProviderInput = document.getElementById("treatment-min-provider-input");
     const locationInput = document.getElementById("treatment-location-input");
-    const locationApplyButton = document.getElementById("treatment-location-apply-button");
-    const locationResetButton = document.getElementById("treatment-location-reset-button");
-
-    if (applyButton) {
-		applyButton.addEventListener("click", function () {
-			if (!validateLocationDependentFilters()) {
-				return;
-			}
-
-			loadTreatmentResults();
-		});
-	}
+    const locationClearButton = document.getElementById("treatment-location-clear-button");
 
     if (resetButton) {
         resetButton.addEventListener("click", resetTreatmentFilters);
     }
 
-    if (sortSelect) {
-        sortSelect.addEventListener("change", function () {
-            if (!validateLocationDependentFilters()) {
-                return;
-            }
+    updateTreatmentSortSelects();
 
-            loadTreatmentResults();
+    sortSelects.forEach(function (sortSelect) {
+        sortSelect.addEventListener("change", function () {
+            sortSelects.forEach(function (otherSelect) {
+                otherSelect.value = sortSelect.value;
+            });
+            currentTreatmentTableSortKey = null;
+            currentTreatmentTableSortDirection = "asc";
+            applyTreatmentFiltersFromControls();
         });
-    }
+    });
 
     if (categorySelect) {
         categorySelect.addEventListener("change", function () {
-            if (!validateLocationDependentFilters()) {
-                return;
-            }
-
-            loadTreatmentResults();
+            applyTreatmentFiltersFromControls();
         });
     }
 
     if (radiusInput) {
-        radiusInput.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                normalizeRadiusInput();
-
-                if (!validateLocationDependentFilters()) {
-                    return;
-                }
-
-                loadTreatmentResults();
-            }
-        });
-
         radiusInput.addEventListener("blur", function () {
             normalizeRadiusInput();
+        });
+
+        radiusInput.addEventListener("input", function () {
+            scheduleTreatmentAutoApply(350);
         });
     }
 
@@ -309,56 +336,156 @@ function bindTreatmentNavigationEvents() {
                 minProviderInput.value = Math.max(1, Number(minProviderInput.value || 0));
             }
 
-            loadTreatmentResults();
+            applyTreatmentFiltersFromControls();
         });
     }
 
-    if (onlyCurrentCityInput) {
-        onlyCurrentCityInput.addEventListener("change", function () {
-            if (!validateLocationDependentFilters()) {
-                return;
-            }
+    if (acceptsGkvInput) {
+        acceptsGkvInput.addEventListener("change", applyTreatmentFiltersFromControls);
+    }
 
-            loadTreatmentResults();
+    if (mappedProvidersOnlyInput) {
+        mappedProvidersOnlyInput.addEventListener("change", function () {
+            updateTreatmentRadiusInputState();
+            applyTreatmentFiltersFromControls();
         });
     }
 
+    if (radiusEnabledInput) {
+        radiusEnabledInput.addEventListener("change", function () {
+            updateTreatmentRadiusInputState();
+            applyTreatmentFiltersFromControls();
+        });
+    }
+
+    if (includeNoCoordsInput) {
+        includeNoCoordsInput.addEventListener("change", applyTreatmentFiltersFromControls);
+    }
 
     if (minProviderInput) {
-        minProviderInput.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                loadTreatmentResults();
-            }
+        minProviderInput.addEventListener("input", function () {
+            scheduleTreatmentAutoApply(350);
         });
     }
 
-    if (locationApplyButton) {
-        locationApplyButton.addEventListener("click", applyTreatmentLocationFromInput);
-    }
-
-    if (locationResetButton) {
-        locationResetButton.addEventListener("click", resetTreatmentLocation);
+    if (locationClearButton) {
+        locationClearButton.addEventListener("click", function () {
+            resetTreatmentLocation();
+        });
     }
 
     if (locationInput) {
+        locationInput.addEventListener("input", function () {
+            updateTreatmentLocationClearButton();
+            scheduleTreatmentLocationSuggestions();
+        });
+
         locationInput.addEventListener("keydown", function (event) {
             if (event.key === "Enter") {
+                event.preventDefault();
+                hideTreatmentLocationSuggestions();
                 applyTreatmentLocationFromInput();
             }
+
+            if (event.key === "Escape") hideTreatmentLocationSuggestions();
+        });
+    }
+
+    const locationSuggestions = document.getElementById("treatment-location-suggestions");
+    if (locationSuggestions) {
+        locationSuggestions.addEventListener("click", function (event) {
+            const button = event.target.closest("[data-location-suggestion-index]");
+            if (!button) return;
+            const suggestion = treatmentLocationSuggestions[Number(button.dataset.locationSuggestionIndex)];
+            if (!suggestion || !locationInput) return;
+            locationInput.value = suggestion.formatted;
+            hideTreatmentLocationSuggestions();
+            applyTreatmentLocationFromInput();
         });
     }
 
     bindRangePair(
         "treatment-min-positive-range",
         "treatment-min-positive-input",
-        loadTreatmentResults
+        function () { scheduleTreatmentAutoApply(250); }
     );
 
     bindRangePair(
         "treatment-max-negative-range",
         "treatment-max-negative-input",
-        loadTreatmentResults
+        function () { scheduleTreatmentAutoApply(250); }
     );
+
+    bindTreatmentTableSortControls();
+}
+
+function updateTreatmentSortSelects() {
+    const source = document.getElementById("treatment-sort-select");
+    const value = source ? source.value : "name:asc";
+
+    [
+        document.getElementById("treatment-sort-select"),
+        document.getElementById("treatment-results-sort-select")
+    ].filter(Boolean).forEach(function (select) {
+        select.value = value;
+    });
+}
+
+function scheduleTreatmentAutoApply(delay = 300) {
+    clearTimeout(treatmentAutoApplyTimer);
+    treatmentAutoApplyTimer = setTimeout(applyTreatmentFiltersFromControls, delay);
+}
+
+function scheduleTreatmentLocationSuggestions() {
+    clearTimeout(treatmentLocationSuggestionTimer);
+    const input = document.getElementById("treatment-location-input");
+    const query = input ? String(input.value || "").trim() : "";
+
+    if (query.length < 3) {
+        hideTreatmentLocationSuggestions();
+        return;
+    }
+
+    treatmentLocationSuggestionTimer = setTimeout(function () {
+        loadTreatmentLocationSuggestions(query);
+    }, 300);
+}
+
+async function loadTreatmentLocationSuggestions(query) {
+    if (treatmentLocationSuggestionController) treatmentLocationSuggestionController.abort();
+    treatmentLocationSuggestionController = new AbortController();
+
+    try {
+        const response = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}`, {
+            signal: treatmentLocationSuggestionController.signal
+        });
+        if (!response.ok) throw new Error("Standortvorschläge konnten nicht geladen werden.");
+        const data = await response.json();
+        treatmentLocationSuggestions = Array.isArray(data.results) ? data.results : [];
+        renderTreatmentLocationSuggestions();
+    } catch (error) {
+        if (error.name !== "AbortError") hideTreatmentLocationSuggestions();
+    }
+}
+
+function renderTreatmentLocationSuggestions() {
+    const box = document.getElementById("treatment-location-suggestions");
+    if (!box) return;
+    box.innerHTML = treatmentLocationSuggestions.map(function (suggestion, index) {
+        return `<button class="location-suggestion-button" type="button" role="option" data-location-suggestion-index="${index}">${escapeHtml(suggestion.formatted || "")}</button>`;
+    }).join("");
+    box.classList.toggle("is-hidden", treatmentLocationSuggestions.length === 0);
+}
+
+function hideTreatmentLocationSuggestions() {
+    const box = document.getElementById("treatment-location-suggestions");
+    if (box) box.classList.add("is-hidden");
+}
+
+function applyTreatmentFiltersFromControls() {
+    if (validateLocationDependentFilters()) {
+        loadTreatmentResults();
+    }
 }
 
 function bindTreatmentSmartSearchEvents() {
@@ -368,6 +495,13 @@ function bindTreatmentSmartSearchEvents() {
     if (input) {
 		input.addEventListener("input", function () {
 			const query = String(input.value || "").trim();
+
+            if (showOnlyTreatmentCompareSelection) {
+                showOnlyTreatmentCompareSelection = false;
+                currentTreatmentCompareMapData = null;
+                currentTreatmentCompareMapKey = "";
+                refreshTreatmentDisplay();
+            }
 
 			if (query === "") {
 				treatmentSmartSearchOverride = null;
@@ -566,6 +700,20 @@ function groupTreatmentAliasSmartSuggestions(suggestions, query) {
 function applyTreatmentAliasSmartGroup(groupKey) {
     const input = document.getElementById("treatment-alias-smart-input");
     const query = input ? String(input.value || "").trim() : "";
+
+    if (query === "") {
+        treatmentSmartSearchOverride = null;
+        treatmentAliasSmartSuggestions = [];
+        hideTreatmentAliasSmartSuggestions();
+        setTreatmentAliasSmartStatus("Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
+
+        if (validateLocationDependentFilters()) {
+            loadTreatmentResults();
+        }
+
+        return;
+    }
+
     const groups = groupTreatmentAliasSmartSuggestions(treatmentAliasSmartSuggestions, query);
     const group = groups[groupKey] || groups.direct;
 
@@ -638,31 +786,14 @@ function validateLocationDependentFilters() {
     }
 
     if (!currentTreatmentUserLocation) {
-        alert("Bitte zuerst deinen Kartenstandort setzen. Danach können Stadt- und Radiusfilter verwendet werden.");
-
-        const onlyCurrentCityInput = document.getElementById("treatment-only-current-city-input");
-        const radiusInput = document.getElementById("treatment-radius-input");
-
-        if (onlyCurrentCityInput) {
-            onlyCurrentCityInput.checked = false;
-        }
-
-        if (radiusInput) {
-            radiusInput.value = "0";
-        }
-
-        clearTreatmentRadiusCircle();
+        updateTreatmentLocationStatus("Bitte eine Adresse oder einen Ort eingeben.");
         return false;
     }
 
     if (filters.onlyCurrentCity && !getCurrentTreatmentCity()) {
         alert("Aus dem Kartenstandort konnte keine Stadt erkannt werden. Bitte gib den Standort eindeutiger ein, z. B. 50677 Köln.");
 
-        const onlyCurrentCityInput = document.getElementById("treatment-only-current-city-input");
-
-        if (onlyCurrentCityInput) {
-            onlyCurrentCityInput.checked = false;
-        }
+        setTreatmentLocationMode("radius");
 
         return false;
     }
@@ -762,18 +893,6 @@ function bindTreatmentCardContainerEvents() {
             return;
         }
 
-        const detailButton = event.target.closest(".treatment-card-detail-button");
-
-        if (detailButton) {
-            const treatId = Number(detailButton.dataset.treatId || 0);
-
-            if (!treatId) {
-                alert("Für diese Therapie fehlt die technische ID.");
-                return;
-            }
-
-            window.location.href = `therapie_detail.html?treat_id=${encodeURIComponent(treatId)}`;
-        }
     });
 }
 
@@ -869,15 +988,13 @@ function bindRangePair(rangeId, numberId, onChangeCallback) {
 
     rangeInput.addEventListener("input", function () {
         numberInput.value = rangeInput.value;
-    });
-
-    rangeInput.addEventListener("change", function () {
         onChangeCallback();
     });
 
     numberInput.addEventListener("input", function () {
         const clampedValue = clampNumber(numberInput.value, 0, 100);
         rangeInput.value = clampedValue;
+        onChangeCallback();
     });
 
     numberInput.addEventListener("keydown", function (event) {
@@ -922,8 +1039,11 @@ function getTreatmentFilters() {
     const maxNegativeInput = document.getElementById("treatment-max-negative-input");
     const minProviderInput = document.getElementById("treatment-min-provider-input");
     const onlyWithProviderInput = document.getElementById("treatment-only-with-provider-input");
-    const onlyCurrentCityInput = document.getElementById("treatment-only-current-city-input");
+    const acceptsGkvInput = document.getElementById("treatment-accepts-gkv-input");
+    const mappedProvidersOnlyInput = document.getElementById("treatment-mapped-providers-only-input");
+    const radiusEnabledInput = document.getElementById("treatment-radius-enabled-input");
     const radiusInput = document.getElementById("treatment-radius-input");
+    const includeNoCoordsInput = document.getElementById("treatment-include-no-coords-input");
 
     const sortValue = sortSelect ? sortSelect.value : "name:asc";
     const sortParts = sortValue.split(":");
@@ -943,12 +1063,19 @@ function getTreatmentFilters() {
         sortDirection: sortParts[1] || "asc",
 		searchTerm: "",
         category: categorySelect ? String(categorySelect.value || "").trim() : "",
-        onlyCurrentCity: onlyCurrentCityInput ? onlyCurrentCityInput.checked : false,
-        radiusKm: radiusInput ? clampNumber(radiusInput.value, 0, 1000) : 0,
+        onlyCurrentCity: currentTreatmentLocationMode === "city",
+        radiusKm: currentTreatmentLocationMode === "radius" && radiusEnabledInput && radiusEnabledInput.checked && radiusInput
+            ? clampNumber(radiusInput.value, 0, 1000)
+            : 0,
         minPositiveRatio: minPositiveInput ? clampNumber(minPositiveInput.value, 0, 100) : 0,
         maxNegativeRatio: maxNegativeInput ? clampNumber(maxNegativeInput.value, 0, 100) : 100,
         minProviderCount: minProviderCount,
-        onlyWithProvider: onlyWithProvider
+        onlyWithProvider: onlyWithProvider,
+        acceptsGkv: Boolean(acceptsGkvInput?.checked),
+        mappedProvidersOnly: Boolean(mappedProvidersOnlyInput?.checked),
+        includeNoCoords: Boolean(includeNoCoordsInput?.checked)
+            && Boolean(radiusEnabledInput?.checked)
+            && !Boolean(mappedProvidersOnlyInput?.checked)
     };
 }
 
@@ -974,8 +1101,21 @@ function applyClientSideTreatmentSort() {
 }
 
 function resetTreatmentFilters() {
+    clearTimeout(treatmentAutoApplyTimer);
+    treatmentAutoApplyTimer = null;
+
+    if (treatmentAliasSmartSuggestController) {
+        treatmentAliasSmartSuggestController.abort();
+        treatmentAliasSmartSuggestController = null;
+    }
+
     treatmentSmartSearchOverride = null;
     treatmentAliasSmartSuggestions = [];
+    showOnlyTreatmentCompareSelection = false;
+    currentTreatmentCompareMapData = null;
+    currentTreatmentCompareMapKey = "";
+    currentTreatmentTableSortKey = null;
+    currentTreatmentTableSortDirection = "asc";
     hideTreatmentAliasSmartSuggestions();
     setInputValue("treatment-alias-smart-input", "");
     setTreatmentAliasSmartStatus("Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
@@ -986,21 +1126,58 @@ function resetTreatmentFilters() {
     setInputValue("treatment-max-negative-range", "100");
     setInputValue("treatment-max-negative-input", "100");
     setInputValue("treatment-min-provider-input", "0");
-    setInputValue("treatment-radius-input", "0");
+    setInputValue("treatment-radius-input", "100");
 
     const onlyWithProviderInput = document.getElementById("treatment-only-with-provider-input");
-    const onlyCurrentCityInput = document.getElementById("treatment-only-current-city-input");
+    const radiusEnabledInput = document.getElementById("treatment-radius-enabled-input");
+    const acceptsGkvInput = document.getElementById("treatment-accepts-gkv-input");
+    const mappedProvidersOnlyInput = document.getElementById("treatment-mapped-providers-only-input");
+    const includeNoCoordsInput = document.getElementById("treatment-include-no-coords-input");
 
     if (onlyWithProviderInput) {
         onlyWithProviderInput.checked = false;
     }
 
-    if (onlyCurrentCityInput) {
-        onlyCurrentCityInput.checked = false;
+    if (acceptsGkvInput) {
+        acceptsGkvInput.checked = false;
     }
 
-    resetTreatmentLocation(false);
+    if (mappedProvidersOnlyInput) {
+        mappedProvidersOnlyInput.checked = false;
+    }
+
+    if (includeNoCoordsInput) {
+        includeNoCoordsInput.checked = false;
+    }
+
+    if (radiusEnabledInput) {
+        radiusEnabledInput.checked = false;
+    }
+
+    setTreatmentLocationMode("radius");
+    updateTreatmentRadiusInputState();
+    updateTreatmentSortSelects();
     loadTreatmentResults();
+}
+
+function bindTreatmentTableSortControls() {
+    const table = document.querySelector(".treatment-results-table");
+    if (!table) return;
+
+    table.addEventListener("click", function (event) {
+        const button = event.target.closest("[data-table-sort-key]");
+        if (!button || !table.contains(button)) return;
+
+        const key = button.dataset.tableSortKey;
+        if (currentTreatmentTableSortKey === key) {
+            currentTreatmentTableSortDirection = currentTreatmentTableSortDirection === "asc" ? "desc" : "asc";
+        } else {
+            currentTreatmentTableSortKey = key;
+            currentTreatmentTableSortDirection = ["experience", "provider"].includes(key) ? "desc" : "asc";
+        }
+
+        renderTreatmentResultsTable(getDisplayedTreatments());
+    });
 }
 
 function setInputValue(id, value) {
@@ -1013,7 +1190,7 @@ function setInputValue(id, value) {
     element.value = value;
 }
 
-function buildTreatmentTableRowHtml(treatment, index) {
+function buildTreatmentTableRowHtml(treatment, rank) {
     const treatmentName = escapeHtml(treatment.behandlung || "Unbekannte Therapie");
     const categoryHtml = buildTreatmentCategoryHtml(treatment);
     const experienceHtml = buildTreatmentExperienceHtml(treatment);
@@ -1023,7 +1200,7 @@ function buildTreatmentTableRowHtml(treatment, index) {
 
     return `
         <tr data-treat-id="${treatment.treat_id}">
-            <td class="treatment-table-rank">${index + 1}</td>
+            <td class="treatment-table-rank">${rank}</td>
             <td class="treatment-table-name">
                 <div class="treatment-table-name-stack">
                     <a class="treatment-table-detail-link" href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">
@@ -1084,9 +1261,56 @@ function renderTreatmentResultsTable(treatments) {
         return;
     }
 
-    tableBody.innerHTML = treatments.map(function (treatment, index) {
-        return buildTreatmentTableRowHtml(treatment, index);
+    const rows = treatments.map(function (treatment, index) {
+        const globalIndex = currentTreatments.findIndex(function (currentTreatment) {
+            return Number(currentTreatment.treat_id) === Number(treatment.treat_id);
+        });
+        return { treatment, rank: globalIndex >= 0 ? globalIndex + 1 : index + 1, originalIndex: index };
+    });
+
+    sortTreatmentTableRows(rows);
+    updateTreatmentTableSortHeaders();
+
+    tableBody.innerHTML = rows.map(function (row) {
+        return buildTreatmentTableRowHtml(row.treatment, row.rank);
     }).join("");
+}
+
+function sortTreatmentTableRows(rows) {
+    if (!currentTreatmentTableSortKey) return rows;
+    const factor = currentTreatmentTableSortDirection === "desc" ? -1 : 1;
+
+    rows.sort(function (rowA, rowB) {
+        const a = rowA.treatment;
+        const b = rowB.treatment;
+        let result = 0;
+
+        if (currentTreatmentTableSortKey === "rank") result = rowA.rank - rowB.rank;
+        else if (currentTreatmentTableSortKey === "name") result = String(a.behandlung || "").localeCompare(String(b.behandlung || ""), "de", { sensitivity: "base" });
+        else if (currentTreatmentTableSortKey === "category") result = String(a.typ || "").localeCompare(String(b.typ || ""), "de", { sensitivity: "base" });
+        else if (currentTreatmentTableSortKey === "experience") result = Number(a.positive_ratio || 0) - Number(b.positive_ratio || 0) || Number(a.total_votes || 0) - Number(b.total_votes || 0);
+        else if (currentTreatmentTableSortKey === "provider") result = Number(a.matching_provider_count || a.provider_count || 0) - Number(b.matching_provider_count || b.provider_count || 0);
+        else if (currentTreatmentTableSortKey === "location") {
+            const distanceA = a.nearest_provider_distance_km === null ? Infinity : Number(a.nearest_provider_distance_km);
+            const distanceB = b.nearest_provider_distance_km === null ? Infinity : Number(b.nearest_provider_distance_km);
+            result = distanceA - distanceB;
+            if (!Number.isFinite(distanceA) && !Number.isFinite(distanceB)) {
+                result = String(a.nearest_provider?.loc_city || "").localeCompare(String(b.nearest_provider?.loc_city || ""), "de", { sensitivity: "base" });
+            }
+        }
+
+        return result === 0 ? rowA.originalIndex - rowB.originalIndex : result * factor;
+    });
+    return rows;
+}
+
+function updateTreatmentTableSortHeaders() {
+    document.querySelectorAll("[data-table-sort-key]").forEach(function (button) {
+        const active = button.dataset.tableSortKey === currentTreatmentTableSortKey;
+        const indicator = button.querySelector(".treatment-table-sort-indicator");
+        button.classList.toggle("is-active", active);
+        if (indicator) indicator.textContent = active ? (currentTreatmentTableSortDirection === "asc" ? "▲" : "▼") : "↕";
+    });
 }
 
 function renderTreatmentCards(treatments) {
@@ -1142,7 +1366,7 @@ function buildTreatmentCardHtml(treatment, index) {
                 </div>
 
                 <div class="treatment-card-title-area">
-                    <h3 class="treatment-card-title">${treatmentName}</h3>
+                    <h3 class="treatment-card-title"><a class="treatment-card-title-link" href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">${treatmentName}</a></h3>
 
                     <div class="treatment-card-meta">
                         ${categoryHtml}
@@ -1235,14 +1459,6 @@ function buildTreatmentCardHtml(treatment, index) {
             </section>
 
             <footer class="treatment-card-footer treatment-card-footer-with-compare">
-                <button
-                    type="button"
-                    class="treatment-card-detail-button"
-                    data-treat-id="${treatment.treat_id}"
-                >
-                    Mehr Details
-                </button>
-
                 <button
                     type="button"
                     class="treatment-compare-add-button ${isTreatmentSelectedForCompare(treatment.treat_id) ? "is-selected" : ""}"
@@ -1526,14 +1742,25 @@ function buildTreatmentProviderHtml(treatment) {
     const filters = getTreatmentFilters();
     const providerCount = Number(treatment.provider_count ?? 0);
     const matchingProviderCount = Number(treatment.matching_provider_count ?? 0);
-    const hasSearchArea = (filters.onlyCurrentCity && getCurrentTreatmentCity() !== "") || filters.radiusKm > 0;
+    const unlocatedProviderCount = Number(treatment.unlocated_provider_count ?? 0);
+    const hasSearchArea = (filters.onlyCurrentCity && getCurrentTreatmentCity() !== "")
+        || filters.radiusKm > 0
+        || filters.acceptsGkv;
 
     if (providerCount <= 0) {
         return `<span class="treatment-provider-bubble treatment-provider-bubble-empty">0</span>`;
     }
 
     if (hasSearchArea) {
+        if (filters.includeNoCoords && unlocatedProviderCount > 0) {
+            return `<span class="treatment-provider-bubble" title="${matchingProviderCount} Anbieter im Suchgebiet, ${unlocatedProviderCount} ohne Koordinaten, ${providerCount} Anbieter gesamt">${matchingProviderCount}+?/${providerCount}</span>`;
+        }
         return `<span class="treatment-provider-bubble" title="${matchingProviderCount} Anbieter im Suchgebiet, ${providerCount} Anbieter gesamt">${matchingProviderCount}/${providerCount}</span>`;
+    }
+
+    if (filters.mappedProvidersOnly) {
+        const totalProviderCount = Number(treatment.total_provider_count ?? providerCount);
+        return `<span class="treatment-provider-bubble" title="${providerCount} kartierte von ${totalProviderCount} Anbietern">${providerCount}</span>`;
     }
 
     return `<span class="treatment-provider-bubble">${providerCount}</span>`;
@@ -1566,10 +1793,23 @@ function initTreatmentMap() {
         return;
     }
 
-    treatmentMap = L.map("treatment-map", { zoomControl: false }).setView(
+    treatmentMap = L.map("treatment-map", {
+        zoomControl: false,
+        scrollWheelZoom: false
+    }).setView(
         [treatmentDefaultMapCenter.lat, treatmentDefaultMapCenter.lng],
         6
     );
+
+    mapElement.addEventListener("click", function () {
+        treatmentMap.scrollWheelZoom.enable();
+        mapElement.classList.add("is-scroll-zoom-active");
+    });
+
+    mapElement.addEventListener("mouseleave", function () {
+        treatmentMap.scrollWheelZoom.disable();
+        mapElement.classList.remove("is-scroll-zoom-active");
+    });
 
     L.control.zoom({
         position: "topright"
@@ -1629,6 +1869,9 @@ async function applyTreatmentLocationFromInput() {
             locationInput.value = geocodedLocation.label;
         }
 
+        saveTreatmentLocationPreference();
+        updateTreatmentLocationClearButton();
+
         const cityText = geocodedLocation.city
             ? ` · Stadt: ${geocodedLocation.city}`
             : "";
@@ -1636,6 +1879,11 @@ async function applyTreatmentLocationFromInput() {
         updateTreatmentLocationStatus(`Kartenstandort gesetzt: ${geocodedLocation.label}${cityText}`);
         updateTreatmentUserLocationMarker();
         updateTreatmentRadiusCircle();
+
+        if (treatmentMap) {
+            treatmentMap.setView([geocodedLocation.lat, geocodedLocation.lng], currentTreatmentLocationMode === "city" ? 11 : 10);
+        }
+
         await loadTreatmentResults();
 
     } catch (error) {
@@ -1648,18 +1896,18 @@ async function applyTreatmentLocationFromInput() {
 
 function resetTreatmentLocation(shouldReload = true) {
     currentTreatmentUserLocation = null;
+    localStorage.removeItem(treatmentLocationStorageKey);
+    localStorage.removeItem(sharedLocationStorageKey);
+    localStorage.setItem(sharedLocationClearedStorageKey, "1");
     setInputValue("treatment-location-input", "");
-    setInputValue("treatment-radius-input", "0");
+    setInputValue("treatment-radius-input", "100");
     updateTreatmentLocationStatus("Kein Kartenstandort gesetzt.");
     clearTreatmentUserLocationMarker();
     clearTreatmentRadiusCircle();
     clearTreatmentProviderMarkers();
 
-    const onlyCurrentCityInput = document.getElementById("treatment-only-current-city-input");
-
-    if (onlyCurrentCityInput) {
-        onlyCurrentCityInput.checked = false;
-    }
+    setTreatmentLocationMode("radius");
+    updateTreatmentLocationClearButton();
 
     if (treatmentMap) {
         treatmentMap.setView([treatmentDefaultMapCenter.lat, treatmentDefaultMapCenter.lng], 6);
@@ -1670,6 +1918,113 @@ function resetTreatmentLocation(shouldReload = true) {
     if (shouldReload) {
         loadTreatmentResults();
     }
+}
+
+function setTreatmentLocationMode(mode) {
+    currentTreatmentLocationMode = mode === "city" ? "city" : "radius";
+    const radiusButton = document.getElementById("treatment-location-mode-radius-button");
+    const cityButton = document.getElementById("treatment-location-mode-city-button");
+    const radiusEnabledInput = document.getElementById("treatment-radius-enabled-input");
+
+    if (radiusButton) {
+        const active = currentTreatmentLocationMode === "radius";
+        radiusButton.classList.toggle("is-active", active);
+        radiusButton.setAttribute("aria-pressed", String(active));
+    }
+
+    if (cityButton) {
+        const active = currentTreatmentLocationMode === "city";
+        cityButton.classList.toggle("is-active", active);
+        cityButton.setAttribute("aria-pressed", String(active));
+    }
+
+    if (radiusEnabledInput) {
+        radiusEnabledInput.disabled = currentTreatmentLocationMode !== "radius";
+    }
+
+    updateTreatmentRadiusInputState();
+    saveTreatmentLocationPreference();
+}
+
+function updateTreatmentRadiusInputState() {
+    const enabledInput = document.getElementById("treatment-radius-enabled-input");
+    const radiusInput = document.getElementById("treatment-radius-input");
+    const includeNoCoordsInput = document.getElementById("treatment-include-no-coords-input");
+    const mappedProvidersOnlyInput = document.getElementById("treatment-mapped-providers-only-input");
+    const enabled = currentTreatmentLocationMode === "radius" && Boolean(enabledInput && enabledInput.checked);
+
+    if (radiusInput) {
+        radiusInput.disabled = !enabled;
+        radiusInput.classList.toggle("is-disabled", !enabled);
+    }
+    if (includeNoCoordsInput) {
+        const includeNoCoordsDisabled = !enabled || Boolean(mappedProvidersOnlyInput?.checked);
+        includeNoCoordsInput.disabled = includeNoCoordsDisabled;
+        if (includeNoCoordsDisabled) includeNoCoordsInput.checked = false;
+    }
+    updateTreatmentRadiusCircle();
+}
+
+function saveTreatmentLocationPreference() {
+    if (!currentTreatmentUserLocation) return;
+    localStorage.setItem(treatmentLocationStorageKey, JSON.stringify({ ...currentTreatmentUserLocation, mode: currentTreatmentLocationMode }));
+    localStorage.setItem(sharedLocationStorageKey, JSON.stringify({
+        location: currentTreatmentUserLocation.label,
+        label: currentTreatmentUserLocation.label,
+        city: currentTreatmentUserLocation.city || "",
+        lat: currentTreatmentUserLocation.lat,
+        lng: currentTreatmentUserLocation.lng
+    }));
+    localStorage.removeItem(sharedLocationClearedStorageKey);
+}
+
+async function restoreTreatmentLocationPreference() {
+    try {
+        const sharedRaw = localStorage.getItem(sharedLocationStorageKey);
+        const treatmentRaw = localStorage.getItem(treatmentLocationStorageKey);
+        let stored = sharedRaw ? JSON.parse(sharedRaw) : null;
+        const treatmentPreference = treatmentRaw ? JSON.parse(treatmentRaw) : null;
+
+        if (!stored && !localStorage.getItem(sharedLocationClearedStorageKey)
+            && treatmentPreference && typeof treatmentPreference.label === "string") {
+            stored = { ...treatmentPreference, location: treatmentPreference.label };
+            localStorage.setItem(sharedLocationStorageKey, JSON.stringify(stored));
+        }
+
+        const storedLocation = String(stored?.location || stored?.label || "").trim();
+        if (!stored || storedLocation === "") {
+            updateTreatmentLocationClearButton();
+            return;
+        }
+
+        if (!hasValidCoordinates(stored.lat, stored.lng)) {
+            stored = await geocodeTreatmentLocation(storedLocation);
+            localStorage.setItem(sharedLocationStorageKey, JSON.stringify({
+                ...stored,
+                location: stored.label
+            }));
+        }
+
+        currentTreatmentUserLocation = {
+            lat: Number(stored.lat),
+            lng: Number(stored.lng),
+            label: String(stored.label || "Gespeicherter Standort"),
+            city: String(stored.city || "")
+        };
+        setTreatmentLocationMode(treatmentPreference?.mode || "radius");
+        setInputValue("treatment-location-input", currentTreatmentUserLocation.label);
+        updateTreatmentLocationStatus(`Gespeicherter Standort: ${currentTreatmentUserLocation.label}`);
+        updateTreatmentUserLocationMarker();
+        updateTreatmentLocationClearButton();
+    } catch (error) {
+        console.warn("Gespeicherter Therapiestandort konnte nicht geladen werden:", error);
+        updateTreatmentLocationClearButton();
+    }
+}
+
+function updateTreatmentLocationClearButton() {
+    const button = document.getElementById("treatment-location-clear-button");
+    if (button) button.classList.toggle("is-hidden", !currentTreatmentUserLocation);
 }
 
 async function geocodeTreatmentLocation(query) {
@@ -2141,7 +2496,7 @@ function buildTreatmentMapPopupHtml(group) {
         return String(a.behandlung || "").localeCompare(String(b.behandlung || ""), "de");
     });
 
-    const visibleTreatments = treatments.slice(0, 8);
+    const visibleTreatments = treatments.slice(0, 4);
     const hiddenCount = Math.max(0, treatments.length - visibleTreatments.length);
 
     const treatmentListHtml = visibleTreatments.map(function (treatment) {
@@ -2170,8 +2525,6 @@ function buildTreatmentMapPopupHtml(group) {
         <div class="treatment-map-popup">
             <strong>${providerName}</strong>
             ${address ? `<div class="treatment-map-popup-muted">${escapeHtml(address)}</div>` : ""}
-            <hr>
-            <div><strong>Therapien an diesem nächsten Standort:</strong></div>
             <ul>
                 ${treatmentListHtml}
                 ${moreHtml}
@@ -2184,7 +2537,9 @@ function buildTreatmentMapPopupHtml(group) {
 }
 
 function buildAllMatchingProvidersPopupHtml(group) {
-    const providerBlocksHtml = group.providers.map(function (providerEntry) {
+    const visibleProviders = group.providers.slice(0, 3);
+    const hiddenProviderCount = Math.max(0, group.providers.length - visibleProviders.length);
+    const providerBlocksHtml = visibleProviders.map(function (providerEntry) {
         const provider = providerEntry.provider;
         const providerName = escapeHtml(provider.dr_display_name || "Anbieter");
         const address = buildProviderAddressText(provider);
@@ -2193,7 +2548,7 @@ function buildAllMatchingProvidersPopupHtml(group) {
             : "";
 
         const uniqueTreatments = dedupeProviderTreatments(providerEntry.treatments);
-        const treatmentListHtml = uniqueTreatments.map(function (treatment) {
+        const treatmentListHtml = uniqueTreatments.slice(0, 4).map(function (treatment) {
             const color = treatmentMapMarkerColors[Math.abs(Number(treatment.color_index || 0)) % treatmentMapMarkerColors.length];
             const distance = treatment.distance_km === null || treatment.distance_km === undefined
                 ? ""
@@ -2223,11 +2578,14 @@ function buildAllMatchingProvidersPopupHtml(group) {
         `;
     }).join("<hr>");
 
+    const moreProvidersHtml = hiddenProviderCount > 0
+        ? `<div class="treatment-map-popup-muted">+ ${hiddenProviderCount} weitere Anbieter an diesem Standort</div>`
+        : "";
+
     return `
         <div class="treatment-map-popup treatment-map-popup-wide">
-            <div><strong>Anbieterstandort mit passenden Therapien</strong></div>
-            <hr>
             ${providerBlocksHtml}
+            ${moreProvidersHtml}
         </div>
     `;
 }

@@ -165,7 +165,8 @@ function enrichItemsWithNearestProviders(
     float $userLng,
     string $providerCity = '',
     bool $hasProviderRadius = false,
-    ?float $radiusKm = null
+    ?float $radiusKm = null,
+    bool $acceptsGkv = false
 ) {
     if (empty($items)) {
         return [
@@ -248,6 +249,7 @@ function enrichItemsWithNearestProviders(
         WHERE c.treat_id IN (" . implode(', ', $placeholders) . ")
           AND c.treat_id IS NOT NULL
           AND c.dr_id IS NOT NULL
+          AND (:map_accepts_gkv = 0 OR d.dr_accepts_gkv = 'yes')
           AND l.loc_lat IS NOT NULL
           AND l.loc_lng IS NOT NULL
           AND l.loc_lat <> ''
@@ -288,6 +290,7 @@ function enrichItemsWithNearestProviders(
     $providerStmt->bindValue(':map_provider_lat_b', $userLat);
     $providerStmt->bindValue(':map_provider_lng', $userLng);
     $providerStmt->bindValue(':map_radius_km', $radiusKm ?? 0);
+    $providerStmt->bindValue(':map_accepts_gkv', $acceptsGkv ? 1 : 0, PDO::PARAM_INT);
 
     $providerStmt->execute();
     $providerRows = $providerStmt->fetchAll();
@@ -456,6 +459,9 @@ try {
 
     $minProvider = getIntParam('min_provider', 0, 0, 9999);
     $onlyWithProvider = getBoolParam('only_with_provider', false);
+    $acceptsGkv = getBoolParam('accepts_gkv', false);
+    $mappedProvidersOnly = getBoolParam('mapped_providers_only', false);
+    $includeNoCoords = getBoolParam('include_no_coords', false) && $hasProviderRadius && !$mappedProvidersOnly;
 
     if ($onlyWithProvider) {
         $minProvider = max(1, $minProvider);
@@ -772,9 +778,16 @@ try {
                         + COALESCE(rv.contra, 0)
                     ) AS total_votes,
 
-                    COALESCE(pc.provider_count, 0) AS provider_count,
+                    COALESCE(pc.provider_count, 0) AS total_provider_count,
+
+                    CASE
+                        WHEN :mapped_providers_only_for_select = 1
+                        THEN COALESCE(kpc.mapped_provider_count, 0)
+                        ELSE COALESCE(pc.provider_count, 0)
+                    END AS provider_count,
 
                     COALESCE(mpc.matching_provider_count, 0) AS matching_provider_count
+                    ,COALESCE(upc.unlocated_provider_count, 0) AS unlocated_provider_count
 
                 FROM tbl_treatments_03 t
 
@@ -820,12 +833,44 @@ try {
                 LEFT JOIN (
                     SELECT
                         c.treat_id,
-                        COUNT(DISTINCT c.dr_id) AS matching_provider_count
+                        COUNT(DISTINCT c.dr_id) AS mapped_provider_count
                     FROM tbl_cpl_drs2treatments_03 c
+                    INNER JOIN tbl_drs_03 d
+                        ON c.dr_id = d.dr_id
                     INNER JOIN tbl_drs_locations_03 l
                         ON c.dr_id = l.dr_id
                     WHERE c.treat_id IS NOT NULL
                       AND c.dr_id IS NOT NULL
+                      AND l.loc_lat IS NOT NULL
+                      AND l.loc_lng IS NOT NULL
+                      AND l.loc_lat <> ''
+                      AND l.loc_lng <> ''
+                      AND (:accepts_gkv_for_mapped = 0 OR d.dr_accepts_gkv = 'yes')
+                    GROUP BY c.treat_id
+                ) kpc
+                    ON t.treat_id = kpc.treat_id
+
+                LEFT JOIN (
+                    SELECT
+                        c.treat_id,
+                        COUNT(DISTINCT c.dr_id) AS matching_provider_count
+                    FROM tbl_cpl_drs2treatments_03 c
+                    INNER JOIN tbl_drs_03 d
+                        ON c.dr_id = d.dr_id
+                    INNER JOIN tbl_drs_locations_03 l
+                        ON c.dr_id = l.dr_id
+                    WHERE c.treat_id IS NOT NULL
+                      AND c.dr_id IS NOT NULL
+                      AND (:accepts_gkv_for_count = 0 OR d.dr_accepts_gkv = 'yes')
+                      AND (
+                            :mapped_providers_only_for_count = 0
+                            OR (
+                                l.loc_lat IS NOT NULL
+                                AND l.loc_lng IS NOT NULL
+                                AND l.loc_lat <> ''
+                                AND l.loc_lng <> ''
+                            )
+                      )
                       AND (:provider_city_for_count = ''
                            OR l.loc_city COLLATE utf8mb4_unicode_ci LIKE :provider_city_like_for_count)
                       AND (
@@ -850,12 +895,36 @@ try {
                     GROUP BY c.treat_id
                 ) mpc
                     ON t.treat_id = mpc.treat_id
+
+                LEFT JOIN (
+                    SELECT
+                        c.treat_id,
+                        COUNT(DISTINCT c.dr_id) AS unlocated_provider_count
+                    FROM tbl_cpl_drs2treatments_03 c
+                    INNER JOIN tbl_drs_03 d
+                        ON c.dr_id = d.dr_id
+                    WHERE c.treat_id IS NOT NULL
+                      AND c.dr_id IS NOT NULL
+                      AND (:accepts_gkv_for_unlocated = 0 OR d.dr_accepts_gkv = 'yes')
+                      AND NOT EXISTS (
+                          SELECT 1
+                          FROM tbl_drs_locations_03 ul
+                          WHERE ul.dr_id = c.dr_id
+                            AND ul.loc_lat IS NOT NULL
+                            AND ul.loc_lng IS NOT NULL
+                            AND ul.loc_lat <> ''
+                            AND ul.loc_lng <> ''
+                      )
+                    GROUP BY c.treat_id
+                ) upc
+                    ON t.treat_id = upc.treat_id
             ) AS calculated
         ) AS results
     ";
 
     $whereParts = [];
     $params = [
+        ':mapped_providers_only_for_select' => $mappedProvidersOnly ? 1 : 0,
         ':provider_city_for_count' => $providerCity,
         ':provider_city_like_for_count' => '%' . $providerCity . '%',
         ':has_provider_radius_for_count' => $hasProviderRadius ? 1 : 0,
@@ -863,6 +932,10 @@ try {
         ':provider_lat_for_count_b' => $hasProviderRadius ? (float)$providerLat : 0,
         ':provider_lng_for_count' => $hasProviderRadius ? (float)$providerLng : 0,
         ':radius_km_for_count' => $hasProviderRadius ? (float)$radiusKm : 0,
+        ':accepts_gkv_for_count' => $acceptsGkv ? 1 : 0,
+        ':mapped_providers_only_for_count' => $mappedProvidersOnly ? 1 : 0,
+        ':accepts_gkv_for_unlocated' => $acceptsGkv ? 1 : 0,
+        ':accepts_gkv_for_mapped' => $acceptsGkv ? 1 : 0,
     ];
 
     if ($hasTreatIdsParam) {
@@ -923,8 +996,12 @@ try {
 			$params[':category'] = $category;
 		}
 
-		if ($providerCity !== '' || $hasProviderRadius) {
-			$whereParts[] = "results.matching_provider_count > 0";
+        if ($providerCity !== '' || $hasProviderRadius || $acceptsGkv) {
+            if ($includeNoCoords) {
+                $whereParts[] = "(results.matching_provider_count > 0 OR results.unlocated_provider_count > 0)";
+            } else {
+			    $whereParts[] = "results.matching_provider_count > 0";
+            }
 		}
 
 		$whereParts[] = "results.positive_ratio >= :min_positive";
@@ -935,6 +1012,10 @@ try {
 
 		$whereParts[] = "results.provider_count >= :min_provider";
 		$params[':min_provider'] = $minProvider;
+
+        if ($mappedProvidersOnly) {
+            $whereParts[] = "results.provider_count > 0";
+        }
 	}
 
     $whereSql = '';
@@ -1006,7 +1087,9 @@ try {
         $item['negative_ratio'] = (int)$item['negative_ratio'];
 
         $item['provider_count'] = (int)$item['provider_count'];
+        $item['total_provider_count'] = (int)$item['total_provider_count'];
         $item['matching_provider_count'] = (int)$item['matching_provider_count'];
+        $item['unlocated_provider_count'] = (int)$item['unlocated_provider_count'];
     }
     unset($item);
 
@@ -1028,7 +1111,8 @@ try {
             (float)$userLng,
             $providerCity,
             $hasProviderRadius,
-            $radiusKm
+            $radiusKm,
+            $acceptsGkv
         );
     } elseif ($includeMap) {
         foreach ($items as &$item) {
@@ -1058,6 +1142,9 @@ try {
             'max_negative' => $maxNegative,
             'min_provider' => $minProvider,
             'only_with_provider' => $onlyWithProvider,
+            'accepts_gkv' => $acceptsGkv,
+            'include_no_coords' => $includeNoCoords,
+            'mapped_providers_only' => $mappedProvidersOnly,
             'sort' => $sort,
             'direction' => $direction,
             'include_map' => $includeMap,
