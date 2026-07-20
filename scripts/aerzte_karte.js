@@ -261,8 +261,10 @@ function setupDoctorRatingAndFilterControls() {
     if (searchInput) {
         searchInput.addEventListener("input", function () {
             currentDoctorSearchTerm = searchInput.value.trim();
-            showOnlyCompareSelection = false;
-            renderDoctorCompareSelection();
+            if (showOnlyCompareSelection) {
+                showOnlyCompareSelection = false;
+                refreshDoctorDisplay();
+            }
             scheduleDoctorLiveSearch();
         });
     }
@@ -836,7 +838,6 @@ function resetDoctorNavigationControls() {
     currentDoctorSearchTerm = "";
     currentSpecialtyTermId = 0;
     currentIncludeNoCoords = false;
-    currentLocation = null;
     showOnlyCompareSelection = false;
 
     if (sortSelect) sortSelect.value = "name:asc";
@@ -851,12 +852,10 @@ function resetDoctorNavigationControls() {
     if (hasPhoneInput) hasPhoneInput.checked = false;
     if (specialtySelect) specialtySelect.value = "0";
     if (searchInput) searchInput.value = "";
-    if (locationInput) locationInput.value = "";
     if (radiusEnabledInput) radiusEnabledInput.checked = false;
     if (includeNoCoordsInput) includeNoCoordsInput.checked = false;
     if (radiusInput) radiusInput.value = "100";
 
-    clearUserLocationMarker();
     setLocationMode("radius");
     updateRadiusInputState();
     renderDoctorCompareSelection();
