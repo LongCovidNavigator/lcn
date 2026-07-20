@@ -2352,12 +2352,33 @@
     }
 
     .doctor-nav-info::before {
+        left: 0;
+        right: 0;
+        width: auto;
+        max-width: none;
         background: #07152f;
         color: #ffffff;
         box-shadow: 0 8px 20px rgba(0, 32, 80, 0.22);
-        transform: translate(-50%, 4px);
-        width: min(240px, calc(100vw - 28px));
+        transform: translateY(4px);
         font-size: 0.72rem;
+    }
+
+    .doctor-nav-heading,
+    .doctor-nav-checkbox-row {
+        position: relative;
+    }
+
+    .doctor-nav-info {
+        position: static;
+    }
+
+    .doctor-nav-info::after {
+        display: none;
+    }
+
+    .doctor-nav-info:hover::before,
+    .doctor-nav-info:focus-visible::before {
+        transform: translateY(0);
     }
 
     .doctor-results-header {
