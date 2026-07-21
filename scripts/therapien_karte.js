@@ -30,9 +30,14 @@ let currentTreatmentTableSortKey = null;
 let currentTreatmentTableSortDirection = "asc";
 let treatmentAutoApplyTimer = null;
 let treatmentSearchRequestId = 0;
+let treatmentSearchController = null;
+let treatmentMapDataController = null;
+let treatmentMapRequestId = 0;
+let currentTreatmentMapData = null;
 let treatmentLocationSuggestionTimer = null;
 let treatmentLocationSuggestionController = null;
 let treatmentLocationSuggestions = [];
+let treatmentTableResizeTimer = null;
 
 const treatmentLocationStorageKey = "lcn_treatment_location_preference";
 const sharedLocationStorageKey = "lcn_shared_location_preference";
@@ -83,6 +88,14 @@ async function initTreatmentPage() {
     bindTreatmentCardContainerEvents();
     bindTreatmentTableContainerEvents();
     bindTreatmentMapEvents();
+    window.addEventListener("resize", function () {
+        clearTimeout(treatmentTableResizeTimer);
+        treatmentTableResizeTimer = setTimeout(function () {
+            if (currentViewMode === "table") {
+                renderTreatmentResultsTable(getDisplayedTreatments());
+            }
+        }, 100);
+    });
     setTreatmentLocationMode("radius");
     await restoreTreatmentLocationPreference();
     updateTreatmentRadiusInputState();
@@ -90,13 +103,27 @@ async function initTreatmentPage() {
 }
 
 async function loadTreatmentResults() {
+    clearTimeout(treatmentAutoApplyTimer);
+    treatmentAutoApplyTimer = null;
+
+    if (treatmentSearchController) {
+        treatmentSearchController.abort();
+    }
+    if (treatmentMapDataController) {
+        treatmentMapDataController.abort();
+    }
+
+    treatmentSearchController = new AbortController();
     const requestId = ++treatmentSearchRequestId;
     const tableBody = document.getElementById("treatment-results-body");
     const cardResults = document.getElementById("treatment-card-results");
 
     try {
-        const url = buildTreatmentSearchUrl();
-        const response = await fetch(url);
+        const loadsMapImmediately = getTreatmentFilters().sortKey === "distance";
+        const url = buildTreatmentSearchUrl(loadsMapImmediately);
+        const response = await fetch(url, {
+            signal: treatmentSearchController.signal
+        });
 
         if (!response.ok) {
             throw new Error("Fehler beim Laden der Therapiedaten.");
@@ -129,7 +156,17 @@ async function loadTreatmentResults() {
 
         refreshTreatmentDisplay();
 
+        if (!loadsMapImmediately && currentTreatmentUserLocation) {
+            setTimeout(function () {
+                loadTreatmentMapData(requestId, currentTreatments);
+            }, 50);
+        }
+
     } catch (error) {
+        if (error.name === "AbortError") {
+            return;
+        }
+
         console.error("Fehler beim Laden der Therapien:", error);
 
         if (tableBody) {
@@ -153,8 +190,68 @@ async function loadTreatmentResults() {
     }
 }
 
+async function loadTreatmentMapData(resultRequestId, treatments) {
+    if (!currentTreatmentUserLocation || resultRequestId !== treatmentSearchRequestId) {
+        return;
+    }
 
-function buildTreatmentSearchUrl() {
+    if (treatmentMapDataController) {
+        treatmentMapDataController.abort();
+    }
+
+    treatmentMapDataController = new AbortController();
+    const mapRequestId = ++treatmentMapRequestId;
+
+    try {
+        const response = await fetch(buildTreatmentSearchUrl(true), {
+            signal: treatmentMapDataController.signal
+        });
+
+        if (!response.ok) {
+            throw new Error("Fehler beim Laden der Kartendaten.");
+        }
+
+        const data = await response.json();
+
+        if (
+            resultRequestId !== treatmentSearchRequestId
+            || mapRequestId !== treatmentMapRequestId
+            || !data.ok
+            || !Array.isArray(data.items)
+        ) {
+            return;
+        }
+
+        const mapItemsById = new Map(data.items.map(function (item) {
+            return [Number(item.treat_id), item];
+        }));
+
+        treatments.forEach(function (treatment) {
+            const mapItem = mapItemsById.get(Number(treatment.treat_id));
+
+            if (!mapItem) {
+                return;
+            }
+
+            treatment.nearest_provider = mapItem.nearest_provider || null;
+            treatment.nearest_provider_distance_km = mapItem.nearest_provider_distance_km === null
+                || mapItem.nearest_provider_distance_km === undefined
+                ? null
+                : Number(mapItem.nearest_provider_distance_km);
+        });
+
+        currentTreatmentMapData = data.map && typeof data.map === "object" ? data.map : null;
+        refreshTreatmentDisplay();
+    } catch (error) {
+        if (error.name !== "AbortError") {
+            console.warn("Kartendaten konnten nicht nachgeladen werden:", error);
+            updateTreatmentMapStatus("Die Kartendaten konnten nicht geladen werden.");
+        }
+    }
+}
+
+
+function buildTreatmentSearchUrl(includeMap = false) {
     const filters = getTreatmentFilters();
     const params = new URLSearchParams();
 
@@ -203,12 +300,15 @@ function buildTreatmentSearchUrl() {
     if (filters.sortKey === "distance") {
         params.set("sort", "name");
         params.set("direction", "asc");
+    } else if (filters.sortKey === "matching_provider_count" && !hasActiveTreatmentSearchArea()) {
+        params.set("sort", "provider_count");
+        params.set("direction", filters.sortDirection);
     } else {
         params.set("sort", filters.sortKey);
         params.set("direction", filters.sortDirection);
     }
 
-    if (currentTreatmentUserLocation) {
+    if (includeMap && currentTreatmentUserLocation) {
         params.set("include_map", "1");
         params.set("lat", String(currentTreatmentUserLocation.lat));
         params.set("lng", String(currentTreatmentUserLocation.lng));
@@ -429,11 +529,49 @@ function updateTreatmentSortSelects() {
     ].filter(Boolean).forEach(function (select) {
         select.value = value;
     });
+
+    updateTreatmentSortAvailability();
+}
+
+function hasActiveTreatmentSearchArea() {
+    const radiusEnabledInput = document.getElementById("treatment-radius-enabled-input");
+
+    return Boolean(currentTreatmentUserLocation) && (
+        currentTreatmentLocationMode === "city"
+        || (currentTreatmentLocationMode === "radius" && Boolean(radiusEnabledInput?.checked))
+    );
+}
+
+function updateTreatmentSortAvailability() {
+    const searchAreaActive = hasActiveTreatmentSearchArea();
+    const sortSelects = [
+        document.getElementById("treatment-sort-select"),
+        document.getElementById("treatment-results-sort-select")
+    ].filter(Boolean);
+
+    sortSelects.forEach(function (select) {
+        Array.from(select.options).forEach(function (option) {
+            if (option.value.startsWith("matching_provider_count:")) {
+                option.disabled = false;
+            }
+        });
+    });
+
 }
 
 function scheduleTreatmentAutoApply(delay = 300) {
     clearTimeout(treatmentAutoApplyTimer);
-    treatmentAutoApplyTimer = setTimeout(applyTreatmentFiltersFromControls, delay);
+    treatmentSearchRequestId += 1;
+    treatmentMapRequestId += 1;
+
+    if (treatmentSearchController) {
+        treatmentSearchController.abort();
+    }
+    if (treatmentMapDataController) {
+        treatmentMapDataController.abort();
+    }
+
+    treatmentAutoApplyTimer = setTimeout(runTreatmentFilterLoad, delay);
 }
 
 function scheduleTreatmentLocationSuggestions() {
@@ -483,6 +621,12 @@ function hideTreatmentLocationSuggestions() {
 }
 
 function applyTreatmentFiltersFromControls() {
+    scheduleTreatmentAutoApply(250);
+}
+
+function runTreatmentFilterLoad() {
+    treatmentAutoApplyTimer = null;
+
     if (validateLocationDependentFilters()) {
         loadTreatmentResults();
     }
@@ -1173,7 +1317,13 @@ function bindTreatmentTableSortControls() {
             currentTreatmentTableSortDirection = currentTreatmentTableSortDirection === "asc" ? "desc" : "asc";
         } else {
             currentTreatmentTableSortKey = key;
-            currentTreatmentTableSortDirection = ["experience", "provider"].includes(key) ? "desc" : "asc";
+            currentTreatmentTableSortDirection = [
+                "experience",
+                "experience-negative",
+                "provider",
+                "provider-total",
+                "provider-area"
+            ].includes(key) ? "desc" : "asc";
         }
 
         renderTreatmentResultsTable(getDisplayedTreatments());
@@ -1190,12 +1340,14 @@ function setInputValue(id, value) {
     element.value = value;
 }
 
-function buildTreatmentTableRowHtml(treatment, rank) {
+function buildTreatmentTableRowHtml(treatment, rank, presentation) {
     const treatmentName = escapeHtml(treatment.behandlung || "Unbekannte Therapie");
     const categoryHtml = buildTreatmentCategoryHtml(treatment);
-    const experienceHtml = buildTreatmentExperienceHtml(treatment);
+    const experienceHtml = buildTreatmentExperienceHtml(treatment, presentation.experienceMode);
     const providerHtml = buildTreatmentProviderHtml(treatment);
-    const distanceLocationHtml = buildTreatmentDistanceLocationHtml(treatment);
+    const metricHtml = presentation.isMobile
+        ? buildTreatmentMobileMetricHtml(treatment, presentation.metricMode)
+        : buildTreatmentDistanceLocationHtml(treatment);
     const isSelected = isTreatmentSelectedForCompare(treatment.treat_id);
 
     return `
@@ -1218,9 +1370,82 @@ function buildTreatmentTableRowHtml(treatment, rank) {
             <td>${categoryHtml}</td>
             <td>${experienceHtml}</td>
             <td>${providerHtml}</td>
-            <td>${distanceLocationHtml}</td>
+            <td>${metricHtml}</td>
         </tr>
     `;
+}
+
+function buildTreatmentMobileMetricHtml(treatment, mode) {
+    if (mode === "provider-total") {
+        return `<div class="treatment-table-mobile-provider-count">${Number(treatment.provider_count ?? 0)}</div>`;
+    }
+
+    if (mode === "provider-area") {
+        const totalCount = Number(treatment.total_provider_count ?? treatment.provider_count ?? 0);
+        const matchingCount = hasActiveTreatmentSearchArea()
+            ? Number(treatment.matching_provider_count ?? 0)
+            : totalCount;
+        return `
+            <div class="treatment-table-mobile-provider-count">${matchingCount}</div>
+            <div class="treatment-table-muted">von ${totalCount}</div>
+        `;
+    }
+
+    return buildTreatmentDistanceLocationHtml(treatment);
+}
+
+function updateTreatmentMobileTablePresentation() {
+    const table = document.querySelector(".treatment-results-table");
+    const filters = getTreatmentFilters();
+    const experienceButton = document.getElementById("treatment-table-experience-button");
+    const experienceHeading = document.getElementById("treatment-table-experience-heading");
+    const metricButton = document.getElementById("treatment-table-metric-button");
+    const metricHeading = document.getElementById("treatment-table-metric-heading");
+    const providerHeading = document.getElementById("treatment-table-provider-heading");
+    const isMobile = window.matchMedia("(max-width: 760px)").matches;
+    const experienceMode = isMobile && filters.sortKey === "negative_ratio" ? "negative" : isMobile ? "positive" : "all";
+    let metricMode = "location";
+
+    if (isMobile && filters.sortKey === "provider_count") {
+        metricMode = "provider-total";
+    } else if (isMobile && filters.sortKey === "matching_provider_count") {
+        metricMode = "provider-area";
+    }
+
+    if (table) {
+        table.dataset.mobileMetric = metricMode;
+        table.dataset.mobileExperience = experienceMode;
+    }
+
+    if (experienceButton) {
+        experienceButton.dataset.tableSortKey = experienceMode === "negative" ? "experience-negative" : "experience";
+    }
+
+    if (experienceHeading) {
+        experienceHeading.textContent = experienceMode === "negative" ? "Negativ" : experienceMode === "positive" ? "Positiv" : "Erfahrung";
+    }
+
+    if (metricButton) {
+        metricButton.dataset.tableSortKey = metricMode;
+    }
+
+    if (metricHeading) {
+        metricHeading.textContent = metricMode === "provider-total"
+            ? "Anbieter gesamt"
+            : metricMode === "provider-area"
+                ? "Im Suchgebiet"
+                : "Entfernung / Ort";
+    }
+
+    if (providerHeading) {
+        const searchAreaActive = hasActiveTreatmentSearchArea() || filters.sortKey === "matching_provider_count";
+        providerHeading.textContent = searchAreaActive ? "Suchgebiet / Gesamt" : "Anbieter gesamt";
+        providerHeading.title = searchAreaActive
+            ? "Anbieter im aktiven Suchgebiet / Anbieter insgesamt"
+            : "Anbieter insgesamt";
+    }
+
+    return { isMobile, metricMode, experienceMode };
 }
 
 
@@ -1252,6 +1477,8 @@ function renderTreatmentResultsTable(treatments) {
         return;
     }
 
+    const presentation = updateTreatmentMobileTablePresentation();
+
     if (!treatments || treatments.length === 0) {
         tableBody.innerHTML = `
             <tr>
@@ -1272,7 +1499,7 @@ function renderTreatmentResultsTable(treatments) {
     updateTreatmentTableSortHeaders();
 
     tableBody.innerHTML = rows.map(function (row) {
-        return buildTreatmentTableRowHtml(row.treatment, row.rank);
+        return buildTreatmentTableRowHtml(row.treatment, row.rank, presentation);
     }).join("");
 }
 
@@ -1289,7 +1516,14 @@ function sortTreatmentTableRows(rows) {
         else if (currentTreatmentTableSortKey === "name") result = String(a.behandlung || "").localeCompare(String(b.behandlung || ""), "de", { sensitivity: "base" });
         else if (currentTreatmentTableSortKey === "category") result = String(a.typ || "").localeCompare(String(b.typ || ""), "de", { sensitivity: "base" });
         else if (currentTreatmentTableSortKey === "experience") result = Number(a.positive_ratio || 0) - Number(b.positive_ratio || 0) || Number(a.total_votes || 0) - Number(b.total_votes || 0);
+        else if (currentTreatmentTableSortKey === "experience-negative") result = Number(a.negative_ratio || 0) - Number(b.negative_ratio || 0) || Number(a.total_votes || 0) - Number(b.total_votes || 0);
         else if (currentTreatmentTableSortKey === "provider") result = Number(a.matching_provider_count || a.provider_count || 0) - Number(b.matching_provider_count || b.provider_count || 0);
+        else if (currentTreatmentTableSortKey === "provider-total") result = Number(a.provider_count || 0) - Number(b.provider_count || 0);
+        else if (currentTreatmentTableSortKey === "provider-area") {
+            const countA = hasActiveTreatmentSearchArea() ? Number(a.matching_provider_count || 0) : Number(a.total_provider_count ?? a.provider_count ?? 0);
+            const countB = hasActiveTreatmentSearchArea() ? Number(b.matching_provider_count || 0) : Number(b.total_provider_count ?? b.provider_count ?? 0);
+            result = countA - countB;
+        }
         else if (currentTreatmentTableSortKey === "location") {
             const distanceA = a.nearest_provider_distance_km === null ? Infinity : Number(a.nearest_provider_distance_km);
             const distanceB = b.nearest_provider_distance_km === null ? Infinity : Number(b.nearest_provider_distance_km);
@@ -1717,7 +1951,7 @@ function buildTreatmentCategoryHtml(treatment) {
     `;
 }
 
-function buildTreatmentExperienceHtml(treatment) {
+function buildTreatmentExperienceHtml(treatment, mode = "all") {
     const totalVotes = Number(treatment.total_votes ?? 0);
 
     if (totalVotes === 0) {
@@ -1727,6 +1961,20 @@ function buildTreatmentExperienceHtml(treatment) {
     const positiveRatio = Number(treatment.positive_ratio ?? 0);
     const neutralRatio = Number(treatment.neutral_ratio ?? 0);
     const negativeRatio = Number(treatment.negative_ratio ?? 0);
+
+    if (mode === "positive" || mode === "negative") {
+        const isNegative = mode === "negative";
+        const ratio = isNegative ? negativeRatio : positiveRatio;
+        const badgeClass = isNegative ? "treatment-table-badge-negative" : "treatment-table-badge-positive";
+        const prefix = isNegative ? "-" : "+";
+
+        return `
+            <div class="treatment-table-experience-grid">
+                <span class="treatment-table-experience-value ${badgeClass}">${prefix}${ratio}%</span>
+                <span class="treatment-table-vote-count">(n=${totalVotes})</span>
+            </div>
+        `;
+    }
 
     return `
         <div class="treatment-table-experience-grid">
@@ -1746,9 +1994,14 @@ function buildTreatmentProviderHtml(treatment) {
     const hasSearchArea = (filters.onlyCurrentCity && getCurrentTreatmentCity() !== "")
         || filters.radiusKm > 0
         || filters.acceptsGkv;
+    const displaysWholeResultAsSearchArea = filters.sortKey === "matching_provider_count" && !hasSearchArea;
 
     if (providerCount <= 0) {
         return `<span class="treatment-provider-bubble treatment-provider-bubble-empty">0</span>`;
+    }
+
+    if (displaysWholeResultAsSearchArea) {
+        return `<span class="treatment-provider-bubble" title="${providerCount} Anbieter im Suchgebiet, ${providerCount} Anbieter gesamt">${providerCount}/${providerCount}</span>`;
     }
 
     if (hasSearchArea) {
@@ -1963,6 +2216,7 @@ function updateTreatmentRadiusInputState() {
         if (includeNoCoordsDisabled) includeNoCoordsInput.checked = false;
     }
     updateTreatmentRadiusCircle();
+    updateTreatmentSortAvailability();
 }
 
 function saveTreatmentLocationPreference() {

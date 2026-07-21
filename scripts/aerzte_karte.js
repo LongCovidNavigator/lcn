@@ -1575,6 +1575,7 @@ function buildDoctorSpecialtyChipsHtml(doctor, chipClassName = "doctor-card-tag"
 function renderDoctorResultsTable(doctors) {
     const tableBody = document.getElementById("doctor-map-results-body");
 
+    updateDoctorMobileTablePresentation();
     updateDoctorTableSortHeaders();
 
     if (!tableBody) {
@@ -1620,8 +1621,8 @@ function buildDoctorTableRowHtml(doctor, rank) {
                     </button>
                 </div>
             </td>
-            <td>${buildDoctorTableLocationHtml(doctor)}</td>
             <td>${buildDoctorTableExperienceHtml(doctor)}</td>
+            <td>${buildDoctorTableLocationHtml(doctor)}</td>
             <td>${buildDoctorTableInsuranceHtml(doctor)}</td>
             <td>${buildDoctorTableContactHtml(doctor)}</td>
         </tr>
@@ -1760,6 +1761,20 @@ function buildDoctorTableExperienceHtml(doctor) {
 
     if (stats.totalVotes === 0) {
         return `<span class="doctor-table-muted">Noch keine Bewertungen</span>`;
+    }
+
+    if (window.matchMedia("(max-width: 760px)").matches) {
+        const showsNegative = currentDoctorSortKey === "negative_ratio";
+        const ratio = showsNegative ? stats.contraRatio : stats.proRatio;
+        const badgeClass = showsNegative ? "doctor-table-badge-negative" : "doctor-table-badge-positive";
+        const prefix = showsNegative ? "-" : "+";
+
+        return `
+            <div class="doctor-table-experience-grid">
+                <span class="doctor-table-experience-value ${badgeClass}">${prefix}${ratio}%</span>
+                <span class="doctor-table-vote-count">(n=${stats.totalVotes})</span>
+            </div>
+        `;
     }
 
     return `
@@ -2088,7 +2103,6 @@ function buildDoctorPopupHtml(doctor) {
 	const ratingText = stats.totalVotes > 0
         ? `${stats.proRatio}% positiv · ${stats.totalVotes} Bewertungen`
         : "Noch keine Bewertungen";
-
     return `
         <div class="doctor-map-popup">
             <strong>${name}</strong><br>
@@ -2198,4 +2212,19 @@ function escapeHtml(value) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+}
+
+function updateDoctorMobileTablePresentation() {
+    const heading = document.getElementById("doctor-table-experience-heading");
+
+    if (!heading) {
+        return;
+    }
+
+    if (!window.matchMedia("(max-width: 760px)").matches) {
+        heading.textContent = "Erfahrung";
+        return;
+    }
+
+    heading.textContent = currentDoctorSortKey === "negative_ratio" ? "Negativ" : "Positiv";
 }

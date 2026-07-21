@@ -15,7 +15,7 @@
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
 
-    <link rel="stylesheet" href="styles/therapien_karte.css?v=25">
+    <link rel="stylesheet" href="styles/therapien_karte.css?v=35">
 </head>
 
 <script>
@@ -395,9 +395,9 @@
                         <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="rank"><span class="table-rank-label-full">Platz</span><span class="table-rank-label-short">#</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                         <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="name">Therapie <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                         <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="category">Kategorie <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
-                        <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="experience">Erfahrung <span class="treatment-table-header-note">(n = Votes)</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
-                        <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="provider">Anbieter <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
-                        <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="location">Entfernung / Ort <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
+                        <th><button id="treatment-table-experience-button" class="treatment-table-sort-button" type="button" data-table-sort-key="experience"><span id="treatment-table-experience-heading">Erfahrung</span> <span class="treatment-table-header-note">(n = Votes)</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
+                        <th><button id="treatment-table-provider-button" class="treatment-table-sort-button" type="button" data-table-sort-key="provider"><span id="treatment-table-provider-heading">Anbieter gesamt</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
+                        <th><button id="treatment-table-metric-button" class="treatment-table-sort-button" type="button" data-table-sort-key="location"><span id="treatment-table-metric-heading">Entfernung / Ort</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                     </tr>
                 </thead>
 
@@ -411,7 +411,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="scripts/therapien_karte.js?v=23"></script>
+    <script src="scripts/therapien_karte.js?v=31"></script>
 
     <div id="footer-placeholder"></div>
 

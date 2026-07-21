@@ -14,7 +14,7 @@
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
-    <link rel="stylesheet" href="styles/aerzte_karte.css?v=5">
+    <link rel="stylesheet" href="styles/aerzte_karte.css?v=6">
 </head>
 
 <script>
@@ -423,8 +423,8 @@
 					<tr>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="rank"><span class="table-rank-label-full">Platz</span><span class="table-rank-label-short">#</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="name">Ärzt:in <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
+						<th><button id="doctor-table-experience-button" class="doctor-table-sort-button" type="button" data-table-sort-key="experience"><span id="doctor-table-experience-heading">Erfahrung</span> <span class="doctor-table-header-note">(n = Votes)</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="location">Standort <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
-						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="experience">Erfahrung <span class="doctor-table-header-note">(n = Votes)</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="insurance">Versorgung <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="contact">Kontakt <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 					</tr>
@@ -440,7 +440,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-	<script src="scripts/aerzte_karte.js?v=6"></script>
+	<script src="scripts/aerzte_karte.js?v=9"></script>
 
     <div id="footer-placeholder"></div>
 
