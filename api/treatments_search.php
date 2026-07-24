@@ -954,6 +954,7 @@ try {
 		}
 	} elseif ($treatId > 0) {
 		$whereParts[] = "results.treat_id = :treat_id";
+		$params[':treat_id'] = $treatId;
 	}
 
 	if ($treatId <= 0) {
