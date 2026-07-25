@@ -426,6 +426,7 @@ try {
 
     $search = getStringParam('search');
     $category = getStringParam('category');
+	$subcategory = getStringParam('subcategory');
 
     $searchMode = getStringParam('search_mode', 'basic');
 
@@ -742,6 +743,7 @@ try {
                     t.slug,
                     t.behandlung,
                     t.typ,
+					t.unterkategorie,
                     t.aufwand,
                     t.crashrisiko,
                     t.eskalationsstufe,
@@ -997,6 +999,11 @@ try {
 			$params[':category'] = $category;
 		}
 
+		if ($subcategory !== '') {
+			$whereParts[] = "results.unterkategorie COLLATE utf8mb4_unicode_ci = :subcategory";
+			$params[':subcategory'] = $subcategory;
+		}
+
         if ($providerCity !== '' || $hasProviderRadius || $acceptsGkv) {
             if ($includeNoCoords) {
                 $whereParts[] = "(results.matching_provider_count > 0 OR results.unlocated_provider_count > 0)";
@@ -1028,16 +1035,42 @@ try {
     $totalCount = (int)$pdo->query("SELECT COUNT(*) FROM tbl_treatments_03")->fetchColumn();
 
     $categoriesStmt = $pdo->query("
-        SELECT DISTINCT typ
-        FROM tbl_treatments_03
-        WHERE typ IS NOT NULL
-          AND TRIM(typ) <> ''
-        ORDER BY typ ASC
-    ");
+		SELECT DISTINCT typ
+		FROM tbl_treatments_03
+		WHERE typ IS NOT NULL
+		  AND TRIM(typ) <> ''
+		ORDER BY typ ASC
+	");
 
-    $categories = array_map(function ($row) {
-        return $row['typ'];
-    }, $categoriesStmt->fetchAll());
+	$categories = array_map(function ($row) {
+		return $row['typ'];
+	}, $categoriesStmt->fetchAll());
+
+	$subcategoriesStmt = $pdo->query("
+		SELECT DISTINCT typ, unterkategorie
+		FROM tbl_treatments_03
+		WHERE typ IS NOT NULL
+		  AND TRIM(typ) <> ''
+		  AND unterkategorie IS NOT NULL
+		  AND TRIM(unterkategorie) <> ''
+		ORDER BY typ ASC, unterkategorie ASC
+	");
+
+	$subcategoriesByCategory = [];
+
+	foreach ($subcategoriesStmt->fetchAll() as $row) {
+		$mainCategory = $row['typ'];
+
+		if (!isset($subcategoriesByCategory[$mainCategory])) {
+			$subcategoriesByCategory[$mainCategory] = [];
+		}
+
+		$subcategoriesByCategory[$mainCategory][] = $row['unterkategorie'];
+	}
+
+	$subcategories = $category !== ''
+		? ($subcategoriesByCategory[$category] ?? [])
+		: [];
 
     $countSql = "
         SELECT COUNT(*)
@@ -1124,18 +1157,21 @@ try {
     }
 
     echo json_encode([
-        'ok' => true,
-        'count' => $filteredCount,
-        'total_count' => $totalCount,
-        'categories' => $categories,
-        'items' => $items,
-        'filters' => [
+		'ok' => true,
+		'count' => $filteredCount,
+		'total_count' => $totalCount,
+		'categories' => $categories,
+		'subcategories' => $subcategories,
+		'subcategories_by_category' => $subcategoriesByCategory,
+		'items' => $items,
+		'filters' => [
             'treat_id' => $treatId,
             'treat_ids' => $treatIds,
             'search' => $search,
-            'search_mode' => $searchMode,
-            'category' => $category,
-            'provider_city' => $providerCity,
+			'search_mode' => $searchMode,
+			'category' => $category,
+			'subcategory' => $subcategory,
+			'provider_city' => $providerCity,
             'provider_lat' => $hasProviderRadius ? (float)$providerLat : null,
             'provider_lng' => $hasProviderRadius ? (float)$providerLng : null,
             'radius_km' => $hasProviderRadius ? (float)$radiusKm : null,
