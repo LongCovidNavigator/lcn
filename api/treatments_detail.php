@@ -104,9 +104,6 @@ function loadTreatmentBase(PDO $pdo, int $treatId) {
                 t.wirkgeschwindigkeit,
                 t.wirkmechanismus,
                 t.indikationen_anwendungsgebiete,
-                t.weitere_hinweise,
-                t.bookstack_page_id,
-                t.wiki_url_path,
 
                 (
                     COALESCE(lv.pro, 0)
@@ -189,10 +186,6 @@ function loadTreatmentBase(PDO $pdo, int $treatId) {
     }
 
     $item['treat_id'] = (int)$item['treat_id'];
-
-    $item['bookstack_page_id'] = $item['bookstack_page_id'] !== null
-        ? (int)$item['bookstack_page_id']
-        : null;
 
     $item['pro'] = (int)$item['pro'];
     $item['neutral'] = (int)$item['neutral'];

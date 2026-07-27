@@ -59,9 +59,6 @@ function normalizeTreatmentDetail(treatment) {
         wirkgeschwindigkeit: treatment.wirkgeschwindigkeit || "",
         wirkmechanismus: treatment.wirkmechanismus || "",
         indikationen_anwendungsgebiete: treatment.indikationen_anwendungsgebiete || "",
-        weitere_hinweise: treatment.weitere_hinweise || "",
-        bookstack_page_id: treatment.bookstack_page_id ?? null,
-        wiki_url_path: treatment.wiki_url_path || "",
         pro: Number(treatment.pro ?? 0),
         neutral: Number(treatment.neutral ?? 0),
         contra: Number(treatment.contra ?? 0),
@@ -276,7 +273,6 @@ function renderTreatmentDetail(treatment) {
     renderTreatmentRating(treatment);
     renderCompactText("treatment-detail-category", category);
     renderTreatmentProviderCard(treatment);
-    renderCompactText("treatment-detail-note", treatment.weitere_hinweise || "Noch kein Hinweis hinterlegt.");
     renderTreatmentProviders(treatment.providers);
     renderTreatmentSources(treatment.sources);
     renderTreatmentAliases(treatment);

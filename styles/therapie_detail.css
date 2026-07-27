@@ -1,13 +1,13 @@
-/* ------------------------------
-   Therapie-Detailseite: kompakt
------------------------------- */
+/* =========================================================
+   1. GRUNDSTRUKTUR UND KOMPONENTEN
+========================================================= */
 
 .treatment-detail-page {
     background: #f5f8fc;
 }
 
 .treatment-detail-page-shell {
-    width: min(1580px, calc(100% - 32px));
+    width: min(1120px, calc(100% - 40px));
     margin: 0 auto 44px auto;
 }
 
@@ -540,590 +540,9 @@
     color: #66758f;
 }
 
-.treatment-detail-provider-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    border: 1px solid #dbe5f1;
-    border-radius: 10px;
-    background: #fbfcfe;
-    overflow: hidden;
-}
-
-.treatment-detail-provider-view-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    padding: 10px 13px;
-    border-bottom: 1px solid #dbe5f1;
-    background: #ffffff;
-}
-
-.treatment-detail-provider-view-toolbar > span {
-    color: #07326f;
-    font-size: 0.82rem;
-    font-weight: 900;
-}
-
-.treatment-detail-provider-view-switch {
-    display: inline-flex;
-    border: 1px solid #b9c8dc;
-    border-radius: 7px;
-    overflow: hidden;
-    background: #f3f6fa;
-}
-
-.treatment-detail-provider-view-button {
-    border: none;
-    border-right: 1px solid #b9c8dc;
-    background: transparent;
-    color: #07326f;
-    padding: 6px 11px;
-    font-size: 0.76rem;
-    font-weight: 900;
-    cursor: pointer;
-}
-
-.treatment-detail-provider-view-button:last-child {
-    border-right: none;
-}
-
-.treatment-detail-provider-view-button:hover {
-    background: #eaf1f8;
-}
-
-.treatment-detail-provider-view-button.is-active {
-    background: #003878;
-    color: #ffffff;
-}
-
-.treatment-detail-provider-list-inner {
-    display: flex;
-    flex-direction: column;
-}
-
-.treatment-detail-provider-group {
-    min-width: 0;
-    padding: 13px;
-}
-
-.treatment-detail-provider-group + .treatment-detail-provider-group {
-    border-top: 1px solid #dbe5f1;
-    background: #ffffff;
-}
-
-.treatment-detail-provider-group-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin: 0 0 10px 0;
-}
-
-.treatment-detail-provider-group-header h3 {
-    margin: 0;
-    color: #07326f;
-    font-size: 0.88rem;
-    font-weight: 900;
-}
-
-.treatment-detail-provider-group-header span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 25px;
-    height: 23px;
-    padding: 0 8px;
-    border: 1px solid #c8dcf2;
-    border-radius: 999px;
-    background: #f3f8ff;
-    color: #005fa8;
-    font-size: 0.72rem;
-    font-weight: 900;
-}
-
-.treatment-detail-provider-group-note {
-    margin: -4px 0 10px 0;
-    color: #66758f;
-    font-size: 0.76rem;
-    font-weight: 700;
-    line-height: 1.35;
-}
-
-.treatment-detail-provider-card-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.treatment-detail-provider-card {
-    min-width: 0;
-    border: 1px solid #dbe5f1;
-    border-radius: 10px;
-    background: #ffffff;
-    padding: 12px 13px;
-}
-
-.treatment-detail-provider-card-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 11px;
-}
-
-.treatment-detail-provider-card h3 {
-    margin: 0 0 4px 0;
-    color: #07326f;
-    font-size: 0.84rem;
-    font-weight: 900;
-}
-
-.treatment-detail-provider-card p {
-    margin: 0;
-    color: #526b90;
-    font-size: 0.76rem;
-    font-weight: 700;
-    line-height: 1.3;
-}
-
-.treatment-detail-provider-detail-link {
-    color: #006b60;
-    font-size: 0.74rem;
-    font-weight: 900;
-    text-decoration: none;
-    white-space: nowrap;
-}
-
-.treatment-detail-provider-detail-link:hover {
-    text-decoration: underline;
-}
-
-.treatment-detail-provider-card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-}
-
-.treatment-detail-provider-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.treatment-detail-care-badge {
-    display: inline-flex;
-    align-items: center;
-    min-height: 20px;
-    padding: 2px 7px;
-    border-radius: 999px;
-    font-size: 0.68rem;
-    font-weight: 900;
-}
-
-.treatment-detail-care-badge-positive {
-    border: 1px solid #bfe7d1;
-    background: #f1fbf6;
-    color: #008c54;
-}
-
-.treatment-detail-provider-contact {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.treatment-detail-provider-contact a {
-    color: #006b60;
-    font-size: 0.76rem;
-    font-weight: 900;
-    text-decoration: none;
-}
-
-.treatment-detail-provider-contact a:hover {
-    text-decoration: underline;
-}
-
 /* ------------------------------
-   Arztbewertungen im Anbieterbereich
------------------------------- */
-
-.treatment-detail-provider-rating {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-    margin: 8px 0 10px 0;
-}
-
-.treatment-detail-provider-rating-item {
-    padding: 7px 5px;
-    border-radius: 8px;
-    border: 1px solid #dbe5f1;
-    text-align: center;
-}
-
-.treatment-detail-provider-rating-item strong {
-    display: block;
-    margin-bottom: 2px;
-    font-size: 0.9rem;
-    font-weight: 900;
-    line-height: 1;
-}
-
-.treatment-detail-provider-rating-item span {
-    color: #425672;
-    font-size: 0.64rem;
-    font-weight: 800;
-    line-height: 1;
-}
-
-.treatment-detail-provider-rating-positive {
-    background: #f1fbf6;
-    border-color: #bfe7d1;
-}
-
-.treatment-detail-provider-rating-positive strong {
-    color: #008c54;
-}
-
-.treatment-detail-provider-rating-neutral {
-    background: #f3f8ff;
-    border-color: #c8dcf2;
-}
-
-.treatment-detail-provider-rating-neutral strong {
-    color: #005fa8;
-}
-
-.treatment-detail-provider-rating-negative {
-    background: #fff4f5;
-    border-color: #f3c3c7;
-}
-
-.treatment-detail-provider-rating-negative strong {
-    color: #c9333e;
-}
-
-.treatment-detail-provider-rating-total {
-    grid-column: 1 / -1;
-    color: #66758f;
-    font-size: 0.68rem;
-    font-weight: 800;
-    text-align: right;
-}
-
-.treatment-detail-provider-rating-empty {
-    margin: 8px 0 10px 0;
-    padding: 9px 10px;
-    border: 1px dashed #b8c5d5;
-    border-radius: 8px;
-    background: #fafcff;
-    color: #66758f;
-    font-size: 0.74rem;
-    font-weight: 800;
-}
-
-.treatment-detail-provider-rating-compact {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 5px;
-}
-
-.treatment-detail-provider-rating-compact span {
-    display: inline-flex;
-    align-items: center;
-    min-height: 19px;
-    padding: 2px 6px;
-    border-radius: 999px;
-    font-size: 0.68rem;
-    font-weight: 900;
-}
-
-.treatment-detail-provider-rating-compact .is-positive {
-    background: #f1fbf6;
-    color: #008c54;
-    border: 1px solid #bfe7d1;
-}
-
-.treatment-detail-provider-rating-compact .is-neutral {
-    background: #f3f8ff;
-    color: #005fa8;
-    border: 1px solid #c8dcf2;
-}
-
-.treatment-detail-provider-rating-compact .is-negative {
-    background: #fff4f5;
-    color: #c9333e;
-    border: 1px solid #f3c3c7;
-}
-
-.treatment-detail-provider-rating-compact small {
-    color: #66758f;
-    font-size: 0.68rem;
-    font-weight: 800;
-}
-
-/* ------------------------------
-   Anbieter-Liste / Tabelle
------------------------------- */
-
-.treatment-detail-provider-table-wrap {
-    overflow-x: auto;
-}
-
-.treatment-detail-provider-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #ffffff;
-    border: 1px solid #dbe5f1;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.treatment-detail-provider-table th,
-.treatment-detail-provider-table td {
-    padding: 8px 9px;
-    border-bottom: 1px solid #e5ecf5;
-    color: #1d2d46;
-    font-size: 0.74rem;
-    line-height: 1.25;
-    vertical-align: middle;
-    text-align: left;
-}
-
-.treatment-detail-provider-table th {
-    background: #f2f7ff;
-    color: #07326f;/* ------------------------------
    Anbieter-Sortierung + Standort
 ------------------------------ */
-
-.treatment-detail-provider-toolbar-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    width: 100%;
-}
-
-.treatment-detail-provider-view-block {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    min-width: 0;
-}
-
-.treatment-detail-provider-view-block > span {
-    color: #07326f;
-    font-size: 0.82rem;
-    font-weight: 900;
-    white-space: nowrap;
-}
-
-.treatment-detail-provider-sort-block {
-    justify-content: flex-end;
-}
-
-.treatment-detail-provider-sort-switch {
-    display: inline-flex;
-    border: 1px solid #b9c8dc;
-    border-radius: 7px;
-    overflow: hidden;
-    background: #f3f6fa;
-}
-
-.treatment-detail-provider-sort-button {
-    border: none;
-    border-right: 1px solid #b9c8dc;
-    background: transparent;
-    color: #07326f;
-    padding: 6px 10px;
-    font-size: 0.74rem;
-    font-weight: 900;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.treatment-detail-provider-sort-button:last-child {
-    border-right: none;
-}
-
-.treatment-detail-provider-sort-button:hover {
-    background: #eaf1f8;
-}
-
-.treatment-detail-provider-sort-button.is-active {
-    background: #003878;
-    color: #ffffff;
-}
-
-.treatment-detail-provider-location-row {
-    display: grid;
-    grid-template-columns: auto minmax(190px, 280px) auto auto minmax(180px, 1fr);
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    margin-top: 9px;
-    padding-top: 9px;
-    border-top: 1px solid #e5ecf5;
-}
-
-.treatment-detail-provider-location-row label {
-    color: #07326f;
-    font-size: 0.78rem;
-    font-weight: 900;
-}
-
-.treatment-detail-provider-location-input {
-    width: 100%;
-    min-height: 31px;
-    border: 1px solid #b9c8dc;
-    border-radius: 7px;
-    padding: 6px 9px;
-    color: #1d2d46;
-    font-size: 0.78rem;
-    font-weight: 700;
-    background: #ffffff;
-}
-
-.treatment-detail-provider-location-set-button,
-.treatment-detail-provider-location-reset-button {
-    min-height: 31px;
-    border: 1px solid #b9c8dc;
-    border-radius: 7px;
-    background: #ffffff;
-    color: #07326f;
-    padding: 6px 10px;
-    font-size: 0.74rem;
-    font-weight: 900;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.treatment-detail-provider-location-set-button:hover,
-.treatment-detail-provider-location-reset-button:hover {
-    background: #eaf1f8;
-}
-
-.treatment-detail-provider-location-set-button.is-saving,
-.treatment-detail-provider-location-reset-button.is-saving,
-.treatment-detail-provider-location-input.is-saving,
-.treatment-detail-provider-location-set-button:disabled,
-.treatment-detail-provider-location-reset-button:disabled,
-.treatment-detail-provider-location-input:disabled {
-    opacity: 0.55;
-    cursor: wait;
-}
-
-.treatment-detail-provider-location-reset-button:disabled {
-    cursor: not-allowed;
-}
-
-.treatment-detail-provider-location-status {
-    color: #66758f;
-    font-size: 0.74rem;
-    font-weight: 800;
-    line-height: 1.25;
-}
-
-.treatment-detail-provider-distance {
-    display: inline-flex;
-    align-items: center;
-    min-height: 21px;
-    padding: 2px 8px;
-    border: 1px solid #c8dcf2;
-    border-radius: 999px;
-    background: #f3f8ff;
-    color: #005fa8;
-    font-size: 0.68rem;
-    font-weight: 900;
-    white-space: nowrap;
-}
-
-.treatment-detail-provider-card-distance {
-    margin: 0 0 10px 0;
-    color: #66758f;
-    font-size: 0.74rem;
-    font-weight: 800;
-}
-
-@media (max-width: 1050px) {
-    .treatment-detail-provider-toolbar-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .treatment-detail-provider-sort-block {
-        justify-content: flex-start;
-    }
-
-    .treatment-detail-provider-location-row {
-        grid-template-columns: 1fr;
-        align-items: stretch;
-    }
-
-    .treatment-detail-provider-location-status {
-        margin-top: 2px;
-    }
-}
-
-@media (max-width: 760px) {
-    .treatment-detail-provider-view-block {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .treatment-detail-provider-view-switch,
-    .treatment-detail-provider-sort-switch {
-        flex-wrap: wrap;
-    }
-
-    .treatment-detail-provider-sort-button,
-    .treatment-detail-provider-view-button {
-        border-bottom: 1px solid #b9c8dc;
-    }
-}
-    font-size: 0.72rem;
-    font-weight: 900;
-}
-
-.treatment-detail-provider-table tr:last-child td {
-    border-bottom: none;
-}
-
-.treatment-detail-provider-table td strong {
-    color: #07326f;
-    font-weight: 900;
-}
-
-
-.treatment-detail-map-status {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 42px;
-    min-height: 21px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 0.68rem;
-    font-weight: 900;
-    line-height: 1;
-}
-
-.treatment-detail-map-status-yes {
-    border: 1px solid #bfe7d1;
-    background: #f1fbf6;
-    color: #008c54;
-}
-
-.treatment-detail-map-status-no {
-    border: 1px solid #d8e0ea;
-    background: #f4f6f9;
-    color: #66758f;
-}
-
-
 
 /* ------------------------------
    Quellen
@@ -1255,154 +674,8 @@
     color: #07326f;
 }
 
-/* ------------------------------
-   Responsive
------------------------------- */
-
-@media (max-width: 1400px) {
-    .treatment-detail-sticky-header {
-        grid-template-columns: minmax(360px, 1fr) minmax(220px, 0.45fr);
-    }
-
-    .treatment-detail-action-votes {
-        grid-column: 1 / -1;
-        justify-content: flex-end;
-        border-top: 1px solid #e3eaf3;
-        min-height: 44px;
-    }
-
-    .treatment-detail-overview-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .treatment-detail-provider-card-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 1100px) {
-    .treatment-detail-sticky-header {
-        position: static;
-        grid-template-columns: 1fr;
-    }
-
-    .treatment-detail-sticky-profile {
-        border-right: none;
-        border-bottom: 1px solid #e3eaf3;
-    }
-
-    .treatment-detail-action-summary {
-        border-right: none;
-        border-bottom: 1px solid #e3eaf3;
-    }
-
-    .treatment-detail-action-votes {
-        justify-content: flex-start;
-    }
-
-    .treatment-detail-guided-section {
-        grid-template-columns: 1fr;
-    }
-
-    .treatment-detail-question-intro {
-        align-items: center;
-    }
-}
-
-@media (max-width: 900px) {
-    .treatment-detail-page-shell {
-        width: min(100% - 22px, 1580px);
-    }
-
-    .treatment-detail-overview-grid,
-    .treatment-detail-provider-card-grid,
-    .treatment-detail-source-list {
-        grid-template-columns: 1fr;
-    }
-
-    .treatment-detail-note-card {
-        min-width: 0;
-    }
-
-    .treatment-detail-action-votes {
-        flex-wrap: wrap;
-    }
-
-    .treatment-detail-source-card {
-        flex-direction: column;
-    }
-
-    .treatment-detail-provider-map {
-        height: 285px;
-    }
-
-    .treatment-detail-provider-view-toolbar {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-}
-
-@media (max-width: 620px) {
-    .treatment-detail-sticky-profile {
-        grid-template-columns: 46px minmax(0, 1fr);
-        padding: 10px 12px;
-    }
-
-    .treatment-detail-avatar {
-        width: 42px;
-        height: 42px;
-        font-size: 0.82rem;
-    }
-
-    .treatment-detail-sticky-profile-main h1 {
-        font-size: 1.02rem;
-    }
-
-    .treatment-detail-guided-section {
-        padding: 14px;
-    }
-
-    .treatment-detail-question-number {
-        width: 32px;
-        height: 32px;
-        font-size: 0.88rem;
-    }
-
-    .treatment-detail-question-intro h2 {
-        font-size: 0.98rem;
-    }
-
-    .treatment-detail-action-summary,
-    .treatment-detail-rating-tiles,
-    .treatment-detail-vote-buttons,
-    .treatment-detail-provider-rating {
-        grid-template-columns: 1fr;
-    }
-
-    .treatment-detail-action-summary-item {
-        min-height: 48px;
-        border-right: none;
-        border-bottom: 1px solid #e3eaf3;
-    }
-
-    .treatment-detail-action-summary-item:last-child {
-        border-bottom: none;
-    }
-
-    .treatment-detail-provider-card-header {
-        flex-direction: column;
-    }
-
-    .treatment-detail-provider-map-header {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 4px;
-    }
-}
-
 /* =========================================================
    Anbieter-Navigation + Rangdarstellung
-   ganz unten an therapie_detail.css anhängen
 ========================================================= */
 
 .treatment-detail-provider-list {
@@ -1456,6 +729,10 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    border: 1px solid #b9c8dc;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #f3f6fa;
 }
 
 .treatment-detail-provider-view-button,
@@ -1917,52 +1194,6 @@
     font-weight: 800;
 }
 
-@media (max-width: 1200px) {
-    .treatment-detail-provider-controls-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .treatment-detail-provider-control-card-location {
-        grid-column: 1 / -1;
-    }
-}
-
-@media (max-width: 1050px) {
-    .treatment-detail-provider-card-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .treatment-detail-provider-location-controls {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 900px) {
-    .treatment-detail-provider-card-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .treatment-detail-provider-controls-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .treatment-detail-provider-control-card-location {
-        grid-column: auto;
-    }
-}
-
-@media (max-width: 620px) {
-    .treatment-detail-provider-view-switch,
-    .treatment-detail-provider-sort-switch {
-        flex-direction: column;
-    }
-
-    .treatment-detail-provider-card-topline {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
-
 /* =========================================================
    Roter Standortmarker auf der Therapie-Detailkarte
 ========================================================= */
@@ -2004,4 +1235,198 @@
 
 .treatment-detail-location-tooltip:before {
     border-top-color: #d93025 !important;
+}
+
+/* =========================================================
+   2. DESKTOP
+   Gültig ab 1101 px
+========================================================= */
+
+@media (min-width: 1101px) {
+    .treatment-detail-sticky-header {
+        grid-template-columns: minmax(360px, 1fr) minmax(220px, 0.45fr);
+    }
+
+    .treatment-detail-action-votes {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+        min-height: 44px;
+        border-top: 1px solid #e3eaf3;
+    }
+
+    .treatment-detail-overview-grid,
+    .treatment-detail-provider-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* =========================================================
+   3. TABLET / SPLITSCREEN
+   Gültig von 761 px bis einschließlich 1100 px
+========================================================= */
+
+@media (min-width: 761px) and (max-width: 1100px) {
+    .treatment-detail-sticky-header {
+        position: static;
+        grid-template-columns: 1fr;
+    }
+
+    .treatment-detail-sticky-profile {
+        border-right: none;
+        border-bottom: 1px solid #e3eaf3;
+    }
+
+    .treatment-detail-action-summary {
+        border-right: none;
+        border-bottom: 1px solid #e3eaf3;
+    }
+
+    .treatment-detail-action-votes {
+        justify-content: flex-start;
+    }
+
+    .treatment-detail-guided-section {
+        grid-template-columns: 1fr;
+    }
+
+    .treatment-detail-question-intro {
+        align-items: center;
+    }
+
+    .treatment-detail-provider-location-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .treatment-detail-provider-location-status {
+        margin-top: 2px;
+    }
+
+    .treatment-detail-provider-controls-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .treatment-detail-provider-control-card-location {
+        grid-column: 1 / -1;
+    }
+
+    .treatment-detail-provider-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* =========================================================
+   4. MOBILE
+   Gültig bis einschließlich 760 px
+========================================================= */
+
+@media (max-width: 760px) {
+    .treatment-detail-page-shell {
+        width: calc(100% - 32px);
+    }
+
+    .treatment-detail-overview-grid,
+    .treatment-detail-provider-card-grid,
+    .treatment-detail-provider-controls-grid,
+    .treatment-detail-source-list {
+        grid-template-columns: 1fr;
+    }
+
+    .treatment-detail-note-card {
+        min-width: 0;
+    }
+
+    .treatment-detail-action-votes {
+        flex-wrap: wrap;
+    }
+
+    .treatment-detail-source-card {
+        flex-direction: column;
+    }
+
+    .treatment-detail-provider-map {
+        height: 285px;
+    }
+
+    .treatment-detail-provider-view-switch,
+    .treatment-detail-provider-sort-switch {
+        flex-wrap: wrap;
+    }
+
+    .treatment-detail-provider-sort-button,
+    .treatment-detail-provider-view-button {
+        border-bottom: 1px solid #b9c8dc;
+    }
+
+    .treatment-detail-provider-control-card-location {
+        grid-column: auto;
+    }
+}
+
+/* =========================================================
+   5. KLEINE MOBILGERÄTE
+   Gültig bis einschließlich 430 px
+========================================================= */
+
+@media (max-width: 430px) {
+    .treatment-detail-sticky-profile {
+        grid-template-columns: 46px minmax(0, 1fr);
+        padding: 10px 12px;
+    }
+
+    .treatment-detail-avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 0.82rem;
+    }
+
+    .treatment-detail-sticky-profile-main h1 {
+        font-size: 1.02rem;
+    }
+
+    .treatment-detail-guided-section {
+        padding: 14px;
+    }
+
+    .treatment-detail-question-number {
+        width: 32px;
+        height: 32px;
+        font-size: 0.88rem;
+    }
+
+    .treatment-detail-question-intro h2 {
+        font-size: 0.98rem;
+    }
+
+    .treatment-detail-action-summary,
+    .treatment-detail-rating-tiles,
+    .treatment-detail-vote-buttons,
+    .treatment-detail-provider-rating {
+        grid-template-columns: 1fr;
+    }
+
+    .treatment-detail-action-summary-item {
+        min-height: 48px;
+        border-right: none;
+        border-bottom: 1px solid #e3eaf3;
+    }
+
+    .treatment-detail-action-summary-item:last-child {
+        border-bottom: none;
+    }
+
+    .treatment-detail-provider-card-header,
+    .treatment-detail-provider-map-header,
+    .treatment-detail-provider-card-topline {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .treatment-detail-provider-map-header {
+        gap: 4px;
+    }
+
+    .treatment-detail-provider-view-switch,
+    .treatment-detail-provider-sort-switch {
+        flex-direction: column;
+    }
 }

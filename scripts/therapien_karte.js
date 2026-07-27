@@ -324,7 +324,6 @@ function normalizeTreatment(treatment) {
         slug: treatment.slug || "",
         behandlung: treatment.behandlung || "",
         typ: treatment.typ || "",
-        weitere_hinweise: treatment.weitere_hinweise || "",
         pro: Number(treatment.pro ?? 0),
         neutral: Number(treatment.neutral ?? 0),
         contra: Number(treatment.contra ?? 0),
@@ -1571,10 +1570,6 @@ function buildTreatmentCardHtml(treatment, index) {
     const rawTreatmentName = escapeHtmlAttribute(treatment.behandlung || "");
     const categoryHtml = buildTreatmentCategoryHtml(treatment);
     const providerHtml = buildTreatmentProviderHtml(treatment);
-    const noteText = String(treatment.weitere_hinweise || "").trim();
-    const noteHtml = noteText
-        ? escapeHtml(noteText)
-        : `<span class="treatment-card-muted">Kein Hinweis hinterlegt.</span>`;
 
     const totalVotes = Number(treatment.total_votes ?? 0);
     const positiveRatio = Number(treatment.positive_ratio ?? 0);
@@ -1615,11 +1610,6 @@ function buildTreatmentCardHtml(treatment, index) {
             </div>
 
             <div class="treatment-card-content-grid">
-                <section class="treatment-card-info-panel treatment-card-note-panel">
-                    <h4 class="treatment-card-section-heading">Hinweis</h4>
-                    <div class="treatment-card-main-text">${noteHtml}</div>
-                </section>
-
                 <section class="treatment-card-info-panel treatment-card-rating-panel">
                     <h4 class="treatment-card-section-heading">
                         Bewertung
@@ -2017,20 +2007,6 @@ function buildTreatmentProviderHtml(treatment) {
     }
 
     return `<span class="treatment-provider-bubble">${providerCount}</span>`;
-}
-
-function buildTreatmentNoteHtml(treatment) {
-    const note = String(treatment.weitere_hinweise || "").trim();
-
-    if (!note) {
-        return `<span class="treatment-table-muted">—</span>`;
-    }
-
-    return `
-        <div class="treatment-table-note">
-            ${escapeHtml(note)}
-        </div>
-    `;
 }
 
 function initTreatmentMap() {

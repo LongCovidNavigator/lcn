@@ -1,13 +1,13 @@
-/* ------------------------------
-   Arzt-Detailseite: Basis
------------------------------- */
+/* =========================================================
+   1. GRUNDSTRUKTUR UND KOMPONENTEN
+========================================================= */
 
 .doctor-detail-page {
     background: #f5f8fc;
 }
 
 .doctor-detail-page-shell {
-    width: min(1580px, calc(100% - 32px));
+    width: min(1120px, calc(100% - 40px));
     margin: 0 auto 44px auto;
 }
 
@@ -709,10 +709,11 @@
     display: none;
     position: absolute;
     top: calc(100% + 6px);
-    left: 0;
+    left: auto;
+    right: 0;
     z-index: 60;
-    width: 280px;
-    max-width: min(360px, calc(100vw - 36px));
+    width: min(280px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
     padding: 8px;
     border: 1px solid #c8d8eb;
     border-radius: 10px;
@@ -899,10 +900,7 @@
 ------------------------------ */
 
 .doctor-detail-treatment-category-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-    width: 100%;
+    display: none !important;
 }
 
 .doctor-detail-treatment-category-chip {
@@ -1316,12 +1314,12 @@
     font-size: 0.66rem;
     font-weight: 800;
 }
+/* =========================================================
+   2. DESKTOP
+   Gültig ab 1101 px
+========================================================= */
 
-/* ------------------------------
-   Responsive
------------------------------- */
-
-@media (max-width: 1400px) {
+@media (min-width: 1101px) {
     .doctor-detail-sticky-header {
         grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
     }
@@ -1346,7 +1344,24 @@
     }
 }
 
-@media (max-width: 1100px) {
+/* =========================================================
+   3. TABLET / SPLITSCREEN
+   Gültig von 761 px bis einschließlich 1100 px
+========================================================= */
+
+@media (min-width: 761px) and (max-width: 1100px) {
+    .doctor-detail-page {
+        overflow-x: hidden;
+    }
+
+    .doctor-detail-page-shell,
+    .doctor-detail-sticky-header,
+    .doctor-detail-guided-section {
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
     .doctor-detail-sticky-header {
         position: static;
         grid-template-columns: 1fr;
@@ -1390,9 +1405,51 @@
     }
 }
 
-@media (max-width: 900px) {
+/* =========================================================
+   4. MOBILE
+   Gültig bis einschließlich 760 px
+========================================================= */
+
+@media (max-width: 760px) {
+    .doctor-detail-page {
+        overflow-x: hidden;
+    }
+
     .doctor-detail-page-shell {
-        width: min(100% - 22px, 1580px);
+        width: calc(100% - 32px);
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .doctor-detail-sticky-header {
+        position: static;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .doctor-detail-sticky-profile {
+        min-width: 0;
+        border-right: none;
+        border-bottom: 1px solid #e3eaf3;
+    }
+
+    .doctor-detail-action-votes {
+        min-width: 0;
+        white-space: normal;
+    }
+
+    .doctor-detail-guided-section {
+        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .doctor-detail-question-intro {
+        align-items: center;
     }
 
     .doctor-detail-fit-grid,
@@ -1426,12 +1483,19 @@
     }
 
     .doctor-detail-treatment-category-dropdown-panel {
+        left: 0;
+        right: auto;
         width: 100%;
         max-width: none;
     }
 }
 
-@media (max-width: 620px) {
+/* =========================================================
+   5. KLEINE MOBILGERÄTE
+   Gültig bis einschließlich 430 px
+========================================================= */
+
+@media (max-width: 430px) {
     .doctor-detail-sticky-profile {
         grid-template-columns: 46px minmax(0, 1fr);
         padding: 10px 12px;
@@ -1461,10 +1525,27 @@
         font-size: 0.98rem;
     }
 
-    .doctor-detail-action-links,
+    .doctor-detail-action-links {
+        grid-template-columns: 1fr;
+    }
+
+    .doctor-detail-rating-card {
+        min-width: 0;
+    }
+
     .doctor-detail-rating-tiles,
     .doctor-detail-vote-buttons {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    .doctor-detail-rating-tile {
+        padding: 7px 4px;
+    }
+
+    .doctor-detail-vote-main-button {
+        padding: 7px 3px;
+        font-size: 0.7rem;
     }
 
     .doctor-detail-action-link {
@@ -1497,36 +1578,4 @@
     .doctor-detail-treatment-percent-input {
         width: 82px;
     }
-}
-
-/* =========================================================
-   Fix: Kategorie-Dropdown im Splitscreen nicht abschneiden
-========================================================= */
-
-.doctor-detail-treatment-category-dropdown {
-    position: relative;
-}
-
-.doctor-detail-treatment-category-dropdown-panel {
-    left: auto;
-    right: 0;
-    width: min(280px, calc(100vw - 32px));
-    max-width: calc(100vw - 32px);
-}
-
-@media (max-width: 900px) {
-    .doctor-detail-treatment-category-dropdown-panel {
-        left: 0;
-        right: auto;
-        width: 100%;
-        max-width: none;
-    }
-}
-
-/* =========================================================
-   Kategorie-Chips ausblenden, Dropdown ist jetzt führend
-========================================================= */
-
-.doctor-detail-treatment-category-row {
-    display: none !important;
 }

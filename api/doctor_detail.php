@@ -268,7 +268,6 @@ try {
                 t.slug,
                 t.behandlung,
                 t.typ,
-                t.wiki_url_path,
 
                 COALESCE(rv.pro, 0) AS pro,
                 COALESCE(rv.neutral, 0) AS neutral,
