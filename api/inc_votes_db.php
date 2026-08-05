@@ -1,45 +1,13 @@
 <?php
-require_once __DIR__ . '/_security.php';
+require_once __DIR__ . '/_lcn_db.php';
 
 header('Content-Type: application/json; charset=utf-8');
-
-function loadEnvFile($path) {
-  if (!file_exists($path)) return;
-  foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-    $line = trim($line);
-    if ($line === '' || str_starts_with($line, '#')) continue;
-    $pos = strpos($line, '=');
-    if ($pos === false) continue;
-    $key = trim(substr($line, 0, $pos));
-    $val = trim(substr($line, $pos + 1));
-    if ((str_starts_with($val, '"') && str_ends_with($val, '"')) || (str_starts_with($val, "'") && str_ends_with($val, "'"))) {
-      $val = substr($val, 1, -1);
-    }
-    if (getenv($key) === false) putenv("$key=$val");
-  }
-}
-
-foreach ([__DIR__ . '/../data2bs/data2lcn_db/.env'] as $p) loadEnvFile($p);
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
   http_response_code(405);
   echo json_encode(["error"=>"Method not allowed", "method"=>($_SERVER['REQUEST_METHOD'] ?? null)], JSON_UNESCAPED_UNICODE);
   exit;
 }
-
-$dbName = getenv('LCN_DB_DATABASE');
-if (!$dbName) { error_log('inc_votes_db failed: database configuration missing'); http_response_code(500); echo json_encode(["error"=>"Die Bewertung konnte nicht gespeichert werden."]); exit; }
-if (in_array(strtolower(trim($dbName)), ['bookstack_db','bookstack','bookstackdb'], true)) {
-  http_response_code(500);
-  error_log('inc_votes_db failed: unsafe database configuration');
-  echo json_encode(["error"=>"Die Bewertung konnte nicht gespeichert werden."]);
-  exit;
-}
-
-$host = getenv('LCN_DB_HOST') ?: (getenv('DB_HOST') ?: 'localhost');
-$port = getenv('LCN_DB_PORT') ?: (getenv('DB_PORT') ?: '3306');
-$user = getenv('LCN_DB_USERNAME') ?: (getenv('DB_USERNAME') ?: 'root');
-$pass = getenv('LCN_DB_PASSWORD') ?: (getenv('DB_PASSWORD') ?: '');
 
 $raw = file_get_contents("php://input");
 $body = null;
@@ -80,11 +48,7 @@ $liveTable = "lcn_votes";     // nur schreiben
 $rawTable  = "lcn_raw_votes"; // nur lesen
 
 try {
-  $dsn = "mysql:host=$host;port=$port;dbname=$dbName;charset=utf8mb4";
-  $pdo = new PDO($dsn, $user, $pass, [
-    PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC
-  ]);
+  $pdo = lcnDatabase();
 
   // Atomarer increment in lcn_votes
   $sql = "

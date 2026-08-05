@@ -1,29 +1,7 @@
 <?php
-require_once __DIR__ . '/_security.php';
+require_once __DIR__ . '/_lcn_db.php';
 
 header('Content-Type: application/json; charset=utf-8');
-
-function loadEnv($path) {
-    if (!file_exists($path)) {
-        throw new Exception(".env-Datei nicht gefunden: " . $path);
-    }
-
-    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-    foreach ($lines as $line) {
-        $line = trim($line);
-
-        if ($line === '' || str_starts_with($line, '#')) {
-            continue;
-        }
-
-        $parts = explode('=', $line, 2);
-
-        if (count($parts) === 2) {
-            $_ENV[trim($parts[0])] = trim($parts[1]);
-        }
-    }
-}
 
 function fetchJsonWithCurl($url) {
     $ch = curl_init($url);
@@ -76,10 +54,7 @@ try {
         throw new InvalidArgumentException("Der Suchbegriff ist zu lang.");
     }
 
-    $envPath = __DIR__ . '/../data2bs/data2lcn_db/.env';
-    loadEnv($envPath);
-
-    $apiKey = $_ENV['GEOAPIFY_API_KEY'] ?? '';
+    $apiKey = lcnEnv('GEOAPIFY_API_KEY', '');
 
     if ($apiKey === '' || $apiKey === 'DEIN_GEOAPIFY_KEY_HIER') {
         throw new Exception("GEOAPIFY_API_KEY fehlt in der .env-Datei.");
@@ -151,7 +126,7 @@ try {
     echo json_encode([
         'ok' => false,
         'error' => true,
-        'message' => 'Ungültige Ortsanfrage.',
+        'message' => 'Ungueltige Ortsanfrage.',
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 } catch (Throwable $e) {
@@ -161,6 +136,6 @@ try {
     echo json_encode([
         'ok' => false,
         'error' => true,
-        'message' => 'Ortssuche konnte nicht ausgeführt werden.',
+        'message' => 'Ortssuche konnte nicht ausgefuehrt werden.',
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 }

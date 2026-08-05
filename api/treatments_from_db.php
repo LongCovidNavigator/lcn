@@ -1,77 +1,13 @@
 <?php
-require_once __DIR__ . '/_security.php';
+require_once __DIR__ . '/_lcn_db.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-function loadEnvFile($path) {
-    if (!file_exists($path)) return;
-    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if ($line === '' || str_starts_with($line, '#')) continue;
-        $pos = strpos($line, '=');
-        if ($pos === false) continue;
-
-        $key = trim(substr($line, 0, $pos));
-        $val = trim(substr($line, $pos + 1));
-
-        // strip quotes
-        if ((str_starts_with($val, '"') && str_ends_with($val, '"')) || (str_starts_with($val, "'") && str_ends_with($val, "'"))) {
-            $val = substr($val, 1, -1);
-        }
-
-        // don't overwrite existing env
-        if (getenv($key) === false) {
-            putenv("$key=$val");
-            $_ENV[$key] = $val;
-        }
-    }
-}
-
-// 1) .env im selben Ordner wie dieses PHP (api/.env) ODER Projektroot (lcn/.env)
-$envCandidates = [
-  __DIR__ . '/.env',                 // optional: lcn/api/.env
-  dirname(__DIR__) . '/.env',        // optional: lcn/.env
-  'C:/xampp/htdocs/bookstack/.env',  // <-- DEINE BookStack .env
-];
-
-foreach ($envCandidates as $p) {
-  loadEnvFile($p);
-}
-
-
-
-// 2) Nur LCN-DB erlauben (kein BookStack)
-$dbName = getenv('LCN_DB_DATABASE');
-if (!$dbName) {
-    http_response_code(500);
-    error_log('treatments_from_db failed: database configuration missing');
-    echo json_encode(["error" => "Therapiedaten konnten nicht geladen werden."]);
-    exit;
-}
-$lower = strtolower(trim($dbName));
-if (in_array($lower, ['bookstack_db', 'bookstack', 'bookstackdb'], true)) {
-    http_response_code(500);
-    error_log('treatments_from_db failed: unsafe database configuration');
-    echo json_encode(["error" => "Therapiedaten konnten nicht geladen werden."]);
-    exit;
-}
-
-$host = getenv('LCN_DB_HOST') ?: (getenv('DB_HOST') ?: 'localhost');
-$port = getenv('LCN_DB_PORT') ?: (getenv('DB_PORT') ?: '3306');
-$user = getenv('LCN_DB_USERNAME') ?: (getenv('DB_USERNAME') ?: 'root');
-$pass = getenv('LCN_DB_PASSWORD') ?: (getenv('DB_PASSWORD') ?: '');
-
-// 3) Tabelle (du nutzt aktuell TABLE_NAME="lcn_raw_wiki" im Import)
+// Tabelle (du nutzt aktuell TABLE_NAME="lcn_raw_wiki" im Import)
 $table = 'tbl_treatments_03';
 
-// 4) DB connect
-$dsn = "mysql:host=$host;port=$port;dbname=$dbName;charset=utf8mb4";
 try {
-    $pdo = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
+    $pdo = lcnDatabase();
 } catch (Throwable $e) {
     lcnLogApiError('treatments_from_db connection', $e);
     http_response_code(500);
