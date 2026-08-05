@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/aerzte_karte.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="styles/arzt_detail.css?v=7">
+    <link rel="stylesheet" href="styles/arzt_detail.css?v=11">
 </head>
 
 <script>
@@ -213,6 +213,10 @@
                 </aside>
 
                 <div class="doctor-detail-question-content">
+                    <div id="doctor-detail-treatment-offer-summary" class="doctor-detail-treatment-offer-summary" aria-live="polite">
+                        <span class="doctor-detail-muted">Angebotsübersicht wird geladen …</span>
+                    </div>
+
                     <article class="doctor-detail-treatment-panel">
                         <div class="doctor-detail-treatment-heading-row">
                             <div>
@@ -448,7 +452,7 @@
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="scripts/arzt_detail.js?v=7"></script>
+    <script src="scripts/arzt_detail.js?v=11"></script>
 
     <div id="footer-placeholder"></div>
 

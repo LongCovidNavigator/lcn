@@ -268,6 +268,7 @@ try {
                 t.slug,
                 t.behandlung,
                 t.typ,
+                t.unterkategorie,
 
                 COALESCE(rv.pro, 0) AS pro,
                 COALESCE(rv.neutral, 0) AS neutral,

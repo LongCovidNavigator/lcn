@@ -1177,6 +1177,7 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
     listElement.classList.toggle("is-category-view", treatmentViewMode === "categories");
 
     const groups = getVisibleTreatmentGroups(treatmentsGrouped);
+    renderTreatmentOfferSummary(groups);
 
     if (groups.length === 0) {
         currentTreatmentCategoryOptions = [];
@@ -1782,35 +1783,215 @@ function showDoctorDetailContent() {
 }
 
 function buildTreatmentCategoryOverviewHtml(groups, visibleEntries) {
-    const visibleCounts = new Map();
+    const categoryCards = groups.flatMap(function (group) {
+        const groupEntries = visibleEntries.filter(function (entry) {
+            return entry.categorySlug === group.slug;
+        });
+        const subcategoryCounts = new Map();
+        let entriesWithoutSubcategory = 0;
 
-    visibleEntries.forEach(function (entry) {
-        visibleCounts.set(entry.categorySlug, (visibleCounts.get(entry.categorySlug) || 0) + 1);
+        groupEntries.forEach(function (entry) {
+            const subcategory = String(entry.treatment?.unterkategorie || "").trim();
+
+            if (subcategory) {
+                subcategoryCounts.set(subcategory, (subcategoryCounts.get(subcategory) || 0) + 1);
+            } else {
+                entriesWithoutSubcategory += 1;
+            }
+        });
+
+        if (subcategoryCounts.size === 0) {
+            return groupEntries.length > 0
+                ? [{
+                    parent: "",
+                    type: group.type,
+                    count: groupEntries.length
+                }]
+                : [];
+        }
+
+        const cards = Array.from(subcategoryCounts.entries()).map(function ([subcategory, count]) {
+            return {
+                parent: group.type,
+                type: subcategory,
+                count
+            };
+        });
+
+        if (entriesWithoutSubcategory > 0) {
+            cards.push({
+                parent: group.type,
+                type: "Weitere Behandlungen",
+                count: entriesWithoutSubcategory
+            });
+        }
+
+        return cards;
     });
 
-    return groups
-        .map(function (group) {
-            return {
-                type: group.type,
-                slug: group.slug,
-                count: visibleCounts.get(group.slug) || 0
-            };
+    return categoryCards
+        .sort(function (a, b) {
+            return b.count - a.count || a.type.localeCompare(b.type, "de");
         })
-        .filter(function (group) {
-            return group.count > 0;
-        })
-        .map(function (group) {
-            const treatmentLabel = group.count === 1 ? "Therapie" : "Therapien";
+        .map(function (card, index) {
+            const treatmentLabel = card.count === 1 ? "Therapie" : "Therapien";
+            const sizeClass = index < 2
+                ? "is-featured"
+                : index < 4
+                    ? "is-medium"
+                    : "is-compact";
+            const themeClass = `is-theme-${(index % 6) + 1}`;
+            const parentHtml = card.parent
+                ? `<span class="doctor-detail-treatment-category-overview-parent">${escapeHtml(card.parent)}</span>`
+                : "";
 
             return `
-                <article class="doctor-detail-treatment-category-overview-card">
-                    <h4>${escapeHtml(group.type)}</h4>
-                    <div class="doctor-detail-treatment-category-overview-count">${group.count}</div>
-                    <span>${treatmentLabel}</span>
+                <article class="doctor-detail-treatment-category-overview-card ${sizeClass} ${themeClass} ${card.parent ? "has-subcategory" : ""}">
+                    <span class="doctor-detail-treatment-category-overview-icon" aria-hidden="true">${getTreatmentCategoryIcon(card.parent || card.type)}</span>
+                    <div class="doctor-detail-treatment-category-overview-copy">
+                        ${parentHtml}
+                        <h4>${escapeHtml(card.type)}</h4>
+                        <strong>${card.count}</strong>
+                        <span>${treatmentLabel}</span>
+                    </div>
                 </article>
             `;
         })
         .join("");
+}
+
+function renderTreatmentOfferSummary(groups) {
+    const summary = document.getElementById("doctor-detail-treatment-offer-summary");
+
+    if (!summary) {
+        return;
+    }
+
+    const entries = flattenTreatmentGroups(groups || []);
+    const totalTreatments = entries.length;
+    const categoryCount = (groups || []).length;
+    const subcategoryCount = new Set(entries
+        .map(function (entry) {
+            const subcategory = String(entry.treatment?.unterkategorie || "").trim();
+            return subcategory ? `${entry.categorySlug}::${subcategory}` : "";
+        })
+        .filter(Boolean)).size;
+    const ratedStats = entries
+        .map(function (entry) {
+            return getTreatmentVoteStats(entry.treatment);
+        })
+        .filter(function (stats) {
+            return stats.totalVotes > 0;
+        });
+    const totalVotes = ratedStats.reduce(function (sum, stats) {
+        return sum + stats.totalVotes;
+    }, 0);
+    const positiveVotes = ratedStats.reduce(function (sum, stats) {
+        return sum + stats.pro;
+    }, 0);
+    const neutralVotes = ratedStats.reduce(function (sum, stats) {
+        return sum + stats.neutral;
+    }, 0);
+    const negativeVotes = ratedStats.reduce(function (sum, stats) {
+        return sum + stats.contra;
+    }, 0);
+    const averageRating = totalVotes > 0
+        ? ((positiveVotes * 5 + neutralVotes * 3 + negativeVotes) / totalVotes).toFixed(1).replace(".", ",")
+        : null;
+    const roundedRating = averageRating === null ? 0 : Math.round(Number(averageRating.replace(",", ".")));
+    const ratingStars = `${"★".repeat(roundedRating)}${"☆".repeat(5 - roundedRating)}`;
+    const leadingCategories = (groups || [])
+        .map(function (group) {
+            return {
+                name: group.type,
+                count: group.treatments.length
+            };
+        })
+        .sort(function (a, b) {
+            return b.count - a.count || a.name.localeCompare(b.name, "de");
+        })
+        .slice(0, 2);
+
+    let status = "Basisangebot";
+    let statusHint = "Einordnung nach Umfang und Vielfalt des Angebots";
+
+    if (totalTreatments >= 100 && categoryCount >= 8) {
+        status = "Koryphäe";
+    } else if (totalTreatments >= 50 && categoryCount >= 6) {
+        status = "Sehr breites Angebot";
+    } else if (totalTreatments >= 20 && categoryCount >= 4) {
+        status = "Breites Angebot";
+    }
+
+    const firstCategory = leadingCategories[0] || { name: "Keine Kategorie", count: 0 };
+    const secondCategory = leadingCategories[1] || { name: "Keine weitere Kategorie", count: 0 };
+
+    summary.title = statusHint;
+    summary.innerHTML = `
+        <div class="doctor-detail-treatment-overview-item is-overview">
+            <span class="doctor-detail-treatment-overview-icon" aria-hidden="true">♡</span>
+            <div class="doctor-detail-treatment-overview-copy">
+                <small>Behandlungen im Überblick</small>
+                <strong>${categoryCount} Kategorien</strong>
+                <span>${totalTreatments} Behandlungen insgesamt</span>
+                ${subcategoryCount > 0 ? `<span>${subcategoryCount} Unterkategorien</span>` : ""}
+                <em>${escapeHtml(status)}</em>
+            </div>
+        </div>
+
+        <div class="doctor-detail-treatment-overview-item">
+            <span class="doctor-detail-treatment-overview-icon is-blue" aria-hidden="true">${getTreatmentCategoryIcon(firstCategory.name)}</span>
+            <div class="doctor-detail-treatment-overview-copy">
+                <strong>${firstCategory.count}</strong>
+                <b>${escapeHtml(firstCategory.name)}</b>
+                <span>häufigste Kategorie</span>
+            </div>
+        </div>
+
+        <div class="doctor-detail-treatment-overview-item">
+            <span class="doctor-detail-treatment-overview-icon is-green" aria-hidden="true">${getTreatmentCategoryIcon(secondCategory.name)}</span>
+            <div class="doctor-detail-treatment-overview-copy">
+                <strong>${secondCategory.count}</strong>
+                <b>${escapeHtml(secondCategory.name)}</b>
+                <span>zweithäufigste Kategorie</span>
+            </div>
+        </div>
+
+        <div class="doctor-detail-treatment-overview-item">
+            <span class="doctor-detail-treatment-overview-icon is-purple" aria-hidden="true">☆</span>
+            <div class="doctor-detail-treatment-overview-copy">
+                <strong>${ratedStats.length}</strong>
+                <b>mit Bewertungen</b>
+                <span>von Patient:innen bewertet</span>
+            </div>
+        </div>
+
+        <div class="doctor-detail-treatment-overview-item is-rating">
+            <span class="doctor-detail-treatment-overview-icon is-orange" aria-hidden="true">✓</span>
+            <div class="doctor-detail-treatment-overview-copy">
+                <strong>${averageRating === null ? "–" : averageRating}</strong>
+                <b class="doctor-detail-treatment-overview-stars" aria-label="Durchschnittliche Bewertung von fünf">${ratingStars}</b>
+                <span>Ø Bewertung (von 5)</span>
+            </div>
+        </div>
+    `;
+}
+
+function getTreatmentCategoryIcon(categoryName) {
+    const normalized = String(categoryName || "").toLowerCase();
+
+    if (normalized.includes("diagnost")) return "⌕";
+    if (normalized.includes("arznei")) return "✚";
+    if (normalized.includes("nahrung")) return "⌁";
+    if (normalized.includes("bewegung") || normalized.includes("rehabilitation")) return "↗";
+    if (normalized.includes("selbstmanagement") || normalized.includes("alltag")) return "◉";
+    if (normalized.includes("infusion")) return "◇";
+    if (normalized.includes("ernährung") || normalized.includes("diät")) return "♧";
+    if (normalized.includes("hilfsmittel")) return "✦";
+    if (normalized.includes("verfahren") || normalized.includes("prozedur")) return "⌁";
+    if (normalized.includes("coaching") || normalized.includes("beratung")) return "◎";
+
+    return "＋";
 }
 
 function setupDoctorDetailStickyHeader() {

@@ -277,6 +277,15 @@
     gap: 10px;
 }
 
+.treatment-detail-guided-section:has(#treatment-detail-provider-map-panel) {
+    grid-template-columns: 1fr;
+}
+
+.treatment-detail-guided-section:has(#treatment-detail-provider-map-panel) .treatment-detail-question-intro {
+    display: flex;
+    align-items: center;
+}
+
 .treatment-detail-info-card {
     min-width: 0;
     border: 1px solid #dbe5f1;
@@ -499,6 +508,43 @@
     height: 315px;
 }
 
+.treatment-detail-category-definition {
+    display: grid;
+    gap: 9px;
+}
+
+.treatment-detail-category-definition > div {
+    display: grid;
+    gap: 3px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e3eaf3;
+}
+
+.treatment-detail-category-definition > div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.treatment-detail-category-definition span {
+    color: #607493;
+    font-size: 0.66rem;
+    font-weight: 850;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+}
+
+.treatment-detail-category-definition strong {
+    color: #07326f;
+    font-size: 0.8rem;
+    font-weight: 900;
+    line-height: 1.3;
+}
+
+.treatment-detail-category-definition strong.is-muted {
+    color: #66758f;
+    font-weight: 750;
+}
+
 .treatment-detail-map-popup {
     color: #1d2d46;
     font-size: 0.82rem;
@@ -702,7 +748,7 @@
 
 .treatment-detail-provider-controls-grid {
     display: grid;
-    grid-template-columns: minmax(220px, 1fr) minmax(260px, 1.2fr) minmax(320px, 1.5fr);
+    grid-template-columns: minmax(180px, 0.7fr) minmax(300px, 1.15fr) minmax(380px, 1.6fr);
     gap: 12px;
 }
 
@@ -771,14 +817,17 @@
 
 .treatment-detail-provider-location-controls {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(180px, 1fr) max-content max-content;
     gap: 8px;
     align-items: center;
+    min-width: 0;
 }
 
 .treatment-detail-provider-location-input {
     width: 100%;
+    min-width: 0;
     min-height: 34px;
+    box-sizing: border-box;
     border: 1px solid #b9c8dc;
     border-radius: 8px;
     padding: 7px 10px;
@@ -821,6 +870,7 @@
     font-size: 0.74rem;
     font-weight: 800;
     line-height: 1.3;
+    overflow-wrap: anywhere;
 }
 
 .treatment-detail-provider-list-inner {
@@ -878,12 +928,15 @@
 
 .treatment-detail-provider-card-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
 }
 
 .treatment-detail-provider-card {
+    display: flex;
+    flex-direction: column;
     min-width: 0;
+    height: 100%;
     border: 1px solid #dbe5f1;
     border-radius: 10px;
     background: #ffffff;
@@ -957,6 +1010,7 @@
     display: flex;
     flex-direction: column;
     gap: 9px;
+    margin-top: auto;
 }
 
 .treatment-detail-provider-meta {
@@ -1120,7 +1174,9 @@
 
 .treatment-detail-provider-table {
     width: 100%;
+    min-width: 1180px;
     border-collapse: collapse;
+    table-layout: fixed;
     background: #ffffff;
     border: 1px solid #dbe5f1;
     border-radius: 10px;
@@ -1143,7 +1199,27 @@
     color: #07326f;
     font-size: 0.72rem;
     font-weight: 900;
+    white-space: nowrap;
 }
+
+.treatment-detail-provider-table th:nth-child(1),
+.treatment-detail-provider-table td:nth-child(1) { width: 58px; text-align: center; }
+.treatment-detail-provider-table th:nth-child(2),
+.treatment-detail-provider-table td:nth-child(2) { width: 175px; }
+.treatment-detail-provider-table th:nth-child(3),
+.treatment-detail-provider-table td:nth-child(3) { width: 180px; }
+.treatment-detail-provider-table th:nth-child(4),
+.treatment-detail-provider-table td:nth-child(4) { width: 72px; text-align: center; }
+.treatment-detail-provider-table th:nth-child(5),
+.treatment-detail-provider-table td:nth-child(5) { width: 105px; text-align: center; }
+.treatment-detail-provider-table th:nth-child(6),
+.treatment-detail-provider-table td:nth-child(6) { width: 165px; }
+.treatment-detail-provider-table th:nth-child(7),
+.treatment-detail-provider-table td:nth-child(7) { width: 145px; }
+.treatment-detail-provider-table th:nth-child(8),
+.treatment-detail-provider-table td:nth-child(8) { width: 125px; }
+.treatment-detail-provider-table th:nth-child(9),
+.treatment-detail-provider-table td:nth-child(9) { width: 86px; text-align: right; }
 
 .treatment-detail-provider-table tr:last-child td {
     border-bottom: none;
@@ -1243,6 +1319,33 @@
     border-top-color: #d93025 !important;
 }
 
+.treatment-detail-provider-table-sort {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 900;
+    text-align: left;
+    cursor: pointer;
+}
+
+.treatment-detail-provider-table-sort:hover,
+.treatment-detail-provider-table-sort:focus-visible,
+.treatment-detail-provider-table-sort.is-active {
+    color: #005fa8;
+}
+
+.treatment-detail-provider-table-sort span {
+    margin-left: auto;
+    font-size: 0.82rem;
+}
+
 /* =========================================================
    2. DESKTOP
    Gültig ab 1101 px
@@ -1303,6 +1406,7 @@
     .treatment-detail-provider-card-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
 }
 
 /* =========================================================

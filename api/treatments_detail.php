@@ -96,6 +96,7 @@ function loadTreatmentBase(PDO $pdo, int $treatId) {
                 t.slug,
                 t.behandlung,
                 t.typ,
+                t.unterkategorie,
                 t.aufwand,
                 t.crashrisiko,
                 t.eskalationsstufe,

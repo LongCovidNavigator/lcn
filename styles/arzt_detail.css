@@ -1051,6 +1051,113 @@
     margin: 0;
 }
 
+.doctor-detail-treatment-offer-summary {
+    display: grid;
+    grid-template-columns: 1.25fr repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+    min-height: 112px;
+    padding: 14px 16px;
+    border: 1px solid #dbe5f1;
+    border-radius: 11px;
+    background: linear-gradient(110deg, #f8fbff 0%, #ffffff 58%, #fbfcff 100%);
+    box-shadow: 0 3px 12px rgba(31, 50, 82, 0.05);
+}
+
+.doctor-detail-guided-section:has(.doctor-detail-treatment-panel) .doctor-detail-question-content {
+    display: grid;
+    gap: 12px;
+}
+
+.doctor-detail-treatment-overview-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    padding: 5px 14px;
+    border-left: 1px solid #e1e8f2;
+}
+
+.doctor-detail-treatment-overview-item:first-child {
+    padding-left: 2px;
+    border-left: 0;
+}
+
+.doctor-detail-treatment-overview-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #eef4ff;
+    color: #0759c7;
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+.doctor-detail-treatment-overview-item.is-overview .doctor-detail-treatment-overview-icon {
+    width: 54px;
+    height: 54px;
+    flex-basis: 54px;
+    background: #ffffff;
+    box-shadow: 0 5px 16px rgba(0, 64, 128, 0.1);
+    font-size: 1.7rem;
+}
+
+.doctor-detail-treatment-overview-icon.is-green { background: #eaf9f2; color: #009b68; }
+.doctor-detail-treatment-overview-icon.is-purple { background: #f1edff; color: #7554d6; }
+.doctor-detail-treatment-overview-icon.is-orange { background: #fff3e8; color: #e67b16; }
+
+.doctor-detail-treatment-overview-copy {
+    min-width: 0;
+}
+
+.doctor-detail-treatment-overview-copy small,
+.doctor-detail-treatment-overview-copy b,
+.doctor-detail-treatment-overview-copy span,
+.doctor-detail-treatment-overview-copy em {
+    display: block;
+    overflow: hidden;
+    color: #607493;
+    font-size: 0.66rem;
+    font-style: normal;
+    font-weight: 750;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+}
+
+.doctor-detail-treatment-overview-copy strong {
+    display: block;
+    margin: 2px 0;
+    color: #07326f;
+    font-size: 1.35rem;
+    font-weight: 900;
+    line-height: 1.08;
+}
+
+.doctor-detail-treatment-overview-copy b {
+    margin-bottom: 3px;
+    color: #07326f;
+    font-size: 0.71rem;
+}
+
+.doctor-detail-treatment-overview-copy em {
+    display: inline-flex;
+    width: fit-content;
+    margin-top: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #fff3df;
+    color: #9a5b00;
+    font-weight: 900;
+}
+
+.doctor-detail-treatment-overview-stars {
+    color: #e67b16 !important;
+    letter-spacing: 2px;
+}
+
 .doctor-detail-treatment-item-main {
     display: flex;
     flex-direction: column;
@@ -1374,25 +1481,57 @@
 }
 
 .doctor-detail-treatment-list.is-category-view {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px;
 }
 
 .doctor-detail-treatment-category-overview-card {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto auto;
-    gap: 3px 12px;
+    grid-column: span 3;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 13px;
     align-items: center;
-    min-height: 74px;
-    padding: 12px 14px;
-    border: 1px solid #dbe5f1;
-    border-radius: 10px;
-    background: #ffffff;
-    box-shadow: 0 2px 7px rgba(0, 32, 80, 0.035);
+    min-height: 112px;
+    padding: 16px;
+    border: 1px solid color-mix(in srgb, var(--category-accent) 24%, #dbe5f1);
+    border-radius: 12px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--category-accent) 7%, #ffffff), #ffffff 74%);
+    box-shadow: 0 3px 10px rgba(0, 32, 80, 0.035);
+    overflow: hidden;
 }
 
-.doctor-detail-treatment-category-overview-card h4 {
-    grid-row: 1 / -1;
+.doctor-detail-treatment-category-overview-card.is-featured {
+    grid-column: span 6;
+    min-height: 150px;
+    grid-template-columns: 72px minmax(0, 1fr);
+    padding: 22px 26px;
+}
+
+.doctor-detail-treatment-category-overview-card.is-medium {
+    grid-column: span 4;
+    min-height: 128px;
+}
+
+.doctor-detail-treatment-category-overview-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--category-accent) 12%, #ffffff);
+    color: var(--category-accent);
+    font-size: 1.45rem;
+    font-weight: 900;
+}
+
+.is-featured .doctor-detail-treatment-category-overview-icon {
+    width: 72px;
+    height: 72px;
+    font-size: 2rem;
+}
+
+.doctor-detail-treatment-category-overview-copy h4 {
     margin: 0;
     color: #07326f;
     font-size: 0.8rem;
@@ -1400,26 +1539,48 @@
     line-height: 1.3;
 }
 
-.doctor-detail-treatment-category-overview-count {
-    grid-column: 2;
-    justify-self: end;
-    min-width: 34px;
-    padding: 5px 9px;
-    border-radius: 999px;
-    background: #eef4fb;
-    color: #0759c7;
-    font-size: 0.9rem;
-    font-weight: 900;
-    text-align: center;
+.doctor-detail-treatment-category-overview-parent {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--category-accent) !important;
+    font-size: 0.61rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
 }
 
-.doctor-detail-treatment-category-overview-card > span {
-    grid-column: 2;
+.doctor-detail-treatment-category-overview-card.has-subcategory h4 {
+    font-size: 0.78rem;
+}
+
+.doctor-detail-treatment-category-overview-copy strong {
+    display: inline-block;
+    margin-top: 5px;
+    color: var(--category-accent);
+    font-size: 1.75rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.is-featured .doctor-detail-treatment-category-overview-copy strong {
+    font-size: 2.7rem;
+}
+
+.doctor-detail-treatment-category-overview-copy > span {
+    display: block;
+    margin-top: 3px;
     color: #607493;
     font-size: 0.66rem;
     font-weight: 800;
-    text-align: right;
 }
+
+.doctor-detail-treatment-category-overview-card.is-theme-1 { --category-accent: #0759c7; }
+.doctor-detail-treatment-category-overview-card.is-theme-2 { --category-accent: #008c95; }
+.doctor-detail-treatment-category-overview-card.is-theme-3 { --category-accent: #348e46; }
+.doctor-detail-treatment-category-overview-card.is-theme-4 { --category-accent: #6546bf; }
+.doctor-detail-treatment-category-overview-card.is-theme-5 { --category-accent: #a74061; }
+.doctor-detail-treatment-category-overview-card.is-theme-6 { --category-accent: #b26b00; }
 /* =========================================================
    2. DESKTOP
    Gültig ab 1101 px
@@ -1553,6 +1714,33 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .doctor-detail-treatment-category-overview-card,
+    .doctor-detail-treatment-category-overview-card.is-featured,
+    .doctor-detail-treatment-category-overview-card.is-medium {
+        grid-column: auto;
+    }
+
+    .doctor-detail-treatment-offer-summary {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 0;
+    }
+
+    .doctor-detail-treatment-overview-item.is-overview {
+        grid-column: 1 / -1;
+        padding-bottom: 12px;
+        border-left: 0;
+        border-bottom: 1px solid #dfe7f1;
+    }
+
+    .doctor-detail-treatment-overview-item:nth-child(even) {
+        border-left: 0;
+    }
+
+    .doctor-detail-treatment-overview-item:nth-child(n + 4) {
+        border-top: 1px solid #dfe7f1;
+        padding-top: 12px;
+    }
+
     .doctor-detail-treatment-controls {
         grid-template-columns: 1fr 1fr;
     }
@@ -1612,6 +1800,25 @@
 
     .doctor-detail-treatment-list.is-category-view {
         grid-template-columns: 1fr;
+    }
+
+    .doctor-detail-treatment-offer-summary {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .doctor-detail-treatment-overview-item,
+    .doctor-detail-treatment-overview-item:nth-child(even),
+    .doctor-detail-treatment-overview-item:nth-child(n + 4) {
+        grid-column: 1;
+        padding: 12px 2px;
+        border-top: 1px solid #dfe7f1;
+        border-left: 0;
+    }
+
+    .doctor-detail-treatment-overview-item.is-overview {
+        padding-top: 2px;
+        border-top: 0;
     }
 
     .doctor-detail-action-links {

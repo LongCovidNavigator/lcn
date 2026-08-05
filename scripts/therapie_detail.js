@@ -3,10 +3,12 @@ let treatmentProviderMap = null;
 let treatmentProviderMarkerLayer = null;
 let currentProviderViewMode = "list";
 let currentProviderSortMode = "name";
+let currentProviderSortDirection = "asc";
 let currentProviderLocation = null;
 
 
 document.addEventListener("DOMContentLoaded", function () {
+    currentProviderLocation = getSavedSharedTreatmentLocation();
     loadTreatmentDetail();
     setupTreatmentDetailVoteButtons();
     setupProviderViewSwitch();
@@ -53,6 +55,7 @@ function normalizeTreatmentDetail(treatment) {
         slug: treatment.slug || "",
         behandlung: treatment.behandlung || "",
         typ: treatment.typ || "",
+        unterkategorie: treatment.unterkategorie || "",
         aufwand: treatment.aufwand || "",
         crashrisiko: treatment.crashrisiko || "",
         eskalationsstufe: treatment.eskalationsstufe || "",
@@ -140,11 +143,20 @@ function setupProviderViewSwitch() {
             }
 
             currentProviderSortMode = nextSort;
+            currentProviderSortDirection = nextSort === "rating" ? "desc" : "asc";
 
             if (currentTreatmentDetail) {
                 renderTreatmentProviders(currentTreatmentDetail.providers);
             }
 
+            return;
+        }
+
+        const tableSortButton = event.target.closest(".treatment-detail-provider-table-sort");
+
+        if (tableSortButton) {
+            const nextSort = tableSortButton.getAttribute("data-provider-table-sort");
+            setProviderTableSort(nextSort);
             return;
         }
 
@@ -159,6 +171,7 @@ function setupProviderViewSwitch() {
 
 		if (resetLocationButton) {
 			currentProviderLocation = null;
+			clearSavedSharedTreatmentLocation();
 
 			if (currentProviderSortMode === "distance") {
 				currentProviderSortMode = "name";
@@ -259,7 +272,6 @@ function getTreatIdFromUrl() {
 
 function renderTreatmentDetail(treatment) {
     const name = treatment.behandlung || "Unbekannte Therapie";
-    const category = treatment.typ || "Noch nicht hinterlegt.";
     const providerCount = Number(treatment.provider_count || 0);
     const totalVotes = Number(treatment.total_votes || 0);
 
@@ -273,7 +285,7 @@ function renderTreatmentDetail(treatment) {
 
     renderTreatmentTags(treatment);
     renderTreatmentRating(treatment);
-    renderCompactText("treatment-detail-category", category);
+    renderTreatmentCategory(treatment);
     renderTreatmentProviderCard(treatment);
     renderTreatmentProviders(treatment.providers);
     renderTreatmentSources(treatment.sources);
@@ -681,13 +693,13 @@ function buildProviderListHtml(providers) {
                 <thead>
                     <tr>
                         <th>Rang</th>
-                        <th>Anbieter</th>
-                        <th>Standort</th>
-                        <th>Karte</th>
-                        <th>Entfernung</th>
-                        <th>Bewertung</th>
-                        <th>Versorgung</th>
-                        <th>Kontakt</th>
+                        <th>${buildProviderTableSortHeader("Anbieter", "name")}</th>
+                        <th>${buildProviderTableSortHeader("Standort", "location")}</th>
+                        <th>${buildProviderTableSortHeader("Karte", "map")}</th>
+                        <th>${buildProviderTableSortHeader("Entfernung", "distance")}</th>
+                        <th>${buildProviderTableSortHeader("Bewertung", "rating")}</th>
+                        <th>${buildProviderTableSortHeader("Versorgung", "care")}</th>
+                        <th>${buildProviderTableSortHeader("Kontakt", "contact")}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -801,19 +813,20 @@ function buildProviderDistanceHtml(provider) {
 
 function sortProvidersForDisplay(providers) {
     const providersCopy = Array.isArray(providers) ? [...providers] : [];
+    const directionFactor = currentProviderSortDirection === "desc" ? -1 : 1;
 
     providersCopy.sort(function (providerA, providerB) {
         if (currentProviderSortMode === "rating") {
-            const ratingDiff = Number(providerB.positive_ratio || 0) - Number(providerA.positive_ratio || 0);
+            const ratingDiff = Number(providerA.positive_ratio || 0) - Number(providerB.positive_ratio || 0);
 
             if (ratingDiff !== 0) {
-                return ratingDiff;
+                return ratingDiff * directionFactor;
             }
 
-            const voteDiff = Number(providerB.total_votes || 0) - Number(providerA.total_votes || 0);
+            const voteDiff = Number(providerA.total_votes || 0) - Number(providerB.total_votes || 0);
 
             if (voteDiff !== 0) {
-                return voteDiff;
+                return voteDiff * directionFactor;
             }
 
             return compareProviderNames(providerA, providerB);
@@ -824,13 +837,35 @@ function sortProvidersForDisplay(providers) {
             const distanceB = getProviderDistanceForSorting(providerB);
 
             if (distanceA !== distanceB) {
-                return distanceA - distanceB;
+                return (distanceA - distanceB) * directionFactor;
             }
 
             return compareProviderNames(providerA, providerB);
         }
 
-        return compareProviderNames(providerA, providerB);
+        if (currentProviderSortMode === "location") {
+            return buildProviderLocation(providerA).localeCompare(buildProviderLocation(providerB), "de", {
+                sensitivity: "base",
+                numeric: true
+            }) * directionFactor;
+        }
+
+        if (currentProviderSortMode === "map") {
+            const mapDiff = Number(hasValidCoordinates(providerA)) - Number(hasValidCoordinates(providerB));
+            return mapDiff !== 0 ? mapDiff * directionFactor : compareProviderNames(providerA, providerB);
+        }
+
+        if (currentProviderSortMode === "care") {
+            const careDiff = getProviderCareScore(providerA) - getProviderCareScore(providerB);
+            return careDiff !== 0 ? careDiff * directionFactor : compareProviderNames(providerA, providerB);
+        }
+
+        if (currentProviderSortMode === "contact") {
+            const contactDiff = getProviderContactScore(providerA) - getProviderContactScore(providerB);
+            return contactDiff !== 0 ? contactDiff * directionFactor : compareProviderNames(providerA, providerB);
+        }
+
+        return compareProviderNames(providerA, providerB) * directionFactor;
     });
 
     return providersCopy;
@@ -914,6 +949,8 @@ async function handleProviderLocationSubmit() {
 
         currentProviderLocation = geocodedLocation;
         currentProviderSortMode = "distance";
+        currentProviderSortDirection = "asc";
+        saveSharedTreatmentLocation(geocodedLocation);
 
         if (currentTreatmentDetail) {
 			renderTreatmentProviders(currentTreatmentDetail.providers);
@@ -1489,6 +1526,121 @@ function renderCompactText(elementId, text) {
     element.innerHTML = escapeHtml(cleanText);
 }
 
+function getProviderCareScore(provider) {
+    return [provider.dr_accepts_gkv, provider.dr_accepts_pkv]
+        .filter(function (value) {
+            return value === true || value === 1 || value === "1";
+        }).length;
+}
+
+function getProviderContactScore(provider) {
+    return [provider.dr_website || provider.loc_website, provider.dr_email || provider.loc_email, provider.loc_phone]
+        .filter(function (value) {
+            return String(value || "").trim() !== "";
+        }).length;
+}
+
+function buildProviderTableSortHeader(label, sortMode) {
+    const isActive = currentProviderSortMode === sortMode;
+    const arrow = isActive ? (currentProviderSortDirection === "asc" ? "↑" : "↓") : "↕";
+
+    return `
+        <button type="button" class="treatment-detail-provider-table-sort ${isActive ? "is-active" : ""}" data-provider-table-sort="${sortMode}">
+            ${label}<span aria-hidden="true">${arrow}</span>
+        </button>
+    `;
+}
+
+function setProviderTableSort(sortMode) {
+    const supportedModes = ["name", "location", "map", "distance", "rating", "care", "contact"];
+
+    if (!supportedModes.includes(sortMode)) {
+        return;
+    }
+
+    if (sortMode === "distance" && !currentProviderLocation) {
+        focusProviderLocationInput();
+        alert("Bitte zuerst einen Standort eingeben, damit nach Entfernung sortiert werden kann.");
+        return;
+    }
+
+    if (currentProviderSortMode === sortMode) {
+        currentProviderSortDirection = currentProviderSortDirection === "asc" ? "desc" : "asc";
+    } else {
+        currentProviderSortMode = sortMode;
+        currentProviderSortDirection = ["rating", "map", "care", "contact"].includes(sortMode) ? "desc" : "asc";
+    }
+
+    if (currentTreatmentDetail) {
+        renderTreatmentProviders(currentTreatmentDetail.providers);
+    }
+}
+
+function saveSharedTreatmentLocation(location) {
+    try {
+        localStorage.setItem("lcn_shared_location_preference", JSON.stringify({
+            location: location.label,
+            label: location.label,
+            lat: Number(location.lat),
+            lng: Number(location.lng)
+        }));
+        localStorage.setItem("lcn_treatment_location_preference", JSON.stringify(location));
+        localStorage.removeItem("lcn_shared_location_cleared");
+    } catch (error) {
+        console.warn("Der Standort konnte nicht dauerhaft gespeichert werden:", error);
+    }
+}
+
+function clearSavedSharedTreatmentLocation() {
+    try {
+        localStorage.removeItem("lcn_shared_location_preference");
+        localStorage.removeItem("lcn_doctor_location_preference");
+        localStorage.removeItem("lcn_treatment_location_preference");
+        localStorage.setItem("lcn_shared_location_cleared", "1");
+    } catch (error) {
+        console.warn("Der gespeicherte Standort konnte nicht entfernt werden:", error);
+    }
+}
+
+function getSavedSharedTreatmentLocation() {
+    try {
+        const sharedRaw = localStorage.getItem("lcn_shared_location_preference");
+        const treatmentRaw = localStorage.getItem("lcn_treatment_location_preference");
+        const location = sharedRaw ? JSON.parse(sharedRaw) : treatmentRaw ? JSON.parse(treatmentRaw) : null;
+        const lat = Number(location?.lat);
+        const lng = Number(location?.lng);
+        const label = String(location?.label || location?.location || location?.city || "Eigener Standort").trim();
+
+        return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng, label } : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function renderTreatmentCategory(treatment) {
+    const element = document.getElementById("treatment-detail-category");
+
+    if (!element) {
+        return;
+    }
+
+    const category = String(treatment?.typ || "").trim();
+    const subcategory = String(treatment?.unterkategorie || "").trim();
+
+    element.innerHTML = `
+        <div class="treatment-detail-category-definition">
+            <div>
+                <span>Kategorie</span>
+                <strong>${category ? escapeHtml(category) : "Noch nicht hinterlegt"}</strong>
+            </div>
+            <div>
+                <span>Unterkategorie</span>
+                <strong class="${subcategory ? "" : "is-muted"}">${subcategory ? escapeHtml(subcategory) : "Keine Unterkategorie hinterlegt"}</strong>
+            </div>
+        </div>
+    `;
+}
+
 function showTreatmentDetailContent() {
     const statusElement = document.getElementById("treatment-detail-status");
     const contentElement = document.getElementById("treatment-detail-content");
@@ -1566,6 +1718,10 @@ function setupTreatmentDetailStickyHeader() {
 
         header.classList.toggle("is-compact-sticky", shouldStick);
         spacer.style.height = shouldStick ? `${header.dataset.expandedHeight || 0}px` : "0px";
+        document.documentElement.style.setProperty(
+            "--treatment-detail-sticky-offset",
+            shouldStick ? `${header.getBoundingClientRect().height}px` : "0px"
+        );
     };
 
     const requestStickyUpdate = function () {
