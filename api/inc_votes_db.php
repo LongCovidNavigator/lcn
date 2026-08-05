@@ -17,7 +17,7 @@ function loadEnvFile($path) {
   }
 }
 
-foreach ([__DIR__.'/.env', dirname(__DIR__).'/.env', 'C:/xampp/htdocs/bookstack/.env'] as $p) loadEnvFile($p);
+foreach ([__DIR__ . '/../data2bs/data2lcn_db/.env'] as $p) loadEnvFile($p);
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
   http_response_code(405);
