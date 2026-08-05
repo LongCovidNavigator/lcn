@@ -2172,6 +2172,7 @@ function setTreatmentLocationMode(mode) {
     }
 
     updateTreatmentRadiusInputState();
+    updateTreatmentUserLocationMarker();
     saveTreatmentLocationPreference();
 }
 

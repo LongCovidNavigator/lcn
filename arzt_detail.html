@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="styles/navigation.css">
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/aerzte_karte.css">
-    <link rel="stylesheet" href="styles/arzt_detail.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="styles/arzt_detail.css?v=7">
 </head>
 
 <script>
@@ -36,16 +37,11 @@
 
             <nav class="doctor-detail-sticky-header" aria-label="Arzt-Steckbrief und Schnellaktionen">
                 <div class="doctor-detail-sticky-profile">
-                    <div class="doctor-detail-avatar" id="doctor-detail-avatar">DR</div>
+                    <div class="doctor-detail-avatar" id="doctor-detail-sticky-avatar">DR</div>
 
                     <div class="doctor-detail-sticky-profile-main">
-                        <h1 id="doctor-detail-title">Ärzt:in wird geladen …</h1>
-                        <p id="doctor-detail-subtitle" class="doctor-detail-subtitle">Bitte kurz warten.</p>
-
-                        <h2 id="doctor-detail-name" class="doctor-detail-hidden-name">-</h2>
-
-                        <div id="doctor-detail-tags" class="doctor-detail-tag-row"></div>
-                        <div id="doctor-detail-city-badge" class="doctor-detail-city-badge"></div>
+                        <h1 id="doctor-detail-sticky-title">Ärzt:in wird geladen …</h1>
+                        <p id="doctor-detail-sticky-location" class="doctor-detail-subtitle">Bitte kurz warten.</p>
                     </div>
                 </div>
 
@@ -71,22 +67,27 @@
                     </a>
                 </div>
 
-                <div class="doctor-detail-action-votes" aria-label="Diese Praxis bewerten">
-                    <span>Bewerten:</span>
-
-                    <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-positive" data-type="pro">
-                        Positiv
-                    </button>
-
-                    <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-neutral" data-type="neutral">
-                        Neutral
-                    </button>
-
-                    <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-negative" data-type="contra">
-                        Negativ
-                    </button>
-                </div>
             </nav>
+
+            <section class="doctor-detail-profile-card">
+                <div class="doctor-detail-profile-main">
+                    <div class="doctor-detail-avatar doctor-detail-profile-avatar" id="doctor-detail-avatar">DR</div>
+
+                    <div class="doctor-detail-profile-copy">
+                        <h1 id="doctor-detail-title">Ärzt:in wird geladen …</h1>
+                        <p id="doctor-detail-subtitle" class="doctor-detail-subtitle">Bitte kurz warten.</p>
+                        <h2 id="doctor-detail-name" class="doctor-detail-hidden-name">-</h2>
+                        <div id="doctor-detail-tags" class="doctor-detail-tag-row"></div>
+                        <div id="doctor-detail-city-badge" class="doctor-detail-city-badge"></div>
+                    </div>
+                </div>
+
+                <div class="doctor-detail-profile-contact">
+                    <strong>Kontaktmöglichkeiten</strong>
+                    <div id="doctor-detail-contact" class="doctor-detail-contact-list"></div>
+                    <div id="doctor-detail-website-card"></div>
+                </div>
+            </section>
 
             <section class="doctor-detail-guided-section">
                 <aside class="doctor-detail-question-intro">
@@ -103,33 +104,110 @@
                         <div id="doctor-detail-rating"></div>
                     </article>
 
-                    <article class="doctor-detail-info-card">
+                    <article class="doctor-detail-info-card doctor-detail-specialties-card">
                         <h3>Fachrichtungen</h3>
                         <div id="doctor-detail-specialties" class="doctor-detail-term-list"></div>
                     </article>
 
-                    <article class="doctor-detail-info-card">
-                        <h3>Erfahrung &amp; Versorgung</h3>
-                        <div id="doctor-detail-badges" class="doctor-detail-term-list"></div>
-                    </article>
-
-                    <article class="doctor-detail-info-card">
+                    <article class="doctor-detail-info-card doctor-detail-care-card">
                         <h3>Kassen</h3>
                         <div id="doctor-detail-care" class="doctor-detail-tag-row"></div>
                     </article>
 
-                    <article class="doctor-detail-info-card">
-                        <h3>Zugänglichkeit</h3>
-                        <div id="doctor-detail-accessibility" class="doctor-detail-term-list"></div>
+                    <article class="doctor-detail-info-card doctor-detail-contact-info-card">
+                        <h3>Diese Praxis bewerten</h3>
+                        <div class="doctor-detail-profile-vote-buttons" aria-label="Diese Praxis bewerten">
+                            <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-positive" data-type="pro">
+                                Positiv
+                            </button>
+
+                            <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-neutral" data-type="neutral">
+                                Neutral
+                            </button>
+
+                            <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-negative" data-type="contra">
+                                Negativ
+                            </button>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="doctor-detail-guided-section doctor-detail-location-section">
+                <aside class="doctor-detail-question-intro">
+                    <div class="doctor-detail-question-number">2</div>
+                    <div>
+                        <h2>Wo befindet sich die Praxis?</h2>
+                    </div>
+                </aside>
+
+                <div class="doctor-detail-location-grid">
+                    <div class="doctor-detail-location-address">
+                        <div class="doctor-detail-location-block doctor-detail-practice-location">
+                            <strong id="doctor-detail-location-label">Praxisstandort</strong>
+                            <div id="doctor-detail-address"></div>
+                        </div>
+
+                        <div class="doctor-detail-location-block doctor-detail-location-distance">
+                            <strong>Entfernung zum Standort</strong>
+                            <span id="doctor-detail-distance">Standort nicht gesetzt</span>
+                        </div>
+
+                        <div class="doctor-detail-location-block doctor-detail-own-location">
+                            <strong>Eigener Standort</strong>
+                            <div class="doctor-detail-own-location-control">
+                                <input id="doctor-detail-own-location-input" type="text" placeholder="Adresse oder Ort" autocomplete="street-address">
+                                <button id="doctor-detail-own-location-clear" type="button" aria-label="Gespeicherten Standort entfernen">×</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="doctor-detail-map" class="doctor-detail-map" aria-label="Karte des Praxisstandorts"></div>
+                </div>
+            </section>
+
+            <section class="doctor-detail-guided-section doctor-detail-features-section">
+                <aside class="doctor-detail-question-intro">
+                    <div class="doctor-detail-question-number">3</div>
+                    <div>
+                        <h2>Was zeichnet die Praxis aus?</h2>
+                        <p>Erfahrungen, Versorgung und Zugänglichkeit im Überblick.</p>
+                    </div>
+                </aside>
+
+                <div class="doctor-detail-question-content doctor-detail-feature-columns">
+                    <article class="doctor-detail-feature-group is-expertise">
+                        <header><span class="doctor-detail-feature-group-icon" aria-hidden="true">⚕</span><h3>Fachliche Erfahrung</h3><span id="doctor-detail-expertise-count" class="doctor-detail-feature-count"></span></header>
+                        <div id="doctor-detail-expertise" class="doctor-detail-term-list doctor-detail-feature-list"></div>
+                    </article>
+
+                    <article class="doctor-detail-feature-group is-care-contact">
+                        <header><span class="doctor-detail-feature-group-icon" aria-hidden="true">☎</span><h3>Kontakt &amp; Versorgung</h3><span id="doctor-detail-care-contact-count" class="doctor-detail-feature-count"></span></header>
+                        <div id="doctor-detail-care-contact" class="doctor-detail-term-list doctor-detail-feature-list"></div>
+                    </article>
+
+                    <article class="doctor-detail-feature-group is-diagnostics">
+                        <header><span class="doctor-detail-feature-group-icon" aria-hidden="true">⌕</span><h3>Diagnostik &amp; Behandlung</h3><span id="doctor-detail-diagnostics-count" class="doctor-detail-feature-count"></span></header>
+                        <div id="doctor-detail-diagnostics" class="doctor-detail-term-list doctor-detail-feature-list"></div>
+                    </article>
+
+                    <article class="doctor-detail-feature-group is-practice-access">
+                        <header><span class="doctor-detail-feature-group-icon" aria-hidden="true">♿</span><h3>Barrierefreiheit &amp; Praxisbesuch</h3><span id="doctor-detail-practice-access-count" class="doctor-detail-feature-count"></span></header>
+                        <div id="doctor-detail-practice-access" class="doctor-detail-term-list doctor-detail-feature-list"></div>
+                    </article>
+
+                    <article class="doctor-detail-feature-group is-patient-experience">
+                        <header><span class="doctor-detail-feature-group-icon" aria-hidden="true">●●</span><h3>Erfahrungen von Patient:innen</h3><span id="doctor-detail-patient-experience-count" class="doctor-detail-feature-count"></span></header>
+                        <div id="doctor-detail-patient-experience" class="doctor-detail-term-list doctor-detail-feature-list"></div>
                     </article>
                 </div>
             </section>
 
             <section class="doctor-detail-guided-section">
                 <aside class="doctor-detail-question-intro">
-                    <div class="doctor-detail-question-number">2</div>
+                    <div class="doctor-detail-question-number">4</div>
                     <div>
-                        <h2>Was behandelt sie?</h2>
+                        <h2>Was wird behandelt?</h2>
                         <p>Ein Überblick über das Behandlungsspektrum.</p>
                     </div>
                 </aside>
@@ -163,6 +241,14 @@
                                             data-treatment-view="table"
                                         >
                                             Tabelle
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-view-button"
+                                            data-treatment-view="categories"
+                                        >
+                                            Kategorien
                                         </button>
                                     </div>
                                 </div>
@@ -361,7 +447,8 @@
         </section>
     </main>
 
-    <script src="scripts/arzt_detail.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="scripts/arzt_detail.js?v=7"></script>
 
     <div id="footer-placeholder"></div>
 

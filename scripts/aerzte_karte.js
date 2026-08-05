@@ -640,11 +640,10 @@ function setLocationMode(mode) {
 
     if (!useRadius) {
         if (radiusEnabledInput) radiusEnabledInput.checked = false;
-        currentLocation = null;
-        clearUserLocationMarker();
     }
 
     updateRadiusInputState();
+    updateUserLocationMarker();
 }
 
 function updateRadiusInputState() {
@@ -988,8 +987,8 @@ async function applySearchFromControls() {
             const geocodedCity = await geocodeLocation(settings.cityQuery);
             currentCityFilter = geocodedCity.city || settings.cityQuery;
             settings.cityCenter = geocodedCity;
-            currentLocation = null;
-            clearUserLocationMarker();
+            currentLocation = geocodedCity;
+            updateUserLocationMarker();
             saveDoctorLocationPreference();
         } else if (settings.locationQuery !== "") {
             const geocodedLocation = await geocodeLocation(settings.locationQuery);
@@ -1333,6 +1332,10 @@ function renderDoctorMarkers(doctors) {
     });
 
     doctorMarkerGroup.addTo(map);
+
+    // Der eigene Standort gehört unabhängig vom Suchmodus dauerhaft zur Karte.
+    // Nach dem Neuaufbau der Ergebnismarker wird er deshalb nochmals abgesichert.
+    updateUserLocationMarker();
 
     const markerLayers = doctorMarkerGroup.getLayers();
 

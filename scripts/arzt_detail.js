@@ -21,6 +21,7 @@ let treatmentNegativeMax = 100;
 let treatmentCategoryDropdownOpen = false;
 
 let currentTreatmentCategoryOptions = [];
+let doctorDetailMap = null;
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -28,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
     setupDoctorDetailVoteButtons();
     setupTreatmentToggle();
     setupTreatmentControlEvents();
+    setupDoctorDetailLocationControl();
 });
 
 async function loadDoctorDetail() {
@@ -237,6 +239,15 @@ function setupTreatmentControlEvents() {
     });
 
     document.addEventListener("click", function (event) {
+        const tableSortButton = event.target.closest("[data-treatment-table-sort]");
+
+        if (tableSortButton) {
+            setTreatmentTableSort(tableSortButton.getAttribute("data-treatment-table-sort"));
+            treatmentSpectrumExpanded = false;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+            return;
+        }
+
         const dropdown = document.getElementById("doctor-detail-treatment-category-dropdown");
 
         if (!dropdown || !treatmentCategoryDropdownOpen) {
@@ -342,9 +353,12 @@ function renderDoctorDetail(doctor, terms, treatmentsGrouped) {
     document.title = `${name} | Long Covid Navigator`;
 
     setText("doctor-detail-title", name);
+    setText("doctor-detail-sticky-title", name);
     setText("doctor-detail-name", name);
     setText("doctor-detail-subtitle", buildSubtitle(label, plz, city));
+    setText("doctor-detail-sticky-location", [plz, city].filter(Boolean).join(" ") || "Standort nicht hinterlegt");
     setText("doctor-detail-avatar", buildInitials(name));
+    setText("doctor-detail-sticky-avatar", buildInitials(name));
 
     renderCityBadge(doctor);
     renderTags(doctor, safeTerms);
@@ -356,9 +370,9 @@ function renderDoctorDetail(doctor, terms, treatmentsGrouped) {
     renderWebsiteCard(doctor);
     renderCare(doctor);
     renderTermGroup("doctor-detail-specialties", safeTerms.specialty, "Keine Fachrichtung hinterlegt.");
-    renderTermGroup("doctor-detail-badges", safeTerms.badge, "Keine zusätzlichen Erfahrungs-/Versorgungsangaben hinterlegt.");
-    renderTermGroup("doctor-detail-accessibility", safeTerms.accessibility, "Keine Angaben zur Zugänglichkeit hinterlegt.");
+    renderPracticeFeatureGroups(safeTerms);
     renderTreatmentSpectrum(treatmentsGrouped);
+    renderDoctorLocationMap(doctor);
 }
 
 function normalizeTermsObject(terms) {
@@ -639,39 +653,7 @@ function renderRating(doctor) {
             </div>
         `;
 
-    element.innerHTML = `
-        ${ratingHtml}
-
-        <div class="doctor-detail-own-rating">
-            <h4 class="doctor-detail-own-rating-heading">Diese Praxis bewerten</h4>
-
-            <div class="doctor-detail-vote-buttons">
-                <button
-                    type="button"
-                    class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-positive"
-                    data-type="pro"
-                >
-                    Positiv
-                </button>
-
-                <button
-                    type="button"
-                    class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-neutral"
-                    data-type="neutral"
-                >
-                    Neutral
-                </button>
-
-                <button
-                    type="button"
-                    class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-negative"
-                    data-type="contra"
-                >
-                    Negativ
-                </button>
-            </div>
-        </div>
-    `;
+    element.innerHTML = ratingHtml;
 }
 
 function buildRatingTilesHtml(stats) {
@@ -679,20 +661,17 @@ function buildRatingTilesHtml(stats) {
         <div class="doctor-detail-rating-tiles">
             <div class="doctor-detail-rating-tile doctor-detail-rating-positive">
                 <div class="doctor-detail-rating-value">${stats.proRatio}%</div>
-                <div class="doctor-detail-rating-label">Positiv</div>
-                <div class="doctor-detail-rating-count">${stats.pro}</div>
+                <div class="doctor-detail-rating-label">Positiv <span class="doctor-detail-rating-count">(${stats.pro})</span></div>
             </div>
 
             <div class="doctor-detail-rating-tile doctor-detail-rating-neutral">
                 <div class="doctor-detail-rating-value">${stats.neutralRatio}%</div>
-                <div class="doctor-detail-rating-label">Neutral</div>
-                <div class="doctor-detail-rating-count">${stats.neutral}</div>
+                <div class="doctor-detail-rating-label">Neutral <span class="doctor-detail-rating-count">(${stats.neutral})</span></div>
             </div>
 
             <div class="doctor-detail-rating-tile doctor-detail-rating-negative">
                 <div class="doctor-detail-rating-value">${stats.contraRatio}%</div>
-                <div class="doctor-detail-rating-label">Negativ</div>
-                <div class="doctor-detail-rating-count">${stats.contra}</div>
+                <div class="doctor-detail-rating-label">Negativ <span class="doctor-detail-rating-count">(${stats.contra})</span></div>
             </div>
         </div>
     `;
@@ -768,9 +747,12 @@ function renderWebsiteCard(doctor) {
     }
 
     element.innerHTML = `
-        <a class="doctor-detail-website-link" href="${escapeHtml(website)}" target="_blank" rel="noopener noreferrer">
-            ${escapeHtml(cleanWebsiteLabel(website))}
-        </a>
+        <div class="doctor-detail-contact-entry">
+            <div class="doctor-detail-mini-label">Website</div>
+            <a class="doctor-detail-website-link" href="${escapeHtml(website)}" target="_blank" rel="noopener noreferrer">
+                ${escapeHtml(cleanWebsiteLabel(website))}
+            </a>
+        </div>
     `;
 }
 
@@ -816,12 +798,29 @@ function renderTermGroup(elementId, terms, emptyText) {
     }
 
     if (!Array.isArray(terms) || terms.length === 0) {
-        element.innerHTML = `<span class="doctor-detail-muted">${escapeHtml(emptyText)}</span>`;
+        element.innerHTML = element.classList.contains("doctor-detail-feature-list")
+            ? `<div class="doctor-detail-feature-empty"><span aria-hidden="true">◎</span><p>${escapeHtml(emptyText)}</p></div>`
+            : `<span class="doctor-detail-muted">${escapeHtml(emptyText)}</span>`;
         return;
     }
 
+    const featureList = element.classList.contains("doctor-detail-feature-list");
+    const accessibilityList = elementId === "doctor-detail-accessibility";
+
     element.innerHTML = terms
         .map(function (term) {
+            if (featureList) {
+                const featureIcon = accessibilityList ? getAccessibilityIcon(term.term_code) : "✓";
+
+                return `
+                    <div class="doctor-detail-feature-row${accessibilityList ? " is-accessibility" : ""}" title="${escapeHtml(term.term_desc || term.term_code || "")}">
+                        <span class="doctor-detail-feature-icon" aria-hidden="true">${featureIcon}</span>
+                        <span class="doctor-detail-feature-label">${escapeHtml(term.term_label)}</span>
+                        <strong class="doctor-detail-feature-status">Ja</strong>
+                    </div>
+                `;
+            }
+
             return `
                 <span
                     class="doctor-detail-term-pill"
@@ -834,6 +833,337 @@ function renderTermGroup(elementId, terms, emptyText) {
         .join("");
 }
 
+const doctorPracticeFeatureGroups = [
+    {
+        id: "expertise",
+        codes: [
+            "long-covid-expertise",
+            "postvac-expertise",
+            "mecfs-knowledgeable",
+            "pots-expertise",
+            "mcas-expertise",
+            "mecfs-aware"
+        ],
+        separatedCodes: new Set(["mecfs-aware"]),
+        emptyText: "Keine Angaben zur fachlichen Erfahrung hinterlegt."
+    },
+    {
+        id: "diagnostics",
+        codes: [
+            "provides-mecfs-diagnosis",
+            "accepts-mecfs-diagnosis",
+            "treats-mecfs-offlabel",
+            "offers-immunodiagnostics",
+            "provides-attestations"
+        ],
+        emptyText: "Keine Angaben zu Diagnostik und Behandlung hinterlegt."
+    },
+    {
+        id: "patient-experience",
+        codes: ["patients-feel-heard", "gender-sensitive", "lgbtq-friendly"],
+        emptyText: "Keine Erfahrungen von Patient:innen hinterlegt."
+    },
+    {
+        id: "care-contact",
+        codes: ["telemedicine-phone", "telemedicine-video", "home-visits-available", "email-contact"],
+        emptyText: "Keine Angaben zu Kontakt und Versorgung hinterlegt."
+    },
+    {
+        id: "practice-access",
+        codes: [
+            "wheelchair-accessible",
+            "automatic-doors",
+            "wheelchair-ramps",
+            "parking-nearby",
+            "infection-control-protocols"
+        ],
+        emptyText: "Keine Angaben zu Barrierefreiheit und Praxisbesuch hinterlegt."
+    }
+];
+
+function renderPracticeFeatureGroups(terms) {
+    const allTerms = [...(terms.badge || []), ...(terms.accessibility || [])];
+    const termsByCode = new Map(allTerms.map(function (term) {
+        return [String(term.term_code || ""), term];
+    }));
+    const assignedCodes = new Set();
+
+    doctorPracticeFeatureGroups.forEach(function (group) {
+        const groupTerms = group.codes
+            .map(function (code) {
+                const term = termsByCode.get(code);
+                if (term) assignedCodes.add(code);
+                return term;
+            })
+            .filter(Boolean);
+
+        renderPracticeFeatureGroup(group, groupTerms);
+    });
+
+    const unassignedTerms = allTerms.filter(function (term) {
+        return !assignedCodes.has(String(term.term_code || ""));
+    });
+
+    if (unassignedTerms.length > 0) {
+        console.warn("Nicht eingeordnete Praxismerkmale:", unassignedTerms);
+    }
+}
+
+function renderPracticeFeatureGroup(group, terms) {
+    const element = document.getElementById(`doctor-detail-${group.id}`);
+    const countElement = document.getElementById(`doctor-detail-${group.id}-count`);
+    if (!element) return;
+
+    if (countElement) countElement.textContent = `${terms.length} / ${group.codes.length}`;
+
+    if (terms.length === 0) {
+        element.innerHTML = `<div class="doctor-detail-feature-group-empty">${escapeHtml(group.emptyText)}</div>`;
+        return;
+    }
+
+    element.innerHTML = terms.map(function (term) {
+        const isSeparated = group.separatedCodes?.has(String(term.term_code || ""));
+        return `
+            <div class="doctor-detail-feature-row${isSeparated ? " is-separated" : ""}" title="${escapeHtml(term.term_desc || term.term_code || "")}">
+                <span class="doctor-detail-feature-icon" aria-hidden="true">✓</span>
+                <span class="doctor-detail-feature-label">${escapeHtml(term.term_label)}</span>
+                <strong class="doctor-detail-feature-status">Ja</strong>
+            </div>
+        `;
+    }).join("");
+}
+
+function getAccessibilityIcon(termCode) {
+    const icons = {
+        "telemedicine-phone": "☎",
+        "telemedicine-video": "▣",
+        "wheelchair-accessible": "♿",
+        "automatic-doors": "↔",
+        "wheelchair-ramps": "◿",
+        "home-visits-available": "⌂",
+        "infection-control-protocols": "✥",
+        "email-contact": "✉",
+        "parking-nearby": "P"
+    };
+
+    return icons[String(termCode || "")] || "◆";
+}
+
+function renderDoctorLocationMap(doctor) {
+    const mapElement = document.getElementById("doctor-detail-map");
+    const distanceElement = document.getElementById("doctor-detail-distance");
+    const ownLocationInput = document.getElementById("doctor-detail-own-location-input");
+    const ownLocationClear = document.getElementById("doctor-detail-own-location-clear");
+    const savedLocation = getSavedSharedLocation();
+
+    if (ownLocationInput && document.activeElement !== ownLocationInput) {
+        ownLocationInput.value = savedLocation?.label || "";
+    }
+    if (ownLocationClear) ownLocationClear.classList.toggle("is-hidden", !savedLocation);
+
+    if (!mapElement) {
+        return;
+    }
+
+    if (!hasDoctorCoordinates(doctor) || typeof L === "undefined") {
+        mapElement.innerHTML = `<span class="doctor-detail-muted">Keine Kartenposition hinterlegt.</span>`;
+
+        if (distanceElement) {
+            distanceElement.textContent = "Entfernung nicht verfügbar";
+        }
+
+        return;
+    }
+
+    const lat = Number(doctor.loc_lat);
+    const lng = Number(doctor.loc_lng);
+
+    if (doctorDetailMap) {
+        doctorDetailMap.remove();
+        doctorDetailMap = null;
+        mapElement.replaceChildren();
+    }
+
+    doctorDetailMap = L.map(mapElement, {
+        zoomControl: false,
+        scrollWheelZoom: false,
+        dragging: true
+    }).setView([lat, lng], 15);
+
+    mapElement.onclick = function () {
+        doctorDetailMap.scrollWheelZoom.enable();
+        mapElement.classList.add("is-scroll-zoom-active");
+    };
+
+    mapElement.onmouseleave = function () {
+        doctorDetailMap.scrollWheelZoom.disable();
+        mapElement.classList.remove("is-scroll-zoom-active");
+    };
+
+    L.control.zoom({
+        position: "topright"
+    }).addTo(doctorDetailMap);
+
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
+        maxZoom: 19,
+        attribution: "Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere"
+    }).addTo(doctorDetailMap);
+
+    L.marker([lat, lng])
+        .addTo(doctorDetailMap)
+        .bindPopup(`<strong>Praxis</strong><br>${escapeHtml(buildAddressPlainText(doctor))}`);
+
+    if (distanceElement) {
+        if (savedLocation) {
+            const distance = calculateDistanceKm(savedLocation.lat, savedLocation.lng, lat, lng);
+            distanceElement.textContent = `ca. ${formatDistanceKm(distance)} km (Luftlinie)`;
+        } else {
+            distanceElement.textContent = "Standort nicht gesetzt";
+        }
+    }
+
+    if (savedLocation) {
+        const ownLocationIcon = L.icon({
+            iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+            shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        L.marker([savedLocation.lat, savedLocation.lng], {
+            icon: ownLocationIcon,
+            zIndexOffset: 1000,
+            title: `Standort: ${savedLocation.label}`
+        })
+            .addTo(doctorDetailMap)
+            .bindPopup(`<strong>Standort</strong><br>${escapeHtml(savedLocation.label)}`);
+
+        fitDoctorDetailMapToLocations();
+    }
+
+    window.setTimeout(function () {
+        doctorDetailMap?.invalidateSize();
+        fitDoctorDetailMapToLocations();
+    }, 0);
+
+    function fitDoctorDetailMapToLocations() {
+        if (!doctorDetailMap || !savedLocation) {
+            return;
+        }
+
+        doctorDetailMap.fitBounds(L.latLngBounds([
+            [lat, lng],
+            [savedLocation.lat, savedLocation.lng]
+        ]), {
+            padding: [30, 30]
+        });
+    }
+}
+
+function setupDoctorDetailLocationControl() {
+    const input = document.getElementById("doctor-detail-own-location-input");
+    const clearButton = document.getElementById("doctor-detail-own-location-clear");
+    if (!input) return;
+
+    input.addEventListener("keydown", function (event) {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        saveDoctorDetailLocationFromInput();
+    });
+
+    input.addEventListener("change", saveDoctorDetailLocationFromInput);
+
+    clearButton?.addEventListener("click", function () {
+        clearSharedDoctorLocation();
+    });
+}
+
+async function saveDoctorDetailLocationFromInput() {
+    const input = document.getElementById("doctor-detail-own-location-input");
+    const query = input?.value.trim() || "";
+
+    if (query === "") {
+        clearSharedDoctorLocation();
+        return;
+    }
+
+    input.disabled = true;
+
+    try {
+        const response = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.message || "Standort nicht gefunden.");
+
+        const result = data.result || {};
+        const location = {
+            location: result.formatted || query,
+            label: result.formatted || query,
+            city: result.city || "",
+            lat: Number(result.lat),
+            lng: Number(result.lng)
+        };
+
+        if (!Number.isFinite(location.lat) || !Number.isFinite(location.lng)) {
+            throw new Error("Der Standort enthält keine gültigen Koordinaten.");
+        }
+
+        localStorage.setItem("lcn_shared_location_preference", JSON.stringify(location));
+        localStorage.removeItem("lcn_shared_location_cleared");
+        input.value = location.label;
+        renderDoctorLocationMap(currentDoctorDetail || {});
+    } catch (error) {
+        console.error("Der Standort konnte nicht übernommen werden:", error);
+        alert("Der Standort konnte nicht gefunden werden. Bitte gib die Adresse oder den Ort eindeutiger ein.");
+    } finally {
+        input.disabled = false;
+    }
+}
+
+function clearSharedDoctorLocation() {
+    localStorage.removeItem("lcn_shared_location_preference");
+    localStorage.removeItem("lcn_doctor_location_preference");
+    localStorage.removeItem("lcn_treatment_location_preference");
+    localStorage.setItem("lcn_shared_location_cleared", "1");
+
+    const input = document.getElementById("doctor-detail-own-location-input");
+    if (input) input.value = "";
+    renderDoctorLocationMap(currentDoctorDetail || {});
+}
+
+function getSavedSharedLocation() {
+    try {
+        const value = localStorage.getItem("lcn_shared_location_preference");
+        const location = value ? JSON.parse(value) : null;
+        const hasCoordinates = location?.lat !== null && location?.lat !== undefined
+            && location?.lng !== null && location?.lng !== undefined;
+        const lat = Number(location?.lat);
+        const lng = Number(location?.lng);
+
+        const label = String(location?.label || location?.location || location?.city || "Eigener Standort").trim();
+
+        return hasCoordinates && Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng, label } : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function calculateDistanceKm(lat1, lng1, lat2, lng2) {
+    const toRadians = value => value * Math.PI / 180;
+    const earthRadiusKm = 6371;
+    const latDelta = toRadians(lat2 - lat1);
+    const lngDelta = toRadians(lng2 - lng1);
+    const a = Math.sin(latDelta / 2) ** 2
+        + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(lngDelta / 2) ** 2;
+
+    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function formatDistanceKm(distance) {
+    return distance < 10 ? distance.toFixed(1).replace(".", ",") : Math.round(distance).toString();
+}
+
 function renderTreatmentSpectrum(treatmentsGrouped) {
     const listElement = document.getElementById("doctor-detail-treatments");
     const summaryElement = document.getElementById("doctor-detail-treatment-summary");
@@ -844,6 +1174,7 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
     }
 
     listElement.classList.toggle("is-table-view", treatmentViewMode === "table");
+    listElement.classList.toggle("is-category-view", treatmentViewMode === "categories");
 
     const groups = getVisibleTreatmentGroups(treatmentsGrouped);
 
@@ -921,6 +1252,16 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
         return;
     }
 
+    if (treatmentViewMode === "categories") {
+        listElement.innerHTML = buildTreatmentCategoryOverviewHtml(groups, visibleEntries);
+
+        if (toggleButton) {
+            toggleButton.classList.add("is-hidden");
+        }
+
+        return;
+    }
+
     if (treatmentViewMode === "table") {
         listElement.innerHTML = buildTreatmentTableHtml(visibleEntries);
 
@@ -931,49 +1272,20 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
         return;
     }
 
-    const groupedEntries = groupTreatmentEntriesByCategory(visibleEntries);
+    const visibleLimit = treatmentSpectrumExpanded ? visibleEntries.length : 6;
+    const displayedEntries = visibleEntries.slice(0, visibleLimit);
 
-    listElement.innerHTML = groupedEntries
-        .map(function (group) {
-            const visibleLimit = treatmentSpectrumExpanded ? group.entries.length : 6;
-            const visibleGroupEntries = group.entries.slice(0, visibleLimit);
-            const hiddenCount = group.entries.length - visibleGroupEntries.length;
-
-            const treatmentItems = visibleGroupEntries
-                .map(function (entry) {
-                    return buildTreatmentCardItemHtml(entry);
-                })
-                .join("");
-
-            const hiddenText = hiddenCount > 0
-                ? `<li class="doctor-detail-treatment-more">+ ${hiddenCount} weitere</li>`
-                : "";
-
-            return `
-                <section id="doctor-detail-treatment-group-${escapeHtml(group.slug)}" class="doctor-detail-treatment-group">
-                    <header class="doctor-detail-treatment-group-header">
-                        <h4>${escapeHtml(group.type)}</h4>
-                        <span>${group.entries.length}</span>
-                    </header>
-
-                    <ul>
-                        ${treatmentItems}
-                        ${hiddenText}
-                    </ul>
-                </section>
-            `;
-        })
+    listElement.innerHTML = displayedEntries
+        .map(buildTreatmentCardItemHtml)
         .join("");
 
-    const hasHiddenTreatments = groupedEntries.some(function (group) {
-        return group.entries.length > 6;
-    });
+    const hasHiddenTreatments = visibleEntries.length > 6;
 
     if (toggleButton) {
         toggleButton.classList.toggle("is-hidden", !hasHiddenTreatments);
         toggleButton.textContent = treatmentSpectrumExpanded
-            ? "Details wieder kompakt anzeigen"
-            : "Alle Details anzeigen";
+            ? "Weniger Therapien anzeigen"
+            : `Alle ${visibleEntries.length} Therapien anzeigen →`;
     }
 }
 
@@ -1140,8 +1452,11 @@ function getFilteredAndSortedTreatmentEntries(entries) {
 
 function compareTreatmentEntriesForCurrentSort(a, b) {
     const nameCompare = String(a?.treatment?.behandlung || "").localeCompare(String(b?.treatment?.behandlung || ""), "de", { sensitivity: "base" });
+    const categoryCompare = String(a?.categoryType || "").localeCompare(String(b?.categoryType || ""), "de", { sensitivity: "base" });
     const statsA = getTreatmentVoteStats(a.treatment);
     const statsB = getTreatmentVoteStats(b.treatment);
+    const providersA = getTreatmentProviderCount(a.treatment);
+    const providersB = getTreatmentProviderCount(b.treatment);
 
     if (treatmentSortMode === "name_desc") {
         return -nameCompare;
@@ -1151,6 +1466,28 @@ function compareTreatmentEntriesForCurrentSort(a, b) {
         return (statsB.positiveRatio - statsA.positiveRatio)
             || (statsB.totalVotes - statsA.totalVotes)
             || nameCompare;
+    }
+
+    if (treatmentSortMode === "positive_asc") {
+        return (statsA.positiveRatio - statsB.positiveRatio)
+            || (statsA.totalVotes - statsB.totalVotes)
+            || nameCompare;
+    }
+
+    if (treatmentSortMode === "category_asc") {
+        return categoryCompare || nameCompare;
+    }
+
+    if (treatmentSortMode === "category_desc") {
+        return -categoryCompare || nameCompare;
+    }
+
+    if (treatmentSortMode === "providers_desc") {
+        return (providersB - providersA) || nameCompare;
+    }
+
+    if (treatmentSortMode === "providers_asc") {
+        return (providersA - providersB) || nameCompare;
     }
 
     if (treatmentSortMode === "negative_desc") {
@@ -1165,7 +1502,51 @@ function compareTreatmentEntriesForCurrentSort(a, b) {
             || nameCompare;
     }
 
+    if (treatmentSortMode === "votes_asc") {
+        return (statsA.totalVotes - statsB.totalVotes)
+            || (statsA.positiveRatio - statsB.positiveRatio)
+            || nameCompare;
+    }
+
     return nameCompare;
+}
+
+function getTreatmentProviderCount(treatment) {
+    return Number(treatment?.provider_count || treatment?.provider_total || treatment?.provider_count_total || 0);
+}
+
+function setTreatmentTableSort(sortKey) {
+    const sortModes = {
+        name: ["name_asc", "name_desc"],
+        category: ["category_asc", "category_desc"],
+        experience: ["positive_desc", "positive_asc"],
+        votes: ["votes_desc", "votes_asc"],
+        providers: ["providers_desc", "providers_asc"]
+    };
+    const modes = sortModes[sortKey];
+    if (!modes) return;
+
+    treatmentSortMode = treatmentSortMode === modes[0] ? modes[1] : modes[0];
+}
+
+function buildTreatmentTableSortHeader(label, sortKey) {
+    const sortModes = {
+        name: ["name_asc", "name_desc"],
+        category: ["category_asc", "category_desc"],
+        experience: ["positive_desc", "positive_asc"],
+        votes: ["votes_desc", "votes_asc"],
+        providers: ["providers_desc", "providers_asc"]
+    };
+    const modes = sortModes[sortKey] || [];
+    const activeIndex = modes.indexOf(treatmentSortMode);
+    const descendingFirst = sortKey === "experience" || sortKey === "votes" || sortKey === "providers";
+    const arrow = activeIndex === 0
+        ? (descendingFirst ? "↓" : "↑")
+        : activeIndex === 1
+            ? (descendingFirst ? "↑" : "↓")
+            : "↕";
+
+    return `<button type="button" class="doctor-detail-treatment-table-sort" data-treatment-table-sort="${sortKey}">${label}<span aria-hidden="true">${arrow}</span></button>`;
 }
 
 function flattenTreatmentGroups(groups) {
@@ -1206,6 +1587,7 @@ function buildTreatmentItemHtml(treatment, rank) {
     const name = treatment.behandlung || "Unbenannte Behandlung";
     const detailUrl = buildTreatmentDetailUrl(treatment);
     const ratingHtml = buildTreatmentRatingCompactHtml(treatment);
+    const providerCount = Number(treatment.provider_count || treatment.provider_total || treatment.provider_count_total || 0);
 
     const titleHtml = detailUrl
         ? `<a class="doctor-detail-treatment-link" href="${escapeHtml(detailUrl)}">${escapeHtml(name)}</a>`
@@ -1215,8 +1597,8 @@ function buildTreatmentItemHtml(treatment, rank) {
         <li class="doctor-detail-treatment-item doctor-detail-treatment-item-with-rating">
             <div class="doctor-detail-treatment-item-main">
                 <div class="doctor-detail-treatment-item-topline">
-                    <span class="doctor-detail-treatment-rank-badge">#${rank}</span>
                     ${titleHtml}
+                    <span class="doctor-detail-treatment-rank-badge" title="Anbieter gesamt">${providerCount || rank}</span>
                 </div>
 
                 ${ratingHtml}
@@ -1232,10 +1614,11 @@ function buildTreatmentTableHtml(entries) {
                 <thead>
                     <tr>
                         <th>Rang</th>
-                        <th>Therapie</th>
-                        <th>Kategorie</th>
-                        <th>Erfahrung</th>
-                        <th>Anbieter gesamt</th>
+                        <th>${buildTreatmentTableSortHeader("Therapie", "name")}</th>
+                        <th>${buildTreatmentTableSortHeader("Kategorie", "category")}</th>
+                        <th>${buildTreatmentTableSortHeader("Erfahrung", "experience")}</th>
+                        <th>${buildTreatmentTableSortHeader("Bewertungen", "votes")}</th>
+                        <th>${buildTreatmentTableSortHeader("Anbieter gesamt", "providers")}</th>
                     </tr>
                 </thead>
 
@@ -1249,6 +1632,7 @@ function buildTreatmentTableHtml(entries) {
 
 function buildTreatmentTableRowHtml(entry) {
     const treatment = entry.treatment;
+    const stats = getTreatmentVoteStats(treatment);
     const name = treatment.behandlung || "Unbenannte Behandlung";
     const detailUrl = buildTreatmentDetailUrl(treatment);
     const providerCount = Number(treatment.provider_count || treatment.provider_total || treatment.provider_count_total || 0);
@@ -1276,6 +1660,10 @@ function buildTreatmentTableRowHtml(entry) {
             </td>
 
             <td>
+                <span class="doctor-detail-treatment-vote-total">${stats.totalVotes}</span>
+            </td>
+
+            <td>
                 <span class="doctor-detail-treatment-provider-badge">
                     ${providerCount > 0 ? escapeHtml(providerCount) : "—"}
                 </span>
@@ -1296,7 +1684,6 @@ function buildTreatmentExperienceTableHtml(treatment) {
             <span class="doctor-detail-treatment-table-rating is-positive">+${stats.positiveRatio}%</span>
             <span class="doctor-detail-treatment-table-rating is-neutral">=${stats.neutralRatio}%</span>
             <span class="doctor-detail-treatment-table-rating is-negative">-${stats.negativeRatio}%</span>
-            <small>(n=${stats.totalVotes})</small>
         </div>
     `;
 }
@@ -1390,7 +1777,101 @@ function showDoctorDetailContent() {
 
     if (contentElement) {
         contentElement.classList.remove("is-hidden");
+        setupDoctorDetailStickyHeader();
     }
+}
+
+function buildTreatmentCategoryOverviewHtml(groups, visibleEntries) {
+    const visibleCounts = new Map();
+
+    visibleEntries.forEach(function (entry) {
+        visibleCounts.set(entry.categorySlug, (visibleCounts.get(entry.categorySlug) || 0) + 1);
+    });
+
+    return groups
+        .map(function (group) {
+            return {
+                type: group.type,
+                slug: group.slug,
+                count: visibleCounts.get(group.slug) || 0
+            };
+        })
+        .filter(function (group) {
+            return group.count > 0;
+        })
+        .map(function (group) {
+            const treatmentLabel = group.count === 1 ? "Therapie" : "Therapien";
+
+            return `
+                <article class="doctor-detail-treatment-category-overview-card">
+                    <h4>${escapeHtml(group.type)}</h4>
+                    <div class="doctor-detail-treatment-category-overview-count">${group.count}</div>
+                    <span>${treatmentLabel}</span>
+                </article>
+            `;
+        })
+        .join("");
+}
+
+function setupDoctorDetailStickyHeader() {
+    const headerElement = document.querySelector(".doctor-detail-sticky-header");
+    const profileElement = document.querySelector(".doctor-detail-profile-card");
+
+    if (!headerElement || !profileElement || headerElement.dataset.stickyInitialized === "true") {
+        return;
+    }
+
+    headerElement.dataset.stickyInitialized = "true";
+    let profileEnd = profileElement.getBoundingClientRect().bottom + window.scrollY;
+    let ticking = false;
+
+    const updateStickyState = function () {
+        const desktopStickyEnabled = window.matchMedia("(min-width: 1101px)").matches;
+
+        if (!desktopStickyEnabled) {
+            headerElement.classList.remove("is-compact-sticky");
+            document.documentElement.style.setProperty("--doctor-detail-sticky-offset", "0px");
+            return;
+        }
+
+        profileEnd = profileElement.getBoundingClientRect().bottom + window.scrollY;
+        const isCompact = headerElement.classList.contains("is-compact-sticky");
+        const activationPoint = profileEnd;
+        const deactivationPoint = profileEnd - 64;
+
+        if (!isCompact && window.scrollY >= activationPoint) {
+            headerElement.classList.add("is-compact-sticky");
+        } else if (isCompact && window.scrollY <= deactivationPoint) {
+            headerElement.classList.remove("is-compact-sticky");
+        }
+
+        const stickyOffset = headerElement.classList.contains("is-compact-sticky")
+            ? headerElement.offsetHeight
+            : 0;
+        document.documentElement.style.setProperty("--doctor-detail-sticky-offset", `${stickyOffset}px`);
+    };
+
+    const requestStickyUpdate = function () {
+        if (ticking) {
+            return;
+        }
+
+        ticking = true;
+        window.requestAnimationFrame(function () {
+            updateStickyState();
+            ticking = false;
+        });
+    };
+
+    window.addEventListener("scroll", requestStickyUpdate, { passive: true });
+
+    window.addEventListener("resize", function () {
+        headerElement.classList.remove("is-compact-sticky");
+        profileEnd = profileElement.getBoundingClientRect().bottom + window.scrollY;
+        requestStickyUpdate();
+    });
+
+    updateStickyState();
 }
 
 function showDoctorDetailError(message) {

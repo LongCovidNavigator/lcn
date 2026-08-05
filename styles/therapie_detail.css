@@ -55,9 +55,8 @@
 ------------------------------ */
 
 .treatment-detail-sticky-header {
-    position: sticky;
-    top: 0;
-    z-index: 30;
+    position: relative;
+    z-index: 20;
     display: grid;
     grid-template-columns: minmax(360px, 1.2fr) minmax(220px, 0.45fr) auto;
     align-items: stretch;
@@ -69,6 +68,10 @@
     box-shadow: 0 4px 14px rgba(0, 32, 80, 0.10);
     overflow: hidden;
     backdrop-filter: blur(6px);
+}
+
+.treatment-detail-sticky-spacer {
+    height: 0;
 }
 
 .treatment-detail-sticky-profile {
@@ -270,7 +273,7 @@
 
 .treatment-detail-overview-grid {
     display: grid;
-    grid-template-columns: 1.15fr 0.75fr 0.85fr 1.35fr;
+    grid-template-columns: minmax(300px, 2fr) repeat(2, minmax(140px, 1fr));
     gap: 10px;
 }
 
@@ -462,6 +465,9 @@
 ------------------------------ */
 
 .treatment-detail-provider-map-panel {
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
     margin-bottom: 14px;
     border: 1px solid #dbe5f1;
     border-radius: 10px;
@@ -1247,6 +1253,46 @@
         grid-template-columns: minmax(360px, 1fr) minmax(220px, 0.45fr);
     }
 
+    .treatment-detail-sticky-header.is-compact-sticky {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        z-index: 2000;
+        width: min(1120px, calc(100% - 40px));
+        grid-template-columns: minmax(360px, 1fr) 270px;
+        margin: 0;
+        transform: translateX(-50%);
+        box-shadow: 0 5px 18px rgba(0, 32, 80, 0.16);
+    }
+
+    .treatment-detail-sticky-header.is-compact-sticky .treatment-detail-sticky-profile {
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 10px;
+        padding: 7px 14px;
+    }
+
+    .treatment-detail-sticky-header.is-compact-sticky .treatment-detail-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 0.8rem;
+    }
+
+    .treatment-detail-sticky-header.is-compact-sticky .treatment-detail-sticky-profile-main h1 {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .treatment-detail-sticky-header.is-compact-sticky .treatment-detail-subtitle,
+    .treatment-detail-sticky-header.is-compact-sticky .treatment-detail-tag-row,
+    .treatment-detail-sticky-header.is-compact-sticky .treatment-detail-action-votes {
+        display: none;
+    }
+
+    .treatment-detail-sticky-header.is-compact-sticky .treatment-detail-action-summary-item {
+        min-height: 54px;
+        padding-inline: 10px;
+    }
+
     .treatment-detail-action-votes {
         grid-column: 1 / -1;
         justify-content: flex-end;
@@ -1254,7 +1300,6 @@
         border-top: 1px solid #e3eaf3;
     }
 
-    .treatment-detail-overview-grid,
     .treatment-detail-provider-card-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }

@@ -127,3 +127,574 @@ Grundregeln:
 ## Geplanter Test
 
 Das Schema wird zunächst mit zwei bis drei deutlich unterschiedlichen Einträgen getestet, zum Beispiel einem Arzneimittel, einer apparativen Behandlung und einer Selbstmanagement-Maßnahme. Erst danach werden das endgültige Markdown-Arbeitsprotokoll und die spätere Datenbankstruktur festgelegt.
+
+
+## Block 0 – Dubletten- und Abgrenzungsprüfung
+
+Dieser Block muss vor jeder Neuanlage, Umbenennung oder strukturellen Änderung eines Therapieeintrags vollständig geprüft werden.
+
+Ziel ist es, unnötige Dubletten zu verhindern und sauber zu unterscheiden zwischen:
+
+* identischen Einträgen,
+* echten Synonymen,
+* Schreib- und Sprachvarianten,
+* Wirkstoffen und Handelsnamen,
+* Ober- und Unterbegriffen,
+* eigenständigen Verfahren,
+* Kombinationen und Behandlungsprotokollen.
+
+Ein neuer Hauptdatensatz darf erst vorgeschlagen werden, nachdem Hauptnamen, Aliasse, normalisierte Schreibweisen, Abkürzungen, Langformen, deutsche und englische Varianten sowie Wirkstoff- und Handelsnamen gegen den bestehenden Datenbestand geprüft wurden.
+
+---
+
+### Vorgeschlagener Hauptname
+
+**Vorgeschlagener Hauptname:**
+`...`
+
+#### Anforderungen
+
+* genau eine eindeutige und verständliche Bezeichnung,
+* korrekte deutsche Rechtschreibung,
+* keine zusätzlichen Erklärungen in Klammern, sofern sie nicht zur eindeutigen Abgrenzung erforderlich sind,
+* kein Handelsname als Hauptname, wenn der Wirkstoff der geeignetere Haupteintrag ist,
+* keine Abkürzung als Hauptname, wenn eine allgemein verständliche Langform existiert,
+* keine Kombination als eigenständiger Eintrag, ohne vorher die enthaltenen Einzelmaßnahmen und bestehenden Kombinationsbezüge zu prüfen.
+
+---
+
+### Art des Eintrags
+
+Genau eine primäre Eintragsart auswählen.
+
+* [ ] Wirkstoff
+* [ ] Arzneimittelklasse
+* [ ] medizinisches oder therapeutisches Verfahren
+* [ ] Diagnostik
+* [ ] Hilfsmittel
+* [ ] Nahrungsergänzungsmittel
+* [ ] Produkt- oder Handelsname
+* [ ] Therapiekonzept
+* [ ] Kombinationsbehandlung oder Kombinationsprotokoll
+* [ ] Beratung, Schulung oder Selbstmanagement
+* [ ] sonstiges
+
+**Begründung der Zuordnung:**
+`...`
+
+#### Abgrenzungsregeln
+
+* **Wirkstoff:** pharmakologisch wirksame Substanz, beispielsweise Cetirizin oder Prednisolon.
+* **Arzneimittelklasse:** Gruppe von Wirkstoffen mit gemeinsamer pharmakologischer oder therapeutischer Einordnung, beispielsweise H1-Antihistaminika oder Betablocker.
+* **Produkt- oder Handelsname:** geschützter oder produktbezogener Name eines Arzneimittels, Hilfsmittels oder Präparats.
+* **Medizinisches oder therapeutisches Verfahren:** Behandlung, Intervention oder medizinische Prozedur.
+* **Diagnostik:** Untersuchung oder Verfahren zur Erhebung diagnostischer Informationen.
+* **Therapiekonzept:** übergeordnetes Vorgehen, das mehrere einzelne Maßnahmen enthalten kann.
+* **Kombinationsbehandlung oder Kombinationsprotokoll:** bewusst festgelegte Kombination mehrerer Wirkstoffe, Verfahren oder Maßnahmen.
+* **Beratung, Schulung oder Selbstmanagement:** Maßnahmen, bei denen Information, Verhaltensanpassung oder selbstständige Umsetzung im Mittelpunkt stehen.
+
+---
+
+### Bekannte Aliasse und alternative Bezeichnungen
+
+Alle auffindbaren Bezeichnungen sammeln. Zu jedem Alias muss später ein zulässiger Alias-Typ vergeben werden.
+
+| Bereich                                | Gefundene Bezeichnungen |
+| -------------------------------------- | ----------------------- |
+| Abkürzungen                            |                         |
+| ausgeschriebene Langformen             |                         |
+| deutsche Varianten                     |                         |
+| englische Varianten                    |                         |
+| Wirkstoffnamen                         |                         |
+| Handels- oder Produktnamen             |                         |
+| alternative Schreibweisen              |                         |
+| historische oder frühere Bezeichnungen |                         |
+| gebräuchliche Patient:innenbegriffe    |                         |
+| Ober- oder Sammelbegriffe              |                         |
+| Kombinationsbegriffe                   |                         |
+
+#### Regeln
+
+* Ein Alias ist nicht automatisch ein Synonym.
+* Handelsname und Wirkstoff müssen als unterschiedliche Beziehungen gekennzeichnet werden.
+* Oberbegriffe dürfen mit mehreren eigenständigen Einträgen verknüpft sein.
+* Kombinationsbegriffe dürfen auf mehrere enthaltene Maßnahmen verweisen.
+* Schreibvarianten, Abkürzungen und Sprachvarianten sollen nach Möglichkeit erhalten werden, wenn sie die Auffindbarkeit verbessern.
+* Neue Alias-Typen dürfen nicht während einer Einzelrecherche frei erfunden werden.
+* Es dürfen nur die im LCN-Rechercheschema festgelegten Alias-Typen verwendet werden.
+* Fehlt ein passender Alias-Typ, wird dies als offener Strukturpunkt dokumentiert.
+
+---
+
+### Prüfung im bestehenden Datenbestand
+
+Vor einer Entscheidung müssen mindestens folgende Prüfungen durchgeführt werden:
+
+* [ ] Hauptnamen nach vollständiger Bezeichnung durchsucht
+* [ ] Hauptnamen nach bedeutungstragenden Bestandteilen durchsucht
+* [ ] bestehende Aliasse durchsucht
+* [ ] Groß- und Kleinschreibung normalisiert
+* [ ] Bindestriche, Leerzeichen und Zusammenschreibung geprüft
+* [ ] Umlaute und umgeschriebene Umlaute geprüft
+* [ ] Singular- und Pluralformen geprüft
+* [ ] Abkürzung und ausgeschriebene Langform geprüft
+* [ ] deutsche und englische Bezeichnungen geprüft
+* [ ] Wirkstoff und Handelsnamen geprüft
+* [ ] Arzneimittelklasse oder übergeordneter Gruppenbegriff geprüft
+* [ ] mögliche Kombinationen und Kombinationsprotokolle geprüft
+* [ ] ähnlich klingende, fachlich aber unterschiedliche Einträge geprüft
+
+**Verwendete Suchbegriffe:**
+`...`
+
+**Durchsuchte Tabellen oder Datenquellen:**
+`...`
+
+---
+
+### Ähnliche bestehende Einträge
+
+Alle fachlich oder sprachlich ähnlichen Einträge aufführen. Nicht nur den wahrscheinlichsten Treffer nennen.
+
+| treat_id | bestehender Hauptname | gefundener Alias oder Suchtreffer | Verhältnis zum vorgeschlagenen Eintrag | Begründung |
+| -------: | --------------------- | --------------------------------- | -------------------------------------- | ---------- |
+|          |                       |                                   |                                        |            |
+
+#### Zulässige Verhältnisse
+
+Für jeden geprüften bestehenden Eintrag genau eine Beziehung auswählen:
+
+* `echte Dublette`
+* `Synonym`
+* `Schreibvariante`
+* `Abkürzung oder Langform`
+* `deutsche oder englische Sprachvariante`
+* `Handelsname`
+* `Wirkstoffbezug`
+* `Arzneimittelklasse oder Oberbegriff`
+* `Unterform oder spezifische Ausprägung`
+* `Bestandteil einer Kombination`
+* `Kombinationsbegriff`
+* `verwandter, aber eigenständiger Eintrag`
+* `fachlich nicht identisch`
+* `weitere Abgrenzungsrecherche erforderlich`
+
+---
+
+### Fachliche Abgrenzung
+
+#### Leitfrage
+
+Warum ist der vorgeschlagene Eintrag bereits durch einen vorhandenen Datensatz abgedeckt oder warum benötigt er einen eigenständigen Hauptdatensatz?
+
+**Abgrenzungsbegründung:**
+`...`
+
+Die Begründung muss konkret benennen:
+
+* worin die fachliche Übereinstimmung oder Abweichung besteht,
+* ob dieselbe Maßnahme, derselbe Wirkstoff oder nur ein verwandter Begriff gemeint ist,
+* ob der Unterschied für Suche, Darstellung, Anbieterzuordnung oder Nutzerbewertung relevant ist,
+* ob getrennte Bewertungen sinnvoll wären,
+* ob der Begriff lediglich als Alias erhalten werden sollte,
+* ob es sich um eine Kombination mehrerer bereits vorhandener Einträge handelt.
+
+Nicht ausreichend sind Begründungen wie:
+
+* „klingt ähnlich“,
+* „wird manchmal so genannt“,
+* „scheint dasselbe zu sein“,
+* „könnte ein neuer Eintrag sein“,
+* „zur Sicherheit getrennt anlegen“.
+
+---
+
+### Kategoriezuordnung
+
+**Typ:**
+`...`
+
+**Unterkategorie:**
+`...`
+
+**Begründung:**
+`...`
+
+#### Regeln
+
+* Es darf nur ein bestehender Typ aus der festgelegten LCN-Werteliste verwendet werden.
+* Die Unterkategorie muss für den ausgewählten Typ zulässig sein.
+* Neue Kategorien oder Unterkategorien dürfen nicht innerhalb einer Einzelrecherche spontan angelegt werden.
+* Fehlt eine passende Kategorie, wird dies als offener Strukturpunkt dokumentiert.
+* Einträge bleiben grundsätzlich gemeinsam in der Therapietabelle; unterschiedliche Arten von Maßnahmen werden über Typ, Unterkategorie und ergänzende Strukturen unterschieden.
+
+---
+
+### Entscheidung
+
+Genau eine Hauptentscheidung auswählen.
+
+* [ ] bestehenden Datensatz unverändert verwenden
+* [ ] bestehenden Datensatz verwenden und Alias ergänzen
+* [ ] bestehenden Datensatz umbenennen
+* [ ] bestehende Datensätze zusammenführen
+* [ ] neuen eigenständigen Datensatz anlegen
+* [ ] Kombinationsbeziehung ergänzen, aber keinen neuen Hauptdatensatz anlegen
+* [ ] weitere Recherche erforderlich
+* [ ] strukturelle Entscheidung außerhalb der Einzelrecherche erforderlich
+
+**Betroffene treat_id:**
+`...`
+
+**Endgültiger Hauptname:**
+`...`
+
+**Neu anzulegende oder zu ergänzende Aliasse:**
+`...`
+
+**Notwendige Folgeänderungen:**
+`...`
+
+**Entscheidungsbegründung:**
+`...`
+
+---
+
+### Abschlusskontrolle
+
+* [ ] Hauptname ist eindeutig und korrekt geschrieben.
+* [ ] Der Eintrag ist nicht bereits als Hauptname vorhanden.
+* [ ] Der Eintrag ist nicht bereits ausreichend als Alias abgedeckt.
+* [ ] Wirkstoff, Handelsname und Arzneimittelklasse wurden voneinander abgegrenzt.
+* [ ] Oberbegriffe und Unterformen wurden geprüft.
+* [ ] Kombinationen wurden von Einzelmaßnahmen abgegrenzt.
+* [ ] Typ und Unterkategorie entsprechen den bestehenden Wertelisten.
+* [ ] Die Entscheidung ist nachvollziehbar begründet.
+* [ ] Alle vorgesehenen Folgeänderungen wurden dokumentiert.
+* [ ] Erst nach dieser Prüfung beginnt die inhaltliche Anreicherung des Therapieeintrags.
+
+
+### Zusatzprüfung bei englischsprachigen Hauptnamen
+
+Ein englischsprachiger Hauptname darf nur bestehen bleiben, wenn der englische Begriff auch im deutschsprachigen medizinischen, therapeutischen oder patientennahen Kontext tatsächlich als etablierte Bezeichnung verwendet wird.
+
+Existiert eine etablierte, fachlich gleichwertige und für Betroffene verständlichere deutsche Bezeichnung, wird diese als Hauptname bevorzugt. Der bisherige englische Begriff bleibt als Suchalias erhalten.
+
+Eine bloße wörtliche Übersetzung ist nicht ausreichend. Entscheidend ist, unter welchem Namen die konkrete Behandlung im deutschsprachigen Raum tatsächlich bezeichnet wird.
+
+#### Recherchefrage
+
+Nicht nur prüfen:
+
+> Wie lautet die deutsche Übersetzung?
+
+Sondern:
+
+> Unter welchem Namen wird diese konkrete Behandlung im deutschsprachigen medizinischen, therapeutischen und patientennahen Umfeld tatsächlich bezeichnet?
+
+#### Vor der Entscheidung prüfen
+
+* [ ] Wird der englische Begriff in Deutschland als etablierter Fach- oder Praxisbegriff verwendet?
+* [ ] Existiert eine etablierte und fachlich gleichwertige deutsche Bezeichnung?
+* [ ] Ist die deutsche Bezeichnung für Betroffene verständlicher?
+* [ ] Existiert der vorgeschlagene deutsche Name bereits als Hauptname?
+* [ ] Ist der deutsche Name bereits als Alias einem anderen Treatment zugeordnet?
+* [ ] Bezeichnen der englische und der deutsche Begriff tatsächlich dieselbe Behandlung?
+* [ ] Wird durch die Übersetzung eine bestehende Dublette sichtbar?
+* [ ] Bleibt die fachliche Bedeutung bei einer Umbenennung vollständig erhalten?
+
+Ähnliche oder gleichlautende Namen sind lediglich ein Prüfhinweis. Sie reichen nicht als Begründung für eine Zusammenführung oder Umbenennung aus.
+
+#### Entscheidungsregel
+
+Genau eine Entscheidung auswählen:
+
+* [ ] **Englischen Hauptnamen beibehalten:** Der Begriff ist im deutschsprachigen Umfeld etabliert und es existiert keine gleichwertige gebräuchliche deutsche Bezeichnung.
+* [ ] **Deutschen Hauptnamen verwenden:** Eine etablierte, fachlich gleichwertige und verständlichere deutsche Bezeichnung ist vorhanden. Der englische Begriff wird als Alias erhalten.
+* [ ] **Gemischten Namen verwenden:** Ein englischer Konzeptbegriff ist etabliert, wird aber durch eine deutsche Langform, Erläuterung oder verständliche Abkürzungsauflösung ergänzt.
+* [ ] **In die Dublettenprüfung verschieben:** Die deutsche Bezeichnung gehört bereits zu einem fachlich identischen bestehenden Treatment.
+* [ ] **Weitere Recherche erforderlich:** Die tatsächliche Verwendung im deutschsprachigen Raum ist noch nicht ausreichend belegt.
+
+#### Bevorzugte Quellen
+
+Die tatsächliche deutschsprachige Verwendung wird in dieser Reihenfolge geprüft:
+
+1. deutschsprachige Leitlinien und Fachgesellschaften,
+2. deutsche Universitätskliniken und medizinische Einrichtungen,
+3. deutschsprachige Fachliteratur,
+4. seriöse deutschsprachige Patienteninformationen,
+5. Anbieter-, Hersteller- und Verbandsseiten nur ergänzend.
+
+#### Ergebnisdokumentation
+
+**Bisheriger englischer Name:**
+`...`
+
+**Gefundene deutsche Bezeichnung:**
+`...`
+
+**Im deutschsprachigen Umfeld überwiegend verwendeter Begriff:**
+`...`
+
+**Entscheidung:**
+`Englischer Hauptname | deutscher Hauptname | gemischter Hauptname | Dublettenprüfung | weitere Recherche`
+
+**Künftiger Hauptname:**
+`...`
+
+**Als Alias zu erhaltende Bezeichnungen:**
+`...`
+
+**Begründung mit Quellen:**
+`...`
+
+### Zusatzprüfung bei Abkürzungen in neuen Treatment-Namen
+
+Bei jedem neuen Treatment-Namen und bei jeder Umbenennung muss geprüft werden, ob eine enthaltene Abkürzung für Betroffene ausreichend verständlich und im deutschsprachigen medizinischen oder patientennahen Umfeld tatsächlich gebräuchlich ist.
+
+Abkürzungen sind grundsätzlich sinnvoll für die Wiedererkennung und die Suche. Sie sollen aber nur dann Teil des Hauptnamens sein, wenn sie dort einen echten Verständlichkeits- oder Wiedererkennungswert haben.
+
+#### Grundregel
+
+Für den Hauptnamen gelten drei Fälle:
+
+1. **Sehr bekannte Abkürzung als Hauptname**
+
+   Eine allgemein bekannte medizinische Abkürzung darf ohne Langform als Hauptname verwendet werden, wenn die Abkürzung deutlich bekannter ist als ihre ausgeschriebene Form.
+
+   Beispiele:
+
+   * `MRT`
+   * `CT`
+   * `EKG`
+   * `COVID-19`
+
+   Die Langform muss in diesem Fall nicht in den Hauptnamen aufgenommen werden.
+
+2. **Gebräuchliche Abkürzung hinter der Langform**
+
+   Ist die Abkürzung fachlich gebräuchlich und für die Wiedererkennung hilfreich, aber nicht allgemein verständlich, wird folgende Form verwendet:
+
+   > **Etablierte Langform (Abkürzung)**
+
+   Beispiel:
+
+   > `Palmitoylethanolamid (PEA)`
+
+   Verwendet wird die im deutschsprachigen Raum fachlich etablierte Langform.
+
+3. **Unübliche Abkürzung nicht im Hauptnamen**
+
+   Ist die Abkürzung wenig bekannt, schwer verständlich oder für die Wiedererkennung nicht wesentlich, wird sie nicht in den Hauptnamen aufgenommen.
+
+   Sie bleibt dennoch als Suchalias erhalten.
+
+#### Auswahl der Langform
+
+* Bevorzugt wird die fachlich etablierte deutsche Langform.
+* Existiert keine gleichwertige und gebräuchliche deutsche Langform, wird die etablierte englische Originalbezeichnung verwendet.
+* Es darf keine künstliche Übersetzung erfunden werden.
+* Es darf keine zusätzliche dritte Bezeichnung konstruiert werden, wenn bereits eine etablierte deutsche oder englische Form existiert.
+* Produkt-, Geräte-, Studien- oder Wirkstoffcodes ohne sinnvolle Langform bleiben unverändert.
+* Eine unübliche Abkürzung darf nur dann im Hauptnamen verbleiben, wenn sie fachlich etabliert und für die eindeutige Wiedererkennung notwendig ist.
+
+#### Aliasse
+
+Unabhängig davon, wie der Hauptname gebildet wird, gelten für die Suche folgende Regeln:
+
+* Jede bekannte Abkürzung wird als Suchalias aufgenommen.
+* Die ausgeschriebene Langform wird als Alias aufgenommen, wenn sie nicht bereits Hauptname ist.
+* Deutsche und englische Varianten bleiben als sinnvolle Aliasse erhalten.
+* Frühere Hauptnamen bleiben als Alias erhalten, sofern sie fachlich korrekt oder gebräuchlich waren.
+* Alternative korrekte Schreibweisen bleiben als Alias erhalten.
+* Der neue Hauptname wird als `primary_name` geführt.
+* Reine Schreibfehler oder offensichtlich falsche Bezeichnungen müssen nicht als Alias erhalten werden.
+
+#### Prüfung vor dem Eintrag
+
+Vor jeder Neuanlage oder Umbenennung prüfen:
+
+* [ ] Ist die Abkürzung allgemein bekannt?
+* [ ] Ist die Abkürzung bekannter als die Langform?
+* [ ] Ist die Abkürzung fachlich gebräuchlich?
+* [ ] Ist die Abkürzung für die Wiedererkennung hilfreich?
+* [ ] Existiert eine etablierte deutsche Langform?
+* [ ] Existiert nur eine etablierte englische Originalbezeichnung?
+* [ ] Ist die Langform bereits als Hauptname vorhanden?
+* [ ] Ist die Abkürzung bereits als Alias vorhanden?
+* [ ] Gibt es einen fachlich identischen oder sehr ähnlichen Eintrag?
+* [ ] Entsteht durch die Umbenennung eine Slug-Kollision?
+* [ ] Handelt es sich um eine Dublette, einen Oberbegriff, eine Unterform oder einen eigenständigen Eintrag?
+
+Ähnliche Namen oder gleiche Abkürzungen sind nur ein Prüfhinweis. Eine Zusammenführung erfolgt nur, wenn fachlich tatsächlich dieselbe Behandlung, Untersuchung oder Maßnahme gemeint ist.
+
+#### Entscheidungsregel
+
+Genau eine Entscheidung auswählen:
+
+* [ ] **Abkürzung allein verwenden:** Die Abkürzung ist allgemein bekannt und deutlich gebräuchlicher als die Langform.
+* [ ] **Langform mit Abkürzung verwenden:** Die Abkürzung ist gebräuchlich und hilfreich, aber nicht allgemein verständlich.
+* [ ] **Nur Langform verwenden:** Die Abkürzung ist zu unüblich oder bringt keinen ausreichenden Wiedererkennungswert.
+* [ ] **Code unverändert verwenden:** Es handelt sich um einen etablierten Produkt-, Geräte-, Studien- oder Wirkstoffcode ohne sinnvolle Langform.
+* [ ] **Weitere Recherche erforderlich:** Verbreitung, Langform oder fachliche Bedeutung sind nicht ausreichend geklärt.
+
+#### Ergebnisdokumentation
+
+**Bisheriger Name:**
+`...`
+
+**Gefundene Abkürzung:**
+`...`
+
+**Gefundene Langform:**
+`...`
+
+**Etablierte Sprache der Langform:**
+`Deutsch | Englisch`
+
+**Bekanntheitsgrad der Abkürzung:**
+`allgemein bekannt | fachlich gebräuchlich | wenig gebräuchlich`
+
+**Entscheidung für den Hauptnamen:**
+`Abkürzung allein | Langform (Abkürzung) | nur Langform | Code unverändert | weitere Recherche`
+
+**Künftiger Hauptname:**
+`...`
+
+**Als Alias zu erhaltende Formen:**
+`...`
+
+**Begründung:**
+`...`
+
+
+## Regel für Kombinationen, Alternativen und zusammengefasste Maßnahmen
+
+- **Echte Kombinationen** als eigenen Eintrag führen:
+
+  **Therapie A & Therapie B (Kombi)**
+
+- Das Zeichen **`&` ausschließlich für echte Kombinationen** verwenden.
+- In normalen Namen immer **„und“ ausschreiben**.
+- Jede Komponente einer Kombination muss zusätzlich als **eigener Treatment-Eintrag** existieren.
+- Die Einzelbestandteile werden als Suchaliase mit dem Kombinationseintrag verknüpft.
+- Der Kombinationsname wird umgekehrt auch bei den Einzelbehandlungen als Suchalias hinterlegt.
+- **Alternativen niemals als Kombination führen.**  
+  Aus `Therapie A / Therapie B` werden zwei getrennte Einträge.
+- **Schrägstriche grundsätzlich vermeiden.** Sie sind nur zulässig, wenn sie Bestandteil einer festen Fachbezeichnung oder einer bewusst verkürzten Schreibweise sind, zum Beispiel:
+  - `Long-/Post-COVID-Reha`
+  - `VQ-SPECT/CT`
+- Schrägstriche dürfen nicht verwendet werden, um mehrere unterschiedliche Therapien, Untersuchungen oder Leistungen unsauber zusammenzufassen.
+- Mehrere versehentlich zusammengefasste Maßnahmen werden aufgeteilt. Ärzt:innen-, Quellen- und weitere Verknüpfungen werden fachlich passend auf die neuen Einträge übertragen.
+- Diagnostik und Therapie nicht in einem gemeinsamen Treatment-Datensatz vermischen.
+- Unbestimmte Zusätze wie `+ Begleitmittel` entfernen oder konkret benennen.
+- Sammelnamen nach einer Aufteilung nur dann als Alias erhalten, wenn sie für die Suche sinnvoll sind.
+- Vor neuen Einträgen immer auf bestehende Hauptnamen, Aliasse, Slugs und fachliche Dubletten prüfen.
+
+
+# Regel für Oberbegriffe und Aliasverknüpfungen bei neuen Treatments
+
+Bei jeder neuen Behandlung oder Diagnostik ist zu prüfen, ob der Eintrag:
+
+* ein konkretes Einzelverfahren,
+* ein Ober- oder Sammelbegriff,
+* oder Teil eines bereits vorhandenen Oberbegriffs ist.
+
+## Vorgehen
+
+1. **Vor Neuanlage Dubletten prüfen**
+
+   * Hauptnamen, Aliasse, Abkürzungen und ähnliche Oberbegriffe durchsuchen.
+   * Keine nahezu gleichbedeutenden Oberbegriffe parallel anlegen, wenn keine klare fachliche Abgrenzung besteht.
+
+2. **Oberbegriffe dürfen bestehen bleiben**
+
+   * Ein allgemeiner Begriff ist nicht automatisch ungeeignet.
+   * Er muss aber fachlich sinnvoll, verständlich und von ähnlichen Oberbegriffen abgrenzbar sein.
+
+3. **Unterbegriffe direkt mitprüfen**
+
+   * Bei einem neuen Oberbegriff vorhandene konkrete Treatments sammeln, die echte Unterarten, Einzelverfahren oder klare Bestandteile sind.
+   * Bei einem neuen konkreten Treatment prüfen, ob es zu bestehenden Oberbegriffen gehört.
+
+4. **Aliasrichtung**
+
+   * Den vorhandenen Alias des Oberbegriffs zusätzlich mit passenden konkreten Treatments verknüpfen.
+   * Keine neuen Aliasdatensätze anlegen, wenn der Begriff bereits existiert.
+   * Konkrete Aliasse nicht automatisch mit dem Oberbegriff verknüpfen.
+
+5. **Restriktiv zuordnen**
+
+   * Nur verknüpfen bei einer echten fachlichen Hierarchie.
+   * Nicht ausreichend sind bloße thematische Nähe, ähnliche Wirkung, gemeinsame Anwendung oder dieselbe Kategorie.
+
+6. **Mehrfachzuordnung ist erlaubt**
+
+   * Ein konkretes Treatment darf mehreren passenden Oberbegriffen zugeordnet werden.
+
+7. **Kategorien nicht doppelt pflegen**
+
+   * `typ` und `unterkategorie` bleiben die strukturelle Einordnung.
+   * Aliasverknüpfungen nur ergänzen, wenn sie einen zusätzlichen Nutzen für die Freitextsuche bringen.
+
+## Dokumentation
+
+Für jede neue Oberbegriff-Verknüpfung in `tbl_cpl_treatments2aliases_03`:
+
+```text
+note = Oberbegriff-Alias für konkrete Treatment-Suche
+```
+
+Vor dem Einfügen immer prüfen:
+
+* Alias-ID existiert,
+* Treatment-ID existiert,
+* Verbindung besteht noch nicht,
+* keine Selbstverknüpfung,
+* keine Dublette.
+
+
+## Ergänzende Regeln für neue Treatment-Recherchen
+
+### Ober- und Unterbegriffe
+
+- Sinnvolle Ober- und Sammelbegriffe dürfen neben konkreten Treatments bestehen bleiben.
+- Konkrete Unterbegriffe werden zusätzlich als eigene Treatments geführt.
+- Der Oberbegriff kann als Suchalias mit fachlich passenden Unterbegriffen verknüpft werden.
+- Nur echte Unterarten oder Bestandteile verknüpfen, nicht bloß thematisch verwandte Treatments.
+
+### Wirkstoffe und Markenprodukte
+
+- Wirkstoff und Markenprodukt dürfen jeweils als eigene Treatments geführt werden, wenn beide separat gesucht, beschrieben oder bewertet werden sollen.
+- Wirkstoff und Marke gegenseitig über Aliasse auffindbar machen:
+  - Marke beim Wirkstoff: `trade_name`
+  - Wirkstoff bei der Marke: `generic_name`
+- Spezielle Dosierungen, Darreichungsformen und Marken nicht automatisch mit dem allgemeinen Wirkstoff gleichsetzen.
+- Ärzte- und Quellenverknüpfungen nur übertragen, wenn sie nachweislich auch für den neuen Eintrag gelten.
+
+### Aufteilungen und frühere Sammelnamen
+
+- Werden zusammengefasste Einträge aufgeteilt, Ärzte, Quellen und weitere Verknüpfungen fachlich passend übertragen.
+- Den früheren Sammelnamen als `alternate_name` bei den daraus entstandenen Treatments erhalten, sofern er als Suchbegriff sinnvoll ist.
+- Diagnostik, Therapie, Produkt und Wirkstoff nicht allein wegen gemeinsamer Nennung in einen Datensatz zusammenfassen.
+
+### Aliasse
+
+- Jedes Treatment benötigt einen exakt passenden Alias vom Typ `primary_name`.
+- Derselbe Alias darf mit mehreren Treatments verknüpft sein.
+- Mehrfach vorhandene Aliastexte nicht automatisch löschen oder zusammenführen.
+- Verwaiste alte Hauptnamen entweder sinnvoll neu verknüpfen oder löschen, wenn sie keinen Suchwert mehr haben.
+- Aliasse bilden Suchbeziehungen ab; bestehende Daten nicht ohne konkreten Fehler „bereinigen“.
+
+### Ungewöhnliche Produkt-, Geräte- und Eigennamen
+
+- Einen ungewöhnlichen Namen nicht allein deshalb ändern, weil ein allgemeinerer Fachbegriff existiert.
+- Eigennamen, Geräte-, System- und Produktnamen unverändert lassen, sofern sie korrekt und eindeutig identifizierbar sind.
+- Nur bei tatsächlicher Unklarheit, falscher Bezeichnung oder fachlicher Dublette recherchieren und ändern.
+- Keine erklärenden Zusätze, Oberbegriffe oder neuen Treatments ohne konkreten Bedarf erfinden.
+
+### Löschen
+
+- Nur löschen, wenn kein eigenständiges Treatment, Versorgungsangebot oder sinnvoller Sucheinstieg vorliegt.
+- Vor dem Löschen alle Ärzte-, Quellen-, Symptom-, Alias- und sonstigen Treatment-Verknüpfungen prüfen.
+- Verwaiste Aliasdatensätze anschließend separat kontrollieren und gegebenenfalls löschen.

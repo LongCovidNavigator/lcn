@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadTreatmentDetail();
     setupTreatmentDetailVoteButtons();
     setupProviderViewSwitch();
+    setupTreatmentDetailStickyHeader();
 });
 
 async function loadTreatmentDetail() {
@@ -28,6 +29,7 @@ async function loadTreatmentDetail() {
         renderTreatmentDetail(currentTreatmentDetail);
         showTreatmentDetailContent();
         renderTreatmentProviderMap(currentTreatmentDetail.providers);
+        refreshTreatmentDetailStickyHeader();
     } catch (error) {
         console.error("Fehler beim Laden des Therapie-Steckbriefs:", error);
         showTreatmentDetailError(error.message || "Der Therapie-Steckbrief konnte nicht geladen werden.");
@@ -1196,6 +1198,16 @@ function renderTreatmentProviderMap(providers) {
             scrollWheelZoom: false
         });
 
+        mapElement.addEventListener("click", function () {
+            treatmentProviderMap?.scrollWheelZoom.enable();
+            mapElement.classList.add("is-scroll-zoom-active");
+        });
+
+        mapElement.addEventListener("mouseleave", function () {
+            treatmentProviderMap?.scrollWheelZoom.disable();
+            mapElement.classList.remove("is-scroll-zoom-active");
+        });
+
         L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
             attribution: "Tiles © Esri"
         }).addTo(treatmentProviderMap);
@@ -1530,4 +1542,56 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
     return escapeHtml(value);
+}
+
+let treatmentStickyActivationPoint = 0;
+let treatmentStickyFramePending = false;
+
+function setupTreatmentDetailStickyHeader() {
+    const header = document.querySelector(".treatment-detail-sticky-header");
+    if (!header) return;
+
+    let spacer = header.nextElementSibling;
+    if (!spacer?.classList.contains("treatment-detail-sticky-spacer")) {
+        spacer = document.createElement("div");
+        spacer.className = "treatment-detail-sticky-spacer";
+        spacer.setAttribute("aria-hidden", "true");
+        header.insertAdjacentElement("afterend", spacer);
+    }
+
+    const updateStickyState = function () {
+        treatmentStickyFramePending = false;
+        const desktop = window.matchMedia("(min-width: 1101px)").matches;
+        const shouldStick = desktop && window.scrollY > treatmentStickyActivationPoint;
+
+        header.classList.toggle("is-compact-sticky", shouldStick);
+        spacer.style.height = shouldStick ? `${header.dataset.expandedHeight || 0}px` : "0px";
+    };
+
+    const requestStickyUpdate = function () {
+        if (treatmentStickyFramePending) return;
+        treatmentStickyFramePending = true;
+        window.requestAnimationFrame(updateStickyState);
+    };
+
+    window.addEventListener("scroll", requestStickyUpdate, { passive: true });
+    window.addEventListener("resize", function () {
+        refreshTreatmentDetailStickyHeader();
+        requestStickyUpdate();
+    });
+
+    header._requestTreatmentStickyUpdate = requestStickyUpdate;
+}
+
+function refreshTreatmentDetailStickyHeader() {
+    const header = document.querySelector(".treatment-detail-sticky-header");
+    const spacer = document.querySelector(".treatment-detail-sticky-spacer");
+    if (!header || header.offsetParent === null) return;
+
+    header.classList.remove("is-compact-sticky");
+    if (spacer) spacer.style.height = "0px";
+
+    header.dataset.expandedHeight = String(header.offsetHeight + 12);
+    treatmentStickyActivationPoint = header.getBoundingClientRect().bottom + window.scrollY;
+    header._requestTreatmentStickyUpdate?.();
 }
