@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+
 header('Content-Type: application/json; charset=utf-8');
 
 function loadEnvFile($path) {
@@ -26,10 +28,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 
 $dbName = getenv('LCN_DB_DATABASE');
-if (!$dbName) { http_response_code(500); echo json_encode(["error"=>"LCN_DB_DATABASE fehlt"]); exit; }
+if (!$dbName) { error_log('inc_votes_db failed: database configuration missing'); http_response_code(500); echo json_encode(["error"=>"Die Bewertung konnte nicht gespeichert werden."]); exit; }
 if (in_array(strtolower(trim($dbName)), ['bookstack_db','bookstack','bookstackdb'], true)) {
   http_response_code(500);
-  echo json_encode(["error"=>"Refusing BookStack DB"]);
+  error_log('inc_votes_db failed: unsafe database configuration');
+  echo json_encode(["error"=>"Die Bewertung konnte nicht gespeichert werden."]);
   exit;
 }
 
@@ -66,15 +69,8 @@ $map = [
 if ($treatment === "" || !isset($map[$type])) {
   http_response_code(400);
   echo json_encode([
-    "error" => "bad request",
-    "content_type" => ($_SERVER["CONTENT_TYPE"] ?? null),
-    "raw_body" => $raw,
-    "decoded" => $body,
-    "parsed_treatment" => $treatment,
-    "parsed_type" => $type,
-    "expected_type_keys" => array_keys($map),
-    "hint" => "Send JSON: {treatment:'...', type:'hilft|gleich|verschlechterung'} with Content-Type: application/json"
-  ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    "error" => "Ungültige Anfrage"
+  ], JSON_UNESCAPED_UNICODE);
   exit;
 }
 
@@ -136,6 +132,9 @@ try {
   echo json_encode(["ok"=>true, "row"=>$row], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (Throwable $e) {
+  lcnLogApiError('inc_votes_db', $e);
   http_response_code(500);
-  echo json_encode(["error"=>"inc failed", "details"=>$e->getMessage()], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  echo json_encode([
+    "error" => "Die Bewertung konnte nicht gespeichert werden."
+  ], JSON_UNESCAPED_UNICODE);
 }

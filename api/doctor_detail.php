@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+
 header('Content-Type: application/json; charset=utf-8');
 
 function loadEnv($path) {
@@ -383,13 +385,14 @@ try {
     sendJson([
         'ok' => false,
         'error' => true,
-        'message' => $e->getMessage(),
+        'message' => 'Ungültige Anfrage.',
     ], 400);
 
 } catch (Throwable $e) {
+    lcnLogApiError('doctor_detail', $e);
     sendJson([
         'ok' => false,
         'error' => true,
-        'message' => $e->getMessage(),
+        'message' => 'Arztdetails konnten nicht geladen werden.',
     ], 500);
 }

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+
 header('Content-Type: application/json; charset=utf-8');
 
 function loadEnv($path) {
@@ -482,11 +484,12 @@ try {
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 } catch (Throwable $e) {
+    lcnLogApiError('treatments_detail', $e);
     http_response_code(500);
 
     echo json_encode([
         'ok' => false,
         'error' => true,
-        'message' => $e->getMessage(),
+        'message' => 'Therapiedetails konnten nicht geladen werden.',
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 }

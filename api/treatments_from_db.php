@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+
 header('Content-Type: application/json; charset=utf-8');
 
 function loadEnvFile($path) {
@@ -43,13 +45,15 @@ foreach ($envCandidates as $p) {
 $dbName = getenv('LCN_DB_DATABASE');
 if (!$dbName) {
     http_response_code(500);
-    echo json_encode(["error" => "LCN_DB_DATABASE fehlt. Lege eine .env mit LCN_DB_* an."]);
+    error_log('treatments_from_db failed: database configuration missing');
+    echo json_encode(["error" => "Therapiedaten konnten nicht geladen werden."]);
     exit;
 }
 $lower = strtolower(trim($dbName));
 if (in_array($lower, ['bookstack_db', 'bookstack', 'bookstackdb'], true)) {
     http_response_code(500);
-    echo json_encode(["error" => "Refusing to use BookStack DB. Check LCN_DB_DATABASE."]);
+    error_log('treatments_from_db failed: unsafe database configuration');
+    echo json_encode(["error" => "Therapiedaten konnten nicht geladen werden."]);
     exit;
 }
 
@@ -69,8 +73,9 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     ]);
 } catch (Throwable $e) {
+    lcnLogApiError('treatments_from_db connection', $e);
     http_response_code(500);
-    echo json_encode(["error" => "DB connect failed", "details" => $e->getMessage()]);
+    echo json_encode(["error" => "Therapiedaten konnten nicht geladen werden."]);
     exit;
 }
 
@@ -85,8 +90,9 @@ try {
     $stmt->execute([':t' => $table]);
     $cols = $stmt->fetchAll(PDO::FETCH_COLUMN);
 } catch (Throwable $e) {
+    lcnLogApiError('treatments_from_db columns', $e);
     http_response_code(500);
-    echo json_encode(["error" => "Could not read columns", "details" => $e->getMessage()]);
+    echo json_encode(["error" => "Therapiedaten konnten nicht geladen werden."]);
     exit;
 }
 
@@ -116,8 +122,9 @@ if (in_array('behandlung', $dataCols, true) && !in_array('Behandlung', $dataCols
 try {
     $rows = $pdo->query("SELECT $selectList FROM `$table`")->fetchAll();
 } catch (Throwable $e) {
+    lcnLogApiError('treatments_from_db select', $e);
     http_response_code(500);
-    echo json_encode(["error" => "Select failed", "details" => $e->getMessage()]);
+    echo json_encode(["error" => "Therapiedaten konnten nicht geladen werden."]);
     exit;
 }
 

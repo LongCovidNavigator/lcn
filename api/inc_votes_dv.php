@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+
 header('Content-Type: application/json; charset=utf-8');
 
 function loadEnvFile($path) {
@@ -20,10 +22,11 @@ function loadEnvFile($path) {
 foreach ([__DIR__.'/.env', dirname(__DIR__).'/.env', 'C:/xampp/htdocs/bookstack/.env'] as $p) loadEnvFile($p);
 
 $dbName = getenv('LCN_DB_DATABASE');
-if (!$dbName) { http_response_code(500); echo json_encode(["error"=>"LCN_DB_DATABASE fehlt"]); exit; }
+if (!$dbName) { error_log('inc_votes_dv failed: database configuration missing'); http_response_code(500); echo json_encode(["error"=>"Die Bewertung konnte nicht gespeichert werden."]); exit; }
 if (in_array(strtolower(trim($dbName)), ['bookstack_db','bookstack','bookstackdb'], true)) {
   http_response_code(500);
-  echo json_encode(["error"=>"Refusing BookStack DB"]);
+  error_log('inc_votes_dv failed: unsafe database configuration');
+  echo json_encode(["error"=>"Die Bewertung konnte nicht gespeichert werden."]);
   exit;
 }
 
@@ -110,8 +113,9 @@ try {
   echo json_encode(["ok"=>true, "row"=>$row], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (Throwable $e) {
+  lcnLogApiError('inc_votes_dv', $e);
   http_response_code(500);
-  echo json_encode(["error"=>"vote_inc failed", "details"=>$e->getMessage()], JSON_UNESCAPED_UNICODE);
+  echo json_encode(["error"=>"Die Bewertung konnte nicht gespeichert werden."], JSON_UNESCAPED_UNICODE);
 }
 
 

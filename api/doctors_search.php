@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+
 header('Content-Type: application/json; charset=utf-8');
 
 function loadEnv($path) {
@@ -667,15 +669,16 @@ try {
     echo json_encode([
         'ok' => false,
         'error' => true,
-        'message' => $e->getMessage(),
+        'message' => 'Ungültige Suchanfrage.',
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 } catch (Throwable $e) {
+    lcnLogApiError('doctors_search', $e);
     http_response_code(500);
 
     echo json_encode([
         'ok' => false,
         'error' => true,
-        'message' => $e->getMessage(),
+        'message' => 'Ärztesuche konnte nicht ausgeführt werden.',
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 }

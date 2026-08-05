@@ -324,6 +324,7 @@ function normalizeTreatment(treatment) {
         slug: treatment.slug || "",
         behandlung: treatment.behandlung || "",
         typ: treatment.typ || "",
+        unterkategorie: treatment.unterkategorie || "",
         pro: Number(treatment.pro ?? 0),
         neutral: Number(treatment.neutral ?? 0),
         contra: Number(treatment.contra ?? 0),
@@ -1570,6 +1571,10 @@ function buildTreatmentCardHtml(treatment, index) {
     const rawTreatmentName = escapeHtmlAttribute(treatment.behandlung || "");
     const categoryHtml = buildTreatmentCategoryHtml(treatment);
     const providerHtml = buildTreatmentProviderHtml(treatment);
+    const category = escapeHtml(String(treatment.typ || "").trim() || "Keine Kategorie angegeben");
+    const subcategory = escapeHtml(String(treatment.unterkategorie || "").trim() || "Keine Unterkategorie angegeben");
+    const providerCount = Number(treatment.total_provider_count ?? treatment.provider_count ?? 0);
+    const providerCountLabel = providerCount === 1 ? "1 Anbieter insgesamt" : `${providerCount} Anbieter insgesamt`;
 
     const totalVotes = Number(treatment.total_votes ?? 0);
     const positiveRatio = Number(treatment.positive_ratio ?? 0);
@@ -1603,13 +1608,31 @@ function buildTreatmentCardHtml(treatment, index) {
                     </div>
                 </div>
 
-                <div class="treatment-card-provider-wrap">
-                    <span class="treatment-card-provider-label">Anbieter</span>
-                    ${providerHtml}
-                </div>
             </div>
 
             <div class="treatment-card-content-grid">
+                <section class="treatment-card-info-panel treatment-card-classification-panel">
+                    <h4 class="treatment-card-section-heading">Einordnung &amp; Anbieter</h4>
+
+                    <div class="treatment-card-info-block">
+                        <div class="treatment-card-mini-label">Kategorie</div>
+                        <div class="treatment-card-classification-value">${category}</div>
+                    </div>
+
+                    <div class="treatment-card-info-block">
+                        <div class="treatment-card-mini-label">Unterkategorie</div>
+                        <div class="treatment-card-classification-value">${subcategory}</div>
+                    </div>
+
+                    <div class="treatment-card-info-block treatment-card-provider-info">
+                        <div class="treatment-card-mini-label">Anbieter</div>
+                        <div class="treatment-card-provider-detail">
+                            ${providerHtml}
+                            <span>${escapeHtml(providerCountLabel)}</span>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="treatment-card-info-panel treatment-card-rating-panel">
                     <h4 class="treatment-card-section-heading">
                         Bewertung

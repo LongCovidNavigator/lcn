@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+
 // ---------------------------------------------
 // BookStack-DB: Connection via BookStack .env
 // .env liegt bei dir: C:/xampp/htdocs/bookstack/.env

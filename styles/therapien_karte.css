@@ -911,19 +911,6 @@
     gap: 7px;
 }
 
-.treatment-card-provider-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-.treatment-card-provider-label {
-    color: #66758f;
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-
 .treatment-card-content-grid {
     display: grid;
     grid-template-columns: minmax(260px, 0.85fr) minmax(360px, 1.45fr);
@@ -936,9 +923,41 @@
     min-width: 0;
 }
 
-.treatment-card-note-panel {
+.treatment-card-note-panel,
+.treatment-card-classification-panel {
     padding-right: 22px;
     border-right: 1px solid #dde4ed;
+}
+
+.treatment-card-info-block {
+    margin-bottom: 11px;
+}
+
+.treatment-card-info-block:last-child {
+    margin-bottom: 0;
+}
+
+.treatment-card-mini-label {
+    margin-bottom: 3px;
+    color: #66758f;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.treatment-card-classification-value {
+    color: #1d2d46;
+    font-size: 0.86rem;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.treatment-card-provider-detail {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #1d2d46;
+    font-size: 0.82rem;
+    font-weight: 650;
 }
 
 .treatment-card-rating-panel {
@@ -1564,19 +1583,16 @@
         gap: 3px;
     }
 
-    .treatment-card-provider-wrap {
-        grid-column: 1 / -1;
-        justify-content: flex-start;
-    }
-
     .treatment-card-content-grid {
         grid-template-columns: 1fr;
     }
 
-    .treatment-card-note-panel {
+    .treatment-card-note-panel,
+    .treatment-card-classification-panel {
         padding-right: 0;
         border-right: none;
         border-bottom: 1px solid #dde4ed;
+        padding-bottom: 14px;
     }
 
     .treatment-card-rating-panel {
@@ -2137,7 +2153,8 @@
         padding: 11px 14px;
     }
 
-    .treatment-card-note-panel {
+    .treatment-card-note-panel,
+    .treatment-card-classification-panel {
         padding-bottom: 10px;
     }
 

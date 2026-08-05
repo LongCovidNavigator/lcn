@@ -1,7 +1,5 @@
 <?php
-// Fehleranzeige aktivieren
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+require_once __DIR__ . '/_security.php';
 
 // ---------------------------------------------
 // BookStack-DB: Connection via BookStack .env
@@ -67,9 +65,10 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     ]);
 } catch (Throwable $e) {
+    lcnLogApiError('get_therapien', $e);
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['error' => 'DB-Verbindung fehlgeschlagen', 'details' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['error' => 'Therapiedaten konnten nicht geladen werden.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

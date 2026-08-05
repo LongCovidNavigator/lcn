@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+
 // get_content.php aufrufen (lokal!)
 $json = file_get_contents('http://localhost/lcn/api/get_content.php');
 $pages = json_decode($json, true);

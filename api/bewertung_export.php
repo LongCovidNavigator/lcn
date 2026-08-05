@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_security.php';
+
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: http://localhost:8080");
 
@@ -21,10 +23,11 @@ function loadEnvFile($path) {
 foreach ([__DIR__.'/.env', dirname(__DIR__).'/.env', 'C:/xampp/htdocs/bookstack/.env'] as $p) loadEnvFile($p);
 
 $dbName = getenv('LCN_DB_DATABASE');
-if (!$dbName) { http_response_code(500); echo json_encode(["error"=>"LCN_DB_DATABASE fehlt"]); exit; }
+if (!$dbName) { error_log('bewertung_export failed: database configuration missing'); http_response_code(500); echo json_encode(["error"=>"Export konnte nicht geladen werden."]); exit; }
 if (in_array(strtolower(trim($dbName)), ['bookstack_db','bookstack','bookstackdb'], true)) {
   http_response_code(500);
-  echo json_encode(["error"=>"Refusing BookStack DB"]);
+  error_log('bewertung_export failed: unsafe database configuration');
+  echo json_encode(["error"=>"Export konnte nicht geladen werden."]);
   exit;
 }
 
@@ -87,6 +90,7 @@ try {
   echo json_encode($out, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (Throwable $e) {
+  lcnLogApiError('bewertung_export', $e);
   http_response_code(500);
-  echo json_encode(["error"=>"DB error", "details"=>$e->getMessage()], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  echo json_encode(["error"=>"Export konnte nicht geladen werden."], JSON_UNESCAPED_UNICODE);
 }
