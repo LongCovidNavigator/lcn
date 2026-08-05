@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Tuple, Optional
 from pathlib import Path
 
 
+from lcn_env import lcn_env_path
 import mysql.connector
 
 
@@ -20,15 +21,15 @@ TABLE_NAME = "lcn_raw_votes"
 SOURCE_LABEL = "votes.json"
 
 
-# .env liegt im gleichen Ordner wie dieses Script (data2db.py)
+# Zentrale private LCN-Umgebungsdatei
 SCRIPT_DIR = Path(__file__).resolve().parent
-ENV_PATH = SCRIPT_DIR / ".env"
+ENV_PATH = lcn_env_path()
 
 from dotenv import load_dotenv
 
 loaded = load_dotenv(ENV_PATH)
 if not loaded:
-    raise RuntimeError(f"Could not load .env next to script: {ENV_PATH}")
+    raise RuntimeError(f"Could not load central LCN env file: {ENV_PATH}")
 
 
 # =========================

@@ -3,12 +3,13 @@ import os
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
+from lcn_env import lcn_env_path
 import mysql.connector
 from dotenv import load_dotenv
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-ENV_PATH = SCRIPT_DIR / ".env"
+ENV_PATH = lcn_env_path()
 CSV_PATH = SCRIPT_DIR / "geocode_locations_review.csv"
 
 # Zunächst nur kontrollieren. Noch keine Änderungen speichern.

@@ -5,6 +5,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+from lcn_env import lcn_env_path
 import mysql.connector
 from dotenv import load_dotenv
 
@@ -13,7 +14,7 @@ from dotenv import load_dotenv
 # CONFIG
 # =========================
 SCRIPT_DIR = Path(__file__).resolve().parent
-ENV_PATH = SCRIPT_DIR / ".env"
+ENV_PATH = lcn_env_path()
 
 TABLE_DRS = os.getenv("LCN_DRS_TABLE", "tbl_drs_02")
 COL_FN = os.getenv("LCN_DRS_FIRSTNAME", "dr_firstname")
@@ -36,7 +37,7 @@ OUT_FIELD_STATS = SCRIPT_DIR / "dupes_location_field_diff_stats.csv"
 def load_env():
     loaded = load_dotenv(ENV_PATH)
     if not loaded:
-        raise RuntimeError(f"Could not load .env next to script: {ENV_PATH}")
+        raise RuntimeError(f"Could not load central LCN env file: {ENV_PATH}")
 
 def db_connect():
     db = os.getenv("LCN_DB_DATABASE")

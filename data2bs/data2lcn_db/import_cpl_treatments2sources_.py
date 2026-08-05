@@ -31,6 +31,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from lcn_env import lcn_env_path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 import pymysql
@@ -39,7 +40,7 @@ import pymysql
 # ---------- Configuration ----------
 SCRIPT_PATH = Path(__file__).resolve()
 BASE_DIR = SCRIPT_PATH.parent
-DEFAULT_ENV_PATH = BASE_DIR / ".env"
+DEFAULT_ENV_PATH = lcn_env_path()
 DEFAULT_IMPORT_CSV = BASE_DIR / "Master" / "tbl_cpl_treatments2sources_03_from_master_01.csv"
 DEFAULT_MASTER_CSV = BASE_DIR / "Master" / "treatment_source_mapping_master_01.csv"
 DEFAULT_OUTPUT_DIR = BASE_DIR / "Prev_02" / "out_treatments2sources_03"

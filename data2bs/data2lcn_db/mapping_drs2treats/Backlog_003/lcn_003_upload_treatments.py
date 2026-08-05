@@ -34,6 +34,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+_LCN_HELPER_DIR = next(parent for parent in Path(__file__).resolve().parents if (parent / "lcn_env.py").is_file())
+if str(_LCN_HELPER_DIR) not in sys.path:
+    sys.path.insert(0, str(_LCN_HELPER_DIR))
+from lcn_env import lcn_env_path
+
 try:
     from dotenv import load_dotenv
 except ImportError:
@@ -285,7 +290,7 @@ def main() -> None:
     if not data_dir.exists():
         fail(f"data-dir existiert nicht: {data_dir}")
 
-    env_file = Path(args.env_file) if args.env_file else data_dir / ".env"
+    env_file = Path(args.env_file) if args.env_file else lcn_env_path()
     cfg = load_env(env_file)
 
     input_path = data_dir / EXPECTED_INPUT

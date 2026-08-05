@@ -40,6 +40,7 @@ import re
 import sys
 import traceback
 from pathlib import Path
+from lcn_env import lcn_env_path
 from typing import Any, Dict, List, Optional, Tuple
 
 from dotenv import load_dotenv
@@ -56,7 +57,7 @@ except Exception:
 # Paths / ENV
 # -------------------------
 BASE_DIR = Path(__file__).resolve().parent
-ENV_PATH = BASE_DIR / ".env"
+ENV_PATH = lcn_env_path()
 
 DEFAULT_JSON = BASE_DIR / "market" / "covidhilfe_com_196.json"
 ALT_JSON = Path("/mnt/data/covidhilfe_com_196.json")

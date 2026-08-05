@@ -3,6 +3,7 @@ import hashlib
 import os
 import random
 from pathlib import Path
+from lcn_env import lcn_env_path
 from typing import Any, Dict, List, Tuple
 
 import mysql.connector
@@ -28,9 +29,9 @@ VOTE_COLS = ["pro", "neutral", "contra"]
 RANDOM_MIN = 0
 RANDOM_MAX = 100
 
-# .env liegt im gleichen Ordner wie dieses Skript
+# Zentrale private LCN-Umgebungsdatei
 SCRIPT_DIR = Path(__file__).resolve().parent
-ENV_PATH = SCRIPT_DIR / ".env"
+ENV_PATH = lcn_env_path()
 
 
 # =========================
@@ -48,7 +49,7 @@ def sha256_text(s: str) -> str:
 def load_env() -> None:
     loaded = load_dotenv(ENV_PATH)
     if not loaded:
-        raise RuntimeError(f"Could not load .env next to script: {ENV_PATH}")
+        raise RuntimeError(f"Could not load central LCN env file: {ENV_PATH}")
 
 
 def db_connect():

@@ -39,6 +39,7 @@ import re
 import sys
 import traceback
 from pathlib import Path
+from lcn_env import lcn_env_path
 from typing import Any, Dict, List, Optional, Tuple
 
 from dotenv import load_dotenv
@@ -57,11 +58,7 @@ except Exception:
 # -------------------------
 BASE_DIR = Path(__file__).resolve().parent
 
-ENV_CANDIDATES = [
-    BASE_DIR / ".env",
-    BASE_DIR.parent / ".env",
-]
-ENV_PATH = next((p for p in ENV_CANDIDATES if p.exists()), ENV_CANDIDATES[0])
+ENV_PATH = lcn_env_path()
 
 JSON_CANDIDATES = [
     BASE_DIR / "market" / "mecfsmed_de.json",

@@ -7,13 +7,14 @@ import math
 
 from pathlib import Path
 
+from lcn_env import lcn_env_path
 import mysql.connector
 import requests
 from dotenv import load_dotenv
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-ENV_PATH = SCRIPT_DIR / ".env"
+ENV_PATH = lcn_env_path()
 OUTPUT_PATH = SCRIPT_DIR / "geocode_locations_review.csv"
 
 load_dotenv(ENV_PATH)

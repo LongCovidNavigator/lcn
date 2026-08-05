@@ -2,6 +2,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from lcn_env import lcn_env_path
 from urllib.parse import urlsplit
 
 import mysql.connector
@@ -12,7 +13,7 @@ from dotenv import load_dotenv
 # CONFIG
 # =========================
 SCRIPT_DIR = Path(__file__).resolve().parent
-ENV_PATH = SCRIPT_DIR / ".env"
+ENV_PATH = lcn_env_path()
 
 TABLE = os.getenv("LCN_DRS_TABLE", "tbl_drs_02")
 PK = "dr_id"
@@ -35,7 +36,7 @@ SKIP_COLS = {"dr_accepts_gkv", "dr_accepts_pkv", "dr_org_name"}
 def load_env():
     loaded = load_dotenv(ENV_PATH)
     if not loaded:
-        raise RuntimeError(f"Could not load .env next to script: {ENV_PATH}")
+        raise RuntimeError(f"Could not load central LCN env file: {ENV_PATH}")
 
 
 def db_connect():

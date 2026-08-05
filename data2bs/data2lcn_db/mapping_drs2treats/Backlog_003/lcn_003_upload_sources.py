@@ -41,6 +41,11 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+_LCN_HELPER_DIR = next(parent for parent in Path(__file__).resolve().parents if (parent / "lcn_env.py").is_file())
+if str(_LCN_HELPER_DIR) not in sys.path:
+    sys.path.insert(0, str(_LCN_HELPER_DIR))
+from lcn_env import lcn_env_path
+
 try:
     import pymysql
 except ImportError:
@@ -75,7 +80,7 @@ def load_env(env_file: str | None, data_dir: Path) -> None:
     if env_file:
         env_path = Path(env_file)
     else:
-        env_path = data_dir / ".env"
+        env_path = lcn_env_path()
 
     if not env_path.exists():
         fail(f".env nicht gefunden: {env_path}")

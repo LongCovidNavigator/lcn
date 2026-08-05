@@ -28,6 +28,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from lcn_env import lcn_env_path
 from typing import Any, Dict, List, Optional, Tuple
 
 import pymysql
@@ -38,7 +39,7 @@ from dotenv import load_dotenv
 # CONFIG
 # ============================================================
 
-DEFAULT_ENV_PATH = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\.env"
+DEFAULT_ENV_PATH = lcn_env_path()
 DEFAULT_CSV_PATH = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\Master\sources4treatments_master_02.csv"
 TABLE_NAME = "tbl_treatments_sources_03"
 

@@ -6,6 +6,13 @@ import sys
 from collections import Counter
 from typing import Dict, List, Tuple, Optional
 
+from pathlib import Path
+
+_LCN_HELPER_DIR = next(parent for parent in Path(__file__).resolve().parents if (parent / "lcn_env.py" ).is_file())
+if str(_LCN_HELPER_DIR) not in sys.path:
+    sys.path.insert(0, str(_LCN_HELPER_DIR))
+from lcn_env import lcn_env_path
+
 try:
     import mysql.connector
 except Exception:
@@ -156,7 +163,7 @@ def fetch_existing_pairs(conn, table_name: str) -> set:
 def main():
     ap = argparse.ArgumentParser(description='LCN 003 – Upload Treatment↔Alias')
     ap.add_argument('--data-dir', required=True)
-    ap.add_argument('--env-file', required=True)
+    ap.add_argument('--env-file', default=str(lcn_env_path()))
     ap.add_argument('--apply', action='store_true')
     ap.add_argument('--table-name', default='tbl_cpl_treatments2aliases_03')
     args = ap.parse_args()

@@ -32,6 +32,7 @@ import unicodedata
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from lcn_env import lcn_env_path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 pymysql = None
@@ -73,7 +74,7 @@ def require_openpyxl():
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_ENV = SCRIPT_DIR / ".env"
+DEFAULT_ENV = lcn_env_path()
 DEFAULT_XLSX = SCRIPT_DIR / "market" / "Behandlungs_Recherche.xlsx"
 IMPORT_SOURCE = "Behandlungs_Recherche.xlsx"
 STAGING_TABLE = "lcn_import_treatments_market"

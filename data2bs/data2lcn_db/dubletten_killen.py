@@ -6,6 +6,7 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
+from lcn_env import lcn_env_path
 from urllib.parse import urlsplit
 
 import mysql.connector
@@ -16,11 +17,11 @@ from dotenv import load_dotenv
 # .env (same folder as script)
 # =========================
 SCRIPT_DIR = Path(__file__).resolve().parent
-ENV_PATH = SCRIPT_DIR / ".env"
+ENV_PATH = lcn_env_path()
 
 loaded = load_dotenv(ENV_PATH)
 if not loaded:
-    raise RuntimeError(f"Could not load .env next to script: {ENV_PATH}")
+    raise RuntimeError(f"Could not load central LCN env file: {ENV_PATH}")
 
 
 # =========================

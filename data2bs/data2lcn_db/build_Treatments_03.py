@@ -18,6 +18,7 @@ from pathlib import Path
 
 import pymysql
 from dotenv import load_dotenv
+from lcn_env import lcn_env_path
 
 
 def get_env(*names: str, default=None, required: bool = False):
@@ -37,13 +38,7 @@ def load_env_file(explicit_env_path: str | None) -> str | None:
     if explicit_env_path:
         candidates.append(Path(explicit_env_path))
 
-    script_dir = Path(__file__).resolve().parent
-    candidates.extend(
-        [
-            script_dir / ".env",
-            Path.cwd() / ".env",
-        ]
-    )
+    candidates.append(lcn_env_path())
 
     for path in candidates:
         if path.exists():

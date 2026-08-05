@@ -23,6 +23,7 @@ import hashlib
 
 from dataclasses import dataclass
 from pathlib import Path
+from lcn_env import lcn_env_path
 from typing import Any, Dict, List, Optional, Tuple
 
 from dotenv import load_dotenv
@@ -34,14 +35,14 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent
 
 # .env in same folder as script (recommended)
-ENV_PATH = BASE_DIR / ".env"
+ENV_PATH = lcn_env_path()
 
 # Optional fallback: if you keep .env one folder above, uncomment:
 # ENV_PATH = BASE_DIR.parent / ".env"
 
 if not ENV_PATH.exists():
     print(f"ERROR: .env nicht gefunden: {ENV_PATH}", file=sys.stderr)
-    print("Tipp: Lege die .env in den gleichen Ordner wie market2db.py oder passe ENV_PATH im Script an.", file=sys.stderr)
+    print("Tipp: Pruefe private/lcn.env oder setze LCN_ENV_FILE.", file=sys.stderr)
     sys.exit(1)
 
 load_dotenv(ENV_PATH)

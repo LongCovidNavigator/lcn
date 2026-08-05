@@ -22,6 +22,13 @@ import os
 import sys
 from typing import Dict, List, Tuple, Any, Optional
 
+from pathlib import Path
+
+_LCN_HELPER_DIR = next(parent for parent in Path(__file__).resolve().parents if (parent / "lcn_env.py" ).is_file())
+if str(_LCN_HELPER_DIR) not in sys.path:
+    sys.path.insert(0, str(_LCN_HELPER_DIR))
+from lcn_env import lcn_env_path
+
 try:
     import mysql.connector
 except Exception:
@@ -247,7 +254,7 @@ def insert_rows(conn, rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="LCN 003 - Upload Treatment↔Alias")
     parser.add_argument("--data-dir", required=True, help="Ordner mit den CSV-Dateien")
-    parser.add_argument("--env-file", required=True, help="Pfad zur .env")
+    parser.add_argument("--env-file", default=str(lcn_env_path()), help="Pfad zur .env")
     parser.add_argument("--apply", action="store_true", help="Echte Inserts ausführen")
     args = parser.parse_args()
 

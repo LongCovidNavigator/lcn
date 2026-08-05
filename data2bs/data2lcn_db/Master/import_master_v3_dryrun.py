@@ -9,6 +9,13 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
+
+_LCN_HELPER_DIR = next(parent for parent in Path(__file__).resolve().parents if (parent / "lcn_env.py" ).is_file())
+if str(_LCN_HELPER_DIR) not in sys.path:
+    sys.path.insert(0, str(_LCN_HELPER_DIR))
+from lcn_env import lcn_env_path
+
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -23,7 +30,7 @@ from dotenv import load_dotenv
 # =========================
 
 DEFAULT_MASTER_DIR = Path(r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\Master")
-DEFAULT_ENV = Path(r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\.env")
+DEFAULT_ENV = lcn_env_path()
 
 TREATMENTS_FILE = "treatments_master_v5.csv"
 ALIASES_FILE = "aliases_master_v5.csv"

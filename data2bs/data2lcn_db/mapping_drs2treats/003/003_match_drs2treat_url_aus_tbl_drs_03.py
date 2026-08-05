@@ -40,6 +40,13 @@ import csv
 import os
 import re
 import sys
+from pathlib import Path
+
+_LCN_HELPER_DIR = next(parent for parent in Path(__file__).resolve().parents if (parent / "lcn_env.py" ).is_file())
+if str(_LCN_HELPER_DIR) not in sys.path:
+    sys.path.insert(0, str(_LCN_HELPER_DIR))
+from lcn_env import lcn_env_path
+
 import unicodedata
 from dataclasses import dataclass
 from typing import Dict, List, Set, Tuple, Optional
@@ -53,7 +60,7 @@ import pymysql
 
 INPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\003_mapping_drs2treat_url_aus_tbl_drs_03.csv"
 OUTPUT_CSV = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\mapping_drs2treats\003_mapping_drs2treat_url_aus_tbl_drs_03__4_3_matched.csv"
-ENV_PATH = r"/data2lcn_db/.env"
+ENV_PATH = lcn_env_path()
 
 TBL_TREATMENTS = "tbl_treatments_03"
 VW_TREATMENT_ALIASES = "vw_treatments2aliases_03"

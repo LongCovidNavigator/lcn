@@ -17,6 +17,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from lcn_env import lcn_env_path
 from typing import Any, Dict, List, Optional, Tuple
 
 from dotenv import load_dotenv
@@ -26,7 +27,7 @@ from dotenv import load_dotenv
 # -------------------------
 
 BASE_DIR = Path(__file__).resolve().parent
-ENV_PATH = BASE_DIR / ".env"
+ENV_PATH = lcn_env_path()
 
 # Files in ./market
 MARKET_DIR = BASE_DIR / "market"

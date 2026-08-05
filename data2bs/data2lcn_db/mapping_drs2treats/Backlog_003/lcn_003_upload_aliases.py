@@ -47,6 +47,13 @@ INPUT_NAME = "003_new_aliases_03.csv"
 TABLE_NAME = "tbl_aliases_03"
 
 
+from pathlib import Path
+
+_LCN_HELPER_DIR = next(parent for parent in Path(__file__).resolve().parents if (parent / "lcn_env.py" ).is_file())
+if str(_LCN_HELPER_DIR) not in sys.path:
+    sys.path.insert(0, str(_LCN_HELPER_DIR))
+from lcn_env import lcn_env_path
+
 def fail(msg: str, code: int = 1) -> None:
     print(f"FEHLER: {msg}")
     raise SystemExit(code)
@@ -130,7 +137,7 @@ def fetch_existing_pairs(conn) -> Dict[Tuple[str, str], int]:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="LCN 003 upload aliases")
     p.add_argument("--data-dir", required=True, help="Ordner mit 003_new_aliases_03.csv")
-    p.add_argument("--env-file", required=True, help="Pfad zur .env")
+    p.add_argument("--env-file", default=str(lcn_env_path()), help="Pfad zur .env")
     p.add_argument("--apply", action="store_true", help="Echten Insert ausführen")
     return p.parse_args()
 

@@ -1,6 +1,12 @@
 import os
+import sys
 from collections import Counter
 from pathlib import Path
+
+_LCN_HELPER_DIR = next(parent for parent in Path(__file__).resolve().parents if (parent / "lcn_env.py").is_file())
+if str(_LCN_HELPER_DIR) not in sys.path:
+    sys.path.insert(0, str(_LCN_HELPER_DIR))
+from lcn_env import lcn_env_path
 
 try:
     import mysql.connector
@@ -15,7 +21,7 @@ except ImportError:
 # =========================
 # KONFIGURATION
 # =========================
-ENV_FILE = r"C:\xampp\htdocs\lcn\data2bs\data2lcn_db\.env"
+ENV_FILE = str(lcn_env_path())
 BATCH_ID = "003_mapping_drs2treat_url_aus_tbl_drs_03"
 
 TABLE_CPL = "tbl_cpl_drs2treatments_03"

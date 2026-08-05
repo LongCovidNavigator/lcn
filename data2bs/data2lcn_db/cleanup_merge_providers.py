@@ -36,6 +36,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from lcn_env import lcn_env_path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from dotenv import load_dotenv
@@ -53,7 +54,7 @@ except Exception:
 # -------------------------
 
 BASE_DIR = Path(__file__).resolve().parent
-ENV_PATH = BASE_DIR / ".env"
+ENV_PATH = lcn_env_path()
 if not ENV_PATH.exists():
     print(f"ERROR: .env nicht gefunden: {ENV_PATH}", file=sys.stderr)
     sys.exit(1)
@@ -66,11 +67,11 @@ def env(name: str, default: Optional[str] = None) -> str:
         return default if default is not None else ""
     return v.strip()
 
-DB_HOST = env("DB_HOST", "127.0.0.1")
-DB_PORT = int(env("DB_PORT", "3306"))
-DB_USER = env("DB_USER", "root")
-DB_PASSWORD = env("DB_PASSWORD", "")
-DB_NAME = env("DB_NAME", "lcn_database")
+DB_HOST = env("LCN_DB_HOST", "127.0.0.1")
+DB_PORT = int(env("LCN_DB_PORT", "3306"))
+DB_USER = env("LCN_DB_USERNAME", "root")
+DB_PASSWORD = env("LCN_DB_PASSWORD", "")
+DB_NAME = env("LCN_DB_DATABASE", "lcn_database")
 
 # -------------------------
 # NORMALIZATION
