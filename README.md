@@ -60,6 +60,8 @@ Die Bilddateien sind unter `assets/images` nach Zweck gegliedert:
 - `icons`: eigenständige Icons und Symbolgrafiken
 - `drafts`: noch nicht fest zugeordnete Bildentwürfe
 
+Dateinamen verwenden ausschließlich Kleinbuchstaben, Zahlen und Unterstriche. Varianten erhalten eine zweistellige Endung wie `_01` oder `_02`.
+
 ## Konfiguration und Geheimnisse
 
 Lokale Zugangsdaten gehören in eine ignorierte `.env`-Datei oder in die dafür vorgesehene lokale Serverkonfiguration. Sie dürfen nicht committed werden. Die `.gitignore` schließt unter anderem `.env`, Datenbankdumps, Backups, Caches und Logs aus.
