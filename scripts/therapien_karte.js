@@ -1608,12 +1608,21 @@ function buildTreatmentCardHtml(treatment, index) {
                     </div>
                 </div>
 
+                <div class="treatment-card-provider-summary">
+                    <span class="treatment-card-provider-summary-label">Anbieter</span>
+                    <div class="treatment-card-provider-detail">
+                        ${providerHtml}
+                        <span>${escapeHtml(providerCountLabel)}</span>
+                    </div>
+                </div>
+
             </div>
 
             <div class="treatment-card-content-grid">
                 <section class="treatment-card-info-panel treatment-card-classification-panel">
-                    <h4 class="treatment-card-section-heading">Einordnung &amp; Anbieter</h4>
+                    <h4 class="treatment-card-section-heading">Einordnung</h4>
 
+                    <div class="treatment-card-classification-list">
                     <div class="treatment-card-info-block">
                         <div class="treatment-card-mini-label">Kategorie</div>
                         <div class="treatment-card-classification-value">${category}</div>
@@ -1623,13 +1632,6 @@ function buildTreatmentCardHtml(treatment, index) {
                         <div class="treatment-card-mini-label">Unterkategorie</div>
                         <div class="treatment-card-classification-value">${subcategory}</div>
                     </div>
-
-                    <div class="treatment-card-info-block treatment-card-provider-info">
-                        <div class="treatment-card-mini-label">Anbieter</div>
-                        <div class="treatment-card-provider-detail">
-                            ${providerHtml}
-                            <span>${escapeHtml(providerCountLabel)}</span>
-                        </div>
                     </div>
                 </section>
 
