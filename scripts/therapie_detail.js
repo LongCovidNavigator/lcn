@@ -699,7 +699,6 @@ function buildProviderListHtml(providers) {
                         <th>${buildProviderTableSortHeader("Bewertung", "rating")}</th>
                         <th>${buildProviderTableSortHeader("Versorgung", "care")}</th>
                         <th>${buildProviderTableSortHeader("Kontakt", "contact")}</th>
-                        <th></th>
                     </tr>
                 </thead>
 
@@ -744,7 +743,7 @@ function buildProviderCompactTableRowHtml(provider) {
             <td>${rank || "–"}</td>
             <td>
                 ${detailUrl
-                    ? `<a href="${detailUrl}">${escapeHtml(name)}</a>`
+                    ? `<a class="treatment-detail-provider-name-link" href="${detailUrl}">${escapeHtml(name)}</a>`
                     : `<strong>${escapeHtml(name)}</strong>`}
             </td>
             <td>
@@ -780,7 +779,9 @@ function buildProviderTableRowHtml(provider) {
             </td>
 
             <td data-label="Anbieter">
-                <strong>${escapeHtml(name)}</strong>
+                ${detailUrl
+                    ? `<a class="treatment-detail-provider-name-link" href="${detailUrl}"><strong>${escapeHtml(name)}</strong></a>`
+                    : `<strong>${escapeHtml(name)}</strong>`}
             </td>
 
             <td data-label="Standort">${escapeHtml(location)}</td>
@@ -803,13 +804,6 @@ function buildProviderTableRowHtml(provider) {
                 </div>
             </td>
 
-            <td class="treatment-detail-provider-action-cell">
-                ${detailUrl ? `
-                    <a class="treatment-detail-provider-detail-link" href="${detailUrl}">
-                        Steckbrief
-                    </a>
-                ` : ""}
-            </td>
         </tr>
     `;
 }
@@ -1416,9 +1410,12 @@ function buildProviderMapPopupHtml(provider) {
 
     return `
         <div class="treatment-detail-map-popup">
-            <strong>${escapeHtml(name)}</strong>
+            <strong>
+                ${detailUrl
+                    ? `<a class="treatment-detail-provider-name-link" href="${detailUrl}">${escapeHtml(name)}</a>`
+                    : escapeHtml(name)}
+            </strong>
             ${location ? `<br><span>${escapeHtml(location)}</span>` : ""}
-            ${detailUrl ? `<br><a href="${detailUrl}">Steckbrief öffnen</a>` : ""}
         </div>
     `;
 }

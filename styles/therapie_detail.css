@@ -929,7 +929,7 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
-    align-items: start;
+    align-items: stretch;
 }
 
 .treatment-detail-provider-card {
@@ -937,14 +937,15 @@
     grid-template-columns: auto minmax(0, 1fr);
     column-gap: 8px;
     min-width: 0;
-    height: auto;
+    height: 100%;
     box-sizing: border-box;
-    border: 1px solid #cbd9ea;
-    border-top: 3px solid #0a8d86;
-    border-radius: 10px;
+    border: 1px solid #d8e0ea;
+    border-top: 5px solid #008c95;
+    border-radius: 12px;
     background: #ffffff;
-    padding: 12px 13px;
-    box-shadow: 0 4px 12px rgba(0, 32, 80, 0.075);
+    padding: 10px 12px;
+    align-content: start;
+    box-shadow: 0 3px 12px rgba(0, 32, 80, 0.10);
 }
 
 .treatment-detail-provider-card-topline {
@@ -955,7 +956,7 @@
     grid-column: 2;
     grid-row: 1;
     min-width: 0;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 .treatment-detail-provider-card h3 {
@@ -1028,7 +1029,8 @@
     grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    align-self: end;
+    gap: 5px;
     margin-top: 0;
 }
 
@@ -1073,29 +1075,36 @@
 
 .treatment-detail-provider-rating {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-    margin: 8px 0 10px 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    gap: 5px;
+    align-items: center;
+    margin: 5px 0 6px;
 }
 
 .treatment-detail-provider-rating-item {
-    padding: 7px 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 30px;
+    padding: 5px 6px;
+    box-sizing: border-box;
     border-radius: 8px;
     border: 1px solid #dbe5f1;
     text-align: center;
 }
 
 .treatment-detail-provider-rating-item strong {
-    display: block;
-    margin-bottom: 2px;
-    font-size: 0.9rem;
+    display: inline;
+    margin: 0;
+    font-size: 0.82rem;
     font-weight: 900;
     line-height: 1;
 }
 
 .treatment-detail-provider-rating-item span {
     color: #425672;
-    font-size: 0.64rem;
+    font-size: 0.6rem;
     font-weight: 800;
     line-height: 1;
 }
@@ -1128,11 +1137,13 @@
 }
 
 .treatment-detail-provider-rating-total {
-    grid-column: 1 / -1;
+    grid-column: auto;
+    padding-left: 3px;
     color: #66758f;
     font-size: 0.68rem;
     font-weight: 800;
     text-align: right;
+    white-space: nowrap;
 }
 
 .treatment-detail-provider-rating-empty {
@@ -1236,21 +1247,19 @@
 .treatment-detail-provider-table th:nth-child(1),
 .treatment-detail-provider-table td:nth-child(1) { width: 6%; text-align: center; }
 .treatment-detail-provider-table th:nth-child(2),
-.treatment-detail-provider-table td:nth-child(2) { width: 15%; }
+.treatment-detail-provider-table td:nth-child(2) { width: 17%; }
 .treatment-detail-provider-table th:nth-child(3),
-.treatment-detail-provider-table td:nth-child(3) { width: 15%; }
+.treatment-detail-provider-table td:nth-child(3) { width: 16%; }
 .treatment-detail-provider-table th:nth-child(4),
 .treatment-detail-provider-table td:nth-child(4) { width: 7%; text-align: center; }
 .treatment-detail-provider-table th:nth-child(5),
 .treatment-detail-provider-table td:nth-child(5) { width: 9%; text-align: center; }
 .treatment-detail-provider-table th:nth-child(6),
-.treatment-detail-provider-table td:nth-child(6) { width: 18%; }
+.treatment-detail-provider-table td:nth-child(6) { width: 20%; }
 .treatment-detail-provider-table th:nth-child(7),
-.treatment-detail-provider-table td:nth-child(7) { width: 11%; }
+.treatment-detail-provider-table td:nth-child(7) { width: 12%; }
 .treatment-detail-provider-table th:nth-child(8),
-.treatment-detail-provider-table td:nth-child(8) { width: 11%; }
-.treatment-detail-provider-table th:nth-child(9),
-.treatment-detail-provider-table td:nth-child(9) { width: 8%; text-align: right; }
+.treatment-detail-provider-table td:nth-child(8) { width: 13%; }
 
 .treatment-detail-provider-table tr:last-child td {
     border-bottom: none;
@@ -1301,7 +1310,7 @@
 }
 
 .treatment-detail-provider-card-distance {
-    margin: 0 0 10px 0;
+    margin: 0 0 6px;
     color: #66758f;
     font-size: 0.74rem;
     font-weight: 800;
@@ -1444,6 +1453,71 @@
 
     .treatment-detail-provider-card-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .treatment-detail-provider-table-detailed tbody tr { height: 58px; }
+    .treatment-detail-provider-table-detailed td { vertical-align: middle; }
+    .treatment-detail-provider-table-detailed td:nth-child(4),
+    .treatment-detail-provider-table-detailed td:nth-child(5) { text-align: center; }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-rank-badge {
+        width: 36px;
+        height: 24px;
+        min-width: 36px;
+        min-height: 24px;
+        padding: 0;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-map-status,
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-distance {
+        width: 72px;
+        height: 28px;
+        min-width: 72px;
+        min-height: 28px;
+        padding: 0 6px;
+        box-sizing: border-box;
+        justify-content: center;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-rating-compact {
+        display: grid;
+        grid-template-columns: repeat(3, 38px) 41px;
+        gap: 4px;
+        align-items: center;
+        justify-content: start;
+        width: 100%;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-rating-compact span {
+        justify-content: center;
+        width: 38px;
+        height: 28px;
+        min-height: 28px;
+        padding: 0 4px;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 1;
+}
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-rating-compact small {
+        display: block;
+        width: 41px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-meta,
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-contact { align-items: center; }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-care-badge {
+        justify-content: center;
+        width: 104px;
+        min-width: 104px;
+        min-height: 32px;
+        padding: 0 7px;
+        box-sizing: border-box;
+        text-align: center;
+        line-height: 1.1;
     }
 
 }
@@ -1836,6 +1910,12 @@
         gap: 5px;
     }
 
+    .treatment-detail-provider-rating-total {
+        grid-column: 1 / -1;
+        min-height: 12px;
+        padding-left: 0;
+    }
+
     .treatment-detail-rating-tile,
     .treatment-detail-provider-rating-item {
         padding: 7px 4px;
@@ -1964,90 +2044,6 @@
     }
 }
 
-/* Einheitliches Chip-Raster in der breiten Anbietertabelle. */
-@media (min-width: 1101px) {
-    .treatment-detail-provider-table-detailed tbody tr {
-        height: 58px;
-    }
-
-    .treatment-detail-provider-table-detailed td {
-        vertical-align: middle;
-    }
-
-    .treatment-detail-provider-table-detailed td:nth-child(4),
-    .treatment-detail-provider-table-detailed td:nth-child(5) {
-        text-align: center;
-    }
-
-    .treatment-detail-provider-table-detailed .treatment-detail-provider-rank-badge {
-        width: 36px;
-        height: 24px;
-        min-width: 36px;
-        min-height: 24px;
-        padding: 0;
-    }
-
-    .treatment-detail-provider-table-detailed .treatment-detail-map-status {
-        width: 72px;
-        height: 28px;
-        min-width: 72px;
-        min-height: 28px;
-        padding: 0 6px;
-        box-sizing: border-box;
-    }
-
-    .treatment-detail-provider-table-detailed .treatment-detail-provider-distance {
-        justify-content: center;
-        width: 72px;
-        height: 28px;
-        min-width: 72px;
-        min-height: 28px;
-        padding: 0 6px;
-        box-sizing: border-box;
-    }
-
-    .treatment-detail-provider-table-detailed .treatment-detail-provider-rating-compact {
-        display: grid;
-        grid-template-columns: repeat(3, 38px) 41px;
-        gap: 4px;
-        align-items: center;
-        justify-content: start;
-        width: 100%;
-    }
-
-    .treatment-detail-provider-table-detailed .treatment-detail-provider-rating-compact span {
-        justify-content: center;
-        width: 38px;
-        height: 28px;
-        min-height: 28px;
-        padding: 0 4px;
-        box-sizing: border-box;
-    }
-
-    .treatment-detail-provider-table-detailed .treatment-detail-provider-rating-compact small {
-        display: block;
-        width: 41px;
-        text-align: center;
-        white-space: nowrap;
-    }
-
-    .treatment-detail-provider-table-detailed .treatment-detail-provider-meta,
-    .treatment-detail-provider-table-detailed .treatment-detail-provider-contact {
-        align-items: center;
-    }
-
-    .treatment-detail-provider-table-detailed .treatment-detail-care-badge {
-        justify-content: center;
-        width: 104px;
-        min-width: 104px;
-        min-height: 32px;
-        padding: 0 7px;
-        box-sizing: border-box;
-        text-align: center;
-        line-height: 1.1;
-    }
-}
-
 /* =========================================================
    5. KLEINE MOBILGERÄTE
    Gültig bis einschließlich 430 px
@@ -2105,7 +2101,6 @@
 
     .treatment-detail-provider-card {
         padding: 10px;
-        border-color: #cbd9ea;
         box-shadow: 0 3px 9px rgba(0, 32, 80, 0.08);
     }
 
@@ -2134,74 +2129,5 @@
     .treatment-detail-provider-view-switch,
     .treatment-detail-provider-sort-switch {
         flex-direction: column;
-    }
-}
-
-/* Kompakte, zeilenweise gleich hohe Anbieter-Kacheln. */
-.treatment-detail-provider-card-grid {
-    align-items: stretch;
-}
-
-.treatment-detail-provider-card {
-    height: 100%;
-    padding: 10px 12px;
-    align-content: start;
-}
-
-.treatment-detail-provider-card-header {
-    margin-bottom: 2px;
-}
-
-.treatment-detail-provider-card-body {
-    align-self: end;
-    gap: 5px;
-}
-
-.treatment-detail-provider-rating {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-    gap: 5px;
-    align-items: center;
-    margin: 5px 0 6px;
-}
-
-.treatment-detail-provider-rating-item {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 4px;
-    min-height: 30px;
-    padding: 5px 6px;
-    box-sizing: border-box;
-}
-
-.treatment-detail-provider-rating-item strong {
-    display: inline;
-    margin: 0;
-    font-size: 0.82rem;
-}
-
-.treatment-detail-provider-rating-item span {
-    font-size: 0.6rem;
-}
-
-.treatment-detail-provider-rating-total {
-    grid-column: auto;
-    padding-left: 3px;
-    white-space: nowrap;
-}
-
-.treatment-detail-provider-card-distance {
-    margin: 0 0 6px;
-}
-
-@media (max-width: 760px) {
-    .treatment-detail-provider-rating {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .treatment-detail-provider-rating-total {
-        grid-column: 1 / -1;
-        min-height: 12px;
-        padding-left: 0;
     }
 }
