@@ -1,8 +1,0 @@
-.env
-
-*.csv
-*.xlsx
-*.json
-*.txt
-*.html
-
