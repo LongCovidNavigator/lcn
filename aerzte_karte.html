@@ -14,7 +14,7 @@
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
-    <link rel="stylesheet" href="styles/aerzte_karte.css?v=6">
+    <link rel="stylesheet" href="styles/aerzte_karte.css?v=7">
     <script src="scripts/image-registry.js?v=5"></script>
 </head>
 
@@ -415,6 +415,11 @@
             <div id="doctor-card-results" class="doctor-card-grid">
                 <p class="doctor-empty-state">Noch keine Ergebnisse geladen.</p>
             </div>
+            <div class="doctor-cards-load-more-wrap">
+                <button id="doctor-cards-load-more-button" class="doctor-cards-load-more-button is-hidden" type="button">
+                    Weitere 30 Kacheln laden
+                </button>
+            </div>
         </section>
 
         <section id="doctor-table-results-section" class="doctor-map-results-section is-hidden">
@@ -442,7 +447,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 	<script>window.LCNImages.configureLeaflet(window.L);</script>
-	<script src="scripts/aerzte_karte.js?v=10"></script>
+	<script src="scripts/aerzte_karte.js?v=11"></script>
 
     <div id="footer-placeholder"></div>
 

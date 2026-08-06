@@ -2,6 +2,8 @@ let currentTreatmentDetail = null;
 let treatmentProviderMap = null;
 let treatmentProviderMarkerLayer = null;
 let currentProviderViewMode = "list";
+const providerCardBatchSize = 30;
+let visibleProviderCardCount = providerCardBatchSize;
 let currentProviderSortMode = "name";
 let currentProviderSortDirection = "asc";
 let currentProviderLocation = null;
@@ -110,6 +112,17 @@ function setupTreatmentDetailVoteButtons() {
 function setupProviderViewSwitch() {
     document.addEventListener("click", async function (event) {
         const viewButton = event.target.closest(".treatment-detail-provider-view-button");
+        const loadMoreButton = event.target.closest(".treatment-detail-provider-load-more-button");
+
+        if (loadMoreButton) {
+            visibleProviderCardCount += providerCardBatchSize;
+
+            if (currentTreatmentDetail) {
+                renderTreatmentProviders(currentTreatmentDetail.providers);
+            }
+
+            return;
+        }
 
         if (viewButton) {
             const nextMode = viewButton.getAttribute("data-provider-view");
@@ -521,8 +534,13 @@ function renderTreatmentProviders(providers) {
         };
     });
 
-    const providersOnMap = rankedProviders.filter(provider => hasValidCoordinates(provider));
-    const providersWithoutMap = rankedProviders.filter(provider => !hasValidCoordinates(provider));
+    const visibleRankedProviders = currentProviderViewMode === "cards"
+        ? rankedProviders.slice(0, visibleProviderCardCount)
+        : rankedProviders;
+    const providersOnMap = visibleRankedProviders.filter(provider => hasValidCoordinates(provider));
+    const providersWithoutMap = visibleRankedProviders.filter(provider => !hasValidCoordinates(provider));
+    const totalProvidersOnMap = rankedProviders.filter(provider => hasValidCoordinates(provider)).length;
+    const totalProvidersWithoutMap = rankedProviders.length - totalProvidersOnMap;
 
     let providersHtml = "";
 
@@ -539,8 +557,15 @@ function renderTreatmentProviders(providers) {
         `;
     } else {
         providersHtml = `
-            ${buildProviderGroupHtml("Auf der Karte angezeigt", providersOnMap, "Diese Anbieter haben nutzbare Koordinaten und werden auf der Karte angezeigt.")}
-            ${buildProviderGroupHtml("Nicht auf der Karte angezeigt", providersWithoutMap, "Diese Anbieter bleiben in der Liste sichtbar, haben aber aktuell keine nutzbaren Koordinaten.")}
+            ${buildProviderGroupHtml("Auf der Karte angezeigt", providersOnMap, "Diese Anbieter haben nutzbare Koordinaten und werden auf der Karte angezeigt.", totalProvidersOnMap)}
+            ${buildProviderGroupHtml("Nicht auf der Karte angezeigt", providersWithoutMap, "Diese Anbieter bleiben in der Liste sichtbar, haben aber aktuell keine nutzbaren Koordinaten.", totalProvidersWithoutMap)}
+            ${rankedProviders.length > visibleRankedProviders.length ? `
+                <div class="treatment-detail-provider-load-more-wrap">
+                    <button type="button" class="treatment-detail-provider-load-more-button">
+                        Weitere ${Math.min(providerCardBatchSize, rankedProviders.length - visibleRankedProviders.length)} Kacheln laden
+                    </button>
+                </div>
+            ` : ""}
         `;
     }
 
@@ -650,8 +675,9 @@ function buildProviderViewSwitchHtml() {
     `;
 }
 
-function buildProviderGroupHtml(title, providers, note) {
+function buildProviderGroupHtml(title, providers, note, totalCount = null) {
     const count = Array.isArray(providers) ? providers.length : 0;
+    const displayedCount = totalCount === null ? count : totalCount;
 
     let contentHtml = "";
 
@@ -675,7 +701,7 @@ function buildProviderGroupHtml(title, providers, note) {
         <section class="treatment-detail-provider-group">
             <div class="treatment-detail-provider-group-header">
                 <h3>${escapeHtml(title)}</h3>
-                <span>${count}</span>
+                <span>${displayedCount}</span>
             </div>
 
             ${note ? `<p class="treatment-detail-provider-group-note">${escapeHtml(note)}</p>` : ""}

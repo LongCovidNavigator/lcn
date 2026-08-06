@@ -10,6 +10,8 @@
 let currentTreatments = [];
 let currentCategories = [];
 let currentViewMode = "cards";
+const treatmentCardBatchSize = 30;
+let visibleTreatmentCardCount = treatmentCardBatchSize;
 let selectedTreatmentsForCompare = [];
 let showOnlyTreatmentCompareSelection = false;
 const treatmentCompareMaxItems = 5;
@@ -141,6 +143,7 @@ async function loadTreatmentResults() {
 
         
 		currentTreatments = data.items.map(normalizeTreatment);
+        visibleTreatmentCardCount = treatmentCardBatchSize;
         syncSelectedTreatmentsWithCurrentResults();
 		currentCategories = Array.isArray(data.categories) ? data.categories : [];
 		currentTreatmentMapData = data.map && typeof data.map === "object" ? data.map : null;
@@ -425,8 +428,12 @@ function bindTreatmentNavigationEvents() {
             normalizeRadiusInput();
         });
 
-        radiusInput.addEventListener("input", function () {
-            scheduleTreatmentAutoApply(350);
+        radiusInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                normalizeRadiusInput();
+                applyTreatmentFiltersFromControls();
+            }
         });
     }
 
@@ -463,8 +470,11 @@ function bindTreatmentNavigationEvents() {
     }
 
     if (minProviderInput) {
-        minProviderInput.addEventListener("input", function () {
-            scheduleTreatmentAutoApply(350);
+        minProviderInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                applyTreatmentFiltersFromControls();
+            }
         });
     }
 
@@ -507,13 +517,13 @@ function bindTreatmentNavigationEvents() {
     bindRangePair(
         "treatment-min-positive-range",
         "treatment-min-positive-input",
-        function () { scheduleTreatmentAutoApply(250); }
+        applyTreatmentFiltersFromControls
     );
 
     bindRangePair(
         "treatment-max-negative-range",
         "treatment-max-negative-input",
-        function () { scheduleTreatmentAutoApply(250); }
+        applyTreatmentFiltersFromControls
     );
 
     bindTreatmentTableSortControls();
@@ -652,10 +662,6 @@ function bindTreatmentSmartSearchEvents() {
 				treatmentAliasSmartSuggestions = [];
 				hideTreatmentAliasSmartSuggestions();
 				setTreatmentAliasSmartStatus("Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
-
-				if (validateLocationDependentFilters()) {
-					loadTreatmentResults();
-				}
 
 				return;
 			}
@@ -1013,9 +1019,17 @@ function bindTreatmentCompareControls() {
 
 function bindTreatmentCardContainerEvents() {
     const cardResults = document.getElementById("treatment-card-results");
+    const loadMoreButton = document.getElementById("treatment-cards-load-more-button");
 
     if (!cardResults) {
         return;
+    }
+
+    if (loadMoreButton) {
+        loadMoreButton.addEventListener("click", function () {
+            visibleTreatmentCardCount += treatmentCardBatchSize;
+            renderTreatmentCards(getDisplayedTreatments());
+        });
     }
 
     cardResults.addEventListener("click", function (event) {
@@ -1132,13 +1146,13 @@ function bindRangePair(rangeId, numberId, onChangeCallback) {
 
     rangeInput.addEventListener("input", function () {
         numberInput.value = rangeInput.value;
-        onChangeCallback();
     });
+
+    rangeInput.addEventListener("change", onChangeCallback);
 
     numberInput.addEventListener("input", function () {
         const clampedValue = clampNumber(numberInput.value, 0, 100);
         rangeInput.value = clampedValue;
-        onChangeCallback();
     });
 
     numberInput.addEventListener("keydown", function (event) {
@@ -1549,6 +1563,7 @@ function updateTreatmentTableSortHeaders() {
 
 function renderTreatmentCards(treatments) {
     const cardResults = document.getElementById("treatment-card-results");
+    const loadMoreButton = document.getElementById("treatment-cards-load-more-button");
 
     if (!cardResults) {
         return;
@@ -1558,12 +1573,24 @@ function renderTreatmentCards(treatments) {
         cardResults.innerHTML = `
             <p class="treatment-empty-state">Keine Therapien gefunden.</p>
         `;
+        if (loadMoreButton) loadMoreButton.classList.add("is-hidden");
         return;
     }
 
-    cardResults.innerHTML = treatments.map(function (treatment, index) {
+    const visibleTreatments = showOnlyTreatmentCompareSelection
+        ? treatments
+        : treatments.slice(0, visibleTreatmentCardCount);
+
+    cardResults.innerHTML = visibleTreatments.map(function (treatment, index) {
         return buildTreatmentCardHtml(treatment, index);
     }).join("");
+
+    if (loadMoreButton) {
+        const remainingCount = Math.max(0, treatments.length - visibleTreatments.length);
+        const nextCount = Math.min(treatmentCardBatchSize, remainingCount);
+        loadMoreButton.textContent = `Weitere ${nextCount} Kacheln laden`;
+        loadMoreButton.classList.toggle("is-hidden", showOnlyTreatmentCompareSelection || remainingCount === 0);
+    }
 }
 
 function buildTreatmentCardHtml(treatment, index) {

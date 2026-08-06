@@ -845,6 +845,29 @@
     gap: 18px;
 }
 
+.treatment-cards-load-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+}
+
+.treatment-cards-load-more-button {
+    min-height: 44px;
+    padding: 10px 22px;
+    border: 1px solid #006f78;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #006f78;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.treatment-cards-load-more-button:hover,
+.treatment-cards-load-more-button:focus-visible {
+    background: #e9f7f7;
+}
+
 .treatment-card {
     position: relative;
     overflow: hidden;

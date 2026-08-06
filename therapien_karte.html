@@ -15,7 +15,7 @@
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
 
-    <link rel="stylesheet" href="styles/therapien_karte.css?v=36">
+    <link rel="stylesheet" href="styles/therapien_karte.css?v=37">
     <script src="scripts/image-registry.js?v=5"></script>
 </head>
 
@@ -387,6 +387,11 @@
             <div id="treatment-card-results" class="treatment-card-grid">
                 <p class="treatment-empty-state">Noch keine Ergebnisse geladen.</p>
             </div>
+            <div class="treatment-cards-load-more-wrap">
+                <button id="treatment-cards-load-more-button" class="treatment-cards-load-more-button is-hidden" type="button">
+                    Weitere 30 Kacheln laden
+                </button>
+            </div>
         </section>
 
         <section id="treatment-table-results-section" class="treatment-table-results-section is-hidden">
@@ -413,7 +418,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>window.LCNImages.configureLeaflet(window.L);</script>
-    <script src="scripts/therapien_karte.js?v=32"></script>
+    <script src="scripts/therapien_karte.js?v=34"></script>
 
     <div id="footer-placeholder"></div>
 

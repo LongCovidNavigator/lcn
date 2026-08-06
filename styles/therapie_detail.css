@@ -745,6 +745,29 @@
     background: #ffffff;
 }
 
+.treatment-detail-provider-load-more-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 4px 14px 18px;
+}
+
+.treatment-detail-provider-load-more-button {
+    min-height: 44px;
+    padding: 10px 22px;
+    border: 1px solid #006f78;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #006f78;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.treatment-detail-provider-load-more-button:hover,
+.treatment-detail-provider-load-more-button:focus-visible {
+    background: #e9f7f7;
+}
+
 .treatment-detail-provider-controls-grid {
     display: grid;
     grid-template-columns: minmax(180px, 0.7fr) minmax(300px, 1.15fr) minmax(380px, 1.6fr);

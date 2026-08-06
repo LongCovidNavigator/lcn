@@ -8,6 +8,8 @@ let currentDoctorTerms = {
 
 let currentDoctorTreatmentsGrouped = {};
 let treatmentSpectrumExpanded = false;
+const treatmentSpectrumBatchSize = 30;
+let treatmentSpectrumVisibleCount = 6;
 let selectedTreatmentCategorySlugs = new Set();
 let treatmentCategorySelectionMode = "all";
 
@@ -99,7 +101,7 @@ function setupTreatmentToggle() {
     }
 
     toggleButton.addEventListener("click", function () {
-        treatmentSpectrumExpanded = !treatmentSpectrumExpanded;
+        treatmentSpectrumVisibleCount += treatmentSpectrumBatchSize;
         renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
     });
 }
@@ -1327,20 +1329,23 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
         return;
     }
 
-    const visibleLimit = treatmentSpectrumExpanded ? visibleEntries.length : 6;
+    if (!treatmentSpectrumExpanded) {
+        treatmentSpectrumExpanded = true;
+        treatmentSpectrumVisibleCount = treatmentSpectrumBatchSize;
+    }
+
+    const visibleLimit = Math.min(treatmentSpectrumVisibleCount, visibleEntries.length);
     const displayedEntries = visibleEntries.slice(0, visibleLimit);
 
     listElement.innerHTML = displayedEntries
         .map(buildTreatmentCardItemHtml)
         .join("");
 
-    const hasHiddenTreatments = visibleEntries.length > 6;
+    const hiddenTreatmentCount = Math.max(0, visibleEntries.length - displayedEntries.length);
 
     if (toggleButton) {
-        toggleButton.classList.toggle("is-hidden", !hasHiddenTreatments);
-        toggleButton.textContent = treatmentSpectrumExpanded
-            ? "Weniger Therapien anzeigen"
-            : `Alle ${visibleEntries.length} Therapien anzeigen →`;
+        toggleButton.classList.toggle("is-hidden", hiddenTreatmentCount === 0);
+        toggleButton.textContent = `Weitere ${Math.min(treatmentSpectrumBatchSize, hiddenTreatmentCount)} Kacheln laden`;
     }
 }
 

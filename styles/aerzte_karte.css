@@ -383,6 +383,29 @@
     gap: 18px;
 }
 
+.doctor-cards-load-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+}
+
+.doctor-cards-load-more-button {
+    min-height: 44px;
+    padding: 10px 22px;
+    border: 1px solid #006f78;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #006f78;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.doctor-cards-load-more-button:hover,
+.doctor-cards-load-more-button:focus-visible {
+    background: #e9f7f7;
+}
+
 .doctor-card-meta {
     display: flex;
     flex-wrap: wrap;

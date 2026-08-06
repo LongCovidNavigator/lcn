@@ -5,6 +5,8 @@ let userLocationMarker = null;
 let userLocationIcon = null;
 
 let currentDoctors = [];
+const doctorCardBatchSize = 30;
+let visibleDoctorCardCount = doctorCardBatchSize;
 let selectedDoctorsForCompare = [];
 let showOnlyCompareSelection = false;
 
@@ -423,6 +425,7 @@ function setupDoctorCompareControls() {
 function setupDoctorResultEventDelegation() {
     const cardResultsContainer = document.getElementById("doctor-card-results");
     const tableResultsBody = document.getElementById("doctor-map-results-body");
+    const loadMoreButton = document.getElementById("doctor-cards-load-more-button");
 
     if (cardResultsContainer) {
         cardResultsContainer.addEventListener("click", handleDoctorCompareClick);
@@ -431,6 +434,13 @@ function setupDoctorResultEventDelegation() {
 
     if (tableResultsBody) {
         tableResultsBody.addEventListener("click", handleDoctorCompareClick);
+    }
+
+    if (loadMoreButton) {
+        loadMoreButton.addEventListener("click", function () {
+            visibleDoctorCardCount += doctorCardBatchSize;
+            renderDoctorCards(getDisplayedDoctors());
+        });
     }
 }
 
@@ -1104,6 +1114,7 @@ async function loadDoctorsFromSearchApi(settings) {
     }
 
     currentDoctors = sortDoctors(apiDoctors, currentDoctorSortKey, currentDoctorSortDirection);
+    visibleDoctorCardCount = doctorCardBatchSize;
 
     if (showOnlyCompareSelection && selectedDoctorsForCompare.length === 0) {
         showOnlyCompareSelection = false;
@@ -1360,6 +1371,7 @@ function renderDoctorMarkers(doctors) {
 
 function renderDoctorCards(doctors) {
     const cardContainer = document.getElementById("doctor-card-results");
+    const loadMoreButton = document.getElementById("doctor-cards-load-more-button");
 
     if (!cardContainer) {
         return;
@@ -1367,12 +1379,24 @@ function renderDoctorCards(doctors) {
 
     if (!doctors || doctors.length === 0) {
         cardContainer.innerHTML = `<p class="doctor-empty-state">Keine Ärztinnen oder Ärzte gefunden.</p>`;
+        if (loadMoreButton) loadMoreButton.classList.add("is-hidden");
         return;
     }
 
-    cardContainer.innerHTML = doctors.map(function (doctor, index) {
+    const visibleDoctors = showOnlyCompareSelection
+        ? doctors
+        : doctors.slice(0, visibleDoctorCardCount);
+
+    cardContainer.innerHTML = visibleDoctors.map(function (doctor, index) {
         return buildDoctorCardHtml(doctor, index);
     }).join("");
+
+    if (loadMoreButton) {
+        const remainingCount = Math.max(0, doctors.length - visibleDoctors.length);
+        const nextCount = Math.min(doctorCardBatchSize, remainingCount);
+        loadMoreButton.textContent = `Weitere ${nextCount} Kacheln laden`;
+        loadMoreButton.classList.toggle("is-hidden", showOnlyCompareSelection || remainingCount === 0);
+    }
 }
 
 function buildDoctorCardHtml(doctor, index) {
