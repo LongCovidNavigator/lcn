@@ -174,7 +174,7 @@ body {
             rgba(247, 251, 252, 0.16) 66%,
             rgba(247, 251, 252, 0.04) 100%
         ),
-        url("../assets/images/Hero_Landing_01.png"),
+        var(--lcn-image-home-hero),
         linear-gradient(135deg, #f6fbfc 0%, #ffffff 46%, #eaf4f7 100%);
     background-size: cover;
     border-bottom: 1px solid rgba(215, 230, 238, 0.65);
@@ -261,7 +261,7 @@ body {
     width: 24px;
     height: 24px;
     margin: auto;
-	background-image: url("../assets/images/rocket-62.svg");
+	background-image: var(--lcn-image-home-quickstart-icon);
 	background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -591,7 +591,7 @@ body {
     grid-template-columns: 36% 1fr !important;
     gap: 8px !important;
     padding: 10px !important;
-    background-image: url("../assets/images/Suche_Landing_02.png") !important;
+    background-image: var(--lcn-image-home-search) !important;
     background-size: cover !important;
     background-position: center center !important;
 }
@@ -775,7 +775,7 @@ body {
 .flow-detail-ui {
     background: linear-gradient(180deg, #ffffff, #f3fafb);
     padding: 11px !important;
-    background-image: url("../assets/images/Detail_Landing_04.png") !important;
+    background-image: var(--lcn-image-home-detail) !important;
     background-size: cover !important;
     background-position: center center !important;
 }
@@ -1283,7 +1283,7 @@ body {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: url("../assets/images/Berg_02.png");
+    background-image: var(--lcn-image-home-project-mountain);
     background-repeat: no-repeat;
     background-position: center;
     background-size: 145%;
@@ -1297,7 +1297,7 @@ body {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: url("../assets/images/Vision_01.png");
+    background-image: var(--lcn-image-home-project-vision);
     background-repeat: no-repeat;
     background-position: center;
     background-size: 145%;
@@ -1311,7 +1311,7 @@ body {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: url("../assets/images/StatusQuo_02.png");
+    background-image: var(--lcn-image-home-project-status);
     background-repeat: no-repeat;
     background-position: center;
     background-size: 150%;

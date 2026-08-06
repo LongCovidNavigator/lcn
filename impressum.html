@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="styles/footer-style.css">
   <link rel="stylesheet" href="styles/navigation.css">
   <link rel="stylesheet" href="styles/homepage.css">
+  <script src="scripts/image-registry.js?v=3"></script>
 
 
 </head>
@@ -54,7 +55,7 @@
 	  </script>
 	  
 	  <script>
-	  fetch("components/header.html")
+	  fetch("components/header.html?v=2")
 		.then(response => response.text())
 		.then(data => {
 		  document.getElementById("header-placeholder").innerHTML = data;
