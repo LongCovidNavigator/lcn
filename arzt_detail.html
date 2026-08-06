@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/aerzte_karte.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="styles/arzt_detail.css?v=11">
+    <link rel="stylesheet" href="styles/arzt_detail.css?v=18">
 </head>
 
 <script>
@@ -102,6 +102,23 @@
                     <article class="doctor-detail-info-card doctor-detail-rating-card">
                         <h3>Bewertungen <span id="doctor-detail-rating-card-total">(0 insgesamt)</span></h3>
                         <div id="doctor-detail-rating"></div>
+
+                        <div class="doctor-detail-own-rating">
+                            <h4 class="doctor-detail-own-rating-heading">Diese Praxis bewerten</h4>
+                            <div class="doctor-detail-vote-buttons" aria-label="Diese Praxis bewerten">
+                                <button type="button" class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-positive" data-type="pro">
+                                    Positiv
+                                </button>
+
+                                <button type="button" class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-neutral" data-type="neutral">
+                                    Neutral
+                                </button>
+
+                                <button type="button" class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-negative" data-type="contra">
+                                    Negativ
+                                </button>
+                            </div>
+                        </div>
                     </article>
 
                     <article class="doctor-detail-info-card doctor-detail-specialties-card">
@@ -114,22 +131,6 @@
                         <div id="doctor-detail-care" class="doctor-detail-tag-row"></div>
                     </article>
 
-                    <article class="doctor-detail-info-card doctor-detail-contact-info-card">
-                        <h3>Diese Praxis bewerten</h3>
-                        <div class="doctor-detail-profile-vote-buttons" aria-label="Diese Praxis bewerten">
-                            <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-positive" data-type="pro">
-                                Positiv
-                            </button>
-
-                            <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-neutral" data-type="neutral">
-                                Neutral
-                            </button>
-
-                            <button type="button" class="doctor-detail-vote-button doctor-detail-action-vote doctor-detail-action-vote-negative" data-type="contra">
-                                Negativ
-                            </button>
-                        </div>
-                    </article>
                 </div>
             </section>
 
@@ -234,6 +235,14 @@
                                         <button
                                             type="button"
                                             class="doctor-detail-treatment-view-button is-active"
+                                            data-treatment-view="categories"
+                                        >
+                                            Kategorien
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="doctor-detail-treatment-view-button"
                                             data-treatment-view="cards"
                                         >
                                             Kacheln
@@ -245,14 +254,6 @@
                                             data-treatment-view="table"
                                         >
                                             Tabelle
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            class="doctor-detail-treatment-view-button"
-                                            data-treatment-view="categories"
-                                        >
-                                            Kategorien
                                         </button>
                                     </div>
                                 </div>

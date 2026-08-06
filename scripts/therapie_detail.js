@@ -494,7 +494,6 @@ function renderTreatmentProviderCard(treatment) {
 
     element.innerHTML = `
         <span class="treatment-detail-provider-bubble">${providerCount}</span>
-        <span>${escapeHtml(label)}</span>
     `;
 }
 
@@ -580,7 +579,7 @@ function buildProviderViewSwitchHtml() {
                             class="treatment-detail-provider-view-button ${currentProviderViewMode === "list" ? "is-active" : ""}"
                             data-provider-view="list"
                         >
-                            Liste
+                            Tabelle
                         </button>
                     </div>
                 </section>
@@ -689,7 +688,7 @@ function buildProviderGroupHtml(title, providers, note) {
 function buildProviderListHtml(providers) {
     return `
         <div class="treatment-detail-provider-table-wrap">
-            <table class="treatment-detail-provider-table">
+            <table class="treatment-detail-provider-table treatment-detail-provider-table-detailed">
                 <thead>
                     <tr>
                         <th>Rang</th>
@@ -708,7 +707,56 @@ function buildProviderListHtml(providers) {
                     ${providers.map(provider => buildProviderTableRowHtml(provider)).join("")}
                 </tbody>
             </table>
+
+            <table class="treatment-detail-provider-compact-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Anbieter</th>
+                        <th>Positiv</th>
+                        <th>Standort</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${providers.map(provider => buildProviderCompactTableRowHtml(provider)).join("")}
+                </tbody>
+            </table>
         </div>
+    `;
+}
+
+function buildProviderCompactTableRowHtml(provider) {
+    const rank = Number(provider.display_rank || 0);
+    const name = provider.dr_display_name || "Unbekannter Anbieter";
+    const compactLocation = [provider.loc_plz, provider.loc_city]
+        .filter(Boolean)
+        .join(" ") || provider.loc_city || "Kein Standort";
+    const stats = getProviderVoteStats(provider);
+    const detailUrl = provider.dr_id
+        ? `arzt_detail.html?id=${encodeURIComponent(provider.dr_id)}`
+        : "";
+    const ratingHtml = stats.totalVotes > 0
+        ? `<span class="treatment-detail-provider-compact-positive">+${stats.positiveRatio}%</span><small>(n=${stats.totalVotes})</small>`
+        : `<span class="treatment-detail-provider-compact-muted">Keine Bewertungen</span>`;
+
+    return `
+        <tr>
+            <td>${rank || "–"}</td>
+            <td>
+                ${detailUrl
+                    ? `<a href="${detailUrl}">${escapeHtml(name)}</a>`
+                    : `<strong>${escapeHtml(name)}</strong>`}
+            </td>
+            <td>
+                <div class="treatment-detail-provider-compact-rating">${ratingHtml}</div>
+            </td>
+            <td>
+                <div class="treatment-detail-provider-compact-location">
+                    ${currentProviderLocation ? buildProviderDistanceHtml(provider) : ""}
+                    <small>${escapeHtml(compactLocation)}</small>
+                </div>
+            </td>
+        </tr>
     `;
 }
 
@@ -727,35 +775,35 @@ function buildProviderTableRowHtml(provider) {
 
     return `
         <tr>
-            <td class="treatment-detail-provider-rank-cell">
+            <td class="treatment-detail-provider-rank-cell" data-label="Rang">
                 ${rankHtml}
             </td>
 
-            <td>
+            <td data-label="Anbieter">
                 <strong>${escapeHtml(name)}</strong>
             </td>
 
-            <td>${escapeHtml(location)}</td>
+            <td data-label="Standort">${escapeHtml(location)}</td>
 
-            <td>${mapStatusHtml}</td>
+            <td data-label="Karte">${mapStatusHtml}</td>
 
-            <td>${distanceHtml}</td>
+            <td data-label="Entfernung">${distanceHtml}</td>
 
-            <td>${ratingHtml}</td>
+            <td data-label="Bewertung">${ratingHtml}</td>
 
-            <td>
+            <td data-label="Versorgung">
                 <div class="treatment-detail-provider-meta">
                     ${careBadges}
                 </div>
             </td>
 
-            <td>
+            <td data-label="Kontakt">
                 <div class="treatment-detail-provider-contact">
                     ${contactLinks}
                 </div>
             </td>
 
-            <td>
+            <td class="treatment-detail-provider-action-cell">
                 ${detailUrl ? `
                     <a class="treatment-detail-provider-detail-link" href="${detailUrl}">
                         Steckbrief
@@ -1027,7 +1075,11 @@ function buildProviderCardHtml(provider) {
 
             <div class="treatment-detail-provider-card-header">
                 <div>
-                    <h3>${escapeHtml(name)}</h3>
+                    <h3>
+                        ${detailUrl
+                            ? `<a class="treatment-detail-provider-name-link" href="${detailUrl}">${escapeHtml(name)}</a>`
+                            : escapeHtml(name)}
+                    </h3>
                     <p>${escapeHtml(location || "Kein Standort hinterlegt")}</p>
                 </div>
             </div>
@@ -1633,10 +1685,10 @@ function renderTreatmentCategory(treatment) {
                 <span>Kategorie</span>
                 <strong>${category ? escapeHtml(category) : "Noch nicht hinterlegt"}</strong>
             </div>
-            <div>
+            ${subcategory ? `<div>
                 <span>Unterkategorie</span>
-                <strong class="${subcategory ? "" : "is-muted"}">${subcategory ? escapeHtml(subcategory) : "Keine Unterkategorie hinterlegt"}</strong>
-            </div>
+                <strong>${escapeHtml(subcategory)}</strong>
+            </div>` : ""}
         </div>
     `;
 }

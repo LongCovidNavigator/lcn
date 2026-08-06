@@ -510,19 +510,17 @@
 
 .treatment-detail-category-definition {
     display: grid;
-    gap: 9px;
+    gap: 7px;
 }
 
 .treatment-detail-category-definition > div {
     display: grid;
-    gap: 3px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e3eaf3;
-}
-
-.treatment-detail-category-definition > div:last-child {
-    padding-bottom: 0;
-    border-bottom: 0;
+    gap: 4px;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid #e1e7ef;
+    border-radius: 8px;
+    background: #f8fafc;
 }
 
 .treatment-detail-category-definition span {
@@ -534,10 +532,11 @@
 }
 
 .treatment-detail-category-definition strong {
-    color: #07326f;
-    font-size: 0.8rem;
-    font-weight: 900;
-    line-height: 1.3;
+    color: #0b1f3a;
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 
 .treatment-detail-category-definition strong.is-muted {
@@ -929,39 +928,53 @@
 .treatment-detail-provider-card-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 14px;
+    align-items: start;
 }
 
 .treatment-detail-provider-card {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 8px;
     min-width: 0;
-    height: 100%;
-    border: 1px solid #dbe5f1;
+    height: auto;
+    box-sizing: border-box;
+    border: 1px solid #cbd9ea;
+    border-top: 3px solid #0a8d86;
     border-radius: 10px;
     background: #ffffff;
     padding: 12px 13px;
+    box-shadow: 0 4px 12px rgba(0, 32, 80, 0.075);
 }
 
 .treatment-detail-provider-card-topline {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 10px;
+    display: contents;
 }
 
 .treatment-detail-provider-card-header {
-    display: block;
-    margin-bottom: 11px;
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    margin-bottom: 5px;
 }
 
 .treatment-detail-provider-card h3 {
-    margin: 0 0 4px 0;
+    margin: 0 0 3px 0;
     color: #07326f;
-    font-size: 0.84rem;
+    font-size: 0.88rem;
     font-weight: 900;
     line-height: 1.25;
+}
+
+.treatment-detail-provider-name-link {
+    color: #006b60;
+    text-decoration: none;
+}
+
+.treatment-detail-provider-name-link:hover,
+.treatment-detail-provider-name-link:focus-visible {
+    color: #004f49;
+    text-decoration: underline;
 }
 
 .treatment-detail-provider-card p {
@@ -976,9 +989,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 42px;
-    min-height: 22px;
-    padding: 2px 8px;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: start;
+    min-width: 0;
+    min-height: 19px;
+    padding: 1px 6px;
+    box-sizing: border-box;
     border: 1px solid #c8dcf2;
     border-radius: 999px;
     background: #f3f8ff;
@@ -995,6 +1012,7 @@
 }
 
 .treatment-detail-provider-detail-link {
+    display: none;
     color: #006b60;
     font-size: 0.74rem;
     font-weight: 900;
@@ -1007,10 +1025,11 @@
 }
 
 .treatment-detail-provider-card-body {
+    grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
     gap: 9px;
-    margin-top: auto;
+    margin-top: 0;
 }
 
 .treatment-detail-provider-meta {
@@ -1169,12 +1188,24 @@
 }
 
 .treatment-detail-provider-table-wrap {
-    overflow-x: auto;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.treatment-detail-provider-card > .treatment-detail-provider-rating,
+.treatment-detail-provider-card > .treatment-detail-provider-rating-empty,
+.treatment-detail-provider-card > .treatment-detail-provider-card-distance {
+    grid-column: 1 / -1;
+}
+
+.treatment-detail-provider-compact-table {
+    display: none;
 }
 
 .treatment-detail-provider-table {
     width: 100%;
-    min-width: 1180px;
+    min-width: 0;
     border-collapse: collapse;
     table-layout: fixed;
     background: #ffffff;
@@ -1185,7 +1216,7 @@
 
 .treatment-detail-provider-table th,
 .treatment-detail-provider-table td {
-    padding: 8px 9px;
+    padding: 8px 6px;
     border-bottom: 1px solid #e5ecf5;
     color: #1d2d46;
     font-size: 0.74rem;
@@ -1199,27 +1230,27 @@
     color: #07326f;
     font-size: 0.72rem;
     font-weight: 900;
-    white-space: nowrap;
+    white-space: normal;
 }
 
 .treatment-detail-provider-table th:nth-child(1),
-.treatment-detail-provider-table td:nth-child(1) { width: 58px; text-align: center; }
+.treatment-detail-provider-table td:nth-child(1) { width: 6%; text-align: center; }
 .treatment-detail-provider-table th:nth-child(2),
-.treatment-detail-provider-table td:nth-child(2) { width: 175px; }
+.treatment-detail-provider-table td:nth-child(2) { width: 15%; }
 .treatment-detail-provider-table th:nth-child(3),
-.treatment-detail-provider-table td:nth-child(3) { width: 180px; }
+.treatment-detail-provider-table td:nth-child(3) { width: 15%; }
 .treatment-detail-provider-table th:nth-child(4),
-.treatment-detail-provider-table td:nth-child(4) { width: 72px; text-align: center; }
+.treatment-detail-provider-table td:nth-child(4) { width: 7%; text-align: center; }
 .treatment-detail-provider-table th:nth-child(5),
-.treatment-detail-provider-table td:nth-child(5) { width: 105px; text-align: center; }
+.treatment-detail-provider-table td:nth-child(5) { width: 9%; text-align: center; }
 .treatment-detail-provider-table th:nth-child(6),
-.treatment-detail-provider-table td:nth-child(6) { width: 165px; }
+.treatment-detail-provider-table td:nth-child(6) { width: 18%; }
 .treatment-detail-provider-table th:nth-child(7),
-.treatment-detail-provider-table td:nth-child(7) { width: 145px; }
+.treatment-detail-provider-table td:nth-child(7) { width: 11%; }
 .treatment-detail-provider-table th:nth-child(8),
-.treatment-detail-provider-table td:nth-child(8) { width: 125px; }
+.treatment-detail-provider-table td:nth-child(8) { width: 11%; }
 .treatment-detail-provider-table th:nth-child(9),
-.treatment-detail-provider-table td:nth-child(9) { width: 86px; text-align: right; }
+.treatment-detail-provider-table td:nth-child(9) { width: 8%; text-align: right; }
 
 .treatment-detail-provider-table tr:last-child td {
     border-bottom: none;
@@ -1319,6 +1350,14 @@
     border-top-color: #d93025 !important;
 }
 
+.treatment-detail-provider-table td {
+    overflow-wrap: anywhere;
+}
+
+.treatment-detail-provider-action-cell {
+    white-space: normal;
+}
+
 .treatment-detail-provider-table-sort {
     display: inline-flex;
     align-items: center;
@@ -1414,6 +1453,211 @@
    Gültig von 761 px bis einschließlich 1100 px
 ========================================================= */
 
+@media (max-width: 1100px) {
+    .treatment-detail-page {
+        overflow-x: hidden;
+    }
+
+    .treatment-detail-page-shell,
+    .treatment-detail-content,
+    .treatment-detail-sticky-header,
+    .treatment-detail-guided-section,
+    .treatment-detail-question-content {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .treatment-detail-sticky-header {
+        position: static;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .treatment-detail-sticky-profile {
+        border-right: none;
+        border-bottom: 1px solid #e3eaf3;
+    }
+
+    .treatment-detail-action-summary {
+        border-right: none;
+        border-bottom: 1px solid #e3eaf3;
+    }
+
+    .treatment-detail-guided-section {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .treatment-detail-question-intro {
+        align-items: center;
+    }
+
+    .treatment-detail-provider-control-card-location {
+        order: -1;
+    }
+
+    .treatment-detail-provider-table-detailed {
+        display: none !important;
+    }
+
+    .treatment-detail-provider-compact-table {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        border: 1px solid #d7e0eb;
+        background: #ffffff;
+    }
+
+    .treatment-detail-provider-compact-table th,
+    .treatment-detail-provider-compact-table td {
+        padding: 6px 6px;
+        border-right: 1px solid #d7e0eb;
+        border-bottom: 1px solid #d7e0eb;
+        vertical-align: middle;
+        text-align: left;
+        overflow-wrap: anywhere;
+    }
+
+    .treatment-detail-provider-compact-table th:last-child,
+    .treatment-detail-provider-compact-table td:last-child {
+        border-right: 0;
+    }
+
+    .treatment-detail-provider-compact-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .treatment-detail-provider-compact-table th {
+        background: #004481;
+        color: #ffffff;
+        font-size: 0.7rem;
+        font-weight: 900;
+    }
+
+    .treatment-detail-provider-compact-table td {
+        color: #1d2d46;
+        font-size: 0.72rem;
+        line-height: 1.25;
+    }
+
+    .treatment-detail-provider-compact-table th:nth-child(1),
+    .treatment-detail-provider-compact-table td:nth-child(1) {
+        width: 8%;
+        text-align: center;
+    }
+
+    .treatment-detail-provider-compact-table th:nth-child(2),
+    .treatment-detail-provider-compact-table td:nth-child(2) {
+        width: 40%;
+    }
+
+    .treatment-detail-provider-compact-table th:nth-child(3),
+    .treatment-detail-provider-compact-table td:nth-child(3) {
+        width: 22%;
+        text-align: center;
+    }
+
+    .treatment-detail-provider-compact-table th:nth-child(4),
+    .treatment-detail-provider-compact-table td:nth-child(4) {
+        width: 30%;
+    }
+
+    .treatment-detail-provider-compact-table a {
+        color: #006b60;
+        font-weight: 900;
+        text-decoration: none;
+    }
+
+    .treatment-detail-provider-compact-rating,
+    .treatment-detail-provider-compact-location {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .treatment-detail-provider-compact-rating small,
+    .treatment-detail-provider-compact-location small {
+        color: #607493;
+        font-size: 0.62rem;
+        font-weight: 700;
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    .treatment-detail-provider-compact-positive {
+        display: inline-flex;
+        padding: 2px 5px;
+        border: 1px solid #bfe7d1;
+        border-radius: 999px;
+        background: #f1fbf6;
+        color: #008c54;
+        font-size: 0.66rem;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .treatment-detail-provider-compact-muted {
+        color: #607493;
+        font-size: 0.62rem;
+        font-weight: 700;
+    }
+
+    .treatment-detail-provider-table,
+    .treatment-detail-provider-table tbody,
+    .treatment-detail-provider-table tr,
+    .treatment-detail-provider-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .treatment-detail-provider-table {
+        border: 0;
+        background: transparent;
+    }
+
+    .treatment-detail-provider-table thead {
+        display: none;
+    }
+
+    .treatment-detail-provider-table tr {
+        margin-bottom: 10px;
+        border: 1px solid #dbe5f1;
+        border-radius: 10px;
+        background: #ffffff;
+        overflow: hidden;
+    }
+
+    .treatment-detail-provider-table tr:last-child {
+        margin-bottom: 0;
+    }
+
+    .treatment-detail-provider-table td,
+    .treatment-detail-provider-table td:nth-child(n) {
+        display: grid;
+        grid-template-columns: minmax(105px, 0.3fr) minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+        width: auto;
+        padding: 9px 12px;
+        text-align: left;
+    }
+
+    .treatment-detail-provider-table td::before {
+        content: attr(data-label);
+        color: #607493;
+        font-size: 0.66rem;
+        font-weight: 850;
+        letter-spacing: 0.035em;
+        text-transform: uppercase;
+    }
+
+    .treatment-detail-provider-table .treatment-detail-provider-action-cell {
+        display: flex;
+        justify-content: flex-end;
+        border-bottom: 0;
+    }
+}
+
 @media (min-width: 761px) and (max-width: 1100px) {
     .treatment-detail-sticky-header {
         position: static;
@@ -1443,7 +1687,11 @@
     }
 
     .treatment-detail-provider-location-controls {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .treatment-detail-provider-location-input {
+        grid-column: 1 / -1;
     }
 
     .treatment-detail-provider-location-status {
@@ -1451,11 +1699,17 @@
     }
 
     .treatment-detail-provider-controls-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(260px, 1.35fr) minmax(145px, 0.7fr) minmax(225px, 1fr);
+        align-items: stretch;
     }
 
     .treatment-detail-provider-control-card-location {
-        grid-column: 1 / -1;
+        grid-column: auto;
+        grid-row: 1;
+    }
+
+    .treatment-detail-provider-control-card:not(.treatment-detail-provider-control-card-location) {
+        grid-row: 1;
     }
 
     .treatment-detail-provider-card-grid {
@@ -1470,18 +1724,126 @@
 
 @media (max-width: 760px) {
     .treatment-detail-page-shell {
-        width: calc(100% - 32px);
+        width: calc(100% - 24px);
+        margin-bottom: 28px;
     }
 
-    .treatment-detail-overview-grid,
+    .treatment-detail-top-panel {
+        margin-top: 10px;
+    }
+
+    .treatment-detail-sticky-header {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .treatment-detail-sticky-profile {
+        grid-template-columns: 46px minmax(0, 1fr);
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    .treatment-detail-avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 0.82rem;
+    }
+
+    .treatment-detail-sticky-profile-main h1,
+    .treatment-detail-subtitle {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+    }
+
+    .treatment-detail-sticky-profile-main h1 {
+        font-size: 1.02rem;
+        line-height: 1.22;
+    }
+
+    .treatment-detail-action-summary-item {
+        min-height: 58px;
+        padding: 8px 10px;
+    }
+
+    .treatment-detail-action-votes {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 7px;
+        min-height: 0;
+        padding: 10px 12px 12px;
+        white-space: normal;
+    }
+
+    .treatment-detail-action-votes > span {
+        grid-column: 1 / -1;
+    }
+
+    .treatment-detail-action-vote {
+        width: 100%;
+        padding-inline: 5px;
+    }
+
+    .treatment-detail-guided-section {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .treatment-detail-question-intro {
+        grid-template-columns: 34px minmax(0, 1fr);
+        gap: 9px;
+        padding-inline: 0;
+    }
+
+    .treatment-detail-overview-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .treatment-detail-rating-card {
+        grid-column: 1 / -1;
+    }
+
     .treatment-detail-provider-card-grid,
     .treatment-detail-provider-controls-grid,
     .treatment-detail-source-list {
         grid-template-columns: 1fr;
     }
 
+    .treatment-detail-overview-grid .treatment-detail-info-card:not(.treatment-detail-rating-card) {
+        padding: 10px;
+    }
+
+    .treatment-detail-overview-grid .treatment-detail-provider-bubble {
+        min-width: 38px;
+        height: 28px;
+        margin-right: 0;
+    }
+
     .treatment-detail-note-card {
         min-width: 0;
+    }
+
+    .treatment-detail-info-card,
+    .treatment-detail-provider-controls,
+    .treatment-detail-provider-group {
+        padding: 11px;
+    }
+
+    .treatment-detail-rating-tiles,
+    .treatment-detail-vote-buttons,
+    .treatment-detail-provider-rating {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    .treatment-detail-rating-tile,
+    .treatment-detail-provider-rating-item {
+        padding: 7px 4px;
+    }
+
+    .treatment-detail-vote-main-button {
+        padding: 7px 3px;
+        font-size: 0.7rem;
     }
 
     .treatment-detail-action-votes {
@@ -1493,12 +1855,28 @@
     }
 
     .treatment-detail-provider-map {
-        height: 285px;
+        height: 235px;
     }
 
     .treatment-detail-provider-view-switch,
     .treatment-detail-provider-sort-switch {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+        overflow: visible;
+        border: 0;
+        background: transparent;
+    }
+
+    .treatment-detail-provider-view-button,
+    .treatment-detail-provider-sort-button {
+        width: 100%;
+        min-height: 36px;
+        padding: 7px 8px;
+    }
+
+    .treatment-detail-provider-location-controls {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .treatment-detail-provider-sort-button,
@@ -1508,6 +1886,165 @@
 
     .treatment-detail-provider-control-card-location {
         grid-column: auto;
+    }
+
+    .treatment-detail-provider-table,
+    .treatment-detail-provider-table tbody,
+    .treatment-detail-provider-table tr,
+    .treatment-detail-provider-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .treatment-detail-provider-table {
+        border: 0;
+        background: transparent;
+    }
+
+    .treatment-detail-provider-table thead {
+        display: none;
+    }
+
+    .treatment-detail-provider-table tr {
+        display: grid;
+        grid-template-columns: 76px minmax(0, 1fr);
+        margin-bottom: 10px;
+        border: 1px solid #cbd9ea;
+        border-radius: 10px;
+        background: #ffffff;
+        box-shadow: 0 3px 9px rgba(0, 32, 80, 0.08);
+        overflow: hidden;
+    }
+
+    .treatment-detail-provider-table tr:last-child {
+        margin-bottom: 0;
+    }
+
+    .treatment-detail-provider-table td,
+    .treatment-detail-provider-table td:nth-child(n) {
+        display: grid;
+        grid-template-columns: minmax(88px, 0.42fr) minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+        width: auto;
+        padding: 8px 10px;
+        text-align: left;
+    }
+
+    .treatment-detail-provider-table td:nth-child(1),
+    .treatment-detail-provider-table td:nth-child(2) {
+        grid-column: auto;
+        grid-template-columns: 1fr;
+        gap: 4px;
+        border-bottom: 1px solid #cbd9ea;
+        background: #f2f7ff;
+    }
+
+    .treatment-detail-provider-table td:nth-child(1) {
+        border-right: 1px solid #dbe5f1;
+    }
+
+    .treatment-detail-provider-table td:nth-child(n + 3) {
+        grid-column: 1 / -1;
+    }
+
+    .treatment-detail-provider-table td::before {
+        content: attr(data-label);
+        color: #607493;
+        font-size: 0.66rem;
+        font-weight: 850;
+        letter-spacing: 0.035em;
+        text-transform: uppercase;
+    }
+
+    .treatment-detail-provider-table .treatment-detail-provider-action-cell {
+        display: flex;
+        justify-content: flex-end;
+        border-bottom: 0;
+    }
+}
+
+/* Einheitliches Chip-Raster in der breiten Anbietertabelle. */
+@media (min-width: 1101px) {
+    .treatment-detail-provider-table-detailed tbody tr {
+        height: 58px;
+    }
+
+    .treatment-detail-provider-table-detailed td {
+        vertical-align: middle;
+    }
+
+    .treatment-detail-provider-table-detailed td:nth-child(4),
+    .treatment-detail-provider-table-detailed td:nth-child(5) {
+        text-align: center;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-rank-badge {
+        width: 36px;
+        height: 24px;
+        min-width: 36px;
+        min-height: 24px;
+        padding: 0;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-map-status {
+        width: 72px;
+        height: 28px;
+        min-width: 72px;
+        min-height: 28px;
+        padding: 0 6px;
+        box-sizing: border-box;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-distance {
+        justify-content: center;
+        width: 72px;
+        height: 28px;
+        min-width: 72px;
+        min-height: 28px;
+        padding: 0 6px;
+        box-sizing: border-box;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-rating-compact {
+        display: grid;
+        grid-template-columns: repeat(3, 38px) 41px;
+        gap: 4px;
+        align-items: center;
+        justify-content: start;
+        width: 100%;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-rating-compact span {
+        justify-content: center;
+        width: 38px;
+        height: 28px;
+        min-height: 28px;
+        padding: 0 4px;
+        box-sizing: border-box;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-rating-compact small {
+        display: block;
+        width: 41px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-meta,
+    .treatment-detail-provider-table-detailed .treatment-detail-provider-contact {
+        align-items: center;
+    }
+
+    .treatment-detail-provider-table-detailed .treatment-detail-care-badge {
+        justify-content: center;
+        width: 104px;
+        min-width: 104px;
+        min-height: 32px;
+        padding: 0 7px;
+        box-sizing: border-box;
+        text-align: center;
+        line-height: 1.1;
     }
 }
 
@@ -1533,7 +2070,7 @@
     }
 
     .treatment-detail-guided-section {
-        padding: 14px;
+        padding: 11px;
     }
 
     .treatment-detail-question-number {
@@ -1546,28 +2083,48 @@
         font-size: 0.98rem;
     }
 
-    .treatment-detail-action-summary,
-    .treatment-detail-rating-tiles,
-    .treatment-detail-vote-buttons,
-    .treatment-detail-provider-rating {
-        grid-template-columns: 1fr;
+    .treatment-detail-action-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .treatment-detail-action-summary-item {
         min-height: 48px;
-        border-right: none;
-        border-bottom: 1px solid #e3eaf3;
-    }
-
-    .treatment-detail-action-summary-item:last-child {
+        border-right: 1px solid #e3eaf3;
         border-bottom: none;
     }
 
+    .treatment-detail-action-summary-item:last-child {
+        border-right: none;
+    }
+
     .treatment-detail-provider-card-header,
-    .treatment-detail-provider-map-header,
-    .treatment-detail-provider-card-topline {
+    .treatment-detail-provider-map-header {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .treatment-detail-provider-card {
+        padding: 10px;
+        border-color: #cbd9ea;
+        box-shadow: 0 3px 9px rgba(0, 32, 80, 0.08);
+    }
+
+    .treatment-detail-provider-card-topline {
+        align-items: center;
+        flex-direction: row;
+        margin-bottom: 7px;
+    }
+
+    .treatment-detail-provider-card-header {
+        margin-bottom: 6px;
+    }
+
+    .treatment-detail-provider-rating {
+        margin: 5px 0 7px;
+    }
+
+    .treatment-detail-provider-rating-total {
+        margin-top: -1px;
     }
 
     .treatment-detail-provider-map-header {
@@ -1577,5 +2134,74 @@
     .treatment-detail-provider-view-switch,
     .treatment-detail-provider-sort-switch {
         flex-direction: column;
+    }
+}
+
+/* Kompakte, zeilenweise gleich hohe Anbieter-Kacheln. */
+.treatment-detail-provider-card-grid {
+    align-items: stretch;
+}
+
+.treatment-detail-provider-card {
+    height: 100%;
+    padding: 10px 12px;
+    align-content: start;
+}
+
+.treatment-detail-provider-card-header {
+    margin-bottom: 2px;
+}
+
+.treatment-detail-provider-card-body {
+    align-self: end;
+    gap: 5px;
+}
+
+.treatment-detail-provider-rating {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    gap: 5px;
+    align-items: center;
+    margin: 5px 0 6px;
+}
+
+.treatment-detail-provider-rating-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+    min-height: 30px;
+    padding: 5px 6px;
+    box-sizing: border-box;
+}
+
+.treatment-detail-provider-rating-item strong {
+    display: inline;
+    margin: 0;
+    font-size: 0.82rem;
+}
+
+.treatment-detail-provider-rating-item span {
+    font-size: 0.6rem;
+}
+
+.treatment-detail-provider-rating-total {
+    grid-column: auto;
+    padding-left: 3px;
+    white-space: nowrap;
+}
+
+.treatment-detail-provider-card-distance {
+    margin: 0 0 6px;
+}
+
+@media (max-width: 760px) {
+    .treatment-detail-provider-rating {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .treatment-detail-provider-rating-total {
+        grid-column: 1 / -1;
+        min-height: 12px;
+        padding-left: 0;
     }
 }
