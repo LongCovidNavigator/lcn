@@ -73,8 +73,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }).addTo(map);
 
     userLocationIcon = L.icon({
-        iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+        iconUrl: window.LCNImages.urls["map-marker-red"],
+        shadowUrl: window.LCNImages.urls["map-marker-shadow"],
         iconSize: [25, 41],
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],

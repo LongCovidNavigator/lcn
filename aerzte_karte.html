@@ -15,6 +15,7 @@
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
     <link rel="stylesheet" href="styles/aerzte_karte.css?v=6">
+    <script src="scripts/image-registry.js?v=4"></script>
 </head>
 
 <script>
@@ -440,6 +441,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+	<script>window.LCNImages.configureLeaflet(window.L);</script>
 	<script src="scripts/aerzte_karte.js?v=10"></script>
 
     <div id="footer-placeholder"></div>
@@ -453,7 +455,7 @@
     </script>
 
     <script>
-        fetch("components/header.html")
+        fetch("components/header.html?v=2")
             .then(response => response.text())
             .then(data => {
                 document.getElementById("header-placeholder").innerHTML = data;

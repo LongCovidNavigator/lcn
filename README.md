@@ -53,6 +53,13 @@ Wenn die Logik der Registry selbst geändert wird, sollte zusätzlich die Versio
 
 Vorhandene Bilddateien werden nicht automatisch gelöscht. Dadurch können Entwürfe und alternative Versionen im Asset-Ordner verbleiben.
 
+Die Bilddateien sind unter `assets/images` nach Zweck gegliedert:
+
+- `brand`: Logos und Markenvarianten
+- `homepage`: Motive und Grafiken der Startseite
+- `icons`: eigenständige Icons und Symbolgrafiken
+- `drafts`: noch nicht fest zugeordnete Bildentwürfe
+
 ## Konfiguration und Geheimnisse
 
 Lokale Zugangsdaten gehören in eine ignorierte `.env`-Datei oder in die dafür vorgesehene lokale Serverkonfiguration. Sie dürfen nicht committed werden. Die `.gitignore` schließt unter anderem `.env`, Datenbankdumps, Backups, Caches und Logs aus.
