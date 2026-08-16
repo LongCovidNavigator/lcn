@@ -415,6 +415,7 @@ try {
 
     $sort = getStringParam('sort', 'name');
     $direction = strtolower(getStringParam('direction', 'asc'));
+    $limit = getIntParam('limit', 0, 0, 500);
 
     $allowedSortColumns = [
         'name' => 'results.behandlung',
@@ -1026,6 +1027,7 @@ try {
         {$baseSql}
         {$whereSql}
         ORDER BY {$orderColumn} {$orderDirection}, results.behandlung ASC
+        " . ($limit > 0 ? "LIMIT {$limit}" : "") . "
     ";
 
     $itemsStmt = $pdo->prepare($itemsSql);
@@ -1115,6 +1117,7 @@ try {
             'mapped_providers_only' => $mappedProvidersOnly,
             'sort' => $sort,
             'direction' => $direction,
+            'limit' => $limit,
             'include_map' => $includeMap,
             'lat' => $hasUserLocationForMap ? (float)$userLat : null,
             'lng' => $hasUserLocationForMap ? (float)$userLng : null,
