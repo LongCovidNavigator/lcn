@@ -5,6 +5,41 @@ require_once __DIR__ . '/_lcn_db.php';
 const LCN_VOTER_COOKIE = 'lcn_voter';
 const LCN_VOTER_COOKIE_LIFETIME = 31536000;
 
+function lcnRequireVotingRequest(): void
+{
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        header('Allow: POST');
+        lcnSendVoteJson(['ok' => false, 'error' => 'Method not allowed.'], 405);
+    }
+
+    $contentType = strtolower(trim(explode(';', (string)($_SERVER['CONTENT_TYPE'] ?? ''))[0]));
+
+    if ($contentType !== 'application/json') {
+        lcnSendVoteJson(['ok' => false, 'error' => 'Content-Type must be application/json.'], 415);
+    }
+
+    $host = strtolower((string)($_SERVER['HTTP_HOST'] ?? ''));
+
+    if ($host === '' || preg_match('/\A[a-z0-9.-]+(?::[0-9]{1,5})?\z/i', $host) !== 1) {
+        lcnSendVoteJson(['ok' => false, 'error' => 'Request origin could not be verified.'], 403);
+    }
+
+    $expectedOrigin = (lcnIsHttpsRequest() ? 'https://' : 'http://') . $host;
+    $origin = trim((string)($_SERVER['HTTP_ORIGIN'] ?? ''));
+    $referer = trim((string)($_SERVER['HTTP_REFERER'] ?? ''));
+    $candidate = $origin !== '' ? $origin : $referer;
+    $candidateParts = $candidate !== '' ? parse_url($candidate) : false;
+    $candidateOrigin = is_array($candidateParts)
+        && isset($candidateParts['scheme'], $candidateParts['host'])
+        ? strtolower($candidateParts['scheme']) . '://' . strtolower($candidateParts['host'])
+            . (isset($candidateParts['port']) ? ':' . (int)$candidateParts['port'] : '')
+        : '';
+
+    if (!hash_equals(strtolower($expectedOrigin), $candidateOrigin)) {
+        lcnSendVoteJson(['ok' => false, 'error' => 'Cross-origin voting is not allowed.'], 403);
+    }
+}
+
 function lcnIsHttpsRequest(): bool
 {
     return (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off')
@@ -133,7 +168,13 @@ function lcnSendVoteJson(array $payload, int $statusCode = 200): never
 
 function lcnReadJsonBody(): array
 {
-    $decoded = json_decode((string)file_get_contents('php://input'), true);
+    $rawBody = (string)file_get_contents('php://input');
+
+    if (strlen($rawBody) > 4096) {
+        lcnSendVoteJson(['ok' => false, 'error' => 'Request body is too large.'], 413);
+    }
+
+    $decoded = json_decode($rawBody, true);
 
     return is_array($decoded) ? $decoded : [];
 }

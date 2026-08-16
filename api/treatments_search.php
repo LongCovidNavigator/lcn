@@ -731,18 +731,14 @@ try {
                 FROM tbl_treatments_03 t
 
                 LEFT JOIN (
-                    SELECT
-                        TRIM(Behandlung) AS behandlung_key,
-                        SUM(COALESCE(pro, 0)) AS pro,
-                        SUM(COALESCE(neutral, 0)) AS neutral,
-                        SUM(COALESCE(contra, 0)) AS contra
-                    FROM lcn_votes
-                    WHERE Behandlung IS NOT NULL
-                      AND TRIM(Behandlung) <> ''
-                    GROUP BY TRIM(Behandlung)
-                ) lv
-                    ON LOWER(TRIM(t.behandlung)) COLLATE utf8mb4_unicode_ci
-                     = LOWER(lv.behandlung_key) COLLATE utf8mb4_unicode_ci
+                    SELECT treat_id,
+                           SUM(vote = 'pro') AS pro,
+                           SUM(vote = 'neutral') AS neutral,
+                           SUM(vote = 'contra') AS contra
+                    FROM treatment_votes
+                    WHERE review_status IN ('active', 'suspicious')
+                    GROUP BY treat_id
+                ) lv ON lv.treat_id = t.treat_id
 
                 LEFT JOIN (
                     SELECT

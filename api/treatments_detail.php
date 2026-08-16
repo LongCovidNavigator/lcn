@@ -99,18 +99,14 @@ function loadTreatmentBase(PDO $pdo, int $treatId) {
             FROM tbl_treatments_03 t
 
             LEFT JOIN (
-                SELECT
-                    TRIM(Behandlung) AS behandlung_key,
-                    SUM(COALESCE(pro, 0)) AS pro,
-                    SUM(COALESCE(neutral, 0)) AS neutral,
-                    SUM(COALESCE(contra, 0)) AS contra
-                FROM lcn_votes
-                WHERE Behandlung IS NOT NULL
-                  AND TRIM(Behandlung) <> ''
-                GROUP BY TRIM(Behandlung)
-            ) lv
-                ON LOWER(TRIM(t.behandlung)) COLLATE utf8mb4_unicode_ci
-                 = LOWER(lv.behandlung_key) COLLATE utf8mb4_unicode_ci
+                SELECT treat_id,
+                       SUM(vote = 'pro') AS pro,
+                       SUM(vote = 'neutral') AS neutral,
+                       SUM(vote = 'contra') AS contra
+                FROM treatment_votes
+                WHERE review_status IN ('active', 'suspicious')
+                GROUP BY treat_id
+            ) lv ON lv.treat_id = t.treat_id
 
             LEFT JOIN (
                 SELECT
@@ -258,8 +254,15 @@ function loadTreatmentProviders(PDO $pdo, int $treatId) {
             LEFT JOIN lcn_raw_doctor_votes rv
                 ON rv.dr_id = d.dr_id
 
-            LEFT JOIN tbl_drs_votes_03 wv
-                ON wv.dr_id = d.dr_id
+            LEFT JOIN (
+                SELECT dr_id,
+                       SUM(vote = 'pro') AS vote_improved,
+                       SUM(vote = 'neutral') AS vote_neutral,
+                       SUM(vote = 'contra') AS vote_worsened
+                FROM doctor_votes
+                WHERE review_status IN ('active', 'suspicious')
+                GROUP BY dr_id
+            ) wv ON wv.dr_id = d.dr_id
 
             WHERE c.treat_id = :treat_id
         ) AS calculated

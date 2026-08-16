@@ -1,11 +1,8 @@
 <?php
 
-require_once __DIR__ . '/_voting.php';
+require_once __DIR__ . '/_vote_abuse.php';
 
-if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-    header('Allow: POST');
-    lcnSendVoteJson(['ok' => false, 'error' => 'Method not allowed.'], 405);
-}
+lcnRequireVotingRequest();
 
 try {
     $input = lcnReadJsonBody();
@@ -27,6 +24,7 @@ try {
     }
 
     $voterKey = lcnVoterKey();
+    $security = lcnBeginVoteSecurity($pdo, 'doctor', (int)$drId, $vote, $voterKey);
     $aggregateColumns = [
         'pro' => 'vote_improved',
         'neutral' => 'vote_neutral',
@@ -81,6 +79,14 @@ try {
         $aggregate->execute([':dr_id' => $drId]);
     }
 
+    lcnCompleteVoteSecurity(
+        $pdo,
+        $security,
+        'doctor',
+        (int)$drId,
+        $vote,
+        $previousVote !== $vote
+    );
     $pdo->commit();
 
     lcnSendVoteJson([

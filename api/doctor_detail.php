@@ -263,8 +263,15 @@ try {
             LEFT JOIN lcn_raw_doctor_votes rv
                 ON d.dr_id = rv.dr_id
 
-            LEFT JOIN tbl_drs_votes_03 wv
-                ON d.dr_id = wv.dr_id
+            LEFT JOIN (
+                SELECT dr_id,
+                       SUM(vote = 'pro') AS vote_improved,
+                       SUM(vote = 'neutral') AS vote_neutral,
+                       SUM(vote = 'contra') AS vote_worsened
+                FROM doctor_votes
+                WHERE review_status IN ('active', 'suspicious')
+                GROUP BY dr_id
+            ) wv ON d.dr_id = wv.dr_id
 
             WHERE d.dr_id = :id
 
