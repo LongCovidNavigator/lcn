@@ -50,6 +50,116 @@ function groupTreatmentsByType($treatments) {
     return $grouped;
 }
 
+function buildTreatmentAnalysis($treatments) {
+    $frequentVotesThreshold = 100;
+    $treatmentCount = count($treatments);
+    $profileLevel = 'none';
+    $profileLabel = 'Kein Behandlungsprofil';
+
+    if ($treatmentCount >= 50) {
+        $profileLevel = 'exceptional';
+        $profileLabel = 'Außergewöhnliches Profil';
+    } elseif ($treatmentCount >= 20) {
+        $profileLevel = 'pronounced';
+        $profileLabel = 'Ausgeprägtes Profil';
+    } elseif ($treatmentCount >= 10) {
+        $profileLevel = 'extensive';
+        $profileLabel = 'Umfangreiches Profil';
+    } elseif ($treatmentCount >= 5) {
+        $profileLevel = 'expanded';
+        $profileLabel = 'Erweitertes Profil';
+    } elseif ($treatmentCount >= 1) {
+        $profileLevel = 'small';
+        $profileLabel = 'Kleines Profil';
+    }
+
+    $areas = [];
+    $highlyPositiveCount = 0;
+    $frequentlyRatedCount = 0;
+    $ratedTreatments = [];
+
+    foreach ($treatments as $treatment) {
+        $subcategory = trim((string)($treatment['unterkategorie'] ?? ''));
+        $type = trim((string)($treatment['typ'] ?? ''));
+        $areaName = $subcategory !== '' ? $subcategory : $type;
+
+        if ($areaName !== '') {
+            if (!isset($areas[$areaName])) {
+                $areas[$areaName] = [];
+            }
+            $areas[$areaName][(string)$treatment['treat_id']] = true;
+        }
+
+        $totalVotes = (int)($treatment['total_votes'] ?? 0);
+        if ($totalVotes <= 0) {
+            continue;
+        }
+
+        $positiveRatio = (int)($treatment['positive_ratio'] ?? 0);
+        if ($positiveRatio >= 70) {
+            $highlyPositiveCount++;
+        }
+        if ($totalVotes >= $frequentVotesThreshold) {
+            $frequentlyRatedCount++;
+        }
+
+        $ratedTreatments[] = [
+            'treat_id' => (int)$treatment['treat_id'],
+            'name' => (string)($treatment['behandlung'] ?? ''),
+            'positive_ratio' => $positiveRatio,
+            'total_votes' => $totalVotes,
+        ];
+    }
+
+    $specialties = [];
+    foreach ($areas as $name => $treatmentIds) {
+        $areaTreatmentCount = count($treatmentIds);
+        if ($areaTreatmentCount >= 5) {
+            $specialties[] = [
+                'name' => $name,
+                'treatment_count' => $areaTreatmentCount,
+            ];
+        }
+    }
+
+    usort($specialties, function ($a, $b) {
+        return $b['treatment_count'] <=> $a['treatment_count']
+            ?: strcasecmp($a['name'], $b['name']);
+    });
+
+    $mostRatedTreatments = $ratedTreatments;
+    usort($mostRatedTreatments, function ($a, $b) {
+        return $b['total_votes'] <=> $a['total_votes']
+            ?: $b['positive_ratio'] <=> $a['positive_ratio']
+            ?: strcasecmp($a['name'], $b['name']);
+    });
+
+    usort($ratedTreatments, function ($a, $b) {
+        return $b['positive_ratio'] <=> $a['positive_ratio']
+            ?: $b['total_votes'] <=> $a['total_votes']
+            ?: strcasecmp($a['name'], $b['name']);
+    });
+
+    return [
+        'profile' => [
+            'treatment_count' => $treatmentCount,
+            'level' => $profileLevel,
+            'label' => $profileLabel,
+        ],
+        'specialties' => $specialties,
+        'specialty_count' => count($specialties),
+        'versatile' => count($specialties) >= 3,
+        'ratings' => [
+            'highly_positive_count' => $highlyPositiveCount,
+            'positive_threshold' => 70,
+            'top_treatments' => array_slice($ratedTreatments, 0, 3),
+            'frequently_rated_count' => $frequentlyRatedCount,
+            'frequent_votes_threshold' => $frequentVotesThreshold,
+            'most_rated_treatments' => array_slice($mostRatedTreatments, 0, 3),
+        ],
+    ];
+}
+
 try {
     $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
@@ -336,6 +446,7 @@ try {
     unset($treatment);
 
     $groupedTreatments = groupTreatmentsByType($treatments);
+    $analysis = buildTreatmentAnalysis($treatments);
 
     sendJson([
         'ok' => true,
@@ -343,6 +454,7 @@ try {
         'terms' => $groupedTerms,
         'treatments' => $treatments,
         'treatments_grouped' => $groupedTreatments,
+        'analysis' => $analysis,
     ]);
 
 } catch (InvalidArgumentException $e) {

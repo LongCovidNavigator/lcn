@@ -1065,15 +1065,47 @@
 
 .doctor-detail-treatment-offer-summary {
     display: grid;
-    grid-template-columns: 1.25fr repeat(4, minmax(0, 1fr));
+    grid-template-columns: minmax(250px, 0.9fr) minmax(300px, 1.08fr) repeat(2, minmax(220px, 1fr));
     align-items: stretch;
-    min-height: 112px;
-    padding: 14px 16px;
+    min-height: 188px;
+    padding: 18px 20px;
     border: 1px solid #dbe5f1;
     border-radius: 11px;
     background: linear-gradient(110deg, #f8fbff 0%, #ffffff 58%, #fbfcff 100%);
     box-shadow: 0 3px 12px rgba(31, 50, 82, 0.05);
 }
+
+.doctor-detail-analysis-section {
+    min-width: 0;
+    padding: 6px 28px;
+    border-left: 1px solid #e1e8f2;
+}
+
+.doctor-detail-analysis-section:first-child { border-left: 0; }
+.doctor-detail-analysis-section small,
+.doctor-detail-analysis-section > span,
+.doctor-detail-analysis-profile-copy > span { display: block; color: #607493; font-size: 0.72rem; font-weight: 750; }
+.doctor-detail-analysis-section > strong,
+.doctor-detail-analysis-profile-copy > strong { display: block; margin: 6px 0 12px; color: #07326f; font-size: 1.08rem; line-height: 1.25; }
+.doctor-detail-analysis-section.is-profile { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 16px; align-items: start; padding-left: 8px; }
+.doctor-detail-analysis-profile-icon { display: inline-flex !important; align-items: center; justify-content: center; width: 54px; height: 54px; margin-top: 10px; border: 3px double #ffffff; border-radius: 50%; outline: 2px solid #073b82; background: #073b82; color: #ffffff !important; font-size: 1.25rem !important; box-shadow: 0 4px 12px rgba(7, 59, 130, 0.16); }
+.doctor-detail-analysis-profile-copy { padding-top: 10px; }
+.doctor-detail-analysis-profile-copy::after { display: block; width: 100%; height: 1px; margin-top: 28px; background: #dbe5f1; content: ""; }
+.doctor-detail-analysis-section.is-specialties { position: relative; display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 14px; padding-left: 28px; }
+.doctor-detail-analysis-section.is-specialties:not(.has-versatile) { display: block; }
+.doctor-detail-analysis-versatile-marker { display: inline-flex !important; align-items: flex-start; justify-content: center; width: 42px; height: 56px; padding-top: 8px; background: #0b927e; color: #ffffff !important; font-size: 1.15rem !important; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%); }
+.doctor-detail-analysis-specialties-copy > small { margin-top: 2px; }
+.doctor-detail-analysis-versatile { display: block; margin: 6px 0 12px; color: #087c69; font-size: 1.12rem; }
+.doctor-detail-analysis-specialty-list { display: grid; gap: 8px; }
+.doctor-detail-analysis-specialty-card { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; min-height: 48px; border: 1px solid #cce8e3; border-radius: 12px; background: linear-gradient(90deg, #f3fbf9, #ffffff); color: #07544c; }
+.doctor-detail-analysis-specialty-card strong { padding: 7px 12px 7px 4px; font-size: 0.72rem; line-height: 1.35; }
+.doctor-detail-analysis-specialty-icon { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; margin-left: -1px; border: 1px solid #bfe1db; border-radius: 50%; background: #edf9f6; color: #078b78; font-size: 1.15rem; font-weight: 900; }
+.doctor-detail-analysis-top-list { display: grid; gap: 4px; margin: 10px 0 0; padding-left: 20px; }
+.doctor-detail-analysis-top-list li { display: grid; grid-template-columns: minmax(0, 1fr) max-content max-content; gap: 7px; padding-left: 2px; color: #334c70; font-size: 0.72rem; }
+.doctor-detail-analysis-top-list li span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doctor-detail-analysis-top-list li strong { color: #087950; }
+.doctor-detail-analysis-top-list li small { color: #71829a; }
+.doctor-detail-analysis-top-list.is-most-rated li strong { color: #0759c7; }
 
 .doctor-detail-guided-section:has(.doctor-detail-treatment-panel) .doctor-detail-question-content {
     display: grid;
@@ -2062,6 +2094,14 @@
         gap: 0;
     }
 
+    .doctor-detail-analysis-section {
+        padding: 12px 2px;
+        border-top: 1px solid #dfe7f1;
+        border-left: 0;
+    }
+
+    .doctor-detail-analysis-section:first-child { border-top: 0; }
+
     .doctor-detail-treatment-overview-item,
     .doctor-detail-treatment-overview-item:nth-child(even),
     .doctor-detail-treatment-overview-item:nth-child(n + 4) {
@@ -2964,5 +3004,1197 @@
 
     .doctor-detail-profile-vote-buttons {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Dreispaltige Auswertungsaufteilung mit gleich gewichteten Bereichen */
+.doctor-detail-treatment-offer-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    padding: 24px;
+}
+
+.doctor-detail-analysis-identity-column {
+    display: grid;
+    align-content: start;
+    min-width: 0;
+    padding-right: 28px;
+    border-right: 1px solid #e1e8f2;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section {
+    border-left: 0;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile {
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    padding: 0 0 18px;
+    border-bottom: 1px solid #e7edf4;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-profile-icon {
+    width: 50px;
+    height: 50px;
+    margin-top: 2px;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-profile-copy {
+    padding-top: 0;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-profile-copy > strong {
+    margin-bottom: 12px;
+    font-size: 1.02rem;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties,
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties:not(.has-versatile) {
+    display: block;
+    padding: 18px 0 0;
+}
+
+.doctor-detail-analysis-versatile-heading {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 6px 0 10px;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-versatile-marker {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    margin: 0;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-versatile {
+    margin: 0;
+    font-size: 1.03rem;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-specialty-list {
+    width: 100%;
+    gap: 6px;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-specialty-card {
+    grid-template-columns: 22px minmax(0, 1fr);
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 42px;
+}
+
+.doctor-detail-analysis-section.is-ratings {
+    padding: 0 28px;
+}
+
+.doctor-detail-analysis-section.is-ratings:last-child {
+    padding-right: 6px;
+}
+
+.doctor-detail-analysis-section.is-ratings > strong {
+    max-width: 28ch;
+}
+
+@media (max-width: 1100px) {
+    .doctor-detail-treatment-offer-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .doctor-detail-analysis-identity-column {
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0 0 22px;
+        border-right: 0;
+        border-bottom: 1px solid #e1e8f2;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile {
+        padding: 0 24px 0 0;
+        border-right: 1px solid #e1e8f2;
+        border-bottom: 0;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties,
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties:not(.has-versatile) {
+        padding: 0 0 0 24px;
+    }
+
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3) {
+        padding: 20px 24px 0 0;
+        border-top: 0;
+        border-left: 0;
+    }
+
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        padding-right: 0;
+        padding-left: 24px;
+        border-left: 1px solid #e1e8f2;
+    }
+}
+
+@media (max-width: 760px) {
+    .doctor-detail-treatment-offer-summary {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+
+    .doctor-detail-analysis-identity-column {
+        grid-template-columns: 1fr;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile {
+        padding: 0 0 20px;
+        border-right: 0;
+        border-bottom: 1px solid #e1e8f2;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties,
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties:not(.has-versatile) {
+        padding: 20px 0 0;
+    }
+
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        padding: 20px 0;
+        border-top: 1px solid #e1e8f2;
+        border-left: 0;
+    }
+}
+
+.doctor-detail-analysis-section.is-ratings > .doctor-detail-analysis-rating-threshold {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    color: #526a94;
+    font-size: 0.86rem;
+    font-weight: 650;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.doctor-detail-analysis-section.is-ratings > .doctor-detail-analysis-top-list {
+    margin-top: 16px;
+}
+
+@media (max-width: 760px) {
+    .doctor-detail-analysis-section.is-ratings > .doctor-detail-analysis-rating-threshold {
+        white-space: normal;
+    }
+}
+
+/* Abschnitt 4: Mockup-Optik in bestehender Drittelaufteilung */
+.doctor-detail-treatment-offer-summary {
+    padding: 26px;
+    align-items: stretch;
+}
+
+.doctor-detail-analysis-profile-icon,
+.doctor-detail-analysis-versatile-marker,
+.doctor-detail-analysis-rating-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin: 0;
+    border: 0;
+    border-radius: 50%;
+    clip-path: none;
+    background: #eaf2ff;
+    color: #174898 !important;
+    box-shadow: none;
+}
+
+.doctor-detail-analysis-profile-icon svg,
+.doctor-detail-analysis-versatile-marker svg,
+.doctor-detail-analysis-rating-icon svg {
+    width: 31px;
+    height: 31px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.doctor-detail-analysis-section small,
+.doctor-detail-analysis-profile-copy > small,
+.doctor-detail-analysis-rating-copy > small {
+    display: block;
+    color: #526a94;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.045em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.doctor-detail-analysis-identity-column {
+    padding-right: 26px;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile {
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+    padding: 2px 0 24px;
+    border-bottom: 1px solid #dce5f0;
+}
+
+.doctor-detail-analysis-profile-copy > strong {
+    margin: 9px 0 13px;
+    font-size: 1.23rem;
+    line-height: 1.25;
+}
+
+.doctor-detail-analysis-profile-copy > span {
+    color: #526a94;
+    font-size: 0.88rem;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties,
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties:not(.has-versatile) {
+    display: block;
+    padding: 22px 0 0;
+}
+
+.doctor-detail-analysis-versatile-heading {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 16px;
+    align-items: center;
+    margin: 0 0 14px;
+}
+
+.doctor-detail-analysis-versatile-marker {
+    background: #e6f6f2;
+    color: #078d70 !important;
+}
+
+.doctor-detail-analysis-versatile-copy {
+    min-width: 0;
+}
+
+.doctor-detail-analysis-versatile {
+    display: block;
+    margin: 7px 0 0;
+    color: #078460;
+    font-size: 1.22rem;
+    line-height: 1.2;
+}
+
+.doctor-detail-analysis-specialty-list {
+    gap: 8px;
+    margin-left: 0;
+}
+
+.doctor-detail-analysis-specialty-card {
+    min-height: 48px;
+    border-color: #d7e2ed;
+    border-radius: 12px;
+}
+
+.doctor-detail-analysis-specialty-card strong {
+    font-size: 0.75rem;
+    line-height: 1.38;
+}
+
+.doctor-detail-analysis-section.is-ratings,
+.doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+.doctor-detail-analysis-section.is-ratings:last-child {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 16px;
+    align-content: start;
+    padding: 2px 26px;
+}
+
+.doctor-detail-analysis-rating-copy {
+    min-width: 0;
+}
+
+.doctor-detail-analysis-rating-copy > strong {
+    display: block;
+    margin: 9px 0 11px;
+    color: #052d6b;
+    font-size: 1.14rem;
+    line-height: 1.28;
+}
+
+.doctor-detail-analysis-rating-copy > span {
+    display: block;
+    color: #526a94;
+    font-size: 0.86rem;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.doctor-detail-analysis-top-list {
+    display: block;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.doctor-detail-analysis-top-list li {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    margin: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid #dce5f0;
+    font-size: 0.84rem;
+}
+
+.doctor-detail-analysis-top-list li:last-child {
+    border-bottom: 0;
+}
+
+.doctor-detail-analysis-rank {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    overflow: visible !important;
+    border: 1px solid #d8e2ef;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #f7faff, #eef3fa);
+    color: #0b347b;
+    font-size: 0.84rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.doctor-detail-analysis-entry-copy {
+    min-width: 0;
+}
+
+.doctor-detail-analysis-treatment-name {
+    color: #092f70;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.doctor-detail-analysis-treatment-meta {
+    margin-top: 4px;
+}
+
+.doctor-detail-analysis-treatment-meta strong,
+.doctor-detail-analysis-treatment-meta small {
+    font-size: 0.81rem;
+}
+
+@media (max-width: 1100px) {
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        padding: 20px 18px;
+    }
+}
+
+@media (max-width: 760px) {
+    .doctor-detail-treatment-offer-summary {
+        padding: 16px;
+    }
+
+    .doctor-detail-analysis-identity-column {
+        padding-right: 0;
+    }
+
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        grid-template-columns: 50px minmax(0, 1fr);
+        gap: 12px;
+        padding: 20px 0;
+    }
+
+    .doctor-detail-analysis-profile-icon,
+    .doctor-detail-analysis-versatile-marker,
+    .doctor-detail-analysis-rating-icon {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* =========================================================
+   Abschnitt 4: ruhige Mockup-Darstellung
+========================================================= */
+
+.doctor-detail-treatment-offer-summary {
+    min-height: 250px;
+    padding: 22px 20px;
+    background: linear-gradient(110deg, #fbfdff 0%, #ffffff 62%, #fcfdff 100%);
+    box-shadow: none;
+}
+
+.doctor-detail-analysis-section {
+    padding: 4px 24px;
+}
+
+.doctor-detail-analysis-section small,
+.doctor-detail-analysis-section > span,
+.doctor-detail-analysis-profile-copy > span {
+    font-size: 0.73rem;
+    line-height: 1.4;
+}
+
+.doctor-detail-analysis-section > strong,
+.doctor-detail-analysis-profile-copy > strong {
+    margin: 7px 0 15px;
+    font-size: 1.08rem;
+    line-height: 1.32;
+}
+
+.doctor-detail-analysis-section.is-profile {
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 16px;
+    padding-left: 2px;
+}
+
+.doctor-detail-analysis-profile-icon {
+    width: 58px;
+    height: 58px;
+    margin-top: 12px;
+    border: 0;
+    outline: 0;
+    background: #eaf2ff;
+    color: #0863d5 !important;
+    font-size: 1.35rem !important;
+    box-shadow: none;
+}
+
+.doctor-detail-analysis-profile-copy::after {
+    display: none;
+}
+
+.doctor-detail-analysis-section.is-specialties {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
+    padding-left: 28px;
+}
+
+.doctor-detail-analysis-versatile-marker {
+    align-items: center;
+    width: 38px;
+    height: 38px;
+    margin-top: 24px;
+    padding-top: 0;
+    border-radius: 50%;
+    clip-path: none;
+    font-size: 0.95rem !important;
+}
+
+.doctor-detail-analysis-versatile {
+    margin: 7px 0 14px;
+    font-size: 1.08rem;
+}
+
+.doctor-detail-analysis-specialty-list {
+    gap: 7px;
+}
+
+.doctor-detail-analysis-specialty-card {
+    grid-template-columns: 24px minmax(0, 1fr);
+    min-height: 46px;
+    border-color: #dce6eb;
+    background: #ffffff;
+}
+
+.doctor-detail-analysis-specialty-card strong {
+    padding: 8px 12px 8px 0;
+    color: #07326f;
+    font-size: 0.69rem;
+    line-height: 1.42;
+}
+
+.doctor-detail-analysis-specialty-icon {
+    width: 7px;
+    height: 7px;
+    margin-left: 12px;
+    border: 0;
+    background: #159a61;
+}
+
+.doctor-detail-analysis-top-list {
+    gap: 13px;
+    margin-top: 16px;
+    padding-left: 22px;
+}
+
+.doctor-detail-analysis-top-list li {
+    display: list-item;
+    padding-left: 4px;
+    color: #334c70;
+    font-size: 0.82rem;
+    line-height: 1.42;
+}
+
+.doctor-detail-analysis-treatment-name {
+    display: block;
+    min-width: 0;
+    overflow: visible;
+    color: #173a68;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.doctor-detail-analysis-treatment-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: baseline;
+    margin-top: 3px;
+}
+
+.doctor-detail-analysis-treatment-meta i {
+    color: #91a0b5;
+    font-style: normal;
+}
+
+.doctor-detail-analysis-treatment-meta strong,
+.doctor-detail-analysis-treatment-meta small {
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.doctor-detail-analysis-section.is-ratings > span {
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.doctor-detail-analysis-section.is-ratings[data-treatment-analysis-filter] {
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.doctor-detail-analysis-section.is-ratings[data-treatment-analysis-filter]:hover {
+    background: #f6f9fe;
+}
+
+.doctor-detail-analysis-section.is-ratings[data-treatment-analysis-filter]:focus-visible {
+    outline: 3px solid rgba(7, 89, 199, 0.2);
+    outline-offset: -3px;
+}
+
+.doctor-detail-analysis-section.is-ratings.is-filter-active {
+    background: #f1f7ff;
+    box-shadow: inset 0 0 0 1px #bad3f1;
+}
+
+.doctor-detail-analysis-treatment-meta strong {
+    color: #087950;
+}
+
+.doctor-detail-analysis-top-list.is-most-rated .doctor-detail-analysis-treatment-meta strong {
+    color: #0759c7;
+}
+
+@media (max-width: 1100px) {
+    .doctor-detail-treatment-offer-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        min-height: 0;
+    }
+
+    .doctor-detail-analysis-section:nth-child(odd) {
+        border-left: 0;
+    }
+
+    .doctor-detail-analysis-section:nth-child(n + 3) {
+        padding-top: 20px;
+        border-top: 1px solid #e1e8f2;
+    }
+
+}
+
+@media (max-width: 760px) {
+    .doctor-detail-treatment-offer-summary {
+        grid-template-columns: 1fr;
+        padding: 14px 16px;
+    }
+
+    .doctor-detail-analysis-section,
+    .doctor-detail-analysis-section:nth-child(odd),
+    .doctor-detail-analysis-section:nth-child(n + 3) {
+        padding: 16px 2px;
+        border-top: 1px solid #e1e8f2;
+        border-left: 0;
+    }
+
+    .doctor-detail-analysis-section:first-child {
+        border-top: 0;
+    }
+
+}
+
+/* Finale Mockup-Abstimmung; bewusst nach den responsiven Bestandsregeln. */
+.doctor-detail-treatment-offer-summary { padding: 26px; }
+.doctor-detail-analysis-profile-icon,
+.doctor-detail-analysis-versatile-marker,
+.doctor-detail-analysis-rating-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px; margin: 0; border: 0; border-radius: 50%;
+    clip-path: none; background: #eaf2ff; color: #174898 !important; box-shadow: none;
+}
+.doctor-detail-analysis-versatile-marker { background: #e6f6f2; color: #078d70 !important; }
+.doctor-detail-analysis-profile-icon svg,
+.doctor-detail-analysis-versatile-marker svg,
+.doctor-detail-analysis-rating-icon svg {
+    width: 31px; height: 31px; fill: none; stroke: currentColor; stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round;
+}
+.doctor-detail-analysis-identity-column { padding-right: 26px; }
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile {
+    grid-template-columns: 62px minmax(0, 1fr); gap: 16px; align-items: start;
+    padding: 2px 0 24px; border-bottom: 1px solid #dce5f0;
+}
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties,
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties:not(.has-versatile) {
+    display: block; padding: 22px 0 0;
+}
+.doctor-detail-analysis-versatile-heading {
+    display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 16px;
+    align-items: center; margin: 0 0 14px;
+}
+.doctor-detail-analysis-versatile { display: block; margin: 7px 0 0; font-size: 1.22rem; }
+.doctor-detail-analysis-section.is-ratings,
+.doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+.doctor-detail-analysis-section.is-ratings:last-child {
+    display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 16px;
+    align-content: start; padding: 2px 26px;
+}
+.doctor-detail-analysis-rating-copy > small,
+.doctor-detail-analysis-profile-copy > small,
+.doctor-detail-analysis-versatile-copy > small {
+    display: block; font-size: .76rem; font-weight: 800; letter-spacing: .045em;
+    line-height: 1.3; text-transform: uppercase;
+}
+.doctor-detail-analysis-rating-copy > strong {
+    display: block; margin: 9px 0 11px; color: #052d6b; font-size: 1.14rem; line-height: 1.28;
+}
+.doctor-detail-analysis-rating-copy > span {
+    display: block; color: #526a94; font-size: .86rem; font-weight: 650; line-height: 1.4;
+}
+.doctor-detail-analysis-top-list { display: block; margin: 14px 0 0; padding: 0; list-style: none; }
+.doctor-detail-analysis-top-list li {
+    display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; align-items: start;
+    margin: 0; padding: 10px 0; border-bottom: 1px solid #dce5f0; font-size: .84rem;
+}
+.doctor-detail-analysis-top-list li:last-child { border-bottom: 0; }
+.doctor-detail-analysis-rank {
+    display: inline-flex !important; align-items: center; justify-content: center;
+    width: 28px; height: 28px; overflow: visible !important; border: 1px solid #d8e2ef;
+    border-radius: 8px; background: linear-gradient(180deg, #f7faff, #eef3fa);
+    color: #0b347b; font-size: .84rem; font-weight: 800; line-height: 1;
+}
+.doctor-detail-analysis-treatment-name {
+    display: block; overflow: visible; color: #092f70; font-size: .85rem;
+    font-weight: 700; line-height: 1.35; text-overflow: clip; white-space: normal;
+}
+.doctor-detail-analysis-top-list li .doctor-detail-analysis-treatment-name {
+    overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere;
+}
+.doctor-detail-analysis-top-list li .doctor-detail-analysis-treatment-meta small {
+    font-weight: 600; letter-spacing: normal; text-transform: none;
+}
+@media (max-width: 760px) {
+    .doctor-detail-treatment-offer-summary { padding: 16px; }
+    .doctor-detail-analysis-identity-column { padding-right: 0; }
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        grid-template-columns: 50px minmax(0, 1fr); gap: 12px; padding: 20px 0;
+    }
+    .doctor-detail-analysis-profile-icon,
+    .doctor-detail-analysis-versatile-marker,
+    .doctor-detail-analysis-rating-icon { width: 48px; height: 48px; }
+}
+
+/* Präzise Mockup-Geometrie: Kopfzeile eingerückt, Rangliste volle Spaltenbreite. */
+.doctor-detail-treatment-offer-summary {
+    min-height: 0;
+    padding: 24px;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-profile-icon,
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-versatile-marker,
+.doctor-detail-analysis-section.is-ratings .doctor-detail-analysis-rating-icon {
+    box-sizing: border-box;
+    flex: 0 0 60px;
+    width: 60px;
+    height: 60px;
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+}
+
+.doctor-detail-analysis-profile-icon svg,
+.doctor-detail-analysis-versatile-marker svg,
+.doctor-detail-analysis-rating-icon svg {
+    display: block;
+    width: 32px;
+    height: 32px;
+    margin: auto;
+}
+
+.doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile,
+.doctor-detail-analysis-versatile-heading,
+.doctor-detail-analysis-rating-heading {
+    grid-template-columns: 60px minmax(0, 1fr);
+    gap: 18px;
+}
+
+.doctor-detail-analysis-rating-heading {
+    display: grid;
+    align-items: start;
+}
+
+.doctor-detail-analysis-section.is-ratings,
+.doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+.doctor-detail-analysis-section.is-ratings:last-child {
+    display: block;
+    padding: 2px 24px 8px;
+}
+
+.doctor-detail-analysis-section.is-ratings .doctor-detail-analysis-top-list {
+    width: 100%;
+    margin: 18px 0 0;
+}
+
+.doctor-detail-analysis-section.is-ratings .doctor-detail-analysis-top-list li {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 12px;
+    min-height: 48px;
+    padding: 11px 2px;
+}
+
+.doctor-detail-analysis-rating-copy > strong {
+    margin-top: 8px;
+    margin-bottom: 9px;
+}
+
+.doctor-detail-analysis-specialty-card strong {
+    padding-block: 10px;
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+.doctor-detail-analysis-specialty-card {
+    min-height: 52px;
+}
+
+@media (max-width: 1100px) {
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        padding: 20px 18px;
+    }
+}
+
+@media (max-width: 760px) {
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-profile-icon,
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-versatile-marker,
+    .doctor-detail-analysis-section.is-ratings .doctor-detail-analysis-rating-icon {
+        flex-basis: 52px;
+        width: 52px;
+        height: 52px;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile,
+    .doctor-detail-analysis-versatile-heading,
+    .doctor-detail-analysis-rating-heading {
+        grid-template-columns: 52px minmax(0, 1fr);
+        gap: 14px;
+    }
+}
+
+.doctor-detail-analysis-rating-copy > .doctor-detail-analysis-rating-threshold {
+    display: block;
+    margin-top: 3px;
+    color: #526a94;
+    font-size: 0.73rem;
+    font-weight: 650;
+    letter-spacing: normal;
+    line-height: 1.35;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.doctor-detail-analysis-section.is-ratings > .doctor-detail-analysis-top-list {
+    margin-top: 13px;
+}
+
+@media (max-width: 760px) {
+    .doctor-detail-analysis-rating-copy > .doctor-detail-analysis-rating-threshold {
+        white-space: normal;
+    }
+}
+
+@media (min-width: 761px) {
+    .doctor-detail-treatment-offer-summary {
+        padding-bottom: 0;
+    }
+}
+
+@media (min-width: 1101px) {
+    .doctor-detail-analysis-identity-column,
+    .doctor-detail-analysis-section.is-ratings {
+        position: relative;
+    }
+
+    .doctor-detail-analysis-identity-column {
+        border-right: 0;
+    }
+
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        border-left: 0;
+    }
+
+    .doctor-detail-analysis-identity-column::after,
+    .doctor-detail-analysis-section.is-ratings::before {
+        position: absolute;
+        top: 0;
+        bottom: 24px;
+        width: 1px;
+        background: #e1e8f2;
+        content: "";
+        pointer-events: none;
+    }
+
+    .doctor-detail-analysis-identity-column::after {
+        right: 0;
+    }
+
+    .doctor-detail-analysis-section.is-ratings::before {
+        left: 0;
+    }
+
+    .doctor-detail-analysis-identity-column::after {
+        display: none;
+    }
+}
+
+/* Tablet: Stammdaten oben, beide Auswertungen gleichberechtigt darunter. */
+@media (min-width: 761px) and (max-width: 1100px) {
+    .doctor-detail-treatment-offer-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 22px;
+    }
+
+    .doctor-detail-analysis-identity-column {
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0 0 22px;
+        border-right: 0;
+        border-bottom: 1px solid #e1e8f2;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile {
+        padding: 0 22px 0 0;
+        border-right: 1px solid #e1e8f2;
+        border-bottom: 0;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties,
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties:not(.has-versatile) {
+        padding: 0 0 0 22px;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-profile-icon,
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-versatile-marker,
+    .doctor-detail-analysis-section.is-ratings .doctor-detail-analysis-rating-icon {
+        flex-basis: 54px;
+        width: 54px;
+        height: 54px;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile,
+    .doctor-detail-analysis-versatile-heading,
+    .doctor-detail-analysis-rating-heading {
+        grid-template-columns: 54px minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3) {
+        padding: 22px 22px 0 0;
+        border-top: 0;
+        border-left: 0;
+    }
+
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        padding: 22px 0 0 22px;
+        border-top: 0;
+        border-left: 1px solid #e1e8f2;
+    }
+}
+
+/* Smartphone: vier ruhige, vollbreite Inhaltsgruppen untereinander. */
+@media (max-width: 760px) {
+    .doctor-detail-treatment-offer-summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        padding: 14px;
+    }
+
+    .doctor-detail-analysis-identity-column {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        padding: 0;
+        border: 0;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile {
+        padding: 0 0 17px;
+        border-right: 0;
+        border-bottom: 1px solid #e1e8f2;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties,
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-specialties:not(.has-versatile) {
+        padding: 17px 0;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-profile-icon,
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-versatile-marker,
+    .doctor-detail-analysis-section.is-ratings .doctor-detail-analysis-rating-icon {
+        flex-basis: 46px;
+        width: 46px;
+        height: 46px;
+    }
+
+    .doctor-detail-analysis-profile-icon svg,
+    .doctor-detail-analysis-versatile-marker svg,
+    .doctor-detail-analysis-rating-icon svg {
+        width: 25px;
+        height: 25px;
+    }
+
+    .doctor-detail-analysis-identity-column .doctor-detail-analysis-section.is-profile,
+    .doctor-detail-analysis-versatile-heading,
+    .doctor-detail-analysis-rating-heading {
+        grid-template-columns: 46px minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .doctor-detail-analysis-section small,
+    .doctor-detail-analysis-profile-copy > small,
+    .doctor-detail-analysis-versatile-copy > small,
+    .doctor-detail-analysis-rating-copy > small {
+        font-size: 0.66rem;
+        letter-spacing: 0.025em;
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+
+    .doctor-detail-analysis-profile-copy > strong,
+    .doctor-detail-analysis-versatile,
+    .doctor-detail-analysis-rating-copy > strong {
+        font-size: 1rem;
+        line-height: 1.28;
+    }
+
+    .doctor-detail-analysis-profile-copy > span,
+    .doctor-detail-analysis-rating-copy > .doctor-detail-analysis-rating-threshold {
+        font-size: 0.7rem;
+    }
+
+    .doctor-detail-analysis-specialty-card {
+        min-height: 46px;
+    }
+
+    .doctor-detail-analysis-specialty-card strong {
+        padding-block: 8px;
+        font-size: 0.76rem;
+    }
+
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        display: block;
+        padding: 18px 0 5px;
+        border-top: 1px solid #e1e8f2;
+        border-left: 0;
+        border-radius: 0;
+    }
+
+    .doctor-detail-analysis-section.is-ratings .doctor-detail-analysis-top-list {
+        width: 100%;
+        margin-top: 12px;
+    }
+
+    .doctor-detail-analysis-section.is-ratings .doctor-detail-analysis-top-list li {
+        grid-template-columns: 30px minmax(0, 1fr);
+        gap: 10px;
+        min-height: 0;
+        padding: 10px 2px;
+    }
+
+    .doctor-detail-analysis-treatment-name {
+        font-size: 0.8rem;
+    }
+
+    .doctor-detail-analysis-treatment-meta strong,
+    .doctor-detail-analysis-treatment-meta small {
+        font-size: 0.74rem;
+    }
+}
+
+@media (max-width: 430px) {
+    .doctor-detail-treatment-controls.is-categories-only .doctor-detail-treatment-control-card-view {
+        width: 100%;
+        justify-self: stretch;
+    }
+
+    .doctor-detail-treatment-control-card-view .doctor-detail-treatment-view-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        width: 100%;
+    }
+
+    .doctor-detail-treatment-control-card-view .doctor-detail-treatment-view-button {
+        width: 100%;
+        min-width: 0;
+        padding-inline: 5px;
+    }
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+    .doctor-detail-fit-grid {
+        grid-template-columns: minmax(0, 1.9fr) minmax(170px, 0.9fr);
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        align-items: stretch;
+    }
+
+    .doctor-detail-rating-card {
+        display: flex;
+        grid-column: 1;
+        grid-row: 1 / 3;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .doctor-detail-specialties-card {
+        grid-column: 2;
+        grid-row: 1;
+        min-width: 0;
+    }
+
+    .doctor-detail-care-card {
+        grid-column: 2;
+        grid-row: 2;
+        min-width: 0;
+    }
+
+    .doctor-detail-treatment-list.is-category-view {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .doctor-detail-treatment-category-overview-card,
+    .doctor-detail-treatment-category-overview-card.is-featured,
+    .doctor-detail-treatment-category-overview-card.is-medium,
+    .doctor-detail-treatment-category-overview-card.is-compact {
+        grid-column: auto;
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: 50px minmax(0, 1fr);
+        padding: 13px 14px;
+    }
+
+    .doctor-detail-treatment-category-overview-card.is-featured {
+        min-height: 116px;
+    }
+
+    .doctor-detail-treatment-category-overview-card.is-medium {
+        min-height: 106px;
+    }
+
+    .doctor-detail-treatment-category-overview-card.is-compact {
+        min-height: 96px;
+    }
+
+    .doctor-detail-feature-columns {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        align-items: start;
+    }
+
+    .doctor-detail-feature-group.is-patient-experience {
+        grid-column: auto;
+    }
+
+    .doctor-detail-feature-group.is-patient-experience .doctor-detail-feature-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 760px) {
+    .doctor-detail-treatment-offer-summary {
+        gap: 10px;
+        padding: 0;
+        overflow: visible;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .doctor-detail-analysis-identity-column,
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        box-sizing: border-box;
+        width: 100%;
+        border: 1px solid #dbe5f1;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 2px 7px rgba(0, 32, 80, 0.035);
+    }
+
+    .doctor-detail-analysis-identity-column {
+        padding: 14px;
+    }
+
+    .doctor-detail-analysis-section.is-ratings,
+    .doctor-detail-analysis-section.is-ratings:nth-child(n + 3),
+    .doctor-detail-analysis-section.is-ratings:last-child {
+        position: relative;
+        padding: 14px 42px 14px 14px;
+    }
+
+    .doctor-detail-analysis-section.is-ratings .doctor-detail-analysis-top-list {
+        display: none;
+    }
+
+    .doctor-detail-analysis-section.is-ratings::after {
+        position: absolute;
+        top: 50%;
+        right: 15px;
+        color: #0759c7;
+        font-size: 1.25rem;
+        font-weight: 800;
+        line-height: 1;
+        content: "›";
+        transform: translateY(-50%);
+    }
+
+    .doctor-detail-analysis-section.is-ratings[data-treatment-analysis-filter]:hover,
+    .doctor-detail-analysis-section.is-ratings.is-filter-active {
+        background: #f6f9fe;
     }
 }

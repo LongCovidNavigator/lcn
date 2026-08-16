@@ -7,6 +7,7 @@ let currentDoctorTerms = {
 };
 
 let currentDoctorTreatmentsGrouped = {};
+let currentDoctorAnalysis = null;
 let treatmentSpectrumExpanded = false;
 const treatmentSpectrumBatchSize = 30;
 let treatmentSpectrumVisibleCount = 6;
@@ -21,8 +22,10 @@ let treatmentSortMode = "name_asc";
 let treatmentOnlyRated = false;
 let treatmentViewMode = "categories";
 let treatmentPositiveMin = 0;
+let treatmentVotesMin = 0;
 let treatmentNegativeMax = 100;
 let treatmentCategoryDropdownOpen = false;
+let treatmentAnalysisFilter = null;
 
 let currentTreatmentCategoryOptions = [];
 let doctorDetailMap = null;
@@ -33,6 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
     setupDoctorDetailVoteButtons();
     setupTreatmentToggle();
     setupTreatmentControlEvents();
+    setupTreatmentAnalysisFilters();
     setupDoctorDetailLocationControl();
 });
 
@@ -55,6 +59,7 @@ async function loadDoctorDetail() {
         currentDoctorDetail = data.item || {};
         currentDoctorTerms = normalizeTermsObject(data.terms || {});
         currentDoctorTreatmentsGrouped = data.treatments_grouped || {};
+        currentDoctorAnalysis = data.analysis || null;
 
         resetTreatmentControlsState();
         renderDoctorDetail(currentDoctorDetail, currentDoctorTerms, currentDoctorTreatmentsGrouped);
@@ -78,9 +83,62 @@ function resetTreatmentControlsState() {
     treatmentOnlyRated = false;
     treatmentViewMode = "categories";
     treatmentPositiveMin = 0;
+    treatmentVotesMin = 0;
     treatmentNegativeMax = 100;
     treatmentCategoryDropdownOpen = false;
+    treatmentAnalysisFilter = null;
     currentTreatmentCategoryOptions = [];
+}
+
+function setupTreatmentAnalysisFilters() {
+    const summary = document.getElementById("doctor-detail-treatment-offer-summary");
+
+    if (!summary) return;
+
+    const activateFilter = function (target) {
+        const filterType = target.getAttribute("data-treatment-analysis-filter");
+        const threshold = Number(target.getAttribute("data-treatment-analysis-threshold") || 0);
+
+        treatmentAnalysisFilter = filterType;
+        treatmentViewMode = "table";
+        treatmentCategorySelectionMode = "all";
+        selectedTreatmentCategorySlugs = new Set();
+        treatmentSubcategoryFilter = null;
+        treatmentCategoryDrilldownLabel = "";
+        treatmentSearchQuery = "";
+        treatmentOnlyRated = true;
+        treatmentNegativeMax = 100;
+        treatmentSpectrumExpanded = false;
+
+        if (filterType === "positive") {
+            treatmentPositiveMin = threshold;
+            treatmentVotesMin = 0;
+            treatmentSortMode = "positive_desc";
+        } else if (filterType === "frequent") {
+            treatmentPositiveMin = 0;
+            treatmentVotesMin = threshold;
+            treatmentSortMode = "votes_desc";
+        }
+
+        renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+        const scrollTarget = window.matchMedia("(max-width: 760px)").matches
+            ? document.getElementById("doctor-detail-treatments")
+            : document.querySelector(".doctor-detail-treatment-panel");
+        scrollTarget?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+    summary.addEventListener("click", function (event) {
+        const target = event.target.closest("[data-treatment-analysis-filter]");
+        if (target) activateFilter(target);
+    });
+
+    summary.addEventListener("keydown", function (event) {
+        const target = event.target.closest("[data-treatment-analysis-filter]");
+        if (target && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            activateFilter(target);
+        }
+    });
 }
 
 function setupDoctorDetailVoteButtons() {
@@ -1233,7 +1291,7 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
     listElement.classList.toggle("is-category-view", treatmentViewMode === "categories");
 
     const groups = getVisibleTreatmentGroups(treatmentsGrouped);
-    renderTreatmentOfferSummary(groups);
+    renderTreatmentOfferSummary(currentDoctorAnalysis);
 
     if (groups.length === 0) {
         currentTreatmentCategoryOptions = [];
@@ -1277,6 +1335,7 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
         treatmentOnlyRated ||
         treatmentCategorySelectionMode === "custom" ||
         treatmentPositiveMin > 0 ||
+        treatmentVotesMin > 0 ||
         treatmentNegativeMax < 100;
 
     if (summaryElement) {
@@ -1507,6 +1566,10 @@ function getFilteredAndSortedTreatmentEntries(entries) {
             }
 
             if (stats.positiveRatio < treatmentPositiveMin) {
+                return false;
+            }
+
+            if (stats.totalVotes < treatmentVotesMin) {
                 return false;
             }
 
@@ -2007,121 +2070,88 @@ function buildTreatmentCategoryOverviewHtml(groups, visibleEntries) {
         .join("");
 }
 
-function renderTreatmentOfferSummary(groups) {
+function renderTreatmentOfferSummary(analysis) {
     const summary = document.getElementById("doctor-detail-treatment-offer-summary");
 
     if (!summary) {
         return;
     }
 
-    const entries = flattenTreatmentGroups(groups || []);
-    const totalTreatments = entries.length;
-    const categoryCount = (groups || []).length;
-    const subcategoryCount = new Set(entries
-        .map(function (entry) {
-            const subcategory = String(entry.treatment?.unterkategorie || "").trim();
-            return subcategory ? `${entry.categorySlug}::${subcategory}` : "";
-        })
-        .filter(Boolean)).size;
-    const ratedStats = entries
-        .map(function (entry) {
-            return getTreatmentVoteStats(entry.treatment);
-        })
-        .filter(function (stats) {
-            return stats.totalVotes > 0;
-        });
-    const totalVotes = ratedStats.reduce(function (sum, stats) {
-        return sum + stats.totalVotes;
-    }, 0);
-    const positiveVotes = ratedStats.reduce(function (sum, stats) {
-        return sum + stats.pro;
-    }, 0);
-    const neutralVotes = ratedStats.reduce(function (sum, stats) {
-        return sum + stats.neutral;
-    }, 0);
-    const negativeVotes = ratedStats.reduce(function (sum, stats) {
-        return sum + stats.contra;
-    }, 0);
-    const averageRating = totalVotes > 0
-        ? ((positiveVotes * 5 + neutralVotes * 3 + negativeVotes) / totalVotes).toFixed(1).replace(".", ",")
-        : null;
-    const roundedRating = averageRating === null ? 0 : Math.round(Number(averageRating.replace(",", ".")));
-    const ratingStars = `${"★".repeat(roundedRating)}${"☆".repeat(5 - roundedRating)}`;
-    const leadingCategories = (groups || [])
-        .map(function (group) {
-            return {
-                name: group.type,
-                count: group.treatments.length
-            };
-        })
-        .sort(function (a, b) {
-            return b.count - a.count || a.name.localeCompare(b.name, "de");
-        })
-        .slice(0, 2);
-
-    let status = "Basisangebot";
-    let statusHint = "Einordnung nach Umfang und Vielfalt des Angebots";
-
-    if (totalTreatments >= 100 && categoryCount >= 8) {
-        status = "Koryphäe";
-    } else if (totalTreatments >= 50 && categoryCount >= 6) {
-        status = "Sehr breites Angebot";
-    } else if (totalTreatments >= 20 && categoryCount >= 4) {
-        status = "Breites Angebot";
+    if (!analysis || !analysis.profile || !analysis.ratings) {
+        summary.innerHTML = `<span class="doctor-detail-muted">Keine Profilanalyse verfügbar.</span>`;
+        return;
     }
 
-    const firstCategory = leadingCategories[0] || { name: "Keine Kategorie", count: 0 };
-    const secondCategory = leadingCategories[1] || { name: "Keine weitere Kategorie", count: 0 };
+    const profile = analysis.profile;
+    const specialties = Array.isArray(analysis.specialties) ? analysis.specialties.slice(0, 2) : [];
+    const topTreatments = Array.isArray(analysis.ratings.top_treatments) ? analysis.ratings.top_treatments : [];
+    const mostRatedTreatments = Array.isArray(analysis.ratings.most_rated_treatments) ? analysis.ratings.most_rated_treatments : [];
+    const specialtyCards = specialties.map(function (specialty) {
+        return `
+            <div class="doctor-detail-analysis-specialty-card">
+                <span class="doctor-detail-analysis-specialty-icon" aria-hidden="true"></span>
+                <strong>Spezialgebiet: ${escapeHtml(specialty.name)} (${specialty.treatment_count})</strong>
+            </div>
+        `;
+    }).join("");
+    const topTreatmentHtml = topTreatments.length > 0
+        ? `<ol class="doctor-detail-analysis-top-list">${topTreatments.map(function (treatment, index) {
+            return `<li><span class="doctor-detail-analysis-rank" aria-hidden="true">${index + 1}</span><div class="doctor-detail-analysis-entry-copy"><span class="doctor-detail-analysis-treatment-name">${escapeHtml(treatment.name)}</span><span class="doctor-detail-analysis-treatment-meta"><strong>${treatment.positive_ratio} % positiv</strong><i aria-hidden="true">·</i><small>n=${treatment.total_votes}</small></span></div></li>`;
+        }).join("")}</ol>`
+        : `<span class="doctor-detail-muted">Noch keine bewerteten Behandlungen.</span>`;
+    const mostRatedTreatmentHtml = mostRatedTreatments.length > 0
+        ? `<ol class="doctor-detail-analysis-top-list is-most-rated">${mostRatedTreatments.map(function (treatment, index) {
+            return `<li><span class="doctor-detail-analysis-rank" aria-hidden="true">${index + 1}</span><div class="doctor-detail-analysis-entry-copy"><span class="doctor-detail-analysis-treatment-name">${escapeHtml(treatment.name)}</span><span class="doctor-detail-analysis-treatment-meta"><strong>${treatment.total_votes} Bewertungen</strong><i aria-hidden="true">·</i><small>${treatment.positive_ratio} % positiv</small></span></div></li>`;
+        }).join("")}</ol>`
+        : `<span class="doctor-detail-muted">Noch keine bewerteten Behandlungen.</span>`;
 
-    summary.title = statusHint;
+    summary.removeAttribute("title");
     summary.innerHTML = `
-        <div class="doctor-detail-treatment-overview-item is-overview">
-            <span class="doctor-detail-treatment-overview-icon" aria-hidden="true">♡</span>
-            <div class="doctor-detail-treatment-overview-copy">
-                <small>Behandlungen im Überblick</small>
-                <strong>${categoryCount} Kategorien</strong>
-                <span>${totalTreatments} Behandlungen insgesamt</span>
-                ${subcategoryCount > 0 ? `<span>${subcategoryCount} Unterkategorien</span>` : ""}
-                <em>${escapeHtml(status)}</em>
+        <div class="doctor-detail-analysis-identity-column">
+            <div class="doctor-detail-analysis-section is-profile">
+                <span class="doctor-detail-analysis-profile-icon" aria-hidden="true">${getTreatmentAnalysisIcon("profile")}</span>
+                <div class="doctor-detail-analysis-profile-copy">
+                    <small>Dokumentiertes LCN-Profil</small>
+                    <strong>${escapeHtml(profile.label)}</strong>
+                    <span>${profile.treatment_count} ${profile.treatment_count === 1 ? "Behandlung" : "Behandlungen"}</span>
+                </div>
+            </div>
+            <div class="doctor-detail-analysis-section is-specialties ${analysis.versatile ? "has-versatile" : ""}">
+                <div class="doctor-detail-analysis-versatile-heading">
+                    <span class="doctor-detail-analysis-versatile-marker" aria-hidden="true">${getTreatmentAnalysisIcon("specialties")}</span>
+                    <div class="doctor-detail-analysis-versatile-copy"><small>Spezialgebiete</small>${analysis.versatile ? `<strong class="doctor-detail-analysis-versatile">Vielseitig</strong>` : ""}</div>
+                </div>
+                <div class="doctor-detail-analysis-specialty-list">
+                    ${specialtyCards || `<span class="doctor-detail-muted">Keine LCN-Spezialgebiete ausgewiesen.</span>`}
+                </div>
             </div>
         </div>
-
-        <div class="doctor-detail-treatment-overview-item">
-            <span class="doctor-detail-treatment-overview-icon is-blue" aria-hidden="true">${getTreatmentCategoryIcon(firstCategory.name)}</span>
-            <div class="doctor-detail-treatment-overview-copy">
-                <strong>${firstCategory.count}</strong>
-                <b>${escapeHtml(firstCategory.name)}</b>
-                <span>häufigste Kategorie</span>
+        <div class="doctor-detail-analysis-section is-ratings is-positive-ratings ${treatmentAnalysisFilter === "positive" ? "is-filter-active" : ""}" role="button" tabindex="0" data-treatment-analysis-filter="positive" data-treatment-analysis-threshold="${analysis.ratings.positive_threshold}" aria-label="Besonders positiv bewertete Behandlungen in der Tabelle anzeigen">
+            <div class="doctor-detail-analysis-rating-heading">
+                <span class="doctor-detail-analysis-rating-icon" aria-hidden="true">${getTreatmentAnalysisIcon("positive")}</span>
+                <div class="doctor-detail-analysis-rating-copy"><small>Behandlungserfahrungen</small><strong>${analysis.ratings.highly_positive_count} besonders positiv bewertete Behandlungen</strong><span class="doctor-detail-analysis-rating-threshold">(Mindestens ${analysis.ratings.positive_threshold} % positive Erfahrungen)</span></div>
             </div>
+            ${topTreatmentHtml}
         </div>
-
-        <div class="doctor-detail-treatment-overview-item">
-            <span class="doctor-detail-treatment-overview-icon is-green" aria-hidden="true">${getTreatmentCategoryIcon(secondCategory.name)}</span>
-            <div class="doctor-detail-treatment-overview-copy">
-                <strong>${secondCategory.count}</strong>
-                <b>${escapeHtml(secondCategory.name)}</b>
-                <span>zweithäufigste Kategorie</span>
+        <div class="doctor-detail-analysis-section is-ratings is-frequent-ratings ${treatmentAnalysisFilter === "frequent" ? "is-filter-active" : ""}" role="button" tabindex="0" data-treatment-analysis-filter="frequent" data-treatment-analysis-threshold="${analysis.ratings.frequent_votes_threshold}" aria-label="Besonders häufig bewertete Behandlungen in der Tabelle anzeigen">
+            <div class="doctor-detail-analysis-rating-heading">
+                <span class="doctor-detail-analysis-rating-icon" aria-hidden="true">${getTreatmentAnalysisIcon("frequent")}</span>
+                <div class="doctor-detail-analysis-rating-copy"><small>Bewertungshäufigkeit</small><strong>${analysis.ratings.frequently_rated_count} besonders häufig bewertete Behandlungen</strong><span class="doctor-detail-analysis-rating-threshold">(Mindestens ${analysis.ratings.frequent_votes_threshold} Bewertungen)</span></div>
             </div>
-        </div>
-
-        <div class="doctor-detail-treatment-overview-item">
-            <span class="doctor-detail-treatment-overview-icon is-purple" aria-hidden="true">☆</span>
-            <div class="doctor-detail-treatment-overview-copy">
-                <strong>${ratedStats.length}</strong>
-                <b>mit Bewertungen</b>
-                <span>von Patient:innen bewertet</span>
-            </div>
-        </div>
-
-        <div class="doctor-detail-treatment-overview-item is-rating">
-            <span class="doctor-detail-treatment-overview-icon is-orange" aria-hidden="true">✓</span>
-            <div class="doctor-detail-treatment-overview-copy">
-                <strong>${averageRating === null ? "–" : averageRating}</strong>
-                <b class="doctor-detail-treatment-overview-stars" aria-label="Durchschnittliche Bewertung von fünf">${ratingStars}</b>
-                <span>Ø Bewertung (von 5)</span>
-            </div>
+            ${mostRatedTreatmentHtml}
         </div>
     `;
+}
+
+function getTreatmentAnalysisIcon(type) {
+    const icons = {
+        profile: '<svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"></circle><path d="m9 13-1.5 8 4.5-2.5 4.5 2.5L15 13"></path><path d="m12 5.8 1 2 2.2.3-1.6 1.6.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.6L11 7.8Z"></path></svg>',
+        specialties: '<svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"></path></svg>',
+        positive: '<svg viewBox="0 0 24 24"><path d="M7 10v10H3V10h4Zm0 9h9.2a2 2 0 0 0 2-1.6l1.4-7A2 2 0 0 0 17.7 8H14l.5-2.5A2.9 2.9 0 0 0 12 2l-5 8v9Z"></path></svg>',
+        frequent: '<svg viewBox="0 0 24 24"><path d="M4 20v-8h4v8H4Zm6 0V7h4v13h-4Zm6 0V3h4v17h-4Z"></path></svg>'
+    };
+
+    return icons[type] || "";
 }
 
 function getTreatmentCategoryIcon(categoryName) {
