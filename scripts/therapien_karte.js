@@ -335,6 +335,7 @@ function normalizeTreatment(treatment) {
         positive_ratio: Number(treatment.positive_ratio ?? 0),
         neutral_ratio: Number(treatment.neutral_ratio ?? 0),
         negative_ratio: Number(treatment.negative_ratio ?? 0),
+        own_vote: ['pro', 'neutral', 'contra'].includes(treatment.own_vote) ? treatment.own_vote : null,
         provider_count: Number(treatment.provider_count ?? 0),
         total_provider_count: Number(treatment.total_provider_count ?? treatment.provider_count ?? 0),
         matching_provider_count: Number(treatment.matching_provider_count ?? 0),
@@ -1611,6 +1612,7 @@ function buildTreatmentCardHtml(treatment, index) {
     const pro = Number(treatment.pro ?? 0);
     const neutral = Number(treatment.neutral ?? 0);
     const contra = Number(treatment.contra ?? 0);
+    const ownVote = ['pro', 'neutral', 'contra'].includes(treatment.own_vote) ? treatment.own_vote : null;
 
     const distanceHtml = treatment.nearest_provider_distance_km === null
         ? ""
@@ -1701,35 +1703,38 @@ function buildTreatmentCardHtml(treatment, index) {
                     <h4 class="treatment-card-section-heading">Deine Bewertung</h4>
                 </div>
 
-                <div class="treatment-card-vote-buttons">
+                <div class="treatment-card-vote-buttons${ownVote ? ' has-selection' : ''}">
                     <button
                         type="button"
-                        class="treatment-card-vote-button treatment-card-vote-positive"
+                        class="treatment-card-vote-button treatment-card-vote-positive${ownVote === 'pro' ? ' is-selected' : ''}"
                         data-treat-id="${treatment.treat_id}"
                         data-treatment-name="${rawTreatmentName}"
                         data-vote-type="hilft"
+                        aria-pressed="${ownVote === 'pro'}"
                     >
-                        Positiv
+                        Positiv${ownVote === 'pro' ? ' ✓' : ''}
                     </button>
 
                     <button
                         type="button"
-                        class="treatment-card-vote-button treatment-card-vote-neutral"
+                        class="treatment-card-vote-button treatment-card-vote-neutral${ownVote === 'neutral' ? ' is-selected' : ''}"
                         data-treat-id="${treatment.treat_id}"
                         data-treatment-name="${rawTreatmentName}"
                         data-vote-type="gleich"
+                        aria-pressed="${ownVote === 'neutral'}"
                     >
-                        Neutral
+                        Neutral${ownVote === 'neutral' ? ' ✓' : ''}
                     </button>
 
                     <button
                         type="button"
-                        class="treatment-card-vote-button treatment-card-vote-negative"
+                        class="treatment-card-vote-button treatment-card-vote-negative${ownVote === 'contra' ? ' is-selected' : ''}"
                         data-treat-id="${treatment.treat_id}"
                         data-treatment-name="${rawTreatmentName}"
                         data-vote-type="verschlechterung"
+                        aria-pressed="${ownVote === 'contra'}"
                     >
-                        Negativ
+                        Negativ${ownVote === 'contra' ? ' ✓' : ''}
                     </button>
                 </div>
             </section>
@@ -1901,7 +1906,7 @@ async function submitTreatmentVote(treatId, treatmentName, voteType, button) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                treatment: treatmentName,
+                treat_id: treatId,
                 type: voteType
             })
         });
@@ -1912,7 +1917,7 @@ async function submitTreatmentVote(treatId, treatmentName, voteType, button) {
             throw new Error(result.message || "Bewertung konnte nicht gespeichert werden.");
         }
 
-        await refreshSingleTreatment(treatId);
+        await refreshSingleTreatment(treatId, result.vote);
 
     } catch (error) {
         console.error("Fehler beim Speichern der Bewertung:", error);
@@ -1925,7 +1930,7 @@ async function submitTreatmentVote(treatId, treatmentName, voteType, button) {
     }
 }
 
-async function refreshSingleTreatment(treatId) {
+async function refreshSingleTreatment(treatId, ownVote = null) {
     const filters = getTreatmentFilters();
     const params = new URLSearchParams();
     params.set("treat_id", String(treatId));
@@ -1960,7 +1965,10 @@ async function refreshSingleTreatment(treatId) {
         throw new Error("Unerwartetes API-Format beim Einzelladen.");
     }
 
-    const updatedTreatment = normalizeTreatment(data.items[0]);
+    const updatedTreatment = {
+        ...normalizeTreatment(data.items[0]),
+        own_vote: ownVote
+    };
     const index = currentTreatments.findIndex(function (treatment) {
         return Number(treatment.treat_id) === Number(treatId);
     });

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/_lcn_db.php';
+require_once __DIR__ . '/_voting.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -410,6 +410,21 @@ try {
         ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         exit;
+    }
+
+    $item['own_vote'] = null;
+    $voterKey = lcnExistingVoterKey();
+
+    if ($voterKey !== null) {
+        $ownVoteStatement = $pdo->prepare("
+            SELECT vote
+            FROM treatment_votes
+            WHERE voter_key = :voter_key AND treat_id = :treat_id
+            LIMIT 1
+        ");
+        $ownVoteStatement->execute([':voter_key' => $voterKey, ':treat_id' => $treatId]);
+        $ownVote = $ownVoteStatement->fetchColumn();
+        $item['own_vote'] = $ownVote !== false ? $ownVote : null;
     }
 
     $item['providers'] = loadTreatmentProviders($pdo, $treatId);

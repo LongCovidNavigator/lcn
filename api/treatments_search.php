@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/_lcn_db.php';
+require_once __DIR__ . '/_voting.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -1059,6 +1059,8 @@ try {
         $item['unlocated_provider_count'] = (int)$item['unlocated_provider_count'];
     }
     unset($item);
+
+    lcnAttachOwnVotes($pdo, $items, 'treatment');
 
     $map = [
 		'enabled' => $includeMap,

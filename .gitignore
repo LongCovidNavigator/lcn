@@ -6,6 +6,8 @@
 
 # Database dumps / exports
 *.sql
+!migrations/
+!migrations/*.sql
 *.sql.gz
 *.dump
 *.csv

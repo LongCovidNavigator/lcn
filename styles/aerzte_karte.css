@@ -619,6 +619,28 @@
     cursor: wait;
 }
 
+.doctor-card-vote-positive.is-selected {
+    background: #ffffff;
+    color: #008c54;
+    box-shadow: none;
+}
+
+.doctor-card-vote-neutral.is-selected {
+    background: #ffffff;
+    color: #005fa8;
+    box-shadow: none;
+}
+
+.doctor-card-vote-negative.is-selected {
+    background: #ffffff;
+    color: #c9333e;
+    box-shadow: none;
+}
+
+.doctor-card-vote-buttons-placeholder.has-selection .doctor-card-vote-button:not(.is-selected) {
+    opacity: 0.58;
+}
+
 .doctor-sort-wrapper {
     position: relative;
     display: inline-block;

@@ -1,71 +1,99 @@
 <?php
-require_once __DIR__ . '/_lcn_db.php';
 
-header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/_voting.php';
+
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+    header('Allow: POST');
+    lcnSendVoteJson(['ok' => false, 'error' => 'Method not allowed.'], 405);
+}
 
 try {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = lcnReadJsonBody();
+    $drId = filter_var($input['dr_id'] ?? null, FILTER_VALIDATE_INT, [
+        'options' => ['min_range' => 1],
+    ]);
+    $vote = (string)($input['type'] ?? '');
 
-    $drId = isset($input['dr_id']) ? (int)$input['dr_id'] : 0;
-    $type = $input['type'] ?? '';
-
-    if ($drId <= 0) {
-        throw new Exception("Ungültige dr_id.");
-    }
-
-    $allowedTypes = ['pro', 'neutral', 'contra'];
-
-    if (!in_array($type, $allowedTypes, true)) {
-        throw new Exception("Ungültiger Vote-Typ.");
+    if ($drId === false || !in_array($vote, ['pro', 'neutral', 'contra'], true)) {
+        lcnSendVoteJson(['ok' => false, 'error' => 'Ungültige Anfrage.'], 400);
     }
 
     $pdo = lcnDatabase();
+    $exists = $pdo->prepare('SELECT 1 FROM tbl_drs_03 WHERE dr_id = :dr_id');
+    $exists->execute([':dr_id' => $drId]);
 
-    $sql = "
-        INSERT INTO tbl_drs_votes_03 (
-            dr_id,
-            vote_improved,
-            vote_neutral,
-            vote_worsened,
-            updated_at
-        )
-        VALUES (
-            :dr_id,
-            CASE WHEN :type1 = 'pro' THEN 1 ELSE 0 END,
-            CASE WHEN :type2 = 'neutral' THEN 1 ELSE 0 END,
-            CASE WHEN :type3 = 'contra' THEN 1 ELSE 0 END,
-            NOW()
-        )
-        ON DUPLICATE KEY UPDATE
-            vote_improved = vote_improved + CASE WHEN :type4 = 'pro' THEN 1 ELSE 0 END,
-            vote_neutral = vote_neutral + CASE WHEN :type5 = 'neutral' THEN 1 ELSE 0 END,
-            vote_worsened = vote_worsened + CASE WHEN :type6 = 'contra' THEN 1 ELSE 0 END,
-            updated_at = NOW()
-    ";
+    if (!$exists->fetchColumn()) {
+        lcnSendVoteJson(['ok' => false, 'error' => 'Arzt oder Praxis nicht gefunden.'], 404);
+    }
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':dr_id' => $drId,
-        ':type1' => $type,
-        ':type2' => $type,
-        ':type3' => $type,
-        ':type4' => $type,
-        ':type5' => $type,
-        ':type6' => $type,
-    ]);
+    $voterKey = lcnVoterKey();
+    $aggregateColumns = [
+        'pro' => 'vote_improved',
+        'neutral' => 'vote_neutral',
+        'contra' => 'vote_worsened',
+    ];
 
-    echo json_encode([
+    $pdo->beginTransaction();
+
+    $currentStatement = $pdo->prepare("
+        SELECT vote
+        FROM doctor_votes
+        WHERE voter_key = :voter_key AND dr_id = :dr_id
+        FOR UPDATE
+    ");
+    $currentStatement->execute([':voter_key' => $voterKey, ':dr_id' => $drId]);
+    $previousVote = $currentStatement->fetchColumn();
+
+    if ($previousVote === false) {
+        $insert = $pdo->prepare("
+            INSERT INTO doctor_votes (voter_key, dr_id, vote)
+            VALUES (:voter_key, :dr_id, :vote)
+        ");
+        $insert->execute([':voter_key' => $voterKey, ':dr_id' => $drId, ':vote' => $vote]);
+
+        $column = $aggregateColumns[$vote];
+        $aggregate = $pdo->prepare("
+            INSERT INTO tbl_drs_votes_03 (dr_id, {$column})
+            VALUES (:dr_id, 1)
+            ON DUPLICATE KEY UPDATE {$column} = {$column} + 1
+        ");
+        $aggregate->execute([':dr_id' => $drId]);
+    } elseif ($previousVote !== $vote) {
+        $update = $pdo->prepare("
+            UPDATE doctor_votes
+            SET vote = :vote,
+                review_status = 'active',
+                flag_reason = NULL,
+                flagged_at = NULL,
+                flag_event_id = NULL
+            WHERE voter_key = :voter_key AND dr_id = :dr_id
+        ");
+        $update->execute([':vote' => $vote, ':voter_key' => $voterKey, ':dr_id' => $drId]);
+
+        $oldColumn = $aggregateColumns[$previousVote];
+        $newColumn = $aggregateColumns[$vote];
+        $aggregate = $pdo->prepare("
+            UPDATE tbl_drs_votes_03
+            SET {$oldColumn} = GREATEST({$oldColumn} - 1, 0),
+                {$newColumn} = {$newColumn} + 1
+            WHERE dr_id = :dr_id
+        ");
+        $aggregate->execute([':dr_id' => $drId]);
+    }
+
+    $pdo->commit();
+
+    lcnSendVoteJson([
         'ok' => true,
-        'dr_id' => $drId,
-        'type' => $type
-    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        'dr_id' => (int)$drId,
+        'vote' => $vote,
+        'changed' => $previousVote !== $vote,
+    ]);
+} catch (Throwable $error) {
+    if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
 
-} catch (Throwable $e) {
-    lcnLogApiError('inc_doctor_votes', $e);
-    http_response_code(500);
-
-    echo json_encode([
-        'ok' => false,
-        'error' => 'Die Bewertung konnte nicht gespeichert werden.'
-    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    lcnLogApiError('inc_doctor_votes', $error);
+    lcnSendVoteJson(['ok' => false, 'error' => 'Die Bewertung konnte nicht gespeichert werden.'], 500);
 }

@@ -1,104 +1,101 @@
 <?php
-require_once __DIR__ . '/_lcn_db.php';
 
-header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/_voting.php';
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-  http_response_code(405);
-  echo json_encode(["error"=>"Method not allowed", "method"=>($_SERVER['REQUEST_METHOD'] ?? null)], JSON_UNESCAPED_UNICODE);
-  exit;
+    header('Allow: POST');
+    lcnSendVoteJson(['ok' => false, 'error' => 'Method not allowed.'], 405);
 }
-
-$raw = file_get_contents("php://input");
-$body = null;
-
-// 1) JSON versuchen
-$body = json_decode($raw, true);
-
-// 2) Fallback: form-urlencoded / multipart (falls fetch/clients anders senden)
-if (!is_array($body)) {
-  $body = $_POST ?: [];
-}
-
-// Payload lesen (akzeptiere mehrere Key-Namen)
-$treatment = trim((string)($body["treatment"] ?? $body["Behandlung"] ?? ""));
-$type      = trim((string)($body["type"] ?? $body["voteType"] ?? ""));
-
-// UI types -> DB columns
-$map = [
-  "hilft" => "pro",
-  "gleich" => "neutral",
-  "verschlechterung" => "contra",
-  "pro" => "pro",
-  "neutral" => "neutral",
-  "contra" => "contra",
-];
-
-if ($treatment === "" || !isset($map[$type])) {
-  http_response_code(400);
-  echo json_encode([
-    "error" => "Ungültige Anfrage"
-  ], JSON_UNESCAPED_UNICODE);
-  exit;
-}
-
-$col = $map[$type];
-
-$liveTable = "lcn_votes";     // nur schreiben
-$rawTable  = "lcn_raw_votes"; // nur lesen
 
 try {
-  $pdo = lcnDatabase();
+    $input = lcnReadJsonBody();
+    $treatId = filter_var($input['treat_id'] ?? null, FILTER_VALIDATE_INT, [
+        'options' => ['min_range' => 1],
+    ]);
+    $requestedVote = (string)($input['type'] ?? '');
+    $voteMap = [
+        'hilft' => 'pro',
+        'gleich' => 'neutral',
+        'verschlechterung' => 'contra',
+        'pro' => 'pro',
+        'neutral' => 'neutral',
+        'contra' => 'contra',
+    ];
 
-  // Atomarer increment in lcn_votes
-  $sql = "
-    INSERT INTO `$liveTable` (Behandlung, pro, neutral, contra)
-    VALUES (:b, 0, 0, 0)
-    ON DUPLICATE KEY UPDATE `$col` = `$col` + 1
-  ";
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute([":b" => $treatment]);
+    if ($treatId === false || !isset($voteMap[$requestedVote])) {
+        lcnSendVoteJson(['ok' => false, 'error' => 'Ungültige Anfrage.'], 400);
+    }
 
-  // Summe live + raw zurückgeben (wie get_votes_db)
-  $sum = $pdo->prepare("
-    SELECT
-      COALESCE(x.Behandlung, TRIM(:b)) AS Behandlung,
-      (COALESCE(x.pro,0) + COALESCE(y.pro,0)) AS pro,
-      (COALESCE(x.neutral,0) + COALESCE(y.neutral,0)) AS neutral,
-      (COALESCE(x.contra,0) + COALESCE(y.contra,0)) AS contra
-    FROM
-      (SELECT TRIM(Behandlung) AS Behandlung,
-              COALESCE(SUM(pro),0) AS pro,
-              COALESCE(SUM(neutral),0) AS neutral,
-              COALESCE(SUM(contra),0) AS contra
-       FROM `$liveTable`
-       WHERE TRIM(Behandlung)=TRIM(:b)
-       GROUP BY TRIM(Behandlung)
-      ) x
-    LEFT JOIN
-      (SELECT TRIM(Behandlung) AS Behandlung,
-              COALESCE(SUM(pro),0) AS pro,
-              COALESCE(SUM(neutral),0) AS neutral,
-              COALESCE(SUM(contra),0) AS contra
-       FROM `$rawTable`
-       WHERE TRIM(Behandlung)=TRIM(:b)
-       GROUP BY TRIM(Behandlung)
-      ) y
-    ON x.Behandlung = y.Behandlung
-  ");
-  $sum->execute([":b" => $treatment]);
-  $row = $sum->fetch();
+    $pdo = lcnDatabase();
+    $exists = $pdo->prepare('SELECT behandlung FROM tbl_treatments_03 WHERE treat_id = :treat_id');
+    $exists->execute([':treat_id' => $treatId]);
+    $treatmentName = $exists->fetchColumn();
 
-  if (!$row) {
-    $row = ["Behandlung"=>$treatment, "pro"=>0, "neutral"=>0, "contra"=>0];
-  }
+    if ($treatmentName === false) {
+        lcnSendVoteJson(['ok' => false, 'error' => 'Therapie nicht gefunden.'], 404);
+    }
 
-  echo json_encode(["ok"=>true, "row"=>$row], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $vote = $voteMap[$requestedVote];
+    $voterKey = lcnVoterKey();
 
-} catch (Throwable $e) {
-  lcnLogApiError('inc_votes_db', $e);
-  http_response_code(500);
-  echo json_encode([
-    "error" => "Die Bewertung konnte nicht gespeichert werden."
-  ], JSON_UNESCAPED_UNICODE);
+    $pdo->beginTransaction();
+
+    $currentStatement = $pdo->prepare("
+        SELECT vote
+        FROM treatment_votes
+        WHERE voter_key = :voter_key AND treat_id = :treat_id
+        FOR UPDATE
+    ");
+    $currentStatement->execute([':voter_key' => $voterKey, ':treat_id' => $treatId]);
+    $previousVote = $currentStatement->fetchColumn();
+
+    if ($previousVote === false) {
+        $insert = $pdo->prepare("
+            INSERT INTO treatment_votes (voter_key, treat_id, vote)
+            VALUES (:voter_key, :treat_id, :vote)
+        ");
+        $insert->execute([':voter_key' => $voterKey, ':treat_id' => $treatId, ':vote' => $vote]);
+
+        $aggregate = $pdo->prepare("
+            INSERT INTO lcn_votes (Behandlung, {$vote})
+            VALUES (:treatment_name, 1)
+            ON DUPLICATE KEY UPDATE {$vote} = {$vote} + 1
+        ");
+        $aggregate->execute([':treatment_name' => $treatmentName]);
+    } elseif ($previousVote !== $vote) {
+        $update = $pdo->prepare("
+            UPDATE treatment_votes
+            SET vote = :vote,
+                review_status = 'active',
+                flag_reason = NULL,
+                flagged_at = NULL,
+                flag_event_id = NULL
+            WHERE voter_key = :voter_key AND treat_id = :treat_id
+        ");
+        $update->execute([':vote' => $vote, ':voter_key' => $voterKey, ':treat_id' => $treatId]);
+
+        $aggregate = $pdo->prepare("
+            UPDATE lcn_votes
+            SET {$previousVote} = GREATEST({$previousVote} - 1, 0),
+                {$vote} = {$vote} + 1
+            WHERE Behandlung = :treatment_name
+        ");
+        $aggregate->execute([':treatment_name' => $treatmentName]);
+    }
+
+    $pdo->commit();
+
+    lcnSendVoteJson([
+        'ok' => true,
+        'treat_id' => (int)$treatId,
+        'vote' => $vote,
+        'changed' => $previousVote !== $vote,
+    ]);
+} catch (Throwable $error) {
+    if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
+    lcnLogApiError('inc_votes_db', $error);
+    lcnSendVoteJson(['ok' => false, 'error' => 'Die Bewertung konnte nicht gespeichert werden.'], 500);
 }

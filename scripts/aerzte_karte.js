@@ -1409,6 +1409,7 @@ function buildDoctorCardHtml(doctor, index) {
     const distance = getDoctorDistanceText(doctor);
     const website = doctor.loc_website || doctor.dr_website || "";
 	const stats = getDoctorVoteStats(doctor);
+	const ownVote = ['pro', 'neutral', 'contra'].includes(doctor.own_vote) ? doctor.own_vote : null;
 	const specialtyChipsHtml = buildDoctorSpecialtyChipsHtml(doctor, "doctor-card-tag", 4);
 
 	const websiteHtml = website
@@ -1480,10 +1481,10 @@ function buildDoctorCardHtml(doctor, index) {
                     <h4 class="doctor-card-section-heading">✎ Deine Bewertung</h4>
                 </div>
 
-                <div class="doctor-card-vote-buttons-placeholder">
-                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-positive doctor-card-vote-button" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="pro">Positiv</button>
-                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-neutral doctor-card-vote-button" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="neutral">Neutral</button>
-                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-negative doctor-card-vote-button" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="contra">Negativ</button>
+                <div class="doctor-card-vote-buttons-placeholder${ownVote ? ' has-selection' : ''}">
+                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-positive doctor-card-vote-button${ownVote === 'pro' ? ' is-selected' : ''}" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="pro" aria-pressed="${ownVote === 'pro'}">Positiv${ownVote === 'pro' ? ' ✓' : ''}</button>
+                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-neutral doctor-card-vote-button${ownVote === 'neutral' ? ' is-selected' : ''}" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="neutral" aria-pressed="${ownVote === 'neutral'}">Neutral${ownVote === 'neutral' ? ' ✓' : ''}</button>
+                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-negative doctor-card-vote-button${ownVote === 'contra' ? ' is-selected' : ''}" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="contra" aria-pressed="${ownVote === 'contra'}">Negativ${ownVote === 'contra' ? ' ✓' : ''}</button>
                 </div>
             </section>
 
@@ -2002,7 +2003,7 @@ async function handleDoctorCardVote(event) {
             throw new Error(data.error || "Vote konnte nicht gespeichert werden.");
         }
 
-        await refreshSingleDoctor(drId);
+        await refreshSingleDoctor(drId, data.vote);
     } catch (error) {
         console.error("Fehler beim Speichern der Ärztebewertung:", error);
         alert("Die Bewertung konnte nicht gespeichert werden. Details stehen in der Konsole.");
@@ -2014,7 +2015,7 @@ async function handleDoctorCardVote(event) {
     }
 }
 
-async function refreshSingleDoctor(drId) {
+async function refreshSingleDoctor(drId, ownVote = null) {
     const centerForApi = currentLocation || defaultMapCenter;
 
     const response = await fetch(
@@ -2034,7 +2035,10 @@ async function refreshSingleDoctor(drId) {
         throw new Error("Unerwartetes API-Format beim Einzelladen.");
     }
 
-    let updatedDoctor = data.items[0];
+    let updatedDoctor = {
+        ...data.items[0],
+        own_vote: ownVote
+    };
 
     if (!currentLocation) {
         updatedDoctor = {

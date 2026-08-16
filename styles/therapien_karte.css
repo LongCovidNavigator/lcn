@@ -1177,6 +1177,28 @@
     color: #c9333e;
 }
 
+.treatment-card-vote-positive.is-selected {
+    background: #ffffff;
+    color: #008c54;
+    box-shadow: none;
+}
+
+.treatment-card-vote-neutral.is-selected {
+    background: #ffffff;
+    color: #005fa8;
+    box-shadow: none;
+}
+
+.treatment-card-vote-negative.is-selected {
+    background: #ffffff;
+    color: #c9333e;
+    box-shadow: none;
+}
+
+.treatment-card-vote-buttons.has-selection .treatment-card-vote-button:not(.is-selected) {
+    opacity: 0.58;
+}
+
 .treatment-card-footer {
     display: flex;
     justify-content: flex-start;

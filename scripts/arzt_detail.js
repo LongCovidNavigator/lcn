@@ -63,6 +63,7 @@ async function loadDoctorDetail() {
 
         resetTreatmentControlsState();
         renderDoctorDetail(currentDoctorDetail, currentDoctorTerms, currentDoctorTreatmentsGrouped);
+        updateDoctorDetailVoteSelection(currentDoctorDetail.own_vote || null);
         showDoctorDetailContent();
 
     } catch (error) {
@@ -392,21 +393,7 @@ async function handleDoctorDetailVote(event) {
             throw new Error(data.error || data.message || "Vote konnte nicht gespeichert werden.");
         }
 
-        currentDoctorDetail = {
-            ...currentDoctorDetail,
-            pro: Number(currentDoctorDetail.pro || 0) + (voteType === "pro" ? 1 : 0),
-            neutral: Number(currentDoctorDetail.neutral || 0) + (voteType === "neutral" ? 1 : 0),
-            contra: Number(currentDoctorDetail.contra || 0) + (voteType === "contra" ? 1 : 0)
-        };
-
-        const stats = getDoctorDetailVoteStats(currentDoctorDetail);
-
-        currentDoctorDetail.total_votes = stats.totalVotes;
-        currentDoctorDetail.positive_ratio = stats.proRatio;
-        currentDoctorDetail.neutral_ratio = stats.neutralRatio;
-        currentDoctorDetail.negative_ratio = stats.contraRatio;
-
-        renderRating(currentDoctorDetail);
+        await loadDoctorDetail();
 
     } catch (error) {
         console.error("Fehler beim Speichern der Ärztebewertung:", error);
@@ -2141,6 +2128,25 @@ function renderTreatmentOfferSummary(analysis) {
             ${mostRatedTreatmentHtml}
         </div>
     `;
+}
+
+function updateDoctorDetailVoteSelection(ownVote) {
+    const group = document.querySelector('.doctor-detail-vote-buttons');
+
+    if (group) {
+        group.classList.toggle('has-selection', Boolean(ownVote));
+    }
+
+    document.querySelectorAll('.doctor-detail-vote-main-button').forEach(function (button) {
+        const selected = button.getAttribute('data-type') === ownVote;
+        const baseLabel = button.getAttribute('data-type') === 'pro'
+            ? 'Positiv'
+            : (button.getAttribute('data-type') === 'neutral' ? 'Neutral' : 'Negativ');
+
+        button.classList.toggle('is-selected', selected);
+        button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+        button.textContent = selected ? `${baseLabel} ✓` : baseLabel;
+    });
 }
 
 function getTreatmentAnalysisIcon(type) {

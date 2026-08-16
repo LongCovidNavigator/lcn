@@ -469,6 +469,25 @@
     cursor: wait;
 }
 
+.treatment-detail-vote-main-positive.is-selected {
+    background: #ffffff;
+    color: #08733e;
+}
+
+.treatment-detail-vote-main-neutral.is-selected {
+    background: #ffffff;
+    color: #005fa8;
+}
+
+.treatment-detail-vote-main-negative.is-selected {
+    background: #ffffff;
+    color: #c9333e;
+}
+
+.treatment-detail-vote-buttons.has-selection .treatment-detail-vote-main-button:not(.is-selected) {
+    opacity: 0.58;
+}
+
 /* ------------------------------
    Anbieterkarte
 ------------------------------ */

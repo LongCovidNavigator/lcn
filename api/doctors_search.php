@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/_lcn_db.php';
+require_once __DIR__ . '/_voting.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -597,6 +597,8 @@ try {
         $item['negative_ratio'] = (int)$item['negative_ratio'];
     }
     unset($item);
+
+    lcnAttachOwnVotes($pdo, $items, 'doctor');
 
     echo json_encode([
         'ok' => true,

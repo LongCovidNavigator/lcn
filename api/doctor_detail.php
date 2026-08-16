@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/_lcn_db.php';
+require_once __DIR__ . '/_voting.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -284,6 +284,21 @@ try {
             'error' => true,
             'message' => 'Für diese Arzt-ID wurde kein Datensatz gefunden.',
         ], 404);
+    }
+
+    $item['own_vote'] = null;
+    $voterKey = lcnExistingVoterKey();
+
+    if ($voterKey !== null) {
+        $ownVoteStatement = $pdo->prepare("
+            SELECT vote
+            FROM doctor_votes
+            WHERE voter_key = :voter_key AND dr_id = :dr_id
+            LIMIT 1
+        ");
+        $ownVoteStatement->execute([':voter_key' => $voterKey, ':dr_id' => $id]);
+        $ownVote = $ownVoteStatement->fetchColumn();
+        $item['own_vote'] = $ownVote !== false ? $ownVote : null;
     }
 
     $termsSql = "

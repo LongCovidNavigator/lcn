@@ -73,6 +73,7 @@ function normalizeTreatmentDetail(treatment) {
         positive_ratio: Number(treatment.positive_ratio ?? 0),
         neutral_ratio: Number(treatment.neutral_ratio ?? 0),
         negative_ratio: Number(treatment.negative_ratio ?? 0),
+        own_vote: ['pro', 'neutral', 'contra'].includes(treatment.own_vote) ? treatment.own_vote : null,
         provider_count: Number(treatment.provider_count ?? 0),
         providers: Array.isArray(treatment.providers) ? treatment.providers.map(normalizeProvider) : [],
         sources: Array.isArray(treatment.sources) ? treatment.sources : [],
@@ -243,7 +244,7 @@ async function handleTreatmentDetailVote(event) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                treatment: treatmentName,
+                treat_id: treatId,
                 type: voteType
             })
         });
@@ -434,33 +435,51 @@ function buildRatingTilesHtml(stats) {
 }
 
 function buildOwnRatingHtml() {
+    const ownVote = currentTreatmentDetail?.own_vote || null;
+
+    function selectionAttributes(vote) {
+        const selected = ownVote === vote;
+        return {
+            className: selected ? ' is-selected' : '',
+            pressed: selected ? 'true' : 'false',
+            suffix: selected ? ' ✓' : ''
+        };
+    }
+
+    const positive = selectionAttributes('pro');
+    const neutral = selectionAttributes('neutral');
+    const negative = selectionAttributes('contra');
+
     return `
         <div class="treatment-detail-own-rating">
             <h4 class="treatment-detail-own-rating-heading">Diese Therapie bewerten</h4>
 
-            <div class="treatment-detail-vote-buttons">
+            <div class="treatment-detail-vote-buttons${ownVote ? ' has-selection' : ''}">
                 <button
                     type="button"
-                    class="treatment-detail-vote-button treatment-detail-vote-main-button treatment-detail-vote-main-positive"
+                    class="treatment-detail-vote-button treatment-detail-vote-main-button treatment-detail-vote-main-positive${positive.className}"
                     data-vote-type="hilft"
+                    aria-pressed="${positive.pressed}"
                 >
-                    Positiv
+                    Positiv${positive.suffix}
                 </button>
 
                 <button
                     type="button"
-                    class="treatment-detail-vote-button treatment-detail-vote-main-button treatment-detail-vote-main-neutral"
+                    class="treatment-detail-vote-button treatment-detail-vote-main-button treatment-detail-vote-main-neutral${neutral.className}"
                     data-vote-type="gleich"
+                    aria-pressed="${neutral.pressed}"
                 >
-                    Neutral
+                    Neutral${neutral.suffix}
                 </button>
 
                 <button
                     type="button"
-                    class="treatment-detail-vote-button treatment-detail-vote-main-button treatment-detail-vote-main-negative"
+                    class="treatment-detail-vote-button treatment-detail-vote-main-button treatment-detail-vote-main-negative${negative.className}"
                     data-vote-type="verschlechterung"
+                    aria-pressed="${negative.pressed}"
                 >
-                    Negativ
+                    Negativ${negative.suffix}
                 </button>
             </div>
         </div>

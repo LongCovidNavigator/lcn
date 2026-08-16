@@ -1075,6 +1075,25 @@
     box-shadow: 0 3px 12px rgba(31, 50, 82, 0.05);
 }
 
+.doctor-detail-vote-main-positive.is-selected {
+    background: #ffffff;
+    color: #008c54;
+}
+
+.doctor-detail-vote-main-neutral.is-selected {
+    background: #ffffff;
+    color: #005fa8;
+}
+
+.doctor-detail-vote-main-negative.is-selected {
+    background: #ffffff;
+    color: #c9333e;
+}
+
+.doctor-detail-vote-buttons.has-selection .doctor-detail-vote-main-button:not(.is-selected) {
+    opacity: 0.58;
+}
+
 .doctor-detail-analysis-section {
     min-width: 0;
     padding: 6px 28px;
