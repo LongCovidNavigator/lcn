@@ -32,6 +32,7 @@ let doctorDetailMap = null;
 
 
 document.addEventListener("DOMContentLoaded", function () {
+    setDoctorDetailSuggestionLinks();
     loadDoctorDetail();
     setupDoctorDetailVoteButtons();
     setupTreatmentToggle();
@@ -39,6 +40,13 @@ document.addEventListener("DOMContentLoaded", function () {
     setupTreatmentAnalysisFilters();
     setupDoctorDetailLocationControl();
 });
+
+function setDoctorDetailSuggestionLinks() {
+    const doctorId = getDoctorIdFromUrl();
+    if (!doctorId) return;
+    const href = `arzt_vorschlagen.html?existing_target_id=${encodeURIComponent(doctorId)}`;
+    document.querySelectorAll("[data-detail-suggestion-link]").forEach(function (link) { link.href = href; });
+}
 
 async function loadDoctorDetail() {
     const doctorId = getDoctorIdFromUrl();
@@ -82,7 +90,7 @@ function resetTreatmentControlsState() {
     treatmentCategoryDrilldownLabel = "";
     treatmentSortMode = "name_asc";
     treatmentOnlyRated = false;
-    treatmentViewMode = "categories";
+    treatmentViewMode = getSavedDoctorDetailTreatmentView();
     treatmentPositiveMin = 0;
     treatmentVotesMin = 0;
     treatmentNegativeMax = 100;
@@ -253,6 +261,9 @@ function setupTreatmentControlEvents() {
         const sortButton = event.target.closest("[data-treatment-sort]");
         if (viewButton) {
             treatmentViewMode = viewButton.getAttribute("data-treatment-view") || "cards";
+            if (treatmentViewMode === "cards" || treatmentViewMode === "table") {
+                try { localStorage.setItem("lcn_result_view_preference", treatmentViewMode); } catch (_) {}
+            }
             treatmentCategoryDrilldownLabel = "";
             treatmentSpectrumExpanded = false;
             treatmentCategoryDropdownOpen = false;
@@ -2128,6 +2139,11 @@ function renderTreatmentOfferSummary(analysis) {
             ${mostRatedTreatmentHtml}
         </div>
     `;
+}
+
+function getSavedDoctorDetailTreatmentView() {
+    try { return localStorage.getItem("lcn_result_view_preference") === "cards" ? "cards" : "table"; }
+    catch (_) { return "table"; }
 }
 
 function updateDoctorDetailVoteSelection(ownVote) {

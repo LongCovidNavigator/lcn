@@ -9,7 +9,7 @@
 
 let currentTreatments = [];
 let currentCategories = [];
-let currentViewMode = "cards";
+let currentViewMode = getSavedTreatmentResultsView();
 const treatmentCardBatchSize = 30;
 let visibleTreatmentCardCount = treatmentCardBatchSize;
 let selectedTreatmentsForCompare = [];
@@ -1084,6 +1084,7 @@ function bindTreatmentTableContainerEvents() {
 
 function setTreatmentViewMode(viewMode) {
     currentViewMode = viewMode === "table" ? "table" : "cards";
+    try { localStorage.setItem("lcn_result_view_preference", currentViewMode); } catch (_) {}
 
     const cardSection = document.getElementById("treatment-card-results-section");
     const tableSection = document.getElementById("treatment-table-results-section");
@@ -2039,6 +2040,11 @@ function buildTreatmentExperienceHtml(treatment, mode = "all") {
             <span class="treatment-table-vote-count">(n=${totalVotes})</span>
         </div>
     `;
+}
+
+function getSavedTreatmentResultsView() {
+    try { return localStorage.getItem("lcn_result_view_preference") === "cards" ? "cards" : "table"; }
+    catch (_) { return "table"; }
 }
 
 function buildTreatmentTableVoteButton(treatment, type, prefix, ratio, badgeClass) {

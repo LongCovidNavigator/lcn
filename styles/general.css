@@ -184,3 +184,9 @@ body {
         font-size: 1.4rem;
     }
 }
+/* Ergänzung bestehender Detail-Einträge */
+.detail-suggestion-actions { display: flex; justify-content: flex-end; width: 100%; margin: 14px 0 22px; box-sizing: border-box; }
+.detail-suggestion-actions.is-bottom { justify-content: center; margin: 28px 0 8px; }
+.detail-suggestion-button { display: inline-flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 42px; padding: 9px 16px; border: 1px solid #007f7b; border-radius: 8px; background: #eef9f7; color: #006a68; font-size: .86rem; font-weight: 800; line-height: 1.25; text-decoration: none; box-sizing: border-box; }
+.detail-suggestion-button:hover, .detail-suggestion-button:focus-visible { background: #007f7b; color: #fff; outline: 2px solid rgba(0,127,123,.2); outline-offset: 2px; }
+@media (max-width: 760px) { .detail-suggestion-actions { justify-content: stretch; } .detail-suggestion-button { width: 100%; } }

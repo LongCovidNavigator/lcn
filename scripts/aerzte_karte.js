@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     restoreDoctorLocationPreference();
     updateRadiusInputState();
-    setResultsView("cards");
+    setResultsView(getSavedDoctorResultsView());
     renderDoctorCards([]);
     renderDoctorResultsTable([]);
     applySearchFromControls();
@@ -1265,6 +1265,8 @@ function updateUserLocationMarker() {
 }
 
 function setResultsView(viewName) {
+    viewName = viewName === "table" ? "table" : "cards";
+    try { localStorage.setItem("lcn_result_view_preference", viewName); } catch (_) {}
     const cardSection = document.getElementById("doctor-card-results-section");
     const tableSection = document.getElementById("doctor-table-results-section");
     const cardButton = document.getElementById("doctor-card-view-button");
@@ -1797,6 +1799,11 @@ function buildDoctorTableExperienceHtml(doctor) {
             <span class="doctor-table-vote-count">(n=${stats.totalVotes})</span>
         </div>
     `;
+}
+
+function getSavedDoctorResultsView() {
+    try { return localStorage.getItem("lcn_result_view_preference") === "cards" ? "cards" : "table"; }
+    catch (_) { return "table"; }
 }
 
 function buildDoctorTableVoteButton(drId, type, prefix, ratio, ownVote, label) {

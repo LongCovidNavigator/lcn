@@ -12,7 +12,7 @@ const featuredTreatments = [
     { id: 176, name: "Atemtherapie", icon: "lungs" }
 ];
 
-const featuredTreatmentInitialCount = 11;
+const featuredTreatmentInitialCount = 10;
 const featuredTreatmentAdditionalCount = 40;
 const featuredTreatmentDataById = new Map();
 
@@ -22,7 +22,10 @@ window.addEventListener("homepage:location-changed", loadFeaturedTreatments);
 async function loadFeaturedTreatments() {
     const list = document.getElementById("featured-treatments-list");
     const moreButton = document.getElementById("featured-treatments-more");
-    if (!list || !moreButton) return;
+    if (!list) return;
+    const initialCount = Math.max(1, Number(list.dataset.initialCount || featuredTreatmentInitialCount));
+    const teaserMode = list.dataset.listMode === "teaser";
+    const fullViewSwitch = list.dataset.fullViewSwitch === "true";
 
     try {
         const ids = featuredTreatments.map(function (treatment) { return treatment.id; }).join(",");
@@ -63,13 +66,42 @@ async function loadFeaturedTreatments() {
             featuredTreatmentDataById.set(Number(editorialTreatment.id), entry.data);
             return entry;
         });
-        list.innerHTML = buildFeaturedTreatmentsHtml(enrichedTreatments.slice(0, featuredTreatmentInitialCount));
+        const initialTreatments = enrichedTreatments.slice(0, initialCount);
+        if (fullViewSwitch) {
+            const viewButtons = document.querySelectorAll("[data-featured-treatment-view]");
+            const renderFullView = function (view) {
+                const mode = view === "table" ? "table" : "cards";
+                const viewSwitch = viewButtons[0]?.closest(".featured-page-view-switch");
+                viewSwitch?.remove();
+                saveSharedViewPreference(mode);
+                list.classList.toggle("is-card-mode", mode === "cards");
+                list.classList.toggle("is-table-mode", mode === "table");
+                list.innerHTML = mode === "cards"
+                    ? buildFeaturedTreatmentGridHtml(initialTreatments)
+                    : buildFeaturedTreatmentTableOnlyHtml(initialTreatments);
+                const remainingGroup = list.querySelector(".featured-ranking-group.is-rest");
+                if (viewSwitch && remainingGroup) remainingGroup.insertBefore(viewSwitch, remainingGroup.children[1] || null);
+                viewButtons.forEach(function (button) {
+                    button.classList.toggle("is-active", button.dataset.featuredTreatmentView === mode);
+                    button.setAttribute("aria-pressed", String(button.dataset.featuredTreatmentView === mode));
+                });
+            };
+            viewButtons.forEach(function (button) {
+                button.addEventListener("click", function () { renderFullView(button.dataset.featuredTreatmentView); });
+            });
+            renderFullView(getSharedViewPreference());
+        } else {
+            list.innerHTML = teaserMode
+                ? buildTreatmentTeaserHtml(initialTreatments)
+                : buildFeaturedTreatmentsHtml(initialTreatments);
+        }
         if (!list.dataset.voteBound) {
             list.addEventListener("click", handleFeaturedTreatmentVote);
             list.dataset.voteBound = "true";
         }
 
-        moreButton.hidden = displayedTreatments.length <= featuredTreatmentInitialCount;
+        if (!moreButton) return;
+        moreButton.hidden = teaserMode || displayedTreatments.length <= initialCount;
         moreButton.onclick = function () {
             const expanded = moreButton.getAttribute("aria-expanded") === "true";
             moreButton.setAttribute("aria-expanded", String(!expanded));
@@ -79,8 +111,8 @@ async function loadFeaturedTreatments() {
                 list.querySelectorAll(".featured-treatment-table-row.is-treatment-extra").forEach(function (row) { row.remove(); });
             } else if (tableBody) {
                 tableBody.insertAdjacentHTML("beforeend", buildFeaturedTreatmentTableRowsHtml(
-                    enrichedTreatments.slice(featuredTreatmentInitialCount),
-                    featuredTreatmentInitialCount,
+                    enrichedTreatments.slice(initialCount),
+                    initialCount,
                     true
                 ));
             }
@@ -89,6 +121,35 @@ async function loadFeaturedTreatments() {
         console.error("Behandlungen für die Startseite konnten nicht geladen werden:", error);
         list.innerHTML = '<p class="featured-treatments-status">Die Behandlungen konnten gerade nicht geladen werden.</p>';
     }
+}
+
+function buildTreatmentTeaserHtml(treatments) {
+    return `<ol class="compact-ranking-list">${treatments.map(function (entry) {
+        const treatment = entry.data || {};
+        const total = Number(treatment.total_votes || 0);
+        const ratio = treatment.positive_ratio !== undefined
+            ? Math.round(Number(treatment.positive_ratio || 0))
+            : total ? Math.round((Number(treatment.pro || 0) / total) * 100) : 0;
+        return `<li><a href="therapie_detail.html?treat_id=${encodeURIComponent(entry.editorial.id)}">${escapeHomepageHtml(entry.editorial.name)}</a><span class="compact-experience" aria-label="${ratio} Prozent positive Erfahrungen">+${ratio}%</span></li>`;
+    }).join("")}</ol>`;
+}
+
+function buildFeaturedTreatmentGridHtml(treatments) {
+    const topEntries = treatments.slice(0, 3);
+    const remainingEntries = treatments.slice(3);
+    return `<section class="featured-ranking-group is-top"><h3>Top 3 Behandlungen</h3><div class="featured-ranking-card-grid">${buildFeaturedTreatmentCardsHtml(topEntries, 0)}</div></section><section class="featured-ranking-group is-rest"><h3>Weitere Behandlungen</h3><div class="featured-ranking-card-grid">${buildFeaturedTreatmentCardsHtml(remainingEntries, 3)}</div></section>`;
+}
+
+function buildFeaturedTreatmentCardsHtml(treatments, rankOffset) {
+    return treatments.map(function (entry, index) {
+        return buildFeaturedTreatmentHtml(entry.editorial, entry.data, rankOffset + index);
+    }).join("");
+}
+
+function buildFeaturedTreatmentTableOnlyHtml(treatments) {
+    const topEntries = treatments.slice(0, 3);
+    const tableEntries = treatments.slice(3);
+    return `<section class="featured-ranking-group is-top"><h3>Top 3 Behandlungen</h3><div class="featured-ranking-card-grid">${buildFeaturedTreatmentCardsHtml(topEntries, 0)}</div></section><section class="featured-ranking-group is-rest"><h3>Weitere Behandlungen</h3><div class="featured-treatments-table-wrap"><table class="featured-treatments-table"><thead><tr><th scope="col">Platz</th><th scope="col">Behandlung</th><th scope="col">Kategorie</th><th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Votes)</span></th><th scope="col">Anbieter gesamt</th><th scope="col">Entfernung / Ort</th></tr></thead><tbody>${buildFeaturedTreatmentTableRowsHtml(tableEntries, 3, false)}</tbody></table></div></section>`;
 }
 
 function buildFeaturedTreatmentsHtml(treatments) {
@@ -330,7 +391,10 @@ document.addEventListener("DOMContentLoaded", initNearbyGps);
 async function loadFeaturedExperts() {
     const list = document.getElementById("featured-experts-list");
     const moreButton = document.getElementById("featured-experts-more");
-    if (!list || !moreButton) return;
+    if (!list) return;
+    const initialCount = Math.max(1, Number(list.dataset.initialCount || 10));
+    const teaserMode = list.dataset.listMode === "teaser";
+    const fullViewSwitch = list.dataset.fullViewSwitch === "true";
 
     let doctors = [];
 
@@ -359,14 +423,42 @@ async function loadFeaturedExperts() {
         });
     });
 
-    const initialEntries = editorialList.slice(0, 11);
-    const longlist = editorialList.slice(11);
-    list.innerHTML = buildFeaturedExpertsHtml(initialEntries, 0, false);
-    moreButton.hidden = false;
+    const initialEntries = editorialList.slice(0, initialCount);
+    const longlist = editorialList.slice(initialCount);
+    if (fullViewSwitch) {
+        const viewButtons = document.querySelectorAll("[data-featured-view]");
+        const renderFullView = function (view) {
+            const mode = view === "table" ? "table" : "cards";
+            const viewSwitch = viewButtons[0]?.closest(".featured-page-view-switch");
+            viewSwitch?.remove();
+            saveSharedViewPreference(mode);
+            list.classList.toggle("is-card-mode", mode === "cards");
+            list.classList.toggle("is-table-mode", mode === "table");
+            list.innerHTML = mode === "cards"
+                ? buildFeaturedExpertGridHtml(initialEntries)
+                : buildFeaturedExpertTableHtml(initialEntries);
+            const remainingGroup = list.querySelector(".featured-ranking-group.is-rest");
+            if (viewSwitch && remainingGroup) remainingGroup.insertBefore(viewSwitch, remainingGroup.children[1] || null);
+            viewButtons.forEach(function (button) {
+                button.classList.toggle("is-active", button.dataset.featuredView === mode);
+                button.setAttribute("aria-pressed", String(button.dataset.featuredView === mode));
+            });
+        };
+        viewButtons.forEach(function (button) {
+            button.addEventListener("click", function () { renderFullView(button.dataset.featuredView); });
+        });
+        renderFullView(getSharedViewPreference());
+    } else {
+        list.innerHTML = teaserMode
+            ? buildExpertTeaserHtml(initialEntries)
+            : buildFeaturedExpertsHtml(initialEntries, 0, false);
+    }
     if (!list.dataset.voteBound) {
         list.addEventListener("click", handleFeaturedExpertVote);
         list.dataset.voteBound = "true";
     }
+    if (!moreButton) return;
+    moreButton.hidden = teaserMode || longlist.length === 0;
 
     moreButton.onclick = function () {
         const isExpanded = moreButton.getAttribute("aria-expanded") === "true";
@@ -382,6 +474,29 @@ async function loadFeaturedExperts() {
         moreButton.querySelector("span:first-child").textContent = isExpanded ? "Weitere anzeigen" : "Weniger anzeigen";
         moreButton.classList.toggle("is-expanded", !isExpanded);
     };
+}
+
+function getSharedViewPreference() {
+    try { return localStorage.getItem("lcn_result_view_preference") === "cards" ? "cards" : "table"; }
+    catch (_) { return "table"; }
+}
+
+function saveSharedViewPreference(view) {
+    try { localStorage.setItem("lcn_result_view_preference", view === "table" ? "table" : "cards"); }
+    catch (_) { /* Die Ansicht bleibt für die aktuelle Seite trotzdem aktiv. */ }
+}
+
+function buildExpertTeaserHtml(doctors) {
+    return `<ol class="compact-ranking-list">${doctors.map(function (doctor) {
+        const total = Number(doctor.total_votes || (Number(doctor.pro || 0) + Number(doctor.neutral || 0) + Number(doctor.contra || 0)));
+        const ratio = doctor.positive_ratio !== undefined
+            ? Math.round(Number(doctor.positive_ratio || 0))
+            : total ? Math.round((Number(doctor.pro || 0) / total) * 100) : 0;
+        const href = doctor.dr_id
+            ? `arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}`
+            : `aerzte_karte.html?search=${encodeURIComponent(doctor.dr_display_name || "")}`;
+        return `<li><a href="${href}">${escapeHomepageHtml(doctor.dr_display_name || "")}</a><span class="compact-experience" aria-label="${ratio} Prozent positive Erfahrungen">+${ratio}%</span></li>`;
+    }).join("")}</ol>`;
 }
 
 function buildFeaturedExpertsHtml(doctors, rankOffset, isLonglist) {
@@ -444,6 +559,34 @@ function buildFeaturedExpertsHtml(doctors, rankOffset, isLonglist) {
                 <tbody>${buildFeaturedExpertTableRowsHtml(tableEntries, rankOffset + featured.length, isLonglist)}</tbody>
             </table>
         </div>`;
+}
+
+function buildFeaturedExpertGridHtml(doctors) {
+    const topDoctors = doctors.slice(0, 3);
+    const remainingDoctors = doctors.slice(3);
+    return `<section class="featured-ranking-group is-top"><h3>Top 3 Ärzt:innen</h3><div class="featured-ranking-card-grid">${buildFeaturedExpertCardsHtml(topDoctors, 0)}</div></section><section class="featured-ranking-group is-rest"><h3>Weitere Ärzt:innen</h3><div class="featured-ranking-card-grid">${buildFeaturedExpertCardsHtml(remainingDoctors, 3)}</div></section>`;
+}
+
+function buildFeaturedExpertCardsHtml(doctors, rankOffset) {
+    return doctors.map(function (doctor, index) {
+        const name = escapeHomepageHtml(doctor.dr_display_name || "");
+        const institution = escapeHomepageHtml(doctor.loc_label || doctor.dr_org_name || doctor.specialty_labels || "");
+        const profileHref = doctor.dr_id
+            ? `arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}`
+            : `aerzte_karte.html?search=${encodeURIComponent(doctor.dr_display_name || "")}`;
+        const ownVote = ["pro", "neutral", "contra"].includes(doctor.own_vote) ? doctor.own_vote : "";
+        return `<article class="featured-expert is-featured featured-expert-grid-card"${doctor.editorial_fallback ? ' data-profile-match="missing"' : ""}>
+            <span class="featured-expert-rank" aria-label="Redaktionelle Reihenfolge ${rankOffset + index + 1}">${String(rankOffset + index + 1).padStart(2, "0")}</span>
+            <div class="featured-expert-main"><div class="featured-expert-title-row"><h3><a href="${profileHref}">${name}</a></h3><span class="featured-expert-location">${getCountryFlag(doctor.editorial_flag)}<span>${escapeHomepageHtml(doctor.editorial_location)}</span></span></div>
+            ${institution ? `<p>${institution}</p>` : ""}<div class="featured-expert-card-facts"><span><small>Versorgung</small><strong>${buildFeaturedExpertSupplyHtml(doctor)}</strong></span><span><small>Entfernung</small><strong>${getFeaturedExpertDistanceHtml(doctor)}</strong></span><span><small>Kontakt</small><strong>${buildFeaturedExpertContactHtml(doctor) || "k. A."}</strong></span></div>
+            <div class="featured-expert-footer">${doctor.dr_id ? buildFeaturedExpertCardExperienceHtml(doctor, ownVote) : ""}</div></div></article>`;
+    }).join("");
+}
+
+function buildFeaturedExpertTableHtml(doctors) {
+    const topDoctors = doctors.slice(0, 3);
+    const tableDoctors = doctors.slice(3);
+    return `<section class="featured-ranking-group is-top"><h3>Top 3 Ärzt:innen</h3><div class="featured-ranking-card-grid">${buildFeaturedExpertCardsHtml(topDoctors, 0)}</div></section><section class="featured-ranking-group is-rest"><h3>Weitere Ärzt:innen</h3><div class="featured-experts-table-wrap"><table class="featured-experts-table"><thead><tr><th scope="col">Platz</th><th scope="col">Ärzt:in</th><th scope="col">Erfahrung <span class="featured-expert-table-header-note">(n = Votes)</span></th><th scope="col">Standort</th><th scope="col">Entfernung</th><th scope="col">Versorgung</th><th scope="col">Kontakt</th></tr></thead><tbody>${buildFeaturedExpertTableRowsHtml(tableDoctors, 3, false)}</tbody></table></div></section>`;
 }
 
 function buildFeaturedExpertCardExperienceHtml(doctor, ownVote) {
@@ -877,7 +1020,9 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     heading.textContent = hasUserLocation ? "Die nächsten Anlaufstellen" : "Hausärztliche Anlaufstellen in Deutschland";
     list.innerHTML = doctors.length ? doctors.slice(0, 5).map(function (doctor) { return buildNearbyGpCard(doctor, hasUserLocation); }).join("")
         : '<p class="nearby-gps-status">Versuche alternativ die vollständige Ärzt:innensuche.</p>';
-    allLink.href = `therapie_detail.html?treat_id=${homepagePrimaryCareTreatmentId}`;
+    if (allLink.dataset.preserveHref !== "true") {
+        allLink.href = `therapie_detail.html?treat_id=${homepagePrimaryCareTreatmentId}`;
+    }
 
     if (typeof L === "undefined") return;
     if (!nearbyGpsMap) {
@@ -897,17 +1042,22 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
             maxZoom: 19,
             attribution: "Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere"
         }).addTo(nearbyGpsMap);
+    }
+    if (!nearbyGpsUserIcon || !nearbyGpsProviderIcon) {
+        const imageUrls = window.LCNImages?.urls || {};
         nearbyGpsUserIcon = L.icon({
-            iconUrl: window.LCNImages.urls["map-marker-red"],
-            shadowUrl: window.LCNImages.urls["map-marker-shadow"],
+            iconUrl: imageUrls["map-marker-red"] || "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+            shadowUrl: imageUrls["map-marker-shadow"] || "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         });
         nearbyGpsProviderIcon = L.icon({
-            iconUrl: window.LCNImages.urls["map-marker-default"],
-            iconRetinaUrl: window.LCNImages.urls["map-marker-default-retina"],
-            shadowUrl: window.LCNImages.urls["map-marker-shadow"],
+            iconUrl: imageUrls["map-marker-default"] || "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+            iconRetinaUrl: imageUrls["map-marker-default-retina"] || "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+            shadowUrl: imageUrls["map-marker-shadow"] || "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         });
+    }
+    if (!nearbyGpsMarkers) {
         nearbyGpsMarkers = L.layerGroup().addTo(nearbyGpsMap);
     }
     nearbyGpsMarkers.clearLayers();

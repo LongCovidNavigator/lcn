@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="styles/arzt_detail.css?v=42">
     <script src="scripts/image-registry.js?v=5"></script>
-    <script src="scripts/access-nav.js?v=1" defer></script>
+    <script src="scripts/access-nav.js?v=2" defer></script>
 </head>
 
 <script>
@@ -70,6 +70,10 @@
                 </div>
 
             </nav>
+
+            <div class="detail-suggestion-actions is-top">
+                <a class="detail-suggestion-button" data-detail-suggestion-link href="arzt_vorschlagen.html">Angaben zu dieser Ärztin oder diesem Arzt ergänzen <span aria-hidden="true">＋</span></a>
+            </div>
 
             <section class="doctor-detail-profile-card">
                 <div class="doctor-detail-profile-main">
@@ -451,12 +455,16 @@
                 </div>
             </section>
 
+            <div class="detail-suggestion-actions is-bottom">
+                <a class="detail-suggestion-button" data-detail-suggestion-link href="arzt_vorschlagen.html">Ergänzung zu diesem Eintrag vorschlagen <span aria-hidden="true">＋</span></a>
+            </div>
+
         </section>
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>window.LCNImages.configureLeaflet(window.L);</script>
-    <script src="scripts/arzt_detail.js?v=26"></script>
+    <script src="scripts/arzt_detail.js?v=29"></script>
 
     <div id="footer-placeholder"></div>
 

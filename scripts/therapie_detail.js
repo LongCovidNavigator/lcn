@@ -1,7 +1,7 @@
 let currentTreatmentDetail = null;
 let treatmentProviderMap = null;
 let treatmentProviderMarkerLayer = null;
-let currentProviderViewMode = "list";
+let currentProviderViewMode = getSavedProviderViewMode();
 const providerCardBatchSize = 30;
 let visibleProviderCardCount = providerCardBatchSize;
 let currentProviderSortMode = "name";
@@ -10,12 +10,20 @@ let currentProviderLocation = null;
 
 
 document.addEventListener("DOMContentLoaded", function () {
+    setTreatmentDetailSuggestionLinks();
     currentProviderLocation = getSavedSharedTreatmentLocation();
     loadTreatmentDetail();
     setupTreatmentDetailVoteButtons();
     setupProviderViewSwitch();
     setupTreatmentDetailStickyHeader();
 });
+
+function setTreatmentDetailSuggestionLinks() {
+    const treatmentId = getTreatIdFromUrl();
+    if (!treatmentId) return;
+    const href = `behandlung_vorschlagen.html?existing_target_id=${encodeURIComponent(treatmentId)}`;
+    document.querySelectorAll("[data-detail-suggestion-link]").forEach(function (link) { link.href = href; });
+}
 
 async function loadTreatmentDetail() {
     const treatId = getTreatIdFromUrl();
@@ -133,6 +141,7 @@ function setupProviderViewSwitch() {
             }
 
             currentProviderViewMode = nextMode;
+            try { localStorage.setItem("lcn_result_view_preference", nextMode === "list" ? "table" : "cards"); } catch (_) {}
 
             if (currentTreatmentDetail) {
                 renderTreatmentProviders(currentTreatmentDetail.providers);
@@ -212,6 +221,11 @@ function setupProviderViewSwitch() {
             await handleProviderLocationSubmit();
         }
     });
+}
+
+function getSavedProviderViewMode() {
+    try { return localStorage.getItem("lcn_result_view_preference") === "cards" ? "cards" : "list"; }
+    catch (_) { return "list"; }
 }
 
 async function handleTreatmentDetailVote(event) {

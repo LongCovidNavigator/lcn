@@ -1,0 +1,7 @@
+.featured-ranking-heading-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.featured-ranking-heading-row>h3{margin:0!important}
+.featured-ranking-heading-row .featured-page-view-switch{flex:none;margin:0}
+.featured-ranking-group.is-rest .featured-expert-table-experience{display:grid;grid-template-columns:repeat(3,42px) 48px;align-items:center;justify-content:center;gap:3px;width:100%;max-width:100%;min-width:0;white-space:nowrap}
+.featured-ranking-group.is-rest .featured-expert-table-experience .featured-vote-button{display:inline-flex;align-items:center;justify-content:center;width:42px;min-width:42px;max-width:42px;height:19px;padding:1px 3px;overflow:hidden;box-sizing:border-box}
+.featured-ranking-group.is-rest .featured-expert-table-vote-count{display:inline-flex;align-items:center;justify-content:center;width:48px;min-width:48px;max-width:48px;white-space:nowrap;box-sizing:border-box}
+@media(max-width:640px){.featured-ranking-heading-row{align-items:stretch;flex-direction:column}.featured-ranking-heading-row .featured-page-view-switch{align-self:flex-start}}

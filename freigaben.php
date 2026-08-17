@@ -13,6 +13,7 @@ header('Cache-Control: no-store, private');
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/freigaben.css?v=2">
     <script src="scripts/image-registry.js?v=5"></script>
+    <script src="scripts/access-nav.js?v=2" defer></script>
 </head>
 <body>
     <div id="header-placeholder"></div>

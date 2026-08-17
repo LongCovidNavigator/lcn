@@ -17,7 +17,7 @@
 
     <link rel="stylesheet" href="styles/therapie_detail.css?v=23">
     <script src="scripts/image-registry.js?v=5"></script>
-    <script src="scripts/access-nav.js?v=1" defer></script>
+    <script src="scripts/access-nav.js?v=2" defer></script>
 </head>
 
 <script>
@@ -67,6 +67,10 @@
                 </div>
 
             </nav>
+
+            <div class="detail-suggestion-actions is-top">
+                <a class="detail-suggestion-button" data-detail-suggestion-link href="behandlung_vorschlagen.html">Angaben zu dieser Behandlung ergänzen <span aria-hidden="true">＋</span></a>
+            </div>
 
             <section class="treatment-detail-guided-section">
                 <aside class="treatment-detail-question-intro">
@@ -154,12 +158,16 @@
                 Aus den Bewertungen wird keine medizinische Wirksamkeit abgeleitet.
             </section>
 
+            <div class="detail-suggestion-actions is-bottom">
+                <a class="detail-suggestion-button" data-detail-suggestion-link href="behandlung_vorschlagen.html">Ergänzung zu dieser Behandlung vorschlagen <span aria-hidden="true">＋</span></a>
+            </div>
+
         </section>
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>window.LCNImages.configureLeaflet(window.L);</script>
-    <script src="scripts/therapie_detail.js?v=9"></script>
+    <script src="scripts/therapie_detail.js?v=12"></script>
 
     <div id="footer-placeholder"></div>
 

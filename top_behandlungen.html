@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Top-Behandlungen | Long Covid Navigator</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/general.css"><link rel="stylesheet" href="styles/navigation.css"><link rel="stylesheet" href="styles/homepage.css?v=25"><link rel="stylesheet" href="styles/top_recommendation_map.css?v=1"><link rel="stylesheet" href="styles/top_recommendation_map_width.css?v=2"><link rel="stylesheet" href="styles/footer-style.css">
+<script src="scripts/image-registry.js?v=5"></script><script src="scripts/homepage.js?v=25" defer></script><script src="scripts/top_recommendation_map.js?v=3" defer></script><script src="scripts/access-nav.js?v=3" defer></script></head>
+<body><div id="header-placeholder"></div>
+<main class="home-page recommendation-page">
+<header class="recommendation-intro"><p class="eyebrow">Empfehlungen</p><h1>Top-Behandlungen</h1><p>Häufig genannte Behandlungen bei Long Covid – mit Erfahrungen aus der Community, Anbietern und Entfernung zur schnellen Orientierung.</p></header>
+<section class="featured-treatments" aria-labelledby="featured-treatments-heading"><div class="featured-treatments-panel">
+<div class="featured-page-heading-row"><div class="section-heading featured-treatments-heading"><h2 id="featured-treatments-heading">Behandlungen im Überblick</h2><p class="featured-treatments-note">Redaktionelle Auswahl – keine Aussage über Wirksamkeit und kein Ersatz für medizinische Beratung.</p></div><div class="featured-page-view-switch" aria-label="Ansicht wechseln"><button type="button" data-featured-treatment-view="cards">Kacheln</button><button type="button" data-featured-treatment-view="table">Tabelle</button></div></div>
+<div id="featured-treatments-list" class="featured-treatments-list" data-initial-count="999" data-full-view-switch="true" aria-live="polite"><p class="featured-treatments-status">Behandlungen werden geladen …</p></div>
+<div class="featured-treatments-actions"><a class="home-button card-button featured-treatments-all" href="therapien_karte.html">Alle Behandlungen durchsuchen <span aria-hidden="true">→</span></a></div>
+</div></section></main><div id="footer-placeholder"></div>
+<script>Promise.all([fetch('components/header.html').then(r=>r.text()),fetch('components/footer.html').then(r=>r.text())]).then(([h,f])=>{document.getElementById('header-placeholder').innerHTML=h;document.getElementById('footer-placeholder').innerHTML=f})</script></body></html>
