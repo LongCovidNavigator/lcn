@@ -434,6 +434,7 @@ function setupDoctorResultEventDelegation() {
 
     if (tableResultsBody) {
         tableResultsBody.addEventListener("click", handleDoctorCompareClick);
+        tableResultsBody.addEventListener("click", handleDoctorCardVote);
     }
 
     if (loadMoreButton) {
@@ -1441,7 +1442,7 @@ function buildDoctorCardHtml(doctor, index) {
                     <div class="doctor-card-meta">
                         ${label ? `<span class="doctor-card-tag">🏥 ${label}</span>` : ""}
 						${specialtyChipsHtml}
-						${insuranceTags || `<span class="doctor-card-tag">Versicherung k. A.</span>`}
+						${insuranceTags || `<span class="doctor-card-tag">Versorgung: Keine Angabe vorhanden</span>`}
                     </div>
                 </div>
 
@@ -1786,33 +1787,28 @@ function buildDoctorTableLocationHtml(doctor) {
 
 function buildDoctorTableExperienceHtml(doctor) {
     const stats = getDoctorVoteStats(doctor);
-
-    if (stats.totalVotes === 0) {
-        return `<span class="doctor-table-muted">Noch keine Bewertungen</span>`;
-    }
-
-    if (window.matchMedia("(max-width: 760px)").matches) {
-        const showsNegative = currentDoctorSortKey === "negative_ratio";
-        const ratio = showsNegative ? stats.contraRatio : stats.proRatio;
-        const badgeClass = showsNegative ? "doctor-table-badge-negative" : "doctor-table-badge-positive";
-        const prefix = showsNegative ? "-" : "+";
-
-        return `
-            <div class="doctor-table-experience-grid">
-                <span class="doctor-table-experience-value ${badgeClass}">${prefix}${ratio}%</span>
-                <span class="doctor-table-vote-count">(n=${stats.totalVotes})</span>
-            </div>
-        `;
-    }
+    const ownVote = ["pro", "neutral", "contra"].includes(doctor.own_vote) ? doctor.own_vote : "";
 
     return `
-        <div class="doctor-table-experience-grid">
-            <span class="doctor-table-experience-value doctor-table-badge-positive">+${stats.proRatio}%</span>
-            <span class="doctor-table-experience-value doctor-table-badge-neutral">=${stats.neutralRatio}%</span>
-            <span class="doctor-table-experience-value doctor-table-badge-negative">-${stats.contraRatio}%</span>
+        <div class="doctor-table-experience-grid${ownVote ? " has-selection" : ""}" data-own-vote="${ownVote}">
+            ${buildDoctorTableVoteButton(doctor.dr_id, "pro", "+", stats.proRatio, ownVote, "Positive Erfahrung")}
+            ${buildDoctorTableVoteButton(doctor.dr_id, "neutral", "=", stats.neutralRatio, ownVote, "Neutrale Erfahrung")}
+            ${buildDoctorTableVoteButton(doctor.dr_id, "contra", "−", stats.contraRatio, ownVote, "Negative Erfahrung")}
             <span class="doctor-table-vote-count">(n=${stats.totalVotes})</span>
         </div>
     `;
+}
+
+function buildDoctorTableVoteButton(drId, type, prefix, ratio, ownVote, label) {
+    const badgeClass = type === "pro"
+        ? "doctor-table-badge-positive"
+        : type === "neutral" ? "doctor-table-badge-neutral" : "doctor-table-badge-negative";
+    const isSelected = ownVote === type;
+
+    return `<button type="button"
+                    class="doctor-table-experience-value doctor-table-vote-button doctor-card-vote-button ${badgeClass}${isSelected ? " is-selected" : ""}"
+                    data-dr-id="${escapeHtml(drId)}" data-type="${type}" aria-pressed="${isSelected}"
+                    aria-label="${label}: ${ratio} Prozent. Jetzt abstimmen">${prefix}${ratio}%</button>`;
 }
 
 function buildDoctorTableInsuranceHtml(doctor) {
@@ -1826,7 +1822,9 @@ function buildDoctorTableInsuranceHtml(doctor) {
         badges.push(`<span class="doctor-table-badge">PKV</span>`);
     }
 
-    return badges.length > 0 ? `<div class="doctor-table-badge-row">${badges.join("")}</div>` : "";
+    return badges.length > 0
+        ? `<div class="doctor-table-badge-row">${badges.join("")}</div>`
+        : '<span class="doctor-table-insurance-empty">Keine Angabe vorhanden</span>';
 }
 
 function buildDoctorTableContactHtml(doctor) {
@@ -1961,7 +1959,7 @@ function renderDoctorCompareSelection() {
 }
 
 async function handleDoctorCardVote(event) {
-    const button = event.target.closest(".doctor-card-vote-button");
+    const button = event.target.closest(".doctor-card-vote-button, .doctor-table-vote-button");
 
     if (!button) {
         return;
@@ -1975,8 +1973,8 @@ async function handleDoctorCardVote(event) {
         return;
     }
 
-    const cardElement = button.closest(".doctor-card");
-    const buttonsInCard = cardElement ? cardElement.querySelectorAll(".doctor-card-vote-button") : [button];
+    const voteContainer = button.closest(".doctor-card, tr");
+    const buttonsInCard = voteContainer ? voteContainer.querySelectorAll(".doctor-card-vote-button, .doctor-table-vote-button") : [button];
 
     buttonsInCard.forEach(function (cardButton) {
         cardButton.disabled = true;

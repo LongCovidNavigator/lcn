@@ -1630,7 +1630,7 @@
 
 .doctor-table-experience-grid {
     display: grid;
-    grid-template-columns: 42px 42px 42px auto;
+    grid-template-columns: 42px 42px 42px 48px;
     align-items: center;
     justify-content: center;
     column-gap: 4px;
@@ -1641,16 +1641,47 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 17px;
+    width: 42px;
+    min-width: 42px;
+    height: 19px;
     padding: 1px 4px;
     border: 1px solid #d8e0ea;
     border-radius: 999px;
     font-size: 0.62rem;
     font-weight: 600;
     line-height: 1;
+    box-sizing: border-box;
 }
 
+.doctor-table-insurance-note { font-size: .66rem; font-weight: 500; opacity: .9; white-space: nowrap; }
+.doctor-table-insurance-empty { display: inline-block; color: #66758f; font-size: .64rem; font-weight: 400; line-height: 1.2; }
+
+button.doctor-table-experience-value {
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease, opacity .15s ease;
+}
+
+button.doctor-table-experience-value:hover,
+button.doctor-table-experience-value:focus-visible {
+    border-color: currentColor;
+    box-shadow: 0 0 0 2px rgba(0, 64, 128, .1);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+button.doctor-table-experience-value.is-selected {
+    box-shadow: 0 0 0 1px currentColor;
+}
+
+.doctor-table-experience-grid.has-selection button.doctor-table-experience-value:not(.is-selected) { opacity: .55; }
+button.doctor-table-experience-value.is-saving { cursor: wait; opacity: .55; }
+
 .doctor-table-vote-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
     color: #66758f;
     font-size: 0.64rem;
     font-weight: 400;

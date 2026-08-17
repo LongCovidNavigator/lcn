@@ -14,7 +14,7 @@
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
-    <link rel="stylesheet" href="styles/aerzte_karte.css?v=8">
+    <link rel="stylesheet" href="styles/aerzte_karte.css?v=12">
     <script src="scripts/image-registry.js?v=5"></script>
 </head>
 
@@ -431,7 +431,7 @@
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="name">Ärzt:in <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 						<th><button id="doctor-table-experience-button" class="doctor-table-sort-button" type="button" data-table-sort-key="experience"><span id="doctor-table-experience-heading">Erfahrung</span> <span class="doctor-table-header-note">(n = Votes)</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="location">Standort <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
-						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="insurance">Versorgung <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="insurance">Versorgung <span class="doctor-table-insurance-note">(GKV, PKV)</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="contact">Kontakt <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 					</tr>
 				</thead>
@@ -447,7 +447,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 	<script>window.LCNImages.configureLeaflet(window.L);</script>
-		<script src="scripts/aerzte_karte.js?v=12"></script>
+		<script src="scripts/aerzte_karte.js?v=16"></script>
 
     <div id="footer-placeholder"></div>
 

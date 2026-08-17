@@ -83,7 +83,11 @@ function lcnExistingVoterKey(): ?string
     $secret = lcnEnv('LCN_VOTER_SECRET');
 
     if ($secret === null || strlen($secret) < 32) {
-        throw new RuntimeException('LCN voter secret is missing or too short.');
+        // Reading public data must not depend on the optional voting identity
+        // configuration. Without a usable secret we simply cannot associate an
+        // existing browser cookie with its own votes. Vote writes remain
+        // fail-closed in lcnVoterKey().
+        return null;
     }
 
     return hash_hmac('sha256', $token, $secret);

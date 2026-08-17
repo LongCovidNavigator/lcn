@@ -60,7 +60,13 @@ function lcnLoadEnvFile(): void
             $value = substr($value, 1, -1);
         }
 
-        if (getenv($key) === false) {
+        $environmentValue = getenv($key);
+
+        // An empty process variable is equivalent to "not configured". This
+        // matters with Apache/XAMPP, which may expose a declared but empty
+        // variable and would otherwise mask the value from the protected file.
+        // A non-empty deployment variable still takes precedence.
+        if ($environmentValue === false || trim((string)$environmentValue) === '') {
             putenv($key . '=' . $value);
         }
 

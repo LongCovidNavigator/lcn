@@ -9,10 +9,13 @@
 
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css">
-    <link rel="stylesheet" href="styles/homepage.css?v=4">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="styles/homepage.css?v=16">
     <link rel="stylesheet" href="styles/footer-style.css">
     <script src="scripts/image-registry.js?v=5"></script>
-    <script src="scripts/homepage.js?v=3" defer></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="scripts/homepage.js?v=17" defer></script>
 </head>
 
 <body>
@@ -249,6 +252,39 @@
             </div>
         </section>
 
+        <section class="nearby-gps" aria-labelledby="nearby-gps-heading">
+            <div class="nearby-gps-panel">
+                <div class="section-heading nearby-gps-heading">
+                    <p class="eyebrow">Hilfe vor Ort</p>
+                    <h2 id="nearby-gps-heading">Hausärztliche Versorgung in deiner Nähe</h2>
+                    <p>Gib deine Adresse oder deinen Ort ein und finde Anbieter der Behandlung „Hausärztliche Behandlung“ im Umkreis.</p>
+                </div>
+                <form id="nearby-gps-form" class="nearby-gps-search">
+                    <label for="nearby-gps-location">Adresse oder Ort</label>
+                    <div class="nearby-gps-search-row">
+                        <input id="nearby-gps-location" type="text" autocomplete="street-address" placeholder="z. B. 50677 Köln" required>
+                        <label class="nearby-gps-radius" for="nearby-gps-radius">
+                            <span>Radius</span>
+                            <span class="nearby-gps-radius-input-wrap">
+                                <input id="nearby-gps-radius" type="number" min="1" max="500" step="1" value="50" inputmode="numeric">
+                                <span>km</span>
+                            </span>
+                        </label>
+                        <button class="home-button primary-button" type="submit">In der Nähe suchen</button>
+                    </div>
+                    <p id="nearby-gps-status" class="nearby-gps-status" aria-live="polite">Hausärztliche Anlaufstellen in Deutschland werden geladen …</p>
+                </form>
+                <div id="nearby-gps-results" class="nearby-gps-results" hidden>
+                    <div id="nearby-gps-map" class="nearby-gps-map" aria-label="Karte mit Hausärzt:innen in der Nähe"></div>
+                    <div>
+                        <h3 id="nearby-gps-results-heading">Hausärztliche Anlaufstellen in Deutschland</h3>
+                        <div id="nearby-gps-list" class="nearby-gps-list"></div>
+                        <a id="nearby-gps-all" class="home-button card-button nearby-gps-all" href="therapie_detail.html?treat_id=409">Hausärztliche Behandlung öffnen <span aria-hidden="true">→</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="featured-treatments" aria-labelledby="featured-treatments-heading">
             <div class="featured-treatments-panel">
                 <div class="section-heading featured-treatments-heading">
@@ -293,6 +329,9 @@
                         <span>Weitere anzeigen</span>
                         <span class="featured-experts-chevron" aria-hidden="true">⌄</span>
                     </button>
+                    <a class="home-button card-button featured-experts-all" href="aerzte_karte.html">
+                        Alle Ärzt:innen anzeigen <span aria-hidden="true">→</span>
+                    </a>
                 </div>
             </div>
         </section>
