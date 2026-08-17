@@ -1067,6 +1067,17 @@ function bindTreatmentTableContainerEvents() {
 
         if (compareButton) {
             handleTreatmentCompareClick(compareButton);
+            return;
+        }
+
+        const voteButton = event.target.closest(".treatment-table-vote-button");
+        if (voteButton) {
+            submitTreatmentVote(
+                Number(voteButton.dataset.treatId || 0),
+                voteButton.dataset.treatmentName || "Behandlung",
+                voteButton.dataset.voteType || "",
+                voteButton
+            );
         }
     });
 }
@@ -1889,10 +1900,10 @@ async function submitTreatmentVote(treatId, treatmentName, voteType, button) {
         return;
     }
 
-    const cardElement = button.closest(".treatment-card");
-    const buttonsInCard = cardElement
-        ? cardElement.querySelectorAll(".treatment-card-vote-button")
-        : [];
+    const voteContainer = button.closest(".treatment-card, tr");
+    const buttonsInCard = voteContainer
+        ? voteContainer.querySelectorAll(".treatment-card-vote-button, .treatment-table-vote-button")
+        : [button];
 
     buttonsInCard.forEach(function (cardButton) {
         cardButton.disabled = true;
@@ -2004,10 +2015,6 @@ function buildTreatmentCategoryHtml(treatment) {
 function buildTreatmentExperienceHtml(treatment, mode = "all") {
     const totalVotes = Number(treatment.total_votes ?? 0);
 
-    if (totalVotes === 0) {
-        return `<span class="treatment-table-muted">Noch keine Bewertungen</span>`;
-    }
-
     const positiveRatio = Number(treatment.positive_ratio ?? 0);
     const neutralRatio = Number(treatment.neutral_ratio ?? 0);
     const negativeRatio = Number(treatment.negative_ratio ?? 0);
@@ -2018,22 +2025,30 @@ function buildTreatmentExperienceHtml(treatment, mode = "all") {
         const badgeClass = isNegative ? "treatment-table-badge-negative" : "treatment-table-badge-positive";
         const prefix = isNegative ? "-" : "+";
 
-        return `
-            <div class="treatment-table-experience-grid">
-                <span class="treatment-table-experience-value ${badgeClass}">${prefix}${ratio}%</span>
-                <span class="treatment-table-vote-count">(n=${totalVotes})</span>
-            </div>
-        `;
+        return `<div class="treatment-table-experience-grid is-single${treatment.own_vote ? " has-selection" : ""}">
+            ${buildTreatmentTableVoteButton(treatment, isNegative ? "contra" : "pro", prefix, ratio, badgeClass)}
+            <span class="treatment-table-vote-count">(n=${totalVotes})</span>
+        </div>`;
     }
 
     return `
-        <div class="treatment-table-experience-grid">
-            <span class="treatment-table-experience-value treatment-table-badge-positive">+${positiveRatio}%</span>
-            <span class="treatment-table-experience-value treatment-table-badge-neutral">=${neutralRatio}%</span>
-            <span class="treatment-table-experience-value treatment-table-badge-negative">-${negativeRatio}%</span>
+        <div class="treatment-table-experience-grid${treatment.own_vote ? " has-selection" : ""}">
+            ${buildTreatmentTableVoteButton(treatment, "pro", "+", positiveRatio, "treatment-table-badge-positive")}
+            ${buildTreatmentTableVoteButton(treatment, "neutral", "=", neutralRatio, "treatment-table-badge-neutral")}
+            ${buildTreatmentTableVoteButton(treatment, "contra", "−", negativeRatio, "treatment-table-badge-negative")}
             <span class="treatment-table-vote-count">(n=${totalVotes})</span>
         </div>
     `;
+}
+
+function buildTreatmentTableVoteButton(treatment, type, prefix, ratio, badgeClass) {
+    const selected = treatment.own_vote === type;
+    const labels = { pro: "Positive", neutral: "Neutrale", contra: "Negative" };
+    return `<button type="button"
+        class="treatment-table-experience-value treatment-table-vote-button ${badgeClass}${selected ? " is-selected" : ""}"
+        data-treat-id="${escapeHtml(treatment.treat_id)}" data-treatment-name="${escapeHtml(treatment.behandlung || "Behandlung")}"
+        data-vote-type="${type}" aria-pressed="${selected}"
+        aria-label="${labels[type]} Erfahrung: ${ratio} Prozent. Jetzt abstimmen">${prefix}${ratio}%</button>`;
 }
 
 function buildTreatmentProviderHtml(treatment) {
