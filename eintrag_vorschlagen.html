@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Eintrag ergänzen – Long Covid Navigator</title>
+    <script>
+        const target = new URLSearchParams(location.search).get("type") === "treatment"
+            ? "behandlung_vorschlagen.html"
+            : "arzt_vorschlagen.html";
+        location.replace(target);
+    </script>
+</head>
+<body><p>Weiterleitung zum passenden Formular …</p></body>
+</html>

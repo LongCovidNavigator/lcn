@@ -16,6 +16,7 @@
     >
     <link rel="stylesheet" href="styles/aerzte_karte.css?v=12">
     <script src="scripts/image-registry.js?v=5"></script>
+    <script src="scripts/access-nav.js?v=1" defer></script>
 </head>
 
 <script>
@@ -410,7 +411,7 @@
 			</div>
 		</section>
 
-		<section id="doctor-card-results-section" class="doctor-card-results-section">
+        <section id="doctor-card-results-section" class="doctor-card-results-section">
 
             <div id="doctor-card-results" class="doctor-card-grid">
                 <p class="doctor-empty-state">Noch keine Ergebnisse geladen.</p>
@@ -421,6 +422,11 @@
                 </button>
             </div>
         </section>
+
+        <aside class="doctor-suggest-entry" aria-label="Ärztin, Arzt oder Praxis ergänzen">
+            <div><strong>Fehlt eine Ärztin, ein Arzt oder eine Praxis?</strong><span>Teile die wichtigsten Informationen und auf Wunsch direkt deine Erfahrung.</span></div>
+            <a href="arzt_vorschlagen.html">Neuen Eintrag vorschlagen →</a>
+        </aside>
 
         <section id="doctor-table-results-section" class="doctor-map-results-section is-hidden">
 
@@ -460,7 +466,7 @@
     </script>
 
     <script>
-        fetch("components/header.html?v=2")
+        fetch("components/header.html?v=4")
             .then(response => response.text())
             .then(data => {
                 document.getElementById("header-placeholder").innerHTML = data;

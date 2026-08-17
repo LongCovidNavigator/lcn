@@ -17,6 +17,7 @@
 
     <link rel="stylesheet" href="styles/therapien_karte.css?v=41">
     <script src="scripts/image-registry.js?v=5"></script>
+    <script src="scripts/access-nav.js?v=1" defer></script>
 </head>
 
 <script>
@@ -394,6 +395,11 @@
             </div>
         </section>
 
+        <aside class="treatment-suggest-entry" aria-label="Behandlung ergänzen">
+            <div><strong>Fehlt eine Behandlung?</strong><span>Ergänze Name, Quelle und alles, was du über die Behandlung weißt.</span></div>
+            <a href="behandlung_vorschlagen.html">Behandlung vorschlagen →</a>
+        </aside>
+
         <section id="treatment-table-results-section" class="treatment-table-results-section is-hidden">
             <table class="treatment-results-table">
                 <thead>
@@ -431,7 +437,7 @@
     </script>
 
     <script>
-        fetch("components/header.html?v=2")
+        fetch("components/header.html?v=4")
             .then(response => response.text())
             .then(data => {
                 document.getElementById("header-placeholder").innerHTML = data;

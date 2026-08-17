@@ -1900,6 +1900,7 @@ body {
 .nearby-gp-card h4 a:hover { color: var(--home-teal-dark); text-decoration: underline; }
 .nearby-gp-card p { margin: 3px 0 0; color: var(--home-muted); font-size: .72rem; line-height: 1.35; }
 .nearby-gps-all { margin-top: 12px; min-height: 36px; padding: 7px 14px; }
+.nearby-gps-suggest { margin-left: 6px; background: #007f7b !important; border-color: #007f7b !important; }
 .nearby-gps-map .leaflet-popup-content { color: var(--home-text); font-family: "Nunito Sans", sans-serif; }
 .nearby-gps-map .leaflet-popup-content a { color: var(--home-teal-dark); font-weight: 800; }
 .nearby-gps-map .leaflet-popup-content a { color: var(--home-blue-dark); }

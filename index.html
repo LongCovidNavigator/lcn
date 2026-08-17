@@ -16,6 +16,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="scripts/homepage.js?v=17" defer></script>
+    <script src="scripts/access-nav.js?v=1" defer></script>
 </head>
 
 <body>
@@ -28,6 +29,9 @@
         <nav class="home-nav" aria-label="Hauptnavigation">
             <a href="therapien_karte.html">Therapien suchen</a>
             <a href="aerzte_karte.html">Ärzt:innen finden</a>
+            <a href="arzt_vorschlagen.html">Ärzt:in ergänzen</a>
+            <a href="behandlung_vorschlagen.html">Behandlung ergänzen</a>
+            <a href="freigaben.php" data-admin-only hidden>Freigaben</a>
         </nav>
     </header>
 
@@ -280,6 +284,7 @@
                         <h3 id="nearby-gps-results-heading">Hausärztliche Anlaufstellen in Deutschland</h3>
                         <div id="nearby-gps-list" class="nearby-gps-list"></div>
                         <a id="nearby-gps-all" class="home-button card-button nearby-gps-all" href="therapie_detail.html?treat_id=409">Hausärztliche Behandlung öffnen <span aria-hidden="true">→</span></a>
+                        <a class="home-button card-button nearby-gps-all nearby-gps-suggest" href="arzt_vorschlagen.html">Fehlt deine Hausarztpraxis? Jetzt ergänzen <span aria-hidden="true">＋</span></a>
                     </div>
                 </div>
             </div>

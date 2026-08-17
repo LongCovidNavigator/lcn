@@ -2608,3 +2608,4 @@ body.treatment-map-page {
         margin-bottom: 3px;
     }
 }
+.treatment-suggest-entry{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:18px 0 24px;padding:20px 22px;border:1px solid #bcd9e6;border-radius:12px;background:linear-gradient(135deg,#e7f5f5,#fff);color:#173b55}.treatment-suggest-entry strong,.treatment-suggest-entry span{display:block}.treatment-suggest-entry span{margin-top:4px;color:#5c7381;font-size:.84rem}.treatment-suggest-entry a{flex:none;padding:11px 15px;border-radius:8px;background:#123f63;color:#fff;font-weight:800;text-decoration:none}@media(max-width:620px){.treatment-suggest-entry{align-items:stretch;flex-direction:column}.treatment-suggest-entry a{text-align:center}}

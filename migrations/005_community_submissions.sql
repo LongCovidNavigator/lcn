@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS community_submissions (
+    submission_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    entity_type ENUM('doctor', 'treatment') NOT NULL,
+    review_status ENUM('pending', 'reviewing', 'approved', 'rejected', 'duplicate') NOT NULL DEFAULT 'pending',
+    name VARCHAR(180) NOT NULL,
+    website VARCHAR(500) NOT NULL,
+    email VARCHAR(254) NULL,
+    phone VARCHAR(60) NULL,
+    city VARCHAR(120) NULL,
+    experience ENUM('pro', 'neutral', 'contra') NULL,
+    payload JSON NOT NULL,
+    submitter_key CHAR(64) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at TIMESTAMP NULL,
+    approved_target_id BIGINT UNSIGNED NULL,
+    reviewer_note TEXT NULL,
+    PRIMARY KEY (submission_id),
+    KEY idx_community_submissions_review (review_status, entity_type, created_at),
+    KEY idx_community_submissions_submitter (submitter_key, created_at),
+    KEY idx_community_submissions_name (entity_type, name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -2953,3 +2953,4 @@ button.doctor-table-experience-value.is-saving { cursor: wait; opacity: .55; }
    Bis einschließlich 430 px
    Keine zusätzlichen Abweichungen vom Mobile-Bereich.
 ========================================================= */
+.doctor-suggest-entry{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:18px 0 24px;padding:20px 22px;border:1px solid #bcd9e6;border-radius:12px;background:linear-gradient(135deg,#e7f5f5,#fff);color:#173b55}.doctor-suggest-entry strong,.doctor-suggest-entry span{display:block}.doctor-suggest-entry span{margin-top:4px;color:#5c7381;font-size:.84rem}.doctor-suggest-entry a{flex:none;padding:11px 15px;border-radius:8px;background:#123f63;color:#fff;font-weight:800;text-decoration:none}@media(max-width:620px){.doctor-suggest-entry{align-items:stretch;flex-direction:column}.doctor-suggest-entry a{text-align:center}}

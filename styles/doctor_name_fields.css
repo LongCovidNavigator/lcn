@@ -1,0 +1,13 @@
+.doctor-entry-form .entry-card-grid{grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);align-items:start}
+.doctor-side-cards{display:grid;gap:12px;align-content:start}
+.doctor-name-fields{grid-template-columns:minmax(105px,.7fr) minmax(140px,1fr) minmax(140px,1fr);margin:0;padding:0;border:0}
+.doctor-name-fields legend{grid-column:1/-1;margin-bottom:7px;padding:0;color:#173f5b;font-weight:900}
+.doctor-name-fields label span{color:#6b7d88;font-size:.72rem;font-weight:400}
+.doctor-entry-form .duplicate-check{margin:12px 0 16px}
+.doctor-entry-form .duplicate-check article{grid-template-columns:minmax(180px,1fr) minmax(150px,auto);gap:6px 16px;padding:12px}
+.doctor-entry-form .duplicate-check article>div{grid-column:1;grid-row:1/3;min-width:0}
+.doctor-entry-form .duplicate-check article>a,.doctor-entry-form .duplicate-check article>button{grid-column:2;width:100%;text-align:center}
+.doctor-entry-form .duplicate-check article b{font-size:.9rem;line-height:1.25}
+.doctor-entry-form .duplicate-check article small{margin-top:4px;font-size:.72rem;line-height:1.35}
+@media(max-width:900px){.doctor-entry-form .entry-card-grid{grid-template-columns:1fr}.doctor-side-cards{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.doctor-entry-form .entry-card-grid,.doctor-side-cards,.doctor-name-fields{grid-template-columns:1fr}.doctor-name-fields label:last-child{grid-column:auto}.doctor-entry-form .duplicate-check article{grid-template-columns:1fr}.doctor-entry-form .duplicate-check article>div,.doctor-entry-form .duplicate-check article>a,.doctor-entry-form .duplicate-check article>button{grid-column:1;grid-row:auto}}
