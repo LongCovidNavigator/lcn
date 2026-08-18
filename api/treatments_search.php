@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/_voting.php';
+require_once __DIR__ . '/_search_normalization.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -376,6 +377,10 @@ try {
 
     $aliasSuggest = getStringParam('alias_suggest');
     $aliasSuggestQuery = getStringParam('q');
+    $normalizedSearch = lcnNormalizeSearchTerm($search);
+    $normalizedAliasSuggestQuery = lcnNormalizeSearchTerm($aliasSuggestQuery);
+    $normalizedTreatmentNameSql = lcnNormalizedSearchSql('t.behandlung');
+    $normalizedAliasSql = lcnNormalizedSearchSql('a.alias');
 
     $providerCity = getStringParam('provider_city');
     $providerCity = preg_replace('/\s+/', ' ', $providerCity);
@@ -452,12 +457,12 @@ try {
                         'basic' AS match_mode,
                         'treatment_name' AS match_type
                     FROM tbl_treatments_03 t
-                    WHERE t.behandlung COLLATE utf8mb4_unicode_ci LIKE :suggest_search
+                    WHERE {$normalizedTreatmentNameSql} LIKE :suggest_search
                     ORDER BY t.behandlung ASC
                     LIMIT 20
                 ");
 
-                $suggestStmt->bindValue(':suggest_search', '%' . $aliasSuggestQuery . '%');
+                $suggestStmt->bindValue(':suggest_search', '%' . $normalizedAliasSuggestQuery . '%');
                 $suggestStmt->execute();
                 $suggestions = $suggestStmt->fetchAll();
             } else {
@@ -483,20 +488,20 @@ try {
                         ON cta.alias_id = a.alias_id
                     INNER JOIN tbl_treatments_03 t
                         ON t.treat_id = cta.treat_id
-                    WHERE a.alias COLLATE utf8mb4_unicode_ci LIKE :suggest_search
+                    WHERE {$normalizedAliasSql} LIKE :suggest_search
                     {$aliasModeFilter}
                     GROUP BY
                         a.alias_id,
                         a.alias,
                         a.alias_type
                     ORDER BY
-                        CASE WHEN a.alias COLLATE utf8mb4_unicode_ci = :suggest_exact THEN 0 ELSE 1 END,
+                        CASE WHEN {$normalizedAliasSql} = :suggest_exact THEN 0 ELSE 1 END,
                         a.alias ASC
                     LIMIT 20
                 ");
 
-                $suggestStmt->bindValue(':suggest_search', '%' . $aliasSuggestQuery . '%');
-                $suggestStmt->bindValue(':suggest_exact', $aliasSuggestQuery);
+                $suggestStmt->bindValue(':suggest_search', '%' . $normalizedAliasSuggestQuery . '%');
+                $suggestStmt->bindValue(':suggest_exact', $normalizedAliasSuggestQuery);
                 $suggestStmt->bindValue(':suggest_mode', $searchMode);
                 $suggestStmt->execute();
                 $suggestions = $suggestStmt->fetchAll();
@@ -523,15 +528,15 @@ try {
                     t.behandlung,
                     t.typ
                 FROM tbl_treatments_03 t
-                WHERE t.behandlung COLLATE utf8mb4_unicode_ci LIKE :suggest_search
+                WHERE {$normalizedTreatmentNameSql} LIKE :suggest_search
                 ORDER BY
-                    CASE WHEN t.behandlung COLLATE utf8mb4_unicode_ci = :suggest_exact THEN 0 ELSE 1 END,
+                    CASE WHEN {$normalizedTreatmentNameSql} = :suggest_exact THEN 0 ELSE 1 END,
                     t.behandlung ASC
                 LIMIT 30
             ");
 
-            $directStmt->bindValue(':suggest_search', '%' . $aliasSuggestQuery . '%');
-            $directStmt->bindValue(':suggest_exact', $aliasSuggestQuery);
+            $directStmt->bindValue(':suggest_search', '%' . $normalizedAliasSuggestQuery . '%');
+            $directStmt->bindValue(':suggest_exact', $normalizedAliasSuggestQuery);
             $directStmt->execute();
 
             foreach ($directStmt->fetchAll() as $row) {
@@ -561,17 +566,17 @@ try {
                     ON c.alias_id = a.alias_id
                 INNER JOIN tbl_treatments_03 t
                     ON t.treat_id = c.treat_id
-                WHERE a.alias COLLATE utf8mb4_unicode_ci LIKE :suggest_search
+                WHERE {$normalizedAliasSql} LIKE :suggest_search
                 ORDER BY
-                    CASE WHEN a.alias COLLATE utf8mb4_unicode_ci = :suggest_exact THEN 0 ELSE 1 END,
+                    CASE WHEN {$normalizedAliasSql} = :suggest_exact THEN 0 ELSE 1 END,
                     a.alias ASC,
                     c.sort_order ASC,
                     t.behandlung ASC
                 LIMIT 500
             ");
 
-            $aliasStmt->bindValue(':suggest_search', '%' . $aliasSuggestQuery . '%');
-            $aliasStmt->bindValue(':suggest_exact', $aliasSuggestQuery);
+            $aliasStmt->bindValue(':suggest_search', '%' . $normalizedAliasSuggestQuery . '%');
+            $aliasStmt->bindValue(':suggest_exact', $normalizedAliasSuggestQuery);
             $aliasStmt->execute();
 
             $aliasGroups = [];
@@ -895,9 +900,7 @@ try {
 
 	if ($treatId <= 0) {
 		if (!$hasTreatIdsParam && $search !== '') {
-			$searchWhere = "
-				results.behandlung COLLATE utf8mb4_unicode_ci LIKE :search
-			";
+			$searchWhere = lcnNormalizedSearchSql('results.behandlung') . " LIKE :search";
 
 			if ($searchMode === 'alias_direct') {
 				$searchWhere .= "
@@ -907,7 +910,7 @@ try {
 						INNER JOIN tbl_aliases_03 a
 							ON a.alias_id = cta.alias_id
 						WHERE cta.treat_id = results.treat_id
-						  AND a.alias COLLATE utf8mb4_unicode_ci LIKE :search
+						  AND ".lcnNormalizedSearchSql('a.alias')." LIKE :search
 						  AND (" . getAliasDirectSafetySql('a', 'cta') . ")
 					)
 				";
@@ -919,13 +922,13 @@ try {
 						INNER JOIN tbl_aliases_03 a
 							ON a.alias_id = cta.alias_id
 						WHERE cta.treat_id = results.treat_id
-						  AND a.alias COLLATE utf8mb4_unicode_ci LIKE :search
+						  AND ".lcnNormalizedSearchSql('a.alias')." LIKE :search
 					)
 				";
 			}
 
 			$whereParts[] = "({$searchWhere})";
-			$params[':search'] = '%' . $search . '%';
+			$params[':search'] = '%' . $normalizedSearch . '%';
 		}
 
 		if ($category !== '') {

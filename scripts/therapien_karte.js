@@ -90,6 +90,7 @@ async function initTreatmentPage() {
     bindTreatmentCardContainerEvents();
     bindTreatmentTableContainerEvents();
     bindTreatmentMapEvents();
+    document.getElementById("treatment-community-status-select")?.addEventListener("change",loadTreatmentResults);
     window.addEventListener("resize", function () {
         clearTimeout(treatmentTableResizeTimer);
         treatmentTableResizeTimer = setTimeout(function () {
@@ -123,9 +124,10 @@ async function loadTreatmentResults() {
     try {
         const loadsMapImmediately = getTreatmentFilters().sortKey === "distance";
         const url = buildTreatmentSearchUrl(loadsMapImmediately);
-        const response = await fetch(url, {
-            signal: treatmentSearchController.signal
-        });
+        const statusFilter=document.getElementById("treatment-community-status-select")?.value||"all";
+        const communitySearch=document.getElementById("treatment-alias-smart-input")?.value?.trim()||"";
+        const communityUrl=`api/community_public.php?entity_type=treatment&search=${encodeURIComponent(communitySearch)}`;
+        const [response,communityResponse] = await Promise.all([fetch(url,{signal:treatmentSearchController.signal}),statusFilter==="approved"?Promise.resolve(null):fetch(communityUrl,{signal:treatmentSearchController.signal})]);
 
         if (!response.ok) {
             throw new Error("Fehler beim Laden der Therapiedaten.");
@@ -142,7 +144,18 @@ async function loadTreatmentResults() {
         }
 
         
-		currentTreatments = data.items.map(normalizeTreatment);
+		const communityData=communityResponse&&communityResponse.ok?await communityResponse.json():{items:[]};
+		const regularItems=statusFilter==="unreviewed"?[]:data.items;
+		let communityItems=Array.isArray(communityData.items)?communityData.items:[];
+		const activeFilters=getTreatmentFilters();
+		communityItems=communityItems.filter(function(item){
+			if(activeFilters.category&&String(item.typ||"")!==activeFilters.category)return false;
+			if(Number(item.positive_ratio||0)<activeFilters.minPositiveRatio||Number(item.negative_ratio||0)>activeFilters.maxNegativeRatio)return false;
+			if(activeFilters.minProviderCount>0||activeFilters.onlyWithProvider||activeFilters.acceptsGkv)return false;
+			return true;
+		});
+		const combined=statusFilter==="approved"?regularItems:regularItems.concat(communityItems);
+		currentTreatments = combined.map(normalizeTreatment);
         visibleTreatmentCardCount = treatmentCardBatchSize;
         syncSelectedTreatmentsWithCurrentResults();
 		currentCategories = Array.isArray(data.categories) ? data.categories : [];
@@ -153,8 +166,8 @@ async function loadTreatmentResults() {
 		populateTreatmentCategorySelect(currentCategories);
 
         updateTreatmentResultsCount(
-            Number(data.count ?? currentTreatments.length),
-            Number(data.total_count ?? currentTreatments.length)
+            currentTreatments.length,
+            currentTreatments.length
         );
 
         refreshTreatmentDisplay();
@@ -336,6 +349,9 @@ function normalizeTreatment(treatment) {
         neutral_ratio: Number(treatment.neutral_ratio ?? 0),
         negative_ratio: Number(treatment.negative_ratio ?? 0),
         own_vote: ['pro', 'neutral', 'contra'].includes(treatment.own_vote) ? treatment.own_vote : null,
+        is_community_preview: Boolean(treatment.is_community_preview),
+        community_submission_id: Number(treatment.community_submission_id||0),
+        community_status: treatment.community_status||null,
         provider_count: Number(treatment.provider_count ?? 0),
         total_provider_count: Number(treatment.total_provider_count ?? treatment.provider_count ?? 0),
         matching_provider_count: Number(treatment.matching_provider_count ?? 0),
@@ -1252,22 +1268,22 @@ function getTreatmentFilters() {
 
 function applyClientSideTreatmentSort() {
     const filters = getTreatmentFilters();
-
-    if (filters.sortKey !== "distance") {
-        return;
-    }
-
     const directionFactor = filters.sortDirection === "desc" ? -1 : 1;
 
     currentTreatments.sort(function (a, b) {
-        const distanceA = a.nearest_provider_distance_km === null ? Infinity : Number(a.nearest_provider_distance_km);
-        const distanceB = b.nearest_provider_distance_km === null ? Infinity : Number(b.nearest_provider_distance_km);
-
-        if (distanceA !== distanceB) {
-            return (distanceA - distanceB) * directionFactor;
+        let result=0;
+        if(filters.sortKey==="name")result=String(a.behandlung||"").localeCompare(String(b.behandlung||""),"de",{sensitivity:"base"});
+        else if(filters.sortKey==="positive_ratio")result=Number(a.positive_ratio||0)-Number(b.positive_ratio||0);
+        else if(filters.sortKey==="negative_ratio")result=Number(a.negative_ratio||0)-Number(b.negative_ratio||0);
+        else if(filters.sortKey==="total_votes")result=Number(a.total_votes||0)-Number(b.total_votes||0);
+        else if(filters.sortKey==="provider_count")result=Number(a.provider_count||0)-Number(b.provider_count||0);
+        else if(filters.sortKey==="matching_provider_count")result=Number(a.matching_provider_count||0)-Number(b.matching_provider_count||0);
+        else if(filters.sortKey==="distance"){
+            const distanceA=a.nearest_provider_distance_km===null?Infinity:Number(a.nearest_provider_distance_km);
+            const distanceB=b.nearest_provider_distance_km===null?Infinity:Number(b.nearest_provider_distance_km);
+            result=Number.isFinite(distanceA)||Number.isFinite(distanceB)?distanceA-distanceB:0;
         }
-
-        return String(a.behandlung || "").localeCompare(String(b.behandlung || ""), "de");
+        return result===0?String(a.behandlung||"").localeCompare(String(b.behandlung||""),"de",{sensitivity:"base"}):result*directionFactor;
     });
 }
 
@@ -1291,6 +1307,7 @@ function resetTreatmentFilters() {
     setInputValue("treatment-alias-smart-input", "");
     setTreatmentAliasSmartStatus("Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
     setInputValue("treatment-sort-select", "name:asc");
+    setInputValue("treatment-community-status-select", "all");
     setInputValue("treatment-category-select", "");
     setInputValue("treatment-min-positive-range", "0");
     setInputValue("treatment-min-positive-input", "0");
@@ -1382,9 +1399,7 @@ function buildTreatmentTableRowHtml(treatment, rank, presentation) {
             <td class="treatment-table-rank">${rank}</td>
             <td class="treatment-table-name">
                 <div class="treatment-table-name-stack">
-                    <a class="treatment-table-detail-link" href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">
-                        ${treatmentName}
-                    </a>
+					${treatment.is_community_preview?`<strong>${treatmentName}</strong><span class="community-preview-badge">Noch nicht geprüft</span>`:`<a class="treatment-table-detail-link" href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">${treatmentName}</a>`}
                     <button
                         type="button"
                         class="treatment-compare-add-button treatment-compare-add-button-table ${isSelected ? "is-selected" : ""}"
@@ -1626,12 +1641,14 @@ function buildTreatmentCardHtml(treatment, index) {
     const contra = Number(treatment.contra ?? 0);
     const ownVote = ['pro', 'neutral', 'contra'].includes(treatment.own_vote) ? treatment.own_vote : null;
 
+    const communityBadge=treatment.is_community_preview?'<span class="community-preview-badge">Community-Vorschlag · noch nicht geprüft</span>':'';
+    const treatmentTitle=treatment.is_community_preview?treatmentName:`<a class="treatment-card-title-link" href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">${treatmentName}</a>`;
     const distanceHtml = treatment.nearest_provider_distance_km === null
         ? ""
         : `<span class="treatment-card-muted">Nächster Anbieter: ${escapeHtml(formatDistanceKm(treatment.nearest_provider_distance_km))}</span>`;
 
     return `
-        <article class="treatment-card" data-treat-id="${treatment.treat_id}">
+        <article class="treatment-card${treatment.is_community_preview ? " is-community-preview" : ""}" data-treat-id="${treatment.treat_id}">
             <div class="treatment-card-accent"></div>
 
             <div class="treatment-card-main-header">
@@ -1641,7 +1658,7 @@ function buildTreatmentCardHtml(treatment, index) {
                 </div>
 
                 <div class="treatment-card-title-area">
-                    <h3 class="treatment-card-title"><a class="treatment-card-title-link" href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">${treatmentName}</a></h3>
+                    <h3 class="treatment-card-title">${treatmentTitle}</h3>${communityBadge}
 
                     <div class="treatment-card-meta">
                         ${categoryHtml}
@@ -1912,13 +1929,14 @@ async function submitTreatmentVote(treatId, treatmentName, voteType, button) {
     });
 
     try {
-        const response = await fetch("api/inc_votes_db.php", {
+        const isCommunity=treatId<0;
+        const response = await fetch(isCommunity?"api/vote_community_submission.php":"api/inc_votes_db.php", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                treat_id: treatId,
+                ...(isCommunity?{submission_id:Math.abs(treatId)}:{treat_id:treatId}),
                 type: voteType
             })
         });
@@ -1929,7 +1947,7 @@ async function submitTreatmentVote(treatId, treatmentName, voteType, button) {
             throw new Error(result.message || "Bewertung konnte nicht gespeichert werden.");
         }
 
-        await refreshSingleTreatment(treatId, result.vote);
+        if(isCommunity){await loadTreatmentResults();}else{await refreshSingleTreatment(treatId, result.vote);}
 
     } catch (error) {
         console.error("Fehler beim Speichern der Bewertung:", error);

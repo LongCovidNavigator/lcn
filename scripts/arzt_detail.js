@@ -1454,13 +1454,13 @@ function renderTreatmentCategoryDropdownOptions() {
     button.classList.toggle("is-active", treatmentCategorySelectionMode === "custom");
     dropdown.classList.toggle("is-open", treatmentCategoryDropdownOpen);
 
-    const normalizedSearch = treatmentCategorySearchQuery.trim().toLowerCase();
+    const normalizedSearch = normalizeGermanSearchValue(treatmentCategorySearchQuery);
     const visibleOptions = currentTreatmentCategoryOptions.filter(function (category) {
         if (!normalizedSearch) {
             return true;
         }
 
-        return String(category.label || "").toLowerCase().includes(normalizedSearch);
+        return normalizeGermanSearchValue(category.label).includes(normalizedSearch);
     });
 
     if (visibleOptions.length === 0) {
@@ -1543,11 +1543,11 @@ function getSelectedTreatmentEntries(entries) {
 }
 
 function getFilteredAndSortedTreatmentEntries(entries) {
-    const normalizedSearchQuery = treatmentSearchQuery.trim().toLowerCase();
+    const normalizedSearchQuery = normalizeGermanSearchValue(treatmentSearchQuery);
 
     return entries
         .filter(function (entry) {
-            const treatmentName = String(entry.treatment?.behandlung || "").toLowerCase();
+            const treatmentName = normalizeGermanSearchValue(entry.treatment?.behandlung);
             const treatmentSubcategory = String(entry.treatment?.unterkategorie || "").trim();
             const stats = getTreatmentVoteStats(entry.treatment);
 
@@ -1945,6 +1945,16 @@ function getVisibleTreatmentGroups(treatmentsGrouped) {
                 treatments: treatments
             };
         });
+}
+
+function normalizeGermanSearchValue(value) {
+    return String(value || "")
+        .trim()
+        .toLocaleLowerCase("de-DE")
+        .replace(/ä/g, "ae")
+        .replace(/ö/g, "oe")
+        .replace(/ü/g, "ue")
+        .replace(/ß/g, "ss");
 }
 
 function slugify(value) {

@@ -17,7 +17,7 @@
         "home-project-status": "assets/images/homepage/project_status_02.png",
         "map-marker-default": "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
         "map-marker-default-retina": "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        "map-marker-red": "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+        "map-marker-red": "assets/images/icons/map_marker_red.svg",
         "map-marker-shadow": "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png"
     });
 

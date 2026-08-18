@@ -200,6 +200,7 @@ function setupDoctorSortControl() {
         refreshDoctorDisplay();
         });
     });
+    document.getElementById("doctor-community-status-select")?.addEventListener("change", function(){ applyDoctorFiltersFromControls(); });
 }
 
 function setupDoctorTableSortControls() {
@@ -862,6 +863,8 @@ function resetDoctorNavigationControls() {
     if (hasPhoneInput) hasPhoneInput.checked = false;
     if (specialtySelect) specialtySelect.value = "0";
     if (searchInput) searchInput.value = "";
+    const communityStatusSelect=document.getElementById("doctor-community-status-select");
+    if(communityStatusSelect)communityStatusSelect.value="all";
     if (radiusEnabledInput) radiusEnabledInput.checked = false;
     if (includeNoCoordsInput) includeNoCoordsInput.checked = false;
     if (radiusInput) radiusInput.value = "100";
@@ -1082,7 +1085,9 @@ async function loadDoctorsFromSearchApi(settings) {
         searchParam +
         specialtyParam;
 
-    const searchResponse = await fetch(url);
+    const statusFilter=document.getElementById("doctor-community-status-select")?.value||"all";
+    const communityUrl=`api/community_public.php?entity_type=doctor&search=${encodeURIComponent(currentDoctorSearchTerm)}&city=${encodeURIComponent(currentCityFilter)}`;
+    const [searchResponse,communityResponse] = await Promise.all([fetch(url),statusFilter==="approved"?Promise.resolve(null):fetch(communityUrl)]);
 
     if (!searchResponse.ok) {
         throw new Error(`HTTP-Fehler: ${searchResponse.status}`);
@@ -1096,7 +1101,18 @@ async function loadDoctorsFromSearchApi(settings) {
 
     renderDoctorSpecialtySelect(data.specialties || []);
 
-    let apiDoctors = data.items || [];
+    const communityData=communityResponse&&communityResponse.ok?await communityResponse.json():{items:[]};
+    let apiDoctors = statusFilter==="unreviewed"?[]:(data.items || []);
+    if(statusFilter!=="approved"&&Array.isArray(communityData.items))apiDoctors=apiDoctors.concat(communityData.items.filter(function(doctor){
+        const stats=getDoctorVoteStats(doctor);
+        if(stats.proRatio<currentMinPositiveRatio||stats.contraRatio>currentMaxNegativeRatio)return false;
+        if(currentAcceptsGkv&&!hasConfirmedInsurance(doctor.dr_accepts_gkv))return false;
+        if(currentAcceptsPkv&&!hasConfirmedInsurance(doctor.dr_accepts_pkv))return false;
+        if(currentHasWebsite&&!(doctor.loc_website||doctor.dr_website))return false;
+        if(currentHasEmail&&!(doctor.loc_email||doctor.dr_email))return false;
+        if(currentHasPhone&&!doctor.loc_phone)return false;
+        return true;
+    }));
 
     if (!currentLocation) {
         apiDoctors = apiDoctors.map(function (doctor) {
@@ -1414,20 +1430,22 @@ function buildDoctorCardHtml(doctor, index) {
 	const stats = getDoctorVoteStats(doctor);
 	const ownVote = ['pro', 'neutral', 'contra'].includes(doctor.own_vote) ? doctor.own_vote : null;
 	const specialtyChipsHtml = buildDoctorSpecialtyChipsHtml(doctor, "doctor-card-tag", 4);
+	const communityBadge=doctor.is_community_preview?'<span class="community-preview-badge">Community-Vorschlag · noch nicht geprüft</span>':'';
+	const doctorTitle=doctor.is_community_preview?name:`<a class="doctor-card-title-link" href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>`;
 
 	const websiteHtml = website
         ? `<a class="doctor-card-link" href="${escapeHtml(normalizeWebsiteUrl(website))}" target="_blank" rel="noopener noreferrer">Website</a>`
         : `<span class="doctor-card-muted">Keine Website</span>`;
 
     const insuranceTags = [
-        isTruthyFlag(doctor.dr_accepts_gkv) ? "GKV" : "",
-        isTruthyFlag(doctor.dr_accepts_pkv) ? "PKV" : ""
+        hasConfirmedInsurance(doctor.dr_accepts_gkv) ? "GKV" : "",
+        hasConfirmedInsurance(doctor.dr_accepts_pkv) ? "PKV" : ""
     ].filter(Boolean).map(function (value) {
         return `<span class="doctor-card-tag">${escapeHtml(value)}</span>`;
     }).join("");
 
     return `
-        <article class="doctor-card doctor-card-v2" data-dr-id="${escapeHtml(doctor.dr_id)}">
+        <article class="doctor-card doctor-card-v2${doctor.is_community_preview ? " is-community-preview" : ""}" data-dr-id="${escapeHtml(doctor.dr_id)}">
             <div class="doctor-card-accent"></div>
 
             <div class="doctor-card-main-header">
@@ -1437,9 +1455,7 @@ function buildDoctorCardHtml(doctor, index) {
                 </div>
 
                 <div class="doctor-card-title-area">
-                    <h3 class="doctor-card-title">
-                        <a class="doctor-card-title-link" href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>
-                    </h3>
+                    <h3 class="doctor-card-title">${doctorTitle}</h3>${communityBadge}
 
                     <div class="doctor-card-meta">
                         ${label ? `<span class="doctor-card-tag">🏥 ${label}</span>` : ""}
@@ -1645,7 +1661,7 @@ function buildDoctorTableRowHtml(doctor, rank) {
             <td class="doctor-table-rank">${rank}</td>
             <td class="doctor-table-name">
                 <div class="doctor-table-name-stack">
-                    <a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>
+					${doctor.is_community_preview?`<strong>${name}</strong><span class="community-preview-badge">Noch nicht geprüft</span>`:`<a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>`}
 					${buildDoctorSpecialtyChipsHtml(doctor, "doctor-table-specialty-badge", 3, "doctor-table-specialty-row")}
 					<button type="button" class="doctor-compare-add-button doctor-compare-add-button-table ${isDoctorSelectedForCompare(doctor.dr_id) ? "is-selected" : ""}" data-dr-id="${escapeHtml(doctor.dr_id)}">
 					${isDoctorSelectedForCompare(doctor.dr_id) ? "Ausgewählt" : "+ vergleichen"}
@@ -1724,8 +1740,8 @@ function compareDoctorTableRows(rowA, rowB, sortKey) {
     }
 
     if (sortKey === "insurance") {
-        const insuranceA = Number(isTruthyFlag(doctorA.dr_accepts_gkv)) + Number(isTruthyFlag(doctorA.dr_accepts_pkv));
-        const insuranceB = Number(isTruthyFlag(doctorB.dr_accepts_gkv)) + Number(isTruthyFlag(doctorB.dr_accepts_pkv));
+        const insuranceA = Number(hasConfirmedInsurance(doctorA.dr_accepts_gkv)) + Number(hasConfirmedInsurance(doctorA.dr_accepts_pkv));
+        const insuranceB = Number(hasConfirmedInsurance(doctorB.dr_accepts_gkv)) + Number(hasConfirmedInsurance(doctorB.dr_accepts_pkv));
         return insuranceA - insuranceB;
     }
 
@@ -1821,11 +1837,11 @@ function buildDoctorTableVoteButton(drId, type, prefix, ratio, ownVote, label) {
 function buildDoctorTableInsuranceHtml(doctor) {
     const badges = [];
 
-    if (isTruthyFlag(doctor.dr_accepts_gkv)) {
+    if (hasConfirmedInsurance(doctor.dr_accepts_gkv)) {
         badges.push(`<span class="doctor-table-badge">GKV</span>`);
     }
 
-    if (isTruthyFlag(doctor.dr_accepts_pkv)) {
+    if (hasConfirmedInsurance(doctor.dr_accepts_pkv)) {
         badges.push(`<span class="doctor-table-badge">PKV</span>`);
     }
 
@@ -1989,13 +2005,14 @@ async function handleDoctorCardVote(event) {
     });
 
     try {
-        const response = await fetch("api/inc_doctor_votes.php", {
+        const isCommunity=drId<0;
+        const response = await fetch(isCommunity?"api/vote_community_submission.php":"api/inc_doctor_votes.php", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                dr_id: drId,
+                ...(isCommunity?{submission_id:Math.abs(drId)}:{dr_id:drId}),
                 type: voteType
             })
         });
@@ -2008,7 +2025,7 @@ async function handleDoctorCardVote(event) {
             throw new Error(data.error || "Vote konnte nicht gespeichert werden.");
         }
 
-        await refreshSingleDoctor(drId, data.vote);
+        if(isCommunity){const settings=getSearchSettingsFromControls();if(settings)await loadDoctorsFromSearchApi(settings);}else{await refreshSingleDoctor(drId, data.vote);}
     } catch (error) {
         console.error("Fehler beim Speichern der Ärztebewertung:", error);
         alert("Die Bewertung konnte nicht gespeichert werden. Details stehen in der Konsole.");
@@ -2196,6 +2213,10 @@ function isTruthyFlag(value) {
 
     return ["1", "true", "yes", "ja", "y", "j"].includes(normalizedValue) ||
         (normalizedValue !== "" && !["0", "false", "no", "nein", "n"].includes(normalizedValue));
+}
+
+function hasConfirmedInsurance(value) {
+    return String(value || "").trim().toLowerCase() === "yes";
 }
 
 function normalizeWebsiteUrl(value) {

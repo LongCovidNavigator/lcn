@@ -15,7 +15,7 @@
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     >
 
-    <link rel="stylesheet" href="styles/therapien_karte.css?v=41">
+    <link rel="stylesheet" href="styles/therapien_karte.css?v=42">
     <script src="scripts/image-registry.js?v=5"></script>
     <script src="scripts/access-nav.js?v=2" defer></script>
 </head>
@@ -358,6 +358,10 @@
                                 <option value="distance:desc">Entfernung nächster Anbieter ↓</option>
                             </select>
                         </div>
+                        <div class="treatment-results-sort-field">
+                            <label class="treatment-results-search-label" for="treatment-community-status-select">Prüfstatus</label>
+                            <select id="treatment-community-status-select" class="treatment-results-search-input"><option value="all">Alle Einträge</option><option value="approved">Nur freigegebene</option><option value="unreviewed">Noch nicht freigegebene</option></select>
+                        </div>
                     </div>
 
                                         <p id="treatment-alias-smart-status" class="treatment-results-search-status">
@@ -424,7 +428,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>window.LCNImages.configureLeaflet(window.L);</script>
-    <script src="scripts/therapien_karte.js?v=38"></script>
+    <script src="scripts/therapien_karte.js?v=39"></script>
 
     <div id="footer-placeholder"></div>
 

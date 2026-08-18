@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="25" height="41" viewBox="0 0 25 41" role="img" aria-label="Eigener Standort">
+  <defs>
+    <linearGradient id="marker-red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f04b55"/>
+      <stop offset="1" stop-color="#c41622"/>
+    </linearGradient>
+  </defs>
+  <path d="M12.5.75C6.01.75.75 6.01.75 12.5c0 8.63 9.03 22.58 11.75 27.04 2.72-4.46 11.75-18.41 11.75-27.04C24.25 6.01 18.99.75 12.5.75Z" fill="url(#marker-red)" stroke="#8f0e17" stroke-width="1.5"/>
+  <circle cx="12.5" cy="12.5" r="5" fill="#fff" stroke="#8f0e17" stroke-width="1"/>
+</svg>

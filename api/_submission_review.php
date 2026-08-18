@@ -16,6 +16,25 @@ function lcnNullable(array $payload, string $key): ?string {
     return $value === '' ? null : $value;
 }
 
+function lcnMigrateCommunitySubmissionVotes(PDO $pdo, int $submissionId, string $entityType, int $targetId, ?string $treatmentName = null): void {
+    $votes=$pdo->prepare('SELECT voter_key,vote FROM community_submission_votes WHERE submission_id=:id AND migrated_target_id IS NULL FOR UPDATE');
+    $votes->execute([':id'=>$submissionId]);
+    $aggregateColumns=['pro'=>'vote_improved','neutral'=>'vote_neutral','contra'=>'vote_worsened'];
+    foreach($votes as $row){
+        if($entityType==='doctor'){
+            $insert=$pdo->prepare('INSERT IGNORE INTO doctor_votes(voter_key,dr_id,vote) VALUES(:key,:id,:vote)');
+            $insert->execute([':key'=>$row['voter_key'],':id'=>$targetId,':vote'=>$row['vote']]);
+            if($insert->rowCount()>0){$column=$aggregateColumns[$row['vote']];$pdo->prepare("INSERT INTO tbl_drs_votes_03(dr_id,$column) VALUES(:id,1) ON DUPLICATE KEY UPDATE $column=$column+1")->execute([':id'=>$targetId]);}
+        }else{
+            $insert=$pdo->prepare('INSERT IGNORE INTO treatment_votes(voter_key,treat_id,vote) VALUES(:key,:id,:vote)');
+            $insert->execute([':key'=>$row['voter_key'],':id'=>$targetId,':vote'=>$row['vote']]);
+            if($insert->rowCount()>0){$column=$row['vote'];$pdo->prepare("INSERT INTO lcn_votes(Behandlung,$column) VALUES(:name,1) ON DUPLICATE KEY UPDATE $column=$column+1")->execute([':name'=>$treatmentName]);}
+        }
+    }
+    $mark=$pdo->prepare('UPDATE community_submission_votes SET migrated_entity_type=:type,migrated_target_id=:target,migrated_at=NOW() WHERE submission_id=:id AND migrated_target_id IS NULL');
+    $mark->execute([':type'=>$entityType,':target'=>$targetId,':id'=>$submissionId]);
+}
+
 function lcnUniqueTreatmentSlug(PDO $pdo, string $name): string {
     $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $name) ?: $name;
     $base = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($ascii)), '-');
@@ -74,12 +93,7 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
         $link=$pdo->prepare('INSERT IGNORE INTO tbl_cpl_drs2treatments_03 (dr_id,treat_id,note) VALUES (:dr,:treat,:note)');
         foreach($valid->fetchAll(PDO::FETCH_COLUMN) as $treatId)$link->execute([':dr'=>$drId,':treat'=>$treatId,':note'=>'Community-Vorschlag #'.$row['submission_id']]);
     }
-    if (($row['experience'] ?? null) !== null) {
-        $vote = $pdo->prepare('INSERT IGNORE INTO doctor_votes (voter_key,dr_id,vote) VALUES (:key,:id,:vote)');
-        $vote->execute([':key'=>$row['submitter_key'],':id'=>$drId,':vote'=>$row['experience']]);
-        $columns=['pro'=>'vote_improved','neutral'=>'vote_neutral','contra'=>'vote_worsened']; $column=$columns[$row['experience']];
-        $pdo->prepare("INSERT INTO tbl_drs_votes_03 (dr_id,$column) VALUES (:id,1) ON DUPLICATE KEY UPDATE $column=$column+1")->execute([':id'=>$drId]);
-    }
+    lcnMigrateCommunitySubmissionVotes($pdo,(int)$row['submission_id'],'doctor',$drId);
     return $drId;
 }
 
@@ -96,6 +110,7 @@ function lcnApproveTreatmentSubmission(PDO $pdo, array $row, array $payload): in
         $link=$pdo->prepare('INSERT IGNORE INTO tbl_cpl_drs2treatments_03 (dr_id,treat_id,note) VALUES (:dr,:treat,:note)');
         foreach($valid->fetchAll(PDO::FETCH_COLUMN) as $drId)$link->execute([':dr'=>$drId,':treat'=>$id,':note'=>'Community-Vorschlag #'.$row['submission_id']]);
     }
-    if (($row['experience']??null)!==null) $pdo->prepare('INSERT IGNORE INTO treatment_votes (voter_key,treat_id,vote) VALUES (:key,:id,:vote)')->execute([':key'=>$row['submitter_key'],':id'=>$id,':vote'=>$row['experience']]);
+    $nameStmt=$pdo->prepare('SELECT behandlung FROM tbl_treatments_03 WHERE treat_id=:id');$nameStmt->execute([':id'=>$id]);
+    lcnMigrateCommunitySubmissionVotes($pdo,(int)$row['submission_id'],'treatment',$id,(string)$nameStmt->fetchColumn());
     return $id;
 }

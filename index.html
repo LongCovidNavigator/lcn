@@ -10,12 +10,12 @@
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="styles/homepage.css?v=22">
+    <link rel="stylesheet" href="styles/homepage.css?v=23">
     <link rel="stylesheet" href="styles/footer-style.css">
     <script src="scripts/image-registry.js?v=5"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="scripts/homepage.js?v=23" defer></script>
+    <script src="scripts/homepage.js?v=24" defer></script>
     <script src="scripts/access-nav.js?v=2" defer></script>
 </head>
 
@@ -298,11 +298,11 @@
                 </form>
                 <div id="nearby-gps-results" class="nearby-gps-results" hidden>
                     <div id="nearby-gps-map" class="nearby-gps-map" aria-label="Karte mit Hausärzt:innen in der Nähe"></div>
-                    <div>
+                    <div class="nearby-gps-sidebar">
                         <h3 id="nearby-gps-results-heading">Hausärztliche Anlaufstellen in Deutschland</h3>
                         <div id="nearby-gps-list" class="nearby-gps-list"></div>
-                        <a id="nearby-gps-all" class="home-button card-button nearby-gps-all" href="hausarzt_suche.html" data-preserve-href="true">Hausärztliche Suche öffnen <span aria-hidden="true">→</span></a>
-                        <a class="home-button card-button nearby-gps-all nearby-gps-suggest" href="arzt_vorschlagen.html">Hausarzt-Vorschlag ergänzen <span aria-hidden="true">＋</span></a>
+                        <div class="nearby-gps-actions"><a id="nearby-gps-all" class="home-button card-button nearby-gps-all" href="hausarzt_suche.html" data-preserve-href="true">Hausärztliche Suche öffnen <span aria-hidden="true">→</span></a>
+                        <a class="home-button card-button nearby-gps-all nearby-gps-suggest" href="arzt_vorschlagen.html">Hausarzt-Vorschlag ergänzen <span aria-hidden="true">＋</span></a></div>
                     </div>
                 </div>
             </div>

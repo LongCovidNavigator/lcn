@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_search_normalization.php';
 require_once __DIR__ . '/_voting.php';
 
 lcnRequireVotingRequest();
@@ -14,14 +15,14 @@ function submissionString(array $input, string $key, int $max): string {
 function buildSubmissionTriage(PDO $pdo,string $type,string $name,string $website,?int $existingTargetId,array $input): array {
     if($existingTargetId!==null)return ['kind'=>'change','status'=>'needs_review','score'=>10,'duplicate_id'=>$existingTargetId,'reasons'=>['Gezielte Ergänzung oder Änderung eines bestehenden Eintrags.']];
     $reasons=[];$score=0;$duplicateId=null;
-    if($type==='doctor'){$stmt=$pdo->prepare("SELECT dr_id FROM tbl_drs_03 WHERE LOWER(TRIM(dr_display_name))=LOWER(TRIM(:name)) OR (:website<>'' AND LOWER(TRIM(COALESCE(dr_website,'')))=LOWER(TRIM(:website))) LIMIT 1");}
-    else{$stmt=$pdo->prepare("SELECT treat_id FROM tbl_treatments_03 WHERE LOWER(TRIM(behandlung))=LOWER(TRIM(:name)) OR (:website<>'' AND LOWER(TRIM(COALESCE(wiki_url_path,'')))=LOWER(TRIM(:website))) LIMIT 1");}
-    $stmt->execute([':name'=>$name,':website'=>$website]);$match=$stmt->fetchColumn();
+    if($type==='doctor'){$stmt=$pdo->prepare("SELECT dr_id FROM tbl_drs_03 WHERE ".lcnNormalizedSearchSql('TRIM(dr_display_name)')."=:name OR (:website<>'' AND LOWER(TRIM(COALESCE(dr_website,'')))=LOWER(TRIM(:website))) LIMIT 1");}
+    else{$stmt=$pdo->prepare("SELECT treat_id FROM tbl_treatments_03 WHERE ".lcnNormalizedSearchSql('TRIM(behandlung)')."=:name OR (:website<>'' AND LOWER(TRIM(COALESCE(wiki_url_path,'')))=LOWER(TRIM(:website))) LIMIT 1");}
+    $stmt->execute([':name'=>lcnNormalizeSearchTerm($name),':website'=>$website]);$match=$stmt->fetchColumn();
     if($match!==false){$duplicateId=(int)$match;$score=95;$reasons[]='Name oder Website stimmt mit einem bestehenden Eintrag überein.';}
     if($duplicateId===null&&mb_strlen($name)>=5){
         $candidateSql=$type==='doctor'?'SELECT dr_id AS id,dr_display_name AS label FROM tbl_drs_03':'SELECT treat_id AS id,behandlung AS label FROM tbl_treatments_03';
-        $needle=mb_strtolower((string)preg_replace('/[^\pL\pN]+/u','',$name));$bestPercent=0.0;$bestId=null;
-        foreach($pdo->query($candidateSql) as $candidate){$candidateName=mb_strtolower((string)preg_replace('/[^\pL\pN]+/u','',(string)$candidate['label']));if($candidateName==='')continue;similar_text($needle,$candidateName,$percent);if($percent>$bestPercent){$bestPercent=$percent;$bestId=(int)$candidate['id'];}}
+        $needle=(string)preg_replace('/[^\pL\pN]+/u','',lcnNormalizeSearchTerm($name));$bestPercent=0.0;$bestId=null;
+        foreach($pdo->query($candidateSql) as $candidate){$candidateName=(string)preg_replace('/[^\pL\pN]+/u','',lcnNormalizeSearchTerm((string)$candidate['label']));if($candidateName==='')continue;similar_text($needle,$candidateName,$percent);if($percent>$bestPercent){$bestPercent=$percent;$bestId=(int)$candidate['id'];}}
         if($bestPercent>=88){$duplicateId=$bestId;$score=max($score,75);$reasons[]='Der Name ist einem bestehenden Eintrag sehr ähnlich ('.round($bestPercent).' %).';}
     }
     $pending=$pdo->prepare("SELECT submission_id FROM community_submissions WHERE entity_type=:type AND review_status IN ('pending','reviewing') AND LOWER(TRIM(name))=LOWER(TRIM(:name)) ORDER BY created_at DESC LIMIT 1");$pending->execute([':type'=>$type,':name'=>$name]);
@@ -83,7 +84,9 @@ try {
     $triage=buildSubmissionTriage($pdo,$type,$name,$website,$existingTargetId,$input);
     $stmt = $pdo->prepare('INSERT INTO community_submissions (entity_type,existing_target_id,submission_kind,name,website,email,phone,city,experience,payload,submitter_key,triage_status,triage_score,duplicate_target_id,triage_reasons) VALUES (:type,:existing,:kind,:name,:website,:email,:phone,:city,:experience,:payload,:key,:triage_status,:score,:duplicate_id,:reasons)');
     $stmt->execute([':type'=>$type,':existing'=>$existingTargetId,':kind'=>$triage['kind'],':name'=>$name,':website'=>$website,':email'=>$email?:null,':phone'=>$phone?:null,':city'=>$city?:null,':experience'=>$experience?:null,':payload'=>json_encode($payload,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR),':key'=>$voterKey,':triage_status'=>$triage['status'],':score'=>$triage['score'],':duplicate_id'=>$triage['duplicate_id'],':reasons'=>json_encode($triage['reasons'],JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR)]);
-    lcnSendVoteJson(['ok'=>true,'submission_id'=>(int)$pdo->lastInsertId(),'submission_kind'=>$triage['kind'],'triage_status'=>$triage['status']],201);
+    $submissionId=(int)$pdo->lastInsertId();
+    if($experience!==''){$initialVote=$pdo->prepare('INSERT INTO community_submission_votes(submission_id,voter_key,vote) VALUES(:id,:key,:vote)');$initialVote->execute([':id'=>$submissionId,':key'=>$voterKey,':vote'=>$experience]);}
+    lcnSendVoteJson(['ok'=>true,'submission_id'=>$submissionId,'submission_kind'=>$triage['kind'],'triage_status'=>$triage['status']],201);
 } catch (Throwable $error) {
     lcnLogApiError('create_submission', $error);
     lcnSendVoteJson(['ok' => false, 'error' => 'Der Vorschlag konnte derzeit nicht gespeichert werden.'], 500);
