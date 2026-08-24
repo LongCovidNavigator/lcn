@@ -86,6 +86,7 @@ async function initTreatmentPage() {
     bindTreatmentSmartSearchEvents();
    
     bindTreatmentViewSwitchEvents();
+    setTreatmentViewMode(currentViewMode);
     bindTreatmentCompareControls();
     bindTreatmentCardContainerEvents();
     bindTreatmentTableContainerEvents();
@@ -2061,8 +2062,8 @@ function buildTreatmentExperienceHtml(treatment, mode = "all") {
 }
 
 function getSavedTreatmentResultsView() {
-    try { return localStorage.getItem("lcn_result_view_preference") === "cards" ? "cards" : "table"; }
-    catch (_) { return "table"; }
+    try { return localStorage.getItem("lcn_result_view_preference") === "table" ? "table" : "cards"; }
+    catch (_) { return "cards"; }
 }
 
 function buildTreatmentTableVoteButton(treatment, type, prefix, ratio, badgeClass) {

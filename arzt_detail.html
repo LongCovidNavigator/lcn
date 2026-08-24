@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/aerzte_karte.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="styles/arzt_detail.css?v=42">
+    <link rel="stylesheet" href="styles/arzt_detail.css?v=46">
     <script src="scripts/image-registry.js?v=5"></script>
     <script src="scripts/access-nav.js?v=2" defer></script>
 </head>
@@ -95,48 +95,19 @@
                 </div>
             </section>
 
-            <section class="doctor-detail-guided-section">
+            <section class="doctor-detail-guided-section doctor-detail-accessibility-overview">
                 <aside class="doctor-detail-question-intro">
                     <div class="doctor-detail-question-number">1</div>
                     <div>
-                        <h2>Passt die Praxis zu mir?</h2>
-                        <p>Erfahrung, Bewertungen und wichtige Eckdaten.</p>
+                        <h2>Wie zugänglich ist der Arzt für mich?</h2>
+                        <p>Versicherung, Kosten und Terminverfügbarkeit im Überblick.</p>
                     </div>
                 </aside>
 
-                <div class="doctor-detail-question-content doctor-detail-fit-grid">
-                    <article class="doctor-detail-info-card doctor-detail-rating-card">
-                        <h3>Bewertungen <span id="doctor-detail-rating-card-total">(0 insgesamt)</span></h3>
-                        <div id="doctor-detail-rating"></div>
-
-                        <div class="doctor-detail-own-rating">
-                            <h4 class="doctor-detail-own-rating-heading">Diese Praxis bewerten</h4>
-                            <div class="doctor-detail-vote-buttons" aria-label="Diese Praxis bewerten">
-                                <button type="button" class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-positive" data-type="pro">
-                                    Positiv
-                                </button>
-
-                                <button type="button" class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-neutral" data-type="neutral">
-                                    Neutral
-                                </button>
-
-                                <button type="button" class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-negative" data-type="contra">
-                                    Negativ
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="doctor-detail-info-card doctor-detail-specialties-card">
-                        <h3>Fachrichtungen</h3>
-                        <div id="doctor-detail-specialties" class="doctor-detail-term-list"></div>
-                    </article>
-
-                    <article class="doctor-detail-info-card doctor-detail-care-card">
-                        <h3>Kassen</h3>
-                        <div id="doctor-detail-care" class="doctor-detail-tag-row"></div>
-                    </article>
-
+                <div class="doctor-detail-question-content doctor-detail-new-card-grid is-three-columns">
+                    <article class="doctor-detail-info-card"><h3>Versicherung &amp; Abrechnung</h3><div id="doctor-detail-care" class="doctor-detail-tag-row"></div><dl id="doctor-detail-access-billing" class="doctor-detail-fact-list"></dl></article>
+                    <article class="doctor-detail-info-card"><h3>Kosten</h3><dl id="doctor-detail-access-costs" class="doctor-detail-fact-list"></dl></article>
+                    <article class="doctor-detail-info-card"><h3>Terminlage</h3><dl id="doctor-detail-access-appointments" class="doctor-detail-fact-list"></dl></article>
                 </div>
             </section>
 
@@ -144,9 +115,15 @@
                 <aside class="doctor-detail-question-intro">
                     <div class="doctor-detail-question-number">2</div>
                     <div>
-                        <h2>Wo befindet sich die Praxis?</h2>
+                        <h2>Kann ich den Termin gesundheitlich bewältigen?</h2>
+                        <p>Terminform, Ausstattung und Rücksichtnahme im Überblick.</p>
                     </div>
                 </aside>
+
+                <div class="doctor-detail-question-content doctor-detail-appointment-layout">
+                    <div class="doctor-detail-appointment-matrix-wrap"><h3>Terminform</h3><table class="doctor-detail-appointment-matrix"><thead><tr><th></th><th>Vor Ort</th><th>Video</th><th>Telefon</th></tr></thead><tbody id="doctor-detail-appointment-matrix"></tbody></table></div>
+                    <article class="doctor-detail-info-card"><h3>Hausbesuche</h3><div id="doctor-detail-home-visits" class="doctor-detail-single-value"></div></article>
+                </div>
 
                 <div class="doctor-detail-location-grid">
                     <div class="doctor-detail-location-address">
@@ -171,48 +148,47 @@
 
                     <div id="doctor-detail-map" class="doctor-detail-map" aria-label="Karte des Praxisstandorts"></div>
                 </div>
+                <div class="doctor-detail-question-content doctor-detail-new-card-grid is-three-columns doctor-detail-onsite-grid">
+                    <article class="doctor-detail-info-card"><h3>LCN-/ME/CFS-spezifische Rücksichtnahme</h3><dl id="doctor-detail-onsite-consideration" class="doctor-detail-fact-list"></dl></article>
+                    <article class="doctor-detail-info-card"><h3>Warten &amp; Reizbelastung</h3><dl id="doctor-detail-onsite-waiting" class="doctor-detail-fact-list"></dl></article>
+                    <article class="doctor-detail-info-card"><h3>Barrierefreiheit</h3><dl id="doctor-detail-onsite-accessibility" class="doctor-detail-fact-list"></dl></article>
+                </div>
             </section>
 
-            <section class="doctor-detail-guided-section doctor-detail-features-section">
+            <section class="doctor-detail-guided-section doctor-detail-experience-section">
                 <aside class="doctor-detail-question-intro">
                     <div class="doctor-detail-question-number">3</div>
                     <div>
-                        <h2>Was zeichnet die Praxis aus?</h2>
-                        <p>Erfahrungen, Versorgung und Zugänglichkeit im Überblick.</p>
+                        <h2>Erfahrungen mit dem Arzt / der Praxis</h2>
+                        <p>Gesamteindruck aus Patient:innenerfahrungen.</p>
                     </div>
                 </aside>
 
-                <div class="doctor-detail-question-content doctor-detail-feature-columns">
-                    <article class="doctor-detail-feature-group is-expertise">
-                        <header><span class="doctor-detail-feature-group-icon" aria-hidden="true">⚕</span><h3>Fachliche Erfahrung</h3><span id="doctor-detail-expertise-count" class="doctor-detail-feature-count"></span></header>
-                        <div id="doctor-detail-expertise" class="doctor-detail-term-list doctor-detail-feature-list"></div>
-                    </article>
-
-                    <article class="doctor-detail-feature-group is-care-contact">
-                        <header><span class="doctor-detail-feature-group-icon" aria-hidden="true">☎</span><h3>Kontakt &amp; Versorgung</h3><span id="doctor-detail-care-contact-count" class="doctor-detail-feature-count"></span></header>
-                        <div id="doctor-detail-care-contact" class="doctor-detail-term-list doctor-detail-feature-list"></div>
-                    </article>
-
-                    <article class="doctor-detail-feature-group is-diagnostics">
-                        <header><span class="doctor-detail-feature-group-icon" aria-hidden="true">⌕</span><h3>Diagnostik &amp; Behandlung</h3><span id="doctor-detail-diagnostics-count" class="doctor-detail-feature-count"></span></header>
-                        <div id="doctor-detail-diagnostics" class="doctor-detail-term-list doctor-detail-feature-list"></div>
-                    </article>
-
-                    <article class="doctor-detail-feature-group is-practice-access">
-                        <header><span class="doctor-detail-feature-group-icon" aria-hidden="true">♿</span><h3>Barrierefreiheit &amp; Praxisbesuch</h3><span id="doctor-detail-practice-access-count" class="doctor-detail-feature-count"></span></header>
-                        <div id="doctor-detail-practice-access" class="doctor-detail-term-list doctor-detail-feature-list"></div>
-                    </article>
-
-                    <article class="doctor-detail-feature-group is-patient-experience">
-                        <header><span class="doctor-detail-feature-group-icon" aria-hidden="true">●●</span><h3>Erfahrungen von Patient:innen</h3><span id="doctor-detail-patient-experience-count" class="doctor-detail-feature-count"></span></header>
-                        <div id="doctor-detail-patient-experience" class="doctor-detail-term-list doctor-detail-feature-list"></div>
-                    </article>
+                <div class="doctor-detail-question-content doctor-detail-new-card-grid is-four-columns">
+                    <article class="doctor-detail-info-card doctor-detail-rating-card"><h3>Gesamtbewertung <span id="doctor-detail-rating-card-total">(0 insgesamt)</span></h3><div id="doctor-detail-rating"></div><div class="doctor-detail-own-rating"><h4 class="doctor-detail-own-rating-heading">Diese Praxis bewerten</h4><div class="doctor-detail-vote-buttons" aria-label="Diese Praxis bewerten"><button type="button" class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-positive" data-type="pro">Positiv</button><button type="button" class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-neutral" data-type="neutral">Neutral</button><button type="button" class="doctor-detail-vote-button doctor-detail-vote-main-button doctor-detail-vote-main-negative" data-type="contra">Negativ</button></div></div></article>
+                    <article class="doctor-detail-info-card"><h3>Ärztlicher Umgang</h3><dl id="doctor-detail-experience-doctor" class="doctor-detail-fact-list"></dl></article>
+                    <article class="doctor-detail-info-card"><h3>Ärztliche Arbeitsweise</h3><dl id="doctor-detail-experience-work" class="doctor-detail-fact-list"></dl></article>
+                    <article class="doctor-detail-info-card"><h3>Umgang</h3><dl id="doctor-detail-experience-practice" class="doctor-detail-fact-list"></dl></article>
                 </div>
+            </section>
+
+            <section class="doctor-detail-guided-section doctor-detail-features-section">
+                <aside class="doctor-detail-question-intro"><div class="doctor-detail-question-number">4</div><div><h2>Was zeichnet diese Praxis fachlich aus?</h2><p>Kompetenzen, Spezialisierungen und Erfahrung.</p></div></aside>
+                <div class="doctor-detail-question-content doctor-detail-new-card-grid is-three-columns">
+                    <article class="doctor-detail-info-card doctor-detail-specialties-card"><h3>Fachrichtungen</h3><div id="doctor-detail-specialties" class="doctor-detail-term-list"></div></article>
+                    <article class="doctor-detail-info-card"><h3>Spezialisierungen</h3><div id="doctor-detail-specializations" class="doctor-detail-term-list"></div></article>
+                    <article class="doctor-detail-info-card"><h3>Fachliche Erfahrung mit</h3><dl id="doctor-detail-expertise" class="doctor-detail-fact-list"></dl></article>
+                </div>
+            </section>
+
+            <section class="doctor-detail-guided-section doctor-detail-help-section">
+                <aside class="doctor-detail-question-intro"><div class="doctor-detail-question-number">5</div><div><h2>Wie kann der Arzt helfen?</h2><p>Leistungen, medikamentöse Möglichkeiten und Diagnostik.</p></div></aside>
+                <div class="doctor-detail-question-content doctor-detail-new-card-grid is-three-columns"><article class="doctor-detail-info-card"><h3>Services</h3><dl id="doctor-detail-help-services" class="doctor-detail-fact-list"></dl></article><article class="doctor-detail-info-card"><h3>Medikamentöse Möglichkeiten</h3><dl id="doctor-detail-help-medication" class="doctor-detail-fact-list"></dl></article><article class="doctor-detail-info-card"><h3>Diagnosen</h3><dl id="doctor-detail-help-diagnoses" class="doctor-detail-fact-list"></dl></article></div>
             </section>
 
             <section class="doctor-detail-guided-section">
                 <aside class="doctor-detail-question-intro">
-                    <div class="doctor-detail-question-number">4</div>
+                    <div class="doctor-detail-question-number">6</div>
                     <div>
                         <h2>Was wird behandelt?</h2>
                         <p>Ein Überblick über das Behandlungsspektrum.</p>
@@ -464,7 +440,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>window.LCNImages.configureLeaflet(window.L);</script>
-    <script src="scripts/arzt_detail.js?v=30"></script>
+    <script src="scripts/arzt_detail.js?v=35"></script>
 
     <div id="footer-placeholder"></div>
 

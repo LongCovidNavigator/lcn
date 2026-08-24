@@ -30,6 +30,25 @@ let treatmentAnalysisFilter = null;
 let currentTreatmentCategoryOptions = [];
 let doctorDetailMap = null;
 
+// TODO: replace temporary doctor structure data with API fields. Until then every
+// missing value is shown explicitly as unavailable and never as a doctor fact.
+const temporaryDoctorStructureData = {
+    billing: [["Abrechnungsmodell", "Noch keine Angabe"], ["Kassensitz", "Unbekannt"]],
+    costs: [["Ersttermin (Sprechstunde)", "Noch keine Angabe in €"], ["Folgetermin (Sprechstunde)", "Noch keine Angabe in €"], ["Typische Gesamtkosten der Behandlung (inklusive Therapie)", "Noch keine Angabe in €"]],
+    appointments: [["Wartezeit bis Ersttermin", "Noch keine Angabe"], ["Warteliste vorhanden", "Unbekannt"], ["Zuletzt aktualisiert", "Noch keine Angabe"]],
+    appointmentForms: { "Ersttermin": ["unknown", "unknown", "unknown"], "Folgetermine": ["unknown", "unknown", "unknown"] },
+    homeVisits: "Unbekannt",
+    consideration: [["Belastungsgrenzen / PEM berücksichtigt", "Unbekannt"], ["Pausen möglich", "Unbekannt"], ["Termin anpassbar", "Unbekannt"]],
+    waiting: [["Warte- und Behandlungszeit", "Noch keine Angabe in Stunden"], ["Ruhiger / reizarmer Wartebereich", {}], ["Warten im Liegen möglich", {}]],
+    accessibility: [["Rollstuhlgerecht", "Unbekannt"], ["Stufenlos / Aufzug", "Unbekannt"], ["Liegen möglich", "Unbekannt"], ["Begleitperson möglich", "Unbekannt"]],
+    doctorExperience: [["Nimmt Beschwerden ernst", "Keine Angabe"], ["Nimmt sich Zeit", "Keine Angabe"], ["Hört zu", "Keine Angabe"], ["Erklärt nachvollziehbar", "Keine Angabe"], ["Respektvoller Umgang", "Keine Angabe"]],
+    workExperience: [["Gründlich", "Keine Angabe"], ["Berücksichtigt Vorbefunde", "Keine Angabe"], ["Gemeinsames Entscheiden", "Keine Angabe"]],
+    practiceExperience: [["Wohlgefühlt", "Keine Angabe"], ["Respektvoller Umgang", "Keine Angabe"], ["Gender-Erfahrungen", "Keine Angabe"], ["Queer / LGBTQ+", "Keine Angabe"]],
+    services: [["Bescheinigungen / Atteste", "Unbekannt"], ["Sozialmedizinische Unterstützung", "Unbekannt"], ["Verlaufskontrolle / Nachbetreuung", "Unbekannt"]],
+    medication: [["Reguläre Verordnungen", "Unbekannt"], ["Off-Label-Therapien", "Unbekannt"], ["Individuelle Therapieversuche", "Unbekannt"]],
+    diagnoses: [["ME/CFS (G93.3)", "Unbekannt"], ["Long Covid", "Unbekannt"], ["POTS / Dysautonomie", "Unbekannt"], ["MCAS", "Unbekannt"], ["Impfschaden", "Unbekannt"]]
+};
+
 
 document.addEventListener("DOMContentLoaded", function () {
     setDoctorDetailSuggestionLinks();
@@ -71,6 +90,7 @@ async function loadDoctorDetail() {
 
         resetTreatmentControlsState();
         renderDoctorDetail(currentDoctorDetail, currentDoctorTerms, currentDoctorTreatmentsGrouped);
+        renderTemporaryDoctorStructure(currentDoctorDetail);
         updateDoctorDetailVoteSelection(currentDoctorDetail.own_vote || null);
         showDoctorDetailContent();
 
@@ -97,6 +117,73 @@ function resetTreatmentControlsState() {
     treatmentCategoryDropdownOpen = false;
     treatmentAnalysisFilter = null;
     currentTreatmentCategoryOptions = [];
+}
+
+function renderTemporaryDoctorStructure(doctor = {}) {
+    const billingModel = doctor.dr_accepts_gkv === "yes"
+        ? "Über GKV möglich"
+        : doctor.dr_accepts_pkv === "yes"
+            ? "Nur PKV / Selbstzahler"
+            : "Unbekannt";
+    const billingFacts = [["Abrechnungsmodell", billingModel], ["Kassensitz", "Unbekannt"]];
+    const lists = {
+        "doctor-detail-access-billing": billingFacts,
+        "doctor-detail-access-costs": temporaryDoctorStructureData.costs,
+        "doctor-detail-access-appointments": temporaryDoctorStructureData.appointments,
+        "doctor-detail-onsite-consideration": temporaryDoctorStructureData.consideration,
+        "doctor-detail-onsite-waiting": temporaryDoctorStructureData.waiting,
+        "doctor-detail-onsite-accessibility": temporaryDoctorStructureData.accessibility,
+        "doctor-detail-experience-doctor": temporaryDoctorStructureData.doctorExperience,
+        "doctor-detail-experience-work": temporaryDoctorStructureData.workExperience,
+        "doctor-detail-experience-practice": temporaryDoctorStructureData.practiceExperience,
+        "doctor-detail-help-services": temporaryDoctorStructureData.services,
+        "doctor-detail-help-medication": temporaryDoctorStructureData.medication,
+        "doctor-detail-help-diagnoses": temporaryDoctorStructureData.diagnoses
+    };
+    const distributionListIds = new Set([
+        "doctor-detail-onsite-consideration",
+        "doctor-detail-onsite-accessibility",
+        "doctor-detail-experience-doctor",
+        "doctor-detail-experience-work",
+        "doctor-detail-experience-practice",
+        "doctor-detail-help-services",
+        "doctor-detail-help-medication",
+        "doctor-detail-help-diagnoses"
+    ]);
+    Object.entries(lists).forEach(function ([id, facts]) {
+        const element = document.getElementById(id);
+        if (!element) return;
+        renderStructuredFactList(element, facts, distributionListIds.has(id));
+    });
+
+    const matrix = document.getElementById("doctor-detail-appointment-matrix");
+    if (matrix) matrix.innerHTML = Object.entries(temporaryDoctorStructureData.appointmentForms).map(function ([label, values]) {
+        return `<tr><th>${escapeHtml(label)}</th>${values.map(function () { return '<td class="is-unknown" aria-label="Unbekannt">–</td>'; }).join("")}</tr>`;
+    }).join("");
+    const homeVisits = document.getElementById("doctor-detail-home-visits");
+    if (homeVisits) homeVisits.innerHTML = `<span class="is-unknown">${escapeHtml(temporaryDoctorStructureData.homeVisits)}</span>`;
+}
+
+function renderStructuredFactList(element, facts, showDistribution = false) {
+    element.innerHTML = facts.map(function ([label, value]) {
+        if (showDistribution || (value && typeof value === "object")) {
+            return `<div><dt>${escapeHtml(label)}</dt><dd>${renderAnswerDistribution(value)}</dd></div>`;
+        }
+        const unknown = /unbekannt|keine angabe/i.test(String(value || ""));
+        return `<div><dt>${escapeHtml(label)}</dt><dd class="${unknown ? "is-unknown" : ""}">${escapeHtml(value)}</dd></div>`;
+    }).join("");
+}
+
+function renderAnswerDistribution(value) {
+    const yes = Number(value?.yes || 0);
+    const no = Number(value?.no || 0);
+    const total = yes + no;
+    if (total <= 0) return '<span class="doctor-detail-distribution-empty">Noch keine Angaben</span>';
+    const yesWins = yes >= no;
+    const winningCount = yesWins ? yes : no;
+    const winningAnswer = yesWins ? "Ja" : "Nein";
+    const winningPercent = Math.round((winningCount / total) * 100);
+    return `<span class="doctor-detail-distribution"><b class="${yesWins ? "is-yes" : "is-no"}">${winningPercent} % sagen ${winningAnswer}</b><small>${total} Angaben</small></span>`;
 }
 
 function setupTreatmentAnalysisFilters() {
@@ -922,104 +1009,21 @@ function renderTermGroup(elementId, terms, emptyText) {
         .join("");
 }
 
-const doctorPracticeFeatureGroups = [
-    {
-        id: "expertise",
-        codes: [
-            "long-covid-expertise",
-            "postvac-expertise",
-            "mecfs-knowledgeable",
-            "pots-expertise",
-            "mcas-expertise",
-            "mecfs-aware"
-        ],
-        separatedCodes: new Set(["mecfs-aware"]),
-        emptyText: "Keine Angaben zur fachlichen Erfahrung hinterlegt."
-    },
-    {
-        id: "diagnostics",
-        codes: [
-            "provides-mecfs-diagnosis",
-            "accepts-mecfs-diagnosis",
-            "treats-mecfs-offlabel",
-            "offers-immunodiagnostics",
-            "provides-attestations"
-        ],
-        emptyText: "Keine Angaben zu Diagnostik und Behandlung hinterlegt."
-    },
-    {
-        id: "patient-experience",
-        codes: ["patients-feel-heard", "gender-sensitive", "lgbtq-friendly"],
-        emptyText: "Keine Erfahrungen von Patient:innen hinterlegt."
-    },
-    {
-        id: "care-contact",
-        codes: ["telemedicine-phone", "telemedicine-video", "home-visits-available", "email-contact"],
-        emptyText: "Keine Angaben zu Kontakt und Versorgung hinterlegt."
-    },
-    {
-        id: "practice-access",
-        codes: [
-            "wheelchair-accessible",
-            "automatic-doors",
-            "wheelchair-ramps",
-            "parking-nearby",
-            "infection-control-protocols"
-        ],
-        emptyText: "Keine Angaben zu Barrierefreiheit und Praxisbesuch hinterlegt."
-    }
-];
-
 function renderPracticeFeatureGroups(terms) {
-    const allTerms = [...(terms.badge || []), ...(terms.accessibility || [])];
-    const termsByCode = new Map(allTerms.map(function (term) {
-        return [String(term.term_code || ""), term];
-    }));
-    const assignedCodes = new Set();
+    const expertiseFields = [
+        ["Long Covid", null],
+        ["ME/CFS", null],
+        ["Post-Vac", null],
+        ["POTS / Dysautonomie", null],
+        ["MCAS", null],
+        ["Belastungsintoleranz / PEM", null]
+    ];
+    const expertiseElement = document.getElementById("doctor-detail-expertise");
+    if (expertiseElement) renderStructuredFactList(expertiseElement, expertiseFields, true);
 
-    doctorPracticeFeatureGroups.forEach(function (group) {
-        const groupTerms = group.codes
-            .map(function (code) {
-                const term = termsByCode.get(code);
-                if (term) assignedCodes.add(code);
-                return term;
-            })
-            .filter(Boolean);
-
-        renderPracticeFeatureGroup(group, groupTerms);
-    });
-
-    const unassignedTerms = allTerms.filter(function (term) {
-        return !assignedCodes.has(String(term.term_code || ""));
-    });
-
-    if (unassignedTerms.length > 0) {
-        console.warn("Nicht eingeordnete Praxismerkmale:", unassignedTerms);
-    }
-}
-
-function renderPracticeFeatureGroup(group, terms) {
-    const element = document.getElementById(`doctor-detail-${group.id}`);
-    const countElement = document.getElementById(`doctor-detail-${group.id}-count`);
-    if (!element) return;
-
-    if (countElement) countElement.textContent = `${terms.length} / ${group.codes.length}`;
-
-    if (terms.length === 0) {
-        element.innerHTML = `<div class="doctor-detail-feature-group-empty">${escapeHtml(group.emptyText)}</div>`;
-        return;
-    }
-
-    element.innerHTML = terms.map(function (term) {
-        const isSeparated = group.separatedCodes?.has(String(term.term_code || ""));
-        return `
-            <div class="doctor-detail-feature-row${isSeparated ? " is-separated" : ""}" title="${escapeHtml(term.term_desc || term.term_code || "")}">
-                <span class="doctor-detail-feature-icon" aria-hidden="true">✓</span>
-                <span class="doctor-detail-feature-label">${escapeHtml(term.term_label)}</span>
-                <strong class="doctor-detail-feature-status">Ja</strong>
-            </div>
-        `;
-    }).join("");
+    // TODO: replace with dedicated specialization API data. Unclassified legacy
+    // terms must not be presented as medical specializations.
+    renderTermGroup("doctor-detail-specializations", [], "Keine Spezialisierungen hinterlegt.");
 }
 
 function getAccessibilityIcon(termCode) {

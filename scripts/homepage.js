@@ -22,7 +22,8 @@ window.addEventListener("homepage:location-changed", loadFeaturedTreatments);
 async function loadFeaturedTreatments() {
     const list = document.getElementById("featured-treatments-list");
     const moreButton = document.getElementById("featured-treatments-more");
-    if (!list || !moreButton) return;
+    if (!list) return;
+    const isFullTreatmentsPage = list.dataset.fullViewSwitch === "true";
 
     try {
         const ids = featuredTreatments.map(function (treatment) { return treatment.id; }).join(",");
@@ -63,12 +64,18 @@ async function loadFeaturedTreatments() {
             featuredTreatmentDataById.set(Number(editorialTreatment.id), entry.data);
             return entry;
         });
-        list.innerHTML = buildFeaturedTreatmentsHtml(enrichedTreatments.slice(0, featuredTreatmentInitialCount));
+        const initialCount = isFullTreatmentsPage ? enrichedTreatments.length : featuredTreatmentInitialCount;
+        const initialTreatments = enrichedTreatments.slice(0, initialCount);
+        list.innerHTML = buildFeaturedTreatmentsHtml(initialTreatments);
+        if (isFullTreatmentsPage) {
+            bindFeaturedTreatmentViewSwitch(list, initialTreatments);
+        }
         if (!list.dataset.voteBound) {
             list.addEventListener("click", handleFeaturedTreatmentVote);
             list.dataset.voteBound = "true";
         }
 
+        if (!moreButton) return;
         moreButton.hidden = displayedTreatments.length <= featuredTreatmentInitialCount;
         moreButton.onclick = function () {
             const expanded = moreButton.getAttribute("aria-expanded") === "true";
@@ -89,6 +96,44 @@ async function loadFeaturedTreatments() {
         console.error("Behandlungen für die Startseite konnten nicht geladen werden:", error);
         list.innerHTML = '<p class="featured-treatments-status">Die Behandlungen konnten gerade nicht geladen werden.</p>';
     }
+}
+
+function bindFeaturedTreatmentViewSwitch(list, treatments) {
+    const buttons = document.querySelectorAll("[data-featured-treatment-view]");
+    if (!buttons.length) return;
+
+    function render(view) {
+        const isTable = view === "table";
+        saveHomepageResultView(view);
+        list.innerHTML = isTable
+            ? buildFeaturedTreatmentsTableHtml(treatments)
+            : treatments.map(function (entry, index) {
+                return buildFeaturedTreatmentHtml(entry.editorial, entry.data, index);
+            }).join("");
+        buttons.forEach(function (button) {
+            const active = button.dataset.featuredTreatmentView === view;
+            button.classList.toggle("is-active", active);
+            button.setAttribute("aria-pressed", String(active));
+        });
+    }
+
+    buttons.forEach(function (button) {
+        button.onclick = function () { render(button.dataset.featuredTreatmentView); };
+    });
+    render(getSavedHomepageResultView());
+}
+
+function buildFeaturedTreatmentsTableHtml(treatments) {
+    return `<div class="featured-treatments-table-wrap">
+        <table class="featured-treatments-table">
+            <thead><tr>
+                <th scope="col">Platz</th><th scope="col">Therapie</th><th scope="col">Kategorie</th>
+                <th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Votes)</span></th>
+                <th scope="col">Anbieter gesamt</th><th scope="col">Entfernung / Ort</th>
+            </tr></thead>
+            <tbody>${buildFeaturedTreatmentTableRowsHtml(treatments, 0, false)}</tbody>
+        </table>
+    </div>`;
 }
 
 function buildFeaturedTreatmentsHtml(treatments) {
@@ -365,6 +410,9 @@ async function loadFeaturedExperts() {
     const initialEntries = editorialList.slice(0, initialCount);
     const longlist = editorialList.slice(initialCount);
     list.innerHTML = buildFeaturedExpertsHtml(initialEntries, 0, false);
+    if (isFullExpertsPage) {
+        bindFeaturedExpertViewSwitch(list, initialEntries);
+    }
     if (!list.dataset.voteBound) {
         list.addEventListener("click", handleFeaturedExpertVote);
         list.dataset.voteBound = "true";
@@ -389,8 +437,56 @@ async function loadFeaturedExperts() {
     };
 }
 
-function buildFeaturedExpertsHtml(doctors, rankOffset, isLonglist) {
-    const featured = doctors.slice(0, Math.max(0, 3 - rankOffset));
+function bindFeaturedExpertViewSwitch(list, doctors) {
+    const buttons = document.querySelectorAll("[data-featured-view]");
+    if (!buttons.length) return;
+
+    function render(view) {
+        const isTable = view === "table";
+        saveHomepageResultView(view);
+        list.innerHTML = isTable
+            ? buildFeaturedExpertsTableOnlyHtml(doctors)
+            : buildFeaturedExpertsHtml(doctors, 0, false, true);
+        buttons.forEach(function (button) {
+            const active = button.dataset.featuredView === view;
+            button.classList.toggle("is-active", active);
+            button.setAttribute("aria-pressed", String(active));
+        });
+    }
+
+    buttons.forEach(function (button) {
+        button.onclick = function () { render(button.dataset.featuredView); };
+    });
+    render(getSavedHomepageResultView());
+}
+
+function buildFeaturedExpertsTableOnlyHtml(doctors) {
+    return `<div class="featured-experts-table-wrap">
+        <table class="featured-experts-table">
+            <thead><tr>
+                <th scope="col">Platz</th><th scope="col">Ärzt:in</th>
+                <th scope="col">Erfahrung <span class="featured-expert-table-header-note">(n = Votes)</span></th>
+                <th scope="col">Standort</th><th scope="col">Entfernung</th>
+                <th scope="col">Versorgung <span class="featured-expert-table-header-note">(GKV, PKV)</span></th>
+                <th scope="col">Kontakt</th>
+            </tr></thead>
+            <tbody>${buildFeaturedExpertTableRowsHtml(doctors, 0, false)}</tbody>
+        </table>
+    </div>`;
+}
+
+function getSavedHomepageResultView() {
+    try { return localStorage.getItem("lcn_result_view_preference") === "table" ? "table" : "cards"; }
+    catch (_) { return "cards"; }
+}
+
+function saveHomepageResultView(view) {
+    try { localStorage.setItem("lcn_result_view_preference", view === "table" ? "table" : "cards"); }
+    catch (_) {}
+}
+
+function buildFeaturedExpertsHtml(doctors, rankOffset, isLonglist, forceCards) {
+    const featured = forceCards ? doctors : doctors.slice(0, Math.max(0, 3 - rankOffset));
     const tableEntries = doctors.slice(featured.length);
     const cardsHtml = featured.map(function (doctor, index) {
         const rank = rankOffset + index + 1;

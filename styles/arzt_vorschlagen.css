@@ -1,0 +1,199 @@
+.entry-content.entry-card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.entry-subgroup-grid {
+    margin-top: 12px;
+}
+
+.entry-choice-list label {
+    position: relative;
+    display: block;
+    margin: 0 0 7px;
+}
+
+.entry-choice-list input {
+    position: absolute;
+    opacity: 0;
+}
+
+.entry-choice-list span {
+    display: block;
+    padding: 9px 10px;
+    border: 1px solid #cbdde7;
+    border-radius: 7px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.entry-choice-list input:checked + span {
+    border-color: var(--e-teal);
+    background: #e2f4ee;
+    color: #096349;
+    font-weight: 800;
+}
+
+.entry-form-matrix {
+    display: grid;
+    grid-template-columns: minmax(100px, 1.3fr) repeat(3, minmax(58px, 1fr));
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.entry-form-matrix strong {
+    text-align: center;
+    color: var(--e-navy);
+    font-size: .7rem;
+}
+
+.entry-form-matrix span {
+    color: #315267;
+    font-size: .76rem;
+    font-weight: 800;
+}
+
+.entry-form-matrix select {
+    padding: 8px 4px;
+    text-align: center;
+}
+
+form.doctor-entry-form .doctor-name-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px 10px;
+}
+
+form.doctor-entry-form .doctor-name-fields legend {
+    margin-bottom: 2px;
+}
+
+form.doctor-entry-form .doctor-name-fields label {
+    margin-top: 2px;
+}
+
+form.doctor-entry-form .doctor-name-fields label:last-child {
+    grid-column: 1 / -1;
+}
+
+.entry-direct-choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.entry-direct-choice label {
+    display: block;
+    margin: 0;
+}
+
+.entry-direct-choice input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.entry-direct-choice span {
+    display: block;
+    padding: 7px 10px;
+    border: 1px solid #c5d6e0;
+    border-radius: 7px;
+    background: #fff;
+    color: #466273;
+    font-size: .74rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.entry-direct-choice button {
+    display: block;
+    padding: 7px 10px;
+    border: 1px solid #c5d6e0;
+    border-radius: 7px;
+    background: #fff;
+    color: #466273;
+    font-size: .74rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.entry-direct-choice button.is-active {
+    border-color: var(--e-teal);
+    background: #e2f4ee;
+    color: #096349;
+    box-shadow: inset 0 0 0 1px var(--e-teal);
+}
+
+.entry-direct-choice input:checked + span {
+    border-color: var(--e-teal);
+    background: #e2f4ee;
+    color: #096349;
+    box-shadow: inset 0 0 0 1px var(--e-teal);
+}
+
+.entry-form-matrix .entry-direct-choice {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    margin: 0;
+}
+
+.entry-form-matrix .entry-direct-choice span {
+    padding: 6px 2px;
+    text-align: center;
+    font-size: .62rem;
+}
+
+.entry-form-matrix .entry-direct-choice button {
+    padding: 6px 2px;
+    text-align: center;
+    font-size: .62rem;
+}
+
+.entry-unit-input,
+.entry-duration-input {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+}
+
+.entry-unit-input input,
+.entry-duration-input input,
+.entry-duration-input select {
+    border-radius: 7px 0 0 7px;
+}
+
+.entry-unit-input b {
+    display: grid;
+    place-items: center;
+    min-width: 42px;
+    padding: 0 10px;
+    border: 1px solid #adc7d4;
+    border-left: 0;
+    border-radius: 0 7px 7px 0;
+    background: #edf5f8;
+    color: #315267;
+    font-size: .78rem;
+}
+
+.entry-duration-input {
+    grid-template-columns: minmax(92px, .75fr) minmax(0, 1fr);
+}
+
+.entry-duration-input select {
+    border-radius: 7px 0 0 7px;
+}
+
+.entry-duration-input input {
+    border-left: 0;
+    border-radius: 0 7px 7px 0;
+}
+
+@media (max-width: 900px) {
+    .entry-content.entry-card-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 620px) {
+    .entry-content.entry-card-grid { grid-template-columns: 1fr; }
+    .entry-form-matrix { grid-template-columns: minmax(90px, 1.3fr) repeat(3, minmax(52px, 1fr)); }
+}
