@@ -89,22 +89,60 @@ function lcnEnv(string $key, ?string $default = null): ?string
     return (string)$value;
 }
 
-function lcnDatabase(): PDO
+function lcnDatabaseProfile(): ?string
 {
-    static $pdo = null;
+    $profile = strtoupper(trim((string)lcnEnv('LCN_DB_ACTIVE_PROFILE', '')));
 
-    if ($pdo instanceof PDO) {
-        return $pdo;
+    if ($profile === '') {
+        return null;
     }
 
-    $host = lcnEnv('LCN_DB_HOST', '127.0.0.1');
-    $port = lcnEnv('LCN_DB_PORT', '3306');
-    $database = lcnEnv('LCN_DB_DATABASE');
-    $username = lcnEnv('LCN_DB_USERNAME');
-    $password = lcnEnv('LCN_DB_PASSWORD', '');
+    $allowedProfiles = [
+        'LOCAL_MAIN',
+        'LOCAL_TEST',
+        'LOCAL_DUMMY',
+        'ONLINE_TEST',
+        'ONLINE_DUMMY',
+    ];
 
-    if ($database === null || $username === null) {
-        throw new RuntimeException('LCN database configuration is incomplete.');
+    if (!in_array($profile, $allowedProfiles, true)) {
+        throw new RuntimeException(
+            'Invalid LCN database profile: ' . $profile
+        );
+    }
+
+    return $profile;
+}
+
+function lcnDatabaseConfig(): array
+{
+    $profile = lcnDatabaseProfile();
+
+    if ($profile === null) {
+        $host = lcnEnv('LCN_DB_HOST', 'localhost');
+        $database = lcnEnv('LCN_DB_DATABASE');
+        $username = lcnEnv('LCN_DB_USERNAME');
+        $password = lcnEnv('LCN_DB_PASSWORD', '');
+        $configurationName = 'legacy';
+    } else {
+        $prefix = 'LCN_DB_' . $profile . '_';
+        $host = lcnEnv($prefix . 'HOST');
+        $database = lcnEnv($prefix . 'DATABASE');
+        $username = lcnEnv($prefix . 'USERNAME', lcnEnv($prefix . 'USER'));
+        $password = lcnEnv($prefix . 'PASSWORD', '');
+        $configurationName = $profile;
+    }
+
+    $port = lcnEnv('LCN_DB_PORT', '3306');
+
+    if (
+        $host === null ||
+        $database === null ||
+        $username === null
+    ) {
+        throw new RuntimeException(
+            'LCN database configuration is incomplete for profile: ' . $configurationName
+        );
     }
 
     if (in_array(strtolower(trim($database)), ['bookstack_db', 'bookstack', 'bookstackdb'], true)) {
@@ -115,13 +153,43 @@ function lcnDatabase(): PDO
         throw new RuntimeException('LCN database port is invalid.');
     }
 
-    $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
+    return [
+        'profile' => $configurationName,
+        'host' => $host,
+        'port' => $port,
+        'database' => $database,
+        'username' => $username,
+        'password' => $password,
+    ];
+}
 
-    $pdo = new PDO($dsn, $username, $password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => true,
-    ]);
+function lcnDatabase(): PDO
+{
+    static $pdo = null;
+
+    if ($pdo instanceof PDO) {
+        return $pdo;
+    }
+
+    $config = lcnDatabaseConfig();
+
+    $dsn = sprintf(
+        'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
+        $config['host'],
+        $config['port'],
+        $config['database']
+    );
+
+    $pdo = new PDO(
+        $dsn,
+        $config['username'],
+        $config['password'],
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => true,
+        ]
+    );
 
     return $pdo;
 }
