@@ -1,0 +1,40 @@
+.doctor-dummy-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 0 0 24px;
+    padding: 16px 20px;
+    color: #173c36;
+    background: linear-gradient(105deg, #e4f5ef, #f5fbf8);
+    border: 1px dashed #55a28e;
+    border-radius: 16px;
+}
+
+.doctor-dummy-bar-copy { display: grid; gap: 3px; }
+.doctor-dummy-bar span { font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #267461; }
+.doctor-dummy-bar strong { font-size: 1rem; }
+.doctor-dummy-bar p { margin: 0; font-size: .84rem; color: #52716a; text-align: right; }
+.doctor-dummy-scenarios { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+.doctor-dummy-scenarios a { padding: 7px 10px; border: 1px solid #b9d7cf; border-radius: 999px; color: #245e52; background: #fff; font-size: .78rem; font-weight: 800; text-decoration: none; }
+.doctor-dummy-scenarios a.is-active { border-color: #168a72; color: #fff; background: #168a72; }
+.doctor-dummy-scenario-note { margin: -12px 0 24px; padding: 12px 16px; border: 1px solid #d8e5e1; border-radius: 12px; background: #f7fbfa; color: #496961; font-size: .84rem; }
+.doctor-dummy-scenario-note strong { color: #174f43; }
+.doctor-detail-guided-section.is-dummy-unavailable > :not(.doctor-detail-question-intro):not(.doctor-dummy-missing-grid) { display: none !important; }
+.doctor-dummy-missing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; min-width: 0; }
+.doctor-dummy-missing-field { padding: 12px 14px; border: 1px dashed #c5ced8; border-radius: 10px; background: #f6f7f8; }
+.doctor-dummy-missing-field strong { display: block; margin-bottom: 4px; color: #596878; font-size: .8rem; }
+.doctor-dummy-missing-field span { color: #7b8794; font-size: .74rem; font-style: italic; }
+.doctor-dummy-source-tag { display: inline-flex; margin-left: 6px; padding: 3px 7px; border-radius: 999px; background: #e7f3f0; color: #287261; font-size: .62rem; font-weight: 800; vertical-align: middle; }
+.doctor-detail-content.is-voting-scenario .doctor-detail-profile-contact,
+.doctor-detail-content.is-hybrid-scenario .doctor-detail-profile-contact,
+.doctor-detail-content.is-voting-scenario .doctor-detail-action-links,
+.doctor-detail-content.is-hybrid-scenario .doctor-detail-action-links { display: none; }
+
+@media (max-width: 720px) {
+    .doctor-dummy-bar { align-items: flex-start; flex-direction: column; gap: 8px; }
+    .doctor-dummy-bar p { text-align: left; }
+    .doctor-dummy-scenarios { justify-content: flex-start; }
+    .doctor-dummy-scenarios a { flex: 1; text-align: center; }
+    .doctor-dummy-missing-grid { grid-template-columns: 1fr; }
+}

@@ -32,7 +32,7 @@ let doctorDetailMap = null;
 
 // TODO: replace temporary doctor structure data with API fields. Until then every
 // missing value is shown explicitly as unavailable and never as a doctor fact.
-const temporaryDoctorStructureData = {
+const temporaryDoctorStructureData = window.LCN_DOCTOR_STRUCTURE_DATA || {
     billing: [["Abrechnungsmodell", "Noch keine Angabe"], ["Kassensitz", "Unbekannt"]],
     costs: [["Ersttermin (Sprechstunde)", "Noch keine Angabe in €"], ["Folgetermin (Sprechstunde)", "Noch keine Angabe in €"], ["Typische Gesamtkosten der Behandlung (inklusive Therapie)", "Noch keine Angabe in €"]],
     appointments: [["Wartezeit bis Ersttermin", "Noch keine Angabe"], ["Warteliste vorhanden", "Unbekannt"], ["Zuletzt aktualisiert", "Noch keine Angabe"]],
@@ -125,7 +125,8 @@ function renderTemporaryDoctorStructure(doctor = {}) {
         : doctor.dr_accepts_pkv === "yes"
             ? "Nur PKV / Selbstzahler"
             : "Unbekannt";
-    const billingFacts = [["Abrechnungsmodell", billingModel], ["Kassensitz", "Unbekannt"]];
+    const billingFacts = window.LCN_DOCTOR_STRUCTURE_DATA?.billing
+        || [["Abrechnungsmodell", billingModel], ["Kassensitz", "Unbekannt"]];
     const lists = {
         "doctor-detail-access-billing": billingFacts,
         "doctor-detail-access-costs": temporaryDoctorStructureData.costs,
@@ -158,7 +159,12 @@ function renderTemporaryDoctorStructure(doctor = {}) {
 
     const matrix = document.getElementById("doctor-detail-appointment-matrix");
     if (matrix) matrix.innerHTML = Object.entries(temporaryDoctorStructureData.appointmentForms).map(function ([label, values]) {
-        return `<tr><th>${escapeHtml(label)}</th>${values.map(function () { return '<td class="is-unknown" aria-label="Unbekannt">–</td>'; }).join("")}</tr>`;
+        return `<tr><th>${escapeHtml(label)}</th>${values.map(function (value) {
+            const normalized = String(value || "unknown").toLowerCase();
+            if (normalized === "yes") return '<td class="is-yes" aria-label="Ja">✓</td>';
+            if (normalized === "no") return '<td class="is-no" aria-label="Nein">×</td>';
+            return '<td class="is-unknown" aria-label="Unbekannt">–</td>';
+        }).join("")}</tr>`;
     }).join("");
     const homeVisits = document.getElementById("doctor-detail-home-visits");
     if (homeVisits) homeVisits.innerHTML = `<span class="is-unknown">${escapeHtml(temporaryDoctorStructureData.homeVisits)}</span>`;
@@ -1010,7 +1016,7 @@ function renderTermGroup(elementId, terms, emptyText) {
 }
 
 function renderPracticeFeatureGroups(terms) {
-    const expertiseFields = [
+    const expertiseFields = temporaryDoctorStructureData.expertise || [
         ["Long Covid", null],
         ["ME/CFS", null],
         ["Post-Vac", null],
@@ -1023,7 +1029,7 @@ function renderPracticeFeatureGroups(terms) {
 
     // TODO: replace with dedicated specialization API data. Unclassified legacy
     // terms must not be presented as medical specializations.
-    renderTermGroup("doctor-detail-specializations", [], "Keine Spezialisierungen hinterlegt.");
+    renderTermGroup("doctor-detail-specializations", temporaryDoctorStructureData.specializations || [], "Keine Spezialisierungen hinterlegt.");
 }
 
 function getAccessibilityIcon(termCode) {
