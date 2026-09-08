@@ -3,16 +3,20 @@
 
     const scenario = new URLSearchParams(location.search).get('scenario') || 'complete';
     const activeScenario = ['complete', 'research', 'voting', 'hybrid'].includes(scenario) ? scenario : 'complete';
+    const fixture = new URLSearchParams(location.search).get('fixture') || '';
     const status = document.getElementById('tdd-status');
     const content = document.getElementById('tdd-content');
 
     document.querySelectorAll('[data-scenario-link]').forEach(link => {
+        const url = new URL(link.href, location.href);
+        if (fixture) url.searchParams.set('fixture', fixture);
+        link.href = url;
         const active = link.dataset.scenarioLink === activeScenario;
         link.classList.toggle('is-active', active);
         if (active) link.setAttribute('aria-current', 'page');
     });
 
-    fetch(`api/treatment_detail_dummy.php?scenario=${encodeURIComponent(activeScenario)}`, { cache: 'no-store' })
+    fetch(`api/treatment_detail_dummy.php?scenario=${encodeURIComponent(activeScenario)}&fixture=${encodeURIComponent(fixture)}`, { cache: 'no-store' })
         .then(response => {
             if (!response.ok) throw new Error('Testdaten konnten nicht geladen werden.');
             return response.json();
@@ -66,7 +70,7 @@
 
     function researchOnlySections(t) {
         return `
-            ${section(1, 'Wie zugänglich ist die Behandlung für mich?', 'Redaktionell recherchierte Voraussetzungen und Statusangaben.', `${accessResearchHtml(t)}${missingFieldsHtml(['Kosten', 'Kostenübernahme'])}`)}
+            ${section(1, 'Wie zugänglich ist die Behandlung für mich?', 'Redaktionell recherchierte Voraussetzungen und Statusangaben.', `${accessResearchHtml(t)}${missingFieldsHtml(['Kosten'])}`)}
             ${section(2, 'Kann ich die Behandlung gesundheitlich bewältigen?', 'Diese Angaben werden hybrid oder durch Abstimmungen erhoben.', missingFieldsHtml(['Durchführungssetting', 'Behandlungsumfang', 'Praktische Bewältigbarkeit', 'Crash-/PEM-Risiko']), true)}
             ${section(3, 'Welche Erfahrungen gibt es mit der Behandlung?', 'Diese Angaben stammen aus Abstimmungen.', missingFieldsHtml(['Gesamtbewertung', 'Gamechanger', 'Zeit bis zur wahrgenommenen Veränderung']), true)}
             ${section(4, 'Was zeichnet die Behandlung fachlich aus?', 'Redaktionelle Einordnung und geprüfte Quellen.', researchProfessionalHtml(t))}
@@ -76,7 +80,7 @@
     }
 
     function accessResearchHtml(t) {
-        return `<div class="tdd-scale-grid">${scaleCard('Zugang', ['Frei erhältlich', 'Ärztliche Verordnung', 'Nur Studie'], 'Ärztliche Verordnung', 'Redaktionell recherchiert')}${scaleCard('Zulassung für Long COVID / ME/CFS', ['Nein', 'Ja'], t.approved_for_condition ? 'Ja' : 'Nein', 'Redaktionell recherchiert')}${scaleCard('Off-Label-Status', ['Kein Off-Label', 'Off-Label'], t.off_label ? 'Off-Label' : 'Kein Off-Label', 'Redaktionell recherchiert')}${scaleCard('Forschungsstatus', ['Phase I', 'Phase II', 'Phase III', 'Zugelassen'], t.research_status, 'Redaktionell recherchiert')}</div>`;
+        return `<div class="tdd-scale-grid">${scaleCard('Zugang', ['Frei erhältlich', 'Ärztliche Verordnung', 'Nur Studie'], 'Ärztliche Verordnung', 'Redaktionell recherchiert')}${scaleCard('Zulassung für Long COVID / ME/CFS', ['Nein', 'Ja'], t.approved_for_condition ? 'Ja' : 'Nein', 'Redaktionell recherchiert')}${scaleCard('Off-Label-Status', ['Kein Off-Label', 'Off-Label'], t.off_label ? 'Off-Label' : 'Kein Off-Label', 'Redaktionell recherchiert')}</div>${studiesHtml(t.studies, t.research_status)}${reimbursementHtml(t)}`;
     }
 
     function researchProfessionalHtml(t) {
@@ -125,12 +129,23 @@
             ${scaleCard('Zugang', ['Frei erhältlich', 'Ärztliche Verordnung', 'Nur Studie'], 'Ärztliche Verordnung', 'Von leicht bis stark eingeschränkt')}
             ${scaleCard('Zulassung für Long COVID / ME/CFS', ['Nein', 'Ja'], t.approved_for_condition ? 'Ja' : 'Nein', 'Zulassung für die konkrete Indikation')}
             ${scaleCard('Off-Label-Status', ['Kein Off-Label', 'Off-Label'], t.off_label ? 'Off-Label' : 'Kein Off-Label', 'Nur relevant bei Arzneimitteln')}
-            ${scaleCard('Forschungsstatus', ['Phase I', 'Phase II', 'Phase III', 'Zugelassen'], t.research_status, 'Fortschritt in Forschung und Entwicklung')}
         </div>
+        ${studiesHtml(t.studies, t.research_status)}
         <div class="tdd-split">
             ${groupCard('Kosten', t.costs ? [['Pro Monat', t.costs.unit], ['Typischer Zeitraum', t.costs.typical_count], ['Gesamtkosten', t.costs.total], ['Laufende Kosten', t.costs.ongoing]] : null)}
-            ${scaleCard('Kostenübernahme', ['GKV möglich', 'PKV / Selbstzahler', 'Nur Selbstzahler'], t.reimbursement, 'Von breiter Erstattung bis vollständig privat')}
+            ${reimbursementHtml(t)}
         </div>`;
+    }
+
+    function studiesHtml(studies, fallbackStatus) {
+        if (!studies?.length) return fallbackStatus ? `<div class="tdd-study-section">${scaleCard('Forschungsstatus', ['Phase I', 'Phase II', 'Phase III', 'Zugelassen'], fallbackStatus, 'Forschungsstand')}</div>` : '';
+        return `<section class="tdd-study-section"><div class="tdd-card-title"><h3>Studien</h3><span>${studies.length} recherchierte Einträge</span></div><div class="tdd-study-grid">${studies.map(study => `<article class="tdd-card tdd-study-card"><div><span>${escape(study.kind || 'Studie')}</span>${study.phase ? `<strong>${escape(study.phase)}</strong>` : '<strong>Keine Studienphase angegeben</strong>'}</div><h4>${escape(study.name)}</h4>${study.url ? `<a href="${escape(study.url)}" target="_blank" rel="noopener noreferrer">Studie öffnen ↗</a>` : ''}</article>`).join('')}</div></section>`;
+    }
+
+    function reimbursementHtml(t) {
+        const details = t.reimbursement_details;
+        if (!details) return scaleCard('Kostenübernahme', ['GKV möglich', 'PKV / Selbstzahler', 'Nur Selbstzahler'], t.reimbursement, 'Von breiter Erstattung bis vollständig privat');
+        return `<section class="tdd-reimbursement"><div class="tdd-card-title"><h3>Kostenübernahme</h3><span>GKV und PKV getrennt</span></div><div class="tdd-reimbursement-grid">${['gkv', 'pkv'].map(key => { const item = details[key]; const label = key.toUpperCase(); return `<article class="tdd-card tdd-reimbursement-card"><div class="tdd-reimbursement-status"><span>${label}</span><strong class="is-${String(item.status).toLowerCase() === 'ja' ? 'yes' : 'no'}">${escape(item.status)}</strong></div><small>${escape(item.certainty || '')}</small><p>${escape(item.note || '')}</p>${item.url ? `<a href="${escape(item.url)}" target="_blank" rel="noopener noreferrer">Quelle öffnen ↗</a>` : ''}</article>`; }).join('')}</div></section>`;
     }
 
     function feasibilityHtml(t, experience) {
@@ -180,53 +195,60 @@
         const related = relationships.related_treatments;
         return `<div class="tdd-relationship-groups">
             <article class="tdd-relationship-group is-alternatives">
-                <div class="tdd-relationship-heading"><div><span>Andere Möglichkeiten</span><h3>Alternative Behandlungen / Ansätze</h3></div><small>Nach Positivbewertung eingeordnet</small></div>
-                <ul class="tdd-relationship-list is-counter-list">${relationshipList(relationships.alternative_treatments, item => item.relation, item => item.recommendations)}</ul>
+                <div class="tdd-relationship-heading"><div><span>Andere Möglichkeiten</span><h3>Alternative Behandlungen / Ansätze</h3></div><small>Fachlich recherchierte Beziehungen</small></div>
+                <ul class="tdd-relationship-list is-counter-list">${relationshipList(relationships.alternative_treatments, item => item.relation, item => item.recommendations, relationships)}</ul>
             </article>
             <article class="tdd-relationship-group is-products">
-                <div class="tdd-relationship-heading"><div><span>Gleicher Wirkstoff</span><h3>Alternative Präparate</h3></div><small>Andere verfügbare Varianten</small></div>
-                <ul class="tdd-relationship-list">${relationshipList(relationships.alternative_products, item => item.type)}</ul>
+                <div class="tdd-relationship-heading"><div><span>Medikamentöse Alternativen</span><h3>Alternative Präparate / Wirkstoffe</h3></div><small>Fachlich recherchierte Beziehungen</small></div>
+                <ul class="tdd-relationship-list">${relationshipList(relationships.alternative_products, item => item.type, () => null, relationships)}</ul>
             </article>
             <article class="tdd-relationship-group is-related">
                 <div class="tdd-relationship-heading"><div><span>Fachliche Nähe</span><h3>Verwandte Behandlungen</h3></div><small>Gehört zu: <strong>${escape(related.classification)}</strong></small></div>
-                <ul class="tdd-relationship-list">${relationshipList(related.items, () => 'Verwandt')}</ul>
+                <ul class="tdd-relationship-list">${relationshipList(related.items, item => item.type || 'Verwandt', () => null, relationships)}</ul>
             </article>
         </div>`;
     }
 
-    function relationshipList(items, labelFor, recommendationsFor = () => null) {
-        const current = { name: 'LDN', positive_rating: 68, is_current: true };
+    function relationshipList(items, labelFor, recommendationsFor = () => null, relationships = {}) {
+        const current = { name: relationships.current_name || 'LDN', positive_rating: relationships.current_rating ?? 68, is_current: true };
         return [...items, current]
-            .sort((a, b) => b.positive_rating - a.positive_rating)
+            .sort((a, b) => (b.positive_rating ?? -1) - (a.positive_rating ?? -1))
             .map(item => item.is_current ? currentRelationshipRow(item) : relationshipCard(item, labelFor(item), recommendationsFor(item)))
             .join('');
     }
 
     function currentRelationshipRow(item) {
-        return `<li class="is-current"><div class="tdd-relationship-card is-current" aria-current="true"><span><strong>${escape(item.name)}</strong><small>Aktuell ausgewählt</small></span><b>${item.positive_rating} %<small>positiv</small></b><i>Aktuell</i></div></li>`;
+        return `<li class="is-current"><div class="tdd-relationship-card is-current" aria-current="true"><span><strong>${escape(item.name)}</strong><small>Aktuell ausgewählt</small></span>${ratingMarkup(item.positive_rating)}<i>Aktuell</i></div></li>`;
     }
 
     function relationshipCard(item, label, recommendations = null) {
         const href = `treatment_detail_dummy.php?scenario=complete&dummy_treatment=${encodeURIComponent(item.slug)}`;
-        return `<li><a class="tdd-relationship-card" href="${href}"><span><strong>${escape(item.name)}</strong><small>${escape(label)}${recommendations === null ? '' : ` · ${recommendations} Empfehlungen`}</small></span><b>${item.positive_rating} %<small>positiv</small></b><i aria-hidden="true">›</i></a></li>`;
+        return `<li><a class="tdd-relationship-card" href="${href}"><span><strong>${escape(item.name)}</strong><small>${escape(label)}${recommendations === null ? '' : ` · ${recommendations} Empfehlungen`}</small></span>${ratingMarkup(item.positive_rating)}<i aria-hidden="true">›</i></a></li>`;
+    }
+
+    function ratingMarkup(ratingValue) {
+        return ratingValue === null || ratingValue === undefined
+            ? '<b>—<small>keine Communitybewertung</small></b>'
+            : `<b>${ratingValue} %<small>positiv</small></b>`;
     }
 
     function providersHtml(providers) {
         if (!providers.length) return empty('In diesem Datenstand sind noch keine Anbieter hinterlegt.');
-        return `<section id="treatment-detail-provider-map-panel" class="treatment-detail-provider-map-panel" aria-label="Anbieterkarte">
+        const mappedProviders = providers.filter(provider => Number.isFinite(provider.lat) && Number.isFinite(provider.lng));
+        return `${mappedProviders.length ? `<section id="treatment-detail-provider-map-panel" class="treatment-detail-provider-map-panel" aria-label="Anbieterkarte">
             <div class="treatment-detail-provider-map-header"><span>Standorte auf der Karte</span><span class="treatment-detail-provider-map-count">${providers.length} Dummy-Standorte</span></div>
             <div id="tdd-provider-map" class="treatment-detail-provider-map"></div>
-        </section>
+        </section>` : ''}
         <div class="treatment-detail-provider-list">
             <div class="treatment-detail-provider-controls" aria-label="Anbieteransicht und Sortierung">
                 <div class="treatment-detail-provider-controls-grid">
                     <section class="treatment-detail-provider-control-card"><h3>Anbieteransicht</h3><div class="treatment-detail-provider-view-switch"><button type="button" class="treatment-detail-provider-view-button is-active" data-tdd-provider-view="cards">Kacheln</button><button type="button" class="treatment-detail-provider-view-button" data-tdd-provider-view="table">Tabelle</button></div></section>
                     <section class="treatment-detail-provider-control-card"><h3>Sortierung</h3><div class="treatment-detail-provider-sort-switch"><button type="button" class="treatment-detail-provider-sort-button is-active">Alphabetisch</button><button type="button" class="treatment-detail-provider-sort-button" disabled>Bewertung positiv</button><button type="button" class="treatment-detail-provider-sort-button" disabled>Entfernung</button></div></section>
-                    <section class="treatment-detail-provider-control-card treatment-detail-provider-control-card-location"><h3>Standort / Entfernung</h3><div class="treatment-detail-provider-location-controls"><input class="treatment-detail-provider-location-input" value="Am Duffesbach 10, 50677 Köln, Deutschland" aria-label="Dummy-Standort"><button class="treatment-detail-provider-location-set-button">Standort setzen</button><button class="treatment-detail-provider-location-reset-button">Zurücksetzen</button></div><div class="treatment-detail-provider-location-status">Aktiver Standort: Am Duffesbach 10, 50677 Köln, Deutschland</div></section>
+                    ${mappedProviders.length ? '<section class="treatment-detail-provider-control-card treatment-detail-provider-control-card-location"><h3>Standort / Entfernung</h3><p>Für Anbieter mit recherchierten Koordinaten.</p></section>' : '<section class="treatment-detail-provider-control-card treatment-detail-provider-control-card-location"><h3>Standortdaten</h3><p>In diesem Modul nicht vollständig recherchiert; deshalb keine Entfernungen.</p></section>'}
                 </div>
             </div>
             <div class="treatment-detail-provider-list-inner treatment-detail-provider-view-cards" data-tdd-provider-cards>
-                <section class="treatment-detail-provider-group"><div class="treatment-detail-provider-group-header"><h3>Auf der Karte angezeigt</h3><span>${providers.length}</span></div><p class="treatment-detail-provider-group-note">Diese fiktiven Anbieter haben Beispielkoordinaten und werden auf der Karte angezeigt.</p><div class="treatment-detail-provider-card-grid">${providers.map((p, i) => providerCard(p, i)).join('')}</div></section>
+                <section class="treatment-detail-provider-group"><div class="treatment-detail-provider-group-header"><h3>Recherchierte Anbieter</h3><span>${providers.length}</span></div><p class="treatment-detail-provider-group-note">Anbieterbeziehungen aus Modul 04; fehlende Standort-, Kontakt- und Bewertungsdaten werden nicht ergänzt.</p><div class="treatment-detail-provider-card-grid">${providers.map((p, i) => providerCard(p, i)).join('')}</div></section>
             </div>
             <div class="treatment-detail-provider-list-inner treatment-detail-provider-view-list" data-tdd-provider-table hidden>
                 <section class="treatment-detail-provider-group"><div class="treatment-detail-provider-group-header"><h3>Alle Anbieter</h3><span>${providers.length}</span></div>${providerTable(providers)}</section>
@@ -235,14 +257,15 @@
     }
 
     function providerCard(p, index) {
-        const total = p.pro + p.neutral + p.contra;
+        const total = [p.pro, p.neutral, p.contra].every(Number.isFinite) ? p.pro + p.neutral + p.contra : 0;
         const percent = value => Math.round(value / total * 100);
-        return `<article class="treatment-detail-provider-card"><div class="treatment-detail-provider-card-topline"><span class="treatment-detail-provider-rank-badge">#${index + 1}</span></div><div class="treatment-detail-provider-card-header"><div><h3><span class="treatment-detail-provider-name-link">${escape(p.name)}</span></h3><p>${escape(p.postal_code)} ${escape(p.location)}</p></div></div><div class="treatment-detail-provider-rating"><div class="treatment-detail-provider-rating-item treatment-detail-provider-rating-positive"><strong>${percent(p.pro)}%</strong><span>positiv</span></div><div class="treatment-detail-provider-rating-item treatment-detail-provider-rating-neutral"><strong>${percent(p.neutral)}%</strong><span>neutral</span></div><div class="treatment-detail-provider-rating-item treatment-detail-provider-rating-negative"><strong>${percent(p.contra)}%</strong><span>negativ</span></div><div class="treatment-detail-provider-rating-total">n = ${total}</div></div><div class="treatment-detail-provider-card-body"><div class="treatment-detail-provider-meta">${p.care.map(c => `<span class="treatment-detail-care-badge treatment-detail-care-badge-positive">${escape(c)}</span>`).join('')}</div><div class="treatment-detail-provider-contact">${p.contact.map(c => `<span>${escape(c)}</span>`).join('')}</div></div></article>`;
+        const ratingBlock = total ? `<div class="treatment-detail-provider-rating"><div class="treatment-detail-provider-rating-item treatment-detail-provider-rating-positive"><strong>${percent(p.pro)}%</strong><span>positiv</span></div><div class="treatment-detail-provider-rating-item treatment-detail-provider-rating-neutral"><strong>${percent(p.neutral)}%</strong><span>neutral</span></div><div class="treatment-detail-provider-rating-item treatment-detail-provider-rating-negative"><strong>${percent(p.contra)}%</strong><span>negativ</span></div><div class="treatment-detail-provider-rating-total">n = ${total}</div></div>` : '<p class="tdd-muted">Keine Communitybewertung im Recherchemodul</p>';
+        return `<article class="treatment-detail-provider-card"><div class="treatment-detail-provider-card-topline"><span class="treatment-detail-provider-rank-badge">#${index + 1}</span><span>${escape(p.kind || 'Anbieter')}</span></div><div class="treatment-detail-provider-card-header"><div><h3><span class="treatment-detail-provider-name-link">${escape(p.name)}</span></h3><p>${p.location ? escape([p.postal_code, p.location].filter(Boolean).join(' ')) : 'Standort nicht im Modul recherchiert'}</p></div></div>${ratingBlock}<div class="treatment-detail-provider-card-body"><p>${escape(p.detail || '')}</p><div class="treatment-detail-provider-meta">${(p.care || []).map(c => `<span class="treatment-detail-care-badge treatment-detail-care-badge-positive">${escape(c)}</span>`).join('')}</div><div class="treatment-detail-provider-contact">${(p.contact || []).map(c => `<span>${escape(c)}</span>`).join('')}</div></div></article>`;
     }
 
     function providerTable(providers) {
-        const rows = providers.map((p, i) => { const total=p.pro+p.neutral+p.contra; return `<tr><td class="treatment-detail-provider-rank-cell" data-label="Rang"><span class="treatment-detail-provider-rank-badge">#${i+1}</span></td><td data-label="Anbieter"><strong>${escape(p.name)}</strong></td><td data-label="Standort">${escape(p.postal_code)} ${escape(p.location)}</td><td data-label="Karte"><span class="treatment-detail-map-status treatment-detail-map-status-yes">Ja</span></td><td data-label="Entfernung"><span class="treatment-detail-provider-distance">${[5.4,435,291][i]} km</span></td><td data-label="Bewertung"><div class="treatment-detail-provider-rating-compact"><span class="is-positive">${Math.round(p.pro/total*100)}%</span><span class="is-neutral">${Math.round(p.neutral/total*100)}%</span><span class="is-negative">${Math.round(p.contra/total*100)}%</span><small>n=${total}</small></div></td><td data-label="Versorgung"><div class="treatment-detail-provider-meta">${p.care.map(c=>`<span class="treatment-detail-care-badge treatment-detail-care-badge-positive">${escape(c)}</span>`).join('')}</div></td><td data-label="Kontakt"><div class="treatment-detail-provider-contact">${p.contact.map(c=>`<span>${escape(c)}</span>`).join('')}</div></td></tr>`; }).join('');
-        const compactRows = providers.map((p, i) => { const total=p.pro+p.neutral+p.contra; return `<tr><td>${i+1}</td><td><strong class="treatment-detail-provider-name-link">${escape(p.name)}</strong></td><td><div class="treatment-detail-provider-compact-rating"><span class="treatment-detail-provider-compact-positive">+${Math.round(p.pro/total*100)}%</span><small>(n=${total})</small></div></td><td><div class="treatment-detail-provider-compact-location"><span class="treatment-detail-provider-distance">${[5.4,435,291][i]} km</span><small>${escape(p.postal_code)} ${escape(p.location)}</small></div></td></tr>`; }).join('');
+        const rows = providers.map((p, i) => { const total=[p.pro,p.neutral,p.contra].every(Number.isFinite)?p.pro+p.neutral+p.contra:0; const hasMap=Number.isFinite(p.lat)&&Number.isFinite(p.lng); return `<tr><td class="treatment-detail-provider-rank-cell" data-label="Rang"><span class="treatment-detail-provider-rank-badge">#${i+1}</span></td><td data-label="Anbieter"><strong>${escape(p.name)}</strong><small>${escape(p.kind || '')}</small></td><td data-label="Standort">${p.location ? escape([p.postal_code,p.location].filter(Boolean).join(' ')) : '—'}</td><td data-label="Karte"><span class="treatment-detail-map-status">${hasMap?'Ja':'Nein'}</span></td><td data-label="Entfernung">—</td><td data-label="Bewertung">${total?`n=${total}`:'—'}</td><td data-label="Versorgung"><div class="treatment-detail-provider-meta">${(p.care||[]).map(c=>`<span class="treatment-detail-care-badge treatment-detail-care-badge-positive">${escape(c)}</span>`).join('')}</div></td><td data-label="Kontakt"><div class="treatment-detail-provider-contact">${(p.contact||[]).map(c=>`<span>${escape(c)}</span>`).join('')}</div></td></tr>`; }).join('');
+        const compactRows = providers.map((p, i) => `<tr><td>${i+1}</td><td><strong class="treatment-detail-provider-name-link">${escape(p.name)}</strong></td><td>—</td><td><small>${p.location ? escape([p.postal_code,p.location].filter(Boolean).join(' ')) : 'nicht recherchiert'}</small></td></tr>`).join('');
         return `<div class="treatment-detail-provider-table-wrap"><table class="treatment-detail-provider-table treatment-detail-provider-table-detailed"><thead><tr><th>Rang</th><th>Anbieter</th><th>Standort</th><th>Karte</th><th>Entfernung</th><th>Bewertung</th><th>Versorgung</th><th>Kontakt</th></tr></thead><tbody>${rows}</tbody></table><table class="treatment-detail-provider-compact-table"><thead><tr><th>#</th><th>Anbieter</th><th>Positiv</th><th>Standort</th></tr></thead><tbody>${compactRows}</tbody></table></div>`;
     }
 
@@ -254,11 +277,12 @@
             document.querySelectorAll('[data-tdd-provider-view]').forEach(item => item.classList.toggle('is-active', item === button));
         }));
         const mapElement = document.getElementById('tdd-provider-map');
-        if (!mapElement || !window.L || !providers.length) return;
+        const mappedProviders = providers.filter(provider => Number.isFinite(provider.lat) && Number.isFinite(provider.lng));
+        if (!mapElement || !window.L || !mappedProviders.length) return;
         const map = window.L.map(mapElement, { scrollWheelZoom: false });
         window.L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: 'Tiles © Esri' }).addTo(map);
         const bounds = [];
-        providers.forEach(p => { const point=[p.lat,p.lng]; bounds.push(point); window.L.marker(point).addTo(map).bindPopup(`<strong>${escape(p.name)}</strong><br>${escape(p.postal_code)} ${escape(p.location)}`); });
+        mappedProviders.forEach(p => { const point=[p.lat,p.lng]; bounds.push(point); window.L.marker(point).addTo(map).bindPopup(`<strong>${escape(p.name)}</strong><br>${escape(p.postal_code)} ${escape(p.location)}`); });
         map.fitBounds(bounds, { padding: [28, 28], maxZoom: 7 });
     }
 

@@ -14,10 +14,10 @@ $banner = <<<'HTML'
 <section class="doctor-dummy-bar" aria-label="Testansicht auswählen">
     <div class="doctor-dummy-bar-copy"><span>Isolierter UI-Prototyp</span><strong>Erhebungsmodell vergleichen</strong></div>
     <nav class="doctor-dummy-scenarios" aria-label="Datenumfang">
-        <a data-doctor-scenario="complete" href="?id=9001&amp;scenario=complete">Vollständig</a>
-        <a data-doctor-scenario="research" href="?id=9001&amp;scenario=research">Nur Recherche</a>
-        <a data-doctor-scenario="voting" href="?id=9001&amp;scenario=voting">Nur Abstimmung</a>
-        <a data-doctor-scenario="hybrid" href="?id=9001&amp;scenario=hybrid">Nur Hybrid</a>
+        <a data-doctor-scenario="complete" href="?scenario=complete">Vollständig</a>
+        <a data-doctor-scenario="research" href="?scenario=research">Nur Recherche</a>
+        <a data-doctor-scenario="voting" href="?scenario=voting">Nur Abstimmung</a>
+        <a data-doctor-scenario="hybrid" href="?scenario=hybrid">Nur Hybrid</a>
     </nav>
 </section>
 <div id="doctor-dummy-scenario-note" class="doctor-dummy-scenario-note"></div>
@@ -42,8 +42,11 @@ $html = preg_replace(
 ) ?? $html;
 $html = str_replace(
     '<script src="scripts/arzt_detail.js?v=35"></script>',
-    '<script src="scripts/arzt_detail_dummy.js?v=3"></script>' . "\n" .
-    '    <script src="scripts/arzt_detail.js?v=36"></script>',
+    '<script src="scripts/doctor_treatment_taxonomy.js?v=1"></script>' . "\n" .
+    '    <script src="scripts/doctor_dummy_fixtures.js?v=2"></script>' . "\n" .
+    '    <script src="scripts/doctor_dummy_fixtures_aug28.js?v=1"></script>' . "\n" .
+    '    <script src="scripts/arzt_detail_dummy.js?v=5"></script>' . "\n" .
+    '    <script src="scripts/arzt_detail.js?v=37"></script>',
     $html
 );
 

@@ -16,7 +16,7 @@
     <div id="header-placeholder"></div>
 
     <main class="tdd-shell">
-        <a class="tdd-back" href="therapien_karte.html">← Zurück zur Therapiesuche</a>
+        <a class="tdd-back" href="dummy_uebersicht.php">← Zurück zur Dummy-Übersicht</a>
 
         <section class="tdd-testbar" aria-label="Testansicht auswählen">
             <div>

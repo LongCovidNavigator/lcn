@@ -1,9 +1,13 @@
 (function () {
     "use strict";
 
-    if (!new URLSearchParams(location.search).has("id")) {
-        const initialScenario = new URLSearchParams(location.search).get("scenario") || "complete";
-        history.replaceState(null, "", `${location.pathname}?id=9001&scenario=${encodeURIComponent(initialScenario)}`);
+    const initialParams = new URLSearchParams(location.search);
+    const fixtureKey = initialParams.get("fixture") || "example";
+    const fixture = window.LCN_DOCTOR_DUMMY_FIXTURES?.[fixtureKey] || null;
+    if (!initialParams.has("id")) {
+        const initialScenario = initialParams.get("scenario") || "complete";
+        const fixtureParam = fixture ? `&fixture=${encodeURIComponent(fixtureKey)}` : "";
+        history.replaceState(null, "", `${location.pathname}?id=${fixture?.item?.dr_id || 9001}&scenario=${encodeURIComponent(initialScenario)}${fixtureParam}`);
     }
 
     const requestedScenario = new URLSearchParams(location.search).get("scenario") || "complete";
@@ -17,12 +21,16 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll("[data-doctor-scenario]").forEach(function (link) {
+            const url = new URL(link.href, location.href);
+            url.searchParams.set("id", fixture?.item?.dr_id || "9001");
+            if (fixture) url.searchParams.set("fixture", fixtureKey);
+            link.href = url;
             const selected = link.dataset.doctorScenario === activeScenario;
             link.classList.toggle("is-active", selected);
             if (selected) link.setAttribute("aria-current", "page");
         });
         const note = document.getElementById("doctor-dummy-scenario-note");
-        if (note) note.innerHTML = `<strong>Gezeigter Datenstand: ${scenarioDefinitions[activeScenario].label}</strong> · ${scenarioDefinitions[activeScenario].note}`;
+        if (note) note.innerHTML = `<strong>${fixture ? fixture.label : "Dr. med. Mara Beispiel"} · ${scenarioDefinitions[activeScenario].label}</strong> · ${fixture?.researchNote || scenarioDefinitions[activeScenario].note}`;
 
         const content = document.getElementById("doctor-detail-content");
         if (!content) return;
@@ -48,7 +56,7 @@
             ["Versicherung & Abrechnung", "Kosten", "Terminlage"],
             ["Terminform", "Hausbesuche", "Rücksichtnahme", "Barrierefreiheit"],
             ["Gesamtbewertung", "Ärztlicher Umgang", "Arbeitsweise", "Praxis-Erfahrungen"],
-            ["Fachrichtungen", "Spezialisierungen", "Fachliche Erfahrung"],
+            ["Fachrichtungen", "Zusatzqualifikationen / Weiterbildungen", "Spezialisierungen", "Fachliche Erfahrung"],
             ["Services", "Medikamentöse Möglichkeiten", "Diagnosen"],
             ["Behandlungsspektrum", "Behandlungsbewertungen", "Angebotsanalyse"]
         ];
@@ -99,6 +107,156 @@
         neutral_ratio: Math.round(neutral / Math.max(1, pro + neutral + contra) * 100),
         negative_ratio: Math.round(contra / Math.max(1, pro + neutral + contra) * 100), provider_count: providers
     });
+
+    const normalizeTreatmentName = value => String(value || "")
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/α/g, "alpha")
+        .replace(/β/g, "beta")
+        .replace(/[^a-zA-Z0-9]+/g, " ")
+        .trim()
+        .toLowerCase();
+    const taxonomyEntries = Object.entries(window.LCN_DOCTOR_TREATMENT_TAXONOMY || {});
+    const taxonomyExact = new Map(taxonomyEntries.map(([name, data]) => [normalizeTreatmentName(name), data]));
+    const taxonomyBaseCandidates = new Map();
+    taxonomyEntries.forEach(([name, data]) => {
+        const base = normalizeTreatmentName(name.replace(/\s*\([^)]*\)\s*/g, " "));
+        if (!taxonomyBaseCandidates.has(base)) taxonomyBaseCandidates.set(base, []);
+        taxonomyBaseCandidates.get(base).push(data);
+    });
+    const taxonomyAliases = new Map(Object.entries({
+        "low dose naltrexon ldn": "Low Dose Naltrexone (LDN)",
+        "low dose aripiprazol lda": "Niedrig dosiertes Aripiprazol (LDA)",
+        "help apherese": "H.E.L.P.-Apherese",
+        "hyperbare sauerstofftherapie hbot": "Hyperbare Sauerstofftherapie (HBO)",
+        "n acetylcystein nac": "N-Acetylcystein",
+        "nacl 0 9 intravenos": "Kochsalzinfusion",
+        "elektrolytlosung": "Elektrolytlösungen",
+        "wenig kaffee": "Kaffeekonsum reduzieren",
+        "mrt schadel": "MRT"
+    }).map(([alias, target]) => [alias, taxonomyExact.get(normalizeTreatmentName(target))]).filter(([, data]) => data));
+    const taxonomyOverrides = new Map(Object.entries({
+        "10-Minuten passiver Stehtest": ["Diagnostik", "Funktionsdiagnostik"],
+        "18F-FDG-PET": ["Diagnostik", "Bildgebung"],
+        "25-OH-Vitamin D": ["Diagnostik", "Labordiagnostik"],
+        "Abklärung Small Fiber Neuropathy": ["Diagnostik", "Klinische und fachärztliche Untersuchung"],
+        "ACTH": ["Diagnostik", "Labordiagnostik"],
+        "Alkoholverzicht": ["Selbstmanagement und Alltag", null],
+        "ANA": ["Diagnostik", "Labordiagnostik"],
+        "Atemfrequenz": ["Diagnostik", "Funktionsdiagnostik"],
+        "Basales Cortisol": ["Diagnostik", "Labordiagnostik"],
+        "Beta2-Glykoprotein-Antikörper": ["Diagnostik", "Labordiagnostik"],
+        "Cardiolipin-Antikörper": ["Diagnostik", "Labordiagnostik"],
+        "CK": ["Diagnostik", "Labordiagnostik"],
+        "CK-MB": ["Diagnostik", "Labordiagnostik"],
+        "COVID-19-Impfung bei Long Covid": ["Arzneimittel", "Weitere Behandlungen"],
+        "CRP": ["Diagnostik", "Labordiagnostik"],
+        "Daosin": ["Nahrungsergänzungsmittel", "Sonstige Nahrungsergänzungsmittel"],
+        "Daridorexant (QUVIVIQ)": ["Arzneimittel", "Neurologie, Psychiatrie, Schmerz und Schlaf"],
+        "dsDNA-Antikörper": ["Diagnostik", "Labordiagnostik"],
+        "EBV-Serologie": ["Diagnostik", "Labordiagnostik"],
+        "Eingehende Anamnese": ["Diagnostik", "Klinische und fachärztliche Untersuchung"],
+        "EKG": ["Diagnostik", "Funktionsdiagnostik"],
+        "Ernährungsberatung": ["Coaching, Beratung und Schulung", null],
+        "fT3": ["Diagnostik", "Labordiagnostik"],
+        "fT4": ["Diagnostik", "Labordiagnostik"],
+        "Glukose": ["Diagnostik", "Labordiagnostik"],
+        "Immunglobuline IgG/IgA/IgM": ["Diagnostik", "Labordiagnostik"],
+        "INR": ["Diagnostik", "Labordiagnostik"],
+        "Kardiales 3T-MRT": ["Diagnostik", "Bildgebung"],
+        "Komplement C3/C4": ["Diagnostik", "Labordiagnostik"],
+        "Komprimierender Bauchgurt": ["Hilfsmittel", null],
+        "L-Lysin": ["Nahrungsergänzungsmittel", "Aminosäuren und verwandte Stoffe"],
+        "L-Tryptophan": ["Nahrungsergänzungsmittel", "Aminosäuren und verwandte Stoffe"],
+        "Liposomales Vitamin C": ["Nahrungsergänzungsmittel", "Vitamine"],
+        "Mannose-bindendes Lektin (MBL)": ["Diagnostik", "Labordiagnostik"],
+        "Mastzell-Histologie CD117": ["Diagnostik", "Labordiagnostik"],
+        "Nebivolol": ["Arzneimittel", "Herz-Kreislauf und Dysautonomie"],
+        "Neurologische Untersuchung / Neurostatus": ["Diagnostik", "Klinische und fachärztliche Untersuchung"],
+        "Neurotransmitter-Rezeptor-Antikörper": ["Diagnostik", "Labordiagnostik"],
+        "Niacin no-flush": ["Nahrungsergänzungsmittel", "Vitamine"],
+        "NT-pro-BNP": ["Diagnostik", "Labordiagnostik"],
+        "pTT": ["Diagnostik", "Labordiagnostik"],
+        "Regelmäßiges Lüften": ["Selbstmanagement und Alltag", null],
+        "SARS-CoV-2 Nucleocapsid-IgG": ["Diagnostik", "Labordiagnostik"],
+        "SARS-CoV-2-Selbsttests vor Treffen": ["Selbstmanagement und Alltag", null],
+        "Strukturiertes Riechtraining": ["Bewegung und Rehabilitation", null],
+        "Systemische Corticosteroide": ["Arzneimittel", "Entzündung und Immunmodulation"],
+        "TSH": ["Diagnostik", "Labordiagnostik"],
+        "Venlafaxin": ["Arzneimittel", "Neurologie, Psychiatrie, Schmerz und Schlaf"],
+        "VQ-SPECT/CT": ["Diagnostik", "Bildgebung"]
+        ,"Antiphospholipid-Syndrom-Abklärung": ["Diagnostik", "Labordiagnostik"]
+        ,"Benzodiazepine": ["Arzneimittel", "Neurologie, Psychiatrie, Schmerz und Schlaf"]
+        ,"Carotis-Sonographie": ["Diagnostik", "Bildgebung"]
+        ,"CH50 (Labor)": ["Diagnostik", "Labordiagnostik"]
+        ,"Elektromyographie (EMG)": ["Diagnostik", "Funktionsdiagnostik"]
+        ,"H1-Antihistaminika": ["Arzneimittel", "Allergie und Mastzellaktivierung"]
+        ,"Hautbiopsie bei Small-Fiber-Neuropathie": ["Diagnostik", "Klinische und fachärztliche Untersuchung"]
+        ,"Kompressionshosen": ["Hilfsmittel", null]
+        ,"MRT (Wirbelsäule)": ["Diagnostik", "Bildgebung"]
+        ,"NASA Lean Test": ["Diagnostik", "Funktionsdiagnostik"]
+        ,"Nervenleitgeschwindigkeit (NLG)": ["Diagnostik", "Funktionsdiagnostik"]
+        ,"Nervenultraschall": ["Diagnostik", "Bildgebung"]
+        ,"TASS": ["Arzneimittel", "Gerinnung und Gefäße"]
+        ,"Virostatika": ["Arzneimittel", "Antiviral und antiinfektiv"]
+        ,"BC007": ["Arzneimittel", "Entzündung und Immunmodulation"]
+        ,"GPCR-Autoantikörper-Untersuchung": ["Diagnostik", "Labordiagnostik"]
+        ,"OCT-Angiografie": ["Diagnostik", "Bildgebung"]
+        ,"Doppler-Ultraschall": ["Diagnostik", "Bildgebung"]
+        ,"Virtual-Reality-Tests": ["Diagnostik", "Funktionsdiagnostik"]
+        ,"Real-Time Deformability Cytometry (RT-DC)": ["Diagnostik", "Labordiagnostik"]
+        ,"Antikoagulanzientherapie": ["Arzneimittel", "Gerinnung und Gefäße"]
+        ,"Heparin": ["Arzneimittel", "Gerinnung und Gefäße"]
+        ,"Dabigatran": ["Arzneimittel", "Gerinnung und Gefäße"]
+        ,"Fluoreszenzmikroskopische Blutuntersuchung": ["Diagnostik", "Labordiagnostik"]
+        ,"Vericiguat": ["Arzneimittel", "Herz-Kreislauf und Dysautonomie"]
+        ,"Handkraftmessung": ["Diagnostik", "Funktionsdiagnostik"]
+        ,"Reinfektionsprävention": ["Selbstmanagement und Alltag", null]
+        ,"Inuspherese Lipids": ["Medizinische Prozeduren", null]
+        ,"Partieller Plasmaaustausch (TPPE)": ["Medizinische Prozeduren", null]
+        ,"Intravenöse Infusionstherapie": ["Infusionen", null]
+        ,"Peptidtherapie": ["Systemische Therapiekonzepte", null]
+        ,"Subkutane Immunglobuline (SCIG)": ["Arzneimittel", "Entzündung und Immunmodulation"]
+        ,"Monoklonale Antikörper": ["Arzneimittel", "Entzündung und Immunmodulation"]
+        ,"Antikoagulationstherapie": ["Arzneimittel", "Gerinnung und Gefäße"]
+        ,"Antivirale Therapie": ["Arzneimittel", "Antiviral und antiinfektiv"]
+        ,"Mitochondriale Therapie": ["Systemische Therapiekonzepte", null]
+        ,"Nutraceutical Therapy": ["Nahrungsergänzungsmittel", "Sonstige Nahrungsergänzungsmittel"]
+        ,"Klinische Ernährungsberatung": ["Coaching, Beratung und Schulung", null]
+        ,"Health Coaching": ["Coaching, Beratung und Schulung", null]
+        ,"Hyperbare Sauerstofftherapie (HBOT)": ["Medizinische Prozeduren", null]
+        ,"EBOO-Ozontherapie": ["Medizinische Prozeduren", null]
+        ,"Stellatumblockade": ["Medizinische Prozeduren", null]
+        ,"Colon-Hydrotherapie": ["Medizinische Prozeduren", null]
+        ,"Repetitive transkranielle Magnetstimulation (rTMS)": ["Gerätegestützte Verfahren", null]
+        ,"Ketamintherapie intramuskulär": ["Arzneimittel", "Neurologie, Psychiatrie, Schmerz und Schlaf"]
+        ,"Vitamin C intravenös": ["Infusionen", null]
+        ,"NAD+ intravenös": ["Infusionen", null]
+        ,"Magnesium intravenös": ["Infusionen", null]
+        ,"L-Carnitin intravenös": ["Infusionen", null]
+        ,"Eisen intravenös": ["Infusionen", null]
+        ,"Vitamin-B-Komplex intravenös": ["Infusionen", null]
+        ,"Multivitamin-Infusion": ["Infusionen", null]
+        ,"Umfangreiches Blutbild / Prä-Treatment-Labordiagnostik": ["Diagnostik", "Labordiagnostik"]
+        ,"Blutgasanalyse": ["Diagnostik", "Labordiagnostik"]
+        ,"Amyloid-Fibrin-Microclots-Test": ["Diagnostik", "Labordiagnostik"]
+        ,"Long-Covid-Antikörperspektrum-Test": ["Diagnostik", "Labordiagnostik"]
+        ,"MCAS-Labordiagnostik": ["Diagnostik", "Labordiagnostik"]
+        ,"Autoantikörperdiagnostik": ["Diagnostik", "Labordiagnostik"]
+        ,"Spike-Protein-Diagnostik": ["Diagnostik", "Labordiagnostik"]
+        ,"Mitochondriale/T-Zell-Diagnostik": ["Diagnostik", "Labordiagnostik"]
+        ,"Zytokin-/Immundiagnostik": ["Diagnostik", "Labordiagnostik"]
+    }).map(([name, [category, subcategory]]) => [normalizeTreatmentName(name), {category, subcategory}]));
+
+    function resolveTreatmentTaxonomy(name) {
+        const normalized = normalizeTreatmentName(name);
+        if (taxonomyExact.has(normalized)) return taxonomyExact.get(normalized);
+        if (taxonomyAliases.has(normalized)) return taxonomyAliases.get(normalized);
+        if (taxonomyOverrides.has(normalized)) return taxonomyOverrides.get(normalized);
+        const base = normalizeTreatmentName(String(name).replace(/\s*\([^)]*\)\s*/g, " "));
+        const candidates = taxonomyBaseCandidates.get(base) || [];
+        return candidates.length === 1 ? candidates[0] : null;
+    }
 
     const grouped = {
         "Medikamentös": [
@@ -158,6 +316,55 @@
             }
         }
     };
+
+    if (fixture) {
+        Object.assign(payload.item, fixture.item, {own_vote: null});
+        payload.terms = Object.fromEntries(Object.entries(fixture.terms).map(([group, values]) => [group, values.map((value, index) => typeof value === "string" ? {term_code: `${fixtureKey}-${group}-${index}`, term_label: value} : value)]));
+        if (fixture.treatments) {
+            payload.treatments_grouped = fixture.treatments.reduce(function (groups, row, index) {
+                const taxonomy = resolveTreatmentTaxonomy(row.name);
+                const category = taxonomy?.category || "Ohne Kategorie";
+                const subcategory = taxonomy?.subcategory || "";
+                const treatmentItem = treatment(
+                    taxonomy?.id || row.fixtureId + index,
+                    row.name,
+                    category,
+                    subcategory,
+                    0, 0, 0, 1
+                );
+                if (taxonomy?.slug) treatmentItem.slug = taxonomy.slug;
+                treatmentItem.recommendation_type = row.recommendationType;
+                treatmentItem.fundbasis = row.basis;
+                treatmentItem.match_status = row.matchStatus;
+                (groups[category] ||= []).push(treatmentItem);
+                return groups;
+            }, {});
+            const treatmentCount = fixture.treatments.length;
+            const categoryCount = Object.keys(payload.treatments_grouped).length;
+            payload.analysis.profile = {label: "Recherchebasiertes Behandlungsspektrum", treatment_count: treatmentCount, category_count: categoryCount};
+            payload.analysis.versatile = categoryCount >= 3;
+            const specialtyAreas = new Map();
+            Object.values(payload.treatments_grouped).flat().forEach(item => {
+                const areaName = String(item.unterkategorie || item.typ || "").trim();
+                if (!areaName) return;
+                if (!specialtyAreas.has(areaName)) specialtyAreas.set(areaName, new Set());
+                specialtyAreas.get(areaName).add(item.treat_id);
+            });
+            payload.analysis.specialties = Array.from(specialtyAreas, ([name, treatmentIds]) => ({
+                name,
+                treatment_count: treatmentIds.size
+            })).filter(specialty => specialty.treatment_count >= 5).sort((a, b) =>
+                b.treatment_count - a.treatment_count || a.name.localeCompare(b.name, "de")
+            );
+        }
+        Object.assign(window.LCN_DOCTOR_STRUCTURE_DATA, fixture.structure);
+        if (!fixture.treatments) {
+            payload.analysis.profile = {label: "Rechercheprofil", treatment_count: 0, category_count: 0};
+            payload.analysis.versatile = false;
+            payload.analysis.specialties = [];
+        }
+        payload.analysis.ratings = {positive_threshold: 70, frequent_votes_threshold: 20, highly_positive_count: 0, frequently_rated_count: 0, top_treatments: [], most_rated_treatments: []};
+    }
 
     let ownVote = null;
     const nativeFetch = window.fetch.bind(window);

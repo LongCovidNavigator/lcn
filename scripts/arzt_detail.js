@@ -1027,6 +1027,8 @@ function renderPracticeFeatureGroups(terms) {
     const expertiseElement = document.getElementById("doctor-detail-expertise");
     if (expertiseElement) renderStructuredFactList(expertiseElement, expertiseFields, true);
 
+    renderTermGroup("doctor-detail-qualifications", temporaryDoctorStructureData.qualifications || [], "Keine Zusatzqualifikationen oder Weiterbildungen hinterlegt.");
+
     // TODO: replace with dedicated specialization API data. Unclassified legacy
     // terms must not be presented as medical specializations.
     renderTermGroup("doctor-detail-specializations", temporaryDoctorStructureData.specializations || [], "Keine Spezialisierungen hinterlegt.");
