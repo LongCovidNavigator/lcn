@@ -39,3 +39,6 @@ Thumbs.db
 # Server-specific auth files
 .htpasswd
 .htaccess
+
+# Generated data artifacts belong in lcn_data
+/outputs/
