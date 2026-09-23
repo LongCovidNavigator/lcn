@@ -95,7 +95,8 @@ document.addEventListener("DOMContentLoaded", function () {
     setupDoctorDirtyFilterHint();
     setupDoctorAutoApplyControls();
 
-    restoreDoctorLocationPreference();
+    // Start the priority selection without a saved geographic restriction.
+    // The saved location itself is retained for the detail view.
     updateRadiusInputState();
     setResultsView(getSavedDoctorResultsView());
     renderDoctorCards([]);
@@ -1085,9 +1086,7 @@ async function loadDoctorsFromSearchApi(settings) {
         searchParam +
         specialtyParam;
 
-    const statusFilter=document.getElementById("doctor-community-status-select")?.value||"all";
-    const communityUrl=`api/community_public.php?entity_type=doctor&search=${encodeURIComponent(currentDoctorSearchTerm)}&city=${encodeURIComponent(currentCityFilter)}`;
-    const [searchResponse,communityResponse] = await Promise.all([fetch(url),statusFilter==="approved"?Promise.resolve(null):fetch(communityUrl)]);
+    const searchResponse = await fetch(url);
 
     if (!searchResponse.ok) {
         throw new Error(`HTTP-Fehler: ${searchResponse.status}`);
@@ -1101,18 +1100,19 @@ async function loadDoctorsFromSearchApi(settings) {
 
     renderDoctorSpecialtySelect(data.specialties || []);
 
-    const communityData=communityResponse&&communityResponse.ok?await communityResponse.json():{items:[]};
-    let apiDoctors = statusFilter==="unreviewed"?[]:(data.items || []);
-    if(statusFilter!=="approved"&&Array.isArray(communityData.items))apiDoctors=apiDoctors.concat(communityData.items.filter(function(doctor){
-        const stats=getDoctorVoteStats(doctor);
-        if(stats.proRatio<currentMinPositiveRatio||stats.contraRatio>currentMaxNegativeRatio)return false;
-        if(currentAcceptsGkv&&!hasConfirmedInsurance(doctor.dr_accepts_gkv))return false;
-        if(currentAcceptsPkv&&!hasConfirmedInsurance(doctor.dr_accepts_pkv))return false;
-        if(currentHasWebsite&&!(doctor.loc_website||doctor.dr_website))return false;
-        if(currentHasEmail&&!(doctor.loc_email||doctor.dr_email))return false;
-        if(currentHasPhone&&!doctor.loc_phone)return false;
-        return true;
-    }));
+    // The API centrally selects the 39 researched providers.
+    let apiDoctors = data.items || [];
+    const reviewFilter=document.getElementById('doctor-community-status-select')?.value||'all';
+    if(reviewFilter==='unreviewed') apiDoctors=[];
+    if(reviewFilter!=='approved') {
+      try {
+        const response=await fetch('api/community_public.php?entity_type=doctor&search='+encodeURIComponent(currentDoctorSearchTerm)+ '&city='+encodeURIComponent(currentCityFilter));
+        const community=await response.json();
+        if(!response.ok||!community.ok)throw Error('Community-Einträge konnten nicht geladen werden.');
+        const matches=(community.items||[]).filter(d=>!currentSpecialtyTermId&&!currentAcceptsGkv&&!currentAcceptsPkv&&(!currentHasWebsite||d.dr_website)&&(!currentHasEmail||d.dr_email)&&(!currentHasPhone||d.loc_phone)&&d.positive_ratio>=currentMinPositiveRatio&&d.negative_ratio<=currentMaxNegativeRatio&&(!settings.radiusEnabled||currentIncludeNoCoords));
+        apiDoctors.push(...matches);
+      } catch(error) { console.error(error); setMapStatus('Community-Einträge konnten nicht geladen werden.'); }
+    }
 
     if (!currentLocation) {
         apiDoctors = apiDoctors.map(function (doctor) {
@@ -1169,6 +1169,10 @@ function renderDoctorSpecialtySelect(specialties) {
 
 function updateStatusAfterSearch(settings) {
     const filterText = buildActiveFilterStatusText();
+    if (currentDoctors.length > 0 && currentDoctors.every(doctor => !doctor.has_coordinates)) {
+        setMapStatus(`${currentDoctors.length} Ärzte gefunden. Adressen vorhanden; Kartenpositionen und Entfernungen fehlen noch.${filterText}`);
+        return;
+    }
 
     if (showOnlyCompareSelection) {
         setMapStatus(`${selectedDoctorsForCompare.length} ausgewählte Ärzt:innen in der Vergleichsansicht.${filterText}`);
@@ -1431,7 +1435,7 @@ function buildDoctorCardHtml(doctor, index) {
 	const ownVote = ['pro', 'neutral', 'contra'].includes(doctor.own_vote) ? doctor.own_vote : null;
 	const specialtyChipsHtml = buildDoctorSpecialtyChipsHtml(doctor, "doctor-card-tag", 4);
 	const communityBadge=doctor.is_community_preview?'<span class="community-preview-badge">Community-Vorschlag · noch nicht geprüft</span>':'';
-	const doctorTitle=doctor.is_community_preview?name:`<a class="doctor-card-title-link" href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>`;
+	const doctorTitle=doctor.is_community_preview?`<a href="arzt_detail.html?submission_id=${Number(doctor.community_submission_id)}">${name}</a>`:`<a class="doctor-card-title-link" href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>`;
 
 	const websiteHtml = website
         ? `<a class="doctor-card-link" href="${escapeHtml(normalizeWebsiteUrl(website))}" target="_blank" rel="noopener noreferrer">Website</a>`
@@ -1661,7 +1665,7 @@ function buildDoctorTableRowHtml(doctor, rank) {
             <td class="doctor-table-rank">${rank}</td>
             <td class="doctor-table-name">
                 <div class="doctor-table-name-stack">
-					${doctor.is_community_preview?`<strong>${name}</strong><span class="community-preview-badge">Noch nicht geprüft</span>`:`<a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>`}
+					${doctor.is_community_preview?`<a href="arzt_detail.html?submission_id=${Number(doctor.community_submission_id)}">${name}</a><span class="community-preview-badge">Noch nicht geprüft</span>`:`<a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>`}
 					${buildDoctorSpecialtyChipsHtml(doctor, "doctor-table-specialty-badge", 3, "doctor-table-specialty-row")}
 					<button type="button" class="doctor-compare-add-button doctor-compare-add-button-table ${isDoctorSelectedForCompare(doctor.dr_id) ? "is-selected" : ""}" data-dr-id="${escapeHtml(doctor.dr_id)}">
 					${isDoctorSelectedForCompare(doctor.dr_id) ? "Ausgewählt" : "+ vergleichen"}

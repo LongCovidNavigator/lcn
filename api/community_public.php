@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_voting.php';
 require_once __DIR__ . '/_search_normalization.php';
 
@@ -9,7 +10,7 @@ try {
     }
     $search = mb_substr(trim((string)($_GET['search'] ?? '')), 0, 180);
     $city = mb_substr(trim((string)($_GET['city'] ?? '')), 0, 120);
-    $pdo = lcnDatabase();
+    $pdo = lcnDoctorDatabase();
     $sql = "SELECT s.submission_id,s.entity_type,s.review_status,s.name,s.website,s.email,s.phone,s.city,s.payload,s.created_at,
                    COALESCE(SUM(v.vote='pro'),0) pro,COALESCE(SUM(v.vote='neutral'),0) neutral,COALESCE(SUM(v.vote='contra'),0) contra,
                    COUNT(v.voter_key) total_votes

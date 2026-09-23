@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_submission_review.php';
 lcnRequireReviewAccess();
 
@@ -8,7 +9,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST'
 }
 
 try {
-    $pdo=lcnDatabase();
+    $pdo=lcnDoctorDatabase();
     if (($_SERVER['REQUEST_METHOD']??'GET')==='GET') {
         $status=(string)($_GET['status']??'pending');
         if (!in_array($status,['pending','reviewing','approved','rejected','duplicate','all'],true)) $status='pending';

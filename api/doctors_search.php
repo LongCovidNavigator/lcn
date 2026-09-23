@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/_voting.php';
+require_once __DIR__ . '/_doctor_hybrid.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -128,19 +129,11 @@ function attachSpecialtyTermsToDoctors($pdo, &$items) {
     }
 
     $termsSql = "
-        SELECT DISTINCT
-            c.dr_id,
-            t.term_id,
-            t.term_type,
-            t.term_code,
-            t.term_label,
-            t.term_desc
-        FROM tbl_cpl_drs2terms_03 c
-        INNER JOIN tbl_terms_03 t
-            ON c.term_id = t.term_id
-        WHERE c.dr_id IN (" . implode(', ', $placeholders) . ")
-          AND t.term_type = 'specialty'
-        ORDER BY t.term_label ASC
+        SELECT f.lcn_id AS dr_id, f.id AS term_id, 'specialty' AS term_type,
+            '' AS term_code, f.fachrichtung AS term_label, '' AS term_desc
+        FROM tbl_fachrichtungen_nd f
+        WHERE f.lcn_id IN (" . implode(', ', $placeholders) . ")
+        ORDER BY f.fachrichtung ASC
     ";
 
     $termsStmt = $pdo->prepare($termsSql);
@@ -182,26 +175,11 @@ function attachSpecialtyTermsToDoctors($pdo, &$items) {
 }
 
 function getAllSpecialtyTerms($pdo) {
-    $sql = "
-        SELECT
-            t.term_id,
-            t.term_type,
-            t.term_code,
-            t.term_label,
-            t.term_desc,
-            COUNT(DISTINCT c.dr_id) AS doctor_count
-        FROM tbl_terms_03 t
-        INNER JOIN tbl_cpl_drs2terms_03 c
-            ON t.term_id = c.term_id
-        WHERE t.term_type = 'specialty'
-        GROUP BY
-            t.term_id,
-            t.term_type,
-            t.term_code,
-            t.term_label,
-            t.term_desc
-        ORDER BY t.term_label ASC
-    ";
+    $ids = implode(',', LCN_PRIORITY_DOCTOR_IDS);
+    $sql = "SELECT MIN(f.id) AS term_id, 'specialty' AS term_type, '' AS term_code,
+        f.fachrichtung AS term_label, '' AS term_desc, COUNT(DISTINCT f.lcn_id) AS doctor_count
+        FROM tbl_fachrichtungen_nd f JOIN tbl_entities_nd e ON e.lcn_id = f.lcn_id
+        WHERE f.lcn_id IN ($ids) AND e.aktiv = 1 GROUP BY f.fachrichtung ORDER BY f.fachrichtung";
 
     $stmt = $pdo->query($sql);
     $items = [];
@@ -261,7 +239,8 @@ try {
         throw new InvalidArgumentException("Bitte entweder Radiusfilter oder Stadtfilter verwenden, nicht beides gleichzeitig.");
     }
 
-    $pdo = lcnDatabase();
+    $pdo = lcnDoctorDatabase();
+    $doctorSource = lcnDoctorSourceSql();
 
     $whereParts = [];
 
@@ -312,9 +291,9 @@ try {
         if ($specialtyTermId > 0) {
             $whereParts[] = "EXISTS (
                 SELECT 1
-                FROM tbl_cpl_drs2terms_03 cst
-                WHERE cst.dr_id = results.dr_id
-                  AND cst.term_id = :specialtyTermId
+                FROM tbl_fachrichtungen_nd cst
+                WHERE cst.lcn_id = results.dr_id
+                  AND cst.fachrichtung = (SELECT fachrichtung FROM tbl_fachrichtungen_nd WHERE id = :specialtyTermId)
             )";
         }
 
@@ -447,9 +426,9 @@ try {
                     l.loc_city,
                     l.loc_street,
                     l.loc_housenumber,
-                    l.loc_phone,
-                    l.loc_email,
-                    l.loc_website,
+                    COALESCE(NULLIF(d.dr_phone, ''), l.loc_phone) AS loc_phone,
+                    COALESCE(NULLIF(d.dr_email, ''), l.loc_email) AS loc_email,
+                    COALESCE(NULLIF(d.dr_website, ''), l.loc_website) AS loc_website,
                     l.loc_lat,
                     l.loc_lng,
                     l.loc_address_visibility,
@@ -508,11 +487,11 @@ try {
                         + COALESCE(wv.vote_worsened, 0)
                     ) AS total_votes
 
-                FROM tbl_drs_03 d
+                FROM {$doctorSource} d
 
                 LEFT JOIN tbl_drs_locations_03 l
                     ON d.dr_id = l.dr_id
-                   AND l.loc_is_primary = 1
+                   AND l.loc_id = (SELECT ll.loc_id FROM tbl_drs_locations_03 ll WHERE ll.dr_id = d.dr_id ORDER BY ll.loc_is_primary DESC, ll.loc_id LIMIT 1)
 
                 LEFT JOIN lcn_raw_doctor_votes rv
                     ON d.dr_id = rv.dr_id

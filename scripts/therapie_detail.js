@@ -1,3 +1,4 @@
+const priorityTreatmentContext = new URLSearchParams(window.location.search).get("source") === "priority";
 let currentTreatmentDetail = null;
 let treatmentProviderMap = null;
 let treatmentProviderMarkerLayer = null;
@@ -49,7 +50,7 @@ async function loadTreatmentDetail() {
 }
 
 async function fetchTreatmentById(treatId) {
-    const response = await fetch(`api/treatments_detail.php?treat_id=${encodeURIComponent(treatId)}`);
+    const response = await fetch(`api/treatments_detail.php?treat_id=${encodeURIComponent(treatId)}${priorityTreatmentContext ? "&source=priority" : ""}`);
     const data = await response.json();
 
     if (!response.ok || !data.ok || !data.item) {
@@ -259,7 +260,8 @@ async function handleTreatmentDetailVote(event) {
             },
             body: JSON.stringify({
                 treat_id: treatId,
-                type: voteType
+                type: voteType,
+                source: priorityTreatmentContext ? "priority" : null
             })
         });
 

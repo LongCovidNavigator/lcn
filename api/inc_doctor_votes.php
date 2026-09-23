@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/_vote_abuse.php';
+require_once __DIR__ . '/_doctor_hybrid.php';
 
 lcnRequireVotingRequest();
 
@@ -15,8 +16,11 @@ try {
         lcnSendVoteJson(['ok' => false, 'error' => 'Ungültige Anfrage.'], 400);
     }
 
-    $pdo = lcnDatabase();
-    $exists = $pdo->prepare('SELECT 1 FROM tbl_drs_03 WHERE dr_id = :dr_id');
+    $pdo = lcnDoctorDatabase();
+    if (!in_array((int)$drId, LCN_PRIORITY_DOCTOR_IDS, true)) {
+        lcnSendVoteJson(['ok' => false, 'error' => 'Arzt oder Praxis nicht gefunden.'], 404);
+    }
+    $exists = $pdo->prepare('SELECT 1 FROM tbl_entities_nd WHERE lcn_id = :dr_id AND aktiv = 1');
     $exists->execute([':dr_id' => $drId]);
 
     if (!$exists->fetchColumn()) {

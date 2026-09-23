@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/_vote_abuse.php';
+require_once __DIR__ . '/_doctor_hybrid.php';
 
 lcnRequireVotingRequest();
 
@@ -23,7 +24,7 @@ try {
         lcnSendVoteJson(['ok' => false, 'error' => 'Ungültige Anfrage.'], 400);
     }
 
-    $pdo = lcnDatabase();
+    $pdo = ($input['source'] ?? '') === 'priority' ? lcnDoctorDatabase() : lcnDatabase();
     $exists = $pdo->prepare('SELECT behandlung FROM tbl_treatments_03 WHERE treat_id = :treat_id');
     $exists->execute([':treat_id' => $treatId]);
     $treatmentName = $exists->fetchColumn();

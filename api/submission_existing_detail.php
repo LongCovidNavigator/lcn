@@ -1,9 +1,10 @@
 <?php
+require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_lcn_db.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try{
-    $pdo=lcnDatabase();$type=(string)($_GET['type']??'');$id=filter_var($_GET['id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+    $pdo=lcnDoctorDatabase();$type=(string)($_GET['type']??'');$id=filter_var($_GET['id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
     if($id===false||!in_array($type,['doctor','treatment'],true)){http_response_code(422);echo json_encode(['ok'=>false,'error'=>'Ungültiger Eintrag.']);exit;}
     if($type==='doctor'){
         $stmt=$pdo->prepare("SELECT d.dr_display_name AS name,d.dr_title_raw AS title,d.dr_firstname AS firstname,d.dr_lastname AS lastname,d.dr_org_name AS organization,CASE d.dr_type WHEN 'physician' THEN 'doctor' WHEN 'practice' THEN 'practice' WHEN 'clinic' THEN 'clinic' ELSE 'other' END AS provider_type,COALESCE(d.dr_website,l.loc_website,'') AS website,COALESCE(d.dr_email,l.loc_email,'') AS email,l.loc_phone AS phone,l.loc_street AS street,l.loc_housenumber AS house_number,l.loc_plz AS postal_code,l.loc_city AS city,l.loc_country AS country,d.dr_accepts_gkv,d.dr_accepts_pkv FROM tbl_drs_03 d LEFT JOIN tbl_drs_locations_03 l ON l.dr_id=d.dr_id AND l.loc_is_primary=1 WHERE d.dr_id=:id LIMIT 1");$stmt->execute([':id'=>$id]);$data=$stmt->fetch();

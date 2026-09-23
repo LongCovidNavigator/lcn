@@ -1,0 +1,15 @@
+# Kurzer Arztvorschlag
+
+Das Formular arzt_vorschlagen.html erfasst Name (Freitext), Praxis, Web-Adresse und eine frei eingegebene Adresse. Zwei unabhängige Checkboxen erfassen hausärztliche Tätigkeit und Tätigkeit als Spezialist; beides darf gewählt werden. Praxis und Tätigkeit werden im Vorschlags-Payload gespeichert und auf der Detailseite angezeigt. Name und Web-Adresse sind erforderlich; die Adresse darf fehlen. Die Website wird bei fehlendem Schema um https:// ergänzt. Keine Recherche oder automatische Freigabe erfolgt beim Eintragen.
+
+create_submission.php legt einen normalen Community-Vorschlag an. simple_doctor=true erlaubt diesen reduzierten Ablauf ohne die Bestätigungscheckbox des alten Formulars. Die vorhandenen Namens-/Website-Dublettenhinweise, Triage und Begrenzung auf zehn Vorschläge pro Browserkennung und Stunde bleiben erhalten. Die freie Adresse liegt im Payload-Feld address und muss bei der Recherche in strukturierte Standortdaten überführt werden.
+
+Die zusammengehörenden Vorschlags-APIs einschließlich Prüfung, Auswahl und Benachrichtigungsdaten lesen dieselbe lokale Hybrid-Datenbank wie die Ärzteseiten. Die allgemeine Datenbankkonfiguration bleibt unverändert; es werden keine alten Online-Daten migriert und keine Benachrichtigungen durch diesen Umbau versendet.
+
+Der Katalog lädt pending/reviewing-Vorschläge zusätzlich, kennzeichnet sie und verlinkt arzt_detail.html?submission_id=.... Bestehende Suchfilter gelten weiter; ein Eintrag ohne bestätigte Koordinaten hat keinen Kartenmarker und erscheint bei aktiver Umkreissuche nur mit eingeschalteten Einträgen ohne Koordinaten.
+
+Nach dem Eintragen öffnet sich direkt die normale vierteilige Arzt-Detailseite mit Hinweis und Einladung zum Ergänzen. Alte Links auf arzt_vorschlag.html werden weitergeleitet. Bereits vorhandene Gesamtbewertungen bleiben in community_submission_votes erhalten; neue Erfahrungsangaben erfolgen in den Bereichen der normalen Detailseite. Die elf einzelnen Fragen verwenden community_doctor_answers (Migration 012), mit einer Antwort pro Vorschlag, Browserkennung, Frage und Kontext. Änderung ersetzt die Antwort, Neuladen stellt sie wieder her. GET/POST doctor_submission.php veröffentlicht nur sichtbare Arztvorschläge, keine internen Recherche- oder Kontaktdaten. Cookie, Herkunftsprüfung und Fragenkatalog werden wiederverwendet. Dummy-Antworten werden nicht erzeugt.
+
+Noch bestehende Grenze der Freigabe: Die bisherige Admin-Freigabe schreibt in die alten Arzt-Stammtabellen; die recherchierte Hybrid-Auswahl bleibt auf die 39 Ärzte beschränkt. Die zusätzlichen Fragebogenantworten bleiben mit dem Vorschlag verknüpft und werden noch nicht in doctor_community_answers übertragen. Vor einer Übernahme eines neuen Vorschlags in die recherchierten Hybrid-Stammdaten muss dieser bestehende Freigabeweg erweitert werden.
+
+Verifiziert: Erfassung ohne Adresse, Website ohne Schema, Weiterleitung, Fragebogen speichern/neuladen, Gesamtstimme, Katalogsuche und Link. Temporäre Testeinträge und Stimmen wurden wieder entfernt.

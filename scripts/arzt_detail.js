@@ -1,4 +1,5 @@
 let currentDoctorDetail = null;
+let currentDoctorResearch = null;
 let currentDoctorTerms = {
     specialty: [],
     badge: [],
@@ -84,6 +85,7 @@ async function loadDoctorDetail() {
         }
 
         currentDoctorDetail = data.item || {};
+        currentDoctorResearch = data.research || null;
         currentDoctorTerms = normalizeTermsObject(data.terms || {});
         currentDoctorTreatmentsGrouped = data.treatments_grouped || {};
         currentDoctorAnalysis = data.analysis || null;
@@ -120,6 +122,10 @@ function resetTreatmentControlsState() {
 }
 
 function renderTemporaryDoctorStructure(doctor = {}) {
+    if (currentDoctorResearch?.entity) {
+        renderHybridDoctorStructure(currentDoctorResearch);
+        return;
+    }
     const billingModel = doctor.dr_accepts_gkv === "yes"
         ? "Über GKV möglich"
         : doctor.dr_accepts_pkv === "yes"
@@ -654,11 +660,11 @@ function renderTags(doctor, terms) {
         tags.push(terms.specialty[0].term_label);
     }
 
-    if (doctor.dr_accepts_gkv === "yes") {
+    if (!currentDoctorResearch && doctor.dr_accepts_gkv === "yes") {
         tags.push("GKV");
     }
 
-    if (doctor.dr_accepts_pkv === "yes") {
+    if (!currentDoctorResearch && doctor.dr_accepts_pkv === "yes") {
         tags.push("PKV");
     }
 
@@ -1900,7 +1906,7 @@ function buildTreatmentDetailUrl(treatment) {
         return "";
     }
 
-    return `therapie_detail.html?treat_id=${encodeURIComponent(treatId)}`;
+    return `therapie_detail.html?treat_id=${encodeURIComponent(treatId)}${currentDoctorResearch ? "&source=priority" : ""}`;
 }
 
 function buildTreatmentRatingCompactHtml(treatment) {

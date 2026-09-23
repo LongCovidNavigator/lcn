@@ -163,7 +163,7 @@
 					<section class="doctor-nav-section doctor-nav-section-insurance">
 						<h3 class="doctor-nav-heading">
 							Versicherung
-							<span class="doctor-nav-info" data-tooltip="Filtert nach Abrechnungsmöglichkeit: GKV für gesetzliche Krankenkasse, PKV / Selbstzahler für private Abrechnung oder Selbstzahlung." tabindex="0" aria-label="Info: Versicherung">i</span>
+							<span class="doctor-nav-info" data-tooltip="Filtert nach Abrechnungsmöglichkeit: GKV für gesetzliche Krankenkasse, PKV (Sprechstunde) für private Abrechnung oder Selbstzahlung." tabindex="0" aria-label="Info: Versicherung">i</span>
 						</h3>
 
 						<label class="doctor-nav-checkbox-row" for="doctor-accepts-gkv-input">
@@ -171,7 +171,7 @@
 								id="doctor-accepts-gkv-input"
 								type="checkbox"
 							>
-							GKV
+							GKV (Sprechstunde)
 						</label>
 
 						<label class="doctor-nav-checkbox-row" for="doctor-accepts-pkv-input">
@@ -376,10 +376,7 @@
 						</select>
 					</div>
 					<div class="doctor-results-sort-field">
-						<label class="doctor-results-search-label" for="doctor-community-status-select">Prüfstatus</label>
-						<select id="doctor-community-status-select" class="doctor-results-search-input">
-							<option value="all">Alle Einträge</option><option value="approved">Nur freigegebene</option><option value="unreviewed">Noch nicht freigegebene</option>
-						</select>
+
 					</div>
 
 				</div>
@@ -459,7 +456,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 	<script>window.LCNImages.configureLeaflet(window.L);</script>
-		<script src="scripts/aerzte_karte.js?v=20"></script>
+		<script src="scripts/aerzte_karte.js?v=community-simple-2"></script>
 
     <div id="footer-placeholder"></div>
 

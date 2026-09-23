@@ -4287,3 +4287,25 @@
     .doctor-detail-new-card-grid.is-three-columns, .doctor-detail-new-card-grid.is-four-columns, .doctor-detail-appointment-layout { grid-template-columns: 1fr; }
     .doctor-detail-appointment-matrix th, .doctor-detail-appointment-matrix td { padding: 9px 6px; }
 }
+
+/* Hybrid research cards reuse the existing detail layout. */
+.doctor-hybrid-page [hidden] { display: none !important; }
+.doctor-hybrid-page .doctor-detail-new-card-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); }
+.doctor-hybrid-page .doctor-detail-fact-list dd { white-space: pre-line; overflow-wrap: anywhere; }
+.doctor-hybrid-page #doctor-detail-access-costs > div { display: block; }
+.doctor-hybrid-page #doctor-detail-access-costs dt { margin-bottom: 8px; }
+.doctor-hybrid-billing { display: block !important; overflow-x: auto; }
+.doctor-hybrid-billing table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+.doctor-hybrid-billing caption { text-align: left; font-size: 0.8rem; color: #526779; margin-bottom: 12px; }
+.doctor-hybrid-billing th, .doctor-hybrid-billing td { padding: 10px 6px; border-bottom: 1px solid #dce5eb; vertical-align: top; overflow-wrap: normal; }
+.doctor-hybrid-billing thead th { font-size: 0.75rem; color: #526779; }
+.doctor-hybrid-page .doctor-detail-appointment-matrix td { font-size: 0.85rem; }
+
+.doctor-hybrid-page #doctor-detail-access-costs dd { text-align: left; font-weight: normal; color: #344b60; margin: 0; }
+.doctor-hybrid-page #doctor-detail-access-costs dd strong { color: #087b75; font-size: 1.1rem; }
+.doctor-hybrid-page #doctor-detail-access-costs dd p { margin: 8px 0 0; line-height: 1.55; font-size: 0.88rem; }
+
+/* Keep unfilled schema fields visible without inventing an answer. */
+.doctor-hybrid-page .doctor-detail-fact-list dd:empty,
+.doctor-hybrid-page .doctor-detail-term-list:empty,
+.doctor-hybrid-page .doctor-detail-single-value:empty { min-height: 1.4em; }

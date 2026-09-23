@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_lcn_db.php';
 
 function lcnSubmissionReviewUrl(): string {
@@ -23,7 +24,7 @@ function lcnBuildSubmissionNotification(PDO $pdo): array {
 }
 
 function lcnRunSubmissionNotifications(bool $dryRun=false): array {
-    $pdo=lcnDatabase();$run=$pdo->prepare("INSERT INTO submission_notification_runs(delivery_status) VALUES('running')");$run->execute();$runId=(int)$pdo->lastInsertId();
+    $pdo=lcnDoctorDatabase();$run=$pdo->prepare("INSERT INTO submission_notification_runs(delivery_status) VALUES('running')");$run->execute();$runId=(int)$pdo->lastInsertId();
     try{$report=lcnBuildSubmissionNotification($pdo);$status='skipped';
         if($dryRun){$status='dry_run';}
         elseif($report['new_count']>0){

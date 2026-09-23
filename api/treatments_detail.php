@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/_voting.php';
+require_once __DIR__ . '/_doctor_hybrid.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -163,6 +164,7 @@ function loadTreatmentBase(PDO $pdo, int $treatId) {
 }
 
 function loadTreatmentProviders(PDO $pdo, int $treatId) {
+    $doctorSource = ($_GET['source'] ?? '') === 'priority' ? lcnDoctorSourceSql() : 'tbl_drs_03';
     $stmt = $pdo->prepare("
         SELECT
             calculated.*,
@@ -244,7 +246,7 @@ function loadTreatmentProviders(PDO $pdo, int $treatId) {
 
             FROM tbl_cpl_drs2treatments_03 c
 
-            INNER JOIN tbl_drs_03 d
+            INNER JOIN {$doctorSource} d
                 ON d.dr_id = c.dr_id
 
             LEFT JOIN tbl_drs_locations_03 l
@@ -398,7 +400,7 @@ try {
         exit;
     }
 
-    $pdo = lcnDatabase();
+    $pdo = ($_GET['source'] ?? '') === 'priority' ? lcnDoctorDatabase() : lcnDatabase();
 
     $item = loadTreatmentBase($pdo, $treatId);
 

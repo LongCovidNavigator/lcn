@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/_submission_treatments.php';
+require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_search_normalization.php';
 require_once __DIR__ . '/_voting.php';
 
@@ -44,6 +46,12 @@ try {
     $type = (string)($input['type'] ?? '');
     $name = submissionString($input, 'name', 180);
     $website = submissionString($input, 'website', 500);
+    submissionString($input, 'address', 500);
+    submissionString($input, 'organization', 180);
+    foreach (['primary_care', 'specialist_care'] as $field) {
+        if (array_key_exists($field, $input) && !is_bool($input[$field])) lcnSendVoteJson(['ok'=>false,'error'=>'Ungültige Angabe zur Tätigkeit.'],422);
+    }
+    if (($input['simple_doctor'] ?? false) === true && ($type !== 'doctor' || $website === '')) lcnSendVoteJson(['ok'=>false,'error'=>'Bitte Name und Web-Adresse angeben.'],422);
     $email = submissionString($input, 'email', 254);
     $phone = submissionString($input, 'phone', 60);
     $city = submissionString($input, 'city', 120);
@@ -63,11 +71,11 @@ try {
     if ($experience !== '' && !in_array($experience, ['pro', 'neutral', 'contra'], true)) {
         lcnSendVoteJson(['ok' => false, 'error' => 'Die Bewertung ist ungültig.'], 422);
     }
-    if (($input['confirmation'] ?? '') !== 'on') {
+    if (!(($input['simple_doctor'] ?? false) === true && $type === 'doctor') && ($input['confirmation'] ?? '') !== 'on') {
         lcnSendVoteJson(['ok' => false, 'error' => 'Bitte bestätige die Richtigkeit deiner Angaben.'], 422);
     }
 
-    $allowed = ['type','existing_target_id','name','website','title','firstname','lastname','organization','provider_type','treatment_category','aliases','email','phone','street','house_number','postal_code','city','country','lat','lng','source_url','known_providers','features','insurance','specialty_ids','treatment_ids','doctor_ids','indications','mechanism','effort','cost','speed','crash_risk','offerings','experience','experience_note','relationship','review_note',
+    $allowed = ['primary_care','specialist_care','address','type','existing_target_id','name','website','title','firstname','lastname','organization','provider_type','treatment_category','aliases','email','phone','street','house_number','postal_code','city','country','lat','lng','source_url','known_providers','features','insurance','specialty_ids','treatment_ids','doctor_ids','indications','mechanism','effort','cost','speed','crash_risk','offerings','experience','experience_note','relationship','review_note',
         'billing_model','statutory_seat','cost_initial','cost_followup','cost_typical_total','first_appointment_wait','first_appointment_wait_unit','waiting_list','availability_updated_at',
         'initial_onsite','initial_video','initial_phone','followup_onsite','followup_video','followup_phone','home_visits','onsite_wait',
         'considers_pem','breaks_possible','appointment_adaptable','quiet_waiting_area','waiting_lying_down','wheelchair_accessible','step_free_access','lying_down_possible','companion_possible',
@@ -75,8 +83,9 @@ try {
         'felt_comfortable','respectful_practice','gender_sensitive_experience','lgbtq_experience','additional_specializations',
         'attestations','social_medical_support','followup_care','regular_prescriptions','off_label_therapy','individual_therapy_trials',
         'diagnoses_mecfs','diagnoses_long_covid','diagnoses_pots','diagnoses_mcas','diagnoses_vaccine_injury','information_source'];
+    if ($type === 'doctor') $input['treatment_ids'] = lcnSubmissionTreatmentIds($input);
     $payload = array_intersect_key($input, array_flip($allowed));
-    $pdo = lcnDatabase();
+    $pdo = lcnDoctorDatabase();
     $voterKey = lcnVoterKey();
 
     $recent = $pdo->prepare('SELECT COUNT(*) FROM community_submissions WHERE submitter_key = :key AND created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)');

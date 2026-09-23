@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/_voting.php';
+require_once __DIR__ . '/_doctor_hybrid.php';
+require_once __DIR__ . '/_editorial_treatments.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -167,7 +169,8 @@ try {
         throw new InvalidArgumentException("Keine gültige Arzt-ID übergeben.");
     }
 
-    $pdo = lcnDatabase();
+    $pdo = lcnDoctorDatabase();
+    $doctorSource = lcnDoctorSourceSql();
 
     $doctorSql = "
         SELECT
@@ -213,9 +216,9 @@ try {
                 l.loc_city,
                 l.loc_street,
                 l.loc_housenumber,
-                l.loc_phone,
-                l.loc_email,
-                l.loc_website,
+                COALESCE(NULLIF(d.dr_phone, ''), l.loc_phone) AS loc_phone,
+                COALESCE(NULLIF(d.dr_email, ''), l.loc_email) AS loc_email,
+                COALESCE(NULLIF(d.dr_website, ''), l.loc_website) AS loc_website,
                 l.loc_lat,
                 l.loc_lng,
                 l.loc_address_visibility,
@@ -254,11 +257,11 @@ try {
                     + COALESCE(wv.vote_worsened, 0)
                 ) AS total_votes
 
-            FROM tbl_drs_03 d
+            FROM {$doctorSource} d
 
             LEFT JOIN tbl_drs_locations_03 l
                 ON d.dr_id = l.dr_id
-               AND l.loc_is_primary = 1
+               AND l.loc_id = (SELECT ll.loc_id FROM tbl_drs_locations_03 ll WHERE ll.dr_id = d.dr_id ORDER BY ll.loc_is_primary DESC, ll.loc_id LIMIT 1)
 
             LEFT JOIN lcn_raw_doctor_votes rv
                 ON d.dr_id = rv.dr_id
@@ -336,6 +339,8 @@ try {
 
     $terms = $termsStmt->fetchAll();
     $groupedTerms = groupTermsByType($terms);
+    $research = lcnDoctorResearch($pdo, $id);
+    $groupedTerms['specialty'] = $research['specialty'];
 
     $treatmentsSql = "
         SELECT
@@ -377,7 +382,8 @@ try {
                     + COALESCE(rv.contra, 0)
                 ) AS total_votes,
 
-                COALESCE(pc.provider_count, 0) AS provider_count
+                COALESCE(pc.provider_count, 0) AS provider_count,
+                (SELECT COUNT(DISTINCT ac.dr_id) FROM tbl_cpl_drs2treatments_03 ac WHERE ac.treat_id=t.treat_id) AS provider_total
 
             FROM tbl_cpl_drs2treatments_03 c
 
@@ -404,7 +410,7 @@ try {
                     COUNT(DISTINCT dr_id) AS provider_count
                 FROM tbl_cpl_drs2treatments_03
                 WHERE treat_id IS NOT NULL
-                  AND dr_id IS NOT NULL
+                  AND dr_id IN (" . implode(',', LCN_PRIORITY_DOCTOR_IDS) . ")
                 GROUP BY treat_id
             ) pc
                 ON c.treat_id = pc.treat_id
@@ -469,28 +475,19 @@ try {
 
     $groupedTreatments = groupTreatmentsByType($treatments);
     $analysis = buildTreatmentAnalysis($treatments);
+    // All catalog profiles with more than five distinct, existing treatments.
+    $counts = $pdo->query('SELECT c.dr_id, COUNT(DISTINCT c.treat_id) AS n FROM tbl_cpl_drs2treatments_03 c INNER JOIN tbl_drs_03 d ON d.dr_id=c.dr_id INNER JOIN tbl_treatments_03 t ON t.treat_id=c.treat_id GROUP BY c.dr_id HAVING COUNT(DISTINCT c.treat_id)>5')->fetchAll();
+    $ownCount = count(array_unique(array_column($treatments, 'treat_id')));
+    $eligible = count($counts);
+    $atLeast = count(array_filter($counts, fn($row)=>(int)$row['n'] >= $ownCount));
+    $analysis['editorial'] = lcnEditorialMatches($treatments);
+    $analysis['catalog'] = ['doctor_count'=>$eligible, 'minimum_exclusive'=>5, 'own_count'=>$ownCount, 'at_least_count'=>$ownCount>5?$atLeast:null, 'top_percent'=>$ownCount>5 && $eligible>0 ? (int)ceil(100*$atLeast/$eligible) : null];
 
-    sendJson([
-        'ok' => true,
-        'item' => $item,
-        'terms' => $groupedTerms,
-        'treatments' => $treatments,
-        'treatments_grouped' => $groupedTreatments,
-        'analysis' => $analysis,
-    ]);
 
+    sendJson(['ok'=>true,'item'=>$item,'terms'=>$groupedTerms,'treatments'=>$treatments,'treatments_grouped'=>$groupedTreatments,'analysis'=>$analysis,'research'=>$research]);
 } catch (InvalidArgumentException $e) {
-    sendJson([
-        'ok' => false,
-        'error' => true,
-        'message' => 'Ungültige Anfrage.',
-    ], 400);
-
+    sendJson(['ok'=>false,'error'=>true,'message'=>'Ungültige Anfrage.'],400);
 } catch (Throwable $e) {
-    lcnLogApiError('doctor_detail', $e);
-    sendJson([
-        'ok' => false,
-        'error' => true,
-        'message' => 'Arztdetails konnten nicht geladen werden.',
-    ], 500);
+    lcnLogApiError('doctor_detail',$e);
+    sendJson(['ok'=>false,'error'=>true,'message'=>'Arztdetails konnten nicht geladen werden.'],500);
 }

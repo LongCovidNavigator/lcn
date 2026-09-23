@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-// Reuse the production markup so the isolated mock always reflects layout changes.
+// Preserve the previous layout for comparison after the regular page was migrated.
 // Only its data source and prototype banner are replaced; no database code is loaded.
-$html = file_get_contents(__DIR__ . '/arzt_detail.html');
+$html = file_get_contents(__DIR__ . '/components/arzt_detail_legacy.html');
 
 if ($html === false) {
     http_response_code(500);
@@ -29,8 +29,8 @@ $html = str_replace(
     $html
 );
 $html = str_replace(
-    '<link rel="stylesheet" href="styles/arzt_detail.css?v=46">',
-    '<link rel="stylesheet" href="styles/arzt_detail.css?v=46">' . "\n" .
+    '<link rel="stylesheet" href="styles/arzt_detail.css?v=48">',
+    '<link rel="stylesheet" href="styles/arzt_detail.css?v=48">' . "\n" .
     '    <link rel="stylesheet" href="styles/arzt_detail_dummy.css?v=3">',
     $html
 );
@@ -41,12 +41,12 @@ $html = preg_replace(
     1
 ) ?? $html;
 $html = str_replace(
-    '<script src="scripts/arzt_detail.js?v=35"></script>',
+    '<script src="scripts/arzt_detail.js?v=38"></script>',
     '<script src="scripts/doctor_treatment_taxonomy.js?v=1"></script>' . "\n" .
     '    <script src="scripts/doctor_dummy_fixtures.js?v=2"></script>' . "\n" .
     '    <script src="scripts/doctor_dummy_fixtures_aug28.js?v=1"></script>' . "\n" .
     '    <script src="scripts/arzt_detail_dummy.js?v=5"></script>' . "\n" .
-    '    <script src="scripts/arzt_detail.js?v=37"></script>',
+    '    <script src="scripts/arzt_detail.js?v=38"></script>',
     $html
 );
 

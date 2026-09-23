@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LCN – Arzt-Steckbrief</title>
-  <link rel="stylesheet" href="styles/general.css">
-  <link rel="stylesheet" href="styles/navigation.css">
-  <link rel="stylesheet" href="styles/footer-style.css">
+  <title>LCN – Arzt-Detailseite · Vier Ansichten</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=38">
   <script src="scripts/image-registry.js?v=5" defer></script>
@@ -14,9 +11,9 @@
   <script src="scripts/arzt_detail_konzept.js?v=52" defer></script>
   <link rel="stylesheet" href="styles/doctor_treatment_table_beta.css?v=2">
 </head>
-<body class="doctor-detail-live" data-doctor-page="live">
-  <div id="header-placeholder"></div>
-  <div class="page-shell"><section id="submission-note" class="card" hidden><strong>Community-Eintrag · noch nicht geprüft</strong><p>Danke fürs Ergänzen! Bitte teile, was du über diese Praxis weißt. In den drei Bereichen kannst du einzelne Fragen beantworten; deine Angaben werden gespeichert.</p><a href="#termin">Angaben zum Termin ergänzen →</a></section>
+<body>
+  <div class="prototype-note"><span><strong>LCN · Entwurf</strong> Praxis und Behandlungen: Originaldaten. <span id="community-mode">Community-Daten werden geladen …</span> Deine Angaben werden gespeichert und diesem Browser zugeordnet.</span><label class="doctor-selector">Behandler ansehen<select id="demo-doctor"><option>Wird geladen …</option></select></label><button type="button" id="reset-demo" disabled>Eigene Angaben zu dieser Praxis löschen</button></div>
+  <div class="page-shell">
     <header class="profile">
       <div class="avatar" aria-hidden="true">LCN</div>
       <div class="profile-copy">
@@ -24,7 +21,7 @@
         <p id="profile-specialty">Praxisinformationen werden geladen …</p>
         <p class="address" id="profile-address"></p>
       </div>
-      <nav class="contact" aria-label="Kontakt zur Praxis">
+      <nav class="contact" aria-label="Kontaktvorschau">
         <button type="button" data-contact="Website"><span aria-hidden="true">↗</span> Website</button>
         <button type="button" data-contact="Telefon"><span aria-hidden="true">☎</span> Telefon</button>
         <button type="button" data-contact="E-Mail"><span aria-hidden="true">✉</span> E-Mail</button>
@@ -42,12 +39,9 @@
       </nav>
       <main id="view-content" tabindex="-1"></main>
     </div>
-    <p class="demo-footer">Neue Detailansicht im Testbetrieb · Dummy-Angaben sind gekennzeichnet. Deine Angaben werden gespeichert und diesem Browser zugeordnet.</p>
+    <p class="demo-footer">Interaktiver Layout-Entwurf · Dummy-Angaben sind gekennzeichnet. Deine Angaben werden gespeichert und diesem Browser zugeordnet.</p>
   </div>
   <div id="feedback" role="status" aria-live="polite"></div>
-  <div id="footer-placeholder"></div>
-  <script src="scripts/access-nav.js?v=2" defer></script>
-  <script src="scripts/doctor_detail_chrome.js?v=5" defer></script>
   <noscript>Bitte JavaScript aktivieren, um die vier Ansichten des Entwurfs zu öffnen.</noscript>
 </body>
 </html>

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_submission_treatments.php';
 require_once __DIR__ . '/_voting.php';
 require_once __DIR__ . '/_site_auth.php';
 
@@ -86,7 +87,7 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
         $link=$pdo->prepare("INSERT IGNORE INTO tbl_cpl_drs2terms_03 (dr_id,term_id,confidence) VALUES (:dr,:term,'medium')");
         foreach($terms->fetchAll(PDO::FETCH_COLUMN) as $termId)$link->execute([':dr'=>$drId,':term'=>$termId]);
     }
-    $treatmentIds = array_values(array_filter(array_map('intval', is_array($payload['treatment_ids'] ?? null) ? $payload['treatment_ids'] : [])));
+    $treatmentIds = lcnSubmissionTreatmentIds($payload);
     if ($treatmentIds) {
         $marks=implode(',',array_fill(0,count($treatmentIds),'?'));
         $valid=$pdo->prepare("SELECT treat_id FROM tbl_treatments_03 WHERE treat_id IN ($marks)");$valid->execute($treatmentIds);
