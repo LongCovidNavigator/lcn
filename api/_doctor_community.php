@@ -12,10 +12,6 @@ function lcnDoctorCommunityQuestions(): array
     foreach (['gkv', 'pkv', 'de-self', 'de-abroad', 'at-public', 'at-elective', 'at-private', 'at-abroad', 'ch-basic', 'ch-extra', 'ch-self', 'ch-abroad', 'other-self', 'other-abroad'] as $context) {
         $questions['costs-' . $context] = ['question' => 'costs', 'context' => $context, 'labels' => ['Komplett übernommen', 'Bis 100 €', 'Mehrere 100 €', 'Mehrere 1.000 €', '10.000 € oder mehr', 'Mehrere 10.000 €']];
     }
-    foreach ($questions as &$definition) {
-        if (str_starts_with($definition['context'], 'ch-')) $definition['labels'] = str_replace('€', 'CHF', $definition['labels']);
-    }
-    unset($definition);
     foreach (['first', 'followup'] as $row => $appointment) {
         foreach (['onsite', 'phone', 'video'] as $column => $form) {
             $questions["appointment-$row-$column"] = ['question' => "appointment_{$appointment}_{$form}", 'context' => '', 'labels' => ['Ja', 'Nein']];

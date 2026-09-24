@@ -23,6 +23,7 @@ async function loadFeaturedTreatments() {
     const list = document.getElementById("featured-treatments-list");
     const moreButton = document.getElementById("featured-treatments-more");
     if (!list) return;
+    if (list.dataset.editorialSelection === "true") return loadHomepageEditorialSelection(list, moreButton);
     const isFullTreatmentsPage = list.dataset.fullViewSwitch === "true";
 
     try {
@@ -406,7 +407,7 @@ async function loadFeaturedExperts() {
         });
     });
 
-    const initialCount = isFullExpertsPage ? editorialList.length : 11;
+    const initialCount = editorialList.length;
     const initialEntries = editorialList.slice(0, initialCount);
     const longlist = editorialList.slice(initialCount);
     list.innerHTML = buildFeaturedExpertsHtml(initialEntries, 0, false);
@@ -419,7 +420,8 @@ async function loadFeaturedExperts() {
     }
 
     if (!moreButton) return;
-    moreButton.hidden = false;
+    moreButton.hidden = longlist.length === 0;
+    alignHomepageRecommendations();
 
     moreButton.onclick = function () {
         const isExpanded = moreButton.getAttribute("aria-expanded") === "true";
@@ -1114,3 +1116,53 @@ function escapeHomepageHtml(value) {
     element.textContent = String(value || "");
     return element.innerHTML;
 }
+
+// Editorial content uses the original Beta card/table renderers.
+async function loadHomepageEditorialSelection(list, moreButton) {
+    try {
+        const response=await fetch('api/editorial_treatments.php');
+        const payload=await response.json();
+        if(!response.ok||!payload.ok)throw new Error('Editorial selection unavailable');
+        const entries=payload.topics.map(topic=>({editorial:{id:topic.items.length===1?Number(topic.items[0].treat_id):0,name:topic.label},data:topic.items.length===1?topic.items[0]:{typ:[...new Set(topic.items.map(i=>i.typ).filter(Boolean))].join(' · ')},topic}));
+        const render=expanded=>{
+            const visible=entries;
+            list.innerHTML=buildFeaturedTreatmentsHtml(visible);
+            const elements=list.querySelectorAll('.featured-treatment, .featured-treatment-table-row');
+            elements.forEach((element,index)=>{
+                const entry=visible[index],single=entry.topic.items.length===1;
+                const name=element.querySelector('h3 a, .featured-treatment-table-name a');
+                if(name&&!single){name.href='therapien_karte.html?search='+encodeURIComponent(entry.topic.label);name.title='Passende Katalogeinträge suchen';}
+                // No synthetic ratings or provider totals for editorial topic groups.
+                const votes=element.querySelector('.featured-treatment-votes, .featured-treatment-table-experience');
+                if(votes){
+                    const rating=entry.topic.ratings||{},total=['pro','neutral','contra'].reduce((sum,key)=>sum+Number(rating[key]||0),0);
+                    votes.classList.add('homepage-rating-display');
+                    votes.title='Bewertungen zu den zugeordneten Katalogeinträgen; einschließlich vorhandener Dummy-Bewertungen. Keine Anzahl unterschiedlicher Personen.';
+                    votes.innerHTML=['pro','neutral','contra'].map((key,i)=>'<span class="homepage-rating-pill rating-'+key+'"><span>'+(['Positiv','Neutral','Negativ'][i])+'</span><strong>'+(total?Math.round(100*Number(rating[key]||0)/total)+'%':'—')+'</strong></span>').join('')+'<small>(n='+total+')</small>';
+                }
+                const rank=element.querySelector('.featured-treatment-rank,.featured-treatment-table-rank');if(rank)rank.textContent=String(index+1).padStart(2,'0');
+                if(!single){const provider=element.querySelector('.featured-treatment-provider-bubble, .featured-treatment-card-facts > span:nth-child(2) strong');if(provider)provider.textContent='—';}
+            });
+            if(moreButton){moreButton.hidden=true;moreButton.setAttribute('aria-expanded',String(expanded));moreButton.textContent=expanded?'Weniger anzeigen':'Weitere anzeigen';moreButton.onclick=()=>render(!expanded);}
+        };
+        render(true);
+        alignHomepageRecommendations();
+    }catch(error){list.innerHTML='<p class="featured-treatments-status">Die Behandlungen konnten gerade nicht geladen werden.</p>';}
+}
+
+function alignHomepageRecommendations() {
+    const area=document.querySelector('.home-recommendation-teasers');
+    if(!area)return;
+    const pairs=[['.featured-treatments-heading','.featured-experts-heading'],['#featured-treatments-list .featured-treatment','#featured-experts-list .featured-expert'],['.featured-treatments-table thead tr','.featured-experts-table thead tr'],['.featured-treatments-table tbody tr','.featured-experts-table tbody tr']];
+    for(const [left,right] of pairs){
+        const a=area.querySelectorAll(left),b=area.querySelectorAll(right);
+        [...a,...b].forEach(el=>el.style.height='');
+        if(window.innerWidth<=760)continue;
+        for(let i=0;i<Math.min(a.length,b.length);i++){
+            const height=Math.ceil(Math.max(a[i].getBoundingClientRect().height,b[i].getBoundingClientRect().height));
+            a[i].style.height=b[i].style.height=height+'px';
+        }
+    }
+}
+window.addEventListener('resize',alignHomepageRecommendations);
+document.fonts?.ready.then(alignHomepageRecommendations);

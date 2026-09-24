@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LCN – Arzt-Detailseite · Vier Ansichten</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=38">
+  <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=45">
   <script src="scripts/image-registry.js?v=5" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
-  <script src="scripts/arzt_detail_konzept.js?v=52" defer></script>
-  <link rel="stylesheet" href="styles/doctor_treatment_table_beta.css?v=2">
+  <script src="scripts/doctor_dashboard_score.js?v=1" defer></script>
+  <script src="scripts/arzt_detail_konzept.js?v=64" defer></script>
+  <link rel="stylesheet" href="styles/doctor_treatment_table_beta.css?v=3">
 </head>
 <body>
   <div class="prototype-note"><span><strong>LCN · Entwurf</strong> Praxis und Behandlungen: Originaldaten. <span id="community-mode">Community-Daten werden geladen …</span> Deine Angaben werden gespeichert und diesem Browser zugeordnet.</span><label class="doctor-selector">Behandler ansehen<select id="demo-doctor"><option>Wird geladen …</option></select></label><button type="button" id="reset-demo" disabled>Eigene Angaben zu dieser Praxis löschen</button></div>
@@ -35,6 +36,7 @@
         <a href="#termin" data-view="termin"><span class="nav-number">2</span><span><strong>Welche Belastungshürden gibt es bei einem Termin?</strong></span></a>
         <a href="#zugang" data-view="zugang"><span class="nav-number">3</span><span><strong>Wie zugänglich ist die Behandlung?</strong></span></a>
         <a href="#wirkung" data-view="wirkung"><span class="nav-number">4</span><span><strong>Wie sind die Erfahrungen mit einer Zustandsverbesserung?</strong></span></a>
+        <a href="#dashboard" data-view="dashboard"><span class="nav-number">5</span><span><strong>Dashboard</strong></span></a>
         </div>
       </nav>
       <main id="view-content" tabindex="-1"></main>
@@ -42,6 +44,6 @@
     <p class="demo-footer">Interaktiver Layout-Entwurf · Dummy-Angaben sind gekennzeichnet. Deine Angaben werden gespeichert und diesem Browser zugeordnet.</p>
   </div>
   <div id="feedback" role="status" aria-live="polite"></div>
-  <noscript>Bitte JavaScript aktivieren, um die vier Ansichten des Entwurfs zu öffnen.</noscript>
+  <noscript>Bitte JavaScript aktivieren, um die fünf Ansichten des Entwurfs zu öffnen.</noscript>
 </body>
 </html>

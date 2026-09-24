@@ -10,12 +10,12 @@
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="styles/homepage.css?v=23">
+    <link rel="stylesheet" href="styles/homepage.css?v=28">
     <link rel="stylesheet" href="styles/footer-style.css">
     <script src="scripts/image-registry.js?v=5"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="scripts/homepage.js?v=24" defer></script>
+    <script src="scripts/homepage.js?v=32" defer></script>
     <script src="scripts/access-nav.js?v=2" defer></script>
 </head>
 
@@ -312,11 +312,11 @@
         <section class="featured-treatments" aria-labelledby="featured-treatments-heading">
             <div class="featured-treatments-panel">
                 <div class="section-heading featured-treatments-heading">
-                    <h2 id="featured-treatments-heading"><a href="top_behandlungen.html">Häufig genannte Behandlungen</a></h2>
-                    <p>Kompakte Auswahl zur Orientierung.</p>
+                    <h2 id="featured-treatments-heading"><a href="top_behandlungen.html">Top 30 Behandlungen + IHHT</a></h2>
+                    <p>Unsere redaktionelle Auswahl zur Orientierung – kein Wirksamkeitsranking.</p>
                 </div>
 
-                <div id="featured-treatments-list" class="featured-treatments-list" data-list-mode="teaser" data-initial-count="10" aria-live="polite">
+                <div id="featured-treatments-list" class="featured-treatments-list" data-editorial-selection="true" data-list-mode="teaser" data-initial-count="10" aria-live="polite">
                     <p class="featured-treatments-status">Behandlungen werden geladen …</p>
                 </div>
 
