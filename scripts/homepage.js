@@ -1138,7 +1138,7 @@ async function loadHomepageEditorialSelection(list, moreButton) {
                     const rating=entry.topic.ratings||{},total=['pro','neutral','contra'].reduce((sum,key)=>sum+Number(rating[key]||0),0);
                     votes.classList.add('homepage-rating-display');
                     votes.title='Bewertungen zu den zugeordneten Katalogeinträgen; einschließlich vorhandener Dummy-Bewertungen. Keine Anzahl unterschiedlicher Personen.';
-                    votes.innerHTML=['pro','neutral','contra'].map((key,i)=>'<span class="homepage-rating-pill rating-'+key+'"><span>'+(['Positiv','Neutral','Negativ'][i])+'</span><strong>'+(total?Math.round(100*Number(rating[key]||0)/total)+'%':'—')+'</strong></span>').join('')+'<small>(n='+total+')</small>';
+                    votes.innerHTML=['pro','neutral','contra'].map((key,i)=>'<span class="homepage-rating-pill rating-'+key+'"><span>'+(['Positiv','Neutral','Negativ'][i])+'</span><strong>'+(total?['+','=','−'][i]+Math.round(100*Number(rating[key]||0)/total)+'%':'—')+'</strong></span>').join('')+'<small>(n='+total+')</small>';
                 }
                 const rank=element.querySelector('.featured-treatment-rank,.featured-treatment-table-rank');if(rank)rank.textContent=String(index+1).padStart(2,'0');
                 if(!single){const provider=element.querySelector('.featured-treatment-provider-bubble, .featured-treatment-card-facts > span:nth-child(2) strong');if(provider)provider.textContent='—';}
@@ -1153,6 +1153,7 @@ async function loadHomepageEditorialSelection(list, moreButton) {
 function alignHomepageRecommendations() {
     const area=document.querySelector('.home-recommendation-teasers');
     if(!area)return;
+    area.querySelectorAll('table').forEach(table=>{const headers=table.querySelectorAll('th');if(headers[0])headers[0].textContent='#';if(headers.length===6)headers[5].textContent='Entfernung';});
     const pairs=[['.featured-treatments-heading','.featured-experts-heading'],['#featured-treatments-list .featured-treatment','#featured-experts-list .featured-expert'],['.featured-treatments-table thead tr','.featured-experts-table thead tr'],['.featured-treatments-table tbody tr','.featured-experts-table tbody tr']];
     for(const [left,right] of pairs){
         const a=area.querySelectorAll(left),b=area.querySelectorAll(right);

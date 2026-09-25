@@ -1,0 +1,14 @@
+const {chromium}=require('playwright');const assert=require('node:assert/strict');
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});try{const p=await b.newPage({viewport:{width:1440,height:1000}});const errors=[];p.on('pageerror',e=>errors.push(e.message));
+await p.goto('http://localhost/lcn/treatment_nd_test.php?id=2&demo=1#zugang');
+assert.equal(await p.locator('.nd-evidence').count(),0);
+assert.equal(await p.locator('[data-research-scale=gkv_kostenuebernahme_status] .is-current').count(),1);
+const a=await p.locator('[data-research-scale=zulassung_long_covid_mecfs]').boundingBox(),o=await p.locator('[data-research-scale=off_label_status]').boundingBox();assert.equal(a.y,o.y);assert.ok(o.x>a.x);
+assert.equal(await p.locator('[data-distribution-percent=gkv]').first().innerText(),'18 %');
+await p.locator('input[name=gkv][value=ja]').check();await p.locator('#nd-demo-header-toggle').click();assert.equal(await p.locator('[data-distribution-percent=gkv]').first().innerText(),'–');assert.ok(await p.locator('input[name=gkv][value=ja]').isChecked());
+await p.getByText('Eigene tatsächliche Kosten ergänzen / bearbeiten',{exact:true}).click();await p.locator('textarea[name=unit_cost]').fill('25 EUR pro Packung');await p.locator('textarea[name=unit_cost]').blur();assert.match(await p.locator('[data-own-inline=costs]').innerText(),/25 EUR/);
+await p.reload();assert.ok(await p.locator('input[name=gkv][value=ja]').isChecked());assert.match(await p.locator('[data-own-inline=costs]').innerText(),/25 EUR/);
+await p.screenshot({path:process.env.TEMP+'/nd-access-final.png',fullPage:true});
+await p.setViewportSize({width:390,height:844});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+await p.goto('http://localhost/lcn/treatment_nd_test.php?id=1#zugang');assert.match(await p.locator('[data-research-scale=zulassung_long_covid_mecfs] .is-current').innerText(),/Nicht anwendbar/);
+await p.goto('http://localhost/lcn/treatment_nd_test.php?id=5#dashboard');assert.equal(await p.locator('#studien a').count(),0);assert.equal(await p.locator('.nd-evidence').count(),0);assert.deepEqual(errors,[]);console.log('PASS: approval layout, stored GKV status, combined dummy/input chart, toggle, local cost persistence, mobile, not-applicable, hidden source links.');}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});

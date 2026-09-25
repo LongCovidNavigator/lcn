@@ -1,0 +1,42 @@
+const { chromium } = require('playwright');
+const assert = require('node:assert/strict');
+(async () => {
+  const browser = await chromium.launch({channel:'msedge',headless:true});
+  try {
+    const page = await browser.newPage({viewport:{width:1440,height:1000}});
+    const errors = [], writes = [];
+    page.on('pageerror', e => errors.push(e.message));
+    page.on('request', r => { if(r.method() !== 'GET') writes.push(r.url()); });
+    await page.goto('http://localhost/lcn/treatment_nd_test.php?id=2#wirkung');
+    await page.locator('[data-effect-value=Verbesserung]').click();
+    await page.locator('input[name=gamechanger][value=ja]').check();
+    await page.locator('input[name=onset][value=Wochen]').check();
+    await page.locator('.side-nav [data-view=termin]').click();
+    await page.locator('input[name=pem][value=niedrig]').check();
+    await page.locator('input[name="setting[]"]').first().check();
+    await page.locator('input[name="setting[]"]').nth(2).check();
+    await page.locator('.side-nav [data-view=ueberblick]').click();
+    await page.locator('textarea[name=duration]').fill('20 Minuten');
+    await page.locator('#ueberblick .nd-save-draft').first().click();
+    await page.reload();
+    assert.equal(await page.locator('textarea[name=duration]').inputValue(), '20 Minuten');
+    assert.equal(await page.locator('input[name="setting[]"]:checked').count(), 2);
+    await page.locator('.side-nav [data-view=dashboard]').click();
+    assert.match(await page.locator('#nd-own-summary').innerText(), /Verbesserung/);
+    assert.equal(await page.locator('.nd-own-scale .is-selected').count(), 4);
+    await page.screenshot({path:process.env.TEMP+'/lcn-nd-input-dashboard.png',fullPage:true});
+    await page.locator('.side-nav [data-view=wirkung]').click();
+    await page.screenshot({path:process.env.TEMP+'/lcn-nd-inputs.png',fullPage:true});
+    await page.setViewportSize({width:390,height:844});
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+    await page.goto('http://localhost/lcn/treatment_nd_test.php?id=1#wirkung');
+    assert.equal(await page.locator('input[name=effect]:checked').count(),0);
+    assert.equal(await page.locator('input[name="application[]"]').count(),0);
+    await page.goto('http://localhost/lcn/treatment_nd_test.php?id=2#dashboard');
+    await page.locator('#nd-reset-draft').click();
+    await page.reload();
+    assert.match(await page.locator('#nd-own-summary').innerText(),/Noch keine/);
+    assert.deepEqual(errors,[]); assert.deepEqual(writes,[]);
+    console.log('PASS: interactive scales, multi-select, text, session restore, treatment isolation, dashboard, reset, mobile, no server writes.');
+  } finally {await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});
