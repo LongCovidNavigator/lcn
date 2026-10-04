@@ -42,3 +42,17 @@ Read-only-Prüfung für LDN (`treat_nd_id=2`, `legacy_treat_id=1`):
 - 14 unterschiedliche andere ND-Treatments teilen vorhandene Symptombezüge mit LDN.
 
 Der Reiter zeigt deshalb drei getrennte Arten der Navigation: explizit recherchierte Beziehungstypen, Verbindungen über gemeinsame Alias-Bezeichnungen und Verbindungen über gemeinsame Symptome. Alias-/Symptom-Verbindungen werden nicht in recherchierte Beziehungstypen umgedeutet. Leere direkte Beziehungen heißen ausdrücklich „Noch keine Verknüpfung hinterlegt“. Keine Aussage, dass medizinisch keine Alternativen existieren. Daten wurden nicht geändert.
+
+## Feste Kostenbezugsgrößen
+
+Die bestätigte Dropdown-Liste ersetzt freie Bezugsgrößentexte: Behandlung/Sitzung, Anwendung, Packung Tabletten, Packung Kapseln, Flasche, Ampulle, Fertigspritze, Tube/Tiegel und Rezeptur. Packungen erfordern eine positive ganze Stückzahl, Flasche/Ampulle einen positiven ml-Inhalt, Tube/Tiegel g oder ml, Rezeptur ml/g/Tabletten/Kapseln. Bei Fertigspritzen ist der Inhalt optional. Keine automatische Standardisierung auf 100 Stück.
+
+Einheit und Inhalt erscheinen unmittelbar an der Kostenskala. Eigene Entwürfe speichern diese strukturiert pro Versicherung; Änderungen löschen die bisherige Preiswahl. Alte Freitext-Kostenentwürfe werden nicht automatisch umgedeutet. Andere Antworten bleiben erhalten. Die fiktive Diagrammverteilung ist ausdrücklich nicht auf Packungsgröße oder Wirkstärke bezogen; weiterhin keine echten Kostenaggregation oder DB-Änderung.
+
+Geprüft mit `tests/treatments_nd_cost_basis.cjs`: ungültige Menge, Mengenwechsel, erneute Preiswahl, Reload und Sitzung ohne Mengenangabe; außerdem bestehende Tests für Versicherungswechsel und mobile Darstellung.
+
+## Vereinfachung der Bezugsgröße (ersetzt die vorherige Detailfestlegung)
+
+Auf Nutzerwunsch nur drei grobe Kategorien: Behandlung / Anwendung; Packung (Tabletten / Kapseln); Flasche / Ampulle / Spritze. Keine Stückzahl, ml/g, Dosierung oder Rezeptur-Sonderoption. Preisstufen bleiben unverändert. Ein Kategorienwechsel behält die grobe Preiswahl. Frühere eindeutig zuordenbare Kategorien werden zusammengeführt und ihre Mengen entfernt; nicht zuordenbare Rezeptur-/Tubenentwürfe werden nicht geraten. Keine DB-Änderung.
+
+Kosten-Sonderantwort: „nicht anwendbar“ steht als erster, optisch abgesetzter Kreis vor den acht verbundenen Kostenpunkten. Kein Verbindungstrich zur Skala. Sie bleibt im gemeinsamen Nenner der Prozentverteilung enthalten. Die Versicherungsumschaltung enthält nur GKV/PKV. Antwort-Indizes bleiben stabil; Rendering liest Prozente über den Antwortindex statt DOM-Reihenfolge. Geprüft mit `tests/treatments_nd_cost_na.cjs`.

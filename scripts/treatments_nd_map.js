@@ -27,7 +27,18 @@
     if(entry.view==='table'){
       list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();['Anbieter','Ort','Entfernung','Zuordnung','Karte'].forEach(label=>{const th=document.createElement('th');th.scope='col';th.textContent=label;head.append(th);});const body=table.createTBody();rows.forEach(point=>{const row=body.insertRow();row.insertCell().append(nameNode(point));[point.place||'Keine Ortsangabe',km(point),point.status].forEach(value=>row.insertCell().textContent=value);row.insertCell().append(showButton(point));});list.append(table);
     }else{
-      list.className='nd-map-results doctor-card-grid';rows.forEach(point=>{const card=document.createElement('article');card.className='doctor-card';const heading=document.createElement('h4');heading.append(nameNode(point));card.append(heading);[point.place||'Keine Ortsangabe',point.status,km(point)].forEach(value=>{const p=document.createElement('p');p.textContent=value;card.append(p);});card.append(showButton(point));list.append(card);});
+      list.className='nd-map-results doctor-card-grid';
+      rows.forEach(point=>{
+        const card=document.createElement('article');card.className='doctor-card';
+        const header=document.createElement('div');header.className='nd-provider-heading';
+        const heading=document.createElement('h4');heading.append(nameNode(point));
+        const distanceLabel=document.createElement('span');distanceLabel.className='nd-provider-distance';distanceLabel.textContent=km(point);
+        header.append(heading,distanceLabel);card.append(header);
+        const place=document.createElement('p');place.className='nd-provider-place';place.textContent=point.place||'Keine Ortsangabe';card.append(place);
+        const footer=document.createElement('div');footer.className='nd-provider-footer';
+        const status=document.createElement('span');status.className='nd-provider-status';status.textContent=point.status;
+        footer.append(status,showButton(point));card.append(footer);list.append(card);
+      });
     }
   }
   function render(entry) {
@@ -77,7 +88,10 @@
     try{localStorage.setItem(sharedKey,JSON.stringify({...origin,location:origin.label}));localStorage.removeItem('lcn_shared_location_cleared');}catch{}
     entries.forEach(render);window.dispatchEvent(new CustomEvent('homepage:location-changed'));
   }
-  function markerIcon(red=false){return L.divIcon({className:'nd-local-marker'+(red?' nd-local-origin':''),html:'<span aria-hidden="true">●</span>',iconSize:[28,36],iconAnchor:[14,36],popupAnchor:[0,-32]});}  async function init(){
+  function markerIcon(red=false){
+    const urls=window.LCNImages.urls;
+    return L.icon({iconUrl:urls[red?'map-marker-red':'map-marker-default'],iconRetinaUrl:urls[red?'map-marker-red':'map-marker-default-retina'],shadowUrl:urls['map-marker-shadow'],iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]});
+  }  async function init(){
     if(!window.L){const css=document.createElement('link');css.rel='stylesheet';css.href='assets/vendor/leaflet/leaflet.css';document.head.append(css);await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='assets/vendor/leaflet/leaflet.js';script.onload=resolve;script.onerror=reject;document.head.append(script);});}
     entries.forEach(entry=>{
       const canvas=entry.host.querySelector('.nd-map-canvas');entry.map=L.map(canvas,{zoomControl:false,scrollWheelZoom:false}).setView([51.1657,10.4515],6);
@@ -98,4 +112,5 @@
   }
   init().catch(()=>entries.forEach(({host})=>{host.querySelector('.nd-map-canvas').textContent='Karte konnte nicht geladen werden. Anbieter und Entfernungen stehen weiterhin in der Liste.';}));
 })();
+
 

@@ -10,7 +10,14 @@
   const questions = [...root.querySelectorAll('[data-question]')];
   const toggle = document.getElementById('nd-demo-header-toggle');
   const number = value => value.toLocaleString('de-DE', {maximumFractionDigits:1});
-  function key(card) { return card.dataset.question + (card.querySelector('[data-insurance]') ? ':' + card.querySelector('[data-insurance][aria-pressed="true"]').dataset.insurance : ''); }
+  const units = {application:'Behandlung / Anwendung',package:'Packung (Tabletten / Kapseln)',container:'Flasche / Ampulle / Spritze'};
+  function basisText(basis) { return units[basis?.type] || ''; }
+  function renderBasis(card,own) {
+    const select=card.querySelector('[data-unit]');if(!select)return;
+    select.value=basisText(own?.basis)?own.basis.type:'';
+    const caption=basisText(own?.basis);
+    card.querySelector('[data-basis-caption]').textContent=(caption?'Kosten pro '+caption+' · ':'')+'Grobe Kosteneinordnung, ohne genaue Mengen- oder Dosierungsangabe.';
+  }  function key(card) { return card.dataset.question + (card.querySelector('[data-insurance]') ? ':' + card.querySelector('[data-insurance][aria-pressed="true"]').dataset.insurance : ''); }
   function save() {
     try { sessionStorage.setItem(storageKey,JSON.stringify(draft)); return 'Deine Auswahl ist als Testentwurf in diesem Tab gespeichert.'; }
     catch { return 'Deine Auswahl bleibt nur bis zum Neuladen erhalten; Browser-Speicherung ist nicht verfügbar.'; }
@@ -21,15 +28,14 @@
     const total = counts.reduce((a,b)=>a+b,0), own = draft[key(card)];
     card.querySelector('[data-community-note]').textContent = (demo ? 'Dummy-Daten · fiktives Beispiel · ' : 'Community · ') + total + ' Angaben' + (!total ? ' · noch keine auswertbare Verteilung' : ' · Anteile aller zugeordneten Antworten');
     options.forEach((button,i)=>{
-      const percent = total ? counts[i]*100/total : null;
+      const percent = total ? counts[Number(button.dataset.option)]*100/total : null;
       button.querySelector('[data-percent]').textContent = percent === null ? '–' : number(percent)+' %';
       button.setAttribute('aria-pressed',String(own?.value === button.dataset.value));
       const bar=button.querySelector('[data-bar]');
       if(bar) bar.style[card.dataset.kind==='effect'?'height':'width']=(percent || 0)+(card.dataset.kind==='effect'?'%':'%');
     });
-    const unit=card.querySelector('[data-unit]');
-    if(unit && document.activeElement!==unit) unit.value=own?.unit || '';
-    card.querySelector('.ux-own').textContent=own?.value ? 'Deine Auswahl: '+own.value+(own.unit?' pro '+own.unit:'')+' · lokaler Testentwurf' : 'Noch keine eigene Auswahl.';
+    renderBasis(card,own);
+    card.querySelector('.ux-own').textContent=own?.value ? 'Deine Auswahl: '+own.value+(own.basis&&own.value!=='nicht anwendbar'?' pro '+basisText(own.basis):'')+' · lokaler Testentwurf' : 'Noch keine eigene Auswahl.';
     if(card.dataset.kind==='donut') {
       const yes=total?counts[0]*100/total:0;
       card.querySelector('[data-donut-value]').textContent=total?number(yes)+' %':'–';
@@ -46,8 +52,9 @@
   questions.forEach(card=>{
     function choose(index) {
       const option=card.querySelector('[data-option="'+index+'"]'), unit=card.querySelector('[data-unit]');
-      if(unit && !unit.value.trim() && option.dataset.value!=='nicht anwendbar') {card.querySelector('.ux-own').textContent='Bitte zuerst die Bezugsgröße eingeben.';unit.focus();return;}
-      draft[key(card)]={value:option.dataset.value, ...(unit?{unit:unit.value.trim()}:{})};
+      const basis=draft[key(card)]?.basis;
+      if(unit && !basisText(basis) && option.dataset.value!=='nicht anwendbar') {card.querySelector('.ux-own').textContent='Bitte zuerst die Bezugsgröße auswählen.';unit.focus();return;}
+      draft[key(card)]={value:option.dataset.value, ...(unit?{basis}:{})};
       const status=save();render(card);card.querySelector('.ux-own').textContent+=' · '+status;
     }
     card.querySelectorAll('[data-option]').forEach(button=>button.addEventListener('click',()=>choose(button.dataset.option)));
@@ -58,10 +65,10 @@
     card.querySelectorAll('[data-insurance]').forEach(button=>button.addEventListener('click',()=>{
       card.querySelectorAll('[data-insurance]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render(card);
     }));
-    card.querySelector('[data-unit]')?.addEventListener('input',event=>{
-      if(draft[key(card)]) {draft[key(card)].unit=event.target.value.trim();save();}
-    });
-    card.querySelector('[data-clear]').addEventListener('click',()=>{delete draft[key(card)];save();render(card);});
+    card.querySelector('[data-unit]')?.addEventListener('change',event=>{
+      draft[key(card)]={...draft[key(card)],basis:{type:event.target.value}};
+      save();render(card);
+    });    card.querySelector('[data-clear]').addEventListener('click',()=>{delete draft[key(card)];save();render(card);});
   });
   function renderAll() {
     toggle.textContent='Dummydaten: '+(demo?'an':'aus');toggle.setAttribute('aria-pressed',String(demo));
@@ -69,5 +76,12 @@
     questions.forEach(render);
   }
   toggle.addEventListener('click',()=>{demo=!demo;const url=new URL(location.href);url.searchParams.set('demo',demo?'1':'0');history.replaceState(null,'',url);renderAll();});
-  renderAll();
+  // Keep existing approximate price answers when merging the former detailed units.
+  const formerUnits={session:'application',application:'application',tablets:'package',capsules:'package',bottle:'container',ampoule:'container',syringe:'container'};
+  Object.keys(draft).filter(k=>k.startsWith('unit_cost:')).forEach(k=>{
+    const type=draft[k]?.basis?.type;
+    if(units[type] || formerUnits[type]) draft[k]={...draft[k],basis:{type:formerUnits[type]||type}};
+    else if(draft[k]?.value!=='nicht anwendbar') delete draft[k];
+  });  renderAll();
 })();
+

@@ -17,14 +17,14 @@ const assert=require('node:assert/strict');
  assert.match(await page.locator('[data-question=pem] [data-community-note]').innerText(),/Dummy.*100 Angaben/);
  await page.locator('[data-view=zugang]').click();
  const cost=page.locator('[data-question=unit_cost]');
- await cost.locator('[data-unit]').fill('Packung');
+ await cost.locator('[data-unit]').selectOption('package');
  await cost.locator('[data-option="2"]').click();
  await cost.locator('[data-insurance=PKV]').click();
  assert.equal(await cost.locator('[data-option="2"]').getAttribute('aria-pressed'),'false');
- await cost.locator('[data-unit]').fill('Rezeptur');
+ await cost.locator('[data-unit]').selectOption('container');
  await cost.locator('[data-option="4"]').click();
  await cost.locator('[data-insurance=GKV]').click();
- assert.equal(await cost.locator('[data-unit]').inputValue(),'Packung');
+ assert.equal(await cost.locator('[data-unit]').inputValue(),'package');
  assert.equal(await cost.locator('[data-option="2"]').getAttribute('aria-pressed'),'true');
  await page.locator('[data-view=wirkung]').click();
  await page.locator('[data-question=effect] [data-option="2"]').click();
@@ -53,5 +53,7 @@ const assert=require('node:assert/strict');
  console.log('PASS: five views, selections, persistence, cost contexts, donut keyboard, desktop/mobile overflow; no JS errors');
  } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});
+
+
 
 

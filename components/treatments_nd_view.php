@@ -35,9 +35,9 @@ function ndStart(string $title, bool $detail = false, bool $reduced = false): vo
 <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=45"><link rel="stylesheet" href="styles/top_recommendation_map.css"><link rel="stylesheet" href="styles/treatments_nd.css?v=14">
 <link rel="stylesheet" href="styles/treatments_nd_provider_beta.css?v=1">
 <script src="scripts/access-nav.js?v=2" defer></script><script src="scripts/image-registry.js?v=5" defer></script><script src="scripts/treatments_nd.js?v=3" defer></script>
-<?php if ($reduced): ?><link rel="stylesheet" href="styles/treatments_nd_reduced.css?v=2"><script src="scripts/treatments_nd_reduced.js?v=2" defer></script>
+<?php if ($reduced): ?><link rel="stylesheet" href="styles/treatments_nd_reduced.css?v=5"><script src="scripts/treatments_nd_reduced.js?v=5" defer></script>
 <?php else: ?><script src="scripts/treatments_nd_inputs.js?v=2" defer></script><script src="scripts/treatments_nd_demo.js?v=7" defer></script><script src="scripts/treatments_nd_dashboard.js?v=3" defer></script><?php endif; ?>
-<script src="scripts/treatments_nd_map.js?v=4" defer></script>
+<script src="scripts/treatments_nd_map.js?v=5" defer></script>
 </head><body class="nd-page<?= $detail ? ' nd-detail compact-doctor-header' : '' ?><?= $reduced ? ' ux-page' : '' ?>"><div id="header-placeholder"><?php if ($reduced): ?>
 <header class="ux-site-header"><a class="ux-brand" href="index.html"><span>LCN</span><strong>Long Covid Navigator</strong></a><nav aria-label="Hauptnavigation"><a href="treatments_nd_test.php" aria-current="page">Treatments</a><a href="aerzte_karte.html">Behandler</a><a href="index.html">Über LCN</a></nav><div class="ux-header-tools"><span>Testansicht</span><button type="button" id="nd-demo-header-toggle" aria-pressed="false">Dummydaten: aus</button></div></header>
 <?php elseif ($detail): ?>
@@ -52,3 +52,7 @@ function ndEnd(): void
 {
     ?></main><div id="footer-placeholder"><?php readfile(__DIR__ . '/footer.html'); ?></div></body></html><?php
 }
+
+
+
+

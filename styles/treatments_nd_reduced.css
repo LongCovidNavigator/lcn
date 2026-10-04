@@ -239,3 +239,54 @@ body.ux-page{background:radial-gradient(ellipse at 35% 0,#e4f7ff 0,transparent 6
 @media(max-width:650px){.ux-question .ux-chart.ux-donut{grid-template-columns:minmax(50px,1fr) 125px minmax(50px,1fr);column-gap:4px}.ux-question svg.ux-donut{width:125px;height:125px}.ux-question .ux-chart.ux-donut [data-percent]{font-size:17px}}
 .ux-page .side-nav strong{overflow-wrap:normal;hyphens:manual}
 .ux-detail .nd-map-canvas{background:#edf4f8}
+/* Match the established LCN map → results layout; never squeeze a table beside the map. */
+.ux-detail .nd-provider-map{display:flex;flex-direction:column;gap:16px;align-items:stretch}
+.ux-detail .nd-provider-map>p{margin:0}
+.ux-detail .nd-provider-map .top-map-panel{order:0;border:0;border-radius:8px;overflow:hidden}
+.ux-detail .nd-provider-map .doctor-results-panel{order:1;margin:0;border:1px solid #dbe7f2;border-radius:8px;background:#fff;overflow:hidden}
+.ux-detail .nd-provider-map>p:last-of-type{order:2;color:#6c829b;font-size:11px}
+.ux-detail .nd-provider-map .top-map-header{padding:11px 18px;background:#003878;color:#fff;font-size:14px;border:0}
+.ux-detail .nd-provider-map .top-map-header:hover{background:#002e63}
+.ux-detail .nd-provider-map .top-map-content{padding-top:12px}
+.ux-detail .nd-provider-map .nd-map-canvas{height:345px;border:1px solid #ddd;border-radius:8px}
+.ux-detail .nd-provider-map .top-map-status{padding:9px 0 0;color:#60758e;font-size:12px;line-height:1.5}
+.ux-detail .nd-provider-map .doctor-results-header{padding:12px 16px;align-items:center;background:#f0f7fd;color:#174f91}
+.ux-detail .nd-provider-map .doctor-results-search-panel{padding:16px;border:0;border-bottom:1px solid #e1ebf5;box-shadow:none}
+.ux-detail .nd-provider-map .doctor-results-search-row{grid-template-columns:minmax(0,1fr) minmax(180px,260px);gap:18px}
+.ux-detail .nd-provider-map .doctor-results-search-label{font-size:12px;margin-bottom:7px;font-weight:600}
+.ux-detail .nd-provider-map .doctor-results-search-input{font-size:13px;min-height:39px;padding:9px 11px}
+.ux-detail .nd-provider-map [data-provider-count]{padding:0 16px;margin:12px 0;font-size:12px}
+.ux-detail .nd-provider-map .nd-map-results.doctor-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:0 16px 16px;gap:12px;max-height:none;overflow:visible}
+.ux-detail .nd-provider-map .nd-map-results .doctor-card{padding:17px;border:1px solid #dce8f3;border-radius:8px;background:#fff;transition:border-color .15s,box-shadow .15s}
+.ux-detail .nd-provider-map .nd-map-results .doctor-card:hover{border-color:#a5c8eb;box-shadow:0 3px 12px #235f9c0a}
+.ux-detail .nd-provider-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.ux-detail .nd-provider-map .nd-map-results .doctor-card h4{font-size:14px;line-height:1.5;margin:0;min-width:0}
+.ux-detail .nd-provider-distance{font-size:11px;line-height:1.5;color:#2869a7;background:#edf6fe;border-radius:5px;padding:4px 7px;flex-shrink:0;white-space:nowrap}
+.ux-detail .nd-provider-map .nd-map-results .doctor-card .nd-provider-place{font-size:12px;color:#64809c;margin:7px 0 16px;line-height:1.5}
+.ux-detail .nd-provider-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid #edf2f7;padding-top:12px}
+.ux-detail .nd-provider-status{font-size:10px;color:#70869e;line-height:1.5}
+.ux-detail .nd-provider-map .nd-map-results .nd-show-provider{white-space:nowrap;overflow-wrap:normal;word-break:normal;flex-shrink:0;width:auto;min-width:120px;min-height:34px;padding:7px 11px;font-size:12px;line-height:1.4;margin:0;border-color:#c9e0f6;background:#f0f8ff}
+.ux-detail .nd-provider-map .nd-provider-table-wrap{overflow-x:auto;padding:0;max-height:none}
+.ux-detail .nd-provider-table{min-width:780px;width:100%;table-layout:auto;font-size:13px}
+.ux-detail .nd-provider-table th,.ux-detail .nd-provider-table td{padding:14px 16px;line-height:1.5;vertical-align:middle;border-bottom:1px solid #e4edf5;word-break:normal;overflow-wrap:normal}
+.ux-detail .nd-provider-table th{font-size:12px;font-weight:600;color:#315e8c;background:#f5f9fd;white-space:nowrap}
+.ux-detail .nd-provider-table td:first-child{font-weight:600;width:25%;min-width:165px}
+.ux-detail .nd-provider-table td:nth-child(2){min-width:125px}
+.ux-detail .nd-provider-table td:nth-child(3){white-space:nowrap;color:#3a709f}
+.ux-detail .nd-provider-table td:nth-child(4){font-size:11px;color:#71869b;min-width:155px}
+.ux-detail .nd-provider-table td:last-child{width:145px;white-space:nowrap}
+.ux-detail .nd-provider-table tbody tr:last-child td{border-bottom:0}
+.ux-detail .nd-provider-table tbody tr:nth-child(even){background:#fbfdff}
+.ux-detail .nd-provider-table tbody tr:hover{background:#f0f7fd}
+@media(max-width:1100px){.ux-detail .nd-provider-map .nd-map-results.doctor-card-grid{grid-template-columns:1fr}}
+@media(max-width:650px){.ux-detail .nd-provider-map .nd-map-canvas{height:300px}.ux-detail .nd-provider-map .doctor-results-search-row{grid-template-columns:1fr;gap:12px}.ux-detail .nd-provider-map .doctor-results-header{align-items:stretch}.ux-detail .nd-provider-map .nd-map-results.doctor-card-grid{padding:0 10px 10px;gap:10px}.ux-detail .nd-provider-map .nd-map-results .doctor-card{padding:13px}.ux-detail .nd-provider-heading{flex-direction:column;gap:7px}.ux-detail .nd-provider-footer{flex-wrap:wrap;gap:10px}.ux-detail .nd-provider-map .doctor-results-search-panel{padding:13px}.ux-detail .nd-provider-table{min-width:780px}}
+.ux-cost-basis{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:16px 0 10px;padding:14px;background:#f3f9fe;border:1px solid #dcebf8;border-radius:7px}
+.ux-cost-basis label{display:flex;flex-direction:column;gap:7px;font-size:12px;color:#426d99;min-width:0}
+.ux-cost-basis label:first-child{flex:1 1 240px}.ux-cost-basis input{width:105px}.ux-cost-basis select,.ux-cost-basis input{font:inherit;color:#174d89;background:white;border:1px solid #c5dcef;border-radius:5px;padding:9px;min-height:38px;max-width:100%}
+.ux-basis-caption{color:#426f9e;font-size:12px!important}
+@media(max-width:650px){.ux-cost-basis{padding:10px}.ux-cost-basis label:first-child{flex-basis:100%}}
+/* Non-applicable precedes the connected cost points and shares their denominator. */
+.ux-question .interactive-dot-scale button[data-option="8"]{margin-right:14px;background:#f6f9fc;border:1px solid #e0e9f2}
+.ux-question .interactive-dot-scale button[data-option="8"]::before{display:none}
+.ux-question .interactive-dot-scale button[data-option="0"]::before{left:50%}
+.ux-question .interactive-dot-scale button[data-option="8"][aria-pressed=true]{background:#e9f4ff;border-color:#80b8fa}

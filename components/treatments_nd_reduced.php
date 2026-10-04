@@ -32,13 +32,18 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
     if ($research !== '') $html .= '<div class="ux-research"><strong>Redaktionelle Angabe</strong><p>'.ndEscape($research).'</p></div>';
     if ($cost) {
         $html .= '<div class="insurance-toggle" role="group" aria-label="Versicherung: '.ndEscape($title).'">';
-        foreach (['GKV','PKV','nicht anwendbar'] as $context) $html .= '<button type="button" data-insurance="'.ndEscape($context).'" aria-pressed="'.($context==='GKV'?'true':'false').'">'.ndEscape($context).'</button>';
+        foreach (['GKV','PKV'] as $context) $html .= '<button type="button" data-insurance="'.ndEscape($context).'" aria-pressed="'.($context==='GKV'?'true':'false').'">'.ndEscape($context).'</button>';
         $html .= '</div>';
-        if ($key === 'unit_cost') $html .= '<label class="ux-unit">Bezugsgröße deiner Angabe <input data-unit maxlength="80" placeholder="z. B. Sitzung, Packung oder Rezeptur"></label><p>Die Bezugsgröße muss vor deiner Kostenauswahl angegeben sein.</p>';
+        if ($key === 'unit_cost') {
+            $html .= '<div class="ux-cost-basis"><label>Preis gilt für … <select data-unit><option value="">Bitte auswählen</option>';
+            foreach (['application'=>'Behandlung / Anwendung','package'=>'Packung (Tabletten / Kapseln)','container'=>'Flasche / Ampulle / Spritze'] as $value=>$label) $html .= '<option value="'.$value.'">'.ndEscape($label).'</option>';
+            $html .= '</select></label></div><p class="ux-basis-caption" data-basis-caption role="status">Grobe Kosteneinordnung – ohne genaue Mengen- oder Dosierungsangabe.</p>';
+        }
     }
     $html .= '<p class="community-label" data-community-note></p><div class="ux-chart '.($kind==='effect'?'effect-chart':($kind==='cost'?'interactive-dot-scale':'ux-'.$kind)).'" style="--count:'.count($options).'" role="group" aria-label="'.ndEscape($title).'">';
     if ($kind === 'donut') $html .= '<svg viewBox="0 0 160 160" class="ux-donut" aria-label="Gamechanger-Verteilung"><circle cx="80" cy="80" r="60" class="ux-donut-track"/><g transform="rotate(-90 80 80)"><circle cx="80" cy="80" r="60" pathLength="100" data-segment="0" role="button" tabindex="0" aria-label="Ja auswählen"/><circle cx="80" cy="80" r="60" pathLength="100" data-segment="1" role="button" tabindex="0" aria-label="Nein auswählen"/></g><text x="80" y="78" text-anchor="middle" data-donut-value>–</text><text x="80" y="98" text-anchor="middle" class="ux-donut-caption">Ja</text></svg>';
-    foreach ($options as $i => $label) {
+    $displayOptions = $cost ? [8 => $options[8]] + $options : $options;
+    foreach ($displayOptions as $i => $label) {
         $html .= '<button type="button" data-option="'.$i.'" data-value="'.ndEscape($label).'" aria-pressed="false" class="'.($kind==='effect'?'effect-column':'ux-choice').'">';
         if ($kind==='effect') $html .= '<span class="bar-area"><strong data-percent>–</strong><span class="effect-bar effect-'.$i.'" data-bar></span></span>';
         elseif ($kind==='cost') $html .= '<span class="dot" aria-hidden="true"></span><strong class="scale-percent" data-percent>–</strong>';
@@ -47,3 +52,5 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
     }
     return $html.'</div><p class="ux-own" role="status"></p><button type="button" data-clear>Auswahl zurücksetzen</button></section>';
 }
+
+
