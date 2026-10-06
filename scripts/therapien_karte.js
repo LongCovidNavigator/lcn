@@ -1,5 +1,5 @@
 // =========================
-// Therapien-Seite - Version 8
+// Behandlungen-Seite - Version 8
 // Ergänzt:
 // - Radius frei eingeben
 // - Radius-Kreis auf Karte anzeigen
@@ -184,7 +184,7 @@ async function loadTreatmentResults() {
             return;
         }
 
-        console.error("Fehler beim Laden der Therapien:", error);
+        console.error("Fehler beim Laden der Behandlungen:", error);
 
         if (tableBody) {
             tableBody.innerHTML = `
@@ -335,8 +335,12 @@ function buildTreatmentSearchUrl(includeMap = false) {
 }
 
 
+function treatmentDetailUrl(treatment) {
+    return treatment.nd_id ? 'therapie_detail.php?treatment_id='+encodeURIComponent(treatment.nd_id) : 'therapie_detail.html?treat_id='+encodeURIComponent(treatment.treat_id)+'&source=priority';
+}
 function normalizeTreatment(treatment) {
     return {
+        nd_id: Number(treatment.nd_id || 0),
         treat_id: Number(treatment.treat_id ?? 0),
         slug: treatment.slug || "",
         behandlung: treatment.behandlung || "",
@@ -679,7 +683,7 @@ function bindTreatmentSmartSearchEvents() {
 				treatmentSmartSearchOverride = null;
 				treatmentAliasSmartSuggestions = [];
 				hideTreatmentAliasSmartSuggestions();
-				setTreatmentAliasSmartStatus("Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
+				setTreatmentAliasSmartStatus("Suche nach direktem Behandlungenamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
 
 				return;
 			}
@@ -763,6 +767,7 @@ async function loadTreatmentAliasSmartSuggestions(query) {
 
         treatmentAliasSmartSuggestions = data.suggestions;
         renderTreatmentAliasSmartSuggestions(treatmentAliasSmartSuggestions, query);
+        return true;
 
     } catch (error) {
         if (error.name !== "AbortError") {
@@ -865,7 +870,7 @@ function groupTreatmentAliasSmartSuggestions(suggestions, query) {
     return groups;
 }
 
-function applyTreatmentAliasSmartGroup(groupKey) {
+async function applyTreatmentAliasSmartGroup(groupKey) {
     const input = document.getElementById("treatment-alias-smart-input");
     const query = input ? String(input.value || "").trim() : "";
 
@@ -873,7 +878,7 @@ function applyTreatmentAliasSmartGroup(groupKey) {
         treatmentSmartSearchOverride = null;
         treatmentAliasSmartSuggestions = [];
         hideTreatmentAliasSmartSuggestions();
-        setTreatmentAliasSmartStatus("Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
+        setTreatmentAliasSmartStatus("Suche nach direktem Behandlungenamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
 
         if (validateLocationDependentFilters()) {
             loadTreatmentResults();
@@ -882,6 +887,8 @@ function applyTreatmentAliasSmartGroup(groupKey) {
         return;
     }
 
+    const loaded = await loadTreatmentAliasSmartSuggestions(query);
+    if (!loaded || String(input?.value || "").trim() !== query) return;
     const groups = groupTreatmentAliasSmartSuggestions(treatmentAliasSmartSuggestions, query);
     const group = groups[groupKey] || groups.direct;
 
@@ -904,7 +911,7 @@ function applyTreatmentAliasSmartGroup(groupKey) {
 
     const countText = uniqueTreatIds.length === 1
         ? "1 Therapie"
-        : `${uniqueTreatIds.length} Therapien`;
+        : `${uniqueTreatIds.length} Behandlungen`;
 
     setTreatmentAliasSmartStatus(`Suche aktiv: ${group.label} · ${countText} aus der Vorschlagsgruppe · „${query}“.`);
 
@@ -942,7 +949,7 @@ function normalizeRadiusInput() {
         return;
     }
 
-    const radius = clampNumber(radiusInput.value, 0, 1000);
+    const radius = clampNumber(radiusInput.value, 1, 2000);
     radiusInput.value = String(radius);
 }
 
@@ -1253,7 +1260,7 @@ function getTreatmentFilters() {
         category: categorySelect ? String(categorySelect.value || "").trim() : "",
         onlyCurrentCity: currentTreatmentLocationMode === "city",
         radiusKm: currentTreatmentLocationMode === "radius" && radiusEnabledInput && radiusEnabledInput.checked && radiusInput
-            ? clampNumber(radiusInput.value, 0, 1000)
+            ? clampNumber(radiusInput.value, 1, 2000)
             : 0,
         minPositiveRatio: minPositiveInput ? clampNumber(minPositiveInput.value, 0, 100) : 0,
         maxNegativeRatio: maxNegativeInput ? clampNumber(maxNegativeInput.value, 0, 100) : 100,
@@ -1306,7 +1313,7 @@ function resetTreatmentFilters() {
     currentTreatmentTableSortDirection = "asc";
     hideTreatmentAliasSmartSuggestions();
     setInputValue("treatment-alias-smart-input", "");
-    setTreatmentAliasSmartStatus("Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
+    setTreatmentAliasSmartStatus("Suche nach direktem Behandlungenamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
     setInputValue("treatment-sort-select", "name:asc");
     setInputValue("treatment-community-status-select", "all");
     setInputValue("treatment-category-select", "");
@@ -1400,7 +1407,7 @@ function buildTreatmentTableRowHtml(treatment, rank, presentation) {
             <td class="treatment-table-rank">${rank}</td>
             <td class="treatment-table-name">
                 <div class="treatment-table-name-stack">
-					${treatment.is_community_preview?`<strong>${treatmentName}</strong><span class="community-preview-badge">Noch nicht geprüft</span>`:`<a class="treatment-table-detail-link" href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">${treatmentName}</a>`}
+					${treatment.is_community_preview?`<strong>${treatmentName}</strong><span class="community-preview-badge">Noch nicht geprüft</span>`:`<a class="treatment-table-detail-link" href="${treatmentDetailUrl(treatment)}">${treatmentName}</a>`}
                     <button
                         type="button"
                         class="treatment-compare-add-button treatment-compare-add-button-table ${isSelected ? "is-selected" : ""}"
@@ -1525,7 +1532,7 @@ function renderTreatmentResultsTable(treatments) {
     if (!treatments || treatments.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="6">Keine Therapien gefunden.</td>
+                <td colspan="6">Keine Behandlungen gefunden.</td>
             </tr>
         `;
         return;
@@ -1600,7 +1607,7 @@ function renderTreatmentCards(treatments) {
 
     if (!treatments || treatments.length === 0) {
         cardResults.innerHTML = `
-            <p class="treatment-empty-state">Keine Therapien gefunden.</p>
+            <p class="treatment-empty-state">Keine Behandlungen gefunden.</p>
         `;
         if (loadMoreButton) loadMoreButton.classList.add("is-hidden");
         return;
@@ -1643,7 +1650,7 @@ function buildTreatmentCardHtml(treatment, index) {
     const ownVote = ['pro', 'neutral', 'contra'].includes(treatment.own_vote) ? treatment.own_vote : null;
 
     const communityBadge=treatment.is_community_preview?'<span class="community-preview-badge">Community-Vorschlag · noch nicht geprüft</span>':'';
-    const treatmentTitle=treatment.is_community_preview?treatmentName:`<a class="treatment-card-title-link" href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">${treatmentName}</a>`;
+    const treatmentTitle=treatment.is_community_preview?treatmentName:`<a class="treatment-card-title-link" href="${treatmentDetailUrl(treatment)}">${treatmentName}</a>`;
     const distanceHtml = treatment.nearest_provider_distance_km === null
         ? ""
         : `<span class="treatment-card-muted">Nächster Anbieter: ${escapeHtml(formatDistanceKm(treatment.nearest_provider_distance_km))}</span>`;
@@ -1700,7 +1707,7 @@ function buildTreatmentCardHtml(treatment, index) {
                         <span class="treatment-card-section-count">(${totalVotes} Bewertungen)</span>
                     </h4>
 
-                    ${totalVotes > 0 ? `
+                    ${treatment.nd_id ? `<a href="${treatmentDetailUrl(treatment)}#wirkung">Community-Erfahrungen auf der Detailseite</a>` : totalVotes > 0 ? `
                         <div class="treatment-card-rating-tiles">
                             <div class="treatment-card-rating-tile treatment-card-rating-positive">
                                 <div class="treatment-card-rating-value">${positiveRatio}%</div>
@@ -1733,6 +1740,7 @@ function buildTreatmentCardHtml(treatment, index) {
                     <h4 class="treatment-card-section-heading">Deine Bewertung</h4>
                 </div>
 
+                ${treatment.nd_id ? `<a href="${treatmentDetailUrl(treatment)}#wirkung">Erfahrung lokal angeben</a>` : `
                 <div class="treatment-card-vote-buttons${ownVote ? ' has-selection' : ''}">
                     <button
                         type="button"
@@ -1766,7 +1774,7 @@ function buildTreatmentCardHtml(treatment, index) {
                     >
                         Negativ${ownVote === 'contra' ? ' ✓' : ''}
                     </button>
-                </div>
+                </div>`}
             </section>
 
             <footer class="treatment-card-footer treatment-card-footer-with-compare">
@@ -1809,7 +1817,7 @@ function addTreatmentToCompareSelection(treatment) {
 
     if (!isTreatmentSelectedForCompare(treatId)) {
         if (selectedTreatmentsForCompare.length >= treatmentCompareMaxItems) {
-            alert(`Du kannst maximal ${treatmentCompareMaxItems} Therapien gleichzeitig vergleichen.`);
+            alert(`Du kannst maximal ${treatmentCompareMaxItems} Behandlungen gleichzeitig vergleichen.`);
             return;
         }
 
@@ -1896,7 +1904,7 @@ function renderTreatmentCompareSelection() {
 
     if (statusElement) {
         statusElement.textContent = hasSelection
-            ? `${selectedTreatmentsForCompare.length} von ${treatmentCompareMaxItems} Therapien ausgewählt.`
+            ? `${selectedTreatmentsForCompare.length} von ${treatmentCompareMaxItems} Behandlungen ausgewählt.`
             : "";
     }
 
@@ -1915,6 +1923,8 @@ function renderTreatmentCompareSelection() {
 }
 
 async function submitTreatmentVote(treatId, treatmentName, voteType, button) {
+    const treatment = currentTreatments.find(item => item.treat_id === Number(treatId));
+    if (treatment?.nd_id) { location.href=treatmentDetailUrl(treatment)+'#wirkung'; return; }
     if (!treatId || !treatmentName || !voteType || !button) {
         return;
     }
@@ -2033,6 +2043,7 @@ function buildTreatmentCategoryHtml(treatment) {
 }
 
 function buildTreatmentExperienceHtml(treatment, mode = "all") {
+    if (treatment.nd_id) return `<a href="${treatmentDetailUrl(treatment)}#wirkung">Erfahrungen ansehen / angeben</a>`;
     const totalVotes = Number(treatment.total_votes ?? 0);
 
     const positiveRatio = Number(treatment.positive_ratio ?? 0);
@@ -2242,7 +2253,7 @@ function resetTreatmentLocation(shouldReload = true) {
         treatmentMap.setView([treatmentDefaultMapCenter.lat, treatmentDefaultMapCenter.lng], 6);
     }
 
-    updateTreatmentMapStatus("Bitte Kartenstandort setzen, um die nächsten Anbieterstandorte der gefundenen Therapien auf der Karte zu sehen.");
+    updateTreatmentMapStatus("Bitte Kartenstandort setzen, um die nächsten Anbieterstandorte der gefundenen Behandlungen auf der Karte zu sehen.");
 
     if (shouldReload) {
         loadTreatmentResults();
@@ -2574,7 +2585,7 @@ function renderTreatmentMap(treatments, mapData) {
     clearTreatmentMapLegend();
 
     if (!currentTreatmentUserLocation) {
-        updateTreatmentMapStatus("Bitte Kartenstandort setzen, um die nächsten Anbieterstandorte der gefundenen Therapien auf der Karte zu sehen.");
+        updateTreatmentMapStatus("Bitte Kartenstandort setzen, um die nächsten Anbieterstandorte der gefundenen Behandlungen auf der Karte zu sehen.");
         return;
     }
 
@@ -2593,7 +2604,7 @@ function renderTreatmentMap(treatments, mapData) {
     const groupValues = Array.from(groups.values());
 
     if (groupValues.length === 0) {
-        updateTreatmentMapStatus("Für die aktuell angezeigten Therapien gibt es keine koordinierten Anbieterstandorte.");
+        updateTreatmentMapStatus("Für die aktuell angezeigten Behandlungen gibt es keine koordinierten Anbieterstandorte.");
         return;
     }
 
@@ -2659,7 +2670,7 @@ function renderTreatmentMap(treatments, mapData) {
         const treatmentCount = countUniqueTreatmentsInProviderGroups(groupValues);
 
         updateTreatmentMapStatus(
-            `${providerCount} Anbieterstandorte für ${treatmentCount} Therapien${viewPart}${cityPart}${radiusPart} auf der Karte. Farben zeigen die Therapie-Zuordnung.`
+            `${providerCount} Anbieterstandorte für ${treatmentCount} Behandlungen${viewPart}${cityPart}${radiusPart} auf der Karte. Farben zeigen die Therapie-Zuordnung.`
         );
         return;
     }
@@ -2669,7 +2680,7 @@ function renderTreatmentMap(treatments, mapData) {
     }, 0);
 
     updateTreatmentMapStatus(
-        `${treatmentCountOnMap} Therapien${viewPart}${cityPart}${radiusPart} mit nächstem Anbieterstandort auf der Karte. Mehrere Therapien am selben Standort werden in einem Popup gebündelt.`
+        `${treatmentCountOnMap} Behandlungen${viewPart}${cityPart}${radiusPart} mit nächstem Anbieterstandort auf der Karte. Mehrere Behandlungen am selben Standort werden in einem Popup gebündelt.`
     );
 }
 
@@ -2837,7 +2848,7 @@ function buildTreatmentMapPopupHtml(group) {
 
         return `
             <li>
-                <a href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">
+                <a href="${treatmentDetailUrl(treatment)}">
                     ${escapeHtml(treatment.behandlung || "Unbekannte Therapie")}
                 </a>${distance}
             </li>
@@ -2845,7 +2856,7 @@ function buildTreatmentMapPopupHtml(group) {
     }).join("");
 
     const moreHtml = hiddenCount > 0
-        ? `<li class="treatment-map-popup-muted">+ ${hiddenCount} weitere Therapien an diesem Standort</li>`
+        ? `<li class="treatment-map-popup-muted">+ ${hiddenCount} weitere Behandlungen an diesem Standort</li>`
         : "";
 
     const doctorLink = provider.dr_id
@@ -2888,7 +2899,7 @@ function buildAllMatchingProvidersPopupHtml(group) {
             return `
                 <li>
                     <span class="treatment-map-popup-color-dot" style="background:${escapeHtml(color)}"></span>
-                    <a href="therapie_detail.html?treat_id=${encodeURIComponent(treatment.treat_id)}">
+                    <a href="${treatmentDetailUrl(treatment)}">
                         ${escapeHtml(treatment.behandlung || "Unbekannte Therapie")}
                     </a>${distance}
                 </li>
@@ -2959,7 +2970,7 @@ function renderTreatmentMapLegend(legend, treatments) {
     legendElement.innerHTML = `
 		<div class="treatment-map-legend-title">Farblegende</div>
 		<div class="treatment-map-legend-hint">
-			Zahl im Marker = Anzahl unterschiedlicher angezeigter Therapien an diesem Standort.
+			Zahl im Marker = Anzahl unterschiedlicher angezeigter Behandlungen an diesem Standort.
 		</div>
 		<div class="treatment-map-legend-list">
 			${legendItems.map(function (item) {
@@ -3184,7 +3195,7 @@ function updateTreatmentResultsCount(filteredCount, totalCount) {
 		: "";
 
     if (showOnlyTreatmentCompareSelection) {
-        countElement.textContent = `${selectedTreatmentsForCompare.length} Therapien in der Vergleichsansicht${citySuffix}${radiusSuffix}`;
+        countElement.textContent = `${selectedTreatmentsForCompare.length} Behandlungen in der Vergleichsansicht${citySuffix}${radiusSuffix}`;
         return;
     }
 
@@ -3194,11 +3205,11 @@ function updateTreatmentResultsCount(filteredCount, totalCount) {
             return;
         }
 
-        countElement.textContent = `${filteredCount} Therapien gefunden${citySuffix}${radiusSuffix}`;
+        countElement.textContent = `${filteredCount} Behandlungen gefunden${citySuffix}${radiusSuffix}`;
         return;
     }
 
-    countElement.textContent = `${filteredCount} von ${totalCount} Therapien gefunden${citySuffix}${radiusSuffix}`;
+    countElement.textContent = `${filteredCount} von ${totalCount} Behandlungen gefunden${citySuffix}${radiusSuffix}`;
 }
 
 function clampNumber(value, min, max) {

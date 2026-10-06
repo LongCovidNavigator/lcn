@@ -41,12 +41,12 @@ $html = preg_replace(
     1
 ) ?? $html;
 $html = str_replace(
-    '<script src="scripts/arzt_detail.js?v=38"></script>',
+    '<script src="scripts/arzt_detail.js?v=wording-20261005"></script>',
     '<script src="scripts/doctor_treatment_taxonomy.js?v=1"></script>' . "\n" .
     '    <script src="scripts/doctor_dummy_fixtures.js?v=2"></script>' . "\n" .
     '    <script src="scripts/doctor_dummy_fixtures_aug28.js?v=1"></script>' . "\n" .
     '    <script src="scripts/arzt_detail_dummy.js?v=5"></script>' . "\n" .
-    '    <script src="scripts/arzt_detail.js?v=38"></script>',
+    '    <script src="scripts/arzt_detail.js?v=wording-20261005"></script>',
     $html
 );
 

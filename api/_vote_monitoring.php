@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_doctor_hybrid.php';
 
 require_once __DIR__ . '/_lcn_db.php';
 
@@ -38,7 +39,7 @@ function lcnBuildVoteMonitoringReport(PDO $pdo): array
     $doctorTargets = $pdo->query("
         SELECT d.dr_display_name AS label, v.vote, COUNT(*) AS vote_count
         FROM doctor_votes v
-        INNER JOIN tbl_drs_03 d ON d.dr_id = v.dr_id
+        INNER JOIN v_lcn_doctors d ON d.dr_id = v.dr_id
         WHERE v.review_status = 'suspicious'
         GROUP BY d.dr_id, d.dr_display_name, v.vote
         ORDER BY vote_count DESC, label ASC
@@ -47,7 +48,7 @@ function lcnBuildVoteMonitoringReport(PDO $pdo): array
     $treatmentTargets = $pdo->query("
         SELECT t.behandlung AS label, v.vote, COUNT(*) AS vote_count
         FROM treatment_votes v
-        INNER JOIN tbl_treatments_03 t ON t.treat_id = v.treat_id
+        INNER JOIN v_lcn_treatments t ON t.treat_id = v.treat_id
         WHERE v.review_status = 'suspicious'
         GROUP BY t.treat_id, t.behandlung, v.vote
         ORDER BY vote_count DESC, label ASC
@@ -116,7 +117,7 @@ function lcnBuildVoteMonitoringReport(PDO $pdo): array
 
 function lcnRunVoteMonitoring(bool $dryRun = false): array
 {
-    $pdo = lcnDatabase();
+    $pdo = lcnDoctorDatabase();
     $run = $pdo->prepare("INSERT INTO vote_monitoring_runs (delivery_status) VALUES ('running')");
     $run->execute();
     $runId = (int)$pdo->lastInsertId();

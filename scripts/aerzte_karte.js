@@ -965,8 +965,8 @@ function getSearchSettingsFromControls() {
         return null;
     }
 
-    if (radiusEnabled && (Number.isNaN(radiusKm) || radiusKm < 1 || radiusKm > 500)) {
-        alert("Bitte einen Radius zwischen 1 und 500 km eingeben.");
+    if (radiusEnabled && (Number.isNaN(radiusKm) || radiusKm < 1 || radiusKm > 2000)) {
+        alert("Bitte einen Radius zwischen 1 und 2000 km eingeben.");
         return null;
     }
 
@@ -1505,9 +1505,9 @@ function buildDoctorCardHtml(doctor, index) {
                 </div>
 
                 <div class="doctor-card-vote-buttons-placeholder${ownVote ? ' has-selection' : ''}">
-                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-positive doctor-card-vote-button${ownVote === 'pro' ? ' is-selected' : ''}" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="pro" aria-pressed="${ownVote === 'pro'}">Positiv${ownVote === 'pro' ? ' ✓' : ''}</button>
-                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-neutral doctor-card-vote-button${ownVote === 'neutral' ? ' is-selected' : ''}" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="neutral" aria-pressed="${ownVote === 'neutral'}">Neutral${ownVote === 'neutral' ? ' ✓' : ''}</button>
-                    <button type="button" class="doctor-card-vote-placeholder-button doctor-card-vote-negative doctor-card-vote-button${ownVote === 'contra' ? ' is-selected' : ''}" data-dr-id="${escapeHtml(doctor.dr_id)}" data-type="contra" aria-pressed="${ownVote === 'contra'}">Negativ${ownVote === 'contra' ? ' ✓' : ''}</button>
+                    <a href="arzt_detail.html?id=${escapeHtml(doctor.dr_id)}" title="Erfahrungen auf der Detailseite ansehen oder angeben" class="doctor-card-vote-placeholder-button doctor-card-vote-positive ${ownVote === 'pro' ? ' is-selected' : ''}">Positiv${ownVote === 'pro' ? ' ✓' : ''}</a>
+                    <a href="arzt_detail.html?id=${escapeHtml(doctor.dr_id)}" title="Erfahrungen auf der Detailseite ansehen oder angeben" class="doctor-card-vote-placeholder-button doctor-card-vote-neutral ${ownVote === 'neutral' ? ' is-selected' : ''}">Neutral${ownVote === 'neutral' ? ' ✓' : ''}</a>
+                    <a href="arzt_detail.html?id=${escapeHtml(doctor.dr_id)}" title="Erfahrungen auf der Detailseite ansehen oder angeben" class="doctor-card-vote-placeholder-button doctor-card-vote-negative ${ownVote === 'contra' ? ' is-selected' : ''}">Negativ${ownVote === 'contra' ? ' ✓' : ''}</a>
                 </div>
             </section>
 
@@ -1832,10 +1832,10 @@ function buildDoctorTableVoteButton(drId, type, prefix, ratio, ownVote, label) {
         : type === "neutral" ? "doctor-table-badge-neutral" : "doctor-table-badge-negative";
     const isSelected = ownVote === type;
 
-    return `<button type="button"
-                    class="doctor-table-experience-value doctor-table-vote-button doctor-card-vote-button ${badgeClass}${isSelected ? " is-selected" : ""}"
-                    data-dr-id="${escapeHtml(drId)}" data-type="${type}" aria-pressed="${isSelected}"
-                    aria-label="${label}: ${ratio} Prozent. Jetzt abstimmen">${prefix}${ratio}%</button>`;
+    return `<a href="arzt_detail.html?id=${escapeHtml(drId)}" title="Erfahrungen auf der Detailseite ansehen oder angeben"
+                    class="doctor-table-experience-value   ${badgeClass}${isSelected ? " is-selected" : ""}"
+
+                   >${prefix}${ratio}%</a>`;
 }
 
 function buildDoctorTableInsuranceHtml(doctor) {

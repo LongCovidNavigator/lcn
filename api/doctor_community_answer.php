@@ -5,7 +5,7 @@ lcnRequireVotingRequest();
 try {
     $body = lcnReadJsonBody();
     $id = $body['dr_id'] ?? null;
-    if (!is_int($id) || !in_array($id, LCN_PRIORITY_DOCTOR_IDS, true)) lcnSendVoteJson(['ok' => false, 'error' => 'Behandler nicht gefunden.'], 404);
+    if (!is_int($id) || !lcnDoctorExists($id)) lcnSendVoteJson(['ok' => false, 'error' => 'Behandler nicht gefunden.'], 404);
     $action = $body['action'] ?? 'answer';
     if (!in_array($action, ['answer', 'reset', 'clear'], true)) lcnSendVoteJson(['ok' => false, 'error' => 'Ungültige Aktion.'], 400);
     $key = $body['question'] ?? null;
@@ -14,6 +14,7 @@ try {
     if ($action === 'clear' && (!is_string($key) || !isset(lcnDoctorCommunityQuestions()[$key]))) lcnSendVoteJson(['ok'=>false,'error'=>'Ungültige Frage.'],400);
     $pdo = lcnDoctorDatabase();
     $respondent = lcnVoterKey();
+    lcnBeginVoteSecurity($pdo,'doctor',$id,'neutral',$respondent);
     if ($action === 'reset') {
         $query = $pdo->prepare('DELETE FROM doctor_community_answers WHERE dr_id = ? AND respondent_key = ?');
         $query->execute([$id, $respondent]);

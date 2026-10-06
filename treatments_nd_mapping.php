@@ -43,6 +43,6 @@ ndStart('Einträge und Zuordnung');
 <section class="card"><h2>Aktuelle Treatment-Einträge</h2><p>Typ und Unterkategorie werden unverändert aus der Datenbank übernommen. Die Beispielprofile ordnen keine medizinischen Eigenschaften zu.</p>
 <?php if ($error): ?><p role="alert">Die Treatment-Liste konnte gerade nicht geladen werden.</p><?php else: ?>
 <p><?= count($items) ?> Treatments</p><div class="nd-mapping-scroll"><table class="nd-mapping-table"><thead><tr><th>Treatment</th><th>Typ</th><th>Unterkategorie</th><th>Legacy-ID</th></tr></thead><tbody>
-<?php foreach ($items as $item): ?><tr><td><a href="treatment_nd_test.php?id=<?= (int)$item['treat_nd_id'] ?>"><?= ndEscape($item['treatmentname']) ?></a></td><td><?= ndEscape($item['typ']) ?></td><td><?= ndEscape($item['unterkategorie'] ?? '—') ?></td><td><?= ndEscape($item['legacy_treat_id'] ?? 'Keine Verknüpfung') ?></td></tr><?php endforeach; ?>
+<?php foreach ($items as $item): ?><tr><td><a href="therapie_detail.php?treatment_id=<?= (int)$item['treat_nd_id'] ?>"><?= ndEscape($item['treatmentname']) ?></a></td><td><?= ndEscape($item['typ']) ?></td><td><?= ndEscape($item['unterkategorie'] ?? '—') ?></td><td><?= ndEscape($item['legacy_treat_id'] ?? 'Keine Verknüpfung') ?></td></tr><?php endforeach; ?>
 </tbody></table></div><?php endif; ?></section>
 <?php ndEnd(); ?>

@@ -17,12 +17,12 @@ function submissionString(array $input, string $key, int $max): string {
 function buildSubmissionTriage(PDO $pdo,string $type,string $name,string $website,?int $existingTargetId,array $input): array {
     if($existingTargetId!==null)return ['kind'=>'change','status'=>'needs_review','score'=>10,'duplicate_id'=>$existingTargetId,'reasons'=>['Gezielte Ergänzung oder Änderung eines bestehenden Eintrags.']];
     $reasons=[];$score=0;$duplicateId=null;
-    if($type==='doctor'){$stmt=$pdo->prepare("SELECT dr_id FROM tbl_drs_03 WHERE ".lcnNormalizedSearchSql('TRIM(dr_display_name)')."=:name OR (:website<>'' AND LOWER(TRIM(COALESCE(dr_website,'')))=LOWER(TRIM(:website))) LIMIT 1");}
-    else{$stmt=$pdo->prepare("SELECT treat_id FROM tbl_treatments_03 WHERE ".lcnNormalizedSearchSql('TRIM(behandlung)')."=:name OR (:website<>'' AND LOWER(TRIM(COALESCE(wiki_url_path,'')))=LOWER(TRIM(:website))) LIMIT 1");}
+    if($type==='doctor'){$stmt=$pdo->prepare("SELECT dr_id FROM v_lcn_doctors WHERE ".lcnNormalizedSearchSql('TRIM(dr_display_name)')."=:name OR (:website<>'' AND LOWER(TRIM(COALESCE(dr_website,'')))=LOWER(TRIM(:website))) LIMIT 1");}
+    else{$stmt=$pdo->prepare("SELECT treat_id FROM v_lcn_treatments WHERE ".lcnNormalizedSearchSql('TRIM(behandlung)')."=:name OR (:website<>'' AND LOWER(TRIM(COALESCE(wiki_url_path,'')))=LOWER(TRIM(:website))) LIMIT 1");}
     $stmt->execute([':name'=>lcnNormalizeSearchTerm($name),':website'=>$website]);$match=$stmt->fetchColumn();
     if($match!==false){$duplicateId=(int)$match;$score=95;$reasons[]='Name oder Website stimmt mit einem bestehenden Eintrag überein.';}
     if($duplicateId===null&&mb_strlen($name)>=5){
-        $candidateSql=$type==='doctor'?'SELECT dr_id AS id,dr_display_name AS label FROM tbl_drs_03':'SELECT treat_id AS id,behandlung AS label FROM tbl_treatments_03';
+        $candidateSql=$type==='doctor'?'SELECT dr_id AS id,dr_display_name AS label FROM v_lcn_doctors':'SELECT treat_id AS id,behandlung AS label FROM v_lcn_treatments';
         $needle=(string)preg_replace('/[^\pL\pN]+/u','',lcnNormalizeSearchTerm($name));$bestPercent=0.0;$bestId=null;
         foreach($pdo->query($candidateSql) as $candidate){$candidateName=(string)preg_replace('/[^\pL\pN]+/u','',lcnNormalizeSearchTerm((string)$candidate['label']));if($candidateName==='')continue;similar_text($needle,$candidateName,$percent);if($percent>$bestPercent){$bestPercent=$percent;$bestId=(int)$candidate['id'];}}
         if($bestPercent>=88){$duplicateId=$bestId;$score=max($score,75);$reasons[]='Der Name ist einem bestehenden Eintrag sehr ähnlich ('.round($bestPercent).' %).';}
@@ -71,7 +71,7 @@ try {
     if ($experience !== '' && !in_array($experience, ['pro', 'neutral', 'contra'], true)) {
         lcnSendVoteJson(['ok' => false, 'error' => 'Die Bewertung ist ungültig.'], 422);
     }
-    if (!(($input['simple_doctor'] ?? false) === true && $type === 'doctor') && ($input['confirmation'] ?? '') !== 'on') {
+    if (!(($input['simple_doctor'] ?? false) === true && $type === 'doctor') && !(($input['simple_treatment'] ?? false) === true && $type === 'treatment') && ($input['confirmation'] ?? '') !== 'on') {
         lcnSendVoteJson(['ok' => false, 'error' => 'Bitte bestätige die Richtigkeit deiner Angaben.'], 422);
     }
 
@@ -93,7 +93,7 @@ try {
     if ((int)$recent->fetchColumn() >= 10) lcnSendVoteJson(['ok' => false, 'error' => 'Zu viele Vorschläge in kurzer Zeit. Bitte versuche es später erneut.'], 429);
 
     if ($existingTargetId !== null) {
-        $table=$type==='doctor'?'tbl_drs_03':'tbl_treatments_03';$column=$type==='doctor'?'dr_id':'treat_id';
+        $table=$type==='doctor'?'v_lcn_doctors':'v_lcn_treatments';$column=$type==='doctor'?'dr_id':'treat_id';
         $exists=$pdo->prepare("SELECT 1 FROM {$table} WHERE {$column}=:id");$exists->execute([':id'=>$existingTargetId]);
         if(!$exists->fetchColumn())lcnSendVoteJson(['ok'=>false,'error'=>'Der ausgewählte bestehende Eintrag wurde nicht gefunden.'],422);
     }

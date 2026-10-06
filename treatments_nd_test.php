@@ -15,8 +15,8 @@ ndStart('Behandlungen entdecken');
 <?php if (!$items): ?><p class="card">Keine passende Behandlung gefunden. Versuche einen anderen Namen.</p><?php endif; ?>
 <div class="nd-results"><?php foreach ($items as $item): ?><article class="card nd-result">
 <?= ndChips([$item['typ'], $item['unterkategorie']]) ?>
-<h2><a href="treatment_nd_test.php?id=<?= (int)$item['treat_nd_id'] ?>"><?= ndEscape($item['treatmentname']) ?></a></h2>
+<h2><a href="therapie_detail.php?treatment_id=<?= (int)$item['treat_nd_id'] ?>"><?= ndEscape($item['treatmentname']) ?></a></h2>
 <?php if (ndHas($item['beschreibung'])): ?><p class="nd-excerpt"><?= ndEscape($item['beschreibung']) ?></p><?php endif; ?>
 <?= ndFields($item, ['zugang' => 'Zugang', 'durchfuehrungssetting' => 'Durchführung']) ?>
-<a class="nd-open" href="treatment_nd_test.php?id=<?= (int)$item['treat_nd_id'] ?>">Behandlung ansehen <span aria-hidden="true">→</span></a>
+<a class="nd-open" href="therapie_detail.php?treatment_id=<?= (int)$item['treat_nd_id'] ?>">Behandlung ansehen <span aria-hidden="true">→</span></a>
 </article><?php endforeach; ?></div><?php endif; ndEnd(); ?>

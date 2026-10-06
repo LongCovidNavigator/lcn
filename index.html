@@ -15,9 +15,9 @@
     <script src="scripts/image-registry.js?v=5"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="scripts/homepage.js?v=34" defer></script>
+    <script src="scripts/homepage.js?v=maps-20261005-2" defer></script>
     <script src="scripts/access-nav.js?v=2" defer></script>
-</head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=2"><script src="scripts/maps_shared.js?v=1" defer></script></head>
 
 <body>
     <header class="home-header">
@@ -38,7 +38,7 @@
             <details class="home-nav-group">
                 <summary>Suche</summary>
                 <div class="home-nav-menu">
-                    <a href="therapien_karte.html">Therapien</a>
+                    <a href="therapien_karte.html">Behandlungen</a>
                     <a href="aerzte_karte.html">Ärzt:innen</a>
                 </div>
             </details>
@@ -79,7 +79,7 @@
                 <div class="quick-start-actions">
                     <a href="therapien_karte.html" class="home-button primary-button">
                         <span class="button-icon search-icon" aria-hidden="true"></span>
-                        Therapien suchen
+                        Behandlungen suchen
                     </a>
 
                     <a href="aerzte_karte.html" class="home-button secondary-button">
@@ -105,13 +105,13 @@
 
                     <div class="flow-photo flow-photo-choice" aria-hidden="true">
                         <img data-lcn-image="home-selection" alt="">
-                        <span class="choice-photo-label choice-label-left">Therapien</span>
+                        <span class="choice-photo-label choice-label-left">Behandlungen</span>
                         <span class="choice-photo-label choice-label-right">Ärzt:innen</span>
                     </div>
 
                     <div class="flow-card-content">
                         <p>
-                            Wähle den passenden Weg: Therapien suchen oder Ärzt:innen finden.
+                            Wähle den passenden Weg: Behandlungen suchen oder Ärzt:innen finden.
                         </p>
                     </div>
                 </article>
@@ -127,7 +127,7 @@
                     <div class="flow-ui flow-search-ui" aria-hidden="true">
                         <div class="search-ui-panel">
                             <div class="search-ui-tabs">
-                                <span class="active">Therapien</span>
+                                <span class="active">Behandlungen</span>
                                 <span>Ärzt:innen</span>
                             </div>
 
@@ -234,7 +234,7 @@
                         <div class="path-card-icon path-card-search-icon" aria-hidden="true"></div>
 
                         <div class="path-card-content">
-                            <h3>Therapien suchen</h3>
+                            <h3>Behandlungen suchen</h3>
                             <p>
                                 Finde evidenzbasierte und unterstützende Therapieangebote,
                                 die zu deinen Bedürfnissen passen – von Pacing und Physiotherapie
@@ -242,7 +242,7 @@
                             </p>
 
                             <a href="therapien_karte.html" class="home-button card-button">
-                                Therapien entdecken
+                                Behandlungen entdecken
                                 <span aria-hidden="true">→</span>
                             </a>
                         </div>
@@ -288,7 +288,7 @@
                         <label class="nearby-gps-radius" for="nearby-gps-radius">
                             <span>Radius</span>
                             <span class="nearby-gps-radius-input-wrap">
-                                <input id="nearby-gps-radius" type="number" min="1" max="500" step="1" value="50" inputmode="numeric">
+                                <input id="nearby-gps-radius" type="number" min="1" max="2000" step="1" value="50" inputmode="numeric">
                                 <span>km</span>
                             </span>
                         </label>

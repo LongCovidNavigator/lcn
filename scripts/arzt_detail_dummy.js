@@ -93,7 +93,7 @@
         workExperience: [["Gründlich", {yes: 18, no: 3}], ["Berücksichtigt Vorbefunde", {yes: 16, no: 2}], ["Gemeinsames Entscheiden", {yes: 14, no: 4}]],
         practiceExperience: [["Wohlgefühlt", {yes: 17, no: 3}], ["Respektvoller Umgang", {yes: 20, no: 1}], ["Gender-Erfahrungen", {yes: 8, no: 2}], ["Queer / LGBTQ+", {yes: 7, no: 1}]],
         services: [["Bescheinigungen / Atteste", {yes: 15, no: 3}], ["Sozialmedizinische Unterstützung", {yes: 11, no: 4}], ["Verlaufskontrolle / Nachbetreuung", {yes: 18, no: 1}]],
-        medication: [["Reguläre Verordnungen", {yes: 19, no: 1}], ["Off-Label-Therapien", {yes: 13, no: 4}], ["Individuelle Therapieversuche", {yes: 12, no: 3}]],
+        medication: [["Reguläre Verordnungen", {yes: 19, no: 1}], ["Off-Label-Behandlungen", {yes: 13, no: 4}], ["Individuelle Therapieversuche", {yes: 12, no: 3}]],
         diagnoses: [["ME/CFS (G93.3)", {yes: 18, no: 2}], ["Long Covid", {yes: 22, no: 0}], ["POTS / Dysautonomie", {yes: 16, no: 3}], ["MCAS", {yes: 11, no: 5}], ["Impfschaden", {yes: 9, no: 4}]]
         ,expertise: [["Long Covid", {yes: 22, no: 0}], ["ME/CFS", {yes: 18, no: 2}], ["Post-Vac", {yes: 9, no: 4}], ["POTS / Dysautonomie", {yes: 16, no: 3}], ["MCAS", {yes: 11, no: 5}], ["Belastungsintoleranz / PEM", {yes: 20, no: 1}]]
         ,specializations: [{term_code: "post-infectious", term_label: "Postinfektiöse Erkrankungen", term_desc: "Long Covid und ME/CFS"}, {term_code: "dysautonomia", term_label: "Dysautonomie", term_desc: "POTS und orthostatische Intoleranz"}, {term_code: "pacing", term_label: "Pacing", term_desc: "Symptomorientiertes Energiemanagement"}]

@@ -1,4 +1,4 @@
-const priorityTreatmentContext = new URLSearchParams(window.location.search).get("source") === "priority";
+const priorityTreatmentContext = true;
 let currentTreatmentDetail = null;
 let treatmentProviderMap = null;
 let treatmentProviderMarkerLayer = null;
@@ -10,7 +10,24 @@ let currentProviderSortDirection = "asc";
 let currentProviderLocation = null;
 
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
+    const params = new URLSearchParams(location.search);
+    const ndId = params.get('nd_id');
+    if (ndId && /^\d+$/.test(ndId)) { location.replace('therapie_detail.php?nd_id='+encodeURIComponent(ndId)+location.hash); return; }
+    const oldId = getTreatIdFromUrl();
+    if (oldId) {
+        try {
+            const response = await fetch('api/treatment_route.php?treat_id='+encodeURIComponent(oldId));
+            const route = await response.json();
+            if (!response.ok || !route.ok) throw new Error('Route unavailable');
+            if (route.nd_id) {
+                const target = new URL('therapie_detail.php',location.href);
+                target.searchParams.set('treatment_id',route.nd_id);
+                if(params.get('demo')==='1') target.searchParams.set('demo','1');
+                target.hash=location.hash; location.replace(target.href); return;
+            }
+        } catch { showTreatmentDetailError('Die Behandlungszuordnung konnte nicht geladen werden. Bitte erneut versuchen.'); return; }
+    }
     setTreatmentDetailSuggestionLinks();
     currentProviderLocation = getSavedSharedTreatmentLocation();
     loadTreatmentDetail();
@@ -44,8 +61,8 @@ async function loadTreatmentDetail() {
         renderTreatmentProviderMap(currentTreatmentDetail.providers);
         refreshTreatmentDetailStickyHeader();
     } catch (error) {
-        console.error("Fehler beim Laden des Therapie-Steckbriefs:", error);
-        showTreatmentDetailError(error.message || "Der Therapie-Steckbrief konnte nicht geladen werden.");
+        console.error("Fehler beim Laden des Behandlungsprofils:", error);
+        showTreatmentDetailError(error.message || "Der Behandlungsprofil konnte nicht geladen werden.");
     }
 }
 
@@ -54,7 +71,7 @@ async function fetchTreatmentById(treatId) {
     const data = await response.json();
 
     if (!response.ok || !data.ok || !data.item) {
-        throw new Error(data.message || "Der Therapie-Steckbrief konnte nicht geladen werden.");
+        throw new Error(data.message || "Der Behandlungsprofil konnte nicht geladen werden.");
     }
 
     return normalizeTreatmentDetail(data.item);
@@ -1775,7 +1792,7 @@ function showTreatmentDetailError(message) {
     if (statusElement) {
         statusElement.classList.remove("is-hidden");
         statusElement.classList.add("treatment-detail-status-error");
-        statusElement.textContent = message || "Der Therapie-Steckbrief konnte nicht geladen werden.";
+        statusElement.textContent = message || "Der Behandlungsprofil konnte nicht geladen werden.";
     }
 }
 

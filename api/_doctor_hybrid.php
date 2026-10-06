@@ -34,7 +34,7 @@ function lcnDoctorSourceSql(): string
         organisationsname AS dr_org_name, website AS dr_website, email AS dr_email, telefon AS dr_phone,
         CASE sprechstunde_gkv WHEN 'GKV' THEN 'yes' WHEN 'Selbstzahler' THEN 'no' ELSE NULL END AS dr_accepts_gkv,
         CASE sprechstunde_pkv WHEN 'PKV' THEN 'yes' WHEN 'Selbstzahler' THEN 'no' ELSE NULL END AS dr_accepts_pkv
-        FROM tbl_entities_nd WHERE lcn_id IN ($ids) AND aktiv = 1)";
+        FROM tbl_entities_nd WHERE aktiv = 1)";
 }
 
 function lcnDoctorResearch(PDO $pdo, int $id): array
@@ -55,3 +55,6 @@ function lcnDoctorResearch(PDO $pdo, int $id): array
     $result['locations'] = $stmt->fetchAll();
     return $result;
 }
+
+function lcnDoctorExists(int $id): bool { $q=lcnDoctorDatabase()->prepare("SELECT 1 FROM tbl_entities_nd WHERE lcn_id=? AND aktiv=1");$q->execute([$id]);return (bool)$q->fetchColumn(); }
+function lcnAllDoctorIds(): array { return array_map("intval",lcnDoctorDatabase()->query("SELECT lcn_id FROM tbl_entities_nd WHERE aktiv=1")->fetchAll(PDO::FETCH_COLUMN)); }

@@ -36,7 +36,7 @@
             <header class="tdd-hero">
                 <div class="tdd-avatar">${escape(t.short_name)}</div>
                 <div class="tdd-hero-copy">
-                    <span class="tdd-eyebrow">Therapie-Steckbrief · Testdaten</span>
+                    <span class="tdd-eyebrow">Behandlungsprofil · Testdaten</span>
                     <h1>${escape(t.name)}</h1>
                     <p>${isVotingOnly ? 'Nur aggregierte Community-Angaben' : (isHybridOnly ? 'Nur hybride Angaben' : `${escape(t.type)} · ${escape(t.subcategory)}`)}</p>
                     <div class="tdd-tags"><span>${escape(t.short_name)}</span>${!isVotingOnly && t.application ? `<span>${escape(t.application)}</span>` : ''}</div>

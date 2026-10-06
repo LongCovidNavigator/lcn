@@ -8,8 +8,8 @@ $available = true;
 $ratings = [];
 try {
     $pdo = lcnDoctorDatabase();
-    $rows = $pdo->query('SELECT t.treat_id, t.behandlung, t.typ, (SELECT COUNT(DISTINCT c.dr_id) FROM tbl_cpl_drs2treatments_03 c WHERE c.treat_id=t.treat_id) AS provider_count FROM tbl_treatments_03 t')->fetchAll();
-    $votes = $pdo->query("SELECT LOWER(TRIM(Behandlung)) AS name, SUM(COALESCE(pro,0)) AS pro, SUM(COALESCE(neutral,0)) AS neutral, SUM(COALESCE(contra,0)) AS contra FROM lcn_raw_votes WHERE Behandlung IS NOT NULL GROUP BY LOWER(TRIM(Behandlung))")->fetchAll();
+    $rows = $pdo->query('SELECT t.treat_id, t.behandlung, t.typ, (SELECT COUNT(DISTINCT c.dr_id) FROM v_lcn_provider_treatments c WHERE c.treat_id=t.treat_id) AS provider_count FROM v_lcn_treatments t')->fetchAll();
+    $votes = $pdo->query("SELECT LOWER(TRIM(t.behandlung)) AS name,SUM(v.vote='pro') AS pro,SUM(v.vote='neutral') AS neutral,SUM(v.vote='contra') AS contra FROM v_lcn_treatment_votes v JOIN v_lcn_treatments t ON t.treat_id=v.treat_id GROUP BY t.treat_id,t.behandlung")->fetchAll();
     foreach ($votes as $vote) $ratings[$vote['name']] = $vote;
     foreach ($rows as $row) $items[(int)$row['treat_id']] = $row;
 } catch (Throwable $e) {

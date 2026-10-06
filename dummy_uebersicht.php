@@ -24,7 +24,7 @@
         <a href="arzt_detail_dummy.php?id=9007&fixture=bellmann&scenario=complete"><strong>Dr. med. Judith Bellmann-Strobl</strong><span>Recherche v0.5 · vollständiger Durchstich</span></a>
         <a href="arzt_detail_dummy.php?id=9008&fixture=cyprus&scenario=complete"><strong>Apheresis Center Cyprus</strong><span>Institutionsrecherche v0.5 · vollständiger Durchstich</span></a>
     </div></section>
-    <section><h2>Therapien</h2><div class="dummy-grid">
+    <section><h2>Behandlungen</h2><div class="dummy-grid">
         <a href="treatment_detail_dummy.php?scenario=complete"><strong>LDN · bestehender Dummy</strong><span>Bisherige fiktive Testansicht</span></a>
         <a href="treatment_detail_dummy.php?fixture=ldn-research&scenario=complete"><strong>LDN · Recherche</strong><span>Durchstich vom 26.08.2026</span></a>
         <a href="treatment_detail_dummy.php?fixture=ivabradin&scenario=complete"><strong>Ivabradin</strong><span>Recherche v0.12 · Module 1–7</span></a>

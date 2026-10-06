@@ -13,17 +13,27 @@
     const h = Math.sin(a/2)**2+Math.cos(rad(origin.lat))*Math.cos(rad(point.lat))*Math.sin(b/2)**2;
     return 6371*2*Math.asin(Math.sqrt(Math.min(1,h)));
   }
+  function filteredProviders(entry) {
+    const {host,providers}=entry;
+    const query=host.querySelector('[data-provider-search]').value.trim().toLocaleLowerCase('de');
+    const city=host.querySelector('[data-provider-city]').value;
+    const radius=host.querySelector('[data-radius]');
+    const enabled=host.querySelector('[data-radius-enabled]').checked;
+    radius.disabled=!enabled;
+    const usable=Boolean(origin && radius.value && radius.validity.valid);
+    host.querySelector('[data-location-filter-note]').textContent=enabled && !origin ? 'Bitte zuerst PLZ oder Ort eingeben und einen Ausgangsort übernehmen.' : enabled && !usable ? 'Bitte einen ganzen Radius zwischen 1 und 2000 km eingeben.' : 'Radius ab dem übernommenen Ausgangsort · Entfernung als Luftlinie.';
+    return providers.filter(p=>(p.name+' '+p.place).toLocaleLowerCase('de').includes(query) && (!city || p.city===city) && (!enabled || !usable || (valid(p) && distance(p)<=Number(radius.value))));
+  }
   function renderProviders(entry){
     const {host,providers,map}=entry,list=host.querySelector('.nd-map-results');list.replaceChildren();
-    const query=host.querySelector('[data-provider-search]').value.trim().toLocaleLowerCase('de');
     const [sort,direction]=host.querySelector('[data-provider-sort]').value.split(':');
-    const rows=providers.filter(p=>(p.name+' '+p.place).toLocaleLowerCase('de').includes(query)).sort((a,b)=>{if(sort==='distance'&&origin){if(!valid(a))return valid(b)?1:0;if(!valid(b))return -1;return (distance(a)-distance(b))*(direction==='desc'?-1:1);}return a.name.localeCompare(b.name,'de')*(direction==='desc'?-1:1);});
+    const rows=filteredProviders(entry).sort((a,b)=>{if(sort==='distance'&&origin){if(!valid(a))return valid(b)?1:0;if(!valid(b))return -1;return (distance(a)-distance(b))*(direction==='desc'?-1:1);}return a.name.localeCompare(b.name,'de')*(direction==='desc'?-1:1);});
     host.querySelector('[data-provider-count]').textContent=rows.length+' von '+providers.length+' Anbietern'+(sort==='distance'&&!origin?' · Für die Entfernungssortierung bitte oben einen Standort eingeben.':'');
     host.querySelectorAll('[data-provider-view]').forEach(b=>{const active=b.dataset.providerView===entry.view;b.classList.toggle('is-active',active);b.setAttribute('aria-pressed',String(active));});
-    if(!rows.length){list.textContent='Keine Anbieter zu dieser Suche gefunden.';return;}
+    if(!rows.length){list.textContent=providers.length?'Keine passenden Anbieter. Bitte ändere den Suchtext oder die Orts- und Radiusfilter.':'Für diese Behandlung sind noch keine bestätigten Anbieter hinterlegt.';return;}
     function nameNode(point){const node=document.createElement(point.href?'a':'strong');node.textContent=point.name;if(point.href)node.href=point.href;return node;}
-    function showButton(point){const button=document.createElement('button');button.type='button';button.className='nd-show-provider';button.textContent=valid(point)?'Auf Karte zeigen':'Kein Kartenstandort';button.disabled=!valid(point);button.addEventListener('click',()=>{if(!map)return;host.querySelector('.top-map-content').classList.remove('is-collapsed');const header=host.querySelector('.top-map-header');header.classList.remove('is-collapsed');header.setAttribute('aria-expanded','true');map.invalidateSize();map.setView([point.lat,point.lng],12);entry.markers.get(point)?.openPopup();host.querySelector('.nd-map-canvas').scrollIntoView({block:'center'});});return button;}
-    const km=p=>!valid(p)?'Keine Koordinaten':origin?distance(p).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':'Ausgangsort fehlt';
+    function showButton(point){const button=document.createElement('button');button.type='button';button.className='nd-show-provider';button.textContent=valid(point)?'Auf Karte zeigen':'Standort nicht verfügbar';button.disabled=!valid(point);button.addEventListener('click',()=>{if(!map)return;host.querySelector('.top-map-content').classList.remove('is-collapsed');const header=host.querySelector('.top-map-header');header.classList.remove('is-collapsed');header.setAttribute('aria-expanded','true');map.invalidateSize();map.setView([point.lat,point.lng],12);entry.markers.get(point)?.openPopup();host.querySelector('.nd-map-canvas').scrollIntoView({block:'center'});});return button;}
+    const km=p=>!valid(p)?'Standort nicht verfügbar':origin?distance(p).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':'Ausgangsort fehlt';
     if(entry.view==='table'){
       list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();['Anbieter','Ort','Entfernung','Zuordnung','Karte'].forEach(label=>{const th=document.createElement('th');th.scope='col';th.textContent=label;head.append(th);});const body=table.createTBody();rows.forEach(point=>{const row=body.insertRow();row.insertCell().append(nameNode(point));[point.place||'Keine Ortsangabe',km(point),point.status].forEach(value=>row.insertCell().textContent=value);row.insertCell().append(showButton(point));});list.append(table);
     }else{
@@ -42,27 +52,40 @@
     }
   }
   function render(entry) {
-    const {host,points,map} = entry;
+    const {host,map} = entry;
+    const points=filteredProviders(entry).filter(valid);
     host.querySelector('input').value = origin?.label || '';
     host.querySelector('[data-map-clear]').classList.toggle('is-hidden',!origin);
     renderProviders(entry);
     let nearest=host.querySelector('.ux-nearest');
     if(!nearest){nearest=document.createElement('p');nearest.className='ux-nearest';host.querySelector('.top-map-location-controls').after(nearest);}
     const closest=origin ? [...points].sort((a,b)=>distance(a)-distance(b))[0] : null;
-    nearest.textContent=closest ? 'Nächstgelegener Anbieter mit Koordinaten: '+closest.name+' · '+distance(closest).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie' : 'PLZ oder Ort eingeben, um den nächstgelegenen Anbieter zu ermitteln.';
-    host.querySelector('[data-map-status]').textContent=points.length ? points.length+' Anbieterstandorte'+(origin?' · Entfernungen ab '+origin.label:'. Ausgangsort eingeben, um Entfernungen zu sehen.') : 'Für diese Behandlung sind noch keine Anbieterkoordinaten hinterlegt.';
+    nearest.textContent=closest ? 'Nächstgelegener Anbieter im Filter mit Koordinaten: '+closest.name+' · '+distance(closest).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie' : origin ? 'Keine Anbieter mit Koordinaten im gewählten Filter.' : 'PLZ oder Ort eingeben, um den nächstgelegenen Anbieter zu ermitteln.';
+    host.querySelector('[data-map-status]').textContent=points.length ? points.length+' Anbieterstandorte'+(origin?' · Entfernungen ab '+origin.label:'. Ausgangsort eingeben, um Entfernungen zu sehen.') : 'Keine Anbieterstandorte im gewählten Filter.';
     if (!map) return;
+    syncMarkers(entry,points);
+    if(entry.radiusCircle) map.removeLayer(entry.radiusCircle);
     if(entry.originMarker) map.removeLayer(entry.originMarker);
     const bounds=points.map(p=>[p.lat,p.lng]);
     if(origin){entry.originMarker=L.marker([origin.lat,origin.lng],{icon:markerIcon(true)}).bindPopup(document.createTextNode('Dein Ausgangsort: '+origin.label)).addTo(map);bounds.push([origin.lat,origin.lng]);}
-    if(bounds.length)map.fitBounds(bounds,{padding:[28,28],maxZoom:8,animate:false});else map.setView([51.16,10.45],5);
+    const radius=host.querySelector('[data-radius]');
+    if(origin && host.querySelector('[data-radius-enabled]').checked && radius.value && radius.validity.valid){
+      entry.radiusCircle=L.circle([origin.lat,origin.lng],{radius:Number(radius.value)*1000,color:'#0875ee',weight:2,fillOpacity:0.06,dashArray:'6 5'}).addTo(map);
+      map.fitBounds(entry.radiusCircle.getBounds(),{padding:[24,24],animate:false});
+    } else if(bounds.length)map.fitBounds(bounds,{padding:[28,28],maxZoom:8,animate:false});else map.setView([51.16,10.45],5);
   }
   entries.forEach(entry=>{
-    const {host}=entry;render(entry);
+    const {host}=entry;
+    const cities=[...new Set(entry.providers.map(p=>p.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'de'));
+    cities.forEach(city=>{const option=document.createElement('option');option.value=city;option.textContent=city;host.querySelector('[data-provider-city]').append(option);});
+    host.querySelector('[data-provider-city]').addEventListener('change',()=>render(entry));
+    host.querySelector('[data-radius-enabled]').addEventListener('change',()=>render(entry));
+    host.querySelector('[data-radius]').addEventListener('input',()=>render(entry));
+    render(entry);
     const all=document.createElement('button');all.type='button';all.textContent='Alle Anbieter anzeigen';
     host.querySelector('.doctor-results-search-panel').append(all);
-    all.addEventListener('click',()=>{host.querySelector('[data-provider-search]').value='';renderProviders(entry);});
-    host.querySelector('[data-provider-search]').addEventListener('input',()=>renderProviders(entry));
+    all.addEventListener('click',()=>{host.querySelector('[data-provider-search]').value='';host.querySelector('[data-provider-city]').value='';host.querySelector('[data-radius-enabled]').checked=false;render(entry);});
+    host.querySelector('[data-provider-search]').addEventListener('input',()=>render(entry));
     host.querySelector('[data-provider-sort]').addEventListener('change',()=>renderProviders(entry));
     host.querySelectorAll('[data-provider-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.providerView;try{localStorage.setItem('lcn_result_view_preference',view);}catch{}entries.forEach(item=>{item.view=view;renderProviders(item);});}));
     const header=host.querySelector('.top-map-header'),content=host.querySelector('.top-map-content');
@@ -84,14 +107,27 @@
     host.querySelector('[data-map-clear]').addEventListener('click',()=>{entry.dismiss();origin=null;try{localStorage.removeItem(sharedKey);localStorage.setItem('lcn_shared_location_cleared','1');}catch{}entries.forEach(render);});
   });
   function setOrigin(result,label){
-    origin={lat:Number(result.lat),lng:Number(result.lng),label:result.formatted||result.label||label};
+    origin={lat:Number(result.lat),lng:Number(result.lng),label:result.formatted||result.label||label,city:result.city||''};
     try{localStorage.setItem(sharedKey,JSON.stringify({...origin,location:origin.label}));localStorage.removeItem('lcn_shared_location_cleared');}catch{}
     entries.forEach(render);window.dispatchEvent(new CustomEvent('homepage:location-changed'));
   }
+  window.addEventListener('storage',event=>{if(![sharedKey,'lcn_shared_location_cleared'].includes(event.key))return;origin=null;try{const saved=JSON.parse(localStorage.getItem(sharedKey));if(valid(saved))origin={...saved,label:saved.location||saved.label||'Gespeicherter Standort'};}catch{}entries.forEach(render);});
   function markerIcon(red=false){
     const urls=window.LCNImages.urls;
     return L.icon({iconUrl:urls[red?'map-marker-red':'map-marker-default'],iconRetinaUrl:urls[red?'map-marker-red':'map-marker-default-retina'],shadowUrl:urls['map-marker-shadow'],iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]});
-  }  async function init(){
+  }
+  function syncMarkers(entry,visiblePoints){
+      if(entry.markers) new Set(entry.markers.values()).forEach(marker=>entry.map.removeLayer(marker));
+      entry.markers=new Map();
+      const groups=new Map();visiblePoints.forEach(point=>{const key=point.lat.toFixed(6)+','+point.lng.toFixed(6);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(point);});
+      groups.forEach(points=>{
+        const popup=document.createElement('div'),heading=document.createElement('strong');heading.textContent=points.length>1?points.length+' Einträge':points[0].name;popup.append(heading);
+        const list=document.createElement('ul');list.className='top-map-popup-list';points.forEach(point=>{const li=document.createElement('li');li.textContent=point.name;const small=document.createElement('small');small.textContent=point.place+' · '+point.status;li.append(small);list.append(li);});popup.append(list);
+        let icon=markerIcon();if(points.length>1){const wrapper=document.createElement('div'),img=document.createElement('img'),count=document.createElement('span');img.src=window.LCNImages.urls['map-marker-default'];img.alt='';count.textContent=points.length;wrapper.append(img,count);icon=L.divIcon({className:'top-map-count-marker',html:wrapper.innerHTML,iconSize:[31,41],iconAnchor:[15,41],popupAnchor:[0,-35]});}
+        const marker=L.marker([points[0].lat,points[0].lng],{icon,riseOnHover:true}).bindPopup(popup).addTo(entry.map);points.forEach(point=>entry.markers.set(point,marker));
+      });
+  }
+  async function init(){
     if(!window.L){const css=document.createElement('link');css.rel='stylesheet';css.href='assets/vendor/leaflet/leaflet.css';document.head.append(css);await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='assets/vendor/leaflet/leaflet.js';script.onload=resolve;script.onerror=reject;document.head.append(script);});}
     entries.forEach(entry=>{
       const canvas=entry.host.querySelector('.nd-map-canvas');entry.map=L.map(canvas,{zoomControl:false,scrollWheelZoom:false}).setView([51.1657,10.4515],6);
@@ -99,14 +135,6 @@
       canvas.addEventListener('click',()=>entry.map.scrollWheelZoom.enable());canvas.addEventListener('mouseleave',()=>entry.map.scrollWheelZoom.disable());
       const tiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere',maxZoom:19}).addTo(entry.map);
       tiles.on('tileerror',()=>{entry.host.querySelector('[data-map-status]').textContent='Kartenhintergrund konnte nicht geladen werden. Anbieter-Marker und Entfernungsliste bleiben verfügbar.';});
-      entry.markers=new Map();
-      const groups=new Map();entry.points.forEach(point=>{const key=point.lat.toFixed(6)+','+point.lng.toFixed(6);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(point);});
-      groups.forEach(points=>{
-        const popup=document.createElement('div'),heading=document.createElement('strong');heading.textContent=points.length>1?points.length+' Einträge':points[0].name;popup.append(heading);
-        const list=document.createElement('ul');list.className='top-map-popup-list';points.forEach(point=>{const li=document.createElement('li');li.textContent=point.name;const small=document.createElement('small');small.textContent=point.place+' · '+point.status;li.append(small);list.append(li);});popup.append(list);
-        let icon=markerIcon();if(points.length>1){const wrapper=document.createElement('div'),img=document.createElement('img'),count=document.createElement('span');img.src=window.LCNImages.urls['map-marker-default'];img.alt='';count.textContent=points.length;wrapper.append(img,count);icon=L.divIcon({className:'top-map-count-marker',html:wrapper.innerHTML,iconSize:[31,41],iconAnchor:[15,41],popupAnchor:[0,-35]});}
-        const marker=L.marker([points[0].lat,points[0].lng],{icon,riseOnHover:true}).bindPopup(popup).addTo(entry.map);points.forEach(point=>entry.markers.set(point,marker));
-      });
       new ResizeObserver(()=>{if(canvas.clientWidth){entry.map.invalidateSize();if(!entry.wasVisible){render(entry);entry.wasVisible=true;}}else entry.wasVisible=false;}).observe(canvas);render(entry);
     });
   }

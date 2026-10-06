@@ -17,7 +17,10 @@
     const panel = target?.closest('.nd-panel') || panels[0];
     panels.forEach(p => { p.hidden = p !== panel; });
     links.forEach(link => { if (link.dataset.view === panel.id) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current'); });
-    if (scroll) (target || document.getElementById('view-content')).scrollIntoView({ block: 'start' });
+    if (scroll) {
+      const context = document.querySelector('.ux-detail #view-content');
+      (context || target || document.getElementById('view-content')).scrollIntoView({ block: 'start' });
+    }
   }
   document.addEventListener('click', event => {
     const link = event.target.closest('a[href^="#"]');

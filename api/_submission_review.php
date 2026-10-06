@@ -20,16 +20,13 @@ function lcnNullable(array $payload, string $key): ?string {
 function lcnMigrateCommunitySubmissionVotes(PDO $pdo, int $submissionId, string $entityType, int $targetId, ?string $treatmentName = null): void {
     $votes=$pdo->prepare('SELECT voter_key,vote FROM community_submission_votes WHERE submission_id=:id AND migrated_target_id IS NULL FOR UPDATE');
     $votes->execute([':id'=>$submissionId]);
-    $aggregateColumns=['pro'=>'vote_improved','neutral'=>'vote_neutral','contra'=>'vote_worsened'];
     foreach($votes as $row){
         if($entityType==='doctor'){
-            $insert=$pdo->prepare('INSERT IGNORE INTO doctor_votes(voter_key,dr_id,vote) VALUES(:key,:id,:vote)');
-            $insert->execute([':key'=>$row['voter_key'],':id'=>$targetId,':vote'=>$row['vote']]);
-            if($insert->rowCount()>0){$column=$aggregateColumns[$row['vote']];$pdo->prepare("INSERT INTO tbl_drs_votes_03(dr_id,$column) VALUES(:id,1) ON DUPLICATE KEY UPDATE $column=$column+1")->execute([':id'=>$targetId]);}
+            $insert=$pdo->prepare("INSERT IGNORE INTO doctor_community_answers(dr_id,respondent_key,question_key,context_key,option_value) VALUES(?,?,'effect','',?)");
+            $insert->execute([$targetId,$row['voter_key'],['contra'=>1,'neutral'=>2,'pro'=>3][$row['vote']]]);
         }else{
-            $insert=$pdo->prepare('INSERT IGNORE INTO treatment_votes(voter_key,treat_id,vote) VALUES(:key,:id,:vote)');
-            $insert->execute([':key'=>$row['voter_key'],':id'=>$targetId,':vote'=>$row['vote']]);
-            if($insert->rowCount()>0){$column=$row['vote'];$pdo->prepare("INSERT INTO lcn_votes(Behandlung,$column) VALUES(:name,1) ON DUPLICATE KEY UPDATE $column=$column+1")->execute([':name'=>$treatmentName]);}
+            $insert=$pdo->prepare("INSERT IGNORE INTO tbl_treatment_community_answers_nd(treat_nd_id,respondent_key,question_key,context_key,answer_value) VALUES(?,?,'effect','',?)");
+            $insert->execute([$targetId,$row['voter_key'],['contra'=>'Verschlechterung','neutral'=>'Keine Veränderung','pro'=>'Verbesserung'][$row['vote']]]);
         }
     }
     $mark=$pdo->prepare('UPDATE community_submission_votes SET migrated_entity_type=:type,migrated_target_id=:target,migrated_at=NOW() WHERE submission_id=:id AND migrated_target_id IS NULL');
@@ -42,7 +39,7 @@ function lcnUniqueTreatmentSlug(PDO $pdo, string $name): string {
     $base = $base !== '' ? substr($base, 0, 220) : 'behandlung';
     $slug = $base;
     $counter = 2;
-    $check = $pdo->prepare('SELECT 1 FROM tbl_treatments_03 WHERE slug = :slug');
+    $check = $pdo->prepare('SELECT 1 FROM v_lcn_treatments WHERE slug = :slug');
     while (true) {
         $check->execute([':slug' => $slug]);
         if (!$check->fetchColumn()) return $slug;
@@ -56,13 +53,14 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
     $insurance = is_array($payload['insurance'] ?? null) ? $payload['insurance'] : [];
     $drId=(int)($row['existing_target_id']??0);
     if($drId>0){
-        $exists=$pdo->prepare('SELECT 1 FROM tbl_drs_03 WHERE dr_id=:id');$exists->execute([':id'=>$drId]);if(!$exists->fetchColumn())throw new DomainException('Der zu ergänzende Arzt-/Praxiseintrag existiert nicht mehr.');
-        $update=$pdo->prepare("UPDATE tbl_drs_03 SET dr_website=COALESCE(NULLIF(dr_website,''),:website),dr_email=COALESCE(NULLIF(dr_email,''),:email),dr_accepts_gkv=IF(:gkv='yes','yes',dr_accepts_gkv),dr_accepts_pkv=IF(:pkv='yes','yes',dr_accepts_pkv),dr_notes=CONCAT_WS('\n',dr_notes,:notes) WHERE dr_id=:id");
-        $update->execute([':website'=>$row['website']?:null,':email'=>$row['email']?:null,':gkv'=>in_array('gkv',$insurance,true)?'yes':'unknown',':pkv'=>in_array('pkv',$insurance,true)?'yes':'unknown',':notes'=>'Community-Ergänzung #'.$row['submission_id'].' geprüft.',':id'=>$drId]);
+        if(!lcnDoctorExists($drId))throw new DomainException('Anbieter nicht gefunden.');
+        $stmt=$pdo->prepare("UPDATE tbl_entities_nd SET website=COALESCE(NULLIF(website,''),:website),email=COALESCE(NULLIF(email,''),:email),sprechstunde_gkv=IF(:gkv='GKV','GKV',sprechstunde_gkv),sprechstunde_pkv=IF(:pkv='PKV','PKV',sprechstunde_pkv),legacy_notes=CONCAT_WS('\n',legacy_notes,:notes) WHERE lcn_id=:id");
+        $stmt->execute([':website'=>$row['website']?:null,':email'=>$row['email']?:null,':gkv'=>in_array('gkv',$insurance,true)?'GKV':null,':pkv'=>in_array('pkv',$insurance,true)?'PKV':null,':notes'=>'Geprüfte Community-Ergänzung #'.$row['submission_id'],':id'=>$drId]);
     }else{
-        $duplicate=$pdo->prepare("SELECT dr_id FROM tbl_drs_03 WHERE LOWER(TRIM(dr_display_name))=LOWER(TRIM(:name)) OR (:website<>'' AND dr_website IS NOT NULL AND LOWER(TRIM(dr_website))=LOWER(TRIM(:website))) LIMIT 1");$duplicate->execute([':name'=>$row['name'],':website'=>$row['website']]);if($duplicate->fetchColumn())throw new DomainException('Ein Arzt-/Praxiseintrag mit diesem Namen oder dieser Website existiert bereits.');
-        $stmt=$pdo->prepare('INSERT INTO tbl_drs_03 (dr_type,dr_is_dr,dr_title_raw,dr_firstname,dr_lastname,dr_org_name,dr_display_name,dr_website,dr_email,dr_accepts_gkv,dr_accepts_pkv,dr_notes) VALUES (:type,:is_dr,:title,:firstname,:lastname,:org,:name,:website,:email,:gkv,:pkv,:notes)');
-        $stmt->execute([':type'=>$typeMap[$providerType]??'other',':is_dr'=>$providerType==='doctor'?1:0,':title'=>lcnNullable($payload,'title'),':firstname'=>lcnNullable($payload,'firstname'),':lastname'=>lcnNullable($payload,'lastname'),':org'=>lcnNullable($payload,'organization')??($providerType==='doctor'?null:$row['name']),':name'=>$row['name'],':website'=>$row['website']?:null,':email'=>$row['email']?:null,':gkv'=>in_array('gkv',$insurance,true)?'yes':'unknown',':pkv'=>in_array('pkv',$insurance,true)?'yes':'unknown',':notes'=>'Community-Vorschlag #'.$row['submission_id'].'; vor Veröffentlichung geprüft.']);$drId=(int)$pdo->lastInsertId();
+        $check=$pdo->prepare('SELECT lcn_id FROM tbl_entities_nd WHERE LOWER(TRIM(anzeigename))=LOWER(TRIM(?))');$check->execute([$row['name']]);if($check->fetchColumn())throw new DomainException('Anbieter bereits vorhanden.');
+        $stmt=$pdo->prepare("INSERT INTO tbl_entities_nd(datensatztyp,behandlertyp,institutionstyp,titel,vorname,nachname,organisationsname,anzeigename,website,email,sprechstunde_gkv,sprechstunde_pkv,review_status,legacy_notes) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'approved',?)");
+        $institution=in_array($providerType,['practice','clinic','therapy_center'],true);
+        $stmt->execute([$institution?'Institution':($providerType==='doctor'?'Behandler':null),$providerType==='doctor'?'Arzt':null,$institution?(['practice'=>'Praxis','clinic'=>'Klinik','therapy_center'=>'Therapiezentrum'][$providerType]):null,lcnNullable($payload,'title'),lcnNullable($payload,'firstname'),lcnNullable($payload,'lastname'),lcnNullable($payload,'organization')??($institution?$row['name']:null),$row['name'],$row['website']?:null,$row['email']?:null,in_array('gkv',$insurance,true)?'GKV':null,in_array('pkv',$insurance,true)?'PKV':null,'Geprüfter Community-Vorschlag #'.$row['submission_id']]);$drId=(int)$pdo->lastInsertId();
     }
     $hasLocation = array_filter([$payload['street']??'', $payload['postal_code']??'', $payload['city']??'', $row['phone']??'']);
     if ($hasLocation) {
@@ -90,8 +88,8 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
     $treatmentIds = lcnSubmissionTreatmentIds($payload);
     if ($treatmentIds) {
         $marks=implode(',',array_fill(0,count($treatmentIds),'?'));
-        $valid=$pdo->prepare("SELECT treat_id FROM tbl_treatments_03 WHERE treat_id IN ($marks)");$valid->execute($treatmentIds);
-        $link=$pdo->prepare('INSERT IGNORE INTO tbl_cpl_drs2treatments_03 (dr_id,treat_id,note) VALUES (:dr,:treat,:note)');
+        $valid=$pdo->prepare("SELECT treat_id FROM v_lcn_treatments WHERE treat_id IN ($marks)");$valid->execute($treatmentIds);
+        $link=$pdo->prepare('INSERT INTO tbl_cpl_entities2treatments_nd (lcn_id,treat_nd_id,note,anbieter_label,dedupe_hash) SELECT :dr,:treat,:note,e.anzeigename,SHA2(CONCAT(CHAR(112,114,111,118,105,100,101,114,58),:dr),256) FROM tbl_entities_nd e WHERE e.lcn_id=:dr AND NOT EXISTS(SELECT 1 FROM tbl_cpl_entities2treatments_nd c WHERE c.lcn_id=:dr AND c.treat_nd_id=:treat)');
         foreach($valid->fetchAll(PDO::FETCH_COLUMN) as $treatId)$link->execute([':dr'=>$drId,':treat'=>$treatId,':note'=>'Community-Vorschlag #'.$row['submission_id']]);
     }
     lcnMigrateCommunitySubmissionVotes($pdo,(int)$row['submission_id'],'doctor',$drId);
@@ -100,18 +98,19 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
 
 function lcnApproveTreatmentSubmission(PDO $pdo, array $row, array $payload): int {
     $id=(int)($row['existing_target_id']??0);
-    if($id>0){$exists=$pdo->prepare('SELECT 1 FROM tbl_treatments_03 WHERE treat_id=:id');$exists->execute([':id'=>$id]);if(!$exists->fetchColumn())throw new DomainException('Die zu ergänzende Behandlung existiert nicht mehr.');
-        $update=$pdo->prepare("UPDATE tbl_treatments_03 SET typ=COALESCE(NULLIF(typ,''),:type),aufwand=COALESCE(NULLIF(aufwand,''),:effort),crashrisiko=COALESCE(NULLIF(crashrisiko,''),:risk),kosten=COALESCE(NULLIF(kosten,''),:cost),wirkgeschwindigkeit=COALESCE(NULLIF(wirkgeschwindigkeit,''),:speed),wirkmechanismus=COALESCE(NULLIF(wirkmechanismus,''),:mechanism),indikationen_anwendungsgebiete=COALESCE(NULLIF(indikationen_anwendungsgebiete,''),:indications),weitere_hinweise=CONCAT_WS('\n',weitere_hinweise,:notes),notes_internal=CONCAT_WS('\n',notes_internal,:internal) WHERE treat_id=:id");
+    if($id>0){$exists=$pdo->prepare('SELECT 1 FROM v_lcn_treatments WHERE treat_id=:id');$exists->execute([':id'=>$id]);if(!$exists->fetchColumn())throw new DomainException('Die zu ergänzende Behandlung existiert nicht mehr.');
+        $update=$pdo->prepare("UPDATE v_lcn_treatments SET typ=COALESCE(NULLIF(typ,''),:type),aufwand=COALESCE(NULLIF(aufwand,''),:effort),crashrisiko=COALESCE(NULLIF(crashrisiko,''),:risk),kosten=COALESCE(NULLIF(kosten,''),:cost),wirkgeschwindigkeit=COALESCE(NULLIF(wirkgeschwindigkeit,''),:speed),wirkmechanismus=COALESCE(NULLIF(wirkmechanismus,''),:mechanism),indikationen_anwendungsgebiete=COALESCE(NULLIF(indikationen_anwendungsgebiete,''),:indications),weitere_hinweise=CONCAT_WS('\n',weitere_hinweise,:notes),notes_internal=CONCAT_WS('\n',notes_internal,:internal) WHERE treat_id=:id");
         $update->execute([':type'=>lcnNullable($payload,'treatment_category'),':effort'=>lcnNullable($payload,'effort'),':risk'=>lcnNullable($payload,'crash_risk'),':cost'=>lcnNullable($payload,'cost'),':speed'=>lcnNullable($payload,'speed'),':mechanism'=>lcnNullable($payload,'mechanism'),':indications'=>lcnNullable($payload,'indications'),':notes'=>lcnNullable($payload,'offerings'),':internal'=>'Community-Ergänzung #'.$row['submission_id'].' geprüft.',':id'=>$id]);
-    }else{$duplicate=$pdo->prepare('SELECT treat_id FROM tbl_treatments_03 WHERE LOWER(TRIM(behandlung))=LOWER(TRIM(:name)) LIMIT 1');$duplicate->execute([':name'=>$row['name']]);if($duplicate->fetchColumn())throw new DomainException('Eine Behandlung mit diesem Namen existiert bereits.');$stmt=$pdo->prepare('INSERT INTO tbl_treatments_03 (slug,behandlung,typ,aufwand,crashrisiko,kosten,wirkgeschwindigkeit,wirkmechanismus,indikationen_anwendungsgebiete,weitere_hinweise,notes_internal,wiki_url_path) VALUES (:slug,:name,:type,:effort,:risk,:cost,:speed,:mechanism,:indications,:notes,:internal,:url)');$stmt->execute([':slug'=>lcnUniqueTreatmentSlug($pdo,$row['name']),':name'=>$row['name'],':type'=>lcnNullable($payload,'treatment_category'),':effort'=>lcnNullable($payload,'effort'),':risk'=>lcnNullable($payload,'crash_risk'),':cost'=>lcnNullable($payload,'cost'),':speed'=>lcnNullable($payload,'speed'),':mechanism'=>lcnNullable($payload,'mechanism'),':indications'=>lcnNullable($payload,'indications'),':notes'=>lcnNullable($payload,'offerings'),':internal'=>'Community-Vorschlag #'.$row['submission_id'].'; vor Veröffentlichung geprüft.',':url'=>$row['website']]);$id=(int)$pdo->lastInsertId();}
+    }else{$duplicate=$pdo->prepare('SELECT treat_id FROM v_lcn_treatments WHERE LOWER(TRIM(behandlung))=LOWER(TRIM(:name)) LIMIT 1');$duplicate->execute([':name'=>$row['name']]);if($duplicate->fetchColumn())throw new DomainException('Eine Behandlung mit diesem Namen existiert bereits.');$stmt=$pdo->prepare('INSERT INTO v_lcn_treatments (slug,behandlung,typ,aufwand,crashrisiko,kosten,wirkgeschwindigkeit,wirkmechanismus,indikationen_anwendungsgebiete,weitere_hinweise,notes_internal,wiki_url_path) VALUES (:slug,:name,:type,:effort,:risk,:cost,:speed,:mechanism,:indications,:notes,:internal,:url)');$stmt->execute([':slug'=>lcnUniqueTreatmentSlug($pdo,$row['name']),':name'=>$row['name'],':type'=>lcnNullable($payload,'treatment_category'),':effort'=>lcnNullable($payload,'effort'),':risk'=>lcnNullable($payload,'crash_risk'),':cost'=>lcnNullable($payload,'cost'),':speed'=>lcnNullable($payload,'speed'),':mechanism'=>lcnNullable($payload,'mechanism'),':indications'=>lcnNullable($payload,'indications'),':notes'=>lcnNullable($payload,'offerings'),':internal'=>'Community-Vorschlag #'.$row['submission_id'].'; vor Veröffentlichung geprüft.',':url'=>$row['website']]);$id=(int)$pdo->lastInsertId();}
+    $pdo->prepare("UPDATE tbl_treatments_nd SET review_status='approved',datenstand=CURRENT_DATE WHERE treat_nd_id=?")->execute([$id]);
     $doctorIds = array_values(array_filter(array_map('intval', is_array($payload['doctor_ids'] ?? null) ? $payload['doctor_ids'] : [])));
     if ($doctorIds) {
         $marks=implode(',',array_fill(0,count($doctorIds),'?'));
-        $valid=$pdo->prepare("SELECT dr_id FROM tbl_drs_03 WHERE dr_id IN ($marks)");$valid->execute($doctorIds);
-        $link=$pdo->prepare('INSERT IGNORE INTO tbl_cpl_drs2treatments_03 (dr_id,treat_id,note) VALUES (:dr,:treat,:note)');
+        $valid=$pdo->prepare("SELECT dr_id FROM v_lcn_doctors WHERE dr_id IN ($marks)");$valid->execute($doctorIds);
+        $link=$pdo->prepare('INSERT INTO tbl_cpl_entities2treatments_nd (lcn_id,treat_nd_id,note,anbieter_label,dedupe_hash) SELECT :dr,:treat,:note,e.anzeigename,SHA2(CONCAT(CHAR(112,114,111,118,105,100,101,114,58),:dr),256) FROM tbl_entities_nd e WHERE e.lcn_id=:dr AND NOT EXISTS(SELECT 1 FROM tbl_cpl_entities2treatments_nd c WHERE c.lcn_id=:dr AND c.treat_nd_id=:treat)');
         foreach($valid->fetchAll(PDO::FETCH_COLUMN) as $drId)$link->execute([':dr'=>$drId,':treat'=>$id,':note'=>'Community-Vorschlag #'.$row['submission_id']]);
     }
-    $nameStmt=$pdo->prepare('SELECT behandlung FROM tbl_treatments_03 WHERE treat_id=:id');$nameStmt->execute([':id'=>$id]);
+    $nameStmt=$pdo->prepare('SELECT behandlung FROM v_lcn_treatments WHERE treat_id=:id');$nameStmt->execute([':id'=>$id]);
     lcnMigrateCommunitySubmissionVotes($pdo,(int)$row['submission_id'],'treatment',$id,(string)$nameStmt->fetchColumn());
     return $id;
 }

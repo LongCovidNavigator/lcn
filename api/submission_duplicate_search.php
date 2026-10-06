@@ -14,7 +14,7 @@ try {
         $tokens=array_values(array_filter($tokens,fn($token)=>!in_array($token,['dr','med','prof'],true)));
         $items=[];
         if($tokens){
-            $rows=$pdo->query('SELECT lcn_id AS id,anzeigename AS label,organisationsname AS organization FROM tbl_entities_nd WHERE aktiv=1 AND lcn_id IN ('.implode(',',LCN_PRIORITY_DOCTOR_IDS).')')->fetchAll();
+            $rows=$pdo->query('SELECT lcn_id AS id,anzeigename AS label,organisationsname AS organization FROM tbl_entities_nd WHERE aktiv=1 AND lcn_id IN ('.implode(',',lcnAllDoctorIds()).')')->fetchAll();
             foreach($rows as $row){
                 $haystack=lcnNormalizeSearchTerm($row['label'].' '.($row['organization']??''));
                 if(count(array_filter($tokens,fn($token)=>mb_strpos($haystack,$token)!==false))!==count($tokens))continue;
@@ -32,7 +32,7 @@ try {
     }
     if($type==='doctor'){
         $doctorSearch=lcnNormalizedSearchSql("CONCAT_WS(' ',d.dr_display_name,d.dr_firstname,d.dr_lastname,d.dr_org_name)");
-        $stmt=$pdo->prepare("SELECT d.dr_id AS id,d.dr_display_name AS label,COALESCE(d.dr_website,l.loc_website,'') AS website,CONCAT_WS(' ',l.loc_plz,l.loc_city) AS meta FROM tbl_drs_03 d LEFT JOIN tbl_drs_locations_03 l ON l.dr_id=d.dr_id AND l.loc_is_primary=1 WHERE {$doctorSearch} LIKE :normalized_query ORDER BY CASE WHEN ".lcnNormalizedSearchSql('TRIM(d.dr_display_name)')."=:normalized_exact THEN 0 ELSE 1 END,d.dr_display_name LIMIT 8");
+        $stmt=$pdo->prepare("SELECT d.dr_id AS id,d.dr_display_name AS label,COALESCE(d.dr_website,l.loc_website,'') AS website,CONCAT_WS(' ',l.loc_plz,l.loc_city) AS meta FROM v_lcn_doctors d LEFT JOIN tbl_drs_locations_03 l ON l.dr_id=d.dr_id AND l.loc_is_primary=1 WHERE {$doctorSearch} LIKE :normalized_query ORDER BY CASE WHEN ".lcnNormalizedSearchSql('TRIM(d.dr_display_name)')."=:normalized_exact THEN 0 ELSE 1 END,d.dr_display_name LIMIT 8");
     }else{
         // Ignore punctuation so that "Help" finds "H.E.L.P." and include aliases.
         $normalizeTreatment=lcnNormalizedSearchSql("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(TRIM(t.behandlung),'.',''),'-',''),' ',''),'/',''),'(',''),')','')");
@@ -40,8 +40,8 @@ try {
         $stmt=$pdo->prepare("
             SELECT t.treat_id AS id,t.behandlung AS label,COALESCE(t.wiki_url_path,'') AS website,
                 CONCAT_WS(' · ',NULLIF(CONCAT('Alias: ',MIN(CASE WHEN {$normalizeAlias} LIKE :normalized_query THEN a.alias END)),'Alias: '),t.typ,t.unterkategorie) AS meta
-            FROM tbl_treatments_03 t
-            LEFT JOIN tbl_cpl_treatments2aliases_03 cta ON cta.treat_id=t.treat_id
+            FROM v_lcn_treatments t
+            LEFT JOIN v_lcn_treatment_aliases cta ON cta.treat_id=t.treat_id
             LEFT JOIN tbl_aliases_03 a ON a.alias_id=cta.alias_id
             WHERE {$normalizeTreatment} LIKE :normalized_query OR {$normalizeAlias} LIKE :normalized_query
             GROUP BY t.treat_id,t.behandlung,t.wiki_url_path,t.typ,t.unterkategorie

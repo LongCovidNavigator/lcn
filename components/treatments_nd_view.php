@@ -30,21 +30,22 @@ function ndStart(string $title, bool $detail = false, bool $reduced = false): vo
 {
     ?><!DOCTYPE html>
 <html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><title><?= ndEscape($title) ?> · LCN Testansicht</title>
+<meta name="robots" content="noindex,nofollow"><title><?= ndEscape($title) ?> · Long Covid Navigator</title>
 <link rel="stylesheet" href="styles/general.css"><link rel="stylesheet" href="styles/navigation.css"><link rel="stylesheet" href="styles/footer-style.css">
 <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=45"><link rel="stylesheet" href="styles/top_recommendation_map.css"><link rel="stylesheet" href="styles/treatments_nd.css?v=14">
 <link rel="stylesheet" href="styles/treatments_nd_provider_beta.css?v=1">
-<script src="scripts/access-nav.js?v=2" defer></script><script src="scripts/image-registry.js?v=5" defer></script><script src="scripts/treatments_nd.js?v=3" defer></script>
-<?php if ($reduced): ?><link rel="stylesheet" href="styles/treatments_nd_reduced.css?v=5"><script src="scripts/treatments_nd_reduced.js?v=5" defer></script>
+<script src="scripts/access-nav.js?v=2" defer></script><script src="scripts/image-registry.js?v=5" defer></script><script src="scripts/treatments_nd.js?v=4" defer></script>
+<?php if ($reduced): ?><link rel="stylesheet" href="styles/treatments_nd_reduced.css?v=10"><link rel="stylesheet" href="styles/treatments_nd_chrome.css?v=2"><script src="scripts/treatments_nd_reduced.js?v=15" defer></script>
 <?php else: ?><script src="scripts/treatments_nd_inputs.js?v=2" defer></script><script src="scripts/treatments_nd_demo.js?v=7" defer></script><script src="scripts/treatments_nd_dashboard.js?v=3" defer></script><?php endif; ?>
-<script src="scripts/treatments_nd_map.js?v=5" defer></script>
-</head><body class="nd-page<?= $detail ? ' nd-detail compact-doctor-header' : '' ?><?= $reduced ? ' ux-page' : '' ?>"><div id="header-placeholder"><?php if ($reduced): ?>
-<header class="ux-site-header"><a class="ux-brand" href="index.html"><span>LCN</span><strong>Long Covid Navigator</strong></a><nav aria-label="Hauptnavigation"><a href="treatments_nd_test.php" aria-current="page">Treatments</a><a href="aerzte_karte.html">Behandler</a><a href="index.html">Über LCN</a></nav><div class="ux-header-tools"><span>Testansicht</span><button type="button" id="nd-demo-header-toggle" aria-pressed="false">Dummydaten: aus</button></div></header>
+<script src="scripts/treatments_nd_map.js?v=8" defer></script>
+<link rel="stylesheet" href="styles/maps_shared.css?v=2"></head><body class="nd-page<?= $detail ? ' nd-detail compact-doctor-header' : '' ?><?= $reduced ? ' ux-page' : '' ?>"><div id="header-placeholder"><?php if ($reduced): ?>
+<header class="profile"><div class="detail-brand-group"><a class="detail-brand" href="index.html" aria-label="LCN – zur Startseite"><img data-lcn-image="brand-logo" alt=""><span>LCN</span></a><a class="detail-back-link" href="therapien_karte.html"><span aria-hidden="true">←</span><span class="detail-back-label">Behandlungs-Suche</span></a></div><div class="profile-copy"><h1><?= ndEscape($title) ?></h1><p>Behandlung</p></div><button type="button" id="nd-demo-header-toggle" aria-pressed="false">Dummydaten: aus</button><button class="detail-menu-toggle" type="button" aria-label="Hauptnavigation öffnen" aria-expanded="false" aria-controls="nd-main-menu">☰</button></header>
+<nav id="nd-main-menu" class="detail-main-menu" aria-label="Hauptnavigation" hidden><ul><li><a href="index.html">Startseite</a></li><li><a href="therapien_karte.html">Behandlungen suchen</a></li><li><a href="aerzte_karte.html">Ärzt:innen suchen</a></li></ul></nav>
 <?php elseif ($detail): ?>
-<header class="profile"><div class="detail-brand-group"><a class="detail-brand" href="index.html"><img data-lcn-image="brand-logo" alt=""><span>LCN</span></a><a class="detail-back-link" href="treatments_nd_test.php">← <span class="detail-back-label">Behandlungs-Suche</span></a></div><div class="profile-copy"><h1><?= ndEscape($title) ?></h1><p>Treatment-Testansicht · <button type="button" id="nd-demo-header-toggle" aria-pressed="false">Dummydaten laden …</button></p></div><button class="detail-menu-toggle" type="button" aria-label="Hauptnavigation öffnen" aria-expanded="false" aria-controls="nd-main-menu">☰</button></header>
+<header class="profile"><div class="detail-brand-group"><a class="detail-brand" href="index.html"><img data-lcn-image="brand-logo" alt=""><span>LCN</span></a><a class="detail-back-link" href="therapien_karte.html">← <span class="detail-back-label">Behandlungs-Suche</span></a></div><div class="profile-copy"><h1><?= ndEscape($title) ?></h1><p>Treatment-Testansicht · <button type="button" id="nd-demo-header-toggle" aria-pressed="false">Dummydaten laden …</button></p></div><button class="detail-menu-toggle" type="button" aria-label="Hauptnavigation öffnen" aria-expanded="false" aria-controls="nd-main-menu">☰</button></header>
 <div id="nd-main-menu" hidden><?php readfile(__DIR__ . '/header.html'); ?></div>
 <?php else: readfile(__DIR__ . '/header.html'); endif; ?></div>
-<main class="page-shell nd-shell"><nav class="nd-breadcrumb" aria-label="Brotkrumennavigation"><a href="index.html">Startseite</a><span aria-hidden="true">/</span><a href="treatments_nd_test.php">Behandlungen · Testansicht</a></nav>
+<main class="page-shell nd-shell"><nav class="nd-breadcrumb" aria-label="Brotkrumennavigation"><a href="index.html">Startseite</a><span aria-hidden="true">/</span><a href="therapien_karte.html">Behandlungen · Testansicht</a></nav>
 <div class="nd-test-note"><strong>Neue Treatment-Testansicht</strong><span>Redaktionelle Daten · Prototyp im Testbetrieb</span></div>
 <?php
 }

@@ -46,7 +46,7 @@ const temporaryDoctorStructureData = window.LCN_DOCTOR_STRUCTURE_DATA || {
     workExperience: [["Gründlich", "Keine Angabe"], ["Berücksichtigt Vorbefunde", "Keine Angabe"], ["Gemeinsames Entscheiden", "Keine Angabe"]],
     practiceExperience: [["Wohlgefühlt", "Keine Angabe"], ["Respektvoller Umgang", "Keine Angabe"], ["Gender-Erfahrungen", "Keine Angabe"], ["Queer / LGBTQ+", "Keine Angabe"]],
     services: [["Bescheinigungen / Atteste", "Unbekannt"], ["Sozialmedizinische Unterstützung", "Unbekannt"], ["Verlaufskontrolle / Nachbetreuung", "Unbekannt"]],
-    medication: [["Reguläre Verordnungen", "Unbekannt"], ["Off-Label-Therapien", "Unbekannt"], ["Individuelle Therapieversuche", "Unbekannt"]],
+    medication: [["Reguläre Verordnungen", "Unbekannt"], ["Off-Label-Behandlungen", "Unbekannt"], ["Individuelle Therapieversuche", "Unbekannt"]],
     diagnoses: [["ME/CFS (G93.3)", "Unbekannt"], ["Long Covid", "Unbekannt"], ["POTS / Dysautonomie", "Unbekannt"], ["MCAS", "Unbekannt"], ["Impfschaden", "Unbekannt"]]
 };
 
@@ -2060,7 +2060,7 @@ function buildTreatmentCategoryOverviewHtml(groups, visibleEntries) {
             return b.count - a.count || a.type.localeCompare(b.type, "de");
         })
         .map(function (card, index) {
-            const treatmentLabel = card.count === 1 ? "Therapie" : "Therapien";
+            const treatmentLabel = card.count === 1 ? "Therapie" : "Behandlungen";
             const sizeClass = index < 2
                 ? "is-featured"
                 : index < 4

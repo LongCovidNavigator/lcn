@@ -27,7 +27,7 @@ function lcnDoctorCommunityIncludesDummy(): bool
 
 function lcnDoctorCommunity(PDO $pdo, int $doctorId): array
 {
-    if (!in_array($doctorId, LCN_PRIORITY_DOCTOR_IDS, true)) throw new InvalidArgumentException('Unknown doctor');
+    if (!lcnDoctorExists($doctorId)) throw new InvalidArgumentException('Unknown doctor');
     $includeDummy = lcnDoctorCommunityIncludesDummy();
     $counts = [];
     $tables = ['doctor_community_answers' => 'real'];
@@ -67,10 +67,10 @@ function lcnDoctorCommunity(PDO $pdo, int $doctorId): array
 
 function lcnDoctorAdaptationBenchmark(PDO $pdo, bool $includeDummy): array
 {
-    $ids = implode(',', LCN_PRIORITY_DOCTOR_IDS);
+    $ids = implode(',', lcnAllDoctorIds());
     $sources = ["SELECT dr_id, option_value, 0 AS is_dummy FROM doctor_community_answers WHERE question_key='adaptation' AND context_key='' AND dr_id IN ($ids)"];
     if ($includeDummy) $sources[] = "SELECT dr_id, option_value, 1 AS is_dummy FROM doctor_community_dummy_answers WHERE question_key='adaptation' AND context_key='' AND dr_id IN ($ids)";
     $sql = 'SELECT AVG(doctor_mean) AS mean, COUNT(*) AS doctor_count, COALESCE(SUM(answer_count),0) AS answer_count, COALESCE(SUM(dummy_count),0) AS dummy_count FROM (SELECT dr_id, AVG(option_value) AS doctor_mean, COUNT(*) AS answer_count, SUM(is_dummy) AS dummy_count FROM ('.implode(' UNION ALL ', $sources).') answers GROUP BY dr_id) doctors';
     $row = $pdo->query($sql)->fetch();
-    return ['mean' => $row['mean'] === null ? null : round((float)$row['mean'], 1), 'doctor_count' => (int)$row['doctor_count'], 'catalog_count' => count(LCN_PRIORITY_DOCTOR_IDS), 'answer_count' => (int)$row['answer_count'], 'dummy_count' => (int)$row['dummy_count']];
+    return ['mean' => $row['mean'] === null ? null : round((float)$row['mean'], 1), 'doctor_count' => (int)$row['doctor_count'], 'catalog_count' => count(lcnAllDoctorIds()), 'answer_count' => (int)$row['answer_count'], 'dummy_count' => (int)$row['dummy_count']];
 }

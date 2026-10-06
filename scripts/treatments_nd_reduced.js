@@ -2,31 +2,39 @@
   'use strict';
   const root = document.querySelector('.ux-detail');
   if (!root) return;
-  const storageKey = 'lcn-nd-reduced-v1-' + root.dataset.treatmentId;
-  let draft = {};
-  try { draft = JSON.parse(sessionStorage.getItem(storageKey)) || {}; } catch {}
+  let draft = {}, serverCounts = {}, busy = false;
+  const endpoint = 'api/treatment_answer.php';
+  const statusNode = document.createElement('p');statusNode.setAttribute('role','status');statusNode.className='ux-test-notice';root.querySelector('#view-content').prepend(statusNode);
+  async function sync(payload) {
+    if(busy)return;if(payload && demo){statusNode.textContent='Beispieldaten sind eingeschaltet. Zum Bewerten bitte Dummydaten ausschalten.';return;}busy=true;
+    root.querySelectorAll('[data-option],[data-clear],[data-segment]').forEach(b=>{b.disabled=true;b.setAttribute('aria-disabled','true');});
+    statusNode.textContent=payload?'Antwort wird gespeichert …':'Bewertungen werden geladen …';
+    try {
+      const response=await fetch(payload?endpoint:endpoint+'?treatment_id='+encodeURIComponent(root.dataset.treatmentId),payload?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({treatment_id:Number(root.dataset.treatmentId),...payload})}:{cache:'no-store'});
+      const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Bewertungen konnten nicht geladen werden.');
+      draft=data.own_answers||{};serverCounts=data.counts||{};renderAll();statusNode.textContent=payload?'Deine Änderung wurde gespeichert.':'Bewertungen sind aktuell.';
+    }catch(error){statusNode.textContent=error.message+' Deine letzte bestätigte Auswahl bleibt unverändert.';}
+    finally{busy=false;root.querySelectorAll('[data-option],[data-clear],[data-segment]').forEach(b=>{b.disabled=false;b.setAttribute('aria-disabled','false');});}
+  }
   let demo = new URLSearchParams(location.search).get('demo') === '1';
   const samples = {setting:[82,7,8,3],pem:[42,31,19,8],access:[6,82,12],effect:[14,18,62,6],gamechanger:[43,57],unit_cost:[10,8,12,26,20,10,6,4,4],total_cost:[10,12,18,24,16,8,6,4,2]};
   const questions = [...root.querySelectorAll('[data-question]')];
   const toggle = document.getElementById('nd-demo-header-toggle');
   const number = value => value.toLocaleString('de-DE', {maximumFractionDigits:1});
-  const units = {application:'Behandlung / Anwendung',package:'Packung (Tabletten / Kapseln)',container:'Flasche / Ampulle / Spritze'};
-  function basisText(basis) { return units[basis?.type] || ''; }
-  function renderBasis(card,own) {
-    const select=card.querySelector('[data-unit]');if(!select)return;
-    select.value=basisText(own?.basis)?own.basis.type:'';
-    const caption=basisText(own?.basis);
-    card.querySelector('[data-basis-caption]').textContent=(caption?'Kosten pro '+caption+' · ':'')+'Grobe Kosteneinordnung, ohne genaue Mengen- oder Dosierungsangabe.';
-  }  function key(card) { return card.dataset.question + (card.querySelector('[data-insurance]') ? ':' + card.querySelector('[data-insurance][aria-pressed="true"]').dataset.insurance : ''); }
-  function save() {
-    try { sessionStorage.setItem(storageKey,JSON.stringify(draft)); return 'Deine Auswahl ist als Testentwurf in diesem Tab gespeichert.'; }
-    catch { return 'Deine Auswahl bleibt nur bis zum Neuladen erhalten; Browser-Speicherung ist nicht verfügbar.'; }
+  function key(card) { return card.dataset.question + (card.querySelector('[data-insurance]') ? ':' + card.querySelector('[data-insurance][aria-pressed="true"]').dataset.insurance : ''); }
+  function countsFor(card) {
+    const base = demo ? (card.dataset.demoCounts ? JSON.parse(card.dataset.demoCounts) : samples[card.dataset.question]) : (serverCounts[key(card)] || JSON.parse(card.dataset.counts));
+    const counts = [...base];
+    const own = draft[key(card)];
+    const option = [...card.querySelectorAll('[data-option]')].find(button => button.dataset.value === own?.value);
+    // Server distributions already include the current respondent.
+    return {counts, local: !demo && Boolean(option)};
   }
   function render(card) {
     const id = card.dataset.question, options = [...card.querySelectorAll('[data-option]')];
-    const counts = demo ? samples[id] : JSON.parse(card.dataset.counts);
+    const {counts, local} = countsFor(card);
     const total = counts.reduce((a,b)=>a+b,0), own = draft[key(card)];
-    card.querySelector('[data-community-note]').textContent = (demo ? 'Dummy-Daten · fiktives Beispiel · ' : 'Community · ') + total + ' Angaben' + (!total ? ' · noch keine auswertbare Verteilung' : ' · Anteile aller zugeordneten Antworten');
+    card.querySelector('[data-community-note]').textContent = (demo ? 'Dummy-Daten · fiktives Beispiel · ' : 'Community · ') + total + (total === 1 ? ' Angabe' : ' Angaben') + (!total ? ' · Noch keine Bewertungen. Du kannst die erste Angabe machen.' : ' · Anteile aller zugeordneten Antworten') + (local ? ' · inklusive deiner gespeicherten Antwort' : '');
     options.forEach((button,i)=>{
       const percent = total ? counts[Number(button.dataset.option)]*100/total : null;
       button.querySelector('[data-percent]').textContent = percent === null ? '–' : number(percent)+' %';
@@ -34,8 +42,7 @@
       const bar=button.querySelector('[data-bar]');
       if(bar) bar.style[card.dataset.kind==='effect'?'height':'width']=(percent || 0)+(card.dataset.kind==='effect'?'%':'%');
     });
-    renderBasis(card,own);
-    card.querySelector('.ux-own').textContent=own?.value ? 'Deine Auswahl: '+own.value+(own.basis&&own.value!=='nicht anwendbar'?' pro '+basisText(own.basis):'')+' · lokaler Testentwurf' : 'Noch keine eigene Auswahl.';
+    card.querySelector('.ux-own').textContent=own?.value ? 'Deine gespeicherte Auswahl: '+own.value : 'Noch keine eigene Auswahl.';
     if(card.dataset.kind==='donut') {
       const yes=total?counts[0]*100/total:0;
       card.querySelector('[data-donut-value]').textContent=total?number(yes)+' %':'–';
@@ -51,11 +58,8 @@
   }
   questions.forEach(card=>{
     function choose(index) {
-      const option=card.querySelector('[data-option="'+index+'"]'), unit=card.querySelector('[data-unit]');
-      const basis=draft[key(card)]?.basis;
-      if(unit && !basisText(basis) && option.dataset.value!=='nicht anwendbar') {card.querySelector('.ux-own').textContent='Bitte zuerst die Bezugsgröße auswählen.';unit.focus();return;}
-      draft[key(card)]={value:option.dataset.value, ...(unit?{basis}:{})};
-      const status=save();render(card);card.querySelector('.ux-own').textContent+=' · '+status;
+      const option=card.querySelector('[data-option="'+index+'"]');
+      sync({question:card.dataset.question,context:key(card).split(':')[1]||'',value:option.dataset.value});
     }
     card.querySelectorAll('[data-option]').forEach(button=>button.addEventListener('click',()=>choose(button.dataset.option)));
     card.querySelectorAll('[data-segment]').forEach(segment=>{
@@ -65,23 +69,25 @@
     card.querySelectorAll('[data-insurance]').forEach(button=>button.addEventListener('click',()=>{
       card.querySelectorAll('[data-insurance]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render(card);
     }));
-    card.querySelector('[data-unit]')?.addEventListener('change',event=>{
-      draft[key(card)]={...draft[key(card)],basis:{type:event.target.value}};
-      save();render(card);
-    });    card.querySelector('[data-clear]').addEventListener('click',()=>{delete draft[key(card)];save();render(card);});
+    card.querySelector('[data-clear]').addEventListener('click',()=>sync({action:'clear',question:card.dataset.question,context:key(card).split(':')[1]||''}));
   });
   function renderAll() {
     toggle.textContent='Dummydaten: '+(demo?'an':'aus');toggle.setAttribute('aria-pressed',String(demo));
-    document.getElementById('ux-demo-state').textContent=demo?'Alle Diagramme zeigen fiktive Beispieldaten, keine Treatment-Ergebnisse.':'';
+    document.getElementById('ux-demo-state').textContent=demo?'Alle Diagramme zeigen fiktive Beispieldaten, keine tatsächlichen Behandlungsergebnisse.':'';
+
+
+
     questions.forEach(render);
+    const effect = questions.find(card => card.dataset.question === 'effect');
+    const summary = root.querySelector('[data-community-summary]');
+    if (effect && summary) {
+      const {counts, local} = countsFor(effect);
+      const total = counts.reduce((a,b) => a+b, 0);
+      summary.textContent = total ? (demo ? 'Beispieldaten · ' : '') + total + (total === 1 ? ' Angabe' : ' Angaben') + (local ? ' · inklusive deiner gespeicherten Antwort' : '') + ' →' : 'Noch keine auswertbaren Angaben →';
+    }
   }
   toggle.addEventListener('click',()=>{demo=!demo;const url=new URL(location.href);url.searchParams.set('demo',demo?'1':'0');history.replaceState(null,'',url);renderAll();});
-  // Keep existing approximate price answers when merging the former detailed units.
-  const formerUnits={session:'application',application:'application',tablets:'package',capsules:'package',bottle:'container',ampoule:'container',syringe:'container'};
-  Object.keys(draft).filter(k=>k.startsWith('unit_cost:')).forEach(k=>{
-    const type=draft[k]?.basis?.type;
-    if(units[type] || formerUnits[type]) draft[k]={...draft[k],basis:{type:formerUnits[type]||type}};
-    else if(draft[k]?.value!=='nicht anwendbar') delete draft[k];
-  });  renderAll();
+  renderAll();
+  sync();
 })();
 

@@ -27,6 +27,20 @@ async function loadFeaturedTreatments() {
     const isFullTreatmentsPage = list.dataset.fullViewSwitch === "true";
 
     try {
+        if (isFullTreatmentsPage) {
+            const selectionResponse = await fetch('api/editorial_treatments.php');
+            const selection = await selectionResponse.json();
+            if (!selectionResponse.ok || !selection.ok || !selection.catalog_available) throw new Error('Auswahl nicht verfügbar');
+            const selectedIds = [...new Set(selection.topics.flatMap(topic => topic.items.map(item => Number(item.treat_id))))];
+            if (!selectedIds.length) { list.textContent = 'Noch keine Top-Behandlungen hinterlegt.'; return; }
+            const response = await fetch('api/treatments_search.php?treat_ids=' + selectedIds.join(',') + buildHomepageLocationQuery());
+            const payload = await response.json();
+            if (!response.ok || !payload.ok) throw new Error('Behandlungen nicht verfügbar');
+            const byId = new Map(payload.items.map(item => [Number(item.treat_id), item]));
+            const entries = selectedIds.filter(id => byId.has(id)).map(id => ({editorial: {id, name: byId.get(id).behandlung}, data: byId.get(id)}));
+            bindFeaturedTreatmentViewSwitch(list, entries);
+            return;
+        }
         const ids = featuredTreatments.map(function (treatment) { return treatment.id; }).join(",");
         const locationQuery = buildHomepageLocationQuery();
         const responses = await Promise.all([
@@ -205,9 +219,9 @@ function buildFeaturedTreatmentTableExperienceHtml(treatment) {
 
 function buildFeaturedTreatmentTableVoteButton(treatment, type, prefix, ratio, className, ownVote) {
     const selected = ownVote === type;
-    return `<button type="button" class="${className} featured-treatment-vote-button${selected ? " is-selected" : ""}"
-        data-treat-id="${Number(treatment.treat_id)}" data-type="${type}" aria-pressed="${selected}"
-        aria-label="${type === "pro" ? "Positive" : type === "neutral" ? "Neutrale" : "Negative"} Erfahrung: ${ratio} Prozent. Jetzt abstimmen">${prefix}${ratio}%</button>`;
+    return `<a href="therapie_detail.php?treatment_id=${Number(treatment.treat_id)}" title="Erfahrungen auf der Detailseite ansehen oder angeben" class="${className} ${selected ? " is-selected" : ""}"
+
+       pro" ? "Positive" : type === "neutral" ? "Neutrale" : "Negative"} Erfahrung: ${ratio} Prozent. Jetzt abstimmen">${prefix}${ratio}%</a>`;
 }
 
 function formatFeaturedTreatmentDistance(value) {
@@ -258,10 +272,10 @@ function getFeaturedTreatmentIconName(type) {
 function buildFeaturedTreatmentVote(treatId, type, label, count, ownVote, totalVotes) {
     const selected = ownVote === type;
     const ratio = totalVotes ? Math.round((Number(count || 0) / totalVotes) * 100) : 0;
-    return `<button type="button" class="featured-treatment-vote featured-treatment-vote-button featured-treatment-vote-${type}${selected ? " is-selected" : ""}"
-        data-treat-id="${Number(treatId)}" data-type="${type}" aria-pressed="${selected}" title="${label}" aria-label="${label}: ${Number(count || 0)}. Jetzt abstimmen">
+    return `<a href="therapie_detail.php?treatment_id=${Number(treatId)}" title="Erfahrungen auf der Detailseite ansehen oder angeben" class="featured-treatment-vote  featured-treatment-vote-${type}${selected ? " is-selected" : ""}"
+       >
         <span>${label}</span><strong>${type === "pro" ? "+" : type === "neutral" ? "=" : "−"}${ratio}%</strong>
-    </button>`;
+    </a>`;
 }
 
 async function handleFeaturedTreatmentVote(event) {
@@ -385,7 +399,7 @@ async function loadFeaturedExperts() {
     try {
         const storedLocation = getHomepageSharedLocation();
         const origin = storedLocation || homepageGermanyCenter;
-        const response = await fetch(`api/doctors_search.php?lat=${encodeURIComponent(origin.lat)}&lng=${encodeURIComponent(origin.lng)}&radiusKm=all&includeNoCoords=1`);
+        const response = await fetch(`api/doctors_search.php?priority=1&lat=${encodeURIComponent(origin.lat)}&lng=${encodeURIComponent(origin.lng)}&radiusKm=all&includeNoCoords=1`);
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.message || "Daten konnten nicht geladen werden.");
         doctors = Array.isArray(data.items) ? data.items : [];
@@ -569,9 +583,9 @@ function buildFeaturedExpertCardExperienceHtml(doctor, ownVote) {
 
 function buildFeaturedExpertCardVoteButton(drId, type, label, prefix, ratio, count, ownVote) {
     const selected = ownVote === type;
-    return `<button type="button" class="featured-vote-button featured-expert-card-vote featured-vote-${type}${selected ? " is-selected" : ""}"
-        data-dr-id="${Number(drId)}" data-type="${type}" data-count="${count}" data-prefix="${prefix}"
-        aria-pressed="${selected}" aria-label="${label}: ${ratio} Prozent. Jetzt abstimmen"><span>${label}</span><strong>${prefix}${ratio}%</strong></button>`;
+    return `<a href="arzt_detail.html?id=${Number(drId)}" title="Erfahrungen auf der Detailseite ansehen oder angeben" class=" featured-expert-card-vote featured-vote-${type}${selected ? " is-selected" : ""}"
+
+       ><span>${label}</span><strong>${prefix}${ratio}%</strong></a>`;
 }
 
 function buildFeaturedExpertTableRowsHtml(doctors, rankOffset, isLonglist) {
@@ -632,9 +646,9 @@ function buildFeaturedExpertTableExperienceHtml(doctor, ownVote) {
 
 function buildFeaturedTableVoteButton(drId, type, prefix, ratio, count, ownVote, label) {
     const isSelected = ownVote === type;
-    return `<button type="button" class="featured-vote-button featured-table-vote-button featured-vote-${type}${isSelected ? " is-selected" : ""}"
-                    data-dr-id="${Number(drId)}" data-type="${type}" data-count="${count}" data-prefix="${prefix}"
-                    aria-pressed="${isSelected}" aria-label="${label}: ${ratio} Prozent. Jetzt abstimmen"><strong>${prefix}${ratio}%</strong></button>`;
+    return `<a href="arzt_detail.html?id=${Number(drId)}" title="Erfahrungen auf der Detailseite ansehen oder angeben" class=" featured-table-vote-button featured-vote-${type}${isSelected ? " is-selected" : ""}"
+
+                   ><strong>${prefix}${ratio}%</strong></a>`;
 }
 
 function buildFeaturedExpertSupplyHtml(doctor) {
@@ -690,13 +704,13 @@ function getCountryFlag(countryCode) {
 function buildFeaturedVoteButton(drId, type, label, count, ownVote) {
     const isSelected = ownVote === type;
     return `
-        <button type="button"
-                class="featured-vote-button featured-vote-${type}${isSelected ? " is-selected" : ""}"
-                data-dr-id="${Number(drId)}" data-type="${type}" aria-pressed="${isSelected}"
-                aria-label="${label}: ${Number(count || 0)} Stimmen">
+        <a href="arzt_detail.html?id=${Number(drId)}" title="Erfahrungen auf der Detailseite ansehen oder angeben"
+                class=" featured-vote-${type}${isSelected ? " is-selected" : ""}"
+
+               >
             ${getVoteIcon(type)}
             <strong>${Number(count || 0)}</strong>
-        </button>`;
+        </a>`;
 }
 
 function getVoteIcon(type) {
@@ -871,7 +885,7 @@ async function searchNearbyGps(event) {
     const submitButton = event.currentTarget.querySelector('button[type="submit"]');
     const radiusInput = document.getElementById("nearby-gps-radius");
     const query = String(input.value || "").trim();
-    const radiusKm = Math.min(500, Math.max(1, Number(radiusInput?.value || 50)));
+    const radiusKm = Math.min(2000, Math.max(1, Number(radiusInput?.value || 50)));
     if (!query) return;
     if (radiusInput) radiusInput.value = String(radiusKm);
 
@@ -917,8 +931,8 @@ async function loadNearbyGpsForLocation(location, restored, requestedRadiusKm) {
     const status = document.getElementById("nearby-gps-status");
     const radiusInput = document.getElementById("nearby-gps-radius");
     const radiusKm = Number.isFinite(Number(requestedRadiusKm))
-        ? Math.min(500, Math.max(1, Number(requestedRadiusKm)))
-        : Math.min(500, Math.max(1, Number(radiusInput?.value || 50)));
+        ? Math.min(2000, Math.max(1, Number(requestedRadiusKm)))
+        : Math.min(2000, Math.max(1, Number(radiusInput?.value || 50)));
     if (radiusInput) radiusInput.value = String(radiusKm);
     status.classList.remove("is-error");
     status.textContent = restored ? "Hausärztliche Anlaufstellen am gespeicherten Standort werden geladen …" : "Hausärzt:innen in der Nähe werden geladen …";
@@ -1137,7 +1151,7 @@ async function loadHomepageEditorialSelection(list, moreButton) {
                 if(votes){
                     const rating=entry.topic.ratings||{},total=['pro','neutral','contra'].reduce((sum,key)=>sum+Number(rating[key]||0),0);
                     votes.classList.add('homepage-rating-display');
-                    votes.title='Bewertungen zu den zugeordneten Katalogeinträgen; einschließlich vorhandener Dummy-Bewertungen. Keine Anzahl unterschiedlicher Personen.';
+                    votes.title='Gespeicherte Gesamtbewertungen. Positiv umfasst Verbesserung und Heilung.';
                     votes.innerHTML=['pro','neutral','contra'].map((key,i)=>'<span class="homepage-rating-pill rating-'+key+'"><span>'+(['Positiv','Neutral','Negativ'][i])+'</span><strong>'+(total?['+','=','−'][i]+Math.round(100*Number(rating[key]||0)/total)+'%':'—')+'</strong></span>').join('')+'<small>(n='+total+')</small>';
                 }
                 const rank=element.querySelector('.featured-treatment-rank,.featured-treatment-table-rank');if(rank)rank.textContent=String(index+1).padStart(2,'0');

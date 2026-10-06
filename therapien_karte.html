@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Long Covid Navigator - Therapien</title>
+    <title>Long Covid Navigator - Behandlungen</title>
 
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css">
@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="styles/therapien_karte.css?v=42">
     <script src="scripts/image-registry.js?v=5"></script>
     <script src="scripts/access-nav.js?v=2" defer></script>
-</head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=2"><script src="scripts/maps_shared.js?v=1" defer></script></head>
 
 <script>
     function toggleMobileMenu() {
@@ -32,7 +32,7 @@
     <div id="header-placeholder"></div>
 
     <div class="container">
-        <section class="treatment-navigation-panel" aria-label="Navigation für Therapiesuche">
+        <section class="treatment-navigation-panel" aria-label="Navigation für Behandlungssuche">
             <button
                 id="treatment-navigation-toggle-button"
                 class="treatment-navigation-header"
@@ -52,7 +52,7 @@
                     <section class="treatment-nav-section treatment-nav-section-sort">
                         <h3 class="treatment-nav-heading">
                             Sortierung
-                            <span class="treatment-nav-info" data-tooltip="Legt fest, in welcher Reihenfolge die Therapien angezeigt werden. Entfernung funktioniert, sobald ein Kartenstandort gesetzt ist." tabindex="0" aria-label="Info: Sortierung">i</span>
+                            <span class="treatment-nav-info" data-tooltip="Legt fest, in welcher Reihenfolge die Behandlungen angezeigt werden. Entfernung funktioniert, sobald ein Kartenstandort gesetzt ist." tabindex="0" aria-label="Info: Sortierung">i</span>
                         </h3>
 
                         <label class="treatment-nav-label" for="treatment-sort-select">Sortieren nach</label>
@@ -176,7 +176,7 @@
                             id="treatment-min-provider-input"
                             class="treatment-nav-text-input treatment-radius-input"
                             type="number"
-                            min="0"
+                            min="1"
                             step="1"
                             value="0"
                         >
@@ -229,7 +229,7 @@
                         <label class="treatment-nav-checkbox-row treatment-include-no-coords" for="treatment-include-no-coords-input">
                             <input id="treatment-include-no-coords-input" type="checkbox" disabled>
                             Einträge ohne Koordinaten einbeziehen
-                            <span class="treatment-nav-info" data-tooltip="Nimmt Therapien mit passenden Anbietern ohne berechenbare Kartenposition zusätzlich auf. Für diese Anbieter kann nicht geprüft werden, ob sie innerhalb des Radius liegen." tabindex="0" aria-label="Info: Einträge ohne Koordinaten einbeziehen">i</span>
+                            <span class="treatment-nav-info" data-tooltip="Nimmt Behandlungen mit passenden Anbietern ohne berechenbare Kartenposition zusätzlich auf. Für diese Anbieter kann nicht geprüft werden, ob sie innerhalb des Radius liegen." tabindex="0" aria-label="Info: Einträge ohne Koordinaten einbeziehen">i</span>
                         </label>
 
                         <label class="treatment-nav-label" for="treatment-radius-input">Radius in km</label>
@@ -237,8 +237,8 @@
                             id="treatment-radius-input"
                             class="treatment-nav-text-input treatment-radius-input"
                             type="number"
-                            min="0"
-                            max="1000"
+                            min="1"
+                            max="2000"
                             step="1"
                             value="100"
                             placeholder="z. B. 25"
@@ -285,16 +285,16 @@
                 </section>
 
                 <p id="treatment-map-status" class="treatment-map-status">
-                    Bitte Kartenstandort setzen, um die nächsten Anbieterstandorte der gefundenen Therapien auf der Karte zu sehen.
+                    Bitte Kartenstandort setzen, um die nächsten Anbieterstandorte der gefundenen Behandlungen auf der Karte zu sehen.
                 </p>
             </div>
         </section>
 
-        <section class="treatment-results-panel" aria-label="Therapien und Behandlungen">
+        <section class="treatment-results-panel" aria-label="Behandlungen und Behandlungen">
             <div class="treatment-results-header">
                 <span class="treatment-results-header-left">
                     <span class="treatment-results-header-icon" aria-hidden="true">▤</span>
-                    <span>Therapien</span>
+                    <span>Behandlungen</span>
                 </span>
 
                 <div class="treatment-view-switch treatment-view-switch-in-header" aria-label="Ansicht wechseln">
@@ -318,7 +318,7 @@
                 </div>
             </div>
 
-            <div class="treatment-results-search-bar" aria-label="Therapien suchen">
+            <div class="treatment-results-search-bar" aria-label="Behandlungen suchen">
                 <div class="treatment-alias-smart-panel treatment-results-search-panel">
                     <div class="treatment-alias-smart-search-row">
                         <div class="treatment-alias-smart-input-wrap">
@@ -365,7 +365,7 @@
                     </div>
 
                                         <p id="treatment-alias-smart-status" class="treatment-results-search-status">
-                        Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.
+                        Suche nach direktem Behandlungenamen, Alias/Synonym oder Oberbegriff/Kombibegriff.
                     </p>
 
                     <div id="treatment-compare-selection" class="treatment-compare-selection is-hidden" aria-live="polite">
@@ -428,7 +428,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>window.LCNImages.configureLeaflet(window.L);</script>
-    <script src="scripts/therapien_karte.js?v=40"></script>
+    <script src="scripts/therapien_karte.js?v=maps-20261005"></script>
 
     <div id="footer-placeholder"></div>
 

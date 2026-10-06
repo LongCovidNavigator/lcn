@@ -8,7 +8,7 @@ try {
         echo json_encode(['ok' => false, 'message' => 'Method not allowed.']); exit;
     }
     $id = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT);
-    if (!$id || !in_array($id, LCN_PRIORITY_DOCTOR_IDS, true)) {
+    if (!$id || !lcnDoctorExists($id)) {
         http_response_code(404); echo json_encode(['ok' => false, 'message' => 'Behandler nicht gefunden.']); exit;
     }
     echo json_encode(['ok' => true, 'dr_id' => $id, 'own_answers' => lcnDoctorOwnAnswers(lcnDoctorDatabase(), $id, lcnExistingVoterKey()), 'community' => lcnDoctorCommunity(lcnDoctorDatabase(), $id)], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);

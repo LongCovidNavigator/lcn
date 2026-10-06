@@ -175,7 +175,7 @@ function attachSpecialtyTermsToDoctors($pdo, &$items) {
 }
 
 function getAllSpecialtyTerms($pdo) {
-    $ids = implode(',', LCN_PRIORITY_DOCTOR_IDS);
+    $ids = implode(',', lcnAllDoctorIds());
     $sql = "SELECT MIN(f.id) AS term_id, 'specialty' AS term_type, '' AS term_code,
         f.fachrichtung AS term_label, '' AS term_desc, COUNT(DISTINCT f.lcn_id) AS doctor_count
         FROM tbl_fachrichtungen_nd f JOIN tbl_entities_nd e ON e.lcn_id = f.lcn_id
@@ -228,8 +228,8 @@ try {
     } else {
         $radiusKm = filter_var($radiusRaw, FILTER_VALIDATE_FLOAT);
 
-        if ($radiusKm === false || $radiusKm < 1 || $radiusKm > 500) {
-            throw new InvalidArgumentException("radiusKm muss zwischen 1 und 500 liegen oder 'all' sein.");
+        if ($radiusKm === false || $radiusKm < 1 || $radiusKm > 2000) {
+            throw new InvalidArgumentException("radiusKm muss zwischen 1 und 2000 liegen oder 'all' sein.");
         }
 
         $radiusKm = (float)$radiusKm;
@@ -243,6 +243,7 @@ try {
     $doctorSource = lcnDoctorSourceSql();
 
     $whereParts = [];
+    if (($_GET['priority'] ?? '') === '1') $whereParts[] = 'dr_id IN (SELECT lcn_id FROM tbl_entities_nd WHERE is_priority_doctor=1)';
 
     if ($drId > 0) {
         $whereParts[] = "dr_id = :dr_id";
@@ -493,7 +494,7 @@ try {
                     ON d.dr_id = l.dr_id
                    AND l.loc_id = (SELECT ll.loc_id FROM tbl_drs_locations_03 ll WHERE ll.dr_id = d.dr_id ORDER BY ll.loc_is_primary DESC, ll.loc_id LIMIT 1)
 
-                LEFT JOIN lcn_raw_doctor_votes rv
+                LEFT JOIN v_lcn_empty_doctor_votes rv
                     ON d.dr_id = rv.dr_id
 
                 LEFT JOIN (
@@ -501,8 +502,8 @@ try {
                            SUM(vote = 'pro') AS vote_improved,
                            SUM(vote = 'neutral') AS vote_neutral,
                            SUM(vote = 'contra') AS vote_worsened
-                    FROM doctor_votes
-                    WHERE review_status IN ('active', 'suspicious')
+                    FROM v_lcn_doctor_votes
+                    WHERE review_status IN ('active', 'approved')
                     GROUP BY dr_id
                 ) wv ON d.dr_id = wv.dr_id
             ) AS base

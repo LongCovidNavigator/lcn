@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/_voting.php';
+require_once __DIR__ . '/_treatment_routes.php';
 require_once __DIR__ . '/_search_normalization.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -133,6 +134,7 @@ function enrichItemsWithNearestProviders(
     ?float $radiusKm = null,
     bool $acceptsGkv = false
 ) {
+    $providerSourceSql = lcnTreatmentSearchProvidersSql();
     if (empty($items)) {
         return [
             'enabled' => true,
@@ -203,9 +205,9 @@ function enrichItemsWithNearestProviders(
             l.loc_lat,
             l.loc_lng
 
-        FROM tbl_cpl_drs2treatments_03 c
+        FROM {$providerSourceSql} c
 
-        INNER JOIN tbl_drs_03 d
+        INNER JOIN v_lcn_doctors d
             ON c.dr_id = d.dr_id
 
         INNER JOIN tbl_drs_locations_03 l
@@ -359,9 +361,11 @@ function enrichItemsWithNearestProviders(
 }
 
 try {
-    $pdo = lcnDatabase();
+    $pdo = lcnTreatmentsNdDatabase();
+    $catalogSql = lcnTreatmentSearchCatalogSql();
+    $providerSourceSql = lcnTreatmentSearchProvidersSql();
 
-    $treatId = getIntParam('treat_id', 0, 0, 999999);
+    $treatId = getIntParam('treat_id', 0, 0, 1999999);
     $treatIds = getIntListParam('treat_ids');
     $hasTreatIdsParam = isset($_GET['treat_ids']);
 
@@ -388,6 +392,7 @@ try {
     $providerLat = getFloatParam('provider_lat', null);
     $providerLng = getFloatParam('provider_lng', null);
     $radiusKm = getFloatParam('radius_km', null);
+    if (isset($_GET['radius_km']) && ($radiusKm === null || !is_finite($radiusKm) || $radiusKm < 1 || $radiusKm > 2000)) throw new InvalidArgumentException('Bitte einen Radius zwischen 1 und 2000 km angeben.');
 
     $hasProviderRadius =
         $radiusKm !== null &&
@@ -456,7 +461,7 @@ try {
                         t.typ,
                         'basic' AS match_mode,
                         'treatment_name' AS match_type
-                    FROM tbl_treatments_03 t
+                    FROM {$catalogSql} t
                     WHERE {$normalizedTreatmentNameSql} LIKE :suggest_search
                     ORDER BY t.behandlung ASC
                     LIMIT 20
@@ -484,9 +489,9 @@ try {
                         :suggest_mode AS match_mode,
                         'alias' AS match_type
                     FROM tbl_aliases_03 a
-                    INNER JOIN tbl_cpl_treatments2aliases_03 cta
+                    INNER JOIN v_lcn_treatment_aliases cta
                         ON cta.alias_id = a.alias_id
-                    INNER JOIN tbl_treatments_03 t
+                    INNER JOIN {$catalogSql} t
                         ON t.treat_id = cta.treat_id
                     WHERE {$normalizedAliasSql} LIKE :suggest_search
                     {$aliasModeFilter}
@@ -527,7 +532,7 @@ try {
                     t.treat_id,
                     t.behandlung,
                     t.typ
-                FROM tbl_treatments_03 t
+                FROM {$catalogSql} t
                 WHERE {$normalizedTreatmentNameSql} LIKE :suggest_search
                 ORDER BY
                     CASE WHEN {$normalizedTreatmentNameSql} = :suggest_exact THEN 0 ELSE 1 END,
@@ -562,9 +567,9 @@ try {
                     t.behandlung,
                     t.typ
                 FROM tbl_aliases_03 a
-                INNER JOIN tbl_cpl_treatments2aliases_03 c
+                INNER JOIN v_lcn_treatment_aliases c
                     ON c.alias_id = a.alias_id
-                INNER JOIN tbl_treatments_03 t
+                INNER JOIN {$catalogSql} t
                     ON t.treat_id = c.treat_id
                 WHERE {$normalizedAliasSql} LIKE :suggest_search
                 ORDER BY
@@ -734,15 +739,15 @@ try {
                     COALESCE(mpc.matching_provider_count, 0) AS matching_provider_count
                     ,COALESCE(upc.unlocated_provider_count, 0) AS unlocated_provider_count
 
-                FROM tbl_treatments_03 t
+                FROM {$catalogSql} t
 
                 LEFT JOIN (
                     SELECT treat_id,
                            SUM(vote = 'pro') AS pro,
                            SUM(vote = 'neutral') AS neutral,
                            SUM(vote = 'contra') AS contra
-                    FROM treatment_votes
-                    WHERE review_status IN ('active', 'suspicious')
+                    FROM v_lcn_treatment_votes
+                    WHERE review_status IN ('active', 'approved')
                     GROUP BY treat_id
                 ) lv ON lv.treat_id = t.treat_id
 
@@ -752,7 +757,7 @@ try {
                         SUM(COALESCE(pro, 0)) AS pro,
                         SUM(COALESCE(neutral, 0)) AS neutral,
                         SUM(COALESCE(contra, 0)) AS contra
-                    FROM lcn_raw_votes
+                    FROM v_lcn_empty_treatment_votes
                     WHERE Behandlung IS NOT NULL
                       AND TRIM(Behandlung) <> ''
                     GROUP BY TRIM(Behandlung)
@@ -764,7 +769,7 @@ try {
                     SELECT
                         treat_id,
                         COUNT(DISTINCT dr_id) AS provider_count
-                    FROM tbl_cpl_drs2treatments_03
+                    FROM {$providerSourceSql} provider_relations
                     WHERE treat_id IS NOT NULL
                       AND dr_id IS NOT NULL
                     GROUP BY treat_id
@@ -775,8 +780,8 @@ try {
                     SELECT
                         c.treat_id,
                         COUNT(DISTINCT c.dr_id) AS mapped_provider_count
-                    FROM tbl_cpl_drs2treatments_03 c
-                    INNER JOIN tbl_drs_03 d
+                    FROM {$providerSourceSql} c
+                    INNER JOIN v_lcn_doctors d
                         ON c.dr_id = d.dr_id
                     INNER JOIN tbl_drs_locations_03 l
                         ON c.dr_id = l.dr_id
@@ -795,8 +800,8 @@ try {
                     SELECT
                         c.treat_id,
                         COUNT(DISTINCT c.dr_id) AS matching_provider_count
-                    FROM tbl_cpl_drs2treatments_03 c
-                    INNER JOIN tbl_drs_03 d
+                    FROM {$providerSourceSql} c
+                    INNER JOIN v_lcn_doctors d
                         ON c.dr_id = d.dr_id
                     INNER JOIN tbl_drs_locations_03 l
                         ON c.dr_id = l.dr_id
@@ -841,8 +846,8 @@ try {
                     SELECT
                         c.treat_id,
                         COUNT(DISTINCT c.dr_id) AS unlocated_provider_count
-                    FROM tbl_cpl_drs2treatments_03 c
-                    INNER JOIN tbl_drs_03 d
+                    FROM {$providerSourceSql} c
+                    INNER JOIN v_lcn_doctors d
                         ON c.dr_id = d.dr_id
                     WHERE c.treat_id IS NOT NULL
                       AND c.dr_id IS NOT NULL
@@ -906,7 +911,7 @@ try {
 				$searchWhere .= "
 					OR EXISTS (
 						SELECT 1
-						FROM tbl_cpl_treatments2aliases_03 cta
+						FROM v_lcn_treatment_aliases cta
 						INNER JOIN tbl_aliases_03 a
 							ON a.alias_id = cta.alias_id
 						WHERE cta.treat_id = results.treat_id
@@ -918,7 +923,7 @@ try {
 				$searchWhere .= "
 					OR EXISTS (
 						SELECT 1
-						FROM tbl_cpl_treatments2aliases_03 cta
+						FROM v_lcn_treatment_aliases cta
 						INNER JOIN tbl_aliases_03 a
 							ON a.alias_id = cta.alias_id
 						WHERE cta.treat_id = results.treat_id
@@ -969,11 +974,11 @@ try {
         $whereSql = " WHERE " . implode(" AND ", $whereParts);
     }
 
-    $totalCount = (int)$pdo->query("SELECT COUNT(*) FROM tbl_treatments_03")->fetchColumn();
+    $totalCount = (int)$pdo->query("SELECT COUNT(*) FROM {$catalogSql} catalog")->fetchColumn();
 
     $categoriesStmt = $pdo->query("
 		SELECT DISTINCT typ
-		FROM tbl_treatments_03
+		FROM {$catalogSql} catalog
 		WHERE typ IS NOT NULL
 		  AND TRIM(typ) <> ''
 		ORDER BY typ ASC
@@ -985,7 +990,7 @@ try {
 
 	$subcategoriesStmt = $pdo->query("
 		SELECT DISTINCT typ, unterkategorie
-		FROM tbl_treatments_03
+		FROM {$catalogSql} catalog
 		WHERE typ IS NOT NULL
 		  AND TRIM(typ) <> ''
 		  AND unterkategorie IS NOT NULL
@@ -1062,6 +1067,7 @@ try {
     unset($item);
 
     lcnAttachOwnVotes($pdo, $items, 'treatment');
+    lcnAttachTreatmentRoutes($pdo, $items);
 
     $map = [
 		'enabled' => $includeMap,
@@ -1128,6 +1134,9 @@ try {
         'map' => $map,
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
+} catch (InvalidArgumentException $e) {
+    http_response_code(400);
+    echo json_encode(['ok'=>false,'message'=>$e->getMessage()],JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
     lcnLogApiError('treatments_search', $e);
     http_response_code(500);

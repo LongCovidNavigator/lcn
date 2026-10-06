@@ -50,7 +50,7 @@ function lcnNdDetail(PDO $pdo, int $id): ?array
         FROM tbl_cpl_treatments_nd_relations r
         LEFT JOIN tbl_treatments_nd n ON n.treat_nd_id = r.target_treat_nd_id
         LEFT JOIN tbl_treatments_nd mapped ON r.target_treat_nd_id IS NULL AND mapped.legacy_treat_id = r.target_legacy_treat_id
-        LEFT JOIN tbl_treatments_03 old ON old.treat_id = r.target_legacy_treat_id
+        LEFT JOIN v_lcn_treatments old ON old.treat_id = r.target_legacy_treat_id
         WHERE r.source_treat_nd_id = ? ORDER BY r.relation_id', [$id]);
     $item['incoming_relations'] = lcnNdRows($pdo, 'SELECT r.*, source.treat_nd_id AS resolved_nd_id, source.treatmentname AS resolved_name
         FROM tbl_cpl_treatments_nd_relations r JOIN tbl_treatments_nd source ON source.treat_nd_id = r.source_treat_nd_id
@@ -67,7 +67,7 @@ function lcnNdDetail(PDO $pdo, int $id): ?array
         AND own.match_status IN ('eindeutig gematcht', 'manuell normalisiert nach LCN-Entscheid 2026-09-24')
         AND other.match_status IN ('eindeutig gematcht', 'manuell normalisiert nach LCN-Entscheid 2026-09-24')
         ORDER BY t.treatmentname, s.sym_name", [$id, $id]);
-    $item['aliases'] = lcnNdRows($pdo, 'SELECT DISTINCT a.alias FROM tbl_cpl_treatments_nd2aliases c
+    $item['aliases'] = lcnNdRows($pdo, 'SELECT DISTINCT a.alias, a.alias_type FROM tbl_cpl_treatments_nd2aliases c
         JOIN tbl_aliases_03 a ON a.alias_id = c.alias_id WHERE c.treat_nd_id = ? ORDER BY a.alias', [$id]);
     // Shared aliases are navigational links, never inferred treatment-relation types.
     // Include legacy targets not yet present in the smaller ND catalogue.
@@ -80,8 +80,8 @@ function lcnNdDetail(PDO $pdo, int $id): ?array
         UNION
         SELECT DISTINCT mapped.treat_nd_id, old.treat_id, COALESCE(mapped.treatmentname, old.behandlung), a.alias
         FROM tbl_cpl_treatments_nd2aliases own
-        JOIN tbl_cpl_treatments2aliases_03 other ON other.alias_id = own.alias_id
-        JOIN tbl_treatments_03 old ON old.treat_id = other.treat_id
+        JOIN v_lcn_treatment_aliases other ON other.alias_id = own.alias_id
+        JOIN v_lcn_treatments old ON old.treat_id = other.treat_id
         LEFT JOIN tbl_treatments_nd mapped ON mapped.legacy_treat_id = old.treat_id
         JOIN tbl_aliases_03 a ON a.alias_id = own.alias_id
         WHERE own.treat_nd_id = ? AND old.treat_id <> ?

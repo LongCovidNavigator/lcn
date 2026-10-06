@@ -263,7 +263,7 @@ try {
                 ON d.dr_id = l.dr_id
                AND l.loc_id = (SELECT ll.loc_id FROM tbl_drs_locations_03 ll WHERE ll.dr_id = d.dr_id ORDER BY ll.loc_is_primary DESC, ll.loc_id LIMIT 1)
 
-            LEFT JOIN lcn_raw_doctor_votes rv
+            LEFT JOIN v_lcn_empty_doctor_votes rv
                 ON d.dr_id = rv.dr_id
 
             LEFT JOIN (
@@ -271,8 +271,8 @@ try {
                        SUM(vote = 'pro') AS vote_improved,
                        SUM(vote = 'neutral') AS vote_neutral,
                        SUM(vote = 'contra') AS vote_worsened
-                FROM doctor_votes
-                WHERE review_status IN ('active', 'suspicious')
+                FROM v_lcn_doctor_votes
+                WHERE review_status IN ('active', 'approved')
                 GROUP BY dr_id
             ) wv ON d.dr_id = wv.dr_id
 
@@ -302,7 +302,7 @@ try {
     if ($voterKey !== null) {
         $ownVoteStatement = $pdo->prepare("
             SELECT vote
-            FROM doctor_votes
+            FROM v_lcn_doctor_votes
             WHERE voter_key = :voter_key AND dr_id = :dr_id
             LIMIT 1
         ");
@@ -383,11 +383,11 @@ try {
                 ) AS total_votes,
 
                 COALESCE(pc.provider_count, 0) AS provider_count,
-                (SELECT COUNT(DISTINCT ac.dr_id) FROM tbl_cpl_drs2treatments_03 ac WHERE ac.treat_id=t.treat_id) AS provider_total
+                (SELECT COUNT(DISTINCT ac.dr_id) FROM v_lcn_provider_treatments ac WHERE ac.treat_id=t.treat_id) AS provider_total
 
-            FROM tbl_cpl_drs2treatments_03 c
+            FROM v_lcn_provider_treatments c
 
-            INNER JOIN tbl_treatments_03 t
+            INNER JOIN v_lcn_treatments t
                 ON c.treat_id = t.treat_id
 
             LEFT JOIN (
@@ -396,7 +396,7 @@ try {
                     SUM(COALESCE(pro, 0)) AS pro,
                     SUM(COALESCE(neutral, 0)) AS neutral,
                     SUM(COALESCE(contra, 0)) AS contra
-                FROM lcn_raw_votes
+                FROM v_lcn_empty_treatment_votes
                 WHERE Behandlung IS NOT NULL
                   AND TRIM(Behandlung) <> ''
                 GROUP BY TRIM(Behandlung)
@@ -408,9 +408,9 @@ try {
                 SELECT
                     treat_id,
                     COUNT(DISTINCT dr_id) AS provider_count
-                FROM tbl_cpl_drs2treatments_03
+                FROM v_lcn_provider_treatments
                 WHERE treat_id IS NOT NULL
-                  AND dr_id IN (" . implode(',', LCN_PRIORITY_DOCTOR_IDS) . ")
+                  AND dr_id IN (" . implode(',', lcnAllDoctorIds()) . ")
                 GROUP BY treat_id
             ) pc
                 ON c.treat_id = pc.treat_id
@@ -476,7 +476,7 @@ try {
     $groupedTreatments = groupTreatmentsByType($treatments);
     $analysis = buildTreatmentAnalysis($treatments);
     // All catalog profiles with more than five distinct, existing treatments.
-    $counts = $pdo->query('SELECT c.dr_id, COUNT(DISTINCT c.treat_id) AS n FROM tbl_cpl_drs2treatments_03 c INNER JOIN tbl_drs_03 d ON d.dr_id=c.dr_id INNER JOIN tbl_treatments_03 t ON t.treat_id=c.treat_id GROUP BY c.dr_id HAVING COUNT(DISTINCT c.treat_id)>5')->fetchAll();
+    $counts = $pdo->query('SELECT c.dr_id, COUNT(DISTINCT c.treat_id) AS n FROM v_lcn_provider_treatments c INNER JOIN v_lcn_doctors d ON d.dr_id=c.dr_id INNER JOIN v_lcn_treatments t ON t.treat_id=c.treat_id GROUP BY c.dr_id HAVING COUNT(DISTINCT c.treat_id)>5')->fetchAll();
     $ownCount = count(array_unique(array_column($treatments, 'treat_id')));
     $eligible = count($counts);
     $atLeast = count(array_filter($counts, fn($row)=>(int)$row['n'] >= $ownCount));

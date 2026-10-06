@@ -97,15 +97,15 @@ function loadTreatmentBase(PDO $pdo, int $treatId) {
 
                 COALESCE(pc.provider_count, 0) AS provider_count
 
-            FROM tbl_treatments_03 t
+            FROM v_lcn_treatments t
 
             LEFT JOIN (
                 SELECT treat_id,
                        SUM(vote = 'pro') AS pro,
                        SUM(vote = 'neutral') AS neutral,
                        SUM(vote = 'contra') AS contra
-                FROM treatment_votes
-                WHERE review_status IN ('active', 'suspicious')
+                FROM v_lcn_treatment_votes
+                WHERE review_status IN ('active', 'approved')
                 GROUP BY treat_id
             ) lv ON lv.treat_id = t.treat_id
 
@@ -115,7 +115,7 @@ function loadTreatmentBase(PDO $pdo, int $treatId) {
                     SUM(COALESCE(pro, 0)) AS pro,
                     SUM(COALESCE(neutral, 0)) AS neutral,
                     SUM(COALESCE(contra, 0)) AS contra
-                FROM lcn_raw_votes
+                FROM v_lcn_empty_treatment_votes
                 WHERE Behandlung IS NOT NULL
                   AND TRIM(Behandlung) <> ''
                 GROUP BY TRIM(Behandlung)
@@ -127,7 +127,7 @@ function loadTreatmentBase(PDO $pdo, int $treatId) {
                 SELECT
                     treat_id,
                     COUNT(DISTINCT dr_id) AS provider_count
-                FROM tbl_cpl_drs2treatments_03
+                FROM v_lcn_provider_treatments
                 WHERE treat_id IS NOT NULL
                   AND dr_id IS NOT NULL
                 GROUP BY treat_id
@@ -164,7 +164,7 @@ function loadTreatmentBase(PDO $pdo, int $treatId) {
 }
 
 function loadTreatmentProviders(PDO $pdo, int $treatId) {
-    $doctorSource = ($_GET['source'] ?? '') === 'priority' ? lcnDoctorSourceSql() : 'tbl_drs_03';
+    $doctorSource = ($_GET['source'] ?? '') === 'priority' ? lcnDoctorSourceSql() : 'v_lcn_doctors';
     $stmt = $pdo->prepare("
         SELECT
             calculated.*,
@@ -244,7 +244,7 @@ function loadTreatmentProviders(PDO $pdo, int $treatId) {
                     + COALESCE(wv.vote_worsened, 0)
                 ) AS total_votes
 
-            FROM tbl_cpl_drs2treatments_03 c
+            FROM v_lcn_provider_treatments c
 
             INNER JOIN {$doctorSource} d
                 ON d.dr_id = c.dr_id
@@ -253,7 +253,7 @@ function loadTreatmentProviders(PDO $pdo, int $treatId) {
                 ON l.dr_id = d.dr_id
                 AND l.loc_is_primary = 1
 
-            LEFT JOIN lcn_raw_doctor_votes rv
+            LEFT JOIN v_lcn_empty_doctor_votes rv
                 ON rv.dr_id = d.dr_id
 
             LEFT JOIN (
@@ -261,8 +261,8 @@ function loadTreatmentProviders(PDO $pdo, int $treatId) {
                        SUM(vote = 'pro') AS vote_improved,
                        SUM(vote = 'neutral') AS vote_neutral,
                        SUM(vote = 'contra') AS vote_worsened
-                FROM doctor_votes
-                WHERE review_status IN ('active', 'suspicious')
+                FROM v_lcn_doctor_votes
+                WHERE review_status IN ('active', 'approved')
                 GROUP BY dr_id
             ) wv ON wv.dr_id = d.dr_id
 
@@ -363,7 +363,7 @@ function loadTreatmentAliases(PDO $pdo, int $treatId) {
             a.alias,
             a.alias_type,
             a.source_examples
-        FROM tbl_cpl_treatments2aliases_03 c
+        FROM v_lcn_treatment_aliases c
         INNER JOIN tbl_aliases_03 a
             ON a.alias_id = c.alias_id
         WHERE c.treat_id = :treat_id
@@ -400,7 +400,7 @@ try {
         exit;
     }
 
-    $pdo = ($_GET['source'] ?? '') === 'priority' ? lcnDoctorDatabase() : lcnDatabase();
+    $pdo = lcnDoctorDatabase();
 
     $item = loadTreatmentBase($pdo, $treatId);
 
@@ -423,7 +423,7 @@ try {
     if ($voterKey !== null) {
         $ownVoteStatement = $pdo->prepare("
             SELECT vote
-            FROM treatment_votes
+            FROM v_lcn_treatment_votes
             WHERE voter_key = :voter_key AND treat_id = :treat_id
             LIMIT 1
         ");
