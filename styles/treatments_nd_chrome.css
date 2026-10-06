@@ -1,0 +1,51 @@
+/* Treatment chrome follows the shared doctor detail layout. Charts remain in the reduced stylesheet. */
+body.ux-page{background:#f7fafc;color:#17365d;--blue:#0878e3;--line:#e1eafa;--muted:#6a7f9e}
+.ux-page #header-placeholder{background:#fff;backdrop-filter:none;border-bottom:1px solid #e5eef8;box-shadow:0 3px 12px #17365d09}
+.ux-page .profile-copy{text-align:center}
+.ux-page .profile h1{color:#17365d}
+.ux-page #nd-demo-header-toggle{flex-shrink:0;border:1px solid #cddfec;border-radius:6px;padding:8px 10px;background:#f3f9fd;color:#315e8c;font-size:12px;cursor:pointer}
+.ux-page #nd-demo-header-toggle[aria-pressed=true]{background:#e6f5f0;color:#287966}
+.ux-page #nd-main-menu[hidden]{display:none}
+.ux-page.nd-detail .nd-shell{max-width:1440px;padding:14px 24px 40px}
+.ux-page .ux-detail{grid-template-columns:244px minmax(0,1fr);gap:0;background:#fff;border:1px solid #e5eef8;border-radius:10px;min-height:800px;align-items:stretch}
+.ux-page .side-nav{position:static;align-self:stretch;background:#f7fbfe;border:0;border-right:1px solid #e6eff9;border-radius:10px 0 0 10px;padding:8px 4px 24px 0;box-shadow:none}
+.ux-page .side-nav .nav-items{position:sticky;top:calc(var(--detail-header-height,76px) + 12px);display:block}
+.ux-page .side-nav a{align-items:center;gap:14px;padding:22px 12px;min-height:112px;border-left:4px solid transparent;border-radius:0 7px 7px 0}
+.ux-page .side-nav strong{font-size:15px;font-weight:600;line-height:1.5;color:#17365d;hyphens:auto;overflow-wrap:normal}
+.ux-page .nav-number{width:38px;height:38px;flex-basis:38px;background:#e7f3ff;border:1px solid #d9ebfc;color:#0878e3;font-size:16px;font-weight:700}
+.ux-page .side-nav a[aria-current]{background:#e7f3ff;border-left-color:#0878e3}
+.ux-page .side-nav a[aria-current] strong{color:#0878e3}
+.ux-page .side-nav a[aria-current] .nav-number{background:#0878e3;border-color:#0878e3;color:white}
+.ux-page #view-content{padding:24px;scroll-margin-top:calc(var(--detail-header-height,76px) + 12px)}
+.ux-page .ux-test-notice{margin:0 0 16px;padding:0;border:0;background:none;color:#6a7f9e;font-size:11px}
+.ux-page .nd-panel{padding:0;border:0;background:none;border-radius:0}
+.ux-page .nd-panel>h2{color:#17365d;font-size:25px;line-height:1.35;margin-bottom:20px}
+.ux-page .nd-panel>h2:before{display:none}
+.ux-page .nd-panel>.ux-section-intro{margin-left:0}
+.ux-page .ux-treatment-overview{padding:22px;background:white;border:1px solid #e1eafa}
+.ux-treatment-overview .overview-heading{font-size:23px;color:#17365d;margin:0 0 20px}
+.ux-treatment-overview .overview-profile-grid{grid-template-columns:minmax(180px,1fr) minmax(0,3fr);align-items:stretch}
+.ux-treatment-overview .overview-identity{padding:28px 18px}
+.ux-treatment-overview .overview-identity h3{font-size:24px;color:#17365d;line-height:1.35;margin:20px 0;overflow-wrap:normal;hyphens:auto}
+.ux-treatment-overview .overview-organization strong{font-size:16px;line-height:1.5}
+.ux-treatment-overview .overview-group h3{font-size:18px;color:#17365d;margin-bottom:16px}
+.ux-treatment-overview .overview-group .nd-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.ux-treatment-overview .overview-group .nd-facts>div{display:block;padding:0 12px;border:0;border-left:1px solid #e1eafa}
+.ux-treatment-overview .overview-group .nd-facts>div:first-child{padding-left:0;border:0}
+.ux-treatment-overview .overview-group dt{font-size:12px;color:#6a7f9e;margin-bottom:8px}
+.ux-treatment-overview .overview-group dd{font-size:14px;color:#17365d;margin:0;line-height:1.5}
+.ux-treatment-overview .ux-alias-groups{gap:12px}
+.ux-treatment-overview .ux-alias-groups>section{padding:0 12px;border:0;border-left:1px solid #e1eafa;border-radius:0;background:none}
+.ux-treatment-overview .ux-alias-groups>section:first-child{border:0;padding-left:0}
+.ux-treatment-overview .ux-alias-groups h4{color:#6a7f9e;font-size:12px;font-weight:400}
+@media(max-width:1100px){.ux-treatment-overview .overview-profile-grid{grid-template-columns:1fr}.ux-treatment-overview .overview-identity{text-align:left;padding:18px}.ux-treatment-overview .overview-identity h3{margin:10px 0}.ux-treatment-overview .overview-organization{padding:12px 0}.ux-page .ux-detail{grid-template-columns:210px minmax(0,1fr)}.ux-page #view-content{padding:18px}}
+@media(max-width:650px){.ux-page.nd-detail .nd-shell{padding:12px}.ux-page .ux-detail{display:block;min-height:0}.ux-page .side-nav{padding:5px;border-right:0;border-bottom:1px solid #e1eafa;border-radius:10px 10px 0 0;margin:0}.ux-page .side-nav .nav-items{position:static;display:flex;overflow-x:auto;max-height:none}.ux-page .side-nav a{flex:0 0 210px;min-width:210px;min-height:94px;padding:10px;border-left:0;border-bottom:3px solid transparent;gap:9px}.ux-page .side-nav a[aria-current]{border-bottom-color:#0878e3}.ux-page .side-nav strong{font-size:12px}.ux-page .nav-number{width:28px;height:28px;flex-basis:28px;font-size:14px}.ux-page #view-content{padding:14px}.ux-page .ux-treatment-overview{padding:14px}.ux-page #nd-demo-header-toggle{font-size:10px;padding:6px}.ux-page .profile h1{white-space:normal;font-size:15px;line-height:1.3}.ux-page .profile p{font-size:11px}.ux-treatment-overview .overview-group .nd-facts,.ux-treatment-overview .ux-alias-groups{grid-template-columns:1fr;gap:14px}.ux-treatment-overview .overview-group .nd-facts>div,.ux-treatment-overview .ux-alias-groups>section{padding:0;border:0}.ux-page .nd-panel>h2{font-size:22px}}
+.ux-page #header-placeholder .profile{display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,1.5fr) auto auto;gap:20px}
+.ux-page #header-placeholder .detail-menu-toggle{grid-column:auto}
+.ux-page #nd-demo-header-toggle{width:auto;justify-self:end}
+@media(max-width:800px){.ux-page #header-placeholder .profile{grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px}.ux-page #header-placeholder .profile h1{font-size:16px;white-space:normal}}
+
+/* Readable status and predictable keyboard focus across detail controls. */
+.ux-page .ux-test-notice{font-size:14px;line-height:1.5;color:#405a75}
+.ux-treatment-overview .overview-identity h3{hyphens:none;overflow-wrap:break-word}
+.ux-page :is(a,button,input,select):focus-visible{outline:3px solid #0878e3;outline-offset:3px}

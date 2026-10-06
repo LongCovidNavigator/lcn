@@ -1,0 +1,21 @@
+/* Shared map presentation only; result tables and page chrome are unchanged. */
+:is(.top-map-location-controls,.doctor-nav-section:has(#doctor-location-input),.treatment-nav-section:has(#treatment-location-input),#location-form,#nearby-gps-form){--map-blue:#0878e3;--map-line:#d6e4ef;font-size:14px;color:#17365d}
+:is(.doctor-location-input-row,.treatment-location-input-row,.top-map-location-input-row,.own-location-control){position:relative;display:flex;gap:8px;width:100%;align-items:center}
+:is(#doctor-location-input,#treatment-location-input,#top-map-location-input,#own-location,.nd-map-location input[name=location],#nearby-gps-location){width:100%;min-width:0;min-height:44px;border:1px solid #cbdce9;border-radius:8px;padding:10px 38px 10px 12px;background:white;color:#17365d;font:inherit;box-sizing:border-box}
+:is(#doctor-radius-input,#treatment-radius-input,[data-radius],#top-map-radius,#nearby-gps-radius){min-height:44px;width:100%;max-width:180px;border:1px solid #cbdce9;border-radius:8px;padding:8px 12px;font:inherit;background:white;color:#17365d;box-sizing:border-box}
+:is(.top-map-location-submit,.lcn-map-submit,#location-form button[type=submit],.nd-map-location button[type=submit]){min-height:44px;border:1px solid #0878e3;border-radius:8px;background:#0878e3;color:white;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;margin-top:8px}
+:is(.doctor-location-mode-button,.treatment-location-mode-button){min-height:40px;border-radius:8px;font-size:14px}
+:is(.location-suggestions,.top-map-location-suggestions){z-index:1100;border:1px solid #cbdce9;border-radius:8px;background:white;box-shadow:0 4px 16px #17365d18}
+:is(.location-suggestions,.top-map-location-suggestions) button{min-height:44px;text-align:left;padding:10px 12px}
+:is(.nd-location-filters,.lcn-map-filters){display:flex;gap:16px;flex-wrap:wrap;align-items:end;margin-top:16px}
+:is(.nd-location-filters,.lcn-map-filters) label{display:flex;flex-direction:column;gap:6px}
+:is(.nd-location-filters,.lcn-map-filters) select{min-height:44px;padding:8px 12px;border:1px solid #cbdce9;border-radius:8px;background:white;font:inherit}
+:is(.nd-map-canvas,#top-recommendation-map,#doctor-detail-map,#doctor-map,#treatment-map,#nearby-gps-map){height:420px;max-height:65vh;min-height:280px;border:1px solid #d6e4ef;border-radius:10px;overflow:hidden}
+:is(.top-map-location-controls,#location-form,.lcn-map-filters) :is(button,input,select):focus-visible{outline:3px solid #0878e3;outline-offset:2px}
+.lcn-map-help{font-size:13px;color:#405a75;line-height:1.5;margin:8px 0}
+.top-map-location-controls{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+.top-map-location-controls form{grid-template-columns:minmax(0,1fr) auto}
+.top-map-location-controls .lcn-map-filters{margin-top:0}
+.top-map-location-controls p{display:block}
+@media(max-width:650px){.top-map-location-controls form{grid-template-columns:1fr}}
+@media(max-width:650px){:is(.nd-location-filters,.lcn-map-filters){gap:10px}:is(.nd-location-filters,.lcn-map-filters)>label{flex:1 1 150px}}
