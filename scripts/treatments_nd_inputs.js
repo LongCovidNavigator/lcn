@@ -91,7 +91,7 @@
     try { sessionStorage.removeItem(storageKey); } catch { /* No persistent storage available. */ }
     forms.forEach(form => { form.querySelector('.nd-draft-status').textContent = ''; });
     render();
-    document.getElementById('nd-reset-status').textContent = 'Alle Testangaben zu dieser Behandlung gelöscht.';
+    document.getElementById('nd-reset-status').textContent = 'Alle Testangaben zu dieser Therapie gelöscht.';
   });
   draft = collect();
   render();

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Long Covid Navigator - Behandlungen</title>
+    <title>Long Covid Navigator - Therapien</title>
 
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css">
@@ -32,7 +32,7 @@
     <div id="header-placeholder"></div>
 
     <div class="container">
-        <section class="treatment-navigation-panel" aria-label="Navigation für Behandlungssuche">
+        <section class="treatment-navigation-panel" aria-label="Navigation für Therapiesuche">
             <button
                 id="treatment-navigation-toggle-button"
                 class="treatment-navigation-header"
@@ -52,7 +52,7 @@
                     <section class="treatment-nav-section treatment-nav-section-sort">
                         <h3 class="treatment-nav-heading">
                             Sortierung
-                            <span class="treatment-nav-info" data-tooltip="Legt fest, in welcher Reihenfolge die Behandlungen angezeigt werden. Entfernung funktioniert, sobald ein Kartenstandort gesetzt ist." tabindex="0" aria-label="Info: Sortierung">i</span>
+                            <span class="treatment-nav-info" data-tooltip="Legt fest, in welcher Reihenfolge die Therapien angezeigt werden. Entfernung funktioniert, sobald ein Kartenstandort gesetzt ist." tabindex="0" aria-label="Info: Sortierung">i</span>
                         </h3>
 
                         <label class="treatment-nav-label" for="treatment-sort-select">Sortieren nach</label>
@@ -65,12 +65,12 @@
                             <option value="negative_ratio:desc">Negative Erfahrungen [%] ↓</option>
                             <option value="total_votes:desc">Anzahl Bewertungen ↓</option>
                             <option value="total_votes:asc">Anzahl Bewertungen ↑</option>
-                            <option value="provider_count:desc">Anbieteranzahl gesamt ↓</option>
-                            <option value="provider_count:asc">Anbieteranzahl gesamt ↑</option>
-                            <option value="matching_provider_count:desc">Anbieter im Suchgebiet ↓</option>
-                            <option value="matching_provider_count:asc">Anbieter im Suchgebiet ↑</option>
-                            <option value="distance:asc">Entfernung nächster Anbieter ↑</option>
-                            <option value="distance:desc">Entfernung nächster Anbieter ↓</option>
+                            <option value="provider_count:desc">Behandleranzahl gesamt ↓</option>
+                            <option value="provider_count:asc">Behandleranzahl gesamt ↑</option>
+                            <option value="matching_provider_count:desc">Behandler im Suchgebiet ↓</option>
+                            <option value="matching_provider_count:asc">Behandler im Suchgebiet ↑</option>
+                            <option value="distance:asc">Entfernung nächster Behandler ↑</option>
+                            <option value="distance:desc">Entfernung nächster Behandler ↓</option>
                         </select>
                     </section>
 
@@ -167,11 +167,11 @@
 
                     <section class="treatment-nav-section treatment-nav-section-provider">
                         <h3 class="treatment-nav-heading">
-                            Anbieter
-                            <span class="treatment-nav-info" data-tooltip="Filtert danach, ob und wie viele Behandler:innen oder Anbieter zu einer Therapie hinterlegt sind." tabindex="0" aria-label="Info: Anbieter">i</span>
+                            Behandler
+                            <span class="treatment-nav-info" data-tooltip="Filtert danach, ob und wie viele Behandler zu einer Therapie hinterlegt sind." tabindex="0" aria-label="Info: Behandler">i</span>
                         </h3>
 
-                        <label class="treatment-nav-label" for="treatment-min-provider-input">Mindestanzahl Anbieter</label>
+                        <label class="treatment-nav-label" for="treatment-min-provider-input">Mindestanzahl Behandler</label>
                         <input
                             id="treatment-min-provider-input"
                             class="treatment-nav-text-input treatment-radius-input"
@@ -184,7 +184,7 @@
                         <div class="treatment-provider-options">
                             <label class="treatment-nav-checkbox-row" for="treatment-only-with-provider-input">
                                 <input id="treatment-only-with-provider-input" type="checkbox">
-                                Mit Anbieter
+                                Mit Behandler
                             </label>
                             <label class="treatment-nav-checkbox-row" for="treatment-accepts-gkv-input">
                                 <input id="treatment-accepts-gkv-input" type="checkbox">
@@ -192,7 +192,7 @@
                             </label>
                             <label class="treatment-nav-checkbox-row" for="treatment-mapped-providers-only-input">
                                 <input id="treatment-mapped-providers-only-input" type="checkbox">
-                                Nur kartierte Anbieter zählen
+                                Nur kartierte Behandler zählen
                             </label>
                         </div>
                     </section>
@@ -200,7 +200,7 @@
                     <section class="treatment-nav-section treatment-nav-section-location">
                         <h3 class="treatment-nav-heading">
                             Standortsuche
-                            <span class="treatment-nav-info" data-tooltip="Setzt deinen Kartenstandort. Optional kannst du die Suche auf Anbieter in deiner Stadt oder in einem frei gewählten Radius beschränken." tabindex="0" aria-label="Info: Ort und Karte">i</span>
+                            <span class="treatment-nav-info" data-tooltip="Setzt deinen Kartenstandort. Optional kannst du die Suche auf Behandler in deiner Stadt oder in einem frei gewählten Radius beschränken." tabindex="0" aria-label="Info: Ort und Karte">i</span>
                         </h3>
 
                         <label class="treatment-nav-label" for="treatment-location-input">Adresse oder Ort</label>
@@ -229,7 +229,7 @@
                         <label class="treatment-nav-checkbox-row treatment-include-no-coords" for="treatment-include-no-coords-input">
                             <input id="treatment-include-no-coords-input" type="checkbox" disabled>
                             Einträge ohne Koordinaten einbeziehen
-                            <span class="treatment-nav-info" data-tooltip="Nimmt Behandlungen mit passenden Anbietern ohne berechenbare Kartenposition zusätzlich auf. Für diese Anbieter kann nicht geprüft werden, ob sie innerhalb des Radius liegen." tabindex="0" aria-label="Info: Einträge ohne Koordinaten einbeziehen">i</span>
+                            <span class="treatment-nav-info" data-tooltip="Nimmt Therapien mit passenden Behandlern ohne berechenbare Kartenposition zusätzlich auf. Für diese Behandler kann nicht geprüft werden, ob sie innerhalb des Radius liegen." tabindex="0" aria-label="Info: Einträge ohne Koordinaten einbeziehen">i</span>
                         </label>
 
                         <label class="treatment-nav-label" for="treatment-radius-input">Radius in km</label>
@@ -285,16 +285,16 @@
                 </section>
 
                 <p id="treatment-map-status" class="treatment-map-status">
-                    Bitte Kartenstandort setzen, um die nächsten Anbieterstandorte der gefundenen Behandlungen auf der Karte zu sehen.
+                    Bitte Kartenstandort setzen, um die nächsten Behandlerstandorte der gefundenen Therapien auf der Karte zu sehen.
                 </p>
             </div>
         </section>
 
-        <section class="treatment-results-panel" aria-label="Behandlungen und Behandlungen">
+        <section class="treatment-results-panel" aria-label="Therapien und Therapien">
             <div class="treatment-results-header">
                 <span class="treatment-results-header-left">
                     <span class="treatment-results-header-icon" aria-hidden="true">▤</span>
-                    <span>Behandlungen</span>
+                    <span>Therapien</span>
                 </span>
 
                 <div class="treatment-view-switch treatment-view-switch-in-header" aria-label="Ansicht wechseln">
@@ -318,7 +318,7 @@
                 </div>
             </div>
 
-            <div class="treatment-results-search-bar" aria-label="Behandlungen suchen">
+            <div class="treatment-results-search-bar" aria-label="Therapien suchen">
                 <div class="treatment-alias-smart-panel treatment-results-search-panel">
                     <div class="treatment-alias-smart-search-row">
                         <div class="treatment-alias-smart-input-wrap">
@@ -350,12 +350,12 @@
                                 <option value="negative_ratio:desc">Negative Erfahrungen [%] ↓</option>
                                 <option value="total_votes:desc">Anzahl Bewertungen ↓</option>
                                 <option value="total_votes:asc">Anzahl Bewertungen ↑</option>
-                                <option value="provider_count:desc">Anbieteranzahl gesamt ↓</option>
-                                <option value="provider_count:asc">Anbieteranzahl gesamt ↑</option>
-                                <option value="matching_provider_count:desc">Anbieter im Suchgebiet ↓</option>
-                                <option value="matching_provider_count:asc">Anbieter im Suchgebiet ↑</option>
-                                <option value="distance:asc">Entfernung nächster Anbieter ↑</option>
-                                <option value="distance:desc">Entfernung nächster Anbieter ↓</option>
+                                <option value="provider_count:desc">Behandleranzahl gesamt ↓</option>
+                                <option value="provider_count:asc">Behandleranzahl gesamt ↑</option>
+                                <option value="matching_provider_count:desc">Behandler im Suchgebiet ↓</option>
+                                <option value="matching_provider_count:asc">Behandler im Suchgebiet ↑</option>
+                                <option value="distance:asc">Entfernung nächster Behandler ↑</option>
+                                <option value="distance:desc">Entfernung nächster Behandler ↓</option>
                             </select>
                         </div>
                         <div class="treatment-results-sort-field">
@@ -365,7 +365,7 @@
                     </div>
 
                                         <p id="treatment-alias-smart-status" class="treatment-results-search-status">
-                        Suche nach direktem Behandlungenamen, Alias/Synonym oder Oberbegriff/Kombibegriff.
+                        Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.
                     </p>
 
                     <div id="treatment-compare-selection" class="treatment-compare-selection is-hidden" aria-live="polite">
@@ -399,9 +399,9 @@
             </div>
         </section>
 
-        <aside class="treatment-suggest-entry" aria-label="Behandlung ergänzen">
-            <div><strong>Fehlt eine Behandlung?</strong><span>Ergänze Name, Quelle und alles, was du über die Behandlung weißt.</span></div>
-            <a href="behandlung_vorschlagen.html">Behandlung vorschlagen →</a>
+        <aside class="treatment-suggest-entry" aria-label="Therapie ergänzen">
+            <div><strong>Fehlt eine Therapie?</strong><span>Ergänze Name, Quelle und alles, was du über die Therapie weißt.</span></div>
+            <a href="behandlung_vorschlagen.html">Therapie vorschlagen →</a>
         </aside>
 
         <section id="treatment-table-results-section" class="treatment-table-results-section is-hidden">
@@ -412,7 +412,7 @@
                         <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="name">Therapie <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                         <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="category">Kategorie <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                         <th><button id="treatment-table-experience-button" class="treatment-table-sort-button" type="button" data-table-sort-key="experience"><span id="treatment-table-experience-heading">Erfahrung</span> <span class="treatment-table-header-note">(n = Angaben)</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
-                        <th><button id="treatment-table-provider-button" class="treatment-table-sort-button" type="button" data-table-sort-key="provider"><span id="treatment-table-provider-heading">Anbieter gesamt</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
+                        <th><button id="treatment-table-provider-button" class="treatment-table-sort-button" type="button" data-table-sort-key="provider"><span id="treatment-table-provider-heading">Behandler gesamt</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                         <th><button id="treatment-table-metric-button" class="treatment-table-sort-button" type="button" data-table-sort-key="location"><span id="treatment-table-metric-heading">Entfernung / Ort</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                     </tr>
                 </thead>

@@ -1,6 +1,6 @@
 # Terminform: aktive und zurückgestellte Variante
 
-Aktiv ist die frühere sichtbare Variante 2: Zahlen links/rechts vom Balken, direkte Abstimmung, zweite Auswahl nimmt die Stimme zurück. Im Code heißt sie appointmentVariant(3).
+Aktiv ist die frühere sichtbare Variante 2: Zahlen links/rechts vom Balken, direkte Abstimmung, zweite Auswahl nimmt die Stimme zurück. Im Code heißt sie appointmentVariant(3). Links steht Nein / nicht möglich (rot), rechts Ja / möglich (grün). Der grüne Balken beginnt rechts; der Verteilungspunkt liegt beim Nein-Anteil von links. Die Antwortwerte bleiben unverändert: 0 = möglich, 1 = nicht möglich.
 
 Die frühere sichtbare Variante 3 ist absichtlich nicht gerendert, aber vollständig erhalten: appointmentVariant(4) und mergedAppointmentCell in scripts/arzt_detail_konzept.js samt CSS in styles/arzt_detail_konzept.css. Anklicken ersetzt den Status durch zwei Optionen; Zustimmung führt zu einem gemeinsamen Feld mit passendem Farbrand, Abweichung zu Community/eigener Angabe. Zum späteren Vergleich appointmentVariant(4) wieder im Rückgabewert von appointment() hinzufügen. Es wird dieselbe gespeicherte Stimme verwendet.
 

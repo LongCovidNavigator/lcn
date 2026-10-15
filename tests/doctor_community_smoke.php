@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../api/_doctor_community.php';
+require_once __DIR__ . '/../api/_doctor_community_answers.php';
 $pdo = lcnDoctorDatabase();
 function verify($condition, $message) { if (!$condition) throw new RuntimeException($message); }
 $expected = LCN_PRIORITY_DOCTOR_IDS; sort($expected);
@@ -10,7 +10,7 @@ try {
     putenv('LCN_DOCTOR_COMMUNITY_INCLUDE_DUMMY=1');
     foreach ($expected as $id) {
         $data = lcnDoctorCommunity($pdo, $id);
-        verify(count($data['questions']) === 11, 'All eleven question/context combinations required.');
+        verify(count($data['questions']) === count(lcnDoctorCommunityQuestions()), 'All question/context combinations required.');
         foreach ($data['questions'] as $key => $question) {
             verify($question['dummy_count'] > 0, "Missing $id/$key dummy answers");
             verify(array_sum(array_column($question['options'], 'count')) === $question['total'], 'Count sum mismatch');
@@ -27,6 +27,13 @@ try {
     $before = lcnDoctorCommunity($pdo, 627)['questions']['effect']['real_count'];
     $pdo->beginTransaction();
     $respondent = bin2hex(random_bytes(32));
+    lcnSaveDoctorAnswer($pdo, 627, $respondent, 'wait', 2);
+    lcnSaveDoctorAnswer($pdo, 627, $respondent, 'wait-followup', 4);
+    $own = (array)lcnDoctorOwnAnswers($pdo, 627, $respondent);
+    verify($own['wait'] === 2 && $own['wait-followup'] === 4, 'First and followup waiting times must save independently.');
+    lcnSaveDoctorAnswer($pdo, 627, $respondent, 'wait-followup', 3);
+    $own = (array)lcnDoctorOwnAnswers($pdo, 627, $respondent);
+    verify($own['wait'] === 2 && $own['wait-followup'] === 3, 'Updating followup waiting time must preserve first appointment.');
     $insert = $pdo->prepare("INSERT INTO doctor_community_answers (dr_id, respondent_key, question_key, context_key, option_value) VALUES (627, ?, 'effect', '', ?)");
     $insert->execute([$respondent, 4]);
     verify(lcnDoctorCommunity($pdo, 627)['questions']['effect']['real_count'] === $before + 1, 'Real answers are not aggregated.');
@@ -36,7 +43,7 @@ try {
     $combined = lcnDoctorCommunity($pdo, 627)['questions']['effect'];
     verify($combined['real_count'] === $before + 1 && $combined['dummy_count'] > 0, 'Source separation failed');
     $pdo->rollBack();
-    echo "PASS: 39 doctors, 11 questions, valid distributions, dummy switch on/off, real/dummy separation, uniqueness, allowed options. Test inserts rolled back.\n";
+    echo "PASS: 39 doctors, all questions, valid distributions, dummy switch on/off, real/dummy separation, uniqueness, allowed options. Test inserts rolled back.\n";
 } finally {
     if ($pdo->inTransaction()) $pdo->rollBack();
     putenv('LCN_DOCTOR_COMMUNITY_INCLUDE_DUMMY=' . ($originalFlag === false ? '' : $originalFlag));

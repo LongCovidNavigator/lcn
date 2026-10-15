@@ -2,8 +2,10 @@
 require_once __DIR__ . '/_voting.php';
 require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_editorial_treatments.php';
+require_once __DIR__ . '/_doctor_treatment_ratings.php';
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: private, no-store');
 
 function sendJson($payload, $statusCode = 200) {
     http_response_code($statusCode);
@@ -56,7 +58,7 @@ function buildTreatmentAnalysis($treatments) {
     $frequentVotesThreshold = 100;
     $treatmentCount = count($treatments);
     $profileLevel = 'none';
-    $profileLabel = 'Kein Behandlungsprofil';
+    $profileLabel = 'Kein Therapieprofil';
 
     if ($treatmentCount >= 50) {
         $profileLevel = 'exceptional';
@@ -343,94 +345,19 @@ try {
     $groupedTerms['specialty'] = $research['specialty'];
 
     $treatmentsSql = "
-        SELECT
-            results.*,
-
-            CASE
-                WHEN results.total_votes > 0
-                THEN ROUND((results.pro / results.total_votes) * 100)
-                ELSE 0
-            END AS positive_ratio,
-
-            CASE
-                WHEN results.total_votes > 0
-                THEN ROUND((results.neutral / results.total_votes) * 100)
-                ELSE 0
-            END AS neutral_ratio,
-
-            CASE
-                WHEN results.total_votes > 0
-                THEN ROUND((results.contra / results.total_votes) * 100)
-                ELSE 0
-            END AS negative_ratio
-
-        FROM (
-            SELECT
-                c.treat_id,
-                c.sort_order,
-                t.slug,
-                t.behandlung,
-                t.typ,
-                t.unterkategorie,
-
-                COALESCE(rv.pro, 0) AS pro,
-                COALESCE(rv.neutral, 0) AS neutral,
-                COALESCE(rv.contra, 0) AS contra,
-                (
-                    COALESCE(rv.pro, 0)
-                    + COALESCE(rv.neutral, 0)
-                    + COALESCE(rv.contra, 0)
-                ) AS total_votes,
-
-                COALESCE(pc.provider_count, 0) AS provider_count,
-                (SELECT COUNT(DISTINCT ac.dr_id) FROM v_lcn_provider_treatments ac WHERE ac.treat_id=t.treat_id) AS provider_total
-
-            FROM v_lcn_provider_treatments c
-
-            INNER JOIN v_lcn_treatments t
-                ON c.treat_id = t.treat_id
-
-            LEFT JOIN (
-                SELECT
-                    TRIM(Behandlung) AS behandlung_key,
-                    SUM(COALESCE(pro, 0)) AS pro,
-                    SUM(COALESCE(neutral, 0)) AS neutral,
-                    SUM(COALESCE(contra, 0)) AS contra
-                FROM v_lcn_empty_treatment_votes
-                WHERE Behandlung IS NOT NULL
-                  AND TRIM(Behandlung) <> ''
-                GROUP BY TRIM(Behandlung)
-            ) rv
-                ON LOWER(TRIM(t.behandlung)) COLLATE utf8mb4_unicode_ci
-                 = LOWER(rv.behandlung_key) COLLATE utf8mb4_unicode_ci
-
-            LEFT JOIN (
-                SELECT
-                    treat_id,
-                    COUNT(DISTINCT dr_id) AS provider_count
-                FROM v_lcn_provider_treatments
-                WHERE treat_id IS NOT NULL
-                  AND dr_id IN (" . implode(',', lcnAllDoctorIds()) . ")
-                GROUP BY treat_id
-            ) pc
-                ON c.treat_id = pc.treat_id
-
-            WHERE c.dr_id = :id
-        ) AS results
-        ORDER BY
-            CASE
-                WHEN results.sort_order IS NULL OR results.sort_order = 0 THEN 999999
-                ELSE results.sort_order
-            END ASC,
-            results.typ ASC,
-            results.behandlung ASC
+        SELECT c.treat_id,c.sort_order,t.slug,t.behandlung,t.typ,t.unterkategorie,
+            (SELECT COUNT(DISTINCT p.dr_id) FROM v_lcn_provider_treatments p INNER JOIN v_lcn_doctors d ON d.dr_id=p.dr_id WHERE p.treat_id=t.treat_id) AS provider_count,
+            (SELECT COUNT(DISTINCT p.dr_id) FROM v_lcn_provider_treatments p WHERE p.treat_id=t.treat_id) AS provider_total
+        FROM v_lcn_provider_treatments c
+        INNER JOIN v_lcn_treatments t ON c.treat_id=t.treat_id
+        WHERE c.dr_id=:id
+        ORDER BY CASE WHEN c.sort_order IS NULL OR c.sort_order=0 THEN 999999 ELSE c.sort_order END,t.typ,t.behandlung
     ";
-
     $treatmentsStmt = $pdo->prepare($treatmentsSql);
     $treatmentsStmt->bindValue(':id', $id, PDO::PARAM_INT);
     $treatmentsStmt->execute();
 
-    $treatments = $treatmentsStmt->fetchAll();
+    $treatments = lcnApplyDoctorTreatmentRatings($pdo, $treatmentsStmt->fetchAll());
 
     $hasCoordinates = (int)$item['has_coordinates'] === 1;
 
@@ -466,9 +393,9 @@ try {
         $treatment['neutral'] = (int)$treatment['neutral'];
         $treatment['contra'] = (int)$treatment['contra'];
         $treatment['total_votes'] = (int)$treatment['total_votes'];
-        $treatment['positive_ratio'] = (int)$treatment['positive_ratio'];
-        $treatment['neutral_ratio'] = (int)$treatment['neutral_ratio'];
-        $treatment['negative_ratio'] = (int)$treatment['negative_ratio'];
+        $treatment['positive_ratio'] = (float)$treatment['positive_ratio'];
+        $treatment['neutral_ratio'] = (float)$treatment['neutral_ratio'];
+        $treatment['negative_ratio'] = (float)$treatment['negative_ratio'];
         $treatment['provider_count'] = (int)$treatment['provider_count'];
     }
     unset($treatment);

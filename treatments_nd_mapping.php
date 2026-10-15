@@ -4,7 +4,7 @@ require_once __DIR__ . '/api/_treatments_nd.php';
 require_once __DIR__ . '/components/treatments_nd_view.php';
 $groups = [
  ['Erfahrungen (Reiter 4)', 'Gamechanger und Zeit bis zur Veränderung', 'Nutzer', 'Lokaler Entwurf und abschaltbare Testverteilung', 'Je eine gemeinsame anklickbare Grafik; keine getrennte Ergebnisgrafik oder doppelte Dashboard-Auswertung'],
- ['Überblick, Belastungshürden und Erfahrungen', 'Anbieterkarte und Entfernung', 'Bestandsdaten', 'ND-Anbieterzuordnung + Standortkoordinaten', 'Gemeinsamer Ausgangsort; Luftlinie; keine erfundenen Anbieterpositionen'],
+ ['Überblick, Belastungshürden und Erfahrungen', 'Behandlerkarte und Entfernung', 'Bestandsdaten', 'ND-Behandlerzuordnung + Standortkoordinaten', 'Gemeinsamer Ausgangsort; Luftlinie; keine erfundenen Behandlerpositionen'],
  ['Belastungshürden', 'Zeitlicher Rahmen: Dauer, Häufigkeit, Anzahl, Gesamtdauer', 'Hybrid', 'Recherche + lokale Testangaben', 'Anklickbare Balken mit abschaltbaren fiktiven Verteilungen; genaue Werte ergänzbar'],
  ['Erfahrungen (Reiter 4)', 'Zugeordnete Beschwerden', 'Recherche', 'tbl_cpl_treatments_nd2symptoms', 'Nach Beschwerdegruppen geordnet'],
  ['Angezeigte Datenpunkte', 'Feldbezogene Quellen, Sicherheit, Quellentyp, Prüfdatum', 'Recherche', 'tbl_treatment_field_sources_nd', 'Nur intern verfügbar; keine sichtbaren Quellen oder Quellenlinks in der Detailansicht'],
@@ -25,7 +25,7 @@ $groups = [
  ['Erfahrungen', 'Zeit bis Veränderung: Stunden, Tage, Wochen, Monate, keine Wirkung', 'Nutzer', 'Eigener Testentwurf / optionale Simulation', 'Erklärte Auswahlkarten; Verteilungsbalken bei Simulation'],
  ['Erfahrungen', 'Eigene Symptome / Beschwerden', 'Hybrid', 'Auswahl aus tbl_symptoms; eigener Testentwurf', 'Mehrfachauswahl, getrennt von den vorhandenen Zuordnungen'],
  ['Dashboard', 'Eigene Antworten und optionale simulierte Erfahrungsübersicht', 'Nutzer', 'Browser-Tab / separate feste Demo-Profile', 'Eigene und fiktive Angaben klar getrennt'],
- ['Erfahrungen (Reiter 4)', 'Anbieter', 'Bestehende Relation', 'tbl_cpl_entities2treatments_nd + tbl_entities_nd; Standort aus tbl_drs_locations_03', 'ND-Zuordnung, aktive Entities; bestätigte / Bestandsangebote und Kandidaten getrennt'],
+ ['Erfahrungen (Reiter 4)', 'Behandler', 'Bestehende Relation', 'tbl_cpl_entities2treatments_nd + tbl_entities_nd; Standort aus tbl_drs_locations_03', 'ND-Zuordnung, aktive Entities; bestätigte / Bestandsangebote und Kandidaten getrennt'],
  ['Dashboard', 'Apotheken und Angebote', 'Redaktion', 'tbl_treatment_pharmacies_nd + tbl_cpl_treatments_nd2pharmacies', 'Angebote mit Belegsicherheit; Quellen nur intern'],
  ['Überblick', 'Verwandte Treatments', 'Redaktion', 'tbl_cpl_treatments_nd_relations; Unterkategorie; tbl_cpl_treatments_nd2symptoms', 'Ausgehende Beziehungen, eingehende Verweise und getrennte Listen über gleiche Unterkategorie / Symptome. Keine Gleichsetzung mit medizinischen Alternativen'],
  ['Dashboard', 'Aliasse, Datenstand, Prüfstatus', 'Bestand / Redaktion', 'tbl_aliases_03 + tbl_cpl_treatments_nd2aliases; tbl_treatments_nd', 'Alternative Namen und Herkunftseinordnung'],

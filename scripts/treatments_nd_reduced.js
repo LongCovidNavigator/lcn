@@ -42,7 +42,7 @@
       const bar=button.querySelector('[data-bar]');
       if(bar) bar.style[card.dataset.kind==='effect'?'height':'width']=(percent || 0)+(card.dataset.kind==='effect'?'%':'%');
     });
-    card.querySelector('.ux-own').textContent=own?.value ? 'Deine gespeicherte Auswahl: '+own.value : 'Noch keine eigene Auswahl.';
+    card.querySelector('.ux-own').textContent=own?.value ? 'Deine gespeicherte Auswahl: '+own.value.replaceAll('Anbieter','Behandler') : 'Noch keine eigene Auswahl.';
     if(card.dataset.kind==='donut') {
       const yes=total?counts[0]*100/total:0;
       card.querySelector('[data-donut-value]').textContent=total?number(yes)+' %':'–';
@@ -73,7 +73,7 @@
   });
   function renderAll() {
     toggle.textContent='Dummydaten: '+(demo?'an':'aus');toggle.setAttribute('aria-pressed',String(demo));
-    document.getElementById('ux-demo-state').textContent=demo?'Alle Diagramme zeigen fiktive Beispieldaten, keine tatsächlichen Behandlungsergebnisse.':'';
+    document.getElementById('ux-demo-state').textContent=demo?'Alle Diagramme zeigen fiktive Beispieldaten, keine tatsächlichen Therapieergebnisse.':'';
 
 
 

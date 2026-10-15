@@ -22,7 +22,7 @@ header('Cache-Control: no-store, private');
         <header><span>LCN Administration</span><h1>Prüf- und Freigabeübersicht</h1><p>Automatisch vorsortierte neue Einträge, Ergänzungen, mögliche Dubletten und Auffälligkeiten.</p></header>
         <section id="review-dashboard" class="review-dashboard" aria-label="Übersicht"></section>
         <div class="review-type-filters" id="review-type-filters">
-            <button class="is-active" data-type="all">Alle</button><button data-type="doctor">Ärzt:innen & Praxen</button><button data-type="treatment">Behandlungen</button>
+            <button class="is-active" data-type="all">Alle</button><button data-type="doctor">Ärzt:innen & Praxen</button><button data-type="treatment">Therapien</button>
         </div>
         <nav id="review-filters">
             <button class="is-active" data-status="all">Übersicht</button>

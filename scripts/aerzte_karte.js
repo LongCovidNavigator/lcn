@@ -1138,7 +1138,7 @@ async function loadDoctorsFromSearchApi(settings) {
     }
 
     refreshDoctorDisplay();
-    setCountText(`Gefundene Behandler:innen: ${currentDoctors.length}`);
+    setCountText(`Gefundene Behandler: ${currentDoctors.length}`);
     updateStatusAfterSearch(settings);
 }
 
@@ -1175,7 +1175,7 @@ function updateStatusAfterSearch(settings) {
     }
 
     if (showOnlyCompareSelection) {
-        setMapStatus(`${selectedDoctorsForCompare.length} ausgewählte Behandler:innen in der Vergleichsansicht.${filterText}`);
+        setMapStatus(`${selectedDoctorsForCompare.length} ausgewählte Behandler in der Vergleichsansicht.${filterText}`);
         return;
     }
 
@@ -1222,7 +1222,7 @@ function buildActiveFilterStatusText() {
 function drawRadiusIfNeeded(settings) {
     if (settings.isCityMode && settings.cityCenter) {
         map.setView([settings.cityCenter.lat, settings.cityCenter.lng], 11);
-        setMapStatus(`Suche Behandler:innen in ${currentCityFilter}.`);
+        setMapStatus(`Suche Behandler in ${currentCityFilter}.`);
         return;
     }
 
@@ -1922,7 +1922,7 @@ function renderDoctorCompareSelection() {
 
     if (statusElement) {
         statusElement.textContent = hasSelection
-            ? `${selectedDoctorsForCompare.length} Behandler:innen ausgewählt.`
+            ? `${selectedDoctorsForCompare.length} Behandler ausgewählt.`
             : "";
     }
 

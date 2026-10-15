@@ -36,13 +36,13 @@
             <header class="tdd-hero">
                 <div class="tdd-avatar">${escape(t.short_name)}</div>
                 <div class="tdd-hero-copy">
-                    <span class="tdd-eyebrow">Behandlungsprofil · Testdaten</span>
+                    <span class="tdd-eyebrow">Therapieprofil · Testdaten</span>
                     <h1>${escape(t.name)}</h1>
                     <p>${isVotingOnly ? 'Nur aggregierte Community-Angaben' : (isHybridOnly ? 'Nur hybride Angaben' : `${escape(t.type)} · ${escape(t.subcategory)}`)}</p>
                     <div class="tdd-tags"><span>${escape(t.short_name)}</span>${!isVotingOnly && t.application ? `<span>${escape(t.application)}</span>` : ''}</div>
                 </div>
                 <div class="tdd-hero-facts">
-                    <div><small>Anbieter</small><strong>${isVotingOnly ? '—' : (t.providers.length || '—')}</strong></div>
+                    <div><small>Behandler</small><strong>${isVotingOnly ? '—' : (t.providers.length || '—')}</strong></div>
                     <div><small>Bewertungen</small><strong>${isHybridOnly ? '—' : (experience ? experience.total : '—')}</strong></div>
                 </div>
             </header>
@@ -59,24 +59,24 @@
 
     function standardSections(t, experience) {
         return `
-            ${section(1, 'Wie zugänglich ist die Behandlung für mich?', 'Voraussetzungen, Status und finanzielle Orientierung.', accessHtml(t))}
-            ${section(2, 'Kann ich die Behandlung gesundheitlich bewältigen?', 'Aufwand, Setting und mögliche Belastungen.', feasibilityHtml(t, experience))}
-            ${section(3, 'Welche Erfahrungen gibt es mit der Behandlung?', 'Aggregierte Angaben von Betroffenen.', experienceHtml(experience), !experience)}
-            ${section(4, 'Was zeichnet die Behandlung fachlich aus?', 'Einordnung, Wirkstoff und redaktionelle Quellen.', professionalHtml(t))}
-            ${section(5, 'Wie kann mir die Behandlung helfen?', 'Beschwerden, zu denen Erfahrungen oder Hinweise vorliegen.', symptomsHtml(t.symptoms), !t.symptoms.length)}
-            ${section(6, 'Welche verwandten oder alternativen Behandlungen gibt es?', 'Weitere Möglichkeiten fachlich einordnen und direkt erkunden.', relationshipsHtml(t.relationships), relationshipsEmpty(t.relationships))}
-            ${section(7, 'Wer bietet diese Behandlung an?', 'Beispielhafte Anbieter analog zur Arzt-Detailseite.', providersHtml(t.providers), !t.providers.length)}`;
+            ${section(1, 'Wie zugänglich ist die Therapie für mich?', 'Voraussetzungen, Status und finanzielle Orientierung.', accessHtml(t))}
+            ${section(2, 'Kann ich die Therapie gesundheitlich bewältigen?', 'Aufwand, Setting und mögliche Belastungen.', feasibilityHtml(t, experience))}
+            ${section(3, 'Welche Erfahrungen gibt es mit der Therapie?', 'Aggregierte Angaben von Betroffenen.', experienceHtml(experience), !experience)}
+            ${section(4, 'Was zeichnet die Therapie fachlich aus?', 'Einordnung, Wirkstoff und redaktionelle Quellen.', professionalHtml(t))}
+            ${section(5, 'Wie kann mir die Therapie helfen?', 'Beschwerden, zu denen Erfahrungen oder Hinweise vorliegen.', symptomsHtml(t.symptoms), !t.symptoms.length)}
+            ${section(6, 'Welche verwandten oder alternativen Therapien gibt es?', 'Weitere Möglichkeiten fachlich einordnen und direkt erkunden.', relationshipsHtml(t.relationships), relationshipsEmpty(t.relationships))}
+            ${section(7, 'Wer bietet diese Therapie an?', 'Beispielhafte Behandler analog zur Arzt-Detailseite.', providersHtml(t.providers), !t.providers.length)}`;
     }
 
     function researchOnlySections(t) {
         return `
-            ${section(1, 'Wie zugänglich ist die Behandlung für mich?', 'Redaktionell recherchierte Voraussetzungen und Statusangaben.', `${accessResearchHtml(t)}${missingFieldsHtml(['Kosten'])}`)}
-            ${section(2, 'Kann ich die Behandlung gesundheitlich bewältigen?', 'Diese Angaben werden hybrid oder durch Abstimmungen erhoben.', missingFieldsHtml(['Durchführungssetting', 'Behandlungsumfang', 'Praktische Bewältigbarkeit', 'Crash-/PEM-Risiko']), true)}
-            ${section(3, 'Welche Erfahrungen gibt es mit der Behandlung?', 'Diese Angaben stammen aus Abstimmungen.', missingFieldsHtml(['Gesamtbewertung', 'Gamechanger', 'Zeit bis zur wahrgenommenen Veränderung']), true)}
-            ${section(4, 'Was zeichnet die Behandlung fachlich aus?', 'Redaktionelle Einordnung und geprüfte Quellen.', researchProfessionalHtml(t))}
-            ${section(5, 'Wie kann mir die Behandlung helfen?', 'Symptomzuordnungen werden hybrid erhoben.', missingFieldsHtml(['Symptome / Beschwerden']), true)}
-            ${section(6, 'Welche verwandten oder alternativen Behandlungen gibt es?', 'Treatment-Beziehungen werden hybrid gepflegt.', missingFieldsHtml(['Verwandte Behandlungen', 'Alternative Präparate', 'Alternative Behandlungen / Ansätze']), true)}
-            ${section(7, 'Wer bietet diese Behandlung an?', 'Anbieter werden recherchiert und durch Vorschläge ergänzt.', missingFieldsHtml(['Anbieterkarte', 'Anbieterliste']), true)}`;
+            ${section(1, 'Wie zugänglich ist die Therapie für mich?', 'Redaktionell recherchierte Voraussetzungen und Statusangaben.', `${accessResearchHtml(t)}${missingFieldsHtml(['Kosten'])}`)}
+            ${section(2, 'Kann ich die Therapie gesundheitlich bewältigen?', 'Diese Angaben werden hybrid oder durch Abstimmungen erhoben.', missingFieldsHtml(['Durchführungssetting', 'Therapieumfang', 'Praktische Bewältigbarkeit', 'Crash-/PEM-Risiko']), true)}
+            ${section(3, 'Welche Erfahrungen gibt es mit der Therapie?', 'Diese Angaben stammen aus Abstimmungen.', missingFieldsHtml(['Gesamtbewertung', 'Gamechanger', 'Zeit bis zur wahrgenommenen Veränderung']), true)}
+            ${section(4, 'Was zeichnet die Therapie fachlich aus?', 'Redaktionelle Einordnung und geprüfte Quellen.', researchProfessionalHtml(t))}
+            ${section(5, 'Wie kann mir die Therapie helfen?', 'Symptomzuordnungen werden hybrid erhoben.', missingFieldsHtml(['Symptome / Beschwerden']), true)}
+            ${section(6, 'Welche verwandten oder alternativen Therapien gibt es?', 'Treatment-Beziehungen werden hybrid gepflegt.', missingFieldsHtml(['Verwandte Therapien', 'Alternative Präparate', 'Alternative Therapien / Ansätze']), true)}
+            ${section(7, 'Wer bietet diese Therapie an?', 'Behandler werden recherchiert und durch Vorschläge ergänzt.', missingFieldsHtml(['Behandlerkarte', 'Behandlerliste']), true)}`;
     }
 
     function accessResearchHtml(t) {
@@ -89,28 +89,28 @@
 
     function votingOnlySections(experience) {
         return `
-            ${section(1, 'Wie zugänglich ist die Behandlung für mich?', 'Voraussetzungen, Status und finanzielle Orientierung.', missingFieldsHtml(['Zugang', 'Zulassung', 'Off-Label-Status', 'Forschungsstatus', 'Kosten', 'Kostenübernahme']), true)}
-            ${section(2, 'Kann ich die Behandlung gesundheitlich bewältigen?', 'Nutzerangabe zum Belastungsrisiko.', `${scaleCard('Crash-/PEM-Risiko', ['Keines', 'Niedrig', 'Mittel', 'Hoch'], experience.pem_risk, 'Aus Angaben von Betroffenen')}${missingFieldsHtml(['Durchführungssetting', 'Behandlungsumfang', 'Praktische Bewältigbarkeit'])}`)}
-            ${section(3, 'Welche Erfahrungen gibt es mit der Behandlung?', 'Aggregierte Angaben von Betroffenen.', experienceHtml(experience))}
-            ${section(4, 'Was zeichnet die Behandlung fachlich aus?', 'Einordnung, Wirkstoff und redaktionelle Quellen.', missingFieldsHtml(['Allgemeine Beschreibung', 'Typ / Unterkategorie', 'Applikationsform', 'Medikamenteninformationen', 'Klassifikation', 'Alternative Bezeichnungen', 'Quellen / Prüfdatum']), true)}
-            ${section(5, 'Wie kann mir die Behandlung helfen?', 'Beschwerden, zu denen Erfahrungen oder Hinweise vorliegen.', missingFieldsHtml(['Symptome / Beschwerden']), true)}
-            ${section(6, 'Welche verwandten oder alternativen Behandlungen gibt es?', 'Dieser hybride Bereich gehört nicht zu den reinen Abstimmungsdaten.', missingFieldsHtml(['Verwandte Behandlungen', 'Alternative Präparate', 'Alternative Behandlungen / Ansätze']), true)}
-            ${section(7, 'Wer bietet diese Behandlung an?', 'Anbieterinformationen gehören nicht zu den Abstimmungsdaten.', missingFieldsHtml(['Anbieterkarte', 'Anbieterliste']), true)}`;
+            ${section(1, 'Wie zugänglich ist die Therapie für mich?', 'Voraussetzungen, Status und finanzielle Orientierung.', missingFieldsHtml(['Zugang', 'Zulassung', 'Off-Label-Status', 'Forschungsstatus', 'Kosten', 'Kostenübernahme']), true)}
+            ${section(2, 'Kann ich die Therapie gesundheitlich bewältigen?', 'Nutzerangabe zum Belastungsrisiko.', `${scaleCard('Crash-/PEM-Risiko', ['Keines', 'Niedrig', 'Mittel', 'Hoch'], experience.pem_risk, 'Aus Angaben von Betroffenen')}${missingFieldsHtml(['Durchführungssetting', 'Therapieumfang', 'Praktische Bewältigbarkeit'])}`)}
+            ${section(3, 'Welche Erfahrungen gibt es mit der Therapie?', 'Aggregierte Angaben von Betroffenen.', experienceHtml(experience))}
+            ${section(4, 'Was zeichnet die Therapie fachlich aus?', 'Einordnung, Wirkstoff und redaktionelle Quellen.', missingFieldsHtml(['Allgemeine Beschreibung', 'Typ / Unterkategorie', 'Applikationsform', 'Medikamenteninformationen', 'Klassifikation', 'Alternative Bezeichnungen', 'Quellen / Prüfdatum']), true)}
+            ${section(5, 'Wie kann mir die Therapie helfen?', 'Beschwerden, zu denen Erfahrungen oder Hinweise vorliegen.', missingFieldsHtml(['Symptome / Beschwerden']), true)}
+            ${section(6, 'Welche verwandten oder alternativen Therapien gibt es?', 'Dieser hybride Bereich gehört nicht zu den reinen Abstimmungsdaten.', missingFieldsHtml(['Verwandte Therapien', 'Alternative Präparate', 'Alternative Therapien / Ansätze']), true)}
+            ${section(7, 'Wer bietet diese Therapie an?', 'Behandlerinformationen gehören nicht zu den Abstimmungsdaten.', missingFieldsHtml(['Behandlerkarte', 'Behandlerliste']), true)}`;
     }
 
     function hybridOnlySections(t) {
         return `
-            ${section(1, 'Wie zugänglich ist die Behandlung für mich?', 'Hybride Angaben zu Kosten und Übernahme.', `${missingFieldsHtml(['Zugang', 'Zulassung', 'Off-Label-Status', 'Forschungsstatus'])}<div class="tdd-split">${groupCard('Kosten', [['Pro Monat', t.costs.unit], ['Typischer Zeitraum', t.costs.typical_count], ['Gesamtkosten', t.costs.total], ['Laufende Kosten', t.costs.ongoing]])}${scaleCard('Kostenübernahme', ['GKV möglich', 'PKV / Selbstzahler', 'Nur Selbstzahler'], t.reimbursement, 'Hybrid aus Recherche und Erfahrungen')}</div>`)}
-            ${section(2, 'Kann ich die Behandlung gesundheitlich bewältigen?', 'Hybride Angaben zu Setting, Umfang und praktischer Bewältigbarkeit.', `${hybridFeasibilityHtml(t)}${missingFieldsHtml(['Crash-/PEM-Risiko'])}`)}
-            ${section(3, 'Welche Erfahrungen gibt es mit der Behandlung?', 'Reine Abstimmungswerte sind in diesem Modus ausgeblendet.', missingFieldsHtml(['Gesamtbewertung', 'Gamechanger', 'Zeit bis zur wahrgenommenen Veränderung']), true)}
-            ${section(4, 'Was zeichnet die Behandlung fachlich aus?', 'Hybride Angaben zu Anwendung und Dosierung.', `${groupCard('Anwendung', [['Applikationsform', t.application], ['Dosierung', t.medication.dosage]])}${missingFieldsHtml(['Allgemeine Beschreibung', 'Typ / Unterkategorie', 'Wirkstoff / Handelsname / Medikamentenklasse', 'Klassifikation', 'Alternative Bezeichnungen', 'Quellen / Prüfdatum'])}`)}
-            ${section(5, 'Wie kann mir die Behandlung helfen?', 'Hybrid zugeordnete Beschwerden.', symptomsHtml(t.symptoms))}
-            ${section(6, 'Welche verwandten oder alternativen Behandlungen gibt es?', 'Hybrid gepflegte Treatment-Verknüpfungen.', relationshipsHtml(t.relationships))}
-            ${section(7, 'Wer bietet diese Behandlung an?', 'Hybrid aus recherchierten und vorgeschlagenen Anbietern.', providersHtml(t.providers))}`;
+            ${section(1, 'Wie zugänglich ist die Therapie für mich?', 'Hybride Angaben zu Kosten und Übernahme.', `${missingFieldsHtml(['Zugang', 'Zulassung', 'Off-Label-Status', 'Forschungsstatus'])}<div class="tdd-split">${groupCard('Kosten', [['Pro Monat', t.costs.unit], ['Typischer Zeitraum', t.costs.typical_count], ['Gesamtkosten', t.costs.total], ['Laufende Kosten', t.costs.ongoing]])}${scaleCard('Kostenübernahme', ['GKV möglich', 'PKV / Selbstzahler', 'Nur Selbstzahler'], t.reimbursement, 'Hybrid aus Recherche und Erfahrungen')}</div>`)}
+            ${section(2, 'Kann ich die Therapie gesundheitlich bewältigen?', 'Hybride Angaben zu Setting, Umfang und praktischer Bewältigbarkeit.', `${hybridFeasibilityHtml(t)}${missingFieldsHtml(['Crash-/PEM-Risiko'])}`)}
+            ${section(3, 'Welche Erfahrungen gibt es mit der Therapie?', 'Reine Abstimmungswerte sind in diesem Modus ausgeblendet.', missingFieldsHtml(['Gesamtbewertung', 'Gamechanger', 'Zeit bis zur wahrgenommenen Veränderung']), true)}
+            ${section(4, 'Was zeichnet die Therapie fachlich aus?', 'Hybride Angaben zu Anwendung und Dosierung.', `${groupCard('Anwendung', [['Applikationsform', t.application], ['Dosierung', t.medication.dosage]])}${missingFieldsHtml(['Allgemeine Beschreibung', 'Typ / Unterkategorie', 'Wirkstoff / Handelsname / Medikamentenklasse', 'Klassifikation', 'Alternative Bezeichnungen', 'Quellen / Prüfdatum'])}`)}
+            ${section(5, 'Wie kann mir die Therapie helfen?', 'Hybrid zugeordnete Beschwerden.', symptomsHtml(t.symptoms))}
+            ${section(6, 'Welche verwandten oder alternativen Therapien gibt es?', 'Hybrid gepflegte Treatment-Verknüpfungen.', relationshipsHtml(t.relationships))}
+            ${section(7, 'Wer bietet diese Therapie an?', 'Hybrid aus recherchierten und vorgeschlagenen Behandlern.', providersHtml(t.providers))}`;
     }
 
     function hybridFeasibilityHtml(t) {
-        return `<div class="tdd-card-grid is-two">${scaleCard('Durchführungssetting', ['Zu Hause', 'Hausbesuch', 'Ambulant', 'Stationär'], normalizeSetting(t.setting), 'Hybrid aus Recherche und Erfahrungen')}</div><div class="tdd-split">${groupCard('Behandlungsumfang', [['Dauer pro Einnahme', t.scope.duration], ['Häufigkeit', t.scope.frequency], ['Anzahl', t.scope.count], ['Gesamtdauer', t.scope.total_duration]])}<article class="tdd-card"><h3>Praktische Bewältigbarkeit</h3><ul class="tdd-checks">${t.accessibility.map(item => `<li><span class="${item.value ? 'yes' : 'no'}">${item.value ? 'Ja' : 'Nein'}</span>${escape(item.label)}</li>`).join('')}</ul></article></div>`;
+        return `<div class="tdd-card-grid is-two">${scaleCard('Durchführungssetting', ['Zu Hause', 'Hausbesuch', 'Ambulant', 'Stationär'], normalizeSetting(t.setting), 'Hybrid aus Recherche und Erfahrungen')}</div><div class="tdd-split">${groupCard('Therapieumfang', [['Dauer pro Einnahme', t.scope.duration], ['Häufigkeit', t.scope.frequency], ['Anzahl', t.scope.count], ['Gesamtdauer', t.scope.total_duration]])}<article class="tdd-card"><h3>Praktische Bewältigbarkeit</h3><ul class="tdd-checks">${t.accessibility.map(item => `<li><span class="${item.value ? 'yes' : 'no'}">${item.value ? 'Ja' : 'Nein'}</span>${escape(item.label)}</li>`).join('')}</ul></article></div>`;
     }
 
     function missingFieldsHtml(labels) {
@@ -154,7 +154,7 @@
             ${experience ? scaleCard('Crash-/PEM-Risiko', ['Keines', 'Niedrig', 'Mittel', 'Hoch'], experience.pem_risk, 'Aus Angaben von Betroffenen') : factCard('Crash-/PEM-Risiko', null)}
         </div>
         <div class="tdd-split">
-            ${groupCard('Behandlungsumfang', t.scope ? [['Dauer pro Einnahme', t.scope.duration], ['Häufigkeit', t.scope.frequency], ['Anzahl', t.scope.count], ['Gesamtdauer', t.scope.total_duration]] : null)}
+            ${groupCard('Therapieumfang', t.scope ? [['Dauer pro Einnahme', t.scope.duration], ['Häufigkeit', t.scope.frequency], ['Anzahl', t.scope.count], ['Gesamtdauer', t.scope.total_duration]] : null)}
             <article class="tdd-card"><h3>Praktische Bewältigbarkeit</h3>${t.accessibility.length ? `<ul class="tdd-checks">${t.accessibility.map(item => `<li><span class="${item.value ? 'yes' : 'no'}">${item.value ? 'Ja' : 'Nein'}</span>${escape(item.label)}</li>`).join('')}</ul>` : empty('Noch keine belastbaren Angaben vorhanden.')}</article>
         </div>`;
     }
@@ -165,7 +165,7 @@
             <article class="tdd-card"><h3>Gesamtbewertung <small>n=${x.total}</small></h3><div class="tdd-ratings">
                 ${rating('Positiv', x.ratings.positive, 'positive')}${rating('Neutral', x.ratings.neutral, 'neutral')}${rating('Negativ', x.ratings.negative, 'negative')}
             </div></article>
-            <article class="tdd-card tdd-gamechanger"><span>${x.gamechanger} %</span><div><h3>Gamechanger</h3><p>bezeichneten die Behandlung als entscheidend für ihre Verbesserung.</p></div></article>
+            <article class="tdd-card tdd-gamechanger"><span>${x.gamechanger} %</span><div><h3>Gamechanger</h3><p>bezeichneten die Therapie als entscheidend für ihre Verbesserung.</p></div></article>
         </div>
         <article class="tdd-card"><h3>Zeit bis zur wahrgenommenen Veränderung</h3><div class="tdd-bars">${x.onset.map(row => `<div><span>${escape(row.label)}</span><i><b style="width:${row.value}%"></b></i><strong>${row.value} %</strong></div>`).join('')}</div></article>`;
     }
@@ -195,7 +195,7 @@
         const related = relationships.related_treatments;
         return `<div class="tdd-relationship-groups">
             <article class="tdd-relationship-group is-alternatives">
-                <div class="tdd-relationship-heading"><div><span>Andere Möglichkeiten</span><h3>Alternative Behandlungen / Ansätze</h3></div><small>Fachlich recherchierte Beziehungen</small></div>
+                <div class="tdd-relationship-heading"><div><span>Andere Möglichkeiten</span><h3>Alternative Therapien / Ansätze</h3></div><small>Fachlich recherchierte Beziehungen</small></div>
                 <ul class="tdd-relationship-list is-counter-list">${relationshipList(relationships.alternative_treatments, item => item.relation, item => item.recommendations, relationships)}</ul>
             </article>
             <article class="tdd-relationship-group is-products">
@@ -203,7 +203,7 @@
                 <ul class="tdd-relationship-list">${relationshipList(relationships.alternative_products, item => item.type, () => null, relationships)}</ul>
             </article>
             <article class="tdd-relationship-group is-related">
-                <div class="tdd-relationship-heading"><div><span>Fachliche Nähe</span><h3>Verwandte Behandlungen</h3></div><small>Gehört zu: <strong>${escape(related.classification)}</strong></small></div>
+                <div class="tdd-relationship-heading"><div><span>Fachliche Nähe</span><h3>Verwandte Therapien</h3></div><small>Gehört zu: <strong>${escape(related.classification)}</strong></small></div>
                 <ul class="tdd-relationship-list">${relationshipList(related.items, item => item.type || 'Verwandt', () => null, relationships)}</ul>
             </article>
         </div>`;
@@ -233,25 +233,25 @@
     }
 
     function providersHtml(providers) {
-        if (!providers.length) return empty('In diesem Datenstand sind noch keine Anbieter hinterlegt.');
+        if (!providers.length) return empty('In diesem Datenstand sind noch keine Behandler hinterlegt.');
         const mappedProviders = providers.filter(provider => Number.isFinite(provider.lat) && Number.isFinite(provider.lng));
-        return `${mappedProviders.length ? `<section id="treatment-detail-provider-map-panel" class="treatment-detail-provider-map-panel" aria-label="Anbieterkarte">
+        return `${mappedProviders.length ? `<section id="treatment-detail-provider-map-panel" class="treatment-detail-provider-map-panel" aria-label="Behandlerkarte">
             <div class="treatment-detail-provider-map-header"><span>Standorte auf der Karte</span><span class="treatment-detail-provider-map-count">${providers.length} Dummy-Standorte</span></div>
             <div id="tdd-provider-map" class="treatment-detail-provider-map"></div>
         </section>` : ''}
         <div class="treatment-detail-provider-list">
-            <div class="treatment-detail-provider-controls" aria-label="Anbieteransicht und Sortierung">
+            <div class="treatment-detail-provider-controls" aria-label="Behandleransicht und Sortierung">
                 <div class="treatment-detail-provider-controls-grid">
-                    <section class="treatment-detail-provider-control-card"><h3>Anbieteransicht</h3><div class="treatment-detail-provider-view-switch"><button type="button" class="treatment-detail-provider-view-button is-active" data-tdd-provider-view="cards">Kacheln</button><button type="button" class="treatment-detail-provider-view-button" data-tdd-provider-view="table">Tabelle</button></div></section>
+                    <section class="treatment-detail-provider-control-card"><h3>Behandleransicht</h3><div class="treatment-detail-provider-view-switch"><button type="button" class="treatment-detail-provider-view-button is-active" data-tdd-provider-view="cards">Kacheln</button><button type="button" class="treatment-detail-provider-view-button" data-tdd-provider-view="table">Tabelle</button></div></section>
                     <section class="treatment-detail-provider-control-card"><h3>Sortierung</h3><div class="treatment-detail-provider-sort-switch"><button type="button" class="treatment-detail-provider-sort-button is-active">Alphabetisch</button><button type="button" class="treatment-detail-provider-sort-button" disabled>Bewertung positiv</button><button type="button" class="treatment-detail-provider-sort-button" disabled>Entfernung</button></div></section>
-                    ${mappedProviders.length ? '<section class="treatment-detail-provider-control-card treatment-detail-provider-control-card-location"><h3>Standort / Entfernung</h3><p>Für Anbieter mit recherchierten Koordinaten.</p></section>' : '<section class="treatment-detail-provider-control-card treatment-detail-provider-control-card-location"><h3>Standortdaten</h3><p>In diesem Modul nicht vollständig recherchiert; deshalb keine Entfernungen.</p></section>'}
+                    ${mappedProviders.length ? '<section class="treatment-detail-provider-control-card treatment-detail-provider-control-card-location"><h3>Standort / Entfernung</h3><p>Für Behandler mit recherchierten Koordinaten.</p></section>' : '<section class="treatment-detail-provider-control-card treatment-detail-provider-control-card-location"><h3>Standortdaten</h3><p>In diesem Modul nicht vollständig recherchiert; deshalb keine Entfernungen.</p></section>'}
                 </div>
             </div>
             <div class="treatment-detail-provider-list-inner treatment-detail-provider-view-cards" data-tdd-provider-cards>
-                <section class="treatment-detail-provider-group"><div class="treatment-detail-provider-group-header"><h3>Recherchierte Anbieter</h3><span>${providers.length}</span></div><p class="treatment-detail-provider-group-note">Anbieterbeziehungen aus Modul 04; fehlende Standort-, Kontakt- und Bewertungsdaten werden nicht ergänzt.</p><div class="treatment-detail-provider-card-grid">${providers.map((p, i) => providerCard(p, i)).join('')}</div></section>
+                <section class="treatment-detail-provider-group"><div class="treatment-detail-provider-group-header"><h3>Recherchierte Behandler</h3><span>${providers.length}</span></div><p class="treatment-detail-provider-group-note">Behandlerbeziehungen aus Modul 04; fehlende Standort-, Kontakt- und Bewertungsdaten werden nicht ergänzt.</p><div class="treatment-detail-provider-card-grid">${providers.map((p, i) => providerCard(p, i)).join('')}</div></section>
             </div>
             <div class="treatment-detail-provider-list-inner treatment-detail-provider-view-list" data-tdd-provider-table hidden>
-                <section class="treatment-detail-provider-group"><div class="treatment-detail-provider-group-header"><h3>Alle Anbieter</h3><span>${providers.length}</span></div>${providerTable(providers)}</section>
+                <section class="treatment-detail-provider-group"><div class="treatment-detail-provider-group-header"><h3>Alle Behandler</h3><span>${providers.length}</span></div>${providerTable(providers)}</section>
             </div>
         </div>`;
     }
@@ -260,13 +260,13 @@
         const total = [p.pro, p.neutral, p.contra].every(Number.isFinite) ? p.pro + p.neutral + p.contra : 0;
         const percent = value => Math.round(value / total * 100);
         const ratingBlock = total ? `<div class="treatment-detail-provider-rating"><div class="treatment-detail-provider-rating-item treatment-detail-provider-rating-positive"><strong>${percent(p.pro)}%</strong><span>positiv</span></div><div class="treatment-detail-provider-rating-item treatment-detail-provider-rating-neutral"><strong>${percent(p.neutral)}%</strong><span>neutral</span></div><div class="treatment-detail-provider-rating-item treatment-detail-provider-rating-negative"><strong>${percent(p.contra)}%</strong><span>negativ</span></div><div class="treatment-detail-provider-rating-total">n = ${total}</div></div>` : '<p class="tdd-muted">Keine Communitybewertung im Recherchemodul</p>';
-        return `<article class="treatment-detail-provider-card"><div class="treatment-detail-provider-card-topline"><span class="treatment-detail-provider-rank-badge">#${index + 1}</span><span>${escape(p.kind || 'Anbieter')}</span></div><div class="treatment-detail-provider-card-header"><div><h3><span class="treatment-detail-provider-name-link">${escape(p.name)}</span></h3><p>${p.location ? escape([p.postal_code, p.location].filter(Boolean).join(' ')) : 'Standort nicht im Modul recherchiert'}</p></div></div>${ratingBlock}<div class="treatment-detail-provider-card-body"><p>${escape(p.detail || '')}</p><div class="treatment-detail-provider-meta">${(p.care || []).map(c => `<span class="treatment-detail-care-badge treatment-detail-care-badge-positive">${escape(c)}</span>`).join('')}</div><div class="treatment-detail-provider-contact">${(p.contact || []).map(c => `<span>${escape(c)}</span>`).join('')}</div></div></article>`;
+        return `<article class="treatment-detail-provider-card"><div class="treatment-detail-provider-card-topline"><span class="treatment-detail-provider-rank-badge">#${index + 1}</span><span>${escape(p.kind || 'Behandler')}</span></div><div class="treatment-detail-provider-card-header"><div><h3><span class="treatment-detail-provider-name-link">${escape(p.name)}</span></h3><p>${p.location ? escape([p.postal_code, p.location].filter(Boolean).join(' ')) : 'Standort nicht im Modul recherchiert'}</p></div></div>${ratingBlock}<div class="treatment-detail-provider-card-body"><p>${escape(p.detail || '')}</p><div class="treatment-detail-provider-meta">${(p.care || []).map(c => `<span class="treatment-detail-care-badge treatment-detail-care-badge-positive">${escape(c)}</span>`).join('')}</div><div class="treatment-detail-provider-contact">${(p.contact || []).map(c => `<span>${escape(c)}</span>`).join('')}</div></div></article>`;
     }
 
     function providerTable(providers) {
-        const rows = providers.map((p, i) => { const total=[p.pro,p.neutral,p.contra].every(Number.isFinite)?p.pro+p.neutral+p.contra:0; const hasMap=Number.isFinite(p.lat)&&Number.isFinite(p.lng); return `<tr><td class="treatment-detail-provider-rank-cell" data-label="Rang"><span class="treatment-detail-provider-rank-badge">#${i+1}</span></td><td data-label="Anbieter"><strong>${escape(p.name)}</strong><small>${escape(p.kind || '')}</small></td><td data-label="Standort">${p.location ? escape([p.postal_code,p.location].filter(Boolean).join(' ')) : '—'}</td><td data-label="Karte"><span class="treatment-detail-map-status">${hasMap?'Ja':'Nein'}</span></td><td data-label="Entfernung">—</td><td data-label="Bewertung">${total?`n=${total}`:'—'}</td><td data-label="Versorgung"><div class="treatment-detail-provider-meta">${(p.care||[]).map(c=>`<span class="treatment-detail-care-badge treatment-detail-care-badge-positive">${escape(c)}</span>`).join('')}</div></td><td data-label="Kontakt"><div class="treatment-detail-provider-contact">${(p.contact||[]).map(c=>`<span>${escape(c)}</span>`).join('')}</div></td></tr>`; }).join('');
+        const rows = providers.map((p, i) => { const total=[p.pro,p.neutral,p.contra].every(Number.isFinite)?p.pro+p.neutral+p.contra:0; const hasMap=Number.isFinite(p.lat)&&Number.isFinite(p.lng); return `<tr><td class="treatment-detail-provider-rank-cell" data-label="Rang"><span class="treatment-detail-provider-rank-badge">#${i+1}</span></td><td data-label="Behandler"><strong>${escape(p.name)}</strong><small>${escape(p.kind || '')}</small></td><td data-label="Standort">${p.location ? escape([p.postal_code,p.location].filter(Boolean).join(' ')) : '—'}</td><td data-label="Karte"><span class="treatment-detail-map-status">${hasMap?'Ja':'Nein'}</span></td><td data-label="Entfernung">—</td><td data-label="Bewertung">${total?`n=${total}`:'—'}</td><td data-label="Versorgung"><div class="treatment-detail-provider-meta">${(p.care||[]).map(c=>`<span class="treatment-detail-care-badge treatment-detail-care-badge-positive">${escape(c)}</span>`).join('')}</div></td><td data-label="Kontakt"><div class="treatment-detail-provider-contact">${(p.contact||[]).map(c=>`<span>${escape(c)}</span>`).join('')}</div></td></tr>`; }).join('');
         const compactRows = providers.map((p, i) => `<tr><td>${i+1}</td><td><strong class="treatment-detail-provider-name-link">${escape(p.name)}</strong></td><td>—</td><td><small>${p.location ? escape([p.postal_code,p.location].filter(Boolean).join(' ')) : 'nicht recherchiert'}</small></td></tr>`).join('');
-        return `<div class="treatment-detail-provider-table-wrap"><table class="treatment-detail-provider-table treatment-detail-provider-table-detailed"><thead><tr><th>Rang</th><th>Anbieter</th><th>Standort</th><th>Karte</th><th>Entfernung</th><th>Bewertung</th><th>Versorgung</th><th>Kontakt</th></tr></thead><tbody>${rows}</tbody></table><table class="treatment-detail-provider-compact-table"><thead><tr><th>#</th><th>Anbieter</th><th>Positiv</th><th>Standort</th></tr></thead><tbody>${compactRows}</tbody></table></div>`;
+        return `<div class="treatment-detail-provider-table-wrap"><table class="treatment-detail-provider-table treatment-detail-provider-table-detailed"><thead><tr><th>Rang</th><th>Behandler</th><th>Standort</th><th>Karte</th><th>Entfernung</th><th>Bewertung</th><th>Versorgung</th><th>Kontakt</th></tr></thead><tbody>${rows}</tbody></table><table class="treatment-detail-provider-compact-table"><thead><tr><th>#</th><th>Behandler</th><th>Positiv</th><th>Standort</th></tr></thead><tbody>${compactRows}</tbody></table></div>`;
     }
 
     function initializeProviderArea(providers) {

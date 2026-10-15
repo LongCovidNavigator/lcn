@@ -11,7 +11,7 @@ try {
     if (!$id || !lcnDoctorExists($id)) {
         http_response_code(404); echo json_encode(['ok' => false, 'message' => 'Behandler nicht gefunden.']); exit;
     }
-    echo json_encode(['ok' => true, 'dr_id' => $id, 'own_answers' => lcnDoctorOwnAnswers(lcnDoctorDatabase(), $id, lcnExistingVoterKey()), 'community' => lcnDoctorCommunity(lcnDoctorDatabase(), $id)], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+    echo json_encode(['ok' => true, 'dr_id' => $id, 'own_answers' => lcnDoctorOwnAnswers(lcnDoctorDatabase(), $id, lcnExistingVoterKey()), 'community' => lcnDoctorCommunity(lcnDoctorDatabase(), $id, isset($_GET['include_dummy']) ? $_GET['include_dummy'] === '1' : null)], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 } catch (Throwable $error) {
     lcnLogApiError('doctor_community', $error);
     http_response_code(500);

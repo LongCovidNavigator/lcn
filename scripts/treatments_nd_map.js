@@ -28,14 +28,14 @@
     const {host,providers,map}=entry,list=host.querySelector('.nd-map-results');list.replaceChildren();
     const [sort,direction]=host.querySelector('[data-provider-sort]').value.split(':');
     const rows=filteredProviders(entry).sort((a,b)=>{if(sort==='distance'&&origin){if(!valid(a))return valid(b)?1:0;if(!valid(b))return -1;return (distance(a)-distance(b))*(direction==='desc'?-1:1);}return a.name.localeCompare(b.name,'de')*(direction==='desc'?-1:1);});
-    host.querySelector('[data-provider-count]').textContent=rows.length+' von '+providers.length+' Anbietern'+(sort==='distance'&&!origin?' · Für die Entfernungssortierung bitte oben einen Standort eingeben.':'');
+    host.querySelector('[data-provider-count]').textContent=rows.length+' von '+providers.length+' Behandlern'+(sort==='distance'&&!origin?' · Für die Entfernungssortierung bitte oben einen Standort eingeben.':'');
     host.querySelectorAll('[data-provider-view]').forEach(b=>{const active=b.dataset.providerView===entry.view;b.classList.toggle('is-active',active);b.setAttribute('aria-pressed',String(active));});
-    if(!rows.length){list.textContent=providers.length?'Keine passenden Anbieter. Bitte ändere den Suchtext oder die Orts- und Radiusfilter.':'Für diese Behandlung sind noch keine bestätigten Anbieter hinterlegt.';return;}
+    if(!rows.length){list.textContent=providers.length?'Keine passenden Behandler. Bitte ändere den Suchtext oder die Orts- und Radiusfilter.':'Für diese Therapie sind noch keine bestätigten Behandler hinterlegt.';return;}
     function nameNode(point){const node=document.createElement(point.href?'a':'strong');node.textContent=point.name;if(point.href)node.href=point.href;return node;}
     function showButton(point){const button=document.createElement('button');button.type='button';button.className='nd-show-provider';button.textContent=valid(point)?'Auf Karte zeigen':'Standort nicht verfügbar';button.disabled=!valid(point);button.addEventListener('click',()=>{if(!map)return;host.querySelector('.top-map-content').classList.remove('is-collapsed');const header=host.querySelector('.top-map-header');header.classList.remove('is-collapsed');header.setAttribute('aria-expanded','true');map.invalidateSize();map.setView([point.lat,point.lng],12);entry.markers.get(point)?.openPopup();host.querySelector('.nd-map-canvas').scrollIntoView({block:'center'});});return button;}
     const km=p=>!valid(p)?'Standort nicht verfügbar':origin?distance(p).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':'Ausgangsort fehlt';
     if(entry.view==='table'){
-      list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();['Anbieter','Ort','Entfernung','Zuordnung','Karte'].forEach(label=>{const th=document.createElement('th');th.scope='col';th.textContent=label;head.append(th);});const body=table.createTBody();rows.forEach(point=>{const row=body.insertRow();row.insertCell().append(nameNode(point));[point.place||'Keine Ortsangabe',km(point),point.status].forEach(value=>row.insertCell().textContent=value);row.insertCell().append(showButton(point));});list.append(table);
+      list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();['Behandler','Ort','Entfernung','Zuordnung','Karte'].forEach(label=>{const th=document.createElement('th');th.scope='col';th.textContent=label;head.append(th);});const body=table.createTBody();rows.forEach(point=>{const row=body.insertRow();row.insertCell().append(nameNode(point));[point.place||'Keine Ortsangabe',km(point),point.status].forEach(value=>row.insertCell().textContent=value);row.insertCell().append(showButton(point));});list.append(table);
     }else{
       list.className='nd-map-results doctor-card-grid';
       rows.forEach(point=>{
@@ -60,8 +60,8 @@
     let nearest=host.querySelector('.ux-nearest');
     if(!nearest){nearest=document.createElement('p');nearest.className='ux-nearest';host.querySelector('.top-map-location-controls').after(nearest);}
     const closest=origin ? [...points].sort((a,b)=>distance(a)-distance(b))[0] : null;
-    nearest.textContent=closest ? 'Nächstgelegener Anbieter im Filter mit Koordinaten: '+closest.name+' · '+distance(closest).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie' : origin ? 'Keine Anbieter mit Koordinaten im gewählten Filter.' : 'PLZ oder Ort eingeben, um den nächstgelegenen Anbieter zu ermitteln.';
-    host.querySelector('[data-map-status]').textContent=points.length ? points.length+' Anbieterstandorte'+(origin?' · Entfernungen ab '+origin.label:'. Ausgangsort eingeben, um Entfernungen zu sehen.') : 'Keine Anbieterstandorte im gewählten Filter.';
+    nearest.textContent=closest ? 'Nächstgelegener Behandler im Filter mit Koordinaten: '+closest.name+' · '+distance(closest).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie' : origin ? 'Keine Behandler mit Koordinaten im gewählten Filter.' : 'PLZ oder Ort eingeben, um den nächstgelegenen Behandler zu ermitteln.';
+    host.querySelector('[data-map-status]').textContent=points.length ? points.length+' Behandlerstandorte'+(origin?' · Entfernungen ab '+origin.label:'. Ausgangsort eingeben, um Entfernungen zu sehen.') : 'Keine Behandlerstandorte im gewählten Filter.';
     if (!map) return;
     syncMarkers(entry,points);
     if(entry.radiusCircle) map.removeLayer(entry.radiusCircle);
@@ -82,7 +82,7 @@
     host.querySelector('[data-radius-enabled]').addEventListener('change',()=>render(entry));
     host.querySelector('[data-radius]').addEventListener('input',()=>render(entry));
     render(entry);
-    const all=document.createElement('button');all.type='button';all.textContent='Alle Anbieter anzeigen';
+    const all=document.createElement('button');all.type='button';all.textContent='Alle Behandler anzeigen';
     host.querySelector('.doctor-results-search-panel').append(all);
     all.addEventListener('click',()=>{host.querySelector('[data-provider-search]').value='';host.querySelector('[data-provider-city]').value='';host.querySelector('[data-radius-enabled]').checked=false;render(entry);});
     host.querySelector('[data-provider-search]').addEventListener('input',()=>render(entry));
@@ -134,11 +134,11 @@
       L.control.zoom({position:'topright'}).addTo(entry.map);
       canvas.addEventListener('click',()=>entry.map.scrollWheelZoom.enable());canvas.addEventListener('mouseleave',()=>entry.map.scrollWheelZoom.disable());
       const tiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere',maxZoom:19}).addTo(entry.map);
-      tiles.on('tileerror',()=>{entry.host.querySelector('[data-map-status]').textContent='Kartenhintergrund konnte nicht geladen werden. Anbieter-Marker und Entfernungsliste bleiben verfügbar.';});
+      tiles.on('tileerror',()=>{entry.host.querySelector('[data-map-status]').textContent='Kartenhintergrund konnte nicht geladen werden. Behandler-Marker und Entfernungsliste bleiben verfügbar.';});
       new ResizeObserver(()=>{if(canvas.clientWidth){entry.map.invalidateSize();if(!entry.wasVisible){render(entry);entry.wasVisible=true;}}else entry.wasVisible=false;}).observe(canvas);render(entry);
     });
   }
-  init().catch(()=>entries.forEach(({host})=>{host.querySelector('.nd-map-canvas').textContent='Karte konnte nicht geladen werden. Anbieter und Entfernungen stehen weiterhin in der Liste.';}));
+  init().catch(()=>entries.forEach(({host})=>{host.querySelector('.nd-map-canvas').textContent='Karte konnte nicht geladen werden. Behandler und Entfernungen stehen weiterhin in der Liste.';}));
 })();
 
 

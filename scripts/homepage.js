@@ -32,10 +32,10 @@ async function loadFeaturedTreatments() {
             const selection = await selectionResponse.json();
             if (!selectionResponse.ok || !selection.ok || !selection.catalog_available) throw new Error('Auswahl nicht verfügbar');
             const selectedIds = [...new Set(selection.topics.flatMap(topic => topic.items.map(item => Number(item.treat_id))))];
-            if (!selectedIds.length) { list.textContent = 'Noch keine Top-Behandlungen hinterlegt.'; return; }
+            if (!selectedIds.length) { list.textContent = 'Noch keine Top-Therapien hinterlegt.'; return; }
             const response = await fetch('api/treatments_search.php?treat_ids=' + selectedIds.join(',') + buildHomepageLocationQuery());
             const payload = await response.json();
-            if (!response.ok || !payload.ok) throw new Error('Behandlungen nicht verfügbar');
+            if (!response.ok || !payload.ok) throw new Error('Therapien nicht verfügbar');
             const byId = new Map(payload.items.map(item => [Number(item.treat_id), item]));
             const entries = selectedIds.filter(id => byId.has(id)).map(id => ({editorial: {id, name: byId.get(id).behandlung}, data: byId.get(id)}));
             bindFeaturedTreatmentViewSwitch(list, entries);
@@ -64,7 +64,7 @@ async function loadFeaturedTreatments() {
             .map(function (treatment) {
                 return {
                     id: Number(treatment.treat_id),
-                    name: treatment.behandlung || "Behandlung",
+                    name: treatment.behandlung || "Therapie",
                     icon: getFeaturedTreatmentIconName(treatment.typ),
                     data: treatment
                 };
@@ -108,8 +108,8 @@ async function loadFeaturedTreatments() {
             }
         };
     } catch (error) {
-        console.error("Behandlungen für die Startseite konnten nicht geladen werden:", error);
-        list.innerHTML = '<p class="featured-treatments-status">Die Behandlungen konnten gerade nicht geladen werden.</p>';
+        console.error("Therapien für die Startseite konnten nicht geladen werden:", error);
+        list.innerHTML = '<p class="featured-treatments-status">Die Therapien konnten gerade nicht geladen werden.</p>';
     }
 }
 
@@ -142,9 +142,9 @@ function buildFeaturedTreatmentsTableHtml(treatments) {
     return `<div class="featured-treatments-table-wrap">
         <table class="featured-treatments-table">
             <thead><tr>
-                <th scope="col">Platz</th><th scope="col">Behandlung</th><th scope="col">Kategorie</th>
+                <th scope="col">Platz</th><th scope="col">Therapie</th><th scope="col">Kategorie</th>
                 <th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Angaben)</span></th>
-                <th scope="col">Anbieter gesamt</th><th scope="col">Entfernung / Ort</th>
+                <th scope="col">Behandler gesamt</th><th scope="col">Entfernung / Ort</th>
             </tr></thead>
             <tbody>${buildFeaturedTreatmentTableRowsHtml(treatments, 0, false)}</tbody>
         </table>
@@ -163,10 +163,10 @@ function buildFeaturedTreatmentsHtml(treatments) {
             <table class="featured-treatments-table">
                 <thead><tr>
                     <th scope="col">Platz</th>
-                    <th scope="col">Behandlung</th>
+                    <th scope="col">Therapie</th>
                     <th scope="col">Kategorie</th>
                     <th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Angaben)</span></th>
-                    <th scope="col">Anbieter gesamt</th>
+                    <th scope="col">Behandler gesamt</th>
                     <th scope="col">Entfernung / Ort</th>
                 </tr></thead>
                 <tbody>${buildFeaturedTreatmentTableRowsHtml(tableEntries, 3, false)}</tbody>
@@ -177,7 +177,7 @@ function buildFeaturedTreatmentsHtml(treatments) {
 function buildFeaturedTreatmentTableRowsHtml(treatments, rankOffset, isExtra) {
     return treatments.map(function (entry, index) {
         const treatment = entry.data || {};
-        const name = escapeHomepageHtml(entry.editorial.name || treatment.behandlung || "Behandlung");
+        const name = escapeHomepageHtml(entry.editorial.name || treatment.behandlung || "Therapie");
         const href = `therapie_detail.html?treat_id=${encodeURIComponent(entry.editorial.id)}`;
         const category = String(treatment.typ || "").trim();
         const providerCount = Number(treatment.provider_count || 0);
@@ -233,7 +233,7 @@ function buildFeaturedTreatmentHtml(editorialTreatment, treatment, index) {
                 </div>
                 <div class="featured-treatment-card-facts">
                     <span><small>Kategorie</small><strong>${type}</strong></span>
-                    <span><small>Anbieter</small><strong>${providerCount}</strong></span>
+                    <span><small>Behandler</small><strong>${providerCount}</strong></span>
                     <span><small>Entfernung / Ort</small><strong>${distance !== null && distance !== undefined ? formatFeaturedTreatmentDistance(distance) : "—"}</strong>${city ? `<em>${escapeHomepageHtml(city)}</em>` : ""}</span>
                 </div>
                 <div class="featured-treatment-votes">
@@ -303,7 +303,7 @@ async function handleFeaturedTreatmentVote(event) {
             }
         }
     } catch (error) {
-        console.error("Fehler beim Speichern der Behandlungsbewertung:", error);
+        console.error("Fehler beim Speichern der Therapiebewertung:", error);
         alert("Die Bewertung konnte nicht gespeichert werden.");
         buttons.forEach(function (item) { item.disabled = false; item.classList.remove("is-saving"); });
     }
@@ -845,7 +845,7 @@ async function searchNearbyGps(event) {
 
     submitButton.disabled = true;
     status.classList.remove("is-error");
-    status.textContent = "Standort und hausärztliche Behandlungen werden gesucht …";
+    status.textContent = "Standort und hausärztliche Therapien werden gesucht …";
     try {
         const geoResponse = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}`);
         const geoData = await geoResponse.json();
@@ -870,7 +870,7 @@ async function loadGpsAcrossGermany() {
     try {
         const response = await fetch(buildHomepagePrimaryCareUrl(homepageGermanyCenter));
         const data = await response.json();
-        if (!response.ok || !data.ok) throw new Error("Die hausärztlichen Behandlungen sind gerade nicht verfügbar.");
+        if (!response.ok || !data.ok) throw new Error("Die hausärztlichen Therapien sind gerade nicht verfügbar.");
         const gps = getHomepagePrimaryCareProviders(data, false);
         renderNearbyGps(homepageGermanyCenter, gps, false);
         status.textContent = `${gps.length} hausärztliche Anlaufstellen in Deutschland auf der Karte.`;
@@ -892,12 +892,12 @@ async function loadNearbyGpsForLocation(location, restored, requestedRadiusKm) {
     status.textContent = restored ? "Hausärztliche Anlaufstellen am gespeicherten Standort werden geladen …" : "Hausärzt:innen in der Nähe werden geladen …";
     const response = await fetch(buildHomepagePrimaryCareUrl(location, radiusKm));
     const data = await response.json();
-    if (!response.ok || !data.ok) throw new Error("Die hausärztlichen Behandlungen sind gerade nicht verfügbar.");
+    if (!response.ok || !data.ok) throw new Error("Die hausärztlichen Therapien sind gerade nicht verfügbar.");
     const gps = getHomepagePrimaryCareProviders(data, true);
     renderNearbyGps(location, gps, true, radiusKm);
     status.textContent = gps.length
-        ? `${gps.length} Anbieter der hausärztlichen Behandlung im Umkreis von ${radiusKm} km gefunden.`
-        : `Im Umkreis von ${radiusKm} km wurden aktuell keine Anbieter der hausärztlichen Behandlung gefunden.`;
+        ? `${gps.length} Behandler der hausärztlichen Therapie im Umkreis von ${radiusKm} km gefunden.`
+        : `Im Umkreis von ${radiusKm} km wurden aktuell keine Behandler der hausärztlichen Therapie gefunden.`;
 }
 
 function buildHomepagePrimaryCareUrl(location, radiusKm) {
@@ -950,7 +950,7 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     results.hidden = false;
     heading.textContent = hasUserLocation ? "Die nächsten Anlaufstellen" : "Hausärztliche Anlaufstellen in Deutschland";
     list.innerHTML = doctors.length ? doctors.map(function (doctor) { return buildNearbyGpCard(doctor, hasUserLocation); }).join("")
-        : '<p class="nearby-gps-status">Versuche alternativ die vollständige Behandler:innensuche.</p>';
+        : '<p class="nearby-gps-status">Versuche alternativ die vollständige Behandlersuche.</p>';
     allLink.href = `therapie_detail.html?treat_id=${homepagePrimaryCareTreatmentId}`;
 
     if (typeof L === "undefined") return;
@@ -1022,7 +1022,7 @@ function buildNearbyGpCard(doctor, showDistance) {
     const distance = showDistance && Number.isFinite(Number(doctor.distance_km))
         ? `${Number(doctor.distance_km).toLocaleString("de-DE", { maximumFractionDigits: 1 })} km`
         : "Versorgung";
-    return `<article class="nearby-gp-card" data-location-key="${escapeHomepageHtml(getNearbyGpsLocationKey(doctor))}"><span class="nearby-gp-distance">${distance}</span><div><h4><a href="${href}">${escapeHomepageHtml(doctor.dr_display_name || "Hausärztliche Praxis")}</a></h4><p>${escapeHomepageHtml(formatDoctorAddress(doctor) || "Hausärztliche Behandlung")}</p></div></article>`;
+    return `<article class="nearby-gp-card" data-location-key="${escapeHomepageHtml(getNearbyGpsLocationKey(doctor))}"><span class="nearby-gp-distance">${distance}</span><div><h4><a href="${href}">${escapeHomepageHtml(doctor.dr_display_name || "Hausärztliche Praxis")}</a></h4><p>${escapeHomepageHtml(formatDoctorAddress(doctor) || "Hausärztliche Therapie")}</p></div></article>`;
 }
 
 function getNearbyGpsLocationKey(doctor) {
@@ -1110,7 +1110,7 @@ async function loadHomepageEditorialSelection(list, moreButton) {
         };
         render(true);
         alignHomepageRecommendations();
-    }catch(error){list.innerHTML='<p class="featured-treatments-status">Die Behandlungen konnten gerade nicht geladen werden.</p>';}
+    }catch(error){list.innerHTML='<p class="featured-treatments-status">Die Therapien konnten gerade nicht geladen werden.</p>';}
 }
 
 function alignHomepageRecommendations() {

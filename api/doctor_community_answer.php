@@ -25,7 +25,7 @@ try {
     } else {
         lcnSaveDoctorAnswer($pdo, $id, $respondent, $key, $value);
     }
-    lcnSendVoteJson(['ok' => true, 'own_answers' => lcnDoctorOwnAnswers($pdo, $id, $respondent), 'community' => lcnDoctorCommunity($pdo, $id)]);
+    lcnSendVoteJson(['ok' => true, 'own_answers' => lcnDoctorOwnAnswers($pdo, $id, $respondent), 'community' => lcnDoctorCommunity($pdo, $id, isset($_GET['include_dummy']) ? $_GET['include_dummy'] === '1' : null)]);
 } catch (Throwable $error) {
     lcnLogApiError('doctor_community_answer', $error);
     lcnSendVoteJson(['ok' => false, 'error' => 'Speichern konnte nicht bestätigt werden. Bitte erneut versuchen.'], 500);

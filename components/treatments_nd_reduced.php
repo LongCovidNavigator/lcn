@@ -29,9 +29,9 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
     }
     $cost = in_array($key, ['unit_cost','total_cost'], true);
     $html = '<section class="card ux-question" data-question="'.$key.'" data-kind="'.$kind.'" data-counts="'.ndEscape(json_encode($counts)).'"><h3>'.ndEscape($title).'</h3>';
-    if ($key === 'gamechanger') $html .= '<p>Hat die Behandlung deinen Alltag entscheidend verbessert?</p>';
-    if ($key === 'unit_cost') $html .= '<p class="ux-basis-caption">(Behandlung / Anwendung / Packung / Flasche / Ampulle / Spritze / Rezeptur)</p>';
-    if ($research !== '') $html .= '<div class="ux-research"><strong>Redaktionelle Angabe</strong><p>'.ndEscape($research).'</p></div>';
+    if ($key === 'gamechanger') $html .= '<p>Hat die Therapie deinen Alltag entscheidend verbessert?</p>';
+    if ($key === 'unit_cost') $html .= '<p class="ux-basis-caption">(Therapie / Anwendung / Packung / Flasche / Ampulle / Spritze / Rezeptur)</p>';
+    if ($research !== '') $html .= '<div class="ux-research"><strong>Redaktionelle Angabe</strong><p>'.ndEscape(str_replace('Anbieter', 'Behandler', $research)).'</p></div>';
     if ($cost) {
         $html .= '<div class="insurance-toggle" role="group" aria-label="Versicherung: '.ndEscape($title).'">';
         foreach (['GKV','PKV'] as $context) $html .= '<button type="button" data-insurance="'.ndEscape($context).'" aria-pressed="'.($context==='GKV'?'true':'false').'">'.ndEscape($context).'</button>';
@@ -46,7 +46,7 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
         if ($kind==='effect') $html .= '<span class="bar-area"><strong data-percent>–</strong><span class="effect-bar effect-'.$i.'" data-bar></span></span>';
         elseif ($kind==='cost') $html .= '<span class="dot" aria-hidden="true"></span><strong class="scale-percent" data-percent>–</strong>';
         else $html .= '<strong data-percent>–</strong><span class="ux-track" aria-hidden="true"><span data-bar></span></span>';
-        $html .= '<span>'.ndEscape($label).'</span><small class="ux-selected">Deine Auswahl</small></button>';
+        $html .= '<span>'.ndEscape(str_replace('Anbieter', 'Behandler', $label)).'</span><small class="ux-selected">Deine Auswahl</small></button>';
     }
     return $html.'</div><p class="ux-own" role="status"></p><button type="button" data-clear>Auswahl zurücksetzen</button></section>';
 }

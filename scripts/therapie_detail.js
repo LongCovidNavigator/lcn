@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 if(params.get('demo')==='1') target.searchParams.set('demo','1');
                 target.hash=location.hash; location.replace(target.href); return;
             }
-        } catch { showTreatmentDetailError('Die Behandlungszuordnung konnte nicht geladen werden. Bitte erneut versuchen.'); return; }
+        } catch { showTreatmentDetailError('Die Therapiezuordnung konnte nicht geladen werden. Bitte erneut versuchen.'); return; }
     }
     setTreatmentDetailSuggestionLinks();
     currentProviderLocation = getSavedSharedTreatmentLocation();
@@ -61,8 +61,8 @@ async function loadTreatmentDetail() {
         renderTreatmentProviderMap(currentTreatmentDetail.providers);
         refreshTreatmentDetailStickyHeader();
     } catch (error) {
-        console.error("Fehler beim Laden des Behandlungsprofils:", error);
-        showTreatmentDetailError(error.message || "Der Behandlungsprofil konnte nicht geladen werden.");
+        console.error("Fehler beim Laden des Therapieprofils:", error);
+        showTreatmentDetailError(error.message || "Der Therapieprofil konnte nicht geladen werden.");
     }
 }
 
@@ -71,7 +71,7 @@ async function fetchTreatmentById(treatId) {
     const data = await response.json();
 
     if (!response.ok || !data.ok || !data.item) {
-        throw new Error(data.message || "Der Behandlungsprofil konnte nicht geladen werden.");
+        throw new Error(data.message || "Der Therapieprofil konnte nicht geladen werden.");
     }
 
     return normalizeTreatmentDetail(data.item);
@@ -347,9 +347,9 @@ function buildTreatmentSubtitle(treatment) {
     }
 
     if (Number(treatment.provider_count || 0) === 1) {
-        parts.push("1 Anbieter hinterlegt");
+        parts.push("1 Behandler hinterlegt");
     } else {
-        parts.push(`${Number(treatment.provider_count || 0)} Anbieter hinterlegt`);
+        parts.push(`${Number(treatment.provider_count || 0)} Behandler hinterlegt`);
     }
 
     return parts.join(" · ");
@@ -391,9 +391,9 @@ function renderTreatmentTags(treatment) {
     }
 
     if (Number(treatment.provider_count || 0) > 0) {
-        tags.push(`${Number(treatment.provider_count || 0)} Anbieter`);
+        tags.push(`${Number(treatment.provider_count || 0)} Behandler`);
     } else {
-        tags.push("Keine Anbieter hinterlegt");
+        tags.push("Keine Behandler hinterlegt");
     }
 
     if (Number(treatment.total_votes || 0) > 0) {
@@ -548,14 +548,14 @@ function renderTreatmentProviderCard(treatment) {
     if (providerCount === 0) {
         element.innerHTML = `
             <span class="treatment-detail-provider-bubble treatment-detail-provider-bubble-empty">0</span>
-            <span class="treatment-detail-muted">Noch kein Anbieter hinterlegt.</span>
+            <span class="treatment-detail-muted">Noch kein Behandler hinterlegt.</span>
         `;
         return;
     }
 
     const label = providerCount === 1
-        ? "1 Anbieter ist aktuell mit dieser Therapie verknüpft."
-        : `${providerCount} Anbieter sind aktuell mit dieser Therapie verknüpft.`;
+        ? "1 Behandler ist aktuell mit dieser Therapie verknüpft."
+        : `${providerCount} Behandler sind aktuell mit dieser Therapie verknüpft.`;
 
     element.innerHTML = `
         <span class="treatment-detail-provider-bubble">${providerCount}</span>
@@ -572,7 +572,7 @@ function renderTreatmentProviders(providers) {
     if (!Array.isArray(providers) || providers.length === 0) {
         element.innerHTML = `
             <div class="treatment-detail-empty-box">
-                Für diese Therapie sind aktuell keine Anbieter hinterlegt.
+                Für diese Therapie sind aktuell keine Behandler hinterlegt.
             </div>
         `;
         return;
@@ -600,7 +600,7 @@ function renderTreatmentProviders(providers) {
         providersHtml = `
             <section class="treatment-detail-provider-group">
                 <div class="treatment-detail-provider-group-header">
-                    <h3>Alle Anbieter</h3>
+                    <h3>Alle Behandler</h3>
                     <span>${rankedProviders.length}</span>
                 </div>
 
@@ -609,8 +609,8 @@ function renderTreatmentProviders(providers) {
         `;
     } else {
         providersHtml = `
-            ${buildProviderGroupHtml("Auf der Karte angezeigt", providersOnMap, "Diese Anbieter haben nutzbare Koordinaten und werden auf der Karte angezeigt.", totalProvidersOnMap)}
-            ${buildProviderGroupHtml("Nicht auf der Karte angezeigt", providersWithoutMap, "Diese Anbieter bleiben in der Liste sichtbar, haben aber aktuell keine nutzbaren Koordinaten.", totalProvidersWithoutMap)}
+            ${buildProviderGroupHtml("Auf der Karte angezeigt", providersOnMap, "Diese Behandler haben nutzbare Koordinaten und werden auf der Karte angezeigt.", totalProvidersOnMap)}
+            ${buildProviderGroupHtml("Nicht auf der Karte angezeigt", providersWithoutMap, "Diese Behandler bleiben in der Liste sichtbar, haben aber aktuell keine nutzbaren Koordinaten.", totalProvidersWithoutMap)}
             ${rankedProviders.length > visibleRankedProviders.length ? `
                 <div class="treatment-detail-provider-load-more-wrap">
                     <button type="button" class="treatment-detail-provider-load-more-button">
@@ -637,10 +637,10 @@ function buildProviderViewSwitchHtml() {
         : "Für die Entfernungssortierung bitte einen Standort eingeben.";
 
     return `
-        <div class="treatment-detail-provider-controls" aria-label="Anbieteransicht und Sortierung">
+        <div class="treatment-detail-provider-controls" aria-label="Behandleransicht und Sortierung">
             <div class="treatment-detail-provider-controls-grid">
                 <section class="treatment-detail-provider-control-card">
-                    <h3>Anbieteransicht</h3>
+                    <h3>Behandleransicht</h3>
 
                     <div class="treatment-detail-provider-view-switch">
                         <button
@@ -770,7 +770,7 @@ function buildProviderListHtml(providers) {
                 <thead>
                     <tr>
                         <th>Rang</th>
-                        <th>${buildProviderTableSortHeader("Anbieter", "name")}</th>
+                        <th>${buildProviderTableSortHeader("Behandler", "name")}</th>
                         <th>${buildProviderTableSortHeader("Standort", "location")}</th>
                         <th>${buildProviderTableSortHeader("Karte", "map")}</th>
                         <th>${buildProviderTableSortHeader("Entfernung", "distance")}</th>
@@ -789,7 +789,7 @@ function buildProviderListHtml(providers) {
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Anbieter</th>
+                        <th>Behandler</th>
                         <th>Positiv</th>
                         <th>Standort</th>
                     </tr>
@@ -804,7 +804,7 @@ function buildProviderListHtml(providers) {
 
 function buildProviderCompactTableRowHtml(provider) {
     const rank = Number(provider.display_rank || 0);
-    const name = provider.dr_display_name || "Unbekannter Anbieter";
+    const name = provider.dr_display_name || "Unbekannter Behandler";
     const compactLocation = [provider.loc_plz, provider.loc_city]
         .filter(Boolean)
         .join(" ") || provider.loc_city || "Kein Standort";
@@ -838,7 +838,7 @@ function buildProviderCompactTableRowHtml(provider) {
 }
 
 function buildProviderTableRowHtml(provider) {
-    const name = provider.dr_display_name || "Unbekannter Anbieter";
+    const name = provider.dr_display_name || "Unbekannter Behandler";
     const location = buildProviderLocation(provider) || "Kein Standort hinterlegt";
     const careBadges = buildProviderCareBadges(provider);
     const contactLinks = buildProviderContactLinks(provider);
@@ -856,7 +856,7 @@ function buildProviderTableRowHtml(provider) {
                 ${rankHtml}
             </td>
 
-            <td data-label="Anbieter">
+            <td data-label="Behandler">
                 ${detailUrl
                     ? `<a class="treatment-detail-provider-name-link" href="${detailUrl}"><strong>${escapeHtml(name)}</strong></a>`
                     : `<strong>${escapeHtml(name)}</strong>`}
@@ -1079,7 +1079,7 @@ async function handleProviderLocationSubmit() {
 
 
     } catch (error) {
-        console.error("Fehler beim Geocoding des Anbieter-Standorts:", error);
+        console.error("Fehler beim Geocoding des Behandler-Standorts:", error);
         alert(error.message || "Der Standort konnte nicht gefunden werden.");
     } finally {
         setProviderLocationControlsDisabled(false);
@@ -1124,7 +1124,7 @@ function focusProviderLocationInput() {
 }
 
 function buildProviderCardHtml(provider) {
-    const name = provider.dr_display_name || "Unbekannter Anbieter";
+    const name = provider.dr_display_name || "Unbekannter Behandler";
     const location = buildProviderLocation(provider);
     const careBadges = buildProviderCareBadges(provider);
     const contactLinks = buildProviderContactLinks(provider);
@@ -1346,8 +1346,8 @@ function renderTreatmentProviderMap(providers) {
 
     if (countElement) {
         const providerCountLabel = providersWithCoords.length === 1
-            ? "1 Anbieterstandort"
-            : `${providersWithCoords.length} Anbieterstandorte`;
+            ? "1 Behandlerstandort"
+            : `${providersWithCoords.length} Behandlerstandorte`;
 
         countElement.textContent = hasUserLocation
             ? `${providerCountLabel} + dein Standort`
@@ -1480,7 +1480,7 @@ function hasValidCoordinates(provider) {
 }
 
 function buildProviderMapPopupHtml(provider) {
-    const name = provider.dr_display_name || "Unbekannter Anbieter";
+    const name = provider.dr_display_name || "Unbekannter Behandler";
     const location = buildProviderLocation(provider);
     const detailUrl = provider.dr_id
         ? `arzt_detail.html?id=${encodeURIComponent(provider.dr_id)}`
@@ -1792,7 +1792,7 @@ function showTreatmentDetailError(message) {
     if (statusElement) {
         statusElement.classList.remove("is-hidden");
         statusElement.classList.add("treatment-detail-status-error");
-        statusElement.textContent = message || "Der Behandlungsprofil konnte nicht geladen werden.";
+        statusElement.textContent = message || "Der Therapieprofil konnte nicht geladen werden.";
     }
 }
 

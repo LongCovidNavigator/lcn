@@ -7,7 +7,7 @@
   const copies=[];
   for(const panelId of ['termin','zugang','wirkung']){
     const group=document.createElement('section');group.className='nd-dashboard-chart-group';
-    const title=document.createElement('h3');title.textContent={termin:'Durchführung und zeitlicher Rahmen',zugang:'Zugang und Kostenübernahme',wirkung:'Erfahrungen mit der Behandlung'}[panelId];group.append(title);
+    const title=document.createElement('h3');title.textContent={termin:'Durchführung und zeitlicher Rahmen',zugang:'Zugang und Kostenübernahme',wirkung:'Erfahrungen mit der Therapie'}[panelId];group.append(title);
     sources.filter(source=>source.closest('.nd-panel').id===panelId).forEach(source=>{
       const card=document.createElement('section');card.className='card nd-dashboard-chart';
       const host=document.createElement('div');card.append(host);group.append(card);copies.push({source,host});

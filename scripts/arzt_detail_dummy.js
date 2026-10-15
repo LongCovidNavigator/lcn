@@ -15,8 +15,8 @@
     const scenarioDefinitions = {
         complete: {label: "Vollständig", note: "Kombiniert redaktionell recherchierte Stammdaten, aggregierte Abstimmungen und hybrid gepflegte Praxisangaben."},
         research: {label: "Nur Recherche", note: "Zeigt überprüfbare Stammdaten: Identität, Kontakt, Abrechnung, Fachrichtungen und Standort. Patient:innen-Erfahrungen und Community-Angaben fehlen."},
-        voting: {label: "Nur Abstimmung", note: "Zeigt ausschließlich aggregierte Patient:innen-Erfahrungen. Kontaktdaten, Praxisorganisation, fachliche Einordnung und Behandlungsspektrum werden nicht aus Abstimmungen abgeleitet."},
-        hybrid: {label: "Nur Hybrid", note: "Zeigt strukturierte Angaben, die aus Community-Vorschlägen entstehen und redaktionell geprüft werden: Zugänglichkeit, Terminbewältigung, Leistungen, Diagnosen und Behandlungsspektrum."}
+        voting: {label: "Nur Abstimmung", note: "Zeigt ausschließlich aggregierte Patient:innen-Erfahrungen. Kontaktdaten, Praxisorganisation, fachliche Einordnung und Therapiespektrum werden nicht aus Abstimmungen abgeleitet."},
+        hybrid: {label: "Nur Hybrid", note: "Zeigt strukturierte Angaben, die aus Community-Vorschlägen entstehen und redaktionell geprüft werden: Zugänglichkeit, Terminbewältigung, Leistungen, Diagnosen und Therapiespektrum."}
     };
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -58,7 +58,7 @@
             ["Gesamtbewertung", "Ärztlicher Umgang", "Arbeitsweise", "Praxis-Erfahrungen"],
             ["Fachrichtungen", "Zusatzqualifikationen / Weiterbildungen", "Spezialisierungen", "Fachliche Erfahrung"],
             ["Services", "Medikamentöse Möglichkeiten", "Diagnosen"],
-            ["Behandlungsspektrum", "Behandlungsbewertungen", "Angebotsanalyse"]
+            ["Therapiespektrum", "Therapiebewertungen", "Angebotsanalyse"]
         ];
         const unavailableReason = activeScenario === "research" ? "Nicht Bestandteil reiner Recherche" : activeScenario === "voting" ? "Nicht aus Abstimmungen ableitbar" : "Benötigt Recherche oder Abstimmungen";
 
@@ -82,18 +82,18 @@
 
     window.LCN_DOCTOR_STRUCTURE_DATA = {
         billing: [["Abrechnungsmodell", "GKV, PKV und Selbstzahler"], ["Kassensitz", "Vorhanden"]],
-        costs: [["Ersttermin (Sprechstunde)", "ca. 0–85 €"], ["Folgetermin (Sprechstunde)", "ca. 0–55 €"], ["Typische Gesamtkosten der Behandlung (inklusive Therapie)", "Abhängig von Diagnostik und Versicherung"]],
+        costs: [["Ersttermin (Sprechstunde)", "ca. 0–85 €"], ["Folgetermin (Sprechstunde)", "ca. 0–55 €"], ["Typische Gesamtkosten der Therapie (inklusive Therapie)", "Abhängig von Diagnostik und Versicherung"]],
         appointments: [["Wartezeit bis Ersttermin", "4–8 Wochen"], ["Warteliste vorhanden", "Ja"], ["Zuletzt aktualisiert", "August 2026"]],
         appointmentForms: { "Ersttermin": ["yes", "yes", "no"], "Folgetermine": ["yes", "yes", "yes"] },
         homeVisits: "In medizinisch begründeten Ausnahmefällen",
         consideration: [["Belastungsgrenzen / PEM berücksichtigt", {yes: 18, no: 2}], ["Pausen möglich", {yes: 15, no: 1}], ["Termin anpassbar", {yes: 13, no: 3}]],
-        waiting: [["Warte- und Behandlungszeit", "Meist 45–70 Minuten"], ["Ruhiger / reizarmer Wartebereich", {yes: 12, no: 4}], ["Warten im Liegen möglich", {yes: 9, no: 5}]],
+        waiting: [["Warte- und Therapiezeit", "Meist 45–70 Minuten"], ["Ruhiger / reizarmer Wartebereich", {yes: 12, no: 4}], ["Warten im Liegen möglich", {yes: 9, no: 5}]],
         accessibility: [["Rollstuhlgerecht", {yes: 17, no: 1}], ["Stufenlos / Aufzug", {yes: 16, no: 0}], ["Liegen möglich", {yes: 11, no: 4}], ["Begleitperson möglich", {yes: 19, no: 1}]],
         doctorExperience: [["Nimmt Beschwerden ernst", {yes: 20, no: 2}], ["Nimmt sich Zeit", {yes: 17, no: 4}], ["Hört zu", {yes: 19, no: 2}], ["Erklärt nachvollziehbar", {yes: 16, no: 3}], ["Respektvoller Umgang", {yes: 21, no: 1}]],
         workExperience: [["Gründlich", {yes: 18, no: 3}], ["Berücksichtigt Vorbefunde", {yes: 16, no: 2}], ["Gemeinsames Entscheiden", {yes: 14, no: 4}]],
         practiceExperience: [["Wohlgefühlt", {yes: 17, no: 3}], ["Respektvoller Umgang", {yes: 20, no: 1}], ["Gender-Erfahrungen", {yes: 8, no: 2}], ["Queer / LGBTQ+", {yes: 7, no: 1}]],
         services: [["Bescheinigungen / Atteste", {yes: 15, no: 3}], ["Sozialmedizinische Unterstützung", {yes: 11, no: 4}], ["Verlaufskontrolle / Nachbetreuung", {yes: 18, no: 1}]],
-        medication: [["Reguläre Verordnungen", {yes: 19, no: 1}], ["Off-Label-Behandlungen", {yes: 13, no: 4}], ["Individuelle Therapieversuche", {yes: 12, no: 3}]],
+        medication: [["Reguläre Verordnungen", {yes: 19, no: 1}], ["Off-Label-Therapien", {yes: 13, no: 4}], ["Individuelle Therapieversuche", {yes: 12, no: 3}]],
         diagnoses: [["ME/CFS (G93.3)", {yes: 18, no: 2}], ["Long Covid", {yes: 22, no: 0}], ["POTS / Dysautonomie", {yes: 16, no: 3}], ["MCAS", {yes: 11, no: 5}], ["Impfschaden", {yes: 9, no: 4}]]
         ,expertise: [["Long Covid", {yes: 22, no: 0}], ["ME/CFS", {yes: 18, no: 2}], ["Post-Vac", {yes: 9, no: 4}], ["POTS / Dysautonomie", {yes: 16, no: 3}], ["MCAS", {yes: 11, no: 5}], ["Belastungsintoleranz / PEM", {yes: 20, no: 1}]]
         ,specializations: [{term_code: "post-infectious", term_label: "Postinfektiöse Erkrankungen", term_desc: "Long Covid und ME/CFS"}, {term_code: "dysautonomia", term_label: "Dysautonomie", term_desc: "POTS und orthostatische Intoleranz"}, {term_code: "pacing", term_label: "Pacing", term_desc: "Symptomorientiertes Energiemanagement"}]
@@ -149,7 +149,7 @@
         "Cardiolipin-Antikörper": ["Diagnostik", "Labordiagnostik"],
         "CK": ["Diagnostik", "Labordiagnostik"],
         "CK-MB": ["Diagnostik", "Labordiagnostik"],
-        "COVID-19-Impfung bei Long Covid": ["Arzneimittel", "Weitere Behandlungen"],
+        "COVID-19-Impfung bei Long Covid": ["Arzneimittel", "Weitere Therapien"],
         "CRP": ["Diagnostik", "Labordiagnostik"],
         "Daosin": ["Nahrungsergänzungsmittel", "Sonstige Nahrungsergänzungsmittel"],
         "Daridorexant (QUVIVIQ)": ["Arzneimittel", "Neurologie, Psychiatrie, Schmerz und Schlaf"],
@@ -296,7 +296,7 @@
         },
         treatments_grouped: grouped,
         analysis: {
-            profile: {label: "Breites Behandlungsprofil", treatment_count: 9, category_count: 3}, versatile: true,
+            profile: {label: "Breites Therapieprofil", treatment_count: 9, category_count: 3}, versatile: true,
             specialties: [{name: "Dysautonomie", treatment_count: 3}, {name: "Energiemanagement", treatment_count: 2}],
             ratings: {
                 positive_threshold: 70,
@@ -341,7 +341,7 @@
             }, {});
             const treatmentCount = fixture.treatments.length;
             const categoryCount = Object.keys(payload.treatments_grouped).length;
-            payload.analysis.profile = {label: "Recherchebasiertes Behandlungsspektrum", treatment_count: treatmentCount, category_count: categoryCount};
+            payload.analysis.profile = {label: "Recherchebasiertes Therapiespektrum", treatment_count: treatmentCount, category_count: categoryCount};
             payload.analysis.versatile = categoryCount >= 3;
             const specialtyAreas = new Map();
             Object.values(payload.treatments_grouped).flat().forEach(item => {

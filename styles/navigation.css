@@ -38,3 +38,45 @@ nav ul li a:hover {
 .main-nav .nav-dropdown{position:relative}.main-nav .nav-dropdown details>summary{padding:10px 20px;border-radius:5px;background:#0066cc;color:#fff;font-size:18px;font-weight:700;cursor:pointer;list-style:none}.main-nav .nav-dropdown summary::-webkit-details-marker{display:none}.main-nav .nav-dropdown summary::after{content:" ⌄"}.main-nav .nav-dropdown-menu{position:absolute;z-index:1000;top:calc(100% + 7px);right:0;display:grid;gap:3px;min-width:245px;padding:7px;border:1px solid #275d88;border-radius:8px;background:#fff;box-shadow:0 10px 25px rgba(0,32,70,.25)}.main-nav .nav-dropdown-menu li{display:block}.main-nav .nav-dropdown-menu a{display:block;padding:10px 12px;background:transparent;color:#174568;font-size:15px}.main-nav .nav-dropdown-menu a:hover{background:#eaf3f8;color:#003b69}@media(max-width:600px){.main-nav .nav-dropdown{display:block}.main-nav .nav-dropdown details>summary{width:100%;box-sizing:border-box}.main-nav .nav-dropdown-menu{position:static;margin-top:5px;box-shadow:none}.main-nav .nav-dropdown-menu a{text-align:left}}
 
 
+/* Shared header. Scoped rules keep page navigation and detail panels independent. */
+.lcn-header {
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    gap:16px 32px; padding:18px clamp(16px,4vw,64px); background:#fff;
+    border-bottom:1px solid #e1e9ef; box-shadow:0 3px 18px #17365d06;
+    color:#17365d; font-family:'Nunito Sans','Segoe UI',Arial,sans-serif;
+    position:relative; z-index:100;
+}
+.lcn-header *, .lcn-header *::before, .lcn-header *::after {box-sizing:border-box}
+.lcn-header [hidden] {display:none!important}
+.lcn-header .lcn-brand {display:flex;align-items:center;gap:12px;color:#17365d;text-decoration:none;font-size:19px;font-weight:600;letter-spacing:-.4px;white-space:nowrap}
+.lcn-brand strong {font-weight:800}
+.lcn-header .lcn-brand-mark {display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;border-radius:13px;background:#e8f5f4;color:#007f7b;font-size:29px;font-weight:700}
+.lcn-header .lcn-nav {padding:0;background:transparent;border:0;box-shadow:none}
+.lcn-header .lcn-nav>ul {display:flex;flex-direction:row;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:4px;margin:0;padding:0;background:transparent;border:0;list-style:none}
+.lcn-header .lcn-nav li {display:block;margin:0;padding:0}
+.lcn-header .lcn-nav :is(a,details>summary) {display:flex;align-items:center;gap:8px;min-height:44px;padding:11px 13px;border:0;border-radius:10px;background:transparent;color:#456079;font-family:inherit;font-size:14px;font-weight:700;line-height:1.4;text-align:left;text-decoration:none;cursor:pointer;list-style:none;transition:background .15s,color .15s}
+.lcn-header .lcn-nav :is(a:hover,details[open]>summary,a[aria-current="page"]) {background:#edf6f7;color:#006e6a}
+.lcn-header .lcn-nav summary::-webkit-details-marker {display:none}
+.lcn-header .lcn-nav summary::after {content:'';width:6px;height:6px;border-right:1.5px solid;border-bottom:1.5px solid;transform:rotate(45deg);margin:-3px 2px 0 4px}
+.lcn-header .lcn-nav details[open]>summary::after {transform:rotate(225deg);margin-top:3px}
+.lcn-header .nav-dropdown {position:relative}
+.lcn-header .lcn-nav .nav-dropdown-menu {display:grid;position:absolute;top:calc(100% + 10px);right:0;z-index:1000;min-width:245px;gap:3px;margin:0;padding:7px;border:1px solid #e1e9ef;border-radius:14px;background:#fff;box-shadow:0 14px 40px #17365d1a;list-style:none}
+.lcn-header .lcn-nav .nav-dropdown-menu a {width:100%;font-size:14px;padding:12px}
+.lcn-header .lcn-menu-toggle {display:none;align-items:center;gap:8px;min-height:44px;border:1px solid #dce7ec;border-radius:10px;padding:8px 12px;background:#fff;color:#17365d;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.lcn-header :is(a,summary,button):focus-visible {outline:3px solid #0878e3;outline-offset:3px}
+@media(max-width:1100px) {
+    .lcn-header {gap:12px;padding:14px 20px}
+    .lcn-header .lcn-brand {font-size:18px}
+    .lcn-header .lcn-nav :is(a,details>summary) {padding:10px}
+}
+@media(max-width:900px) {
+    .lcn-header {padding:14px 16px}
+    .lcn-header .lcn-brand {font-size:clamp(14px,3.6vw,18px);gap:9px}
+    .lcn-header .lcn-brand-mark {width:34px;height:34px;border-radius:11px;font-size:25px}
+    .lcn-header .lcn-menu-toggle {display:flex}
+    .lcn-header .lcn-nav {display:none;width:100%;padding-top:8px;border-top:1px solid #edf1f5}
+    .lcn-header .lcn-nav.is-open {display:block}
+    .lcn-header .lcn-nav>ul {flex-direction:column;align-items:stretch;gap:4px}
+    .lcn-header .lcn-nav .nav-dropdown-menu {position:static;min-width:0;margin:4px 0 8px 12px;border:0;border-left:2px solid #cce8e5;border-radius:0;background:#f7fbfb;box-shadow:none}
+    .lcn-header .lcn-nav details>summary {justify-content:space-between}
+}

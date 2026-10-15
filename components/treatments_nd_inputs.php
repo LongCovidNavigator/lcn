@@ -7,9 +7,9 @@ function ndInputChoices(string $key, string $label, array $options, bool $multip
     $help = [
         'rating' => ['positiv' => ['↑', 'Insgesamt eine hilfreiche Erfahrung.'], 'neutral' => ['↔', 'Insgesamt weder positiv noch negativ.'], 'negativ' => ['↓', 'Insgesamt eine ungünstige Erfahrung.']],
         'pem' => ['keines' => ['○', 'Du hast kein Crash-/PEM-Risiko wahrgenommen.'], 'niedrig' => ['▂', 'Du schätzt das Risiko als gering ein.'], 'mittel' => ['▄', 'Du schätzt das Risiko als mittel ein.'], 'hoch' => ['▇', 'Du schätzt das Risiko als hoch ein.']],
-        'gamechanger' => ['ja' => ['★', 'Die Behandlung hatte einen entscheidenden Anteil an deiner Verbesserung.'], 'nein' => ['○', 'Kein entscheidender Anteil – sie kann trotzdem hilfreich gewesen sein.']],
+        'gamechanger' => ['ja' => ['★', 'Die Therapie hatte einen entscheidenden Anteil an deiner Verbesserung.'], 'nein' => ['○', 'Kein entscheidender Anteil – sie kann trotzdem hilfreich gewesen sein.']],
         'onset' => ['Stunden' => ['◷', 'Erste Veränderung innerhalb von Stunden.'], 'Tage' => ['◷', 'Erste Veränderung nach Tagen.'], 'Wochen' => ['◷', 'Erste Veränderung nach Wochen.'], 'Monate' => ['◷', 'Erste Veränderung nach Monaten.'], 'keine Wirkung' => ['○', 'Bisher keine Wirkung wahrgenommen.']],
-        'setting' => ['selbstständig zu Hause' => ['⌂', 'Du führst die Behandlung selbst zu Hause durch.'], 'Hausbesuch' => ['⌂', 'Eine behandelnde Person kommt zu dir.'], 'ambulant' => ['↗', 'Behandlung vor Ort ohne stationäre Aufnahme.'], 'stationär' => ['▣', 'Behandlung mit stationärem Aufenthalt.']],
+        'setting' => ['selbstständig zu Hause' => ['⌂', 'Du führst die Therapie selbst zu Hause durch.'], 'Hausbesuch' => ['⌂', 'Eine behandelnde Person kommt zu dir.'], 'ambulant' => ['↗', 'Therapie vor Ort ohne stationäre Aufnahme.'], 'stationär' => ['▣', 'Therapie mit stationärem Aufenthalt.']],
         'gkv' => ['ja' => ['✓', 'In deinem Fall hat die GKV Kosten übernommen.'], 'nein' => ['−', 'In deinem Fall keine GKV-Übernahme. Nicht GKV-versichert? Bitte offen lassen.']],
         'pharmacy' => ['ja' => ['✓', 'Zum Beispiel eine individuelle Rezeptur oder besondere Beschaffung.'], 'nein' => ['−', 'Keine besondere Apothekenleistung nötig.']],
     ];
@@ -64,7 +64,7 @@ function ndTreatmentInputs(string $view, array $item): string
 {
     if ($view === 'termin') {
         $html = ndDistributionInput('pem', 'Wie schätzt du das Crash-/PEM-Risiko aus deiner Erfahrung ein?', ['keines', 'niedrig', 'mittel', 'hoch'], ['Kein Risiko wahrgenommen', 'Als gering eingeschätzt', 'Als mittel eingeschätzt', 'Als hoch eingeschätzt']);
-        $html .= ndDistributionInput('setting', 'Wo hast du die Behandlung durchgeführt?', ['selbstständig zu Hause', 'Hausbesuch', 'ambulant', 'stationär'], ['Selbst zu Hause durchgeführt', 'Behandelnde Person kommt zu dir', 'Vor Ort, ohne stationäre Aufnahme', 'Mit stationärem Aufenthalt'], true);
+        $html .= ndDistributionInput('setting', 'Wo hast du die Therapie durchgeführt?', ['selbstständig zu Hause', 'Hausbesuch', 'ambulant', 'stationär'], ['Selbst zu Hause durchgeführt', 'Behandelnde Person kommt zu dir', 'Vor Ort, ohne stationäre Aufnahme', 'Mit stationärem Aufenthalt'], true);
         return ndInputForm('Deine Erfahrung mit der Durchführung', $html);
     }
     if ($view === 'umfang') {
@@ -74,7 +74,7 @@ function ndTreatmentInputs(string $view, array $item): string
             'duration' => ['Dauer einer Anwendung', ['Unter 15 Minuten', '15 bis 60 Minuten', 'Über 1 bis 3 Stunden', 'Über 3 Stunden']],
             'frequency' => ['Häufigkeit', ['Seltener als wöchentlich', 'Wöchentlich / mehrmals pro Woche', 'Einmal täglich', 'Mehrmals täglich']],
             'count' => ['Anzahl Anwendungen', ['Eine Anwendung', '2 bis 10 Anwendungen', '11 bis 30 Anwendungen', 'Mehr als 30 / fortlaufend']],
-            'total_duration' => ['Gesamte Behandlungsdauer', ['Bis zu einer Woche', 'Über 1 bis 4 Wochen', 'Über 4 Wochen bis 3 Monate', 'Über 3 Monate / fortlaufend']],
+            'total_duration' => ['Gesamte Therapiedauer', ['Bis zu einer Woche', 'Über 1 bis 4 Wochen', 'Über 4 Wochen bis 3 Monate', 'Über 3 Monate / fortlaufend']],
         ];
         foreach ($scales as $key => [$label, $options]) {
             $html .= ndResearchAnswer(ndDistributionInput($key . '_band', $label, $options, array_fill(0, 4, '')), $label, $item[$research[$key][0]] ?? null, $research[$key][1]);
@@ -109,16 +109,16 @@ function ndTreatmentInputs(string $view, array $item): string
         return $result;
     }
     if ($view === 'wirkung') {
-        $html = '<fieldset class="nd-answer nd-effect-answer" data-answer="effect"><legend>Zustandsveränderung</legend><div class="chart-heading"><p>Subjektive Erfahrung nach der Behandlung. Klicke auf einen Balken, um deine Erfahrung auszuwählen.</p><span id="nd-effect-data-label">Keine Community-Daten</span></div><div class="effect-chart" role="group" aria-label="Zustandsveränderung: Community und deine Auswahl">';
+        $html = '<fieldset class="nd-answer nd-effect-answer" data-answer="effect"><legend>Zustandsveränderung</legend><div class="chart-heading"><p>Subjektive Erfahrung nach der Therapie. Klicke auf einen Balken, um deine Erfahrung auszuwählen.</p><span id="nd-effect-data-label">Keine Community-Daten</span></div><div class="effect-chart" role="group" aria-label="Zustandsveränderung: Community und deine Auswahl">';
         foreach (['Verschlechterung', 'Keine Veränderung', 'Verbesserung', 'Heilung'] as $index => $label) {
             $html .= '<input class="nd-effect-value" type="radio" name="effect" value="' . ndEscape($label) . '" hidden><button type="button" class="effect-column" data-effect-value="' . ndEscape($label) . '" aria-pressed="false"><span class="bar-area"><strong data-effect-percent="' . $index . '">–</strong><span class="effect-bar effect-' . $index . '" data-effect-bar="' . $index . '" style="height:0px"></span></span><span class="effect-label">' . ndEscape($label) . '</span></button>';
         }
         $html .= '</div><p class="nd-answer-help">Die Skala entspricht der Arztseite. „Heilung“ bezeichnet hier eine subjektive Selbsteinschätzung, keinen medizinischen Nachweis.</p><button type="button" class="nd-clear-answer" data-clear-answer="effect">Auswahl zurücksetzen</button></fieldset>';
-        $html .= ndDistributionInput('gamechanger', 'War die Behandlung für dich ein Gamechanger?', ['ja', 'nein'], ['Entscheidender Anteil an deiner Verbesserung.', 'Kein entscheidender Anteil; die Behandlung kann trotzdem hilfreich gewesen sein.']);
+        $html .= ndDistributionInput('gamechanger', 'War die Therapie für dich ein Gamechanger?', ['ja', 'nein'], ['Entscheidender Anteil an deiner Verbesserung.', 'Kein entscheidender Anteil; die Therapie kann trotzdem hilfreich gewesen sein.']);
         $html .= ndDistributionInput('onset', 'Wann hast du eine Wirkung / Veränderung wahrgenommen?', ['Stunden', 'Tage', 'Wochen', 'Monate', 'keine Wirkung'], ['Erste Veränderung innerhalb von Stunden', 'Erste Veränderung nach Tagen', 'Erste Veränderung nach Wochen', 'Erste Veränderung nach Monaten', 'Bisher keine Wirkung wahrgenommen']);
         $options = array_column($item['symptom_options'], 'sym_name');
-        $html .= '<details class="nd-input-details"><summary>Symptome / Beschwerden zuordnen</summary>' . ndInputChoices('symptoms', 'Für welche Beschwerden hast du die Behandlung angewendet?', $options, true) . '</details>';
-        return ndInputForm('Deine Erfahrung mit der Behandlung', $html);
+        $html .= '<details class="nd-input-details"><summary>Symptome / Beschwerden zuordnen</summary>' . ndInputChoices('symptoms', 'Für welche Beschwerden hast du die Therapie angewendet?', $options, true) . '</details>';
+        return ndInputForm('Deine Erfahrung mit der Therapie', $html);
     }
     return '';
 }

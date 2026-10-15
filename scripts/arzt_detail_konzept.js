@@ -20,6 +20,17 @@
   // Active display is appointmentVariant(3), formerly labelled Variante 2.
   const emptyAppointmentDemo = new URLSearchParams(location.search).get('demo') === 'termine-null';
   const demoAppointmentAnswers = {};
+  let includeDummy = new URLSearchParams(location.search).get('demo') === '1';
+  let communityLoading = false;
+  const dummyToggle = document.getElementById('doctor-demo-toggle');
+  function updateDummyToggle() {
+    if(!dummyToggle)return;
+    dummyToggle.textContent = communityLoading ? 'Dummydaten werden geladen …' : 'Dummy-Daten sind '+(includeDummy?'an':'aus');
+    dummyToggle.setAttribute('aria-pressed',String(includeDummy));
+    dummyToggle.disabled = communityLoading || state.saving || !validId || isSubmission || emptyAppointmentDemo;
+    if(isSubmission || emptyAppointmentDemo)dummyToggle.title='Für diese Test- oder Vorschlagsansicht nicht verfügbar.';
+  }
+  dummyToggle?.addEventListener('click',()=>{if(!communityLoading&&!state.saving)loadCommunityData(!includeDummy);});
   let appointmentEditor = null;
   const state = { view: 'ueberblick', insurance: 'gkv', selections: {}, treatmentCategory: null, treatmentView: 'categories', treatmentSort: null, treatmentSortDirection: 'desc', treatmentQuery: '', treatmentFilterCategories: null, treatmentOnlyRated: false, treatmentPositiveMin: 0, treatmentNegativeMax: 100, data: null, loading: true, error: false, community: null, communityError: false, saving: false };
   const content = document.getElementById('view-content');
@@ -31,7 +42,7 @@
   const validId = /^\d+$/.test(idParam || (livePage ? '' : '627')) && Number.isSafeInteger(doctorId) && doctorId > 0;
   if (isSubmission) {
     const banner=document.querySelector('.prototype-note > span');
-    if(banner) for(const node of banner.childNodes) if(node.nodeType===Node.TEXT_NODE) node.textContent=node.textContent.replace('Praxis und Behandlungen: Originaldaten.', 'Praxisangaben aus dem Community-Eintrag.');
+    if(banner) for(const node of banner.childNodes) if(node.nodeType===Node.TEXT_NODE) node.textContent=node.textContent.replace('Praxis und Therapien: Originaldaten.', 'Praxisangaben aus dem Community-Eintrag.');
   }
   let detailMap = null;
   let profileMap = null;
@@ -65,17 +76,25 @@
     const data = question(key);
     if (!state.community) return state.communityError ? 'Community-Daten konnten nicht geladen werden.' : 'Community-Daten werden geladen …';
     if (!data.total) return 'Noch keine Community-Angaben';
-    return `${data.total} Angaben${Number(data.dummy_count) > 0 ? ` · davon ${data.dummy_count} Dummy-Angaben` : ''}`;
+    return `${data.total} Angaben`;
   }
-  async function loadCommunityData() {
+  async function loadCommunityData(requestedDummy = includeDummy) {
+    communityLoading = true;
+    updateDummyToggle();
+    updateAnswerControls();
     try {
-      const response = await fetch(isSubmission ? `api/doctor_submission.php?id=${doctorId}` : `api/doctor_community.php?id=${doctorId}`);
+      const response = await fetch(isSubmission ? `api/doctor_submission.php?id=${doctorId}` : `api/doctor_community.php?id=${doctorId}&include_dummy=${requestedDummy?1:0}`);
       const data = await response.json();
       if (!response.ok || !data.ok) throw new Error('Community unavailable');
       applyCommunityResponse(data);
+      includeDummy = Boolean(state.community.include_dummy);
+      const url = new URL(location.href);
+      if(!emptyAppointmentDemo) {url.searchParams.set('demo',includeDummy?'1':'0');history.replaceState(history.state,'',url);}
       state.communityError = false;
-    } catch (_) { state.communityError = true; }
-    if (document.getElementById('community-mode')) document.getElementById('community-mode').textContent = state.community ? (state.community.include_dummy ? 'Dummy-Community-Daten eingeschaltet.' : 'Dummy-Community-Daten ausgeschaltet.') : 'Community-Daten derzeit nicht verfügbar.';
+    } catch (_) { state.communityError = true; notify('Community-Daten konnten nicht geladen werden.'); }
+    communityLoading = false;
+    updateDummyToggle();
+    if (document.getElementById('community-mode')) document.getElementById('community-mode').textContent = state.community ? '' : 'Community-Daten derzeit nicht verfügbar.';
     render();
   }
   function applyCommunityResponse(data) {
@@ -106,7 +125,7 @@
   }
   function updateAnswerControls() {
     document.querySelectorAll('[data-choice], #reset-demo').forEach(button => {
-      button.disabled = state.saving || !state.community || state.communityError || (emptyAppointmentDemo && button.dataset.choice && !button.dataset.choice.startsWith('appointment-')); 
+      button.disabled = state.saving || communityLoading || !state.community || state.communityError || (emptyAppointmentDemo && button.dataset.choice && !button.dataset.choice.startsWith('appointment-')); 
     });
   }
   async function saveAnswer(payload) {
@@ -116,12 +135,13 @@
       else demoAppointmentAnswers[payload.question]=payload.value;
       applyDemoAppointments();render();notify('Testauswahl aktualisiert – keine echten Angaben verändert.');return;
     }
-    if (state.saving || !state.community || state.communityError) return;
+    if (state.saving || communityLoading || !state.community || state.communityError) return;
     state.saving = true;
+    updateDummyToggle();
     updateAnswerControls();
     notify('Wird gespeichert …');
     try {
-      const response = await fetch(isSubmission ? 'api/doctor_submission.php' : 'api/doctor_community_answer.php', {
+      const response = await fetch(isSubmission ? 'api/doctor_submission.php' : 'api/doctor_community_answer.php?include_dummy='+(includeDummy?'1':'0'), {
         method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(isSubmission ? {id:doctorId,...payload} : {dr_id: doctorId, ...payload})
       });
@@ -135,6 +155,7 @@
       notify('Speichern konnte nicht bestätigt werden. Bitte erneut versuchen.');
     } finally {
       state.saving = false;
+      updateDummyToggle();
       updateAnswerControls();
     }
   }
@@ -188,6 +209,7 @@
         const link = contactLink(type, value);
         return link.replace('<a ', `<a aria-label="${type}" title="${type}" `).replace(`>${escape(value)}</a>`, livePage ? `><span class="contact-symbol" aria-hidden="true">${({Website:'↗',Telefon:'☎','E-Mail':'✉'})[type]}</span><span class="contact-label">${type}</span></a>` : `>${type}</a>`);
       }).join('');
+      if(dummyToggle)document.querySelector('.contact').prepend(dummyToggle);
       profileMap?.remove();
       profileMap = createMap(document.getElementById('profile-map'), true);
     } catch (error) {
@@ -314,29 +336,40 @@
   }
   function decorateBoxHeadings(root=content) {
     const explanations={
-      'Überblick':'Hier findest du die recherchierten Angaben zu Behandler:in oder Anbieter, medizinischem Profil und Kontakt. Fehlende Angaben sind gekennzeichnet.',
+      'Überblick':'Hier findest du die recherchierten Angaben zu Behandler, medizinischem Profil und Kontakt. Fehlende Angaben sind gekennzeichnet.',
       'Medizinisches Profil':'Fachrichtungen, erfasste Spezialisierungen und Zusatzqualifikationen aus der Recherche.',
       'Standort':'Adresse und Karte der Praxis. Gib deinen Standort ein, um die Luftlinienentfernung zu sehen. Im Termin-Reiter wird zusätzlich der Anreiseaufwand grob geschätzt.',
       'Kontakt':'Über diese Links kannst du die Website öffnen, anrufen oder eine E-Mail schreiben.',
-      'Community-Verteilung':'Subjektive Erfahrungen zur Zustandsveränderung nach der Behandlung. Die Balken zeigen die Verteilung. Klicke eine Kategorie an, um deine eigene Erfahrung anzugeben.',
-      'Behandlungen & Verfahren':'Recherchierte Behandlungen und Verfahren dieser Praxis. Suche und Filter helfen beim Eingrenzen. Die redaktionelle Auswahl ist eine Themenauswahl, kein Wirksamkeitsranking.'
+      'Community-Bewertung':'Subjektive Erfahrungen zur Zustandsveränderung nach der Therapie. Die Balken zeigen die Verteilung. Klicke eine Kategorie an, um deine eigene Erfahrung anzugeben.',
+      'Therapien':'Recherchierte Therapien dieser Praxis. Suche und Filter helfen beim Eingrenzen.'
     };
     root.querySelectorAll('h3').forEach(h=>{
       if(h.querySelector('.heading-help-trigger')||h.closest('.adaptation-heading-help'))return;
       const title=h.textContent.trim();
-      const key=Object.keys(explanations).find(k=>title===k||(k==='Behandlungen & Verfahren'&&title.startsWith(k)));
+      const key=Object.keys(explanations).find(k=>title===k||(k==='Therapien'&&title.startsWith(k)));
       if(!key)return;
       const id='heading-info-'+(++helpSequence),html=h.innerHTML;
       h.classList.add('adaptation-heading-help');
       h.innerHTML='<button type="button" class="heading-help-trigger" aria-describedby="'+id+'">'+html+' <span aria-hidden="true">ⓘ</span></button><span id="'+id+'" class="heading-help-info" role="tooltip">'+escape(explanations[key])+'</span>';
-      if(['Community-Verteilung','Behandlungen & Verfahren'].includes(key)&&h.nextElementSibling?.tagName==='P')h.nextElementSibling.remove();
+      if(['Community-Bewertung','Therapien'].includes(key)&&h.nextElementSibling?.tagName==='P')h.nextElementSibling.remove();
+    });
+    // Only the info icon is interactive; the heading stays ordinary text.
+    root.querySelectorAll('.heading-help-trigger').forEach(button=>{
+      if(button.dataset.iconOnly)return;
+      const icon=button.querySelector('span[aria-hidden="true"]');
+      if(!icon)return;
+      const title=[...button.childNodes].filter(node=>node!==icon).map(node=>node.textContent).join('').trim();
+      if(title)button.setAttribute('aria-label','Information zu '+title);
+      button.before(...[...button.childNodes].filter(node=>node!==icon));
+      button.dataset.iconOnly='true';
+      button.setAttribute('aria-expanded','false');
     });
   }
   function choices(key, labels, numbered = false) {
-    return `<div class="choice-grid" role="group" aria-label="Deine Auswahl: ${key === 'adaptation' ? 'Termin-Anpassung' : key.startsWith('costs') ? 'Eigene Kosten, ' + state.insurance.toUpperCase() : key === 'wait' ? 'Wartezeit' : 'Wirkung'}" style="--count:${labels.length}">${labels.map((label, index) => `<button type="button" data-choice="${key}" data-value="${index}" aria-pressed="${state.selections[key] === index}">${numbered ? `<span class="choice-number" aria-hidden="true">${index + 1}</span>` : ''}${label}</button>`).join('')}</div>`;
+    return `<div class="choice-grid" role="group" aria-label="Deine Auswahl: ${key === 'adaptation' ? 'Termin-Anpassung' : key.startsWith('costs') ? 'Eigene Kosten, ' + state.insurance.toUpperCase() : key.startsWith('wait') ? (key === 'wait' ? 'Wartezeit auf den Ersttermin' : 'Wartezeit auf Folgetermine') : 'Wirkung'}" style="--count:${labels.length}">${labels.map((label, index) => `<button type="button" data-choice="${key}" data-value="${index}" aria-pressed="${state.selections[key] === index}">${numbered ? `<span class="choice-number" aria-hidden="true">${index + 1}</span>` : ''}${label}</button>`).join('')}</div>`;
   }
   function dotScale(key, labels) {
-    return `<p class="community-label">${communityNote(key)}</p><p class="field-note">Prozente: Community-Verteilung · Blauer Punkt: deine Auswahl</p><div class="interactive-dot-scale" role="group" aria-label="Deine Auswahl: ${key === 'wait' ? 'Wartezeit' : 'Eigenanteil ' + state.insurance.toUpperCase()}" style="--count:${labels.length}">${labels.map((label, index) => `<button type="button" data-choice="${key}" data-value="${index}" aria-pressed="${state.selections[key] === index}"><span class="dot" aria-hidden="true"></span><strong class="scale-percent">${percentText(percent(key,index))}</strong><span>${label}</span></button>`).join('')}</div>`;
+    return `<p class="community-label">${communityNote(key)}</p><div class="interactive-dot-scale" role="group" aria-label="Deine Auswahl: ${key.startsWith('wait') ? (key === 'wait' ? 'Wartezeit auf den Ersttermin' : 'Wartezeit auf Folgetermine') : 'Eigenanteil ' + state.insurance.toUpperCase()}" style="--count:${labels.length}">${labels.map((label, index) => `<button type="button" data-choice="${key}" data-value="${index}" aria-pressed="${state.selections[key] === index}"><span class="dot" aria-hidden="true"></span><strong class="scale-percent">${percentText(percent(key,index))}</strong><span>${label}</span></button>`).join('')}</div>`;
   }
   function locationCard() {
     if (!state.data) return `<section class="card"><h3>Standort</h3>${dataStatus()}</section>`;
@@ -374,7 +407,7 @@
   }
 
   function overview() {
-    return profileFacts() + locationCard();
+    return profileFacts() + dashboardScore(true) + locationCard();
   }
 
   function adaptationHelp() {
@@ -389,11 +422,7 @@
     return `<section class="adaptation-explanation" aria-label="Bedeutung deiner gewählten Stufe"><p class="adaptation-explanation-heading">Deine Auswahl: <strong>${escape(scales.adaptation[selected])}</strong> – das bedeutet:</p><div class="adaptation-facts">${adaptationCriteria.map((criterion,i)=>`<div class="adaptation-fact"><span class="adaptation-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons[i]}</svg></span><div><span class="adaptation-fact-label">${escape(criterion)}</span><strong>${escape(adaptationDetails[selected][i])}</strong></div></div>`).join('')}</div></section>`;
   }
   function adaptationResults(data) {
-    const benchmark=state.community?.adaptation_benchmark;
-    const number=value=>value.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
-    const difference=data.mean!==null && benchmark?.mean!=null ? Math.round((data.mean-benchmark.mean)*10)/10 : null;
-    const comparison=difference===null?'':difference===0?'Auf dem Durchschnitt':number(Math.abs(difference))+' Punkte '+(difference>0?'über':'unter')+' dem Durchschnitt';
-    return `<div class="adaptation-results"><div class="community-result"><span>Community-Ergebnis · diese Praxis</span><strong>${escape(commonLabel('adaptation'))}</strong><span>${data.mean!==null?'Ø '+number(data.mean)+' / 5':'Noch keine Bewertung'}</span>${comparison?'<small>'+comparison+'</small>':''}</div><div class="community-result"><span>Durchschnitt über alle Behandler:innen</span><strong>${benchmark?.mean!=null?'Ø '+number(benchmark.mean)+' / 5':'Noch keine Vergleichsdaten'}</strong><span>${benchmark?benchmark.doctor_count+' von '+benchmark.catalog_count+' Behandler:innen mit Angaben':'Vergleich wird geladen …'}</span><small>Jedes Profil zählt gleich viel.${Number(benchmark?.dummy_count) > 0?' Einschließlich Dummy-Angaben.':''}</small></div></div>`;
+    return ratingComparison('adaptation',11,5,'Vergleich: Behandler mit mindestens elf Angaben zur Termin-Anpassung.');
   }
   function appointment() {
     const data = question('adaptation');
@@ -406,8 +435,8 @@
   }
 
   function appointmentVariant(variant) {
-    const description=variant===4?'Klicke auf die Community-Angabe. Bei Zustimmung bleibt ein gemeinsames Feld mit farbigem Rand; abweichende Angaben stehen daneben.':variant===2?'Community und eigene Angabe getrennt. ✓ = möglich, ✕ = nicht möglich. Klicke deine Angabe erneut an, um sie zurückzunehmen.':(emptyAppointmentDemo?'Testansicht 0 / 0 – keine echte Abstimmung. ':'')+'Klicke auf eine Zahl: links grün = möglich, rechts rot = nicht möglich. Deine Auswahl wird fett dargestellt; erneutes Anklicken nimmt sie zurück.';
-    return `<section class="card appointment-variant" data-variant="${variant}">${blockTitle(variant===3?'Terminform':'Terminform · Variante '+(variant-1),description)}<div class="block-content"><div class="appointment-table" role="table" aria-label="Terminform Variante ${variant-1}"><div class="matrix-header" role="row"><span role="columnheader">Termin</span>${['Vor Ort','Telefon','Video'].map(f=>`<strong role="columnheader">${f}</strong>`).join('')}</div>${['Ersttermin','Folgetermin'].map((type,row)=>`<div class="matrix-row" role="row"><strong role="rowheader">${type}</strong>${['Vor Ort','Telefon','Video'].map((form,column)=>{
+    const description=variant===4?'Klicke auf die Community-Angabe. Bei Zustimmung bleibt ein gemeinsames Feld mit farbigem Rand; abweichende Angaben stehen daneben.':variant===2?'Community und eigene Angabe getrennt. ✓ = möglich, ✕ = nicht möglich. Klicke deine Angabe erneut an, um sie zurückzunehmen.':(emptyAppointmentDemo?'Testansicht 0 / 0 – keine echte Abstimmung. ':'')+'Klicke auf eine Zahl: links rot = nein / nicht möglich, rechts grün = ja / möglich. Deine Auswahl wird fett dargestellt; erneutes Anklicken nimmt sie zurück.';
+    return `<section class="card appointment-variant" data-variant="${variant}">${blockTitle(variant===3?'Terminform':'Terminform · Variante '+(variant-1),description)}<div class="block-content"><div class="appointment-table" role="table" aria-label="Terminform"><div class="matrix-header" role="row"><span role="columnheader">Termin</span>${['Vor Ort','Telefon','Video'].map(f=>`<strong role="columnheader">${f}</strong>`).join('')}</div>${['Ersttermin','Folgetermin'].map((type,row)=>`<div class="matrix-row" role="row"><strong role="rowheader">${type}</strong>${['Vor Ort','Telefon','Video'].map((form,column)=>{
       const key=`appointment-${row}-${column}`,q=question(key),own=state.selections[key];
       const yes=q.options[0]?.count||0,no=q.options[1]?.count||0,total=yes+no;
       const status=!total?'Noch keine Angaben':yes===no?'Unterschiedlich':yes>no?'Möglich':'Nicht möglich';
@@ -416,10 +445,10 @@
       const buttons=`<div class="thumb-answers" role="group" aria-label="${type}, ${form}: deine Angabe">${[0,1].map(value=>`<button type="button" class="thumb-answer agreement-answer ${value===0?'agreement-yes':'agreement-no'}" data-choice="${key}" data-value="${value}" aria-pressed="${own===value}" aria-label="${type}, ${form}: ${value===0?'Möglich':'Nicht möglich'}" title="${own===value?'Stimme zurücknehmen':value===0?'Möglich':'Nicht möglich'}"><span aria-hidden="true">${value===0?'✓':'✕'}</span></button>`).join('')}</div>`;
       const ownControl=variant===2&&Number.isInteger(own)?`<button type="button" class="appointment-status agreement-answer own-result ${own===0?'possible':'unlikely'}" data-choice="${key}" data-value="${own}" aria-pressed="true" aria-label="${type}, ${form}: ${own===0?'Möglich':'Nicht möglich'}, Stimme zurücknehmen" title="Erneut klicken: Stimme zurücknehmen">${own===0?'✓ Möglich':'✕ Nicht möglich'}</button>`:buttons;
       const countButton=value=>`<button type="button" class="agreement-answer count-choice ${value===0?'count-yes':'count-no'}" data-choice="${key}" data-value="${value}" aria-pressed="${own===value}" aria-label="${type}, ${form}: ${value===0?'Möglich':'Nicht möglich'}, ${value===0?yes:no} Stimmen" title="${value===0?'Möglich':'Nicht möglich'}${own===value?' – deine Auswahl; erneut klicken zum Zurücknehmen':''}">${value===0?yes:no}</button>`;
-      const community=variant===2?`<span class="appointment-status ${tone}" title="${escape(communityNote(key))}">${status}</span>`:`<div class="inline-vote-meter" role="group" aria-label="${type}, ${form}: eigene Angabe">${countButton(0)}<div class="vote-meter" role="img" aria-label="${yes} Stimmen möglich, ${no} Stimmen nicht möglich"><span class="vote-meter-fill" style="width:${total?100*yes/total:50}%"></span><span class="vote-meter-point" style="left:${total?100*yes/total:50}%"></span></div>${countButton(1)}</div>${!total?'<small>Noch keine Angaben</small>':''}`;
+      const community=variant===2?`<span class="appointment-status ${tone}" title="${escape(communityNote(key))}">${status}</span>`:`<div class="inline-vote-meter" role="group" aria-label="${type}, ${form}: eigene Angabe">${countButton(1)}<div class="vote-meter" role="img" aria-label="${yes} Stimmen möglich, ${no} Stimmen nicht möglich"><span class="vote-meter-fill" style="width:${total?100*yes/total:50}%"></span><span class="vote-meter-point" style="left:${total?100*no/total:50}%"></span></div>${countButton(0)}</div>${!total?'<small>Noch keine Angaben</small>':''}`;
 
       return `<div class="matrix-cell variant-cell variant-cell-${variant}" role="cell"><span class="mobile-form">${form}</span><div class="variant-community">${variant===2?'<span class="variant-label">Community</span>':''}${community}</div>${variant===2?`<div class="variant-own"><span class="variant-label">Deine Angabe</span>${ownControl}</div>`:''}</div>`;
-    }).join('')}</div>`).join('')}</div><p class="field-note">${emptyAppointmentDemo?'Testansicht: Die Terminformen starten bei 0 / 0. Deine Klicks gelten nur hier und werden beim Neuladen zurückgesetzt.':'Pro Terminform zählt nur eine eigene Stimme.'}</p></div></section>`;
+    }).join('')}</div>`).join('')}</div>${emptyAppointmentDemo?'<p class="field-note">Testansicht: Die Terminformen starten bei 0 / 0. Deine Klicks gelten nur hier und werden beim Neuladen zurückgesetzt.</p>':''}</div></section>`;
   }
   function mergedAppointmentCell(key,type,form,own,total,yes,no,status,tone) {
     const answered=Number.isInteger(own), matched=answered&&total>0&&yes!==no&&own===(yes>no?0:1);
@@ -430,18 +459,26 @@
 
   }
   function access() {
-    return `<section class="card"><div class="cost-heading">${blockTitle('Kosten der Behandlung (Eigenanteil)', 'Wie hoch waren deine gesamten eigenen Kosten für die Behandlung dort?')}<span class="cost-country"><span class="country-flag flag-${escape(costSystem().code.toLowerCase())}" aria-hidden="true"></span>${costSystem().name}</span></div><div class="cost-contexts insurance-toggle" role="group" aria-label="Versicherungs- und Abrechnungskontext">${costSystem().options.map(([value,label]) => `<button type="button" data-insurance="${value}" aria-pressed="${costContext() === value}">${label}</button>`).join('')}</div><p class="field-note">„Aus dem Ausland“: nicht im Versicherungssystem des Praxislandes versichert.</p>${dotScale('costs-' + costContext(), scales.costs)}</section>` +
-      `<section class="card">${blockTitle('Wartezeit auf den Ersttermin', 'Wie lange musstest du auf deinen ersten Termin warten?')}${dotScale('wait', scales.wait)}</section>`;
+    return `<section class="card"><div class="cost-heading">${blockTitle('Kosten der Therapie (Eigenanteil)', 'Wie hoch waren deine eigenen Aufwendungen für alle Untersuchungen und Therapien, die du bei diesem Behandler bis zum aktuellen Zeitpunkt hast durchführen lassen?')}<span class="cost-country"><span class="country-flag flag-${escape(costSystem().code.toLowerCase())}" aria-hidden="true"></span>${costSystem().name}</span></div><div class="cost-contexts insurance-toggle" role="group" aria-label="Versicherungs- und Abrechnungskontext">${costSystem().options.map(([value,label]) => `<button type="button" data-insurance="${value}" aria-pressed="${costContext() === value}">${label}</button>`).join('')}</div>${dotScale('costs-' + costContext(), scales.costs)}</section>` +
+      `<section class="card">${blockTitle('Wartezeit auf den Ersttermin', 'Wie lange musstest du auf deinen ersten Termin warten?')}${dotScale('wait', scales.wait)}</section>` +
+      `<section class="card">${blockTitle('Wartezeit auf Folgetermine', 'Wie lange musstest du bei diesem Behandler auf einen Folgetermin warten?')}${dotScale('wait-followup', scales.wait)}</section>`;
   }
 
   function effect() {
-    return `<section class="card"><div class="chart-heading"><div><h3>Community-Verteilung</h3><p>Subjektive Erfahrungen nach der Behandlung.</p></div><span>${communityNote('effect')}</span></div><div class="effect-chart" role="group" aria-label="Zustandsveränderung: Community und deine Auswahl">${scales.effect.map((label, i) => { const value = percent('effect',i); return `<button type="button" class="effect-column" data-choice="effect" data-value="${i}" aria-pressed="${state.selections.effect === i}" aria-label="${label}: ${percentText(value)}. Als eigene Erfahrung auswählen"><span class="bar-area"><strong>${percentText(value)}</strong><span class="effect-bar effect-${i}" style="height:${(value || 0) * 1.5}px"></span></span><span class="effect-label">${label}</span></button>`; }).join('')}</div></section>` + treatmentSection();
+    return `<section class="card"><div class="chart-heading"><div><h3>Community-Bewertung</h3><p>Subjektive Erfahrungen nach der Therapie.</p></div><span>${communityNote('effect')}</span></div><div class="effect-chart" role="group" aria-label="Zustandsveränderung: Community und deine Auswahl">${scales.effect.map((label, i) => { const value = percent('effect',i); return `<button type="button" class="effect-column" data-choice="effect" data-value="${i}" aria-pressed="${state.selections.effect === i}" aria-label="${label}: ${percentText(value)}. Als eigene Erfahrung auswählen"><span class="bar-area"><strong>${percentText(value)}</strong><span class="effect-bar effect-${i}" style="height:${(value || 0) * 1.5}px"></span></span><span class="effect-label">${label}</span></button>`; }).join('')}</div>${effectComparison()}</section>` + treatmentSection();
   }
   function treatmentSection() {
-    if (!state.data) return '<section class="card"><h3>Behandlungen & Verfahren</h3>'+dataStatus()+'</section>';
+    if (!state.data) return '<section class="card"><h3>Therapien</h3>'+dataStatus()+'</section>';
     const groups=Object.entries(state.data.treatments_grouped||{}).sort((a,b)=>b[1].length-a[1].length);
-    const all=[...new Map(groups.flatMap(([category,entries])=>entries.map(e=>[Number(e.treat_id),{...e,category}]))).values()];
-    if(!all.length)return '<section class="card"><h3>Behandlungen & Verfahren</h3><p>Noch keine Behandlungen zugeordnet.</p></section>';
+    const all=[...new Map(groups.flatMap(([category,entries])=>entries.map(e=>{
+      const example=state.community?.treatment_experiences?.[e.treat_id];
+      if(!example)return [Number(e.treat_id),{...e,category,improvement_ratio:e.improvement_ratio??e.positive_ratio,positive_ratio:Number(e.improvement_ratio??e.positive_ratio??0)+Number(e.healing_ratio??0)}];
+      const counts=[Number(e.contra||0)+example.worsening,Number(e.neutral||0)+example.unchanged,Number(e.pro||0)+example.improvement,Number(e.healing||0)+example.healing];
+      const total=counts.reduce((sum,count)=>sum+count,0);
+      const ratios=counts.map(count=>Math.round(count*1000/total)/10);
+      return [Number(e.treat_id),{...e,category,total_votes:total,negative_ratio:ratios[0],neutral_ratio:ratios[1],improvement_ratio:ratios[2],positive_ratio:(counts[2]+counts[3])*100/total,healing_ratio:ratios[3]}];
+    }))).values()];
+    if(!all.length)return '<section class="card"><h3>Therapien</h3><p>Noch keine Therapien zugeordnet.</p></section>';
     const editorialData=state.data.analysis?.editorial;
     const editorialIds=(editorialData?.matches||[]).flatMap(e=>e.treat_ids);
     const editorial=all.filter(e=>editorialIds.includes(Number(e.treat_id)));
@@ -450,30 +487,30 @@
     let rows=category==='@editorial'?editorial:category&&category!=='*'?all.filter(e=>e.category===category):all;
     const normalized=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('de').replaceAll('ß','ss');
     rows=rows.filter(e=>(state.treatmentFilterCategories===null||state.treatmentFilterCategories.includes(e.category)) && normalized(e.behandlung+' '+e.category+' '+(e.unterkategorie||'')).includes(normalized(state.treatmentQuery.trim())) && (!state.treatmentOnlyRated||Number(e.total_votes)>0) && ((state.treatmentPositiveMin===0&&state.treatmentNegativeMax===100)||(Number(e.total_votes)>0&&Number(e.positive_ratio)>=state.treatmentPositiveMin&&Number(e.negative_ratio)<=state.treatmentNegativeMax)));
-    rows=[...rows].sort((a,b)=>category==='@editorial'?editorialIds.indexOf(Number(a.treat_id))-editorialIds.indexOf(Number(b.treat_id)):Number(b.provider_count)-Number(a.provider_count)||a.behandlung.localeCompare(b.behandlung,'de'));
+    rows=[...rows].sort((a,b)=>category==='@editorial'?editorialIds.indexOf(Number(a.treat_id))-editorialIds.indexOf(Number(b.treat_id)):Number(b.provider_total??b.provider_count)-Number(a.provider_total??a.provider_count)||a.behandlung.localeCompare(b.behandlung,'de'));
     if(state.treatmentSort){
       const value=e=>({name:e.behandlung,category:categoryLabel(e.category),experience:Number(e.positive_ratio)||0,negative:Number(e.negative_ratio)||0,votes:Number(e.total_votes)||0,providers:Number(e.provider_total??e.provider_count)||0,editorial:editorialIds.includes(Number(e.treat_id))?1:0})[state.treatmentSort];
       rows.sort((a,b)=>{const x=value(a),y=value(b);const cmp=typeof x==='string'?x.localeCompare(y,'de'):x-y;return cmp*(state.treatmentSortDirection==='asc'?1:-1)||a.behandlung.localeCompare(b.behandlung,'de');});
     }
     const link=e=>'<a href="therapie_detail.html?treat_id='+Number(e.treat_id)+'&source=priority">'+escape(e.behandlung)+'</a>';
-    const stats=e=>editorialIds.includes(Number(e.treat_id))?'Teil der redaktionellen Auswahl':'';
-    const meta=e=>Number(e.provider_count||0)+' von 39 Ärzten zugeordnet';
-    const card=(key,label,count)=>'<button type="button" class="treatment-category-card" data-treatment-category="'+escape(key)+'"><span>'+escape(label)+'</span><strong>'+count+'</strong><span>Behandlungen →</span></button>';
-    const filterControls='<div class="treatment-controls"><div class="treatment-search-controls"><label>Behandlung suchen<input type="search" id="treatment-query" value="'+escape(state.treatmentQuery)+'" placeholder="Name, Kategorie oder Unterkategorie"></label><details id="treatment-category-filter"><summary>Kategorien'+(state.treatmentFilterCategories===null?' · alle':' · '+state.treatmentFilterCategories.length)+'</summary><div class="treatment-category-options"><button type="button" data-treatment-filter-all="1">Alle</button><button type="button" data-treatment-filter-none="1">Keine</button>'+groups.map(([name])=>'<label><input type="checkbox" data-treatment-filter-category="'+escape(name)+'" '+(state.treatmentFilterCategories===null||state.treatmentFilterCategories.includes(name)?'checked':'')+'> '+escape(categoryLabel(name))+'</label>').join('')+'</div></details><label class="treatment-rated-toggle"><input type="checkbox" id="treatment-only-rated" '+(state.treatmentOnlyRated?'checked':'')+'> Nur mit Bewertung</label><button type="button" id="treatment-reset-filters">Zurücksetzen</button></div><div class="treatment-rating-controls">'+[['positive','Positive Erfahrungen mindestens',state.treatmentPositiveMin],['negative','Negative Erfahrungen höchstens',state.treatmentNegativeMax]].map(([key,label,value])=>'<div><label for="treatment-'+key+'-range">'+label+'</label><div class="treatment-range-row"><input id="treatment-'+key+'-range" data-treatment-rating="'+key+'" type="range" min="0" max="100" value="'+value+'"><input aria-label="'+label+' in Prozent" id="treatment-'+key+'-number" data-treatment-rating="'+key+'" type="number" min="0" max="100" value="'+value+'"><span>%</span></div></div>').join('')+'<label>Sortieren<select id="treatment-sort-select">'+[['name:asc','Name A–Z'],['name:desc','Name Z–A'],['experience:desc','Positive Erfahrungen ↓'],['negative:desc','Negative Erfahrungen ↓'],['votes:desc','Bewertungen ↓'],['providers:desc','Anbieter ↓']].map(([key,label])=>'<option value="'+key+'" '+((state.treatmentSort||'providers')+':'+state.treatmentSortDirection===key?'selected':'')+'>'+label+'</option>').join('')+'</select></label></div></div><p class="treatment-result-count" role="status">'+rows.length+' von '+all.length+' Behandlungen'+(category&&category!=='*'?' in der gewählten Auswahl':'')+'</p>';
+    const stats=e=>editorialIds.includes(Number(e.treat_id))?'Teil der redaktionellen Auswahl der Top-Therapien':'';
+    const meta=e=>Number(e.provider_total??e.provider_count??0)+' Behandler';
+    const card=(key,label,count)=>'<button type="button" class="treatment-category-card" data-treatment-category="'+escape(key)+'"><span>'+escape(label)+'</span><strong>'+count+'</strong><span>Therapien →</span></button>';
+    const filterControls='<div class="treatment-controls"><div class="treatment-search-controls"><label>Therapie suchen<input type="search" id="treatment-query" value="'+escape(state.treatmentQuery)+'" placeholder="Name, Kategorie oder Unterkategorie"></label><details id="treatment-category-filter"><summary>Kategorien'+(state.treatmentFilterCategories===null?' · alle':' · '+state.treatmentFilterCategories.length)+'</summary><div class="treatment-category-options"><button type="button" data-treatment-filter-all="1">Alle</button><button type="button" data-treatment-filter-none="1">Keine</button>'+groups.map(([name])=>'<label><input type="checkbox" data-treatment-filter-category="'+escape(name)+'" '+(state.treatmentFilterCategories===null||state.treatmentFilterCategories.includes(name)?'checked':'')+'> '+escape(categoryLabel(name))+'</label>').join('')+'</div></details><label class="treatment-rated-toggle"><input type="checkbox" id="treatment-only-rated" '+(state.treatmentOnlyRated?'checked':'')+'> Nur mit Bewertung</label><button type="button" id="treatment-reset-filters">Zurücksetzen</button></div><div class="treatment-rating-controls">'+[['positive','Positive Erfahrungen mindestens',state.treatmentPositiveMin],['negative','Negative Erfahrungen höchstens',state.treatmentNegativeMax]].map(([key,label,value])=>'<div><label for="treatment-'+key+'-range">'+label+'</label><div class="treatment-range-row"><input id="treatment-'+key+'-range" data-treatment-rating="'+key+'" type="range" min="0" max="100" value="'+value+'"><input aria-label="'+label+' in Prozent" id="treatment-'+key+'-number" data-treatment-rating="'+key+'" type="number" min="0" max="100" value="'+value+'"><span>%</span></div></div>').join('')+'<label>Sortieren<select id="treatment-sort-select">'+[['name:asc','Name A–Z'],['name:desc','Name Z–A'],['experience:desc','Positive Erfahrungen ↓'],['negative:desc','Negative Erfahrungen ↓'],['votes:desc','Bewertungen ↓'],['providers:desc','Behandler ↓']].map(([key,label])=>'<option value="'+key+'" '+((state.treatmentSort||'providers')+':'+state.treatmentSortDirection===key?'selected':'')+'>'+label+'</option>').join('')+'</select></label></div></div><p class="treatment-result-count" role="status">'+rows.length+' von '+all.length+' Therapien'+(category&&category!=='*'?' in der gewählten Auswahl':'')+'</p>';
     let body='';
     if(state.treatmentView==='categories'&&!category){
       body='<div class="treatment-categories">'+groups.map(([name])=>[name,rows.filter(e=>e.category===name)]).filter(([,entries])=>entries.length).map(([name,entries])=>card(name,categoryLabel(name),entries.length)).join('')+'</div>';
     }else{
-      const label=category==='@editorial'?'Redaktionelle Auswahl':category&&category!=='*'?categoryLabel(category):'Alle Behandlungen';
-      body='<div class="treatment-drilldown"><strong>'+escape(label)+' · '+(category==='@editorial'?editorialData.matched_count+' Themen, '+rows.length+' Datenbankeinträge':rows.length+' Behandlungen')+'</strong><button type="button" id="treatment-back">Alle Kategorien</button></div>';
-      if(!rows.length)body+='<p>Noch keine passenden Behandlungen zugeordnet.</p>';
+      const label=category==='@editorial'?'Top-Therapien':category&&category!=='*'?categoryLabel(category):'Alle Therapien';
+      body='<div class="treatment-drilldown"><strong>'+escape(label)+' · '+(category==='@editorial'?editorialData.matched_count+' Top-Therapien, '+rows.length+' Einträge':rows.length+' Therapien')+'</strong><button type="button" id="treatment-back">Alle Kategorien</button></div>';
+      if(!rows.length)body+='<p>Noch keine passenden Therapien zugeordnet.</p>';
       else if(state.treatmentView==='cards')body+='<div class="treatment-categories">'+rows.map(e=>'<article class="treatment-result-card"><h4>'+link(e)+'</h4><p>'+escape(categoryLabel(e.category))+'</p><small>'+meta(e)+'</small><small>'+stats(e)+'</small></article>').join('')+'</div>';
       else {
         const header=(label,key)=>'<th scope="col" aria-sort="'+(state.treatmentSort===key?(state.treatmentSortDirection==='asc'?'ascending':'descending'):'none')+'"><button type="button" class="doctor-detail-treatment-table-sort" data-treatment-sort="'+key+'">'+label+'<span aria-hidden="true">'+(state.treatmentSort===key?(state.treatmentSortDirection==='asc'?'↑':'↓'):'↕')+'</span></button></th>';
-        const experience=e=>'<div class="doctor-detail-treatment-experience-row">'+[['Verschlechterung','negative_ratio',0],['Keine Veränderung','neutral_ratio',1],['Verbesserung','positive_ratio',2],['Heilung','healing_ratio',3]].map(([label,key,color])=>{const value=Number(e.total_votes)>0&&e[key]!=null?Number(e[key])+'%':'–';return '<span class="treatment-experience-value experience-'+color+'" title="'+label+': '+(value==='–'?'noch nicht erfasst':value)+'" aria-label="'+label+': '+(value==='–'?'noch nicht erfasst':value)+'">'+value+'</span>';}).join('')+'</div>';
+        const experience=e=>'<div class="doctor-detail-treatment-experience-row">'+[['Verschlechterung','negative_ratio',0],['Keine Veränderung','neutral_ratio',1],['Verbesserung','improvement_ratio',2],['Heilung','healing_ratio',3]].map(([label,key,color])=>{const value=Number(e.total_votes)>0&&e[key]!=null?Number(e[key])+'%':'–';return '<span class="treatment-experience-value experience-'+color+'" title="'+label+': '+(value==='–'?'noch nicht erfasst':value)+'" aria-label="'+label+': '+(value==='–'?'noch nicht erfasst':value)+'">'+value+'</span>';}).join('')+'</div>';
 
         const providers=e=>'<span class="doctor-detail-treatment-provider-badge">'+(Number(e.provider_total??e.provider_count)||'—')+'</span>';
-        body+='<p class="treatment-rating-note">Bewertungen aus dem vorhandenen Datenbestand, einschließlich Dummy-Bewertungen. Bisherige Negativ-/Neutral-/Positiv-Angaben sind in den ersten drei Positionen dargestellt; Heilung wurde noch nicht separat erfasst (–). Anbieter gesamt zählt den gesamten Katalog.</p><div class="treatment-experience-legend"><span><i class="effect-0"></i>Verschlechterung</span><span><i class="effect-1"></i>Keine Veränderung</span><span><i class="effect-2"></i>Verbesserung</span><span><i class="effect-3"></i>Heilung</span></div><div class="doctor-detail-treatment-table-wrap"><table class="doctor-detail-treatment-table doctor-detail-treatment-table-detailed"><caption class="sr-only">Behandlungen mit Erfahrungen, Bewertungen und Anbietern</caption><thead><tr><th scope="col" aria-label="Rang">#</th>'+header('Therapie','name')+header('Kategorie','category')+header('Erfahrung','experience')+header('<span class="table-heading-label">Bewertungen<small>Anzahl</small></span>','votes')+header('Anbieter gesamt','providers')+header('Redaktionelle Auswahl','editorial')+'</tr></thead><tbody>'+rows.map((e,i)=>'<tr><td><span class="doctor-detail-treatment-rank-badge">#'+(i+1)+'</span></td><td>'+link(e)+'</td><td><span class="doctor-detail-treatment-category-inline">'+escape(categoryLabel(e.category))+'</span></td><td>'+experience(e)+'</td><td><span class="doctor-detail-treatment-vote-total">'+Number(e.total_votes||0)+'</span></td><td>'+providers(e)+'</td><td>'+(editorialIds.includes(Number(e.treat_id))?'Ja':'—')+'</td></tr>').join('')+'</tbody></table><table class="doctor-detail-treatment-compact-table"><caption class="sr-only">Kompakte Behandlungsliste</caption><thead><tr><th scope="col">#</th>'+header('Therapie','name')+header('Erfahrung','experience')+header('Anbieter','providers')+'</tr></thead><tbody>'+rows.map((e,i)=>'<tr><td>'+(i+1)+'</td><td>'+link(e)+'</td><td>'+(experience(e)+'<small>n='+Number(e.total_votes||0)+'</small>')+'</td><td>'+providers(e)+'</td></tr>').join('')+'</tbody></table></div>';
+        body+='<p class="treatment-rating-note">Behandler gesamt zählt den gesamten Katalog. Ein Strich bedeutet, dass für diese Kategorie noch keine Bewertung vorliegt.</p><div class="treatment-experience-legend"><span><i class="effect-0"></i>Verschlechterung</span><span><i class="effect-1"></i>Keine Veränderung</span><span><i class="effect-2"></i>Verbesserung</span><span><i class="effect-3"></i>Heilung</span></div><div class="doctor-detail-treatment-table-wrap"><table class="doctor-detail-treatment-table doctor-detail-treatment-table-detailed"><caption class="sr-only">Therapien mit Erfahrungen, Bewertungen und Behandlern</caption><thead><tr><th scope="col" aria-label="Rang">#</th>'+header('Therapie','name')+header('Kategorie','category')+header('Erfahrung','experience')+header('<span class="table-heading-label">Bewertungen<small>Anzahl</small></span>','votes')+header('Behandler gesamt','providers')+header('Top-Therapie','editorial')+'</tr></thead><tbody>'+rows.map((e,i)=>'<tr><td><span class="doctor-detail-treatment-rank-badge">#'+(i+1)+'</span></td><td>'+link(e)+'</td><td><span class="doctor-detail-treatment-category-inline">'+escape(categoryLabel(e.category))+'</span></td><td>'+experience(e)+'</td><td><span class="doctor-detail-treatment-vote-total">'+Number(e.total_votes||0)+'</span></td><td>'+providers(e)+'</td><td>'+(editorialIds.includes(Number(e.treat_id))?'Ja':'—')+'</td></tr>').join('')+'</tbody></table><table class="doctor-detail-treatment-compact-table"><caption class="sr-only">Kompakte Therapieliste</caption><thead><tr><th scope="col">#</th>'+header('Therapie','name')+header('Erfahrung','experience')+header('Behandler','providers')+'</tr></thead><tbody>'+rows.map((e,i)=>'<tr><td>'+(i+1)+'</td><td>'+link(e)+'</td><td>'+(experience(e)+'<small>n='+Number(e.total_votes||0)+'</small>')+'</td><td>'+providers(e)+'</td></tr>').join('')+'</tbody></table></div>';
       }
     }
     const diagnostics=all.filter(e=>e.category==='Diagnostik').length;
@@ -483,16 +520,16 @@
     const percentile=all.length<=5?'Wenige dokumentierte Einträge':catalog?.top_percent!=null?'Top '+catalog.top_percent+' %':'Noch kein Vergleich verfügbar';
     const preview=(editorialData?.matches||[]).slice(0,3).map(topic=>'<li><button type="button" data-treatment-category="@editorial">'+escape(topic.label)+'</button></li>').join('');
     const categories=groups.filter(([name])=>name!=='Ohne Kategorie');
-    const summary='<div class="treatment-profile-summary"><div><span>Umfang im Vergleich</span><strong>'+percentile+'</strong><dl class="profile-average"><div><dt>Diese Praxis</dt><dd>'+all.length+' Einträge</dd></div><div><dt>Vergleichsgruppe</dt><dd>'+(catalog?catalog.doctor_count:'–')+' Ärzte/Praxen</dd></div></dl><small>'+(all.length<=5?'Bis einschließlich fünf Einträge: keine Prozent-Einstufung.':catalog?.top_percent!=null?catalog.at_least_count+' von '+catalog.doctor_count+' Profilen haben mindestens '+all.length+' Einträge.':'')+' Verglichen werden alle Katalogprofile mit mehr als fünf Einträgen. Gleichstände zählen gemeinsam; der Prozentwert wird aufgerundet.</small></div><div><span>Häufigste Kategorien</span><strong>'+categories.length+' Kategorien</strong><ul class="profile-summary-list">'+categories.slice(0,3).map(([name,entries])=>'<li><button type="button" data-treatment-category="'+escape(name)+'">'+escape(categoryLabel(name))+' <b>'+entries.length+'</b></button></li>').join('')+'</ul><button type="button" class="profile-summary-more" data-treatment-view="categories">Alle Kategorien ansehen →</button></div><div><span>Redaktionelle Auswahl</span><strong>'+(editorialData?editorialData.matched_count+' von 31 Themen':'Noch nicht abgeglichen')+'</strong><ul class="profile-summary-list editorial-preview">'+preview+'</ul>'+(editorialData?'<button type="button" class="profile-summary-more" data-treatment-category="@editorial">Alle '+editorialData.matched_count+' Themen ansehen →</button>':'')+'</div></div>';
+    const summary='<div class="treatment-profile-summary"><div><span>Umfang im Vergleich</span><strong>'+percentile+'</strong><dl class="profile-average"><div><dt>Diese Praxis</dt><dd>'+all.length+' Einträge</dd></div><div><dt>Vergleichsgruppe</dt><dd>'+(catalog?catalog.doctor_count:'–')+' Behandler</dd></div></dl><small>'+(all.length<=5?'Bis einschließlich fünf Einträge: keine Prozent-Einstufung.':catalog?.top_percent!=null?catalog.at_least_count+' von '+catalog.doctor_count+' Profilen haben mindestens '+all.length+' Einträge.':'')+' Verglichen werden alle Katalogprofile mit mehr als fünf Einträgen. </small></div><div><span>Häufigste Kategorien</span><strong>'+categories.length+' Kategorien</strong><ul class="profile-summary-list">'+categories.slice(0,3).map(([name,entries])=>'<li><button type="button" data-treatment-category="'+escape(name)+'">'+escape(categoryLabel(name))+' <b>'+entries.length+'</b></button></li>').join('')+'</ul><button type="button" class="profile-summary-more" data-treatment-view="categories">Alle Kategorien anzeigen →</button></div><div><div class="top-therapy-heading"><span>Abdeckung von Top-Therapien</span><span class="top-therapy-help adaptation-heading-help"><button type="button" class="heading-help-trigger" aria-label="Was sind Top-Therapien?" aria-describedby="top-therapy-info"><span aria-hidden="true">ⓘ</span></button><span id="top-therapy-info" class="heading-help-info" role="tooltip">Top-Therapien sind eine redaktionelle Auswahl zur Orientierung, kein Wirksamkeitsranking. Die Abdeckung zeigt, wie viele Therapien aus dieser Auswahl der Praxis zugeordnet sind.</span></span></div><strong>'+(editorialData?editorialData.matched_count+' von '+editorialData.total+' Top-Therapien':'Noch nicht abgeglichen')+'</strong><ul class="profile-summary-list editorial-preview">'+preview+'</ul>'+(editorialData?'<button type="button" class="profile-summary-more" data-treatment-category="@editorial">Alle '+editorialData.matched_count+' Top-Therapien anzeigen →</button>':'')+'</div></div>';
     const editorialNotes=editorialData?.partial?.length?'<details class="treatment-match-notes"><summary>'+editorialData.partial.length+' nur teilweise passende Zuordnungen</summary><p>Diese zählen nicht als bestätigter Treffer der redaktionellen Auswahl:</p><ul>'+editorialData.partial.map(e=>'<li>'+escape(e.label)+'</li>').join('')+'</ul><p>Zum Beispiel belegt allgemeine Physiotherapie keine PEM-Anpassung; einzelne Komponenten belegen keine vollständige Kombination.</p></details>':'';
-    return '<section class="card" id="treatment-section"><h3 tabindex="-1">Behandlungen & Verfahren <span class="total-count">'+all.length+'</span></h3><p>Das recherchierte Behandlungsprofil von '+escape(state.data.item.dr_display_name)+'.</p>'+summary+'<p class="treatment-specializations"><strong>Erfasste Spezialisierungen:</strong> '+(escape(specializations)||'<span class="overview-missing">Noch keine Angabe</span>')+'</p><p class="field-note">Der Vergleich beschreibt dokumentierte Einträge, nicht Qualität oder Wirksamkeit. Die Vergleichsgruppe wächst mit weiteren Katalogprofilen mit mehr als fünf Einträgen. Die redaktionelle Auswahl ist kein Wirksamkeitsranking.</p>'+editorialNotes+'<div class="treatment-view-switch" role="group" aria-label="Behandlungsansicht">'+[['categories','Kategorien'],['list','Liste'],['cards','Kacheln']].map(([key,label])=>'<button type="button" data-treatment-view="'+key+'" aria-pressed="'+(state.treatmentView===key)+'">'+label+'</button>').join('')+'</div>'+filterControls+body+'</section>';
+    return '<section class="card" id="treatment-section"><h3 tabindex="-1">Therapien <span class="total-count">'+all.length+'</span></h3><p>Das recherchierte Therapieprofil von '+escape(state.data.item.dr_display_name)+'.</p>'+summary+'<p class="treatment-specializations"><strong>Erfasste Spezialisierungen:</strong> '+(escape(specializations)||'<span class="overview-missing">Noch keine Angabe</span>')+'</p><p class="field-note">Der Vergleich beschreibt dokumentierte Einträge, nicht Qualität oder Wirksamkeit. Die Vergleichsgruppe wächst mit weiteren Katalogprofilen mit mehr als fünf Einträgen. Die redaktionelle Auswahl ist kein Wirksamkeitsranking.</p>'+editorialNotes+'<div class="treatment-view-switch" role="group" aria-label="Therapieansicht">'+[['categories','Kategorien'],['list','Liste'],['cards','Kacheln']].map(([key,label])=>'<button type="button" data-treatment-view="'+key+'" aria-pressed="'+(state.treatmentView===key)+'">'+label+'</button>').join('')+'</div>'+filterControls+'<div id="treatment-results" tabindex="-1" aria-label="Therapien und Kategorien">'+body+'</div></section>';
 
   }
   function appointmentCountNote() {
     if(!state.community)return communityNote('appointment-0-0');
-    let total=0,dummy=0;
-    for(let r=0;r<2;r++)for(let c=0;c<3;c++){const q=question('appointment-'+r+'-'+c);total+=Number(q.total)||0;dummy+=Number(q.dummy_count)||0;}
-    return total?total+' Einzelangaben'+(dummy?' · davon '+dummy+' Dummy-Angaben':''):'Noch keine Community-Angaben';
+    let total=0;
+    for(let r=0;r<2;r++)for(let c=0;c<3;c++){const q=question('appointment-'+r+'-'+c);total+=Number(q.total)||0;}
+    return total?total+' Einzelangaben':'Noch keine Community-Angaben';
   }
   function alignCommunityCounters() {
     content.querySelectorAll('.appointment-variant').forEach(card=>{const note=document.createElement('p');note.className='community-label';note.textContent=appointmentCountNote();note.title='Summe über sechs Terminfragen; eine Person kann mehrere Angaben machen.';card.append(note);});
@@ -506,24 +543,108 @@
       const country=row.querySelector('.cost-country');if(country)meta.append(country);row.append(meta);
     });
   }
-  function dashboardScore() {
+  function ratingComparison(key,minimum,unit,reference) {
+    const summarize=options=>{
+      const total=options.reduce((sum,o)=>sum+Number(o.count||0),0);
+      return {total,mean:total?options.reduce((sum,o,i)=>sum+Number(o.count||0)*(i+1),0)/total:null};
+    };
+    const own=summarize(question(key).options||[]);
+    const values=(state.community?.comparison_profiles||[]).flatMap(profile=>{
+      const data=summarize(profile.questions[key]?.options||[]);
+      return data.total>=minimum?[data.mean]:[];
+    });
+    const average=values.length?values.reduce((sum,value)=>sum+value,0)/values.length:null;
+    const eligible=own.total>=minimum;
+    const difference=eligible&&average!=null?own.mean-average:null;
+    const top=difference==null?null:Math.max(1,Math.ceil(100*values.filter(value=>value>=own.mean-1e-9).length/values.length));
+    const format=value=>value.toLocaleString('de-DE',{maximumFractionDigits:2});
+    return '<div class="score-comparison"><span class="score-comparison-label">Vergleich mit anderen Behandlern</span><div class="score-comparison-highlights"><strong>'+(difference==null?'Keine Einordnung möglich':Math.abs(difference)<.005?'Im Durchschnitt':format(Math.abs(difference))+' Punkte '+(difference>0?'über':'unter')+' dem Durchschnitt')+'</strong>'+(top==null?'':'<strong class="score-percentile">Top '+top+' %</strong>')+'</div><div class="comparison-values">'+(own.mean==null?'Noch keine Angaben.':'<span>Dieser Behandler:</span><strong>Ø '+format(own.mean)+' / '+unit+'</strong>')+(average==null?'':'<span>Durchschnitt:</span><strong>Ø '+format(average)+' / '+unit+'</strong>')+'</div><small>'+reference+' ('+values.length+' Behandler)'+(!eligible&&minimum>1?' Für diesen Behandler sind dafür noch zu wenige Bewertungen vorhanden.':'')+'</small></div>';
+  }
+  function effectComparison() {
+    return ratingComparison('effect',11,4,'Vergleich: Behandler mit mehr als zehn Community-Bewertungen.');
+  }
+  function totalComparison(result) {
+    const referenceNote='Vergleich: Behandler mit auswertbaren Angaben in mindestens 70 % der neun Bereiche. Das Therapieprofil zählt als ein Bereich. Gesamtwerte auf 100 Punkte umgerechnet.';
+    if(result.dataCoverage<70)return '<div class="score-comparison"><strong>Keine Einordnung möglich</strong><p class="score-comparison-selection">Weniger als 70 % der neun Bereiche sind auswertbar. Community-Bereiche zählen ab elf Angaben.</p></div>';
+    const ownLocation=savedLocation();
+    const values=(state.community?.comparison_profiles||[]).flatMap(profile=>{
+      let distance=null;
+      if(ownLocation&&profile.lat!=null&&profile.lng!=null){
+        const rad=v=>v*Math.PI/180,a=Math.sin(rad(profile.lat-ownLocation.lat)/2)**2+Math.cos(rad(ownLocation.lat))*Math.cos(rad(profile.lat))*Math.sin(rad(profile.lng-ownLocation.lng)/2)**2;
+        distance=6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(Math.max(0,1-a)));
+      }
+      const candidate=window.lcnDashboardScore({...profile,costKey:'costs-'+costContext(),distance});
+      if(candidate.dataCoverage<70||!candidate.coverage)return [];
+      return [100*candidate.earned/candidate.coverage];
+    });
+    const average=values.length?values.reduce((a,b)=>a+b,0)/values.length:null;
+    const own=100*result.earned/result.coverage;
+    const difference=average==null?null:own-average;
+    const top=values.length?Math.max(1,Math.ceil(100*values.filter(value=>value>=own-1e-9).length/values.length)):null;
+    const format=value=>value.toLocaleString('de-DE',{maximumFractionDigits:2});
+    return '<div class="score-comparison"><span class="score-comparison-label">Vergleich mit anderen Behandlern</span><div class="score-comparison-highlights"><strong>'+(difference==null?'Noch keine Vergleichsdaten':Math.abs(difference)<.005?'Im Durchschnitt':format(Math.abs(difference))+' Punkte '+(difference>0?'über':'unter')+' dem Durchschnitt')+'</strong>'+(top==null?'':'<strong class="score-percentile">Top '+top+' %</strong>')+'</div><p>'+(average==null?'Keine Vergleichsgruppe verfügbar.':'Durchschnitt: <strong>'+format(average)+' / 100 Punkte</strong>')+'</p><small>'+referenceNote+' ('+values.length+' Behandler)'+'</small></div>';
+  }
+  function dashboardCalculation() {
     const groups=Object.entries(state.data?.treatments_grouped||{}),editorial=state.data?.analysis?.editorial;
     const result=window.lcnDashboardScore({questions:state.community?.questions,costKey:'costs-'+costContext(),distance:distanceKm(),treatmentCount:new Set(groups.flatMap(([,items])=>items.map(t=>t.treat_id))).size,categoryCount:groups.filter(([name,items])=>items.length&&name!=='Ohne Kategorie').length,editorialCount:editorial?.matched_count,editorialTotal:editorial?.total});
-    const dummy=Object.values(state.community?.questions||{}).some(q=>Number(q.dummy_count)>0);
+    return result;
+  }
+  function scoreClassification(result) {
+    if(result.dataCoverage<70)return '';
+    const levels=[
+      ['Hohe Hürden','Die erfassten Angaben weisen auf hohe praktische Hürden hin.'],
+      ['Deutliche Hürden','Die erfassten Angaben weisen auf mehrere praktische Hürden hin.'],
+      ['Teilweise passend','Die erfassten Angaben zeigen passende Bedingungen und verbleibende Hürden.'],
+      ['Gute Passung','Die erfassten Angaben sprechen überwiegend für passende praktische Bedingungen.'],
+      ['Sehr gute Passung','Die erfassten Angaben sprechen weitgehend für passende praktische Bedingungen.']
+    ];
+    const index=Math.min(4,Math.floor(100*result.earned/result.coverage/20));
+    return '<div class="score-classification"><ol aria-label="Einordnung der praktischen Passung">'+levels.map(([label],i)=>'<li'+(i===index?' class="is-current" aria-current="step"':'')+'><span class="score-level-bar score-level-'+i+'" aria-hidden="true"></span><span>'+label+'</span></li>').join('')+'</ol><p><strong>'+levels[index][0]+':</strong> '+levels[index][1]+(result.coverage<100?' Die Einordnung bezieht sich auf die bisher bewertbaren Bereiche.':'')+'</p></div>';
+  }
+  function scoreDataStatus() {
+    if(state.communityError)return '<section class="card" role="status"><p>Die Auswertung konnte nicht geladen werden.</p><button type="button" id="retry-data">Erneut versuchen</button></section>';
+    if(state.loading||communityLoading||!state.community)return '<section class="card score-loading" role="status" aria-busy="true"><span class="score-loading-bar" aria-hidden="true"></span><p>Auswertung wird geladen …</p></section>';
+    return '';
+  }
+  function scoreMissingText(row) {
+    return row?.answerCount>0?'Weniger als elf Angaben':'Keine Angaben';
+  }
+  function dashboardScore(overview = false) {
+    const status=scoreDataStatus();
+    if(status)return status;
+    const result=dashboardCalculation();
     const number=n=>n.toLocaleString('de-DE',{maximumFractionDigits:1});
-    return '<section class="card dashboard-score"><div class="score-top"><div><h3>Gesamtauswertung</h3><p>Persönlicher Orientierungsscore · Entwurf</p></div><strong class="score-number">'+(result.score==null?'–':result.score)+'<small> / 100</small></strong></div><div class="score-track" role="img" aria-label="Orientierungsscore '+(result.score??'noch nicht verfügbar')+' von 100"><span style="width:'+(result.score||0)+'%"></span></div><p><strong>'+result.coverage+' % Datenabdeckung</strong> · '+escape(costSystem().name)+' · '+escape(costSystem().options.find(([key])=>key===costContext())?.[1]||'')+'</p><p class="field-note">'+(dummy?'Enthält Dummy-Angaben. ':'')+'Fehlende Angaben zählen nicht als null Punkte. Der Score wird auf die bewertbaren Bereiche umgerechnet; bei Lücken ist er vorläufig. Er beschreibt praktische Passung und dokumentierte Angebote, keine medizinische Qualität.</p><details><summary>Gewichtung und Teilwerte ansehen</summary><p>100 mögliche Gewichtungspunkte. Behandlung: Anzahl 10, Vielfalt 2, redaktionelle Auswahl 1. Die Grenzwerte sind ein erster Vorschlag. Anreise und Kassensystem machen den Wert persönlich.</p><div class="score-parts">'+result.rows.map(row=>'<div><strong>'+escape(row.label)+'</strong><span>'+(row.value==null?'Keine ausreichenden Angaben':number(row.value*row.weight)+' / '+row.weight+' Punkte')+'</span><small>'+escape(row.reason)+'</small></div>').join('')+'</div><p>Berechnung: erreichte Teilpunkte ÷ verfügbare Gewichtungspunkte × 100. Die Ferntermin-Werte beschreiben Zustimmung pro Terminform, keine zusammengeführte Wahrscheinlichkeit.</p></details></section>';
+    return '<section class="card dashboard-score"><div class="score-top"><div><h3>Gesamtauswertung</h3><p>Persönlicher Orientierungsscore</p></div><strong class="score-number">'+(result.coverage?number(result.earned):'–')+'<small> / '+result.coverage+' Punkte</small></strong></div><div class="score-track" role="img" aria-label="'+(result.coverage?number(result.earned)+' von '+result.coverage+' bewertbaren Punkten':'Noch keine Angaben für den Gesamtwert')+'"><span style="width:'+(result.score||0)+'%"></span></div>'+scoreClassification(result)+totalComparison(result)+'<p class="field-note">Der Gesamtwert beschreibt praktische Passung und dokumentierte Angebote, keine medizinische Qualität.</p>'+(overview?'<a class="dashboard-detail" href="#dashboard">Detaillierte Aufschlüsselung im Dashboard →</a>':'<details><summary>Gewichtung und Teilwerte ansehen</summary><div class="score-explanation"><p>Insgesamt sind 100 Punkte möglich. Bereiche ohne Angaben werden vollständig aus der Gewichtung genommen. Oben stehen die erreichten Punkte im Verhältnis zu den aktuell bewertbaren Punkten. Community-Bereiche zählen ab elf Angaben. Therapieanzahl, Kategorienvielfalt und Top-Therapien bilden zusammen einen Bereich; ihre Teilpunkte bleiben einzeln sichtbar.</p><p>Anreise und Kassensystem sorgen für ein individuelles Ergebnis.</p></div><div class="score-parts">'+result.rows.map(row=>'<div><strong>'+escape(row.label)+'</strong><span>'+(row.value==null?scoreMissingText(row):number(row.value*row.weight)+' / '+row.weight+' Punkte')+'</span><small>'+escape(row.reason)+'</small></div>').join('')+'</div><p>Der Balken zeigt den Anteil der erreichten an den bewertbaren Punkten. Die Ferntermin-Werte beschreiben Zustimmung pro Terminform, keine zusammengeführte Wahrscheinlichkeit.</p></details>')+'</section>';
   }
   function dashboard() {
-    const graphics=true;
-    const dist=(key,labels)=>'<div class="dashboard-distribution">'+labels.map((label,i)=>'<div><span>'+escape(label)+'</span><div class="dashboard-track"><span class="'+(key==='effect'?'effect-'+i:'dashboard-blue')+'" style="width:'+(percent(key,i)||0)+'%"></span></div><strong>'+percentText(percent(key,i))+'</strong></div>').join('')+'</div>';
-    const card=(title,key,labels,view,extra='')=>'<section class="card dashboard-card"><div class="assessment-header"><h3>'+title+'</h3><span class="assessment-count">'+communityNote(key)+'</span></div>'+extra+(graphics?dist(key,labels):'<strong class="dashboard-result">'+escape(commonLabel(key))+'</strong>')+'<a class="dashboard-detail" href="#'+view+'">Details ansehen →</a></section>';
+    const status=scoreDataStatus();
+    if(status)return status;
+    const result=dashboardCalculation();
+    const number=n=>n.toLocaleString('de-DE',{maximumFractionDigits:1});
+    const points=row=>'<div class="dashboard-points"><strong>'+(row?.value==null?scoreMissingText(row):number(row.value*row.weight)+' <small>/ '+row.weight+' Punkte</small>')+'</strong></div>';
+    const scoreRow=label=>result.rows.find(row=>row.label===label);
+    const dist=(key,labels,row)=>'<div class="dashboard-distribution dashboard-scored-distribution"><div class="dashboard-distribution-head"><span>Ausprägung</span><span>Community</span><span>Stufenwert</span></div>'+labels.map((label,i)=>'<div><span>'+escape(label)+'</span><div class="dashboard-bar-value"><div class="dashboard-track"><span class="'+(key==='effect'?'effect-'+i:'dashboard-blue')+'" style="width:'+(percent(key,i)||0)+'%"></span></div><strong>'+percentText(percent(key,i))+'</strong></div><span class="dashboard-level-points">'+number(row.scalePoints[i])+' P.</span></div>').join('')+'</div>';
+    const card=(title,key,labels,view,extra='')=>{
+      const row=result.rows.find(row=>row.key===key);
+      return '<section class="card dashboard-card"><div class="assessment-header"><h3>'+title+'</h3><span class="assessment-count">'+communityNote(key)+'</span></div>'+points(row)+extra+dist(key,labels,row)+(key==='effect'?effectComparison():'')+'<p class="dashboard-score-reason">Die Anteile der Community gewichten die Stufenwerte zum angezeigten Punktwert.</p><a class="dashboard-detail" href="#'+view+'">Details ansehen →</a></section>';
+    };
     const costKey='costs-'+costContext();
-    const costChoices='<p>'+escape(costSystem().name)+'</p><div class="insurance-toggle dashboard-insurance">'+costSystem().options.map(([value,label])=>'<button type="button" data-insurance="'+value+'" aria-pressed="'+(costContext()===value)+'">'+label+'</button>').join('')+'</div>';
-    const appointments='<section class="card dashboard-card"><div class="assessment-header"><h3>Terminform</h3><span class="assessment-count" title="Summe über sechs Terminfragen; mehrere Angaben pro Person möglich.">'+appointmentCountNote()+'</span></div><div class="dashboard-appointments">'+['Ersttermin','Folgetermin'].map((type,r)=>'<section><h4>'+type+'</h4>'+['Vor Ort','Telefon','Video'].map((label,c)=>{const q=question('appointment-'+r+'-'+c),yes=q.options[0]?.count||0,no=q.options[1]?.count||0;return '<div><span>'+label+'</span><strong>'+(!q.total?'Noch keine Angaben':graphics?yes+' möglich · '+no+' nicht möglich':yes===no?'Unterschiedlich':yes>no?'Möglich':'Nicht möglich')+'</strong></div>'+(graphics?'<div class="dashboard-appointment-meter" role="img" aria-label="'+yes+' möglich, '+no+' nicht möglich"><span style="width:'+((yes+no)?100*yes/(yes+no):50)+'%"></span></div>':'');}).join('')+'</section>').join('')+'</div><a class="dashboard-detail" href="#termin">Details ansehen →</a></section>';
-    const groups=Object.entries(state.data?.treatments_grouped||{}).sort((a,b)=>b[1].length-a[1].length),count=new Set(groups.flatMap(([,items])=>items.map(t=>t.treat_id))).size,editorial=state.data?.analysis?.editorial;
-    const treatments='<section class="card dashboard-card"><h3>Behandlungen & Verfahren</h3><strong class="dashboard-result">'+(state.data?count+' dokumentierte Einträge':'Daten werden geladen …')+'</strong><ul>'+groups.slice(0,3).map(([name,items])=>'<li>'+escape(name)+' <strong>'+items.length+'</strong></li>').join('')+'</ul><p>Redaktionelle Auswahl: '+(editorial?editorial.matched_count+' von '+editorial.total:'Noch keine Angabe')+'</p><a class="dashboard-detail" href="#wirkung">Behandlungen ansehen →</a></section>';
-    const km=distanceKm(),band=km===null?null:travelBands.find(([limit])=>km<=limit);
-    return '<section class="card dashboard-intro"><h3>Dashboard</h3></section>'+dashboardScore()+'<div class="dashboard-grid">'+card('Long-Covid-gerechter Termin','adaptation',scales.adaptation,'termin')+appointments+card('Behandlungskosten',costKey,scales.costs,'zugang',costChoices)+card('Wartezeit auf den Ersttermin','wait',scales.wait,'zugang')+card('Zustandsveränderung','effect',scales.effect,'wirkung')+treatments+'<section class="card dashboard-card"><h3>Anreise</h3><strong class="dashboard-result">'+(km===null?'Standort für die Entfernung ergänzen':distanceText())+'</strong>'+(band?'<p>'+band[2]+' · grobe Orientierung</p>':'')+'<a class="dashboard-detail" href="#termin">Standort und Einordnung ansehen →</a></section></div>';
+    const costChoices='<div class="insurance-toggle dashboard-insurance" aria-label="Versicherungskontext">'+costSystem().options.map(([value,label])=>'<button type="button" data-insurance="'+value+'" aria-pressed="'+(costContext()===value)+'">'+label+'</button>').join('')+'</div>';
+    const appointments='<section class="card dashboard-card"><div class="assessment-header"><h3>Terminform</h3><span class="assessment-count">'+appointmentCountNote()+'</span></div><div class="dashboard-appointments">'+['Ersttermin','Folgetermin'].map((type,r)=>{
+      const row=scoreRow(r?'Folgetermin aus der Ferne':'Ersttermin aus der Ferne');
+      return '<section><div class="dashboard-appointment-heading"><h4>'+type+'</h4>'+points(row)+'</div><div class="dashboard-term-distribution"><div class="dashboard-term-head"><span>Terminform</span><span>Nicht möglich · möglich</span><span>Stufenwert</span></div>'+['Vor Ort','Telefon','Video'].map((label,c)=>{
+        const q=question('appointment-'+r+'-'+c),yes=q.options[0]?.count||0,no=q.options[1]?.count||0,total=yes+no;
+        const yesPercent=total?100*yes/total:null,noPercent=total?100*no/total:null;
+        return '<div class="dashboard-term-row"><span>'+label+'</span><div class="dashboard-term-bar"><div class="dashboard-term-meter" role="img" aria-label="'+(total?percentText(noPercent)+' nicht möglich, '+percentText(yesPercent)+' möglich':'Keine Angaben')+'">'+(total?'<span class="term-no" style="width:'+noPercent+'%"></span><span class="term-yes" style="width:'+yesPercent+'%"></span>':'')+'</div><div class="dashboard-term-percent"><span>'+percentText(noPercent)+'</span><span>'+percentText(yesPercent)+'</span></div></div><span class="dashboard-level-points">'+(c?'10 P.':'0 P.')+'</span></div>';
+      }).join('')+'</div><p class="dashboard-score-reason">Möglich: 10 Punkte · nicht möglich: 0 Punkte. Der höhere Möglich-Anteil von Telefon oder Video zählt, ohne Addition. Vor Ort gibt keine Punkte.</p></section>';
+    }).join('')+'</div><a class="dashboard-detail" href="#termin">Details ansehen →</a></section>';
+    const groups=Object.entries(state.data?.treatments_grouped||{}),count=new Set(groups.flatMap(([,items])=>items.map(t=>t.treat_id))).size,editorial=state.data?.analysis?.editorial;
+    const treatmentRows=['Anzahl Therapien','Vielfalt der Kategorien','Redaktionelle Auswahl'].map(scoreRow);
+    const treatmentEarned=treatmentRows.reduce((sum,row)=>sum+(row.value??0)*row.weight,0),treatmentAvailable=treatmentRows.reduce((sum,row)=>sum+(row.value==null?0:row.weight),0);
+    const treatments='<section class="card dashboard-card"><div class="assessment-header"><h3>Therapien</h3><span class="assessment-count">'+count+' Einträge</span></div><div class="dashboard-points"><strong>'+(treatmentAvailable?number(treatmentEarned)+' <small>/ '+treatmentAvailable+' Punkte</small>':'Keine Angaben')+'</strong></div><div class="dashboard-treatment-points">'+treatmentRows.map((row,i)=>'<div><span>'+['Anzahl: '+count+' Therapien','Vielfalt: '+groups.filter(([name,items])=>items.length&&name!=='Ohne Kategorie').length+' Kategorien','Top-Therapien: '+(editorial?editorial.matched_count+' von '+editorial.total:'Keine Angaben')][i]+'</span><strong>'+(row.value==null?scoreMissingText(row):number(row.value*row.weight)+' / '+row.weight+' P.')+'</strong></div>').join('')+'</div><p class="dashboard-score-reason">60 Therapien ergeben 10 Punkte, acht Kategorien 2 Punkte. Ab vier zugeordneten Top-Therapien gibt es 1 Zusatzpunkt, sonst 0 Punkte. Bei Anzahl und Vielfalt zählt der jeweilige Anteil.</p><a class="dashboard-detail" href="#wirkung">Therapien ansehen →</a></section>';
+    const km=distanceKm(),band=km===null?null:travelBands.find(([limit])=>km<=limit),travelRow=scoreRow('Persönliche Anreise');
+    const travel='<section class="card dashboard-card"><h3>Anreise</h3>'+points(travelRow)+'<strong class="dashboard-result">'+(km===null?'Standort für die Entfernung ergänzen':distanceText())+'</strong>'+(band?'<p>'+band[2]+' · grobe Orientierung</p>':'')+'<p class="dashboard-score-reason">Bis 20 km: 7 P. · bis 50 km: 5,6 P. · bis 100 km: 4,2 P. · bis 300 km: 2,8 P. · bis 800 km: 1,4 P. · darüber: 0 P.</p><a class="dashboard-detail" href="#termin">Standort und Einordnung ansehen →</a></section>';
+    return dashboardScore()+'<div class="dashboard-grid dashboard-columns"><div class="dashboard-column">'+card('Long-Covid-gerechter Termin','adaptation',scales.adaptation,'termin')+card('Therapiekosten',costKey,scales.costs,'zugang',costChoices)+card('Wartezeit auf den Ersttermin','wait',scales.wait,'zugang')+card('Wartezeit auf Folgetermine','wait-followup',scales.wait,'zugang')+'</div><div class="dashboard-column">'+appointments+card('Zustandsveränderung','effect',scales.effect,'wirkung')+treatments+travel+'</div></div>';
   }
   const views = { ueberblick: overview, termin: appointment, zugang: access, wirkung: effect, dashboard: dashboard };
   function render(focus = false) {
@@ -533,7 +654,7 @@
     document.querySelector('.side-nav').hidden = state.error;
     document.querySelector('.detail-layout').classList.toggle('has-error', state.error);
     if (state.error) {
-      content.innerHTML = '<section class="card" role="status"><h2>Praxis konnte nicht geladen werden</h2><p>Der Eintrag ist nicht in der aktuellen Auswahl enthalten oder die Daten sind gerade nicht erreichbar.</p><button type="button" id="retry-data">Erneut versuchen</button> <a href="aerzte_karte.html">Zur Behandler:innen-Suche</a></section>';
+      content.innerHTML = '<section class="card" role="status"><h2>Praxis konnte nicht geladen werden</h2><p>Der Eintrag ist nicht in der aktuellen Auswahl enthalten oder die Daten sind gerade nicht erreichbar.</p><button type="button" id="retry-data">Erneut versuchen</button> <a href="aerzte_karte.html">Zur Behandler-Suche</a></section>';
       return;
     }
     content.innerHTML = views[state.view]();
@@ -554,6 +675,13 @@
     state.view = Object.hasOwn(views, view) ? view : 'ueberblick';
     render(focus);
   }
+  function revealTreatmentResults() {
+    const results=document.getElementById('treatment-results');
+    if(!results)return;
+    document.querySelectorAll('.adaptation-heading-help').forEach(el=>el.classList.add('help-dismissed'));
+    results.focus({preventScroll:true});
+    results.scrollIntoView({block:'start',behavior:'instant'});
+  }
   function refreshTreatmentControls(focusId) {
     const section=document.getElementById('treatment-section');
     const open=document.getElementById('treatment-category-filter')?.open;
@@ -566,11 +694,31 @@
     if(caret!==null&&target?.id==='treatment-query')target.setSelectionRange(caret,caret);
   }
   document.addEventListener('keydown',event=>{
-    if(event.key==='Escape')document.querySelectorAll('.adaptation-heading-help').forEach(el=>el.classList.add('help-dismissed'));
+    if(event.key==='Escape')document.querySelectorAll('.adaptation-heading-help').forEach(el=>{el.classList.add('help-dismissed');el.classList.remove('help-open');el.querySelector('.heading-help-trigger')?.setAttribute('aria-expanded','false');});
   });
   document.addEventListener('pointerover',event=>{
-    const help=event.target.closest('.adaptation-heading-help');
-    if(help&&!help.contains(event.relatedTarget))help.classList.remove('help-dismissed');
+    const icon=event.target.closest('.heading-help-trigger');
+    if(icon&&!icon.contains(event.relatedTarget))icon.closest('.adaptation-heading-help').classList.remove('help-dismissed');
+  });
+  document.addEventListener('pointerout',event=>{
+    const icon=event.target.closest('.heading-help-trigger');
+    if(icon&&!icon.contains(event.relatedTarget)){
+      icon.closest('.adaptation-heading-help').classList.remove('help-open');
+      icon.setAttribute('aria-expanded','false');
+    }
+  });
+  document.addEventListener('click',event=>{
+    const icon=event.target.closest('.heading-help-trigger');
+    document.querySelectorAll('.adaptation-heading-help.help-open').forEach(help=>{
+      if(!icon||help!==icon.closest('.adaptation-heading-help')){
+        help.classList.remove('help-open');help.querySelector('.heading-help-trigger')?.setAttribute('aria-expanded','false');
+      }
+    });
+    if(icon){
+      const help=icon.closest('.adaptation-heading-help');
+      help.classList.remove('help-dismissed');
+      icon.setAttribute('aria-expanded',String(help.classList.toggle('help-open')));
+    }
   });
   document.addEventListener('focusin',event=>{
     if(event.target.matches('.heading-help-trigger'))event.target.closest('.adaptation-heading-help').classList.remove('help-dismissed');
@@ -623,7 +771,7 @@
       content.querySelector('[data-edit-appointment="'+key+'"]')?.focus({preventScroll:true});
     } else if (button.dataset.choice) {
       const key = button.dataset.choice, value = Number(button.dataset.value);
-      saveAnswer(button.classList.contains('agreement-answer') && state.selections[key] === value ? {action:'clear',question:key} : {question:key,value:value+1});
+      saveAnswer(state.selections[key] === value ? {action:'clear',question:key} : {question:key,value:value+1});
     } else if (button.dataset.insurance) {
       state.insurance = button.dataset.insurance;
       render();
@@ -644,19 +792,19 @@
       state.treatmentView=button.dataset.treatmentView;
       if(state.treatmentView==='categories')state.treatmentCategory=null;
       render();
-      content.querySelector('[data-treatment-view="'+state.treatmentView+'"]').focus({preventScroll:true});
+      if(button.classList.contains('profile-summary-more')) revealTreatmentResults();
+      else content.querySelector('[data-treatment-view="'+state.treatmentView+'"]').focus({preventScroll:true});
     } else if (button.hasAttribute('data-treatment-category')) {
       state.treatmentCategory = button.dataset.treatmentCategory;
       render();
-      document.querySelector('#treatment-section h3').focus({preventScroll:true});
-      document.getElementById('treatment-section').scrollIntoView({block:'start'});
+      revealTreatmentResults();
     } else if (button.id === 'treatment-back') {
       const previous = state.treatmentCategory;
       state.treatmentView = 'categories';
       state.treatmentCategory = null;
       render();
       [...content.querySelectorAll('[data-treatment-category]')].find(option => option.dataset.treatmentCategory === previous)?.focus({preventScroll:true});
-      document.getElementById('treatment-section').scrollIntoView({block:'start'});
+      revealTreatmentResults();
     } else if (button.id === 'retry-data') {
       loadOriginalData();
       loadCommunityData();
@@ -665,7 +813,7 @@
     } else if (button.id === 'reset-demo') {
       saveAnswer({action: 'reset'});
     } else if (button.dataset.contact) {
-      notify(`${button.dataset.contact}: In diesem Entwurf sind keine Kontaktdaten hinterlegt.`);
+      notify(`${button.dataset.contact}: Für diesen Behandler sind keine Kontaktdaten hinterlegt.`);
     }
   });
   document.addEventListener('submit', event => {
@@ -685,7 +833,7 @@
     document.querySelector('.profile').hidden = true;
     document.querySelector('.side-nav').hidden = true;
     document.querySelector('.detail-layout').classList.add('has-error');
-    content.innerHTML = '<section class="card" role="status"><h2>Kein gültiges Profil angegeben</h2><p>Öffne einen Behandler über die Behandler:innen-Suche.</p><a href="aerzte_karte.html">Zur Behandler:innen-Suche →</a></section>';
+    content.innerHTML = '<section class="card" role="status"><h2>Kein gültiges Profil angegeben</h2><p>Öffne einen Behandler über die Behandler-Suche.</p><a href="aerzte_karte.html">Zur Behandler-Suche →</a></section>';
     document.getElementById('community-mode').textContent = '';
     return;
   }

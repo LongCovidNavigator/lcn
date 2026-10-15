@@ -39,10 +39,10 @@ function ndAccessScales(array $item, ?array $only = null): string
         $html .= '<section class="nd-research-scale" data-research-scale="' . $field . '"><div class="nd-scale-heading"><h4>' . ndEscape($title) . '</h4><span>Redaktionell recherchiert</span></div><ol class="nd-option-line" style="--options:' . count($options) . '">';
         foreach ($options as $index => $option) {
             $active = $selected === $index;
-            $html .= '<li' . ($active ? ' class="is-current"' : '') . '><span class="nd-option-dot" aria-hidden="true">' . ($active ? '✓' : '') . '</span><span>' . ndEscape($option) . '</span>' . ($active ? '<strong>Recherchierter Wert</strong>' : '') . '</li>';
+            $html .= '<li' . ($active ? ' class="is-current"' : '') . '><span class="nd-option-dot" aria-hidden="true">' . ($active ? '✓' : '') . '</span><span>' . ndEscape(str_replace('Anbieter', 'Behandler', $option)) . '</span>' . ($active ? '<strong>Recherchierter Wert</strong>' : '') . '</li>';
         }
         $display = $field === 'gkv_kostenuebernahme_status' && $selected !== null ? ($selected === 0 ? 'Grundsätzlich erstattungsfähig – Voraussetzungen beachten.' : 'Keine reguläre Erstattung im recherchierten Einsatzkontext.') : $raw;
-        $html .= '</ol><p class="nd-researched-value"><strong>' . ($notApplicable ? 'Nicht anwendbar' : ($selected === null ? 'Differenzierte Angabe' : 'Einordnung')) . ':</strong> ' . ndEscape($display) . '</p>';
+        $html .= '</ol><p class="nd-researched-value"><strong>' . ($notApplicable ? 'Nicht anwendbar' : ($selected === null ? 'Differenzierte Angabe' : 'Einordnung')) . ':</strong> ' . ndEscape(str_replace('Anbieter', 'Behandler', $display)) . '</p>';
         if ($selected === null && !$notApplicable) $html .= '<p class="nd-scale-note">Der Recherchewert lässt sich nicht eindeutig einer einzelnen Option zuordnen. Deshalb ist kein Punkt markiert.</p>';
         $html .= ndFieldEvidence($item, $field) . '</section>';
     }
@@ -62,7 +62,7 @@ function ndFieldEvidence(array $item, string $field): string
         'durchfuehrungssetting' => ['Durchführungssetting'], 'typ' => ['Typ / Unterkategorie'], 'unterkategorie' => ['Typ / Unterkategorie'],
     ];
     if (isset($mapping[$field])) return ndEvidence($item, $mapping[$field]);
-    $scope = ['dauer_einer_anwendung' => 'Dauer einer Anwendung', 'haeufigkeit' => 'Häufigkeit', 'anzahl_anwendungen' => 'Anzahl Anwendungen', 'gesamte_behandlungsdauer' => 'gesamte Behandlungsdauer'];
+    $scope = ['dauer_einer_anwendung' => 'Dauer einer Anwendung', 'haeufigkeit' => 'Häufigkeit', 'anzahl_anwendungen' => 'Anzahl Anwendungen', 'gesamte_behandlungsdauer' => 'gesamte Therapiedauer'];
     if (isset($scope[$field])) return ndEvidence($item, ['Behandlungsumfang'], $scope[$field]);
     $medicine = ['wirkstoff' => 'Wirkstoff', 'handels_markenname' => 'Handels-/Markenname', 'medikamentenklasse' => 'Medikamentenklasse', 'applikationsform' => 'Applikationsform', 'dosierung_dosierungsbereich' => 'Dosierung / Dosierungsbereich', 'einnahmehaeufigkeit' => 'Einnahmehäufigkeit', 'einschleichen' => 'Einschleichen', 'einschleichschema' => 'Einschleichschema', 'ausschleichen' => 'Ausschleichen', 'ausschleichschema' => 'Ausschleichschema', 'individuelle_dosisanpassung' => 'Individuelle Dosisanpassung nach Verträglichkeit', 'atc_code' => 'ATC'];
     return isset($medicine[$field]) ? ndEvidence($item, ['Medikamenteninformationen/Klassifikation'], $medicine[$field]) : '';

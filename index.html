@@ -20,38 +20,7 @@
 <link rel="stylesheet" href="styles/maps_shared.css?v=2"><script src="scripts/maps_shared.js?v=1" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=2"><script src="scripts/experience_summary.js?v=1"></script></head>
 
 <body class="lcn-public-page">
-    <header class="home-header">
-        <a href="index.html" class="home-brand" aria-label="Long Covid Navigator Startseite">
-            <span class="home-brand-mark" aria-hidden="true"></span>
-            <span>Long Covid Navigator</span>
-        </a>
-
-        <nav class="home-nav" aria-label="Hauptnavigation">
-            <details class="home-nav-group">
-                <summary>Empfehlungen</summary>
-                <div class="home-nav-menu">
-                    <a href="hausarzt_suche.html">Hausärztliche Suche</a>
-                    <a href="top_behandler.html">Top-Behandler:innen</a>
-                    <a href="top_behandlungen.html">Top-Behandlungen</a>
-                </div>
-            </details>
-            <details class="home-nav-group">
-                <summary>Suche</summary>
-                <div class="home-nav-menu">
-                    <a href="therapien_karte.html">Behandlungen</a>
-                    <a href="aerzte_karte.html">Behandler:innen</a>
-                </div>
-            </details>
-            <details class="home-nav-group">
-                <summary>Ergänzen</summary>
-                <div class="home-nav-menu">
-                    <a href="arzt_vorschlagen.html">Behandler:in ergänzen</a>
-                    <a href="behandlung_vorschlagen.html">Behandlung ergänzen</a>
-                </div>
-            </details>
-            <a href="freigaben.php" data-admin-only hidden>Freigaben</a>
-        </nav>
-    </header>
+    <div id="header-placeholder" data-lcn-header></div>
 
     <main class="home-page">
 
@@ -79,12 +48,12 @@
                 <div class="quick-start-actions">
                     <a href="therapien_karte.html" class="home-button primary-button">
                         <span class="button-icon search-icon" aria-hidden="true"></span>
-                        Behandlungen suchen
+                        Therapien suchen
                     </a>
 
                     <a href="aerzte_karte.html" class="home-button secondary-button">
                         <span class="button-icon group-icon" aria-hidden="true"></span>
-                        Behandler:innen finden
+                        Behandler finden
                     </a>
                 </div>
             </div>
@@ -105,13 +74,13 @@
 
                     <div class="flow-photo flow-photo-choice" aria-hidden="true">
                         <img data-lcn-image="home-selection" alt="">
-                        <span class="choice-photo-label choice-label-left">Behandlungen</span>
-                        <span class="choice-photo-label choice-label-right">Behandler:innen</span>
+                        <span class="choice-photo-label choice-label-left">Therapien</span>
+                        <span class="choice-photo-label choice-label-right">Behandler</span>
                     </div>
 
                     <div class="flow-card-content">
                         <p>
-                            Wähle den passenden Weg: Behandlungen suchen oder Behandler:innen finden.
+                            Wähle den passenden Weg: Therapien suchen oder Behandler finden.
                         </p>
                     </div>
                 </article>
@@ -127,8 +96,8 @@
                     <div class="flow-ui flow-search-ui" aria-hidden="true">
                         <div class="search-ui-panel">
                             <div class="search-ui-tabs">
-                                <span class="active">Behandlungen</span>
-                                <span>Behandler:innen</span>
+                                <span class="active">Therapien</span>
+                                <span>Behandler</span>
                             </div>
 
                             <label>
@@ -221,17 +190,17 @@
 
         <section class="lcn-philosophy" aria-labelledby="lcn-philosophy-heading">
             <span class="eyebrow">Unsere Grundidee</span>
-            <h2 id="lcn-philosophy-heading">Behandlungen finden, die dir helfen können.</h2>
-            <p>Das ist unser Ziel als Team des Long Covid Navigators. Was infrage kommt, hängt auch davon ab, was du im Alltag leisten kannst und welche Unterstützung für dich erreichbar ist. Deshalb betrachten wir Behandlungen aus drei Perspektiven – und verbinden sie mit passenden Behandler:innen und Anbietern.</p>
+            <h2 id="lcn-philosophy-heading">Therapien finden, die dir helfen können.</h2>
+            <p>Das ist unser Ziel als Team des Long Covid Navigators. Was infrage kommt, hängt auch davon ab, was du im Alltag leisten kannst und welche Unterstützung für dich erreichbar ist. Deshalb betrachten wir Therapien aus drei Perspektiven – und verbinden sie mit passenden Behandlern.</p>
             <div class="lcn-philosophy-grid">
                 <article>
                     <span class="lcn-philosophy-number" aria-hidden="true">1</span>
                     <h3>Welche Belastungshürden gibt es?</h3>
-                    <p>Ist die Behandlung zu Hause möglich oder musst du anreisen? Wie viel Kraft kosten Termine und Durchführung? Angaben zum Crash- und PEM-Risiko helfen dir, die mögliche Belastung einzuordnen.</p>
+                    <p>Ist die Therapie zu Hause möglich oder musst du anreisen? Wie viel Kraft kosten Termine und Durchführung? Angaben zum Crash- und PEM-Risiko helfen dir, die mögliche Belastung einzuordnen.</p>
                 </article>
                 <article>
                     <span class="lcn-philosophy-number" aria-hidden="true">2</span>
-                    <h3>Wie zugänglich ist die Behandlung?</h3>
+                    <h3>Wie zugänglich ist die Therapie?</h3>
                     <p>Brauchst du ein Rezept? Wie lange wartest du auf einen Termin? Welche Kosten können entstehen und was übernimmt die Versicherung? Diese Informationen helfen dir bei der Planung.</p>
                 </article>
                 <article>
@@ -242,12 +211,12 @@
                 <article>
                     <span class="lcn-philosophy-number" aria-hidden="true">4</span>
                     <h3>Wer kann dir dabei helfen?</h3>
-                    <p>Wir verknüpfen Behandlungen mit Behandler:innen und Anbietern – etwa ärztlichen Praxen, Therapeut:innen oder Coaches. So findest du von einer Behandlung zu passenden Anlaufstellen und von einem Profil zu den dort angebotenen Behandlungen.</p>
+                    <p>Wir verknüpfen Therapien mit Behandlern – etwa ärztlichen Praxen, Therapeut:innen oder Coaches. So findest du von einer Therapie zu passenden Anlaufstellen und von einem Profil zu den dort angebotenen Therapien.</p>
                 </article>
             </div>
-            <p><strong>Behandlung und passende Unterstützung gehören zusammen.</strong> Du kannst bei einer Behandlung starten oder direkt nach Behandler:innen suchen.</p>
-            <a class="home-button primary-button" href="therapien_karte.html">Behandlungen suchen →</a>
-            <a class="home-button card-button" href="aerzte_karte.html">Behandler:innen finden →</a>
+            <p><strong>Therapie und passende Unterstützung gehören zusammen.</strong> Du kannst bei einer Therapie starten oder direkt nach Behandler suchen.</p>
+            <a class="home-button primary-button" href="therapien_karte.html">Therapien suchen →</a>
+            <a class="home-button card-button" href="aerzte_karte.html">Behandler finden →</a>
         </section>
 
         <section class="path-section" aria-labelledby="path-heading">
@@ -265,7 +234,7 @@
                         <div class="path-card-icon path-card-search-icon" aria-hidden="true"></div>
 
                         <div class="path-card-content">
-                            <h3>Behandlungen suchen</h3>
+                            <h3>Therapien suchen</h3>
                             <p>
                                 Finde evidenzbasierte und unterstützende Therapieangebote,
                                 die zu deinen Bedürfnissen passen – von Pacing und Physiotherapie
@@ -273,7 +242,7 @@
                             </p>
 
                             <a href="therapien_karte.html" class="home-button card-button">
-                                Behandlungen entdecken
+                                Therapien entdecken
                                 <span aria-hidden="true">→</span>
                             </a>
                         </div>
@@ -285,9 +254,9 @@
                         <div class="path-card-icon path-card-group-icon" aria-hidden="true"></div>
 
                         <div class="path-card-content">
-                            <h3>Behandler:innen finden</h3>
+                            <h3>Behandler finden</h3>
                             <p>
-                                Suche nach Behandler:innen und Fachpersonen, die Erfahrung mit Long Covid,
+                                Suche nach Behandler und Fachpersonen, die Erfahrung mit Long Covid,
                                 ME/CFS, POTS und verwandten Erkrankungen haben.
                             </p>
 
@@ -310,7 +279,7 @@
                 <div class="section-heading nearby-gps-heading">
                     <p class="eyebrow">Hilfe vor Ort</p>
                     <h2 id="nearby-gps-heading">Hausärztliche Versorgung in deiner Nähe</h2>
-                    <p>Gib deine Adresse oder deinen Ort ein und finde Anbieter der Behandlung „Hausärztliche Behandlung“ im Umkreis.</p>
+                    <p>Gib deine Adresse oder deinen Ort ein und finde Behandler der Therapie „Hausärztliche Therapie“ im Umkreis.</p>
                 </div>
                 <form id="nearby-gps-form" class="nearby-gps-search">
                     <label for="nearby-gps-location">Adresse oder Ort</label>
@@ -343,12 +312,12 @@
         <section class="featured-treatments" aria-labelledby="featured-treatments-heading">
             <div class="featured-treatments-panel">
                 <div class="section-heading featured-treatments-heading">
-                    <h2 id="featured-treatments-heading"><a href="top_behandlungen.html">Top 30 Behandlungen + IHHT</a></h2>
+                    <h2 id="featured-treatments-heading"><a href="top_behandlungen.html">Top 30 Therapien + IHHT</a></h2>
                     <p>Unsere redaktionelle Auswahl zur Orientierung – kein Wirksamkeitsranking.</p>
                 </div>
 
                 <div id="featured-treatments-list" class="featured-treatments-list" data-editorial-selection="true" data-list-mode="teaser" data-initial-count="10" aria-live="polite">
-                    <p class="featured-treatments-status">Behandlungen werden geladen …</p>
+                    <p class="featured-treatments-status">Therapien werden geladen …</p>
                 </div>
 
                 <div class="featured-treatments-actions">
@@ -357,7 +326,7 @@
                         Weitere anzeigen
                     </button>
                     <a class="home-button card-button featured-treatments-all" href="top_behandlungen.html">
-                        Top-Behandlungen ansehen <span aria-hidden="true">→</span>
+                        Top-Therapien ansehen <span aria-hidden="true">→</span>
                     </a>
                 </div>
             </div>
@@ -366,7 +335,7 @@
         <section class="featured-experts" aria-labelledby="featured-experts-heading">
             <div class="featured-experts-panel">
                 <div class="section-heading featured-experts-heading">
-                    <h2 id="featured-experts-heading"><a href="top_behandler.html">Häufig genannte Behandler:innen</a></h2>
+                    <h2 id="featured-experts-heading"><a href="top_behandler.html">Häufig genannte Behandler</a></h2>
                     <p>Kompakte Auswahl zur Orientierung.</p>
                 </div>
 
@@ -381,7 +350,7 @@
                         <span class="featured-experts-chevron" aria-hidden="true">⌄</span>
                     </button>
                     <a class="home-button card-button featured-experts-all" href="top_behandler.html">
-                        Top-Behandler:innen ansehen <span aria-hidden="true">→</span>
+                        Top-Behandler ansehen <span aria-hidden="true">→</span>
                     </a>
                 </div>
             </div>
@@ -456,7 +425,7 @@
                         <h2>Medizinischer Hinweis</h2>
                         <p>
                             Die Inhalte dieser Plattform dienen der Information und ersetzen keine
-                            medizinische Beratung, Diagnose oder Behandlung.
+                            medizinische Beratung, Diagnose oder Therapie.
                         </p>
                     </div>
                 </article>

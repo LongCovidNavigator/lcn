@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Long Covid Navigator - Behandler:innen-Suche</title>
+    <title>Long Covid Navigator - Behandler-Suche</title>
 
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css">
@@ -31,7 +31,7 @@
     <div id="header-placeholder"></div>
 
     <div class="container">
-        <section class="doctor-navigation-panel" aria-label="Navigation für Ärztinnen- und Behandler:innen-Suche">
+        <section class="doctor-navigation-panel" aria-label="Navigation für Ärztinnen- und Behandler-Suche">
 			<button
 				id="doctor-navigation-toggle-button"
 				class="doctor-navigation-header"
@@ -72,7 +72,7 @@
 					<section class="doctor-nav-section doctor-nav-section-specialty">
 						<h3 class="doctor-nav-heading">
 							Fachrichtung
-							<span class="doctor-nav-info" data-tooltip="Filtert Behandler:innen nach der zugeordneten Fachrichtung. Die Auswahl wird aus den vorhandenen Fachrichtungen in der Datenbank geladen." tabindex="0" aria-label="Info: Fachrichtung">i</span>
+							<span class="doctor-nav-info" data-tooltip="Filtert Behandler nach der zugeordneten Fachrichtung. Die Auswahl wird aus den vorhandenen Fachrichtungen in der Datenbank geladen." tabindex="0" aria-label="Info: Fachrichtung">i</span>
 						</h3>
 
 						<label class="doctor-nav-label" for="doctor-specialty-select">Fachrichtung auswählen</label>
@@ -324,7 +324,7 @@
 			<div class="doctor-results-header">
 				<span class="doctor-results-header-left">
 					<span class="doctor-results-header-icon" aria-hidden="true">▤</span>
-					<span>Behandler:innen</span>
+					<span>Behandler</span>
 				</span>
 
 				<div class="doctor-view-switch doctor-view-switch-in-header" aria-label="Ansicht wechseln">
@@ -351,7 +351,7 @@
 			<div class="doctor-results-search-panel" aria-label="Ärztinnen und Ärzte suchen und vergleichen">
 				<div class="doctor-results-search-row">
 					<div class="doctor-results-search-field">
-						<label class="doctor-results-search-label" for="doctor-search-input">Behandler:in / Anbieter suchen</label>
+						<label class="doctor-results-search-label" for="doctor-search-input">Behandler suchen</label>
 						<input
 							id="doctor-search-input"
 							class="doctor-results-search-input"
@@ -437,7 +437,7 @@
 				<thead>
 					<tr>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="rank"><span class="table-rank-label-full">Platz</span><span class="table-rank-label-short">#</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
-						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="name">Behandler:in <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="name">Behandler <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 						<th><button id="doctor-table-experience-button" class="doctor-table-sort-button" type="button" data-table-sort-key="experience"><span id="doctor-table-experience-heading">Erfahrung</span> <span class="doctor-table-header-note">(n = Angaben)</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="location">Standort <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="insurance">Versorgung <span class="doctor-table-insurance-note">(GKV, PKV)</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>

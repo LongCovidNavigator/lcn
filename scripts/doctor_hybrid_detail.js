@@ -34,7 +34,7 @@ function renderHybridDoctorStructure(research) {
     get('doctor-detail-care').hidden = true;
     const billing = [
         ['Sprechstunde', 'sprechstunde'],
-        ['Eingriffe / Behandlungen', 'eingriffe'],
+        ['Eingriffe / Therapien', 'eingriffe'],
         ['Verordnungen / Rezepte', 'verordnungen_und_rezepte']
     ];
     get('doctor-detail-access-billing').innerHTML = billing.length ? `<div class="doctor-hybrid-billing"><table><caption>Abrechnung nach Versicherungsgruppe</caption><thead><tr><th>Leistung</th><th>GKV-versichert</th><th>PKV-versichert</th></tr></thead><tbody>${billing.map(([label, key]) => `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(entity[key + '_gkv'] ?? '')}</td><td>${escapeHtml(entity[key + '_pkv'] ?? '')}</td></tr>`).join('')}</tbody></table></div>` : '';
@@ -82,7 +82,7 @@ function renderHybridDoctorStructure(research) {
         'doctor-detail-experience-practice': ['Wohlgefühlt', 'Respektvoller Umgang', 'Gender-Erfahrungen', 'Queer und LGBTQ+'],
         'doctor-detail-expertise': ['Long Covid', 'ME/CFS', 'Post-Vac', 'POTS und Dysautonomie', 'MCAS', 'Belastungsintoleranz und PEM', 'Small-Fiber-Neuropathie'],
         'doctor-detail-help-services': ['Bescheinigungen und Atteste', 'Sozialmedizinische Unterstützung', 'Verlaufskontrolle und Nachbetreuung', 'Folgerezept-Service', 'Befundbesprechung', 'Unterstützung bei Anträgen'],
-        'doctor-detail-help-medication': ['Reguläre Verordnungen', 'Off-Label-Behandlungen', 'Individuelle Therapieversuche'],
+        'doctor-detail-help-medication': ['Reguläre Verordnungen', 'Off-Label-Therapien', 'Individuelle Therapieversuche'],
         'doctor-detail-help-diagnoses': ['ME/CFS (G93.3)', 'Long Covid', 'POTS und Dysautonomie', 'MCAS', 'Impfschaden', 'Small-Fiber-Neuropathie']
     };
     Object.entries(userFields).forEach(([id, labels]) => facts(id, labels.map(label => [label, ''])));

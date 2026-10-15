@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LCN – Behandler:innen-Steckbrief</title>
+  <title>LCN – Behandler-Steckbrief</title>
   <link rel="stylesheet" href="styles/general.css">
   <link rel="stylesheet" href="styles/navigation.css">
   <link rel="stylesheet" href="styles/footer-style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=45">
+  <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=real-therapy-ratings-20261015">
   <script src="scripts/image-registry.js?v=5" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
-  <script src="scripts/doctor_dashboard_score.js?v=1" defer></script>
-  <script src="scripts/arzt_detail_konzept.js?v=maps-20261005" defer></script>
-  <link rel="stylesheet" href="styles/doctor_treatment_table_beta.css?v=3">
+  <script src="scripts/doctor_dashboard_score.js?v=7" defer></script>
+  <script src="scripts/arzt_detail_konzept.js?v=real-therapy-ratings-20261015" defer></script>
+  <link rel="stylesheet" href="styles/doctor_treatment_table_beta.css?v=4">
 <link rel="stylesheet" href="styles/maps_shared.css?v=2"><script src="scripts/maps_shared.js?v=1" defer></script></head>
 <body class="doctor-detail-live" data-doctor-page="live">
   <div id="header-placeholder"></div>
@@ -26,6 +26,7 @@
         <p class="address" id="profile-address"></p>
       </div>
       <nav class="contact" aria-label="Kontakt zur Praxis">
+        <button type="button" id="doctor-demo-toggle" aria-pressed="false" disabled>Dummy-Daten sind aus</button>
         <button type="button" data-contact="Website"><span aria-hidden="true">↗</span> Website</button>
         <button type="button" data-contact="Telefon"><span aria-hidden="true">☎</span> Telefon</button>
         <button type="button" data-contact="E-Mail"><span aria-hidden="true">✉</span> E-Mail</button>
@@ -33,23 +34,22 @@
       <div id="profile-map" class="profile-map" aria-label="Kleine Karte des Praxisstandorts"></div>
     </header>
     <div class="detail-layout">
-      <nav class="side-nav" aria-label="Ansichten der Arzt-Detailseite">
+      <nav class="side-nav" aria-label="Ansichten der Behandler-Detailseite">
         <div class="nav-items">
         <a href="#ueberblick" data-view="ueberblick"><span class="nav-number">1</span><span><strong>Überblick</strong></span></a>
         <a href="#termin" data-view="termin"><span class="nav-number">2</span><span><strong>Welche Belastungshürden gibt es bei einem Termin?</strong></span></a>
-        <a href="#zugang" data-view="zugang"><span class="nav-number">3</span><span><strong>Wie zugänglich ist die Behandlung?</strong></span></a>
+        <a href="#zugang" data-view="zugang"><span class="nav-number">3</span><span><strong>Wie gut ist der Behandler erreichbar?</strong></span></a>
         <a href="#wirkung" data-view="wirkung"><span class="nav-number">4</span><span><strong>Welche Erfahrungen gibt es?</strong></span></a>
         <a href="#dashboard" data-view="dashboard"><span class="nav-number">5</span><span><strong>Dashboard</strong></span></a>
         </div>
       </nav>
       <main id="view-content" tabindex="-1"></main>
     </div>
-    <p class="demo-footer">Neue Detailansicht im Testbetrieb · Dummy-Angaben sind gekennzeichnet. Deine Angaben werden gespeichert und diesem Browser zugeordnet.</p>
   </div>
   <div id="feedback" role="status" aria-live="polite"></div>
   <div id="footer-placeholder"></div>
   <script src="scripts/access-nav.js?v=2" defer></script>
   <script src="scripts/doctor_detail_chrome.js?v=5" defer></script>
-  <noscript>Bitte JavaScript aktivieren, um die fünf Ansichten des Entwurfs zu öffnen.</noscript>
+  <noscript>Bitte JavaScript aktivieren, um die fünf Ansichten zu öffnen.</noscript>
 </body>
 </html>
