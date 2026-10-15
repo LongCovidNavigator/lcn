@@ -1138,7 +1138,7 @@ async function loadDoctorsFromSearchApi(settings) {
     }
 
     refreshDoctorDisplay();
-    setCountText(`Gefundene Ärzte: ${currentDoctors.length}`);
+    setCountText(`Gefundene Behandler:innen: ${currentDoctors.length}`);
     updateStatusAfterSearch(settings);
 }
 
@@ -1175,7 +1175,7 @@ function updateStatusAfterSearch(settings) {
     }
 
     if (showOnlyCompareSelection) {
-        setMapStatus(`${selectedDoctorsForCompare.length} ausgewählte Ärzt:innen in der Vergleichsansicht.${filterText}`);
+        setMapStatus(`${selectedDoctorsForCompare.length} ausgewählte Behandler:innen in der Vergleichsansicht.${filterText}`);
         return;
     }
 
@@ -1222,7 +1222,7 @@ function buildActiveFilterStatusText() {
 function drawRadiusIfNeeded(settings) {
     if (settings.isCityMode && settings.cityCenter) {
         map.setView([settings.cityCenter.lat, settings.cityCenter.lng], 11);
-        setMapStatus(`Suche Ärzt:innen in ${currentCityFilter}.`);
+        setMapStatus(`Suche Behandler:innen in ${currentCityFilter}.`);
         return;
     }
 
@@ -1499,17 +1499,7 @@ function buildDoctorCardHtml(doctor, index) {
                 </section>
             </div>
 
-            <section class="doctor-card-own-rating">
-                <div class="doctor-card-own-rating-header">
-                    <h4 class="doctor-card-section-heading">✎ Deine Bewertung</h4>
-                </div>
-
-                <div class="doctor-card-vote-buttons-placeholder${ownVote ? ' has-selection' : ''}">
-                    <a href="arzt_detail.html?id=${escapeHtml(doctor.dr_id)}" title="Erfahrungen auf der Detailseite ansehen oder angeben" class="doctor-card-vote-placeholder-button doctor-card-vote-positive ${ownVote === 'pro' ? ' is-selected' : ''}">Positiv${ownVote === 'pro' ? ' ✓' : ''}</a>
-                    <a href="arzt_detail.html?id=${escapeHtml(doctor.dr_id)}" title="Erfahrungen auf der Detailseite ansehen oder angeben" class="doctor-card-vote-placeholder-button doctor-card-vote-neutral ${ownVote === 'neutral' ? ' is-selected' : ''}">Neutral${ownVote === 'neutral' ? ' ✓' : ''}</a>
-                    <a href="arzt_detail.html?id=${escapeHtml(doctor.dr_id)}" title="Erfahrungen auf der Detailseite ansehen oder angeben" class="doctor-card-vote-placeholder-button doctor-card-vote-negative ${ownVote === 'contra' ? ' is-selected' : ''}">Negativ${ownVote === 'contra' ? ' ✓' : ''}</a>
-                </div>
-            </section>
+            <section class="doctor-card-own-rating"><a href="arzt_detail.html?id=${Number(doctor.dr_id)}#wirkung">Eigene Erfahrung auf der Detailseite angeben →</a></section>
 
             <div class="doctor-card-footer doctor-card-footer-with-compare">
                 <button type="button" class="doctor-compare-add-button ${isDoctorSelectedForCompare(doctor.dr_id) ? "is-selected" : ""}" data-dr-id="${escapeHtml(doctor.dr_id)}">
@@ -1522,33 +1512,8 @@ function buildDoctorCardHtml(doctor, index) {
 }
 
 function buildDoctorCardRatingHtml(doctor) {
-    const stats = getDoctorVoteStats(doctor);
-
-    if (stats.totalVotes === 0) {
-        return `<div class="doctor-card-rating-empty">Noch keine Bewertungen vorhanden.</div>`;
-    }
-
-    return `
-        <div class="doctor-card-rating-tiles">
-            <div class="doctor-card-rating-tile doctor-card-rating-positive">
-                <div class="doctor-card-rating-value">${stats.proRatio}%</div>
-                <div class="doctor-card-rating-label">Positive Erfahrungen</div>
-                <div class="doctor-card-rating-count">${stats.pro} positiv</div>
-            </div>
-            <div class="doctor-card-rating-tile doctor-card-rating-neutral">
-                <div class="doctor-card-rating-value">${stats.neutralRatio}%</div>
-                <div class="doctor-card-rating-label">Neutrale Erfahrungen</div>
-                <div class="doctor-card-rating-count">${stats.neutral} neutral</div>
-            </div>
-            <div class="doctor-card-rating-tile doctor-card-rating-negative">
-                <div class="doctor-card-rating-value">${stats.contraRatio}%</div>
-                <div class="doctor-card-rating-label">Negative Erfahrungen</div>
-                <div class="doctor-card-rating-count">${stats.contra} negativ</div>
-            </div>
-        </div>
-    `;
+    return LCNExperience.html('doctor', doctor.dr_id);
 }
-
 
 function getDoctorSpecialtyLabels(doctor) {
     const rawTerms = Array.isArray(doctor.specialty_terms)
@@ -1808,17 +1773,7 @@ function buildDoctorTableLocationHtml(doctor) {
 }
 
 function buildDoctorTableExperienceHtml(doctor) {
-    const stats = getDoctorVoteStats(doctor);
-    const ownVote = ["pro", "neutral", "contra"].includes(doctor.own_vote) ? doctor.own_vote : "";
-
-    return `
-        <div class="doctor-table-experience-grid${ownVote ? " has-selection" : ""}" data-own-vote="${ownVote}">
-            ${buildDoctorTableVoteButton(doctor.dr_id, "pro", "+", stats.proRatio, ownVote, "Positive Erfahrung")}
-            ${buildDoctorTableVoteButton(doctor.dr_id, "neutral", "=", stats.neutralRatio, ownVote, "Neutrale Erfahrung")}
-            ${buildDoctorTableVoteButton(doctor.dr_id, "contra", "−", stats.contraRatio, ownVote, "Negative Erfahrung")}
-            <span class="doctor-table-vote-count">(n=${stats.totalVotes})</span>
-        </div>
-    `;
+    return LCNExperience.html('doctor', doctor.dr_id);
 }
 
 function getSavedDoctorResultsView() {
@@ -1967,7 +1922,7 @@ function renderDoctorCompareSelection() {
 
     if (statusElement) {
         statusElement.textContent = hasSelection
-            ? `${selectedDoctorsForCompare.length} Ärzt:innen ausgewählt.`
+            ? `${selectedDoctorsForCompare.length} Behandler:innen ausgewählt.`
             : "";
     }
 

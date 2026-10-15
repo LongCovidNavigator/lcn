@@ -1701,81 +1701,10 @@ function buildTreatmentCardHtml(treatment, index) {
                     </div>
                 </section>
 
-                <section class="treatment-card-info-panel treatment-card-rating-panel">
-                    <h4 class="treatment-card-section-heading">
-                        Bewertung
-                        <span class="treatment-card-section-count">(${totalVotes} Bewertungen)</span>
-                    </h4>
-
-                    ${treatment.nd_id ? `<a href="${treatmentDetailUrl(treatment)}#wirkung">Community-Erfahrungen auf der Detailseite</a>` : totalVotes > 0 ? `
-                        <div class="treatment-card-rating-tiles">
-                            <div class="treatment-card-rating-tile treatment-card-rating-positive">
-                                <div class="treatment-card-rating-value">${positiveRatio}%</div>
-                                <div class="treatment-card-rating-label">Positive Erfahrungen</div>
-                                <div class="treatment-card-rating-count">${pro} positiv</div>
-                            </div>
-
-                            <div class="treatment-card-rating-tile treatment-card-rating-neutral">
-                                <div class="treatment-card-rating-value">${neutralRatio}%</div>
-                                <div class="treatment-card-rating-label">Neutrale Erfahrungen</div>
-                                <div class="treatment-card-rating-count">${neutral} neutral</div>
-                            </div>
-
-                            <div class="treatment-card-rating-tile treatment-card-rating-negative">
-                                <div class="treatment-card-rating-value">${negativeRatio}%</div>
-                                <div class="treatment-card-rating-label">Negative Erfahrungen</div>
-                                <div class="treatment-card-rating-count">${contra} negativ</div>
-                            </div>
-                        </div>
-                    ` : `
-                        <div class="treatment-card-rating-empty">
-                            Noch keine Bewertungen vorhanden.
-                        </div>
-                    `}
-                </section>
+                <section class="treatment-card-info-panel treatment-card-rating-panel"><h4 class="treatment-card-section-heading">Erfahrungen</h4>${LCNExperience.html('treatment', treatment.treat_id)}</section>
             </div>
 
-            <section class="treatment-card-own-rating">
-                <div class="treatment-card-own-rating-header">
-                    <h4 class="treatment-card-section-heading">Deine Bewertung</h4>
-                </div>
-
-                ${treatment.nd_id ? `<a href="${treatmentDetailUrl(treatment)}#wirkung">Erfahrung lokal angeben</a>` : `
-                <div class="treatment-card-vote-buttons${ownVote ? ' has-selection' : ''}">
-                    <button
-                        type="button"
-                        class="treatment-card-vote-button treatment-card-vote-positive${ownVote === 'pro' ? ' is-selected' : ''}"
-                        data-treat-id="${treatment.treat_id}"
-                        data-treatment-name="${rawTreatmentName}"
-                        data-vote-type="hilft"
-                        aria-pressed="${ownVote === 'pro'}"
-                    >
-                        Positiv${ownVote === 'pro' ? ' ✓' : ''}
-                    </button>
-
-                    <button
-                        type="button"
-                        class="treatment-card-vote-button treatment-card-vote-neutral${ownVote === 'neutral' ? ' is-selected' : ''}"
-                        data-treat-id="${treatment.treat_id}"
-                        data-treatment-name="${rawTreatmentName}"
-                        data-vote-type="gleich"
-                        aria-pressed="${ownVote === 'neutral'}"
-                    >
-                        Neutral${ownVote === 'neutral' ? ' ✓' : ''}
-                    </button>
-
-                    <button
-                        type="button"
-                        class="treatment-card-vote-button treatment-card-vote-negative${ownVote === 'contra' ? ' is-selected' : ''}"
-                        data-treat-id="${treatment.treat_id}"
-                        data-treatment-name="${rawTreatmentName}"
-                        data-vote-type="verschlechterung"
-                        aria-pressed="${ownVote === 'contra'}"
-                    >
-                        Negativ${ownVote === 'contra' ? ' ✓' : ''}
-                    </button>
-                </div>`}
-            </section>
+            <section class="treatment-card-own-rating"><a href="${treatmentDetailUrl(treatment)}#wirkung">Eigene Erfahrung auf der Detailseite angeben →</a></section>
 
             <footer class="treatment-card-footer treatment-card-footer-with-compare">
                 <button
@@ -2043,33 +1972,7 @@ function buildTreatmentCategoryHtml(treatment) {
 }
 
 function buildTreatmentExperienceHtml(treatment, mode = "all") {
-    if (treatment.nd_id) return `<a href="${treatmentDetailUrl(treatment)}#wirkung">Erfahrungen ansehen / angeben</a>`;
-    const totalVotes = Number(treatment.total_votes ?? 0);
-
-    const positiveRatio = Number(treatment.positive_ratio ?? 0);
-    const neutralRatio = Number(treatment.neutral_ratio ?? 0);
-    const negativeRatio = Number(treatment.negative_ratio ?? 0);
-
-    if (mode === "positive" || mode === "negative") {
-        const isNegative = mode === "negative";
-        const ratio = isNegative ? negativeRatio : positiveRatio;
-        const badgeClass = isNegative ? "treatment-table-badge-negative" : "treatment-table-badge-positive";
-        const prefix = isNegative ? "-" : "+";
-
-        return `<div class="treatment-table-experience-grid is-single${treatment.own_vote ? " has-selection" : ""}">
-            ${buildTreatmentTableVoteButton(treatment, isNegative ? "contra" : "pro", prefix, ratio, badgeClass)}
-            <span class="treatment-table-vote-count">(n=${totalVotes})</span>
-        </div>`;
-    }
-
-    return `
-        <div class="treatment-table-experience-grid${treatment.own_vote ? " has-selection" : ""}">
-            ${buildTreatmentTableVoteButton(treatment, "pro", "+", positiveRatio, "treatment-table-badge-positive")}
-            ${buildTreatmentTableVoteButton(treatment, "neutral", "=", neutralRatio, "treatment-table-badge-neutral")}
-            ${buildTreatmentTableVoteButton(treatment, "contra", "−", negativeRatio, "treatment-table-badge-negative")}
-            <span class="treatment-table-vote-count">(n=${totalVotes})</span>
-        </div>
-    `;
+    return LCNExperience.html('treatment', treatment.treat_id);
 }
 
 function getSavedTreatmentResultsView() {

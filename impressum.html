@@ -11,8 +11,8 @@
 
 
     <script src="scripts/access-nav.js?v=2" defer></script>
-</head>
-<body>
+<link rel="stylesheet" href="styles/public_detail_theme.css?v=2"></head>
+<body class="lcn-public-page">
   <!-- <header> -->
     
   <!-- </header> -->
@@ -48,7 +48,7 @@
   <div id="footer-placeholder"></div>
 
 	  <script>
-		fetch("components/footer.html")
+		fetch("components/footer.html?v=wording-20261006")
 		  .then(response => response.text())
 		  .then(data => {
 			document.getElementById("footer-placeholder").innerHTML = data;
@@ -56,7 +56,7 @@
 	  </script>
 	  
 	  <script>
-	  fetch("components/header.html?v=4")
+	  fetch("components/header.html?v=wording-20261006")
 		.then(response => response.text())
 		.then(data => {
 		  document.getElementById("header-placeholder").innerHTML = data;

@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="styles/therapien_karte.css?v=42">
     <script src="scripts/image-registry.js?v=5"></script>
     <script src="scripts/access-nav.js?v=2" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=2"><script src="scripts/maps_shared.js?v=1" defer></script></head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=2"><script src="scripts/maps_shared.js?v=1" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=2"><script src="scripts/experience_summary.js?v=1"></script></head>
 
 <script>
     function toggleMobileMenu() {
@@ -27,7 +27,7 @@
     }
 </script>
 
-<body class="treatment-map-page">
+<body class="lcn-public-page treatment-map-page">
 
     <div id="header-placeholder"></div>
 
@@ -168,7 +168,7 @@
                     <section class="treatment-nav-section treatment-nav-section-provider">
                         <h3 class="treatment-nav-heading">
                             Anbieter
-                            <span class="treatment-nav-info" data-tooltip="Filtert danach, ob und wie viele Ärzt:innen oder Anbieter zu einer Therapie hinterlegt sind." tabindex="0" aria-label="Info: Anbieter">i</span>
+                            <span class="treatment-nav-info" data-tooltip="Filtert danach, ob und wie viele Behandler:innen oder Anbieter zu einer Therapie hinterlegt sind." tabindex="0" aria-label="Info: Anbieter">i</span>
                         </h3>
 
                         <label class="treatment-nav-label" for="treatment-min-provider-input">Mindestanzahl Anbieter</label>
@@ -411,7 +411,7 @@
                         <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="rank"><span class="table-rank-label-full">Platz</span><span class="table-rank-label-short">#</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                         <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="name">Therapie <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                         <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="category">Kategorie <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
-                        <th><button id="treatment-table-experience-button" class="treatment-table-sort-button" type="button" data-table-sort-key="experience"><span id="treatment-table-experience-heading">Erfahrung</span> <span class="treatment-table-header-note">(n = Votes)</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
+                        <th><button id="treatment-table-experience-button" class="treatment-table-sort-button" type="button" data-table-sort-key="experience"><span id="treatment-table-experience-heading">Erfahrung</span> <span class="treatment-table-header-note">(n = Angaben)</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                         <th><button id="treatment-table-provider-button" class="treatment-table-sort-button" type="button" data-table-sort-key="provider"><span id="treatment-table-provider-heading">Anbieter gesamt</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                         <th><button id="treatment-table-metric-button" class="treatment-table-sort-button" type="button" data-table-sort-key="location"><span id="treatment-table-metric-heading">Entfernung / Ort</span> <span class="treatment-table-sort-indicator" aria-hidden="true"></span></button></th>
                     </tr>
@@ -428,12 +428,12 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>window.LCNImages.configureLeaflet(window.L);</script>
-    <script src="scripts/therapien_karte.js?v=maps-20261005"></script>
+    <script src="scripts/therapien_karte.js?v=experience4-20261006-2"></script>
 
     <div id="footer-placeholder"></div>
 
     <script>
-        fetch("components/footer.html")
+        fetch("components/footer.html?v=wording-20261006")
             .then(response => response.text())
             .then(data => {
                 document.getElementById("footer-placeholder").innerHTML = data;
@@ -441,7 +441,7 @@
     </script>
 
     <script>
-        fetch("components/header.html?v=4")
+        fetch("components/header.html?v=wording-20261006")
             .then(response => response.text())
             .then(data => {
                 document.getElementById("header-placeholder").innerHTML = data;

@@ -314,7 +314,7 @@
   }
   function decorateBoxHeadings(root=content) {
     const explanations={
-      'Überblick':'Hier findest du die recherchierten Angaben zu Arzt oder Praxis, medizinischem Profil und Kontakt. Fehlende Angaben sind gekennzeichnet.',
+      'Überblick':'Hier findest du die recherchierten Angaben zu Behandler:in oder Anbieter, medizinischem Profil und Kontakt. Fehlende Angaben sind gekennzeichnet.',
       'Medizinisches Profil':'Fachrichtungen, erfasste Spezialisierungen und Zusatzqualifikationen aus der Recherche.',
       'Standort':'Adresse und Karte der Praxis. Gib deinen Standort ein, um die Luftlinienentfernung zu sehen. Im Termin-Reiter wird zusätzlich der Anreiseaufwand grob geschätzt.',
       'Kontakt':'Über diese Links kannst du die Website öffnen, anrufen oder eine E-Mail schreiben.',
@@ -393,7 +393,7 @@
     const number=value=>value.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
     const difference=data.mean!==null && benchmark?.mean!=null ? Math.round((data.mean-benchmark.mean)*10)/10 : null;
     const comparison=difference===null?'':difference===0?'Auf dem Durchschnitt':number(Math.abs(difference))+' Punkte '+(difference>0?'über':'unter')+' dem Durchschnitt';
-    return `<div class="adaptation-results"><div class="community-result"><span>Community-Ergebnis · diese Praxis</span><strong>${escape(commonLabel('adaptation'))}</strong><span>${data.mean!==null?'Ø '+number(data.mean)+' / 5':'Noch keine Bewertung'}</span>${comparison?'<small>'+comparison+'</small>':''}</div><div class="community-result"><span>Durchschnitt über alle Ärzte</span><strong>${benchmark?.mean!=null?'Ø '+number(benchmark.mean)+' / 5':'Noch keine Vergleichsdaten'}</strong><span>${benchmark?benchmark.doctor_count+' von '+benchmark.catalog_count+' Ärzten mit Angaben':'Vergleich wird geladen …'}</span><small>Jeder Arzt zählt gleich viel.${Number(benchmark?.dummy_count) > 0?' Einschließlich Dummy-Angaben.':''}</small></div></div>`;
+    return `<div class="adaptation-results"><div class="community-result"><span>Community-Ergebnis · diese Praxis</span><strong>${escape(commonLabel('adaptation'))}</strong><span>${data.mean!==null?'Ø '+number(data.mean)+' / 5':'Noch keine Bewertung'}</span>${comparison?'<small>'+comparison+'</small>':''}</div><div class="community-result"><span>Durchschnitt über alle Behandler:innen</span><strong>${benchmark?.mean!=null?'Ø '+number(benchmark.mean)+' / 5':'Noch keine Vergleichsdaten'}</strong><span>${benchmark?benchmark.doctor_count+' von '+benchmark.catalog_count+' Behandler:innen mit Angaben':'Vergleich wird geladen …'}</span><small>Jedes Profil zählt gleich viel.${Number(benchmark?.dummy_count) > 0?' Einschließlich Dummy-Angaben.':''}</small></div></div>`;
   }
   function appointment() {
     const data = question('adaptation');
@@ -533,7 +533,7 @@
     document.querySelector('.side-nav').hidden = state.error;
     document.querySelector('.detail-layout').classList.toggle('has-error', state.error);
     if (state.error) {
-      content.innerHTML = '<section class="card" role="status"><h2>Praxis konnte nicht geladen werden</h2><p>Der Eintrag ist nicht in der aktuellen Auswahl enthalten oder die Daten sind gerade nicht erreichbar.</p><button type="button" id="retry-data">Erneut versuchen</button> <a href="aerzte_karte.html">Zur Ärzt:innen-Suche</a></section>';
+      content.innerHTML = '<section class="card" role="status"><h2>Praxis konnte nicht geladen werden</h2><p>Der Eintrag ist nicht in der aktuellen Auswahl enthalten oder die Daten sind gerade nicht erreichbar.</p><button type="button" id="retry-data">Erneut versuchen</button> <a href="aerzte_karte.html">Zur Behandler:innen-Suche</a></section>';
       return;
     }
     content.innerHTML = views[state.view]();
@@ -685,7 +685,7 @@
     document.querySelector('.profile').hidden = true;
     document.querySelector('.side-nav').hidden = true;
     document.querySelector('.detail-layout').classList.add('has-error');
-    content.innerHTML = '<section class="card" role="status"><h2>Keine gültige Arzt-ID angegeben</h2><p>Öffne einen Behandler über die Ärzt:innen-Suche.</p><a href="aerzte_karte.html">Zur Ärzt:innen-Suche →</a></section>';
+    content.innerHTML = '<section class="card" role="status"><h2>Kein gültiges Profil angegeben</h2><p>Öffne einen Behandler über die Behandler:innen-Suche.</p><a href="aerzte_karte.html">Zur Behandler:innen-Suche →</a></section>';
     document.getElementById('community-mode').textContent = '';
     return;
   }

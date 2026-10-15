@@ -104,7 +104,7 @@
                 <aside class="treatment-detail-question-intro">
                     <div class="treatment-detail-question-number">2</div>
                     <div>
-                        <h2>Anbieter / Ärzt:innen</h2>
+                        <h2>Anbieter / Behandler:innen</h2>
                         <p>Mit dieser Therapie verknüpfte Einträge aus der LCN-Datenbank.</p>
                     </div>
                 </aside>
@@ -172,7 +172,7 @@
     <div id="footer-placeholder"></div>
 
     <script>
-        fetch("components/footer.html")
+        fetch("components/footer.html?v=wording-20261006")
             .then(response => response.text())
             .then(data => {
                 document.getElementById("footer-placeholder").innerHTML = data;
@@ -180,7 +180,7 @@
     </script>
 
     <script>
-        fetch("components/header.html?v=4")
+        fetch("components/header.html?v=wording-20261006")
             .then(response => response.text())
             .then(data => {
                 document.getElementById("header-placeholder").innerHTML = data;

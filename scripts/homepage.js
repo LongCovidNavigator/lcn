@@ -142,8 +142,8 @@ function buildFeaturedTreatmentsTableHtml(treatments) {
     return `<div class="featured-treatments-table-wrap">
         <table class="featured-treatments-table">
             <thead><tr>
-                <th scope="col">Platz</th><th scope="col">Therapie</th><th scope="col">Kategorie</th>
-                <th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Votes)</span></th>
+                <th scope="col">Platz</th><th scope="col">Behandlung</th><th scope="col">Kategorie</th>
+                <th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Angaben)</span></th>
                 <th scope="col">Anbieter gesamt</th><th scope="col">Entfernung / Ort</th>
             </tr></thead>
             <tbody>${buildFeaturedTreatmentTableRowsHtml(treatments, 0, false)}</tbody>
@@ -163,9 +163,9 @@ function buildFeaturedTreatmentsHtml(treatments) {
             <table class="featured-treatments-table">
                 <thead><tr>
                     <th scope="col">Platz</th>
-                    <th scope="col">Therapie</th>
+                    <th scope="col">Behandlung</th>
                     <th scope="col">Kategorie</th>
-                    <th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Votes)</span></th>
+                    <th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Angaben)</span></th>
                     <th scope="col">Anbieter gesamt</th>
                     <th scope="col">Entfernung / Ort</th>
                 </tr></thead>
@@ -201,20 +201,7 @@ function buildFeaturedTreatmentTableRowsHtml(treatments, rankOffset, isExtra) {
 }
 
 function buildFeaturedTreatmentTableExperienceHtml(treatment) {
-    const pro = Number(treatment.pro || 0);
-    const neutral = Number(treatment.neutral || 0);
-    const contra = Number(treatment.contra || 0);
-    const total = Number(treatment.total_votes || (pro + neutral + contra));
-    const positiveRatio = treatment.positive_ratio !== undefined ? Number(treatment.positive_ratio) : total ? Math.round((pro / total) * 100) : 0;
-    const neutralRatio = treatment.neutral_ratio !== undefined ? Number(treatment.neutral_ratio) : total ? Math.round((neutral / total) * 100) : 0;
-    const negativeRatio = treatment.negative_ratio !== undefined ? Number(treatment.negative_ratio) : total ? Math.round((contra / total) * 100) : 0;
-    const ownVote = ["pro", "neutral", "contra"].includes(treatment.own_vote) ? treatment.own_vote : "";
-    return `<span class="featured-treatment-table-experience">
-        ${buildFeaturedTreatmentTableVoteButton(treatment, "pro", "+", positiveRatio, "is-positive", ownVote)}
-        ${buildFeaturedTreatmentTableVoteButton(treatment, "neutral", "=", neutralRatio, "is-neutral", ownVote)}
-        ${buildFeaturedTreatmentTableVoteButton(treatment, "contra", "−", negativeRatio, "is-negative", ownVote)}
-        <small>(n=${total})</small>
-    </span>`;
+    return LCNExperience.html('treatment', treatment.treat_id);
 }
 
 function buildFeaturedTreatmentTableVoteButton(treatment, type, prefix, ratio, className, ownVote) {
@@ -249,12 +236,8 @@ function buildFeaturedTreatmentHtml(editorialTreatment, treatment, index) {
                     <span><small>Anbieter</small><strong>${providerCount}</strong></span>
                     <span><small>Entfernung / Ort</small><strong>${distance !== null && distance !== undefined ? formatFeaturedTreatmentDistance(distance) : "—"}</strong>${city ? `<em>${escapeHomepageHtml(city)}</em>` : ""}</span>
                 </div>
-                <div class="featured-treatment-votes"
-                     aria-label="Bewertungen: ${Number(treatment.pro || 0)} positiv, ${Number(treatment.neutral || 0)} neutral, ${Number(treatment.contra || 0)} negativ">
-                    ${buildFeaturedTreatmentVote(editorialTreatment.id, "pro", "Positiv", treatment.pro, treatment.own_vote, totalVotes)}
-                    ${buildFeaturedTreatmentVote(editorialTreatment.id, "neutral", "Neutral", treatment.neutral, treatment.own_vote, totalVotes)}
-                    ${buildFeaturedTreatmentVote(editorialTreatment.id, "contra", "Negativ", treatment.contra, treatment.own_vote, totalVotes)}
-                    <span class="featured-treatment-card-vote-count">(n=${totalVotes})</span>
+                <div class="featured-treatment-votes">
+                    ${LCNExperience.html('treatment', editorialTreatment.id)}
                 </div>
             </div>
         </article>`;
@@ -481,7 +464,7 @@ function buildFeaturedExpertsTableOnlyHtml(doctors) {
         <table class="featured-experts-table">
             <thead><tr>
                 <th scope="col">Platz</th><th scope="col">Ärzt:in</th>
-                <th scope="col">Erfahrung <span class="featured-expert-table-header-note">(n = Votes)</span></th>
+                <th scope="col">Erfahrung <span class="featured-expert-table-header-note">(n = Angaben)</span></th>
                 <th scope="col">Standort</th><th scope="col">Entfernung</th>
                 <th scope="col">Versorgung <span class="featured-expert-table-header-note">(GKV, PKV)</span></th>
                 <th scope="col">Kontakt</th>
@@ -551,7 +534,7 @@ function buildFeaturedExpertsHtml(doctors, rankOffset, isLonglist, forceCards) {
                     <tr>
                         <th scope="col">Platz</th>
                         <th scope="col">Ärzt:in</th>
-                        <th scope="col">Erfahrung <span class="featured-expert-table-header-note">(n = Votes)</span></th>
+                        <th scope="col">Erfahrung <span class="featured-expert-table-header-note">(n = Angaben)</span></th>
                         <th scope="col">Standort</th>
                         <th scope="col">Entfernung</th>
                         <th scope="col">Versorgung <span class="featured-expert-table-header-note">(GKV, PKV)</span></th>
@@ -564,21 +547,7 @@ function buildFeaturedExpertsHtml(doctors, rankOffset, isLonglist, forceCards) {
 }
 
 function buildFeaturedExpertCardExperienceHtml(doctor, ownVote) {
-    const pro = Number(doctor.pro || 0);
-    const neutral = Number(doctor.neutral || 0);
-    const contra = Number(doctor.contra || 0);
-    const total = pro + neutral + contra;
-    const ratios = {
-        pro: total ? Math.round((pro / total) * 100) : 0,
-        neutral: total ? Math.round((neutral / total) * 100) : 0,
-        contra: total ? Math.round((contra / total) * 100) : 0
-    };
-    return `<div class="featured-expert-card-experience featured-expert-votes${ownVote ? " has-selection" : ""}" data-own-vote="${ownVote}">
-        ${buildFeaturedExpertCardVoteButton(doctor.dr_id, "pro", "Positiv", "+", ratios.pro, pro, ownVote)}
-        ${buildFeaturedExpertCardVoteButton(doctor.dr_id, "neutral", "Neutral", "=", ratios.neutral, neutral, ownVote)}
-        ${buildFeaturedExpertCardVoteButton(doctor.dr_id, "contra", "Negativ", "−", ratios.contra, contra, ownVote)}
-        <span class="featured-expert-card-vote-count">(n=${total})</span>
-    </div>`;
+    return LCNExperience.html('doctor', doctor.dr_id);
 }
 
 function buildFeaturedExpertCardVoteButton(drId, type, label, prefix, ratio, count, ownVote) {
@@ -626,22 +595,7 @@ function getFeaturedExpertDistanceHtml(doctor) {
 }
 
 function buildFeaturedExpertTableExperienceHtml(doctor, ownVote) {
-    const pro = Number(doctor.pro || 0);
-    const neutral = Number(doctor.neutral || 0);
-    const contra = Number(doctor.contra || 0);
-    const total = pro + neutral + contra;
-    const ratios = {
-        pro: total ? Math.round((pro / total) * 100) : 0,
-        neutral: total ? Math.round((neutral / total) * 100) : 0,
-        contra: total ? Math.round((contra / total) * 100) : 0
-    };
-
-    return `<div class="featured-expert-table-experience featured-expert-votes${ownVote ? " has-selection" : ""}" data-own-vote="${ownVote}">
-        ${buildFeaturedTableVoteButton(doctor.dr_id, "pro", "+", ratios.pro, pro, ownVote, "Positive Erfahrung")}
-        ${buildFeaturedTableVoteButton(doctor.dr_id, "neutral", "=", ratios.neutral, neutral, ownVote, "Neutrale Erfahrung")}
-        ${buildFeaturedTableVoteButton(doctor.dr_id, "contra", "−", ratios.contra, contra, ownVote, "Negative Erfahrung")}
-        <span class="featured-expert-table-vote-count">(n=${total})</span>
-    </div>`;
+    return LCNExperience.html('doctor', doctor.dr_id);
 }
 
 function buildFeaturedTableVoteButton(drId, type, prefix, ratio, count, ownVote, label) {
@@ -996,7 +950,7 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     results.hidden = false;
     heading.textContent = hasUserLocation ? "Die nächsten Anlaufstellen" : "Hausärztliche Anlaufstellen in Deutschland";
     list.innerHTML = doctors.length ? doctors.map(function (doctor) { return buildNearbyGpCard(doctor, hasUserLocation); }).join("")
-        : '<p class="nearby-gps-status">Versuche alternativ die vollständige Ärzt:innensuche.</p>';
+        : '<p class="nearby-gps-status">Versuche alternativ die vollständige Behandler:innensuche.</p>';
     allLink.href = `therapie_detail.html?treat_id=${homepagePrimaryCareTreatmentId}`;
 
     if (typeof L === "undefined") return;
@@ -1147,13 +1101,8 @@ async function loadHomepageEditorialSelection(list, moreButton) {
                 const name=element.querySelector('h3 a, .featured-treatment-table-name a');
                 if(name&&!single){name.href='therapien_karte.html?search='+encodeURIComponent(entry.topic.label);name.title='Passende Katalogeinträge suchen';}
                 // No synthetic ratings or provider totals for editorial topic groups.
-                const votes=element.querySelector('.featured-treatment-votes, .featured-treatment-table-experience');
-                if(votes){
-                    const rating=entry.topic.ratings||{},total=['pro','neutral','contra'].reduce((sum,key)=>sum+Number(rating[key]||0),0);
-                    votes.classList.add('homepage-rating-display');
-                    votes.title='Gespeicherte Gesamtbewertungen. Positiv umfasst Verbesserung und Heilung.';
-                    votes.innerHTML=['pro','neutral','contra'].map((key,i)=>'<span class="homepage-rating-pill rating-'+key+'"><span>'+(['Positiv','Neutral','Negativ'][i])+'</span><strong>'+(total?['+','=','−'][i]+Math.round(100*Number(rating[key]||0)/total)+'%':'—')+'</strong></span>').join('')+'<small>(n='+total+')</small>';
-                }
+                const votes=element.querySelector('.featured-treatment-votes');
+                if(votes){votes.removeAttribute('aria-label');votes.innerHTML=LCNExperience.html('treatment',entry.topic.items.map(item=>item.treat_id).join(','));}
                 const rank=element.querySelector('.featured-treatment-rank,.featured-treatment-table-rank');if(rank)rank.textContent=String(index+1).padStart(2,'0');
                 if(!single){const provider=element.querySelector('.featured-treatment-provider-bubble, .featured-treatment-card-facts > span:nth-child(2) strong');if(provider)provider.textContent='—';}
             });

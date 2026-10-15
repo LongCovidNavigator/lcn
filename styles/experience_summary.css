@@ -1,0 +1,21 @@
+.lcn-experience{display:grid;grid-template-columns:repeat(2,minmax(105px,1fr));gap:6px;min-width:220px;white-space:normal;text-align:left}
+.lcn-experience .lcn-effect{display:flex;flex-direction:column;gap:5px;padding:8px;border:1px solid #e1eafa;border-radius:6px;color:#17365d;background:#fff;text-decoration:none;font-size:12px;line-height:1.35}
+.lcn-experience .lcn-effect strong{font-size:15px}
+.lcn-experience .lcn-effect-0{border-left:4px solid #d8778e}
+.lcn-experience .lcn-effect-1{border-left:4px solid #aabbd1}
+.lcn-experience .lcn-effect-2{border-left:4px solid #75cba5}
+.lcn-experience .lcn-effect-3{border-left:4px solid #299a77}
+.lcn-experience small{grid-column:1/-1;color:#536b89;font-size:12px}
+.lcn-experience a:hover{background:#f0f7ff}
+td .lcn-experience{grid-template-columns:1fr;gap:3px}
+td .lcn-experience .lcn-effect{flex-direction:row;justify-content:space-between;align-items:center;padding:4px 7px}
+td .lcn-experience .lcn-effect strong{font-size:13px;white-space:nowrap}
+.featured-treatment-votes:has(.lcn-experience){display:block}
+.lcn-philosophy{max-width:1200px;margin:40px auto;padding:28px;background:white;border:1px solid #e1eafa;border-radius:10px;color:#17365d}
+.lcn-philosophy>p{max-width:850px;line-height:1.65}
+.lcn-philosophy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:24px 0}
+.lcn-philosophy-grid article{background:#f7fbfe;border:1px solid #e1eafa;border-radius:10px;padding:22px}
+.lcn-philosophy-grid h3{font-size:19px;margin:12px 0}
+.lcn-philosophy-grid p{line-height:1.6;margin:0 0 14px}
+.lcn-philosophy-number{display:inline-grid;place-items:center;width:36px;height:36px;background:#e7f3ff;color:#0878e3;border-radius:50%;font-weight:700}
+@media(max-width:650px){.lcn-philosophy{margin:24px 12px;padding:18px}.lcn-philosophy-grid{grid-template-columns:1fr}}
