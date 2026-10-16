@@ -23,11 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   form.addEventListener('submit',async event=>{
     event.preventDefault(); if(!form.reportValidity())return;
-    const button=form.querySelector('button');button.disabled=true;message.textContent='Wird gespeichert …';
+    const button=form.querySelector('.entry-submit');button.disabled=true;message.textContent='Wird gespeichert …';
     let website=form.elements.website.value.trim();if(!/^https?:\/\//i.test(website))website='https://'+website;
     try {
-      const response=await fetch('api/create_submission.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'doctor',simple_doctor:true,name:form.elements.name.value.trim(),website,organization:form.elements.organization.value.trim(),primary_care:form.elements.primary_care.checked,address:form.elements.address.value.trim(),company:form.elements.company.value})});
+      const response=await fetch('api/create_submission.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'doctor',simple_doctor:true,treatment_ids:window.LCNCatalogEntry?.treatmentIds()||[],name:form.elements.name.value.trim(),website,organization:form.elements.organization.value.trim(),primary_care:form.elements.primary_care.checked,address:form.elements.address.value.trim(),company:form.elements.company.value})});
       const data=await response.json();if(!response.ok||!data.ok||!data.submission_id)throw Error(data.error||'Eintrag konnte nicht gespeichert werden.');
+      if(window.LCNCatalogEntry?.saved(data))return;
       location.href='arzt_detail.html?submission_id='+data.submission_id+'&neu=1';
     }catch(error){message.textContent=error.message;button.disabled=false;}
   });

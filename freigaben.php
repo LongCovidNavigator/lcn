@@ -36,7 +36,7 @@ header('Cache-Control: no-store, private');
         <section id="review-list"></section>
     </main>
     <div id="footer-placeholder"></div>
-    <script src="scripts/freigaben.js?v=3"></script>
+    <script src="scripts/freigaben.js?v=relation-feedback-20261017"></script>
     <script>function toggleMobileMenu(){document.querySelector('.main-nav ul')?.classList.toggle('show');}</script>
 </body>
 </html>

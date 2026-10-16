@@ -17,6 +17,9 @@ try {
         $params=[]; if($status!=='all'){ $sql.=' WHERE review_status=:status'; $params[':status']=$status; }
         $sql.=' ORDER BY created_at DESC LIMIT 200'; $stmt=$pdo->prepare($sql); $stmt->execute($params);
         $items=$stmt->fetchAll(); foreach($items as &$item){$item['payload']=lcnSubmissionPayload($item);$item['triage_reasons']=json_decode((string)($item['triage_reasons']??'[]'),true)?:[];$item['submission_id']=(int)$item['submission_id'];$item['triage_score']=(int)$item['triage_score'];$item['existing_target_id']=$item['existing_target_id']!==null?(int)$item['existing_target_id']:null;$item['duplicate_target_id']=$item['duplicate_target_id']!==null?(int)$item['duplicate_target_id']:null;}
+        unset($item);
+        $feedbackQuery=$pdo->prepare('SELECT COALESCE(SUM(stance=1),0) confirmations,COALESCE(SUM(stance=-1),0) objections FROM catalog_relation_feedback WHERE relation_key IN (?,?)');
+        foreach($items as &$item){$relation=$item['payload']['relationship']??[];$key=isset($relation['doctor_id'],$relation['treatment_id'])?'d:'.(int)$relation['doctor_id'].':t:'.(int)$relation['treatment_id']:'';$feedbackQuery->execute([$key,'s:'.$item['submission_id']]);$votes=$feedbackQuery->fetch(PDO::FETCH_ASSOC);$item['payload']['community_feedback']=(int)$votes['confirmations'].' Bestätigungen · '.(int)$votes['objections'].' Widersprüche';}unset($item);
         lcnSendVoteJson(['ok'=>true,'items'=>$items]);
     }
     if (($_SERVER['REQUEST_METHOD']??'')!=='POST') lcnSendVoteJson(['ok'=>false,'error'=>'Method not allowed.'],405);

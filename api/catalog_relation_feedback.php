@@ -1,0 +1,14 @@
+<?php
+require_once __DIR__.'/_catalog_relations.php';require_once __DIR__.'/_voting.php';require_once __DIR__.'/_vote_abuse.php';
+header('Cache-Control: private, no-store');
+try{$p=lcnDoctorDatabase();
+ if(($_SERVER['REQUEST_METHOD']??'GET')==='POST'){
+ lcnRequireVotingRequest();$in=lcnReadJsonBody();$key=(string)($in['key']??'');$stance=filter_var($in['stance']??null,FILTER_VALIDATE_INT);if(!in_array($stance,[-1,0,1],true))throw new InvalidArgumentException('Ungültige Rückmeldung.');
+ if(preg_match('/^d:(\d+):t:(\d+)$/',$key,$m)){$doctor=(int)$m[1];$treatment=(int)$m[2];lcnValidateCatalogRelation($p,$doctor,$treatment,'add');$q=$p->prepare("SELECT 1 FROM tbl_cpl_entities2treatments_nd WHERE lcn_id=? AND treat_nd_id=? AND relation_status IN ('bestand','belegt')");$q->execute([$doctor,$treatment]);if(!$q->fetchColumn()){$q=$p->query("SELECT payload FROM community_submissions WHERE review_status IN ('pending','reviewing')");$found=false;foreach($q as $r){$x=json_decode($r['payload'],true);$rel=$x['relationship']??[];if(($rel['action']??'')==='add'&&(int)($rel['doctor_id']??0)===$doctor&&(int)($rel['treatment_id']??0)===$treatment)$found=true;}if(!$found)throw new InvalidArgumentException('Zuordnung nicht gefunden.');}}
+ elseif(preg_match('/^s:(\d+)$/',$key,$m)){$q=$p->prepare("SELECT existing_target_id FROM community_submissions WHERE submission_id=? AND review_status IN ('pending','reviewing')");$q->execute([(int)$m[1]]);if($q->fetchColumn()===false)throw new InvalidArgumentException('Vorschlag nicht gefunden.');$doctor=0;}
+ else throw new InvalidArgumentException('Ungültige Zuordnung.');
+ $user=lcnVoterKey();lcnBeginVoteSecurity($p,'doctor',$doctor,'neutral',$user);
+ if($stance===0)$p->prepare('DELETE FROM catalog_relation_feedback WHERE relation_key=? AND respondent_key=?')->execute([$key,$user]);else $p->prepare('INSERT INTO catalog_relation_feedback(relation_key,respondent_key,stance) VALUES(?,?,?) ON DUPLICATE KEY UPDATE stance=VALUES(stance)')->execute([$key,$user,$stance]);
+ }
+ $user=lcnExistingVoterKey();$rows=$p->query('SELECT relation_key,SUM(stance=1) confirmations,SUM(stance=-1) objections FROM catalog_relation_feedback GROUP BY relation_key')->fetchAll(PDO::FETCH_ASSOC);$result=[];foreach($rows as $r)$result[$r['relation_key']]=['confirm'=>(int)$r['confirmations'],'oppose'=>(int)$r['objections'],'own'=>0];if($user){$q=$p->prepare('SELECT relation_key,stance FROM catalog_relation_feedback WHERE respondent_key=?');$q->execute([$user]);foreach($q as $r)$result[$r['relation_key']]['own']=(int)$r['stance'];}lcnSendVoteJson(['ok'=>true,'feedback'=>(object)$result]);
+}catch(InvalidArgumentException $e){lcnSendVoteJson(['ok'=>false,'error'=>$e->getMessage()],400);}catch(Throwable $e){lcnLogApiError('catalog_relation_feedback',$e);lcnSendVoteJson(['ok'=>false,'error'=>'Rückmeldung konnte nicht verarbeitet werden.'],500);}

@@ -36,7 +36,9 @@ console.log('PASS: ten-answer threshold, equal effect scale, grouped therapy fie
 const travel = data => calculate(data).rows.find(row=>row.label==='Persönliche Anreise');
 assert.equal(travel({questions:{},onlineFirst:true}).value,1);
 assert.equal(travel({questions:{},distance:10}).value,.8);
-assert.equal(travel({questions:{'appointment-0-2':options(10,0,2)}}).value,1);
+assert.equal(travel({questions:{'appointment-0-2':options(10,0,2)}}).value,null);
+assert.equal(travel({questions:{'appointment-0-2':options(10,0,2),'appointment-1-2':options(10,0,2)}}).value,1);
+assert.equal(travel({questions:{'appointment-0-2':options(10,0,2),'appointment-1-2':options(10,1,2)},distance:10}).value,.8);
 assert.equal(travel({questions:{'appointment-0-2':options(10,1,2)},onlineFirst:true}).value,null);
 assert.equal(travel({questions:{'appointment-0-3':options(10,0,2)}}).value,null);
 

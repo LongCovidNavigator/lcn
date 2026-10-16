@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS catalog_relation_feedback (
+ relation_key VARCHAR(100) NOT NULL,
+ respondent_key CHAR(64) NOT NULL,
+ stance TINYINT NOT NULL,
+ updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ PRIMARY KEY(relation_key,respondent_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

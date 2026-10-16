@@ -23,8 +23,8 @@
     add('Redaktionelle Auswahl',1,data.treatmentCount>0&&data.editorialTotal>0?(data.editorialCount>3?1:0):null,'Ab vier zugeordneten Top-Therapien gibt es 1 Zusatzpunkt; bei null bis drei gibt es 0 Punkte.');
     const band=data.distance==null?null:[20,50,100,300,800,Infinity].findIndex(limit=>data.distance<=limit);
     const videoFirst=average('appointment-0-2',[1,0]);
-    const onlineFirst=videoFirst===null?data.onlineFirst===true:videoFirst>.5;
-    add('Persönliche Anreise',7,onlineFirst?1:band==null?null:[.8,.6,.4,.2,.1,0][band],'Online-Ersttermin: 7 Punkte ohne Anreise. Luftlinie bis 20 / 50 / 100 / 300 / 800 / über 800 km: 5,6 / 4,2 / 2,8 / 1,4 / 0,7 / 0 Punkte. Ohne Online-Bestätigung und Standort keine Bewertung.');
+    const videoFollow=average('appointment-1-2',[1,0]);const onlineFirst=(videoFirst===null?data.onlineFirst===true:videoFirst>.5)&&(videoFollow===null?data.onlineFirst===true:videoFollow>.5);
+    add('Persönliche Anreise',7,onlineFirst?1:band==null?null:[.8,.6,.4,.2,.1,0][band],'Erst- und Folgetermin online: 7 Punkte ohne Anreise. Luftlinie bis 20 / 50 / 100 / 300 / 800 / über 800 km: 5,6 / 4,2 / 2,8 / 1,4 / 0,7 / 0 Punkte. Ohne Online-Bestätigung und Standort keine Bewertung.');
     const coverage=rows.reduce((n,r)=>n+(r.value==null?0:r.weight),0),earned=rows.reduce((n,r)=>n+(r.value||0)*r.weight,0);
     // The three researched therapy metrics form one field for data completeness.
     const therapyLabels=['Anzahl Therapien','Vielfalt der Kategorien','Redaktionelle Auswahl'];

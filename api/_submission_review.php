@@ -1,5 +1,7 @@
 <?php
+require_once __DIR__.'/_symptom_proposals.php';
 require_once __DIR__ . '/_submission_treatments.php';
+require_once __DIR__ . '/_catalog_relations.php';
 require_once __DIR__ . '/_voting.php';
 require_once __DIR__ . '/_site_auth.php';
 
@@ -48,6 +50,8 @@ function lcnUniqueTreatmentSlug(PDO $pdo, string $name): string {
 }
 
 function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
+    if(isset($payload['symptom_proposal']))return lcnApproveSymptomProposal($pdo,$row,$payload);
+    if(is_array($payload['relationship']??null)&&isset($payload['relationship']['action'],$payload['relationship']['doctor_id'],$payload['relationship']['treatment_id']))return lcnApplyCatalogRelation($pdo,$row,$payload);
     $typeMap = ['doctor'=>'physician','practice'=>'practice','clinic'=>'clinic','therapy_center'=>'practice','other'=>'other'];
     $providerType = (string)($payload['provider_type'] ?? 'doctor');
     $insurance = is_array($payload['insurance'] ?? null) ? $payload['insurance'] : [];
@@ -97,6 +101,7 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
 }
 
 function lcnApproveTreatmentSubmission(PDO $pdo, array $row, array $payload): int {
+    if(isset($payload['symptom_proposal']))return lcnApproveSymptomProposal($pdo,$row,$payload);
     $id=(int)($row['existing_target_id']??0);
     if($id>0){$exists=$pdo->prepare('SELECT 1 FROM v_lcn_treatments WHERE treat_id=:id');$exists->execute([':id'=>$id]);if(!$exists->fetchColumn())throw new DomainException('Die zu ergänzende Therapie existiert nicht mehr.');
         $update=$pdo->prepare("UPDATE v_lcn_treatments SET typ=COALESCE(NULLIF(typ,''),:type),aufwand=COALESCE(NULLIF(aufwand,''),:effort),crashrisiko=COALESCE(NULLIF(crashrisiko,''),:risk),kosten=COALESCE(NULLIF(kosten,''),:cost),wirkgeschwindigkeit=COALESCE(NULLIF(wirkgeschwindigkeit,''),:speed),wirkmechanismus=COALESCE(NULLIF(wirkmechanismus,''),:mechanism),indikationen_anwendungsgebiete=COALESCE(NULLIF(indikationen_anwendungsgebiete,''),:indications),weitere_hinweise=CONCAT_WS('\n',weitere_hinweise,:notes),notes_internal=CONCAT_WS('\n',notes_internal,:internal) WHERE treat_id=:id");

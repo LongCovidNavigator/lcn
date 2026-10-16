@@ -26,11 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let saving=false;
   form.addEventListener('submit',async event=>{
     event.preventDefault(); if(saving||!form.reportValidity())return;saving=true;
-    const button=form.querySelector('button');button.disabled=true;message.textContent='Wird gespeichert …';
+    const button=form.querySelector('.entry-submit');button.disabled=true;message.textContent='Wird gespeichert …';
     let website=form.elements.website.value.trim();if(website && !/^https?:\/\//i.test(website))website='https://'+website;
     try {
-      const response=await fetch('api/create_submission.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'treatment',simple_treatment:true,name:form.elements.name.value.trim(),website,company:form.elements.company.value,existing_target_id:Number(new URLSearchParams(location.search).get('existing_target_id'))||undefined})});
+      const response=await fetch('api/create_submission.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'treatment',simple_treatment:true,doctor_ids:window.LCNCatalogEntry?.doctorIds()||[],name:form.elements.name.value.trim(),website,company:form.elements.company.value,existing_target_id:Number(new URLSearchParams(location.search).get('existing_target_id'))||undefined})});
       const data=await response.json();if(!response.ok||!data.ok||!data.submission_id)throw Error(data.error||'Eintrag konnte nicht gespeichert werden.');
+      if(window.LCNCatalogEntry?.saved(data))return;
       form.reset();form.elements.name.dispatchEvent(new Event('input'));
       message.textContent=existingId>0?'Danke! Dein Änderungsvorschlag wurde zur Prüfung gespeichert.':'Danke! Dein Vorschlag wurde gespeichert und erscheint als noch nicht geprüft im Katalog. Wir übernehmen die weitere Recherche.';button.disabled=false;
     }catch(error){message.textContent=error.message;button.disabled=false;}finally{saving=false;}
