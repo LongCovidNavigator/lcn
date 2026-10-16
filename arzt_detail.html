@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+<script src="scripts/online_access.js?v=open-map-20261016" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LCN – Behandler-Steckbrief</title>
   <link rel="stylesheet" href="styles/general.css">
-  <link rel="stylesheet" href="styles/navigation.css">
+  <link rel="stylesheet" href="styles/navigation.css?v=menu-icon-20261016">
   <link rel="stylesheet" href="styles/footer-style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=real-therapy-ratings-20261015">
+  <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=screen-center-20261016">
   <script src="scripts/image-registry.js?v=5" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
-  <script src="scripts/doctor_dashboard_score.js?v=7" defer></script>
-  <script src="scripts/arzt_detail_konzept.js?v=real-therapy-ratings-20261015" defer></script>
+  <script src="scripts/doctor_dashboard_score.js?v=cost-layout-20261016" defer></script>
+  <script src="scripts/cost_preferences.js?v=insurance-options-20261016" defer></script>
+  <script src="scripts/symptom_search.js?v=1" defer></script><script src="scripts/doctor_symptom_help.js?v=1" defer></script><script src="scripts/arzt_detail_konzept.js?v=single-cost-answer-20261016" defer></script>
   <link rel="stylesheet" href="styles/doctor_treatment_table_beta.css?v=4">
-<link rel="stylesheet" href="styles/maps_shared.css?v=2"><script src="scripts/maps_shared.js?v=1" defer></script></head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=2"><script src="scripts/maps_shared.js?v=1" defer></script><link rel="stylesheet" href="styles/detail_layout_shared.css?v=open-map-20261016"></head>
 <body class="doctor-detail-live" data-doctor-page="live">
   <div id="header-placeholder"></div>
   <div class="page-shell"><section id="submission-note" class="card" hidden><strong>Community-Eintrag · noch nicht geprüft</strong><p>Danke fürs Ergänzen! Bitte teile, was du über diese Praxis weißt. In den drei Bereichen kannst du einzelne Fragen beantworten; deine Angaben werden gespeichert.</p><a href="#termin">Angaben zum Termin ergänzen →</a></section>
@@ -31,7 +33,6 @@
         <button type="button" data-contact="Telefon"><span aria-hidden="true">☎</span> Telefon</button>
         <button type="button" data-contact="E-Mail"><span aria-hidden="true">✉</span> E-Mail</button>
       </nav>
-      <div id="profile-map" class="profile-map" aria-label="Kleine Karte des Praxisstandorts"></div>
     </header>
     <div class="detail-layout">
       <nav class="side-nav" aria-label="Ansichten der Behandler-Detailseite">
@@ -48,7 +49,7 @@
   </div>
   <div id="feedback" role="status" aria-live="polite"></div>
   <div id="footer-placeholder"></div>
-  <script src="scripts/access-nav.js?v=2" defer></script>
+  <script src="scripts/access-nav.js?v=compact-20261016" defer></script>
   <script src="scripts/doctor_detail_chrome.js?v=5" defer></script>
   <noscript>Bitte JavaScript aktivieren, um die fünf Ansichten zu öffnen.</noscript>
 </body>

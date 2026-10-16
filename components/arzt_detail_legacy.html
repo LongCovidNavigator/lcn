@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+<script src="scripts/online_access.js?v=open-map-20261016" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long Covid Navigator - Arzt-Steckbrief</title>
 
     <link rel="stylesheet" href="styles/general.css">
-    <link rel="stylesheet" href="styles/navigation.css">
+    <link rel="stylesheet" href="styles/navigation.css?v=menu-icon-20261016">
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/aerzte_karte.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -455,7 +456,7 @@
     </script>
 
     <script>
-        fetch("components/header.html?v=4")
+        fetch("components/header.html?v=menu-icon-20261016")
             .then(response => response.text())
             .then(data => {
                 document.getElementById("header-placeholder").innerHTML = data;

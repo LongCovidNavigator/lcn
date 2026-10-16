@@ -1,0 +1,7 @@
+.lcn-online-badge{display:inline-block;vertical-align:middle;margin:4px 6px;padding:4px 7px;border-radius:5px;background:#e6f5ec;color:#176748;font:500 11px/1.4 Arial,sans-serif;white-space:normal}
+.lcn-online-legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:10px 0;color:#526b80;font:400 12px/1.5 Arial,sans-serif}
+.lcn-online-legend>span{display:inline-flex;align-items:center;gap:6px}.lcn-online-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}.online-green{background:#248965}.online-blue{background:#2385d6}.online-red{background:#d93b40}
+.lcn-online-marker img{width:25px;height:41px}.lcn-online-marker span{position:absolute;left:14px;top:-4px;border-radius:50%;padding:2px 5px;background:#fff;color:#176748;border:1px solid #248965;font:bold 11px Arial}
+.nd-provider-table th button{background:none;border:0;color:inherit;font:inherit;font-weight:700;padding:0;cursor:pointer;text-align:left}
+
+.travel-scale{grid-template-columns:repeat(7,minmax(85px,1fr))!important;overflow-x:auto}.travel-online-level .travel-scale-bar{background:#176748!important}.travel-online-level{color:#176748}.travel-level-6 .travel-scale-bar{background:#bd4949!important}

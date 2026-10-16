@@ -31,3 +31,5 @@
 /* Local markers keep provider locations visible without third-party icon downloads. */
 .nd-local-marker span{display:grid;place-items:center;width:26px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#0875ee;border:2px solid white;color:white;box-shadow:0 2px 5px #3456;font-size:16px}
 .nd-local-origin span{background:#d74d63}
+.nd-detail #header-placeholder #nd-main-menu{left:auto;right:24px;top:calc(100% + 8px);width:300px;max-width:calc(100vw - 24px)}
+@media(max-width:800px){.nd-detail #header-placeholder #nd-main-menu{right:12px}}

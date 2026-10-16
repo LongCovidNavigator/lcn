@@ -35,57 +35,50 @@ try {
 } catch (Throwable $e) { lcnLogApiError('therapie_detail', $e); http_response_code(503); $error = 'Die Therapie konnte gerade nicht geladen werden.'; }
 ndStart($item['treatmentname'] ?? 'Therapie', true, true);
 if ($error) { echo '<section class="card" role="alert"><h1>Therapie nicht verfügbar</h1><p>'.ndEscape($error).'</p><a href="therapien_karte.html">Zur Therapiesuche</a></section>'; ndEnd(); return; }
-$views = ['ueberblick'=>'Überblick','termin'=>'Welche Belastungshürden gibt es bei der Therapie?','zugang'=>'Wie zugänglich ist die Therapie?','wirkung'=>'Welche Erfahrungen gibt es?','alternativen'=>'Therapiealternativen'];
+$views = ['ueberblick'=>'Überblick','termin'=>'Welche Belastungshürden gibt es bei der Therapie?','zugang'=>'Wie zugänglich ist die Therapie?','wirkung'=>'Welche Erfahrungen gibt es?','alternativen'=>'Therapiealternativen','dashboard'=>'Dashboard'];
 ?>
-<div class="detail-layout ux-detail" data-treatment-id="<?= (int)$id ?>" data-previous-treatment-id="<?= (int)array_search((int)$id, LCN_PREVIOUS_ND_IDS, true) ?>">
+<div class="detail-layout ux-detail" data-home-delivery="<?= lcnNdCanTreatAtHome($item) ? '1' : '0' ?>" data-independent-at-home="<?= lcnNdIndependentAtHome($item) ? '1' : '0' ?>" data-treatment-id="<?= (int)$id ?>" data-previous-treatment-id="<?= (int)array_search((int)$id, LCN_PREVIOUS_ND_IDS, true) ?>">
 <nav class="side-nav" aria-label="Ansichten der Therapie"><div class="nav-items">
 <?php $n=0; foreach ($views as $view=>$label): ?><a href="#<?= $view ?>" data-view="<?= $view ?>"><span class="nav-number"><?= ++$n ?></span><span><strong><?= str_replace("Therapiealternativen", "Therapie&shy;alternativen", ndEscape($label)) ?></strong></span></a><?php endforeach; ?>
 </div></nav>
 <div id="view-content" tabindex="-1">
-<p class="ux-test-notice">Bewertungen werden gespeichert und in den Community-Ergebnissen mitgezählt. Du kannst deine Antwort ändern oder zurücksetzen. <span id="ux-demo-state"></span></p>
+
 <noscript>Bitte JavaScript aktivieren, um zwischen den Ansichten zu wechseln und eigene Angaben auszuwählen.</noscript>
 <section id="ueberblick" class="nd-panel" aria-label="Überblick">
 <?php if (($item['review_status'] ?? '') === 'altbestand_ungeprueft'): ?><p class="ux-test-notice">Übernommener Bestand · Angaben noch nicht geprüft.</p><?php endif; ?>
-<section class="card overview-structured ux-treatment-overview"><h2 class="overview-heading">Überblick</h2>
-<div class="overview-profile-grid">
-<aside class="overview-identity"><span class="ux-eyebrow">Therapie</span><h3><?= ndEscape($item['treatmentname']) ?></h3><div class="overview-organization"><span>Bereich</span><strong><?= ndEscape($item['unterkategorie'] ?: 'Noch keine Angabe') ?></strong></div><span class="overview-type-badge"><?= ndEscape($item['typ']) ?></span></aside>
-<div class="overview-groups">
-<section class="overview-group"><div class="overview-group-content"><h3>Auf einen Blick</h3><?= ndFields($item, ['durchfuehrungssetting'=>'Durchführungssetting','zugang'=>'Zugang','zulassung_long_covid_mecfs'=>'Für Long COVID / ME/CFS zugelassen']) ?: '<p>Noch keine redaktionellen Angaben vorhanden.</p>' ?></div></section>
-<?php $aliasGroups=ndAliasGroups($item); if ($aliasGroups): ?><section class="overview-group"><div class="overview-group-content"><h3>Auch bekannt als</h3><?= $aliasGroups ?></div></section><?php endif; ?>
-<section class="overview-group"><div class="overview-group-content"><h3>Community-Erfahrungen</h3><a href="#wirkung" data-community-summary>Erfahrungen ansehen →</a></div></section>
-</div></div></section></section>
-<section id="termin" class="nd-panel" aria-label="Welche Belastungshürden gibt es bei der Therapie?" hidden><h2>Welche Belastungshürden gibt es bei der Therapie?</h2><p class="ux-section-intro">So läuft die Therapie ab und das bedeutet sie im Alltag.</p>
-<?= ndReducedChart($item,'setting','Durchführungssetting','rows',$item['durchfuehrungssetting'] ?? '') ?>
+<section class="card ux-overview-frame"><div class="ux-overview-heading"><h2>Überblick</h2><span class="ux-heading-info"><button type="button" aria-label="Information zum Überblick" aria-describedby="therapy-overview-help">ⓘ</button><p id="therapy-overview-help" role="tooltip">Hier findest du die Kategorie der Therapie, die Gesamtauswertung. Die einzelnen Bewertungen und ihre Gewichtung kannst du im Dashboard ansehen.</p></span></div>
+<div class="ux-overview-summary">
+<aside class="card ux-treatment-identity"><div class="overview-icon ux-treatment-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/><path d="M3 12h4l2-4 4 8 2-4h6"/></svg></div>
+<h3><?= ndEscape($item['treatmentname']) ?></h3>
+<?php if (ndHas($item['typ'])): ?><div class="ux-identity-field"><span>Kategorie</span><strong><?= ndEscape($item['typ']) ?></strong></div><?php endif; ?>
+<?php if (ndHas($item['unterkategorie'])): ?><div class="ux-identity-field"><span>Unterkategorie</span><strong><?= ndEscape($item['unterkategorie']) ?></strong></div><?php endif; ?>
+
+<a class="ux-identity-experiences" href="#wirkung" data-community-summary>Community-Bewertungen ansehen →</a>
+</aside>
+<div data-treatment-score="overview"></div>
+</div></section>
+
+</section>
+<section id="termin" class="nd-panel" aria-label="Welche Belastungshürden gibt es bei der Therapie?" hidden>
+<?= ndReducedChart($item,'setting','Durchführungssetting','rows') ?>
 <?= ndReducedChart($item,'pem','Crash-/PEM-Risiko','segments') ?>
 <?= ndProviderMap($item, 'anbieter') ?>
 </section>
-<section id="zugang" class="nd-panel" aria-label="Zugang & Kosten" hidden><h2>Wie zugänglich ist die Therapie?</h2><p class="ux-section-intro">Was brauche ich dafür, wie komme ich daran und was kostet mich das?</p>
-<?= ndReducedChart($item,'access','Zugang – wie erhalte ich die Therapie?','rows',$item['zugang'] ?? '') ?>
+<section id="zugang" class="nd-panel" aria-label="Zugang & Kosten" hidden>
+<?= ndReducedChart($item,'access','Zugang','rows') ?>
 <?= ndReducedChart($item,'unit_cost','Kosten pro Therapie / Einheit','cost') ?>
 <?= ndReducedChart($item,'total_cost','Gesamtkosten der Therapie','cost') ?>
 </section>
-<section id="wirkung" class="nd-panel" aria-label="Erfahrungen, Wirkung & Symptome" hidden><h2>Welche Erfahrungen gibt es?</h2><p class="ux-section-intro">Gesamtbewertung, Gamechanger und Symptombezüge auf einen Blick.</p>
-<?= ndReducedChart($item,'effect','Gesamtbewertung','effect') ?>
-<?= ndReducedChart($item,'gamechanger','Gamechanger?','donut') ?>
-<section class="card"><h3>Wobei könnte die Therapie helfen?</h3><p>Redaktionelle Symptombezüge · Die Zuordnung ist kein Nachweis der Wirksamkeit.</p><div class="ux-symptom-groups">
-<?php $groups=[]; foreach ($item['symptoms'] as $symptom) $groups[$symptom['sym_category'] ?: 'Weitere Beschwerden'][]=$symptom['sym_name'];
-foreach ($groups as $group=>$names) echo '<section><h4>'.ndEscape($group).'</h4>'.ndChips($names).'</section>';
-if (!$groups) echo '<p>Noch keine redaktionellen Symptombezüge vorhanden.</p>'; ?>
-</div>
-<?php if ($item['symptoms']): ?><div class="ux-symptom-demo">
-<h3>Community-Erfahrungen nach Symptom</h3>
-<p class="community-label">Klicke auf einen Balken, um deine Erfahrung für das jeweilige Symptom anzugeben. Deine Antwort wird gespeichert und mitgezählt.</p>
-<div class="ux-symptom-demo-grid">
-<?php
-$demoSymptoms = $item['symptoms'];
-$demoDistributions = [[8,20,68,4], [12,32,54,2], [10,24,60,6]];
-foreach ($demoSymptoms as $index=>$symptom) {
-    $chart = ndReducedChart(['community'=>[]], 'effect', $symptom['sym_name'], 'effect');
-    echo str_replace('data-question="effect"', 'data-question="symptom-'.(int)$symptom['sym_id'].'" data-demo-counts="'.ndEscape(json_encode($demoDistributions[$index % count($demoDistributions)])).'"', $chart);
-}
-?>
-</div></div><?php endif; ?></section></section>
-<section id="alternativen" class="nd-panel" aria-label="Therapiealternativen" hidden><h2>Therapiealternativen</h2><p>Verknüpfte Therapien entdecken · keine Empfehlung oder Rangliste.</p><div class="ux-alternatives">
+<section id="wirkung" class="nd-panel" aria-label="Erfahrungen, Wirkung & Symptome" hidden>
+<?= ndReducedChart($item,'effect','Community-Bewertung','effect') ?>
+<?= ndReducedChart($item,'gamechanger','Gamechanger','donut') ?>
+<section class="card ux-symptom-help" aria-labelledby="symptom-help-heading">
+<h3 id="symptom-help-heading">Wobei hat dir die Therapie geholfen?</h3>
+<p>Klicke die Symptome an, bei denen dir die Therapie geholfen hat. Erneutes Anklicken nimmt deine Stimme zurück.</p>
+<ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol>
+<div class="ux-symptom-picker" data-symptom-combobox><label for="symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="symptom-search" type="text" role="combobox" data-symptom-search placeholder="Symptom auswählen oder eintippen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="symptom-picker"><button type="button" data-symptom-toggle aria-label="Symptomliste öffnen" aria-controls="symptom-picker" aria-expanded="false">⌄</button></div><div id="symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div>
+</section></section>
+<section id="alternativen" class="nd-panel" aria-label="Therapiealternativen" hidden><p>Verknüpfte Therapien entdecken · keine Empfehlung oder Rangliste.</p><div class="ux-alternatives">
 <?php
 foreach (['verwandte Behandlung'=>'Verwandte Therapien','alternative Behandlung'=>'Alternative Therapien','alternatives Präparat'=>'Alternative Präparate'] as $type=>$label) {
     $entries='';
@@ -116,5 +109,5 @@ if ($peers): ?>
 <section class="card ux-discovery"><div class="ux-discovery-heading"><div><span class="ux-eyebrow">Navigation über Symptombezüge</span><h3>Über gemeinsame Symptome entdecken</h3></div><span class="ux-count"><?= count($peers) ?> Therapien</span></div><p>Diese Therapien sind einigen derselben Symptome zugeordnet. Das belegt weder eine vergleichbare Wirkung noch eine Eignung als Ersatz.</p><div class="ux-peer-grid">
 <?php foreach ($peers as $peerId=>$peer): ?><a href="therapie_detail.php?treatment_id=<?= (int)$peerId ?>"><strong><?= ndEscape($peer['name']) ?><span aria-hidden="true">↗</span></strong><small>Gemeinsame Symptombezüge</small><?= ndChips($peer['symptoms']) ?></a><?php endforeach; ?>
 </div></section><?php endif; ?>
-</section></div></div><?php ndEnd(); ?>
+</section><section id="dashboard" class="nd-panel" aria-label="Dashboard" hidden><div data-treatment-score="full"></div><div class="ux-dashboard-grid" data-treatment-dashboard></div></section></div></div><?php ndEnd(); ?>
 

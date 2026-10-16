@@ -5,9 +5,9 @@ declare(strict_types=1);
 const ND_REDUCED_SCALES = [
     'setting' => ['selbstständig zu Hause', 'Hausbesuch', 'ambulant', 'stationär'],
     'pem' => ['keines', 'niedrig', 'mittel', 'hoch'],
-    'access' => ['frei erhältlich / privater Anbieter', 'ärztliche Verordnung / Rezept erforderlich', 'nur im Rahmen einer Studie'],
-    'unit_cost' => ['komplett übernommen', 'bis 50 €', 'bis 100 €', 'bis 500 €', 'bis 1.000 €', 'bis 1.500 €', 'bis 2.000 €', 'über 2.000 €', 'nicht anwendbar'],
-    'total_cost' => ['komplett übernommen', 'bis 100 €', 'bis 500 €', 'bis 1.000 €', 'bis 5.000 €', 'bis 10.000 €', 'bis 25.000 €', 'über 25.000 €', 'nicht anwendbar'],
+    'access' => ['frei erhältlich / privater Anbieter', 'ärztliche Verordnung / Rezept erforderlich', 'nur im Rahmen einer Studie', 'Selbstmanagement / eigenständig umsetzbar'],
+    'unit_cost' => ['komplett übernommen', 'bis 50 €', 'bis 100 €', 'bis 500 €', 'bis 1.000 €', 'bis 1.500 €', 'bis 2.000 €', 'über 2.000 €', 'nicht anwendbar', 'kostenlos'],
+    'total_cost' => ['komplett übernommen', 'bis 100 €', 'bis 500 €', 'bis 1.000 €', 'bis 5.000 €', 'bis 10.000 €', 'bis 25.000 €', 'über 25.000 €', 'nicht anwendbar', 'kostenlos'],
     'effect' => ['Verschlechterung', 'Keine Veränderung', 'Verbesserung', 'Heilung'],
     'gamechanger' => ['Ja', 'Nein'],
 ];
@@ -31,7 +31,7 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
     $html = '<section class="card ux-question" data-question="'.$key.'" data-kind="'.$kind.'" data-counts="'.ndEscape(json_encode($counts)).'"><h3>'.ndEscape($title).'</h3>';
     if ($key === 'gamechanger') $html .= '<p>Hat die Therapie deinen Alltag entscheidend verbessert?</p>';
     if ($key === 'unit_cost') $html .= '<p class="ux-basis-caption">(Therapie / Anwendung / Packung / Flasche / Ampulle / Spritze / Rezeptur)</p>';
-    if ($research !== '') $html .= '<div class="ux-research"><strong>Redaktionelle Angabe</strong><p>'.ndEscape(str_replace('Anbieter', 'Behandler', $research)).'</p></div>';
+
     if ($cost) {
         $html .= '<div class="insurance-toggle" role="group" aria-label="Versicherung: '.ndEscape($title).'">';
         foreach (['GKV','PKV'] as $context) $html .= '<button type="button" data-insurance="'.ndEscape($context).'" aria-pressed="'.($context==='GKV'?'true':'false').'">'.ndEscape($context).'</button>';
@@ -40,7 +40,7 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
     }
     $html .= '<p class="community-label" data-community-note></p><div class="ux-chart '.($kind==='effect'?'effect-chart':($kind==='cost'?'interactive-dot-scale':'ux-'.$kind)).'" style="--count:'.count($options).'" role="group" aria-label="'.ndEscape($title).'">';
     if ($kind === 'donut') $html .= '<svg viewBox="0 0 160 160" class="ux-donut" aria-label="Gamechanger-Verteilung"><circle cx="80" cy="80" r="60" class="ux-donut-track"/><g transform="rotate(-90 80 80)"><circle cx="80" cy="80" r="60" pathLength="100" data-segment="0" role="button" tabindex="0" aria-label="Ja auswählen"/><circle cx="80" cy="80" r="60" pathLength="100" data-segment="1" role="button" tabindex="0" aria-label="Nein auswählen"/></g><text x="80" y="78" text-anchor="middle" data-donut-value>–</text><text x="80" y="98" text-anchor="middle" class="ux-donut-caption">Ja</text></svg>';
-    $displayOptions = $cost ? [8 => $options[8]] + $options : $options;
+    $displayOptions = $cost ? [8 => $options[8], 9 => $options[9]] + $options : ($key === 'access' ? [3 => $options[3]] + $options : $options);
     foreach ($displayOptions as $i => $label) {
         $html .= '<button type="button" data-option="'.$i.'" data-value="'.ndEscape($label).'" aria-pressed="false" class="'.($kind==='effect'?'effect-column':'ux-choice').'">';
         if ($kind==='effect') $html .= '<span class="bar-area"><strong data-percent>–</strong><span class="effect-bar effect-'.$i.'" data-bar></span></span>';
@@ -48,7 +48,7 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
         else $html .= '<strong data-percent>–</strong><span class="ux-track" aria-hidden="true"><span data-bar></span></span>';
         $html .= '<span>'.ndEscape(str_replace('Anbieter', 'Behandler', $label)).'</span><small class="ux-selected">Deine Auswahl</small></button>';
     }
-    return $html.'</div><p class="ux-own" role="status"></p><button type="button" data-clear>Auswahl zurücksetzen</button></section>';
+    return $html.'</div><p class="ux-own" role="status"></p></section>';
 }
 
 

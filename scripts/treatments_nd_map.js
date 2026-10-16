@@ -13,6 +13,33 @@
     const h = Math.sin(a/2)**2+Math.cos(rad(origin.lat))*Math.cos(rad(point.lat))*Math.sin(b/2)**2;
     return 6371*2*Math.asin(Math.sqrt(Math.min(1,h)));
   }
+  const travelBands=[[20,'Bis 20 km','Unter 30 Min.',5.6],[50,'Über 20–50 km','30–60 Min.',4.2],[100,'Über 50–100 km','Etwa 1–2 Std.',2.8],[300,'Über 100–300 km','Mehrere Stunden',1.4],[800,'Über 300–800 km','Tagesreise',0.7],[Infinity,'Über 800 km','Tagesreise oder länger / ggf. Flug',0]];
+  const travelBand=km=>travelBands.findIndex(([limit])=>km<=limit);
+  function renderTravel(entry,closest){
+    if(entry.host.dataset.independentAtHome==='1'){entry.host.querySelector('[data-travel-estimate]')?.remove();return;}
+    let box=entry.host.querySelector('[data-travel-estimate]');
+    if(!box){box=document.createElement('section');box.className='travel-estimate';box.dataset.travelEstimate='';entry.host.querySelector('.ux-nearest').after(box);}
+    const online=filteredProviders(entry).find(p=>window.LCNOnline?.get(p.dr_id).first);
+    const km=closest?distance(closest):null,index=online||km===null?-1:travelBand(km);
+    const heading=document.createElement('div');heading.className='travel-estimate-heading';
+    const title=document.createElement('strong');title.textContent='Anreiseaufwand';
+    const result=document.createElement('span');result.textContent=online?online.name+' · Online-Ersttermin':closest?closest.name+' · '+km.toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':origin?'Keine Behandler mit Koordinaten im gewählten Filter.':'Standort eingeben, um die Entfernung einzuordnen.';
+    heading.append(title,result);box.replaceChildren(heading);
+    const scale=document.createElement('ol');scale.className='travel-scale';scale.setAttribute('aria-label','Entfernung und Anreiseaufwand');
+    const remote=document.createElement('li');remote.className='travel-online-level'+(online?' is-current':'');remote.innerHTML='<strong>Online-Ersttermin</strong><span class="travel-scale-bar" aria-hidden="true"></span><span>Keine Anreise zum Ersttermin</span>';scale.append(remote);
+    travelBands.forEach(([,range,time,points],i)=>{
+      const li=document.createElement('li');li.className='travel-level-'+(i+1)+(i===index?' is-current':'');
+      const label=document.createElement('strong');label.textContent=range;
+      const bar=document.createElement('span');bar.className='travel-scale-bar';bar.setAttribute('aria-hidden','true');
+      const timing=document.createElement('span');timing.textContent=time;
+      li.append(label,bar,timing);
+      if(i===index){li.setAttribute('aria-current','true');const current=document.createElement('b');current.textContent='Nächster Behandler im Filter';li.append(current);}
+      scale.append(li);
+    });box.append(scale);
+    const details=document.createElement('details'),summary=document.createElement('summary'),note=document.createElement('p');summary.textContent='Wie wird eingeordnet?';
+    note.textContent='Die Einordnung zeigt die Luftlinienentfernung zum nächstgelegenen Behandler im aktuellen Filter. Fahrzeiten sind grobe Orientierungswerte, keine Routenberechnung. Bei einem Online-Ersttermin entfällt die Anreise zu diesem Termin; das bedeutet nicht automatisch, dass auch die Therapie online möglich ist.';
+    details.append(summary,note);box.append(details);
+  }
   function filteredProviders(entry) {
     const {host,providers}=entry;
     const query=host.querySelector('[data-provider-search]').value.trim().toLocaleLowerCase('de');
@@ -32,10 +59,10 @@
     host.querySelectorAll('[data-provider-view]').forEach(b=>{const active=b.dataset.providerView===entry.view;b.classList.toggle('is-active',active);b.setAttribute('aria-pressed',String(active));});
     if(!rows.length){list.textContent=providers.length?'Keine passenden Behandler. Bitte ändere den Suchtext oder die Orts- und Radiusfilter.':'Für diese Therapie sind noch keine bestätigten Behandler hinterlegt.';return;}
     function nameNode(point){const node=document.createElement(point.href?'a':'strong');node.textContent=point.name;if(point.href)node.href=point.href;return node;}
-    function showButton(point){const button=document.createElement('button');button.type='button';button.className='nd-show-provider';button.textContent=valid(point)?'Auf Karte zeigen':'Standort nicht verfügbar';button.disabled=!valid(point);button.addEventListener('click',()=>{if(!map)return;host.querySelector('.top-map-content').classList.remove('is-collapsed');const header=host.querySelector('.top-map-header');header.classList.remove('is-collapsed');header.setAttribute('aria-expanded','true');map.invalidateSize();map.setView([point.lat,point.lng],12);entry.markers.get(point)?.openPopup();host.querySelector('.nd-map-canvas').scrollIntoView({block:'center'});});return button;}
-    const km=p=>!valid(p)?'Standort nicht verfügbar':origin?distance(p).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':'Ausgangsort fehlt';
+    function showButton(point){const button=document.createElement('button');button.type='button';button.className='nd-show-provider';button.textContent=valid(point)?'Auf Karte zeigen':'Standort nicht verfügbar';button.disabled=!valid(point);button.addEventListener('click',()=>{if(!map)return;host.querySelector('.top-map-content').classList.remove('is-collapsed');map.invalidateSize();if(origin)map.fitBounds([[origin.lat,origin.lng],[point.lat,point.lng]],{padding:[64,64],maxZoom:12});else map.setView([point.lat,point.lng],12);entry.markers.get(point)?.openPopup();host.querySelector('.nd-map-canvas').scrollIntoView({block:'center'});});return button;}
+    const km=p=>window.LCNOnline?.get(p.dr_id).first?'Online-Ersttermin':!valid(p)?'Standort nicht verfügbar':origin?distance(p).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':'Ausgangsort fehlt';
     if(entry.view==='table'){
-      list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();['Behandler','Ort','Entfernung','Zuordnung','Karte'].forEach(label=>{const th=document.createElement('th');th.scope='col';th.textContent=label;head.append(th);});const body=table.createTBody();rows.forEach(point=>{const row=body.insertRow();row.insertCell().append(nameNode(point));[point.place||'Keine Ortsangabe',km(point),point.status].forEach(value=>row.insertCell().textContent=value);row.insertCell().append(showButton(point));});list.append(table);
+      list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();['Nr.','Behandler','Ort','Entfernung','Karte'].forEach(label=>{const th=document.createElement('th');th.scope='col';if(label==='Entfernung'){const button=document.createElement('button');button.type='button';button.textContent='Entfernung'+(sort==='distance'?(direction==='asc'?' ↑':' ↓'):' ↕');button.disabled=!origin;button.title=origin?'Nach Entfernung sortieren':'Bitte zuerst einen Ausgangsort eingeben';button.addEventListener('click',()=>{host.querySelector('[data-provider-sort]').value='distance:'+(sort==='distance'&&direction==='asc'?'desc':'asc');renderProviders(entry);});th.setAttribute('aria-sort',sort==='distance'?(direction==='asc'?'ascending':'descending'):'none');th.append(button);}else th.textContent=label;head.append(th);});const body=table.createTBody();rows.forEach((point,index)=>{const row=body.insertRow();const number=row.insertCell();number.className="nd-provider-row-number";number.textContent=String(index+1);row.insertCell().append(nameNode(point));[point.place||'Keine Ortsangabe',km(point)].forEach(value=>row.insertCell().textContent=value);row.insertCell().append(showButton(point));});list.append(table);
     }else{
       list.className='nd-map-results doctor-card-grid';
       rows.forEach(point=>{
@@ -47,7 +74,7 @@
         const place=document.createElement('p');place.className='nd-provider-place';place.textContent=point.place||'Keine Ortsangabe';card.append(place);
         const footer=document.createElement('div');footer.className='nd-provider-footer';
         const status=document.createElement('span');status.className='nd-provider-status';status.textContent=point.status;
-        footer.append(status,showButton(point));card.append(footer);list.append(card);
+        footer.append(showButton(point));card.append(footer);list.append(card);
       });
     }
   }
@@ -58,9 +85,10 @@
     host.querySelector('[data-map-clear]').classList.toggle('is-hidden',!origin);
     renderProviders(entry);
     let nearest=host.querySelector('.ux-nearest');
-    if(!nearest){nearest=document.createElement('p');nearest.className='ux-nearest';host.querySelector('.top-map-location-controls').after(nearest);}
+    if(!nearest){nearest=document.createElement('p');nearest.className='ux-nearest';host.querySelector('.top-map-location-layout').before(nearest);}
     const closest=origin ? [...points].sort((a,b)=>distance(a)-distance(b))[0] : null;
     nearest.textContent=closest ? 'Nächstgelegener Behandler im Filter mit Koordinaten: '+closest.name+' · '+distance(closest).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie' : origin ? 'Keine Behandler mit Koordinaten im gewählten Filter.' : 'PLZ oder Ort eingeben, um den nächstgelegenen Behandler zu ermitteln.';
+    renderTravel(entry,closest);
     host.querySelector('[data-map-status]').textContent=points.length ? points.length+' Behandlerstandorte'+(origin?' · Entfernungen ab '+origin.label:'. Ausgangsort eingeben, um Entfernungen zu sehen.') : 'Keine Behandlerstandorte im gewählten Filter.';
     if (!map) return;
     syncMarkers(entry,points);
@@ -76,6 +104,7 @@
   }
   entries.forEach(entry=>{
     const {host}=entry;
+    const layout=document.createElement('div');layout.className='top-map-location-layout';const controls=host.querySelector('.top-map-location-controls'),panel=host.querySelector('.top-map-panel');controls.before(layout);layout.append(controls,panel);const notes=document.createElement('div');notes.className='nd-map-notes';layout.after(notes);notes.append(host.querySelector('[data-map-status]'));
     const cities=[...new Set(entry.providers.map(p=>p.city).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'de'));
     cities.forEach(city=>{const option=document.createElement('option');option.value=city;option.textContent=city;host.querySelector('[data-provider-city]').append(option);});
     host.querySelector('[data-provider-city]').addEventListener('change',()=>render(entry));
@@ -88,8 +117,6 @@
     host.querySelector('[data-provider-search]').addEventListener('input',()=>render(entry));
     host.querySelector('[data-provider-sort]').addEventListener('change',()=>renderProviders(entry));
     host.querySelectorAll('[data-provider-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.providerView;try{localStorage.setItem('lcn_result_view_preference',view);}catch{}entries.forEach(item=>{item.view=view;renderProviders(item);});}));
-    const header=host.querySelector('.top-map-header'),content=host.querySelector('.top-map-content');
-    header.addEventListener('click',()=>{const collapsed=content.classList.toggle('is-collapsed');header.classList.toggle('is-collapsed',collapsed);header.setAttribute('aria-expanded',String(!collapsed));if(!collapsed)entry.map?.invalidateSize();});
     const input=host.querySelector('input'),suggestions=host.querySelector('.top-map-location-suggestions');
     let timer,controller;
     function dismiss(){clearTimeout(timer);controller?.abort();suggestions.classList.add('is-hidden');}
@@ -122,9 +149,9 @@
       const groups=new Map();visiblePoints.forEach(point=>{const key=point.lat.toFixed(6)+','+point.lng.toFixed(6);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(point);});
       groups.forEach(points=>{
         const popup=document.createElement('div'),heading=document.createElement('strong');heading.textContent=points.length>1?points.length+' Einträge':points[0].name;popup.append(heading);
-        const list=document.createElement('ul');list.className='top-map-popup-list';points.forEach(point=>{const li=document.createElement('li');li.textContent=point.name;const small=document.createElement('small');small.textContent=point.place+' · '+point.status;li.append(small);list.append(li);});popup.append(list);
+        const list=document.createElement('ul');list.className='top-map-popup-list';points.forEach(point=>{const li=document.createElement('li');li.textContent=point.name;const small=document.createElement('small');small.textContent=point.place;li.append(small);list.append(li);});popup.append(list);
         let icon=markerIcon();if(points.length>1){const wrapper=document.createElement('div'),img=document.createElement('img'),count=document.createElement('span');img.src=window.LCNImages.urls['map-marker-default'];img.alt='';count.textContent=points.length;wrapper.append(img,count);icon=L.divIcon({className:'top-map-count-marker',html:wrapper.innerHTML,iconSize:[31,41],iconAnchor:[15,41],popupAnchor:[0,-35]});}
-        const marker=L.marker([points[0].lat,points[0].lng],{icon,riseOnHover:true}).bindPopup(popup).addTo(entry.map);points.forEach(point=>entry.markers.set(point,marker));
+        const marker=L.marker([points[0].lat,points[0].lng],{icon,riseOnHover:true}).bindPopup(popup,{autoPan:false}).addTo(entry.map);window.LCNOnline?.track(marker,points.map(p=>p.dr_id));points.forEach(point=>entry.markers.set(point,marker));
       });
   }
   async function init(){
@@ -138,6 +165,7 @@
       new ResizeObserver(()=>{if(canvas.clientWidth){entry.map.invalidateSize();if(!entry.wasVisible){render(entry);entry.wasVisible=true;}}else entry.wasVisible=false;}).observe(canvas);render(entry);
     });
   }
+  window.addEventListener('lcn-online-ready',()=>entries.forEach(render));
   init().catch(()=>entries.forEach(({host})=>{host.querySelector('.nd-map-canvas').textContent='Karte konnte nicht geladen werden. Behandler und Entfernungen stehen weiterhin in der Liste.';}));
 })();
 

@@ -530,3 +530,20 @@ main{padding:24px;min-width:0;outline:none}.eyebrow{text-transform:uppercase;let
 @media(max-width:600px){.score-classification ol{gap:3px;}.score-classification li{font-size:10px;padding:6px 2px;}}
 @media(max-width:1100px){.dashboard-columns{grid-template-columns:1fr;}}
 @media(max-width:600px){.dashboard-column>.card{padding:18px;}.dashboard-scored-distribution>div{grid-template-columns:minmax(0,1.2fr) minmax(65px,1fr) 50px;gap:8px;font-size:12px;}.dashboard-appointment-heading{flex-wrap:wrap;}.dashboard-treatment-points>div{flex-wrap:wrap;}}
+.cost-preferences{display:flex;flex-wrap:wrap;align-items:end;gap:12px 20px;margin:14px 0}.cost-preference{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#526b80}.cost-preference select{max-width:100%;padding:9px;border:1px solid #cddfec;border-radius:6px;background:#fff;color:#17365d;font:inherit}.cost-preferences small,.cost-currency-note{font-size:12px;color:#526b80}.cost-preferences small{flex-basis:100%}
+
+/* Keep the identity on the viewport centre, independent of action widths. */
+body.compact-doctor-header #header-placeholder .profile{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:center}
+body.compact-doctor-header #header-placeholder .profile>.detail-brand-group{grid-column:1;grid-row:1;justify-self:start}
+body.compact-doctor-header #header-placeholder .profile>.profile-copy{grid-column:2;grid-row:1;width:100%;min-width:0;margin:0;transform:none;text-align:center}
+body.compact-doctor-header #header-placeholder .profile>.contact{grid-column:3;grid-row:1;justify-self:end;margin-right:64px;min-width:0}
+body.compact-doctor-header #header-placeholder .profile>.detail-menu-toggle{position:absolute;right:24px;top:50%;transform:translateY(-50%)}
+body.ux-page #header-placeholder .profile>#nd-demo-header-toggle{grid-column:3;grid-row:1;justify-self:end;margin-right:64px}
+@media(max-width:1100px){
+body.compact-doctor-header #header-placeholder .profile{grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;padding:12px}
+body.compact-doctor-header #header-placeholder .profile>.profile-copy{grid-column:1/-1;grid-row:1;margin:0;padding:0 12px;box-sizing:border-box}
+body.compact-doctor-header #header-placeholder .profile>.detail-brand-group{grid-column:1;grid-row:2}
+body.compact-doctor-header #header-placeholder .profile>.contact{grid-column:2;grid-row:2;margin-right:54px}
+body.ux-page #header-placeholder .profile>#nd-demo-header-toggle{grid-column:2;grid-row:2;margin-right:54px}
+body.compact-doctor-header #header-placeholder .profile>.detail-menu-toggle{right:12px;top:auto;bottom:12px;transform:none}
+}

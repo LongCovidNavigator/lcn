@@ -17,9 +17,10 @@ try {
         foreach ($question['labels'] as $index => $label) $optionInsert->execute([$question['question'], $question['context'], $index + 1, $label]);
     }
     // Existing rows, including manually refined dummy answers, remain unchanged.
-    $insert = $pdo->prepare('INSERT INTO doctor_community_dummy_answers (dr_id, respondent_key, question_key, context_key, option_value) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE respondent_key = VALUES(respondent_key)');
+    $batch=[];
+    $flush=static function() use($pdo,&$batch){if(!$batch)return;$sql='INSERT INTO doctor_community_dummy_answers (dr_id,respondent_key,question_key,context_key,option_value) VALUES '.implode(',',array_fill(0,count($batch),'(?,?,?,?,?)')).' ON DUPLICATE KEY UPDATE respondent_key=VALUES(respondent_key)';$pdo->prepare($sql)->execute(array_merge(...$batch));$batch=[];};
     $exists = $pdo->prepare('SELECT COUNT(*) FROM tbl_entities_nd WHERE lcn_id = ? AND aktiv = 1');
-    foreach (LCN_PRIORITY_DOCTOR_IDS as $id) {
+    foreach (lcnAllDoctorIds() as $id) {
         $exists->execute([$id]);
         if ((int)$exists->fetchColumn() !== 1) throw new RuntimeException("Missing active doctor $id");
         $respondents = 40 + ($id % 61);
@@ -30,10 +31,11 @@ try {
                 // Deterministic distributions vary per doctor and question, with a clear peak.
                 $roll = (int)(sprintf('%u', crc32("answer:$id:$key:$i")) % 100);
                 $value = $roll < 58 ? $peak + 1 : 1 + (int)(sprintf('%u', crc32("tail:$id:$key:$i")) % $size);
-                $insert->execute([$id, sprintf('seed-v1-%03d', $i), $question['question'], $question['context'], $value]);
+                $batch[]=[$id, sprintf('seed-v1-%03d', $i), $question['question'], $question['context'], $value];if(count($batch)>=1000)$flush();
             }
         }
     }
+    $flush();
     $pdo->commit();
 } catch (Throwable $error) { $pdo->rollBack(); throw $error; }
 echo json_encode(['database' => $database, 'doctors' => $pdo->query('SELECT COUNT(DISTINCT dr_id) FROM doctor_community_dummy_answers')->fetchColumn(),

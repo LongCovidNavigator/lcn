@@ -3,7 +3,23 @@
   window.LCNImages?.apply(document);
   const menu = document.getElementById('nd-main-menu');
   const toggle = document.querySelector('.nd-detail .detail-menu-toggle');
-  if (toggle) {
+  if (toggle && menu) {
+    menu.classList.add('detail-main-menu');
+    fetch('components/header.html?v=menu-icon-20261016').then(response => {
+      if (!response.ok) throw new Error('Navigation konnte nicht geladen werden');
+      return response.text();
+    }).then(html => {
+      const list = new DOMParser().parseFromString(html, 'text/html').querySelector('.main-nav > ul');
+      if (!list) return;
+      list.querySelectorAll('[class]').forEach(node => node.removeAttribute('class'));
+      menu.replaceChildren(list);
+    }).catch(() => {});
+    document.addEventListener('click', event => {
+      if ((!menu.contains(event.target) && !toggle.contains(event.target)) || event.target.closest('#nd-main-menu a')) {
+        menu.hidden = true;
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
     toggle.addEventListener('click', () => { menu.hidden = !menu.hidden; toggle.setAttribute('aria-expanded', String(!menu.hidden)); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { menu.hidden = true; toggle.setAttribute('aria-expanded', 'false'); toggle.focus(); } });
     new ResizeObserver(() => document.documentElement.style.setProperty('--detail-header-height', document.getElementById('header-placeholder').getBoundingClientRect().height + 'px')).observe(document.getElementById('header-placeholder'));

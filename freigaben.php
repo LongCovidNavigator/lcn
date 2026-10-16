@@ -9,11 +9,11 @@ header('Cache-Control: no-store, private');
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Freigaben – LCN</title>
     <link rel="stylesheet" href="styles/general.css">
-    <link rel="stylesheet" href="styles/navigation.css">
+    <link rel="stylesheet" href="styles/navigation.css?v=menu-icon-20261016">
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/freigaben.css?v=2">
     <script src="scripts/image-registry.js?v=5"></script>
-    <script src="scripts/access-nav.js?v=2" defer></script>
+    <script src="scripts/access-nav.js?v=compact-20261016" defer></script>
 </head>
 <body>
     <div id="header-placeholder"></div>

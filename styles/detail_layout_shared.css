@@ -1,0 +1,241 @@
+/* Shared geometry for doctor and therapy details. Load after page-specific styles. */
+body.compact-doctor-header>.page-shell,body.compact-doctor-header>.nd-shell{box-sizing:border-box;width:100%;max-width:1440px;margin:0 auto;padding:14px 24px 40px}
+body.compact-doctor-header .detail-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:0;align-items:stretch;background:#fff;border:1px solid #e1eafa;border-radius:10px}
+body.compact-doctor-header .detail-layout>.side-nav{display:block;position:static;align-self:stretch;background:#f7fbfe;border:0;border-right:1px solid #e1eafa;border-radius:10px 0 0 10px;padding:8px 4px 24px 0;margin:0}
+body.compact-doctor-header .side-nav .nav-items{display:grid;grid-auto-rows:120px;position:sticky;top:calc(var(--detail-header-height,76px) + 12px);max-height:calc(100dvh - var(--detail-header-height,76px) - 24px);overflow:auto}
+body.compact-doctor-header .side-nav a{box-sizing:border-box;display:flex;align-items:center;height:120px;min-height:120px;padding:20px 16px 20px 12px;gap:14px;border-left:4px solid transparent;border-radius:0 7px 7px 0}
+body.compact-doctor-header .side-nav strong{font-size:16px;line-height:1.4;font-weight:600;hyphens:auto;overflow-wrap:normal}
+body.compact-doctor-header .side-nav .nav-number{box-sizing:border-box;width:38px;height:38px;flex:0 0 38px;font-size:16px;font-weight:700;border-radius:50%;background:#e7f3ff;border:1px solid #d9ebfc;color:#0878e3}
+body.compact-doctor-header .side-nav a[aria-current]{background:#e7f3ff;border-left-color:#0878e3}
+body.compact-doctor-header .side-nav a[aria-current] strong{color:#0878e3}
+body.compact-doctor-header .side-nav a[aria-current] .nav-number{background:#0878e3;color:white}
+body.compact-doctor-header .detail-layout>#view-content{box-sizing:border-box;min-width:0;padding:24px}
+.ux-page .ux-overview-frame{padding:24px;margin:0;border:1px solid #e1eafa;border-radius:10px;background:#fff}
+.ux-overview-heading{display:flex;align-items:center;gap:10px;margin:0 0 22px}
+.ux-page .ux-overview-heading h2{font-size:28px;line-height:1.2;margin:0;color:#17365d}
+.ux-page .ux-overview-summary>.ux-treatment-identity{background:linear-gradient(140deg,#edf7ff,#f6fbfe);border:0;border-radius:10px;text-align:center;padding:26px 18px}
+.ux-page .ux-treatment-symbol{width:86px;height:86px;background:#dceeff;margin:0 auto 22px;flex:0 0 86px}
+.ux-page .ux-treatment-symbol svg{width:44px;height:44px}
+.ux-page .ux-treatment-identity .ux-identity-field{margin-bottom:20px}
+.ux-page .ux-overview-summary{gap:20px;grid-template-columns:minmax(200px,1fr) minmax(0,3fr)}
+@media(max-width:1000px){.ux-page .ux-overview-summary{grid-template-columns:1fr}}
+@media(max-width:800px){
+body.compact-doctor-header>.page-shell,body.compact-doctor-header>.nd-shell{padding:12px}
+body.compact-doctor-header .detail-layout{display:block}
+body.compact-doctor-header .detail-layout>.side-nav{padding:5px;border-right:0;border-bottom:1px solid #e1eafa;border-radius:10px 10px 0 0}
+body.compact-doctor-header .side-nav .nav-items{position:static;display:flex;max-height:none;overflow-x:auto}
+body.compact-doctor-header .side-nav a{flex:0 0 210px;min-width:210px;height:100px;min-height:100px;padding:12px;gap:10px;border-left:0;border-bottom:3px solid transparent}
+body.compact-doctor-header .side-nav strong{font-size:14px}
+body.compact-doctor-header .side-nav a[aria-current]{border-bottom-color:#0878e3}
+body.compact-doctor-header .side-nav .nav-number{width:30px;height:30px;flex-basis:30px;font-size:14px}
+body.compact-doctor-header .detail-layout>#view-content{padding:16px}
+.ux-page .ux-overview-frame{padding:18px}
+}
+
+/* Reset inherited sticky offsets when the profile itself is a grid container. */
+body.compact-doctor-header #header-placeholder .profile{top:auto;right:auto;bottom:auto;left:auto;margin:0 auto}
+body.compact-doctor-header .overview-structured>.overview-heading,body.compact-doctor-header .ux-overview-heading>h2{font-family:Arial,sans-serif;font-size:28px;font-weight:700;line-height:1.2;letter-spacing:0;color:#17365d}
+body.compact-doctor-header .overview-structured>.overview-heading{margin:0 0 22px}
+body.compact-doctor-header .ux-overview-heading>h2{margin:0}
+body.compact-doctor-header .ux-heading-info>:is(summary,button),body.compact-doctor-header .heading-help-trigger,body.compact-doctor-header .heading-help-trigger>span{font-family:Arial,sans-serif;font-size:18px;font-weight:400;line-height:1;color:#6a7f9e}
+body.compact-doctor-header .ux-heading-info{position:relative;display:inline-block;margin:0}
+body.compact-doctor-header .ux-heading-info>:is(summary,button){padding:4px;list-style:none;cursor:help}
+body.compact-doctor-header .ux-heading-info>:is(summary,button)::-webkit-details-marker{display:none}
+body.compact-doctor-header .ux-heading-info>p{display:none;position:absolute;left:100%;right:auto;top:0;margin:0 0 0 8px;z-index:30;width:340px;max-width:calc(100vw - 90px);box-sizing:border-box;background:#fff;border:1px solid #e1eafa;border-radius:8px;padding:16px;color:#526b80;font:400 14px/1.6 Arial,sans-serif;box-shadow:0 6px 22px #17365d20}
+body.compact-doctor-header .ux-heading-info:hover>p,body.compact-doctor-header .ux-heading-info:focus-within>p,body.compact-doctor-header .ux-heading-info[open]>p{display:block}
+body.compact-doctor-header .adaptation-heading-help:has(.heading-help-trigger:hover)>.heading-help-info,body.compact-doctor-header .adaptation-heading-help:focus-within>.heading-help-info{display:block}
+@media(max-width:650px){body.compact-doctor-header .ux-heading-info>p{left:auto;right:0;top:100%;margin:6px 0 0}}
+
+body.compact-doctor-header .ux-heading-info>button{background:none;border:0;display:inline-block;vertical-align:middle}
+/* Stable answer cards and unobtrusive cost settings. */
+body.ux-page .ux-question .ux-own,body.ux-page .ux-question .ux-own:empty{display:block;box-sizing:border-box;min-height:40px;height:40px;overflow:hidden;line-height:20px;margin:8px 0 0;padding:0;font-size:12px!important}
+body.ux-page .ux-answer-status{position:fixed;z-index:1300;bottom:16px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 48px);padding:10px 16px;background:#fff;border:1px solid #d9e6f2;border-radius:8px;box-shadow:0 3px 14px #17365d20;margin:0}
+body.ux-page .ux-answer-status:empty{display:none}
+body.ux-page .ux-question .interactive-dot-scale{display:grid;grid-auto-flow:column;grid-template-columns:repeat(var(--count),minmax(90px,1fr));grid-template-rows:auto;overflow-x:auto;overflow-y:hidden;max-width:100%;padding:8px 0 12px;gap:0}
+body.ux-page .ux-question .interactive-dot-scale>button{grid-row:1;min-width:0;min-height:140px;height:auto;box-sizing:border-box}
+body.ux-page .ux-question .interactive-dot-scale>button .cost-converted{display:block;min-height:30px;font-size:10px;line-height:1.4;font-weight:400;color:#6a7f9e;margin-top:4px}
+body.compact-doctor-header .cost-preferences{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px 14px;margin:16px 0 0}
+body.compact-doctor-header .cost-preference{display:inline-flex;flex-direction:row;align-items:center;gap:7px;font-size:12px;color:#6a7f9e}
+body.compact-doctor-header .cost-preference select{font:inherit;color:#526b80;border:1px solid #e1eafa;background:#fff;border-radius:6px;padding:7px;max-width:210px}
+.cost-country-flag{display:block;width:24px;height:15px;border-radius:2px;box-shadow:0 0 0 1px #d9e2eb}
+.cost-currency-symbol{display:grid;place-items:center;min-width:25px;height:25px;box-sizing:border-box;border-radius:50%;background:#e5f1ff;color:#0878e3;font-size:13px;padding:0 4px}
+body.compact-doctor-header .cost-preferences .cost-currency-note{flex:0 0 100%;text-align:right;margin:0;font-size:11px;color:#6a7f9e;min-height:16px}
+body.compact-doctor-header .cost-preferences .cost-currency-note:empty{display:none}
+body.compact-doctor-header .cost-preferences .cost-currency-note a{color:inherit}
+@media(max-width:650px){body.compact-doctor-header .cost-preferences{gap:8px}body.compact-doctor-header .cost-preference select{max-width:175px}.cost-converted{overflow-wrap:anywhere}}
+/* One helpful-experience toggle per symptom, ordered by people who selected it. */
+.ux-symptom-ranking{list-style:none;margin:18px 0;padding:0;display:grid;gap:8px}
+.ux-symptom-ranking li{margin:0;padding:0}
+.ux-symptom-ranking button{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto 24px;gap:16px;align-items:center;text-align:left;padding:14px 16px;background:#f7fbfe;border:1px solid #e1eafa;border-radius:8px;color:#17365d;font:inherit;font-size:14px;min-height:52px}
+.ux-symptom-ranking button[aria-pressed=true]{border-color:#0878e3;background:#e7f3ff;color:#0878e3}
+.ux-symptom-ranking button strong{font-size:13px;font-weight:500;white-space:nowrap;color:#526b80}
+.ux-symptom-check{font-size:20px;text-align:center;color:#0878e3}
+.ux-symptom-picker{display:flex;flex-direction:column;gap:8px;color:#526b80;font-size:13px;max-width:420px;margin-top:20px}
+.ux-symptom-picker select{font:inherit;color:#17365d;border:1px solid #cddfec;border-radius:6px;background:#fff;padding:10px;max-width:100%}
+.ux-symptom-empty{font-size:14px;color:#526b80}
+@media(max-width:650px){.ux-symptom-ranking button{gap:8px;padding:12px;font-size:13px}.ux-symptom-ranking button strong{font-size:12px}}
+
+/* Compact, labelled settings beside the stable answer line. */
+body.ux-page .cost-answer-footer{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-top:4px}
+body.ux-page .cost-answer-footer>.ux-own{flex:1;min-width:0;margin-top:4px}
+body.compact-doctor-header .cost-preferences{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;margin:0 0 0 auto;justify-content:normal;width:330px;max-width:100%;flex:0 0 auto}
+body.compact-doctor-header .cost-preference{display:grid;grid-template-columns:60px 25px minmax(0,1fr);gap:8px;align-items:center;width:100%;font-size:12px}
+body.compact-doctor-header .cost-setting-label{color:#526b80;text-align:left}
+body.compact-doctor-header .cost-preference select{box-sizing:border-box;width:100%;max-width:none;padding:6px 8px;min-height:32px}
+body.compact-doctor-header .cost-preferences .cost-currency-note{margin:0;font-size:10px;text-align:right}
+body.ux-page .ux-question .interactive-dot-scale{margin-bottom:8px}
+body.ux-page .ux-question .interactive-dot-scale>button{min-height:116px}
+body.ux-page .ux-question .interactive-dot-scale button[data-option="8"]:not([aria-pressed="true"]){background:transparent;border-color:transparent;box-shadow:none;margin-right:0}
+@media(max-width:650px){body.ux-page .cost-answer-footer{flex-direction:column;gap:4px}body.compact-doctor-header .cost-preferences{width:300px;max-width:100%}body.compact-doctor-header .cost-preference{grid-template-columns:54px 25px minmax(0,1fr)}body.compact-doctor-header .cost-preference select{max-width:100%}}
+
+/* Denser cost cards: heading and insurance share a row. */
+body.ux-page .ux-question[data-kind="cost"]{padding:20px}
+body.ux-page .cost-question-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;margin:0 0 8px}
+body.ux-page .cost-question-heading h3{flex:1 1 230px;margin:0;min-width:0}
+body.ux-page .cost-question-heading .insurance-toggle{flex:0 1 auto;margin:0;width:auto;max-width:100%;align-self:center}
+body.ux-page .cost-question-heading .insurance-toggle button{min-width:76px;min-height:34px;padding:7px 12px}
+body.ux-page .ux-question[data-kind="cost"] .ux-basis-caption{margin:0 0 8px;font-size:12px}
+body.ux-page .ux-question[data-kind="cost"] .community-label{margin:8px 0!important}
+body.ux-page .ux-question[data-kind="cost"] .interactive-dot-scale{margin:4px 0;padding:6px 0}
+body.ux-page .ux-question[data-kind="cost"] .interactive-dot-scale>button{min-height:100px;gap:6px;padding:8px 4px;justify-content:flex-start}
+body.ux-page .ux-question[data-kind="cost"] .interactive-dot-scale>button .cost-converted:empty{display:none}
+body.ux-page .ux-question[data-kind="cost"] .interactive-dot-scale>button::before{top:14px}
+body.ux-page .cost-answer-footer{margin-top:0;gap:8px}
+body.ux-page .cost-answer-footer>.ux-own{height:32px;min-height:32px;line-height:16px;margin-top:0}
+body.ux-page .cost-answer-footer .cost-preferences{gap:4px;width:315px;margin-top:0}
+body.ux-page .cost-answer-footer .cost-preference select{min-height:29px;padding:4px 7px}
+@media(max-width:650px){body.ux-page .ux-question[data-kind="cost"]{padding:16px}body.ux-page .cost-question-heading h3{flex-basis:100%}body.ux-page .cost-question-heading .insurance-toggle{margin-left:auto}body.ux-page .cost-answer-footer .cost-preferences{width:300px}}
+
+/* Identical menu and demo controls on both detail pages. */
+body.compact-doctor-header #header-placeholder .detail-menu-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-width:44px;padding:10px;border:1px solid #d7e3ee;border-radius:8px;background:#f4f9ff;color:#0878e3}
+body.compact-doctor-header #header-placeholder .detail-menu-toggle svg{display:block;width:24px;height:24px;flex-shrink:0}
+body.compact-doctor-header #header-placeholder :is(#doctor-demo-toggle,#nd-demo-header-toggle){box-sizing:border-box;width:auto;min-width:0;min-height:38px;height:auto;padding:8px 12px;border:1px solid #d7e3ee;border-radius:8px;background:#fff;color:#315e8c;font:400 12px/20px Arial,sans-serif;white-space:nowrap;cursor:pointer;flex-shrink:0;box-shadow:none}
+body.compact-doctor-header #header-placeholder :is(#doctor-demo-toggle,#nd-demo-header-toggle)[aria-pressed="true"]{background:#fff0c2;border-color:#d4a331;color:#694900;box-shadow:0 0 0 3px #f5ca5d40,0 0 16px #e8b63c35;font-weight:700}
+body.compact-doctor-header #header-placeholder :is(#doctor-demo-toggle,#nd-demo-header-toggle):disabled{opacity:.6;cursor:wait}
+body.compact-doctor-header #header-placeholder .contact{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:4px;max-width:calc(100% - 64px)}
+body.compact-doctor-header #header-placeholder .contact a,body.compact-doctor-header #header-placeholder .contact .contact-unavailable{font:400 13px/20px Arial,sans-serif;padding:6px 8px;min-height:38px;gap:6px}
+body.compact-doctor-header #header-placeholder .contact .contact-unavailable{display:flex;align-items:center;background:transparent;border:0;color:#8392a2;cursor:default}
+@media(max-width:1100px){body.compact-doctor-header #header-placeholder .contact{max-width:calc(100% - 54px)}}
+
+body.ux-page #ueberblick-anbieter{margin-top:20px}
+
+/* Community totals use the same top-right placement as doctor cards. */
+body.ux-page .ux-question-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px 20px;margin:0 0 14px}
+body.ux-page .ux-question-heading h3{flex:1;min-width:0;margin:0}
+body.ux-page .ux-question-meta{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:0 1 auto;min-width:0}
+body.ux-page .ux-question .ux-question-meta [data-community-note],body.ux-page .ux-question[data-kind="cost"] .ux-question-meta [data-community-note]{margin:0!important;text-align:right;font:400 13px/1.5 Arial,sans-serif;color:#6a7f9e!important}
+body.ux-page .ux-question-heading .insurance-toggle{margin:0;flex-shrink:0}
+body.ux-page .ux-question-heading.cost-question-heading{align-items:flex-start;flex-wrap:nowrap;margin-bottom:8px}
+@media(max-width:650px){body.ux-page .ux-question-heading{gap:8px}body.ux-page .ux-question-heading.cost-question-heading{flex-wrap:wrap}body.ux-page .cost-question-heading .ux-question-meta{margin-left:auto}body.ux-page .ux-question .ux-question-meta [data-community-note]{font-size:12px}}
+
+/* Shared compact cost settings: one left-aligned row on both detail pages. */
+body.compact-doctor-header .cost-preferences,body.ux-page .cost-answer-footer .cost-preferences{display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:center;width:auto;max-width:100%;gap:8px 24px;margin:8px 0 0;flex:1 1 auto}
+body.compact-doctor-header .cost-preference{display:flex;flex-direction:row;align-items:center;width:auto;gap:8px;font-size:12px}
+body.compact-doctor-header .cost-preference select{width:185px;max-width:100%;min-height:32px;padding:5px 8px}
+body.compact-doctor-header .cost-currency-picker select{width:195px}
+body.compact-doctor-header .cost-currency-symbol{width:34px;height:34px;min-width:34px;flex:0 0 34px;padding:0;font-size:12px}
+body.compact-doctor-header .cost-country-flag{width:26px;flex:0 0 26px}
+body.compact-doctor-header .cost-preferences small,body.compact-doctor-header .cost-preferences .cost-currency-note{flex-basis:100%;text-align:left;margin:0;min-height:0;font-size:10px}
+body.compact-doctor-header .cost-preferences small:empty{display:none}
+body.ux-page .cost-answer-footer{flex-direction:column;gap:0;margin-top:0}
+body.ux-page .cost-answer-footer>.ux-own{flex:none;height:20px;min-height:20px;margin:0;line-height:20px}
+body.ux-page .cost-answer-footer>.ux-own:empty{display:none}
+body.ux-page .ux-question[data-kind="cost"] .interactive-dot-scale>button{min-height:106px}
+body.ux-page .ux-question[data-kind="cost"] .interactive-dot-scale>button .cost-converted{min-height:0;margin-top:4px}
+body.compact-doctor-header .card:has(.cost-contexts) .cost-heading{margin-bottom:8px}
+body.compact-doctor-header .card:has(.cost-contexts) .cost-contexts{margin:0 0 12px auto}
+body.compact-doctor-header .card:has(.cost-contexts) .dot-scale{margin-top:8px;margin-bottom:8px}
+body.compact-doctor-header .card:has(.cost-contexts) [data-choice^="costs-"]{font-size:12px;padding-left:5px;padding-right:5px;min-width:0}
+@media(max-width:780px){body.compact-doctor-header .cost-preference{flex-wrap:wrap}body.compact-doctor-header .cost-country-picker .cost-setting-label{flex-basis:100%}body.compact-doctor-header .cost-preferences{gap:8px 16px}}
+
+/* Same readable save feedback on provider and treatment detail pages. */
+body.ux-page .ux-answer-status{bottom:22px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);background:#17365d;color:#fff;padding:14px 20px;border:0;border-radius:8px;font:400 14px/1.4 Arial,sans-serif;box-shadow:0 4px 22px #17365d20;pointer-events:none;z-index:1300}
+.nd-provider-table .nd-provider-row-number{width:36px;white-space:nowrap;color:#6a7f9e;font-variant-numeric:tabular-nums}
+
+/* Shared detail headings and adjacent map controls. */
+body.compact-doctor-header #view-content .card h3{font-family:Arial,Helvetica,sans-serif;font-size:21px;font-weight:700;letter-spacing:-.4px;line-height:1.3;color:#102566}
+.ux-detail .nd-provider-map .top-map-location-layout{display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:20px;align-items:start;margin-top:16px}
+.ux-detail .top-map-location-layout .top-map-location-controls{margin:0;padding:0;display:block;width:auto;min-width:0}
+.ux-detail .top-map-location-layout .top-map-panel{margin:0;min-width:0}
+.ux-detail .top-map-location-layout .nd-location-filters{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:18px}
+.ux-detail .top-map-location-layout .nd-location-filters label{min-width:0}.ux-detail .top-map-location-layout .nd-location-filters select,.ux-detail .top-map-location-layout .nd-location-filters input[type=number]{width:100%}
+.ux-detail .top-map-location-layout .nd-map-canvas{height:430px}
+.doctor-location-filters{display:grid;gap:12px;margin-top:20px}.doctor-location-filters label{display:grid;gap:6px;color:#62769a;font-size:13px}.doctor-location-filters .nd-radius-toggle{display:flex;align-items:center;gap:8px}.doctor-location-filters select,.doctor-location-filters input[type=number]{box-sizing:border-box;max-width:100%;width:100%;padding:9px;border:1px solid #cddfec;border-radius:6px;background:#fff;color:#17365d;font:inherit}.doctor-location-filters p{font-size:12px!important;line-height:1.5}
+.doctor-detail-location-grid>.lcn-online-legend{grid-column:2}
+@media(max-width:1000px){.ux-detail .nd-provider-map .top-map-location-layout{grid-template-columns:1fr}.ux-detail .top-map-location-layout .nd-location-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.ux-detail .top-map-location-layout .nd-map-canvas{height:340px}}
+@media(max-width:800px){.doctor-detail-location-grid>.lcn-online-legend{grid-column:1}}
+
+/* Insurance choices keep long labels centered and comfortably padded. */
+body.compact-doctor-header #view-content .insurance-toggle{display:flex;flex-wrap:wrap;max-width:100%;width:fit-content;overflow:visible}
+body.compact-doctor-header #view-content .insurance-toggle button{display:flex;align-items:center;justify-content:center;text-align:center;flex:1 0 150px;min-width:150px;min-height:44px;padding:10px 18px;font:400 13px/1.4 Arial,sans-serif;white-space:normal;word-break:normal;overflow-wrap:normal;box-sizing:border-box}
+body.ux-page .ux-question-heading.cost-question-heading{flex-wrap:wrap}
+body.ux-page .cost-question-heading .ux-question-meta{margin-left:auto;max-width:100%;min-width:0}
+@media(max-width:650px){body.compact-doctor-header #view-content .insurance-toggle{width:100%}body.compact-doctor-header #view-content .insurance-toggle button{flex-basis:140px;min-width:140px}}
+
+/* Free is the first connected cost stage; not applicable is a separate stop icon. */
+body.ux-page .ux-question[data-kind="cost"] .interactive-dot-scale button[data-option="9"]::before{display:block;left:50%;right:0}
+body.ux-page .ux-question[data-kind="cost"] .interactive-dot-scale button[data-option="0"]::before{left:0;right:0}
+body.ux-page .ux-question[data-kind="cost"] .interactive-dot-scale button[data-option="7"]::before{right:50%}
+body.ux-page .ux-question[data-kind="cost"] button[data-option="8"] .dot{position:relative;width:16px;height:16px;border:0;border-radius:0;background:#8096ad;box-shadow:none;clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+body.ux-page .ux-question[data-kind="cost"] button[data-option="8"] .dot:after{content:'';position:absolute;left:4px;right:4px;top:7px;height:2px;background:#fff}
+body.ux-page .ux-question[data-kind="cost"] button[data-option="8"][aria-pressed="true"] .dot{background:#0878e3}
+.ux-dashboard-card[data-dashboard-question$="cost"] .ux-dashboard-dots>div[data-stage="8"]:before{display:none}
+.ux-dashboard-card[data-dashboard-question$="cost"] .ux-dashboard-dots>div[data-stage="9"]:before{left:50%}
+.ux-dashboard-card[data-dashboard-question$="cost"] .ux-dashboard-dots>div[data-stage="8"] .ux-dashboard-dot{width:18px;height:18px;opacity:1;border:0;border-radius:0;box-shadow:none;background:#8096ad;clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.ux-dashboard-card[data-dashboard-question$="cost"] .ux-dashboard-dots>div[data-stage="8"] .ux-dashboard-dot:after{content:'';position:absolute;left:4px;right:4px;top:8px;height:2px;background:#fff}
+
+.ux-symptom-picker input[type="search"]{font:inherit;color:#17365d;border:1px solid #cddfec;border-radius:6px;background:#fff;padding:10px;width:100%;box-sizing:border-box;min-height:40px}
+
+.ux-symptom-picker{position:relative}.ux-symptom-input-wrap{display:flex;align-items:stretch;border:1px solid #cddfec;border-radius:6px;background:#fff}.ux-symptom-input-wrap:focus-within{outline:2px solid #8fc2f4;outline-offset:1px}.ux-symptom-input-wrap input{width:100%;min-width:0;border:0;background:transparent;padding:11px 12px;font:inherit;color:#17365d;outline:none}.ux-symptom-input-wrap button{flex:0 0 42px;border:0;background:transparent;color:#526b80;font-size:20px;cursor:pointer}.ux-symptom-picker [role=listbox]{position:absolute;top:100%;left:0;right:0;z-index:45;max-height:260px;overflow-y:auto;background:#fff;border:1px solid #cddfec;border-radius:6px;box-shadow:0 5px 16px #17365d20;margin-top:4px;padding:4px}.ux-symptom-picker [role=option]{display:block;width:100%;border:0;background:#fff;text-align:left;padding:10px 12px;color:#17365d;font:inherit;cursor:pointer}.ux-symptom-picker [role=option]:hover,.ux-symptom-picker [role=option][aria-selected=true]{background:#eaf4ff}.ux-symptom-picker [role=listbox] p{padding:10px;font-size:13px}
+
+.ux-gamechanger-layout{display:grid;grid-template-columns:minmax(300px,1fr) minmax(0,1.1fr);gap:24px;align-items:center}.ux-gamechanger-answer{min-width:0}.ux-page .ux-gamechanger-answer .ux-chart.ux-donut{grid-template-columns:minmax(65px,1fr) 145px minmax(65px,1fr);column-gap:12px;margin:12px 0}.ux-gamechanger-layout [data-gamechanger-comparison]{min-width:0}.ux-gamechanger-layout .score-comparison{margin:0}.ux-gamechanger-layout .field-note{font-size:11px;margin-top:10px}.ux-gamechanger-layout .score-comparison-highlights>strong{font-size:20px}.ux-gamechanger-layout .ux-own{margin-bottom:0}
+@media(max-width:1100px){.ux-gamechanger-layout{grid-template-columns:1fr}.ux-page .ux-gamechanger-answer .ux-chart.ux-donut{grid-template-columns:minmax(65px,120px) 145px minmax(65px,120px)}}
+
+/* Reset legacy grid coordinates inside the new side-by-side map layout. */
+.ux-detail .nd-provider-map>.top-map-location-layout{grid-column:1/-1;width:100%;min-width:0}
+.ux-detail .top-map-location-layout>.top-map-location-controls{grid-column:1;grid-row:1;align-self:start}
+.ux-detail .top-map-location-layout>.top-map-panel{grid-column:2;grid-row:1;align-self:start;width:100%}
+.ux-detail .top-map-location-layout .nd-map-location{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.ux-detail .top-map-location-layout .top-map-location-input-row{min-width:0;width:100%}
+.ux-detail .top-map-location-layout .top-map-location-submit{width:100%;min-width:0}
+@media(max-width:1000px){.ux-detail .top-map-location-layout>.top-map-location-controls{grid-column:1;grid-row:1}.ux-detail .top-map-location-layout>.top-map-panel{grid-column:1;grid-row:2}}
+
+/* Calm, permanently open map layout matching provider details. */
+.ux-detail .nd-provider-map>.top-map-location-layout{grid-template-columns:minmax(300px,360px) minmax(0,1fr);gap:18px;align-items:stretch;margin-top:16px}
+.ux-detail .top-map-location-layout>.top-map-location-controls{align-self:stretch;padding:20px;border:1px solid #dbe5f1;border-radius:9px;background:#fbfdff;display:flex;flex-direction:column;gap:14px}
+.ux-detail .top-map-location-layout .top-map-location-controls label{font:600 13px/1.5 Arial,sans-serif;color:#173d74}
+.ux-detail .top-map-location-layout .top-map-location-controls p{font:400 12px/1.5 Arial,sans-serif;margin:0}
+.ux-detail .top-map-location-layout .nd-location-filters{margin-top:0;padding-top:16px;border-top:1px solid #dbe5f1;gap:14px}
+.ux-detail .top-map-location-layout input,.ux-detail .top-map-location-layout select{font:400 14px/1.5 Arial,sans-serif;min-height:42px}
+.ux-detail .top-map-location-layout input[type=checkbox]{min-height:0}
+.ux-detail .top-map-location-layout>.top-map-panel{align-self:stretch;display:flex;border:0;border-radius:0;overflow:visible;background:transparent}
+.ux-detail .top-map-location-layout .top-map-content{display:flex;flex-direction:column;flex:1;min-width:0;padding:0;margin:0;border:0;background:transparent}
+.ux-detail .top-map-location-layout .nd-map-canvas{flex:1;height:auto;min-height:430px;width:100%;margin:0;border:1px solid #dbe5f1;border-radius:9px;overflow:hidden}
+.ux-detail .nd-map-notes{grid-column:1/-1;margin-top:10px}.ux-detail .nd-map-notes .lcn-online-legend{margin:0 0 8px}.ux-detail .nd-map-notes .top-map-status{margin:0;padding:0;font-size:12px}
+@media(max-width:1000px){.ux-detail .nd-provider-map>.top-map-location-layout{grid-template-columns:1fr}.ux-detail .top-map-location-layout>.top-map-location-controls{padding:18px}.ux-detail .top-map-location-layout .nd-map-canvas{height:340px;min-height:340px}}
+
+.ux-detail .top-map-location-layout .nd-map-canvas{max-height:none}
+
+#view-content .top-map-location-layout .nd-map-canvas{max-height:none}
+
+.ux-dashboard-insurance-settings{display:flex;flex-direction:column;align-items:flex-end;gap:10px;margin:18px 0 20px;margin-left:auto;max-width:100%}
+body.compact-doctor-header .ux-dashboard-insurance-settings .dashboard-country-preferences{justify-content:flex-end;flex:0 0 auto;margin:0;width:auto}
+body.compact-doctor-header #view-content .ux-dashboard-insurance-settings .insurance-toggle{margin:0;max-width:100%}
+@media(max-width:650px){.ux-dashboard-insurance-settings{align-items:stretch}body.compact-doctor-header .ux-dashboard-insurance-settings .dashboard-country-preferences{justify-content:flex-start}}
+
+body.ux-page .dashboard-score>details{margin-top:28px}
+body.ux-page .dashboard-score>details>summary{margin-bottom:18px}
+body.ux-page .dashboard-score .score-explanation{margin:0 0 20px;padding:16px 20px;background:#f5f9fd;border:1px solid #e1eafa;border-radius:8px;line-height:1.6}
+body.ux-page .dashboard-score .score-explanation p{font-size:13px;margin:0}
+body.ux-page .dashboard-score .score-explanation p+p{margin-top:10px}
+body.ux-page .dashboard-score .score-parts>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 18px;padding:16px 0;border-bottom:1px solid #e1eafa;font-size:14px}
+body.ux-page .dashboard-score .score-parts small{grid-column:1/-1;font-size:12px;line-height:1.6;color:#6a7f9e}
+@media(max-width:650px){body.ux-page .dashboard-score .score-parts>div{grid-template-columns:1fr}}
+
+/* Country on the right, compact insurance choices on the left. */
+.ux-dashboard-insurance-settings{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px 20px;width:100%;margin:18px 0 24px}
+body.compact-doctor-header .ux-dashboard-insurance-settings .dashboard-country-preferences{grid-column:2;grid-row:1;justify-self:end;margin:0;flex:none}
+body.compact-doctor-header #view-content .ux-dashboard-insurance-settings .insurance-toggle{grid-column:1;grid-row:1;justify-self:start;align-self:center;flex:0 0 auto;height:auto;min-height:0;margin:0;width:fit-content;flex-wrap:wrap}
+body.compact-doctor-header #view-content .ux-dashboard-insurance-settings .insurance-toggle button{flex:0 1 auto;min-width:90px;min-height:38px;height:auto;padding:8px 12px;line-height:1.4}
+@media(max-width:1400px){.ux-dashboard-insurance-settings{grid-template-columns:1fr}.ux-dashboard-insurance-settings .dashboard-country-preferences{grid-column:1!important;grid-row:2!important;justify-self:end}.ux-dashboard-insurance-settings .insurance-toggle{grid-column:1;grid-row:1}}
+@media(max-width:650px){body.compact-doctor-header .ux-dashboard-insurance-settings .dashboard-country-preferences{justify-content:flex-end;justify-self:end}}

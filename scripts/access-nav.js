@@ -72,7 +72,7 @@
         const placeholder = document.querySelector('[data-lcn-header]');
         if (placeholder && !placeholder.dataset.loading) {
             placeholder.dataset.loading = 'true';
-            fetch('components/header.html?v=shared-logo-20261015').then(response => {
+            fetch('components/header.html?v=menu-icon-20261016').then(response => {
                 if (!response.ok) throw new Error('Header konnte nicht geladen werden.');
                 return response.text();
             }).then(html => { placeholder.innerHTML = html; }).catch(() => {

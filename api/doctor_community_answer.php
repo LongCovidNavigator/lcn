@@ -7,7 +7,7 @@ try {
     $id = $body['dr_id'] ?? null;
     if (!is_int($id) || !lcnDoctorExists($id)) lcnSendVoteJson(['ok' => false, 'error' => 'Behandler nicht gefunden.'], 404);
     $action = $body['action'] ?? 'answer';
-    if (!in_array($action, ['answer', 'reset', 'clear'], true)) lcnSendVoteJson(['ok' => false, 'error' => 'Ungültige Aktion.'], 400);
+    if (!in_array($action, ['answer', 'reset', 'clear','move_cost_context'], true)) lcnSendVoteJson(['ok' => false, 'error' => 'Ungültige Aktion.'], 400);
     $key = $body['question'] ?? null;
     $value = $body['value'] ?? null;
     if ($action === 'answer' && (!is_string($key) || !isset(lcnDoctorCommunityQuestions()[$key]) || !is_int($value) || $value < 1 || $value > count(lcnDoctorCommunityQuestions()[$key]['labels']))) lcnSendVoteJson(['ok' => false, 'error' => 'Ungültige Antwort.'], 400);
@@ -15,7 +15,8 @@ try {
     $pdo = lcnDoctorDatabase();
     $respondent = lcnVoterKey();
     lcnBeginVoteSecurity($pdo,'doctor',$id,'neutral',$respondent);
-    if ($action === 'reset') {
+    if($action==='move_cost_context'){lcnMoveDoctorCostContext($pdo,$id,$respondent,(string)$key);}
+    elseif ($action === 'reset') {
         $query = $pdo->prepare('DELETE FROM doctor_community_answers WHERE dr_id = ? AND respondent_key = ?');
         $query->execute([$id, $respondent]);
     } elseif ($action === 'clear') {

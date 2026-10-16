@@ -1360,9 +1360,10 @@ function renderDoctorMarkers(doctors) {
             return;
         }
 
-        L.marker([lat, lng])
+        const marker=L.marker([lat, lng])
             .bindPopup(buildDoctorPopupHtml(doctor))
             .addTo(doctorMarkerGroup);
+        window.LCNOnline?.track(marker,doctor.dr_id);
     });
 
     doctorMarkerGroup.addTo(map);

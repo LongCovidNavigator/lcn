@@ -9,5 +9,5 @@ $item=['community'=>[
 ]];
 $html=ndReducedChart($item,'effect','Gesamtbewertung','effect');
 if (!str_contains($html,'data-counts="[0,0,3,0]"')) throw new RuntimeException('Only exact approved categories may count');
-if(count(ND_REDUCED_SCALES['unit_cost'])!==9 || count(ND_REDUCED_SCALES['total_cost'])!==9) throw new RuntimeException('Cost scales incomplete');
+if(count(ND_REDUCED_SCALES['unit_cost'])!==10 || count(ND_REDUCED_SCALES['total_cost'])!==10) throw new RuntimeException('Cost scales incomplete');
 echo "PASS: approved exact categories; legacy/suspicious excluded; complete independent cost scales\n";

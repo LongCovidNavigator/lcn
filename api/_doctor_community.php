@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/_doctor_hybrid.php';
+require_once __DIR__ . '/_doctor_online.php';
 
 // Version 1: stable question keys; insurance is a context, never a cost option.
 function lcnDoctorCommunityQuestions(): array
@@ -11,7 +12,13 @@ function lcnDoctorCommunityQuestions(): array
         'effect' => ['question' => 'effect', 'context' => '', 'labels' => ['Verschlechterung', 'Keine Veränderung', 'Verbesserung', 'Heilung']],
     ];
     foreach (['gkv', 'pkv', 'de-self', 'de-abroad', 'at-public', 'at-elective', 'at-private', 'at-abroad', 'ch-basic', 'ch-extra', 'ch-self', 'ch-abroad', 'other-self', 'other-abroad'] as $context) {
-        $questions['costs-' . $context] = ['question' => 'costs', 'context' => $context, 'labels' => ['Komplett übernommen', 'Bis 100 €', 'Mehrere 100 €', 'Mehrere 1.000 €', '10.000 € oder mehr', 'Mehrere 10.000 €']];
+        $questions['costs-' . $context] = ['question' => 'costs_total_v2', 'context' => $context, 'labels' => ['Komplett übernommen', 'Bis 100 €', 'Bis 500 €', 'Bis 1.000 €', 'Bis 5.000 €', 'Bis 10.000 €', 'Bis 25.000 €', 'Über 25.000 €']];
+    }
+    foreach (array_keys($questions) as $key) {
+        if (!str_starts_with($key,'costs-')) continue;
+        $definition=$questions[$key];$definition['context'].='-CHF';
+        $definition['labels']=array_map(static fn($label)=>str_replace('€','CHF',$label),$definition['labels']);
+        $questions[$key.'-CHF']=$definition;
     }
     foreach (['first', 'followup'] as $row => $appointment) {
         foreach (['onsite', 'phone', 'video'] as $column => $form) {
@@ -34,10 +41,11 @@ function lcnDoctorCommunity(PDO $pdo, int $doctorId, ?bool $includeDummy = null)
     $tables = ['doctor_community_answers' => 'real'];
     if ($includeDummy) $tables['doctor_community_dummy_answers'] = 'dummy';
     foreach ($tables as $table => $source) {
-        $statement = $pdo->prepare("SELECT question_key, context_key, option_value, COUNT(*) AS n FROM $table WHERE dr_id = ? GROUP BY question_key, context_key, option_value");
+        $statement = $pdo->prepare("SELECT question_key, context_key, option_value, COUNT(*) AS n FROM $table a WHERE dr_id = ? AND NOT (a.question_key='costs' AND EXISTS (SELECT 1 FROM $table newer WHERE newer.dr_id=a.dr_id AND newer.respondent_key=a.respondent_key AND newer.context_key=a.context_key AND newer.question_key='costs_total_v2')) GROUP BY question_key, context_key, option_value");
         $statement->execute([$doctorId]);
         foreach ($statement as $row) {
-            $counts[$row['question_key']][$row['context_key']][(int)$row['option_value']][$source] = (int)$row['n'];
+            if($row['question_key']==='costs') {if($source==='real' && (int)$row['option_value']>2)continue;$row['question_key']='costs_total_v2';$row['option_value']=([1=>1,2=>2,3=>3,4=>5,5=>7,6=>8])[(int)$row['option_value']]??0;}
+            $q=$row['question_key'];$c=$row['context_key'];$v=(int)$row['option_value'];$counts[$q][$c][$v][$source]=($counts[$q][$c][$v][$source]??0)+(int)$row['n'];
         }
     }
     $questions = [];
@@ -79,7 +87,8 @@ function lcnDoctorComparisonProfiles(PDO $pdo, bool $includeDummy): array
     $definitions=[];
     foreach(lcnDoctorCommunityQuestions() as $key=>$def) $definitions[$def['question'].'|'.$def['context']]=[$key,count($def['labels'])];
     foreach($includeDummy?['doctor_community_answers','doctor_community_dummy_answers']:['doctor_community_answers'] as $table) {
-        foreach($pdo->query("SELECT dr_id,question_key,context_key,option_value,COUNT(*) n FROM $table GROUP BY dr_id,question_key,context_key,option_value") as $row) {
+        foreach($pdo->query("SELECT dr_id,question_key,context_key,option_value,COUNT(*) n FROM $table a WHERE NOT (a.question_key='costs' AND EXISTS (SELECT 1 FROM $table newer WHERE newer.dr_id=a.dr_id AND newer.respondent_key=a.respondent_key AND newer.context_key=a.context_key AND newer.question_key='costs_total_v2')) GROUP BY dr_id,question_key,context_key,option_value") as $row) {
+            if($row['question_key']==='costs'){if($table==='doctor_community_answers'&&(int)$row['option_value']>2)continue;$row['question_key']='costs_total_v2';$row['option_value']=([1=>1,2=>2,3=>3,4=>5,5=>7,6=>8])[(int)$row['option_value']]??0;}
             $id=(int)$row['dr_id'];$definition=$definitions[$row['question_key'].'|'.$row['context_key']]??null;
             if(!isset($profiles[$id])||!$definition)continue;
             [$key,$size]=$definition;
@@ -97,6 +106,7 @@ function lcnDoctorComparisonProfiles(PDO $pdo, bool $includeDummy): array
         $id=(int)$row['dr_id'];if(!isset($profiles[$id])||isset($located[$id]))continue;
         $profiles[$id]['lat']=(float)$row['loc_lat'];$profiles[$id]['lng']=(float)$row['loc_lng'];$located[$id]=true;
     }
+    $remote=lcnDoctorOnlineAccess($pdo,$includeDummy);foreach($profiles as $id=>&$profile)$profile['onlineFirst']=$remote[$id]['first']??false;unset($profile);
     return array_values($profiles);
 }
 
@@ -105,7 +115,7 @@ function lcnDoctorAdaptationBenchmark(PDO $pdo, bool $includeDummy): array
     $ids = implode(',', lcnAllDoctorIds());
     $sources = ["SELECT dr_id, option_value, 0 AS is_dummy FROM doctor_community_answers WHERE question_key='adaptation' AND context_key='' AND dr_id IN ($ids)"];
     if ($includeDummy) $sources[] = "SELECT dr_id, option_value, 1 AS is_dummy FROM doctor_community_dummy_answers WHERE question_key='adaptation' AND context_key='' AND dr_id IN ($ids)";
-    $sql = 'SELECT AVG(doctor_mean) AS mean, COUNT(*) AS doctor_count, COALESCE(SUM(answer_count),0) AS answer_count, COALESCE(SUM(dummy_count),0) AS dummy_count FROM (SELECT dr_id, AVG(option_value) AS doctor_mean, COUNT(*) AS answer_count, SUM(is_dummy) AS dummy_count FROM ('.implode(' UNION ALL ', $sources).') answers GROUP BY dr_id HAVING COUNT(*) >= 11) doctors';
+    $sql = 'SELECT AVG(doctor_mean) AS mean, COUNT(*) AS doctor_count, COALESCE(SUM(answer_count),0) AS answer_count, COALESCE(SUM(dummy_count),0) AS dummy_count FROM (SELECT dr_id, AVG(option_value) AS doctor_mean, COUNT(*) AS answer_count, SUM(is_dummy) AS dummy_count FROM ('.implode(' UNION ALL ', $sources).') answers GROUP BY dr_id HAVING COUNT(*) >= 10) doctors';
     $row = $pdo->query($sql)->fetch();
     return ['mean' => $row['mean'] === null ? null : round((float)$row['mean'], 1), 'doctor_count' => (int)$row['doctor_count'], 'catalog_count' => count(lcnAllDoctorIds()), 'answer_count' => (int)$row['answer_count'], 'dummy_count' => (int)$row['dummy_count']];
 }

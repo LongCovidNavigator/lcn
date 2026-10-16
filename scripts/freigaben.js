@@ -1,6 +1,6 @@
 let reviewStatus='all',reviewType='all',allItems=[];
 const filters=document.getElementById('review-filters'),typeFilters=document.getElementById('review-type-filters'),dashboard=document.getElementById('review-dashboard'),list=document.getElementById('review-list'),message=document.getElementById('review-message');
-loadFragment('header-placeholder','components/header.html?v=4');loadFragment('footer-placeholder','components/footer.html');
+loadFragment('header-placeholder','components/header.html?v=menu-icon-20261016');loadFragment('footer-placeholder','components/footer.html');
 filters.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>{reviewStatus=button.dataset.status;activate(filters,button);loadReviews();}));
 typeFilters.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>{reviewType=button.dataset.type;activate(typeFilters,button);renderOverview();}));
 loadReviews();

@@ -1,0 +1,1 @@
+INSERT INTO doctor_community_options(question_key,context_key,option_value,label) SELECT question_key,CONCAT(context_key,'-CHF'),option_value,REPLACE(label,'€','CHF') FROM doctor_community_options WHERE question_key='costs' AND context_key NOT LIKE '%-CHF' ON DUPLICATE KEY UPDATE label=VALUES(label);

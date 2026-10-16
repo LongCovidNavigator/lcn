@@ -2523,6 +2523,7 @@ function renderTreatmentMap(treatments, mapData) {
 			: {};
 
 		const marker = L.marker([group.lat, group.lng], markerOptions);
+        window.LCNOnline?.track(marker,group.providers?group.providers.map(p=>p.provider.dr_id):group.treatments.map(t=>t.nearest_provider?.dr_id));
 
 		marker.bindPopup(
 			useAllMatchingProviders

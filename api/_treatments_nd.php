@@ -4,6 +4,17 @@ declare(strict_types=1);
 require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_search_normalization.php';
 
+function lcnNdCanTreatAtHome(array $item): bool
+{
+    $setting=(string)($item['durchfuehrungssetting'] ?? '');
+    return lcnNdIndependentAtHome($item) || (mb_stripos($setting,'selbstständig')!==false && mb_stripos($setting,'Hause')!==false);
+}
+
+function lcnNdIndependentAtHome(array $item): bool
+{
+    return mb_stripos((string)($item['typ'] ?? ''), 'Selbstmanagement') !== false;
+}
+
 /** Read-only repository for the separate ND prototype. */
 function lcnTreatmentsNdDatabase(): PDO
 {

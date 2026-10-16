@@ -4,7 +4,7 @@
   'use strict';
   const scales = {
     adaptation: ['Hohe Belastung', 'Etwas belastender', 'Gut angepasst', 'Sehr gut angepasst', 'Individuell anpassbar'],
-    costs: ['Komplett übernommen', 'Bis 100 €', 'Mehrere 100 €', 'Mehrere 1.000 €', '10.000 € oder mehr', 'Mehrere 10.000 €'],
+    costs: ['Komplett übernommen', 'Bis 100 €', 'Bis 500 €', 'Bis 1.000 €', 'Bis 5.000 €', 'Bis 10.000 €', 'Bis 25.000 €', 'Über 25.000 €'],
     wait: ['Wenige Tage', 'Mehrere Wochen', 'Mehrere Monate', 'Etwa ein Jahr', 'Mehr als ein Jahr / mehrere Jahre'],
     effect: ['Verschlechterung', 'Keine Veränderung', 'Verbesserung', 'Heilung']
   };
@@ -32,7 +32,7 @@
   }
   dummyToggle?.addEventListener('click',()=>{if(!communityLoading&&!state.saving)loadCommunityData(!includeDummy);});
   let appointmentEditor = null;
-  const state = { view: 'ueberblick', insurance: 'gkv', selections: {}, treatmentCategory: null, treatmentView: 'categories', treatmentSort: null, treatmentSortDirection: 'desc', treatmentQuery: '', treatmentFilterCategories: null, treatmentOnlyRated: false, treatmentPositiveMin: 0, treatmentNegativeMax: 100, data: null, loading: true, error: false, community: null, communityError: false, saving: false };
+  const state = { view: 'ueberblick', insurance: (window.LCNCost?.get().insurance||'GKV').toLowerCase(), selections: {}, treatmentCategory: null, treatmentView: 'categories', treatmentSort: null, treatmentSortDirection: 'desc', treatmentQuery: '', treatmentFilterCategories: null, treatmentOnlyRated: false, treatmentPositiveMin: 0, treatmentNegativeMax: 100, data: null, loading: true, error: false, community: null, communityError: false, saving: false };
   const content = document.getElementById('view-content');
   const livePage = document.body.dataset.doctorPage === 'live';
   const submissionParam = new URLSearchParams(location.search).get('submission_id');
@@ -59,24 +59,24 @@
   }
   function costSystem() {
     const raw = String(state.data?.item?.loc_country || '').toUpperCase();
-    const code = ({DEUTSCHLAND:'DE',ÖSTERREICH:'AT',SCHWEIZ:'CH'})[raw] || raw;
+    const code = window.LCNCost?.get().country || ({DEUTSCHLAND:'DE',ÖSTERREICH:'AT',SCHWEIZ:'CH'})[raw] || raw;
     const systems = {
-      DE: {name:'Deutschland',options:[['gkv','GKV'],['pkv','PKV'],['de-self','Selbstzahler'],['de-abroad','Aus dem Ausland']]},
-      AT: {name:'Österreich',options:[['at-public','Kassenarzt'],['at-elective','Wahlarzt'],['at-private','Privat'],['at-abroad','Aus dem Ausland']]},
-      CH: {name:'Schweiz',options:[['ch-basic','Grundversicherung'],['ch-extra','Zusatzversicherung'],['ch-self','Selbstzahler'],['ch-abroad','Aus dem Ausland']]}
+      DE: {name:'Deutschland',options:[['gkv','GKV'],['pkv','PKV'],['de-abroad','Aus dem Ausland']]},
+      AT: {name:'Österreich',options:[['at-public','Kassenarzt'],['at-elective','Wahlarzt'],['at-abroad','Aus dem Ausland']]},
+      CH: {name:'Schweiz',options:[['ch-basic','Grundversicherung'],['ch-extra','Zusatzversicherung'],['ch-abroad','Aus dem Ausland']]}
     };
     return {code,...(systems[code] || {name:'Land noch nicht angegeben',options:[['other-self','Selbstzahler'],['other-abroad','Aus dem Ausland']]})};
   }
   function costContext() {
     if(!costSystem().options.some(([key])=>key===state.insurance)) state.insurance=costSystem().options[0][0];
-    return state.insurance;
+    return state.insurance+(costSystem().code==='CH'?'-CHF':'');
   }
   function summaries() { return [commonLabel('adaptation'), commonLabel('costs-' + costContext()) + ' · ' + commonLabel('wait'), commonLabel('effect')]; }
   function communityNote(key) {
     const data = question(key);
     if (!state.community) return state.communityError ? 'Community-Daten konnten nicht geladen werden.' : 'Community-Daten werden geladen …';
     if (!data.total) return 'Noch keine Community-Angaben';
-    return `${data.total} Angaben`;
+    return data.total===1?'1 Angabe':`${data.total} Angaben`;
   }
   async function loadCommunityData(requestedDummy = includeDummy) {
     communityLoading = true;
@@ -93,7 +93,9 @@
       state.communityError = false;
     } catch (_) { state.communityError = true; notify('Community-Daten konnten nicht geladen werden.'); }
     communityLoading = false;
+    if(!isSubmission&&!state.communityError&&Object.keys(state.selections).some(key=>key.startsWith('costs-')&&key!=='costs-'+costContext()))await saveAnswer({action:'move_cost_context',question:'costs-'+costContext()});
     updateDummyToggle();
+    window.LCNOnline?.update(doctorId,onlineAppointments());
     if (document.getElementById('community-mode')) document.getElementById('community-mode').textContent = state.community ? '' : 'Community-Daten derzeit nicht verfügbar.';
     render();
   }
@@ -150,9 +152,9 @@
       applyCommunityResponse(data);
       appointmentEditor = null;
       render();
-      notify(payload.action === 'reset' ? 'Deine Angaben zu dieser Praxis wurden gelöscht.' : payload.action === 'clear' ? 'Deine Stimme wurde zurückgenommen.' : 'Deine Angabe wurde gespeichert.');
+      notify(payload.action === 'move_cost_context' ? 'Deine Angabe wurde gespeichert.' : payload.action === 'reset' ? 'Deine Angaben zu dieser Praxis wurden gelöscht.' : payload.action === 'clear' ? 'Deine Stimme wurde zurückgenommen.' : 'Deine Angabe wurde gespeichert.');return true;
     } catch (error) {
-      notify('Speichern konnte nicht bestätigt werden. Bitte erneut versuchen.');
+      notify('Speichern konnte nicht bestätigt werden. Bitte erneut versuchen.');return false;
     } finally {
       state.saving = false;
       updateDummyToggle();
@@ -205,7 +207,8 @@
       document.querySelector('.avatar').textContent = [doctor.dr_firstname?.[0], doctor.dr_lastname?.[0]].filter(Boolean).join('') || 'LCN';
       document.getElementById('profile-specialty').textContent = [labels(data.research?.specialty || data.terms?.specialty), labels(data.research?.specializations)].filter(Boolean).join(' | ');
       document.getElementById('profile-address').textContent = livePage ? ([doctor.loc_plz, doctor.loc_city].filter(Boolean).join(' ') || address()) : address();
-      document.querySelector('.contact').innerHTML = [['Website', doctor.loc_website || doctor.dr_website], ['Telefon', doctor.loc_phone || doctor.dr_phone], ['E-Mail', doctor.loc_email || doctor.dr_email]].filter(([, value]) => value).map(([type, value]) => {
+      document.querySelector('.contact').innerHTML = [['Website', doctor.loc_website || doctor.dr_website], ['Telefon', doctor.loc_phone || doctor.dr_phone], ['E-Mail', doctor.loc_email || doctor.dr_email]].filter(([type, value]) => type==='E-Mail'||value).map(([type, value]) => {
+        if(type==='E-Mail'&&!String(value||'').trim())return '<button type="button" class="contact-unavailable" disabled title="Keine E-Mail-Adresse hinterlegt" aria-label="E-Mail nicht hinterlegt"><span class="contact-symbol" aria-hidden="true">✉</span><span class="contact-label">E-Mail</span></button>';
         const link = contactLink(type, value);
         return link.replace('<a ', `<a aria-label="${type}" title="${type}" `).replace(`>${escape(value)}</a>`, livePage ? `><span class="contact-symbol" aria-hidden="true">${({Website:'↗',Telefon:'☎','E-Mail':'✉'})[type]}</span><span class="contact-label">${type}</span></a>` : `>${type}</a>`);
       }).join('');
@@ -221,6 +224,10 @@
     }
   }
   // Same Leaflet map, tile layer, marker registry and controls as arzt_detail.js.
+  let locationCity='',locationRadiusEnabled=false,locationRadius=100;
+  function practiceLocations(){const doctor=state.data?.item;if(!doctor)return [];const all=[doctor,...(state.data?.research?.locations||[])];return all.filter((p,i)=>all.findIndex(q=>String(q.loc_id)===String(p.loc_id))===i);}
+  function locationDistance(point){const own=savedLocation();if(!own||point.loc_lat==null||point.loc_lng==null)return null;const rad=v=>Number(v)*Math.PI/180;const a=Math.sin(rad(point.loc_lat-own.lat)/2)**2+Math.cos(rad(own.lat))*Math.cos(rad(point.loc_lat))*Math.sin(rad(point.loc_lng-own.lng)/2)**2;return 6371*2*Math.asin(Math.sqrt(Math.min(1,a)));}
+  function practiceFilters(){const cities=[...new Set(practiceLocations().map(p=>p.loc_city).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'de'));return '<div class="nd-location-filters doctor-location-filters"><label>Praxisstandorte nach Ort filtern<select data-doctor-city><option value="">Alle Städte</option>'+cities.map(city=>'<option'+(city===locationCity?' selected':'')+'>'+escape(city)+'</option>').join('')+'</select></label><label class="nd-radius-toggle"><input type="checkbox" data-doctor-radius-enabled'+(locationRadiusEnabled?' checked':'')+'> Radius aktivieren</label><label>Radius in km<input type="number" data-doctor-radius min="1" max="2000" step="1" value="'+locationRadius+'"'+(!locationRadiusEnabled?' disabled':'')+'></label><p data-doctor-map-status role="status"></p></div>';}
   function createMap(element, compact = false) {
     if (!element) return null;
     const doctor = state.data?.item;
@@ -240,12 +247,16 @@
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
       maxZoom:19, attribution:'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere'
     }).addTo(map);
-    L.marker([Number(doctor.loc_lat), Number(doctor.loc_lng)]).addTo(map).bindPopup(`<strong>Praxis</strong><br>${escape(address())}`);
+    const visible=(compact?[doctor]:practiceLocations()).filter(p=>p.loc_lat!=null&&p.loc_lng!=null&&(!locationCity||compact||p.loc_city===locationCity)&&(!locationRadiusEnabled||compact||!savedLocation()||locationDistance(p)<=locationRadius));
+    const bounds=[];visible.forEach(point=>{bounds.push([Number(point.loc_lat),Number(point.loc_lng)]);const marker=L.marker([Number(point.loc_lat),Number(point.loc_lng)]).addTo(map).bindPopup('<strong>Praxis</strong><br>'+escape(address(point)));window.LCNOnline?.track(marker,doctorId);});
+    if(!compact){const status=document.querySelector('[data-doctor-map-status]');if(status)status.textContent=locationRadiusEnabled&&!savedLocation()?'Bitte zuerst einen Ausgangsort übernehmen.':visible.length+' Praxisstandorte im Filter · Entfernung als Luftlinie.';}
+    if(!compact&&locationRadiusEnabled&&savedLocation())L.circle([savedLocation().lat,savedLocation().lng],{radius:locationRadius*1000,color:'#0875ee',weight:2,fillOpacity:.06}).addTo(map);
+    if(bounds.length)map.fitBounds(bounds,{padding:[30,30],maxZoom:15});
     const own = savedLocation();
     if (!compact && own) {
       const icon = L.icon({iconUrl: window.LCNImages.urls['map-marker-red'], shadowUrl: window.LCNImages.urls['map-marker-shadow'], iconSize:[25,41], iconAnchor:[12,41], popupAnchor:[1,-34], shadowSize:[41,41]});
       L.marker([own.lat, own.lng], {icon, title: own.label}).addTo(map).bindPopup(`<strong>Dein Standort</strong><br>${escape(own.label)}`);
-      map.fitBounds([[Number(doctor.loc_lat), Number(doctor.loc_lng)], [own.lat, own.lng]], {padding:[30,30], maxZoom:15});
+      map.fitBounds([...bounds, [own.lat, own.lng]], {padding:[30,30], maxZoom:15});
     }
     return map;
   }
@@ -272,12 +283,13 @@
     if(km===null)return savedLocation()?'Entfernung nicht verfügbar':'Standort nicht gesetzt';
     return 'ca. '+km.toLocaleString('de-DE',{maximumFractionDigits:km<10?1:0})+' km (Luftlinie)';
   }
+  function onlineAppointments(){return window.LCNOnline?.fromQuestions(doctorId,state.community?.questions)||{first:false,complete:false};}
   function travelEstimate() {
     if(state.view!=='termin')return '';
     const km=distanceKm();
-    if(km===null)return '<div class="travel-estimate"><strong>Anreiseaufwand</strong><p>'+ (savedLocation()?'Für diese Praxis fehlen Koordinaten zur Schätzung.':'Gib deinen Standort ein, um den Anreiseaufwand grob einzuordnen.')+'</p></div>';
-    const index=travelBands.findIndex(([limit])=>km<=limit);
-    return '<div class="travel-estimate"><div class="travel-estimate-heading"><strong>'+distanceText()+'</strong><span>'+travelBands[index][2]+' · grobe Orientierung</span></div><ol class="travel-scale">'+travelBands.map(([,range,time],i)=>'<li class="travel-level-'+i+(i===index?' is-current':'')+'"><strong>'+range+'</strong><span class="travel-scale-bar" aria-hidden="true"></span><span>'+time+'</span>'+(i===index?'<b>Deine Entfernung</b>':'')+'</li>').join('')+'</ol><details><summary>Wie wird eingeordnet?</summary><p>Die Grenzen beziehen sich auf die Luftlinie: 20, 50, 100, 300 und 800 Kilometer. Die Zeiten sind grobe Orientierungswerte für eine Autofahrt, keine berechneten Fahrzeiten. Umwege, Stadtverkehr und Pausen können die Dauer deutlich verändern. Über 800 km kann auch ein Flug infrage kommen; inklusive Anfahrt und Wartezeiten bleibt häufig eine Tagesreise. Verbindungen werden nicht geprüft.</p></details></div>';
+    if(km===null&&!onlineAppointments().first)return '<div class="travel-estimate"><strong>Anreiseaufwand</strong><p>'+ (savedLocation()?'Für diese Praxis fehlen Koordinaten zur Schätzung.':'Gib deinen Standort ein, um den Anreiseaufwand grob einzuordnen.')+'</p></div>';
+    const index=onlineAppointments().first?-1:travelBands.findIndex(([limit])=>km<=limit);
+    return '<div class="travel-estimate"><div class="travel-estimate-heading"><strong>'+(onlineAppointments().first?'Online-Ersttermin · keine Anreise zum Ersttermin':distanceText())+'</strong><span>'+(index<0?'Keine Anreise':travelBands[index][2]+' · grobe Orientierung')+'</span></div><ol class="travel-scale"><li class="travel-online-level'+(index<0?' is-current':'')+'"><strong>Online-Ersttermin</strong><span class="travel-scale-bar" aria-hidden="true"></span><span>Keine Anreise zum Ersttermin</span></li>'+travelBands.map(([,range,time],i)=>'<li class="travel-level-'+(i+1)+(i===index?' is-current':'')+'"><strong>'+range+'</strong><span class="travel-scale-bar" aria-hidden="true"></span><span>'+time+'</span>'+(i===index?'<b>Deine Entfernung</b>':'')+'</li>').join('')+'</ol><details><summary>Wie wird eingeordnet?</summary><p>Die Grenzen beziehen sich auf die Luftlinie: 20, 50, 100, 300 und 800 Kilometer. Die Zeiten sind grobe Orientierungswerte für eine Autofahrt, keine berechneten Fahrzeiten. Umwege, Stadtverkehr und Pausen können die Dauer deutlich verändern. Über 800 km kann auch ein Flug infrage kommen; inklusive Anfahrt und Wartezeiten bleibt häufig eine Tagesreise. Verbindungen werden nicht geprüft.</p></details></div>';
   }
   const travelBands=[[20,'Bis 20 km','Unter 30 Min.'],[50,'20–50 km','30–60 Min.'],[100,'50–100 km','Etwa 1–2 Std.'],[300,'100–300 km','Mehrere Stunden'],[800,'300–800 km','Tagesreise'],[Infinity,'Über 800 km','Tagesreise oder länger / ggf. Flug']];
   let locationRequest = null;
@@ -374,7 +386,7 @@
   function locationCard() {
     if (!state.data) return `<section class="card"><h3>Standort</h3>${dataStatus()}</section>`;
     const own = savedLocation();
-    return `<section class="card location-section" aria-label="Standort"><h3>Standort</h3>${travelEstimate()}<div class="doctor-detail-location-grid"><div class="doctor-detail-location-address"><div class="doctor-detail-location-block"><strong>Praxisstandort</strong><span>${escape(state.data.item.loc_label)}</span><span>${escape(address())}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address())}" target="_blank" rel="noopener noreferrer">In Google Maps öffnen ↗</a></div><div class="doctor-detail-location-block"><strong>Entfernung zu deinem Standort</strong><span id="own-distance">${distanceText()}</span></div><div class="doctor-detail-location-block"><form id="location-form"><label for="own-location">Adresse, PLZ oder Ort</label><div class="own-location-control"><input id="own-location" name="location" type="text" placeholder="z. B. 50667 oder Köln" autocomplete="street-address" maxlength="200" value="${escape(own?.label || '')}"><button type="button" id="clear-location" aria-label="Standort entfernen"${own ? '' : ' hidden'}>×</button></div><button type="submit">Standort übernehmen</button><span role="status" aria-live="polite"></span></form></div></div><div id="doctor-detail-map" class="doctor-detail-map" aria-label="Karte des Praxisstandorts"></div></div></section>`;
+    return `<section class="card location-section" aria-label="Standort"><h3>Standort</h3>${travelEstimate()}<div class="doctor-detail-location-grid"><div class="doctor-detail-location-address"><div class="doctor-detail-location-block"><strong>Praxisstandort</strong><span>${escape(state.data.item.loc_label)}</span><span>${escape(address())}</span><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address())}" target="_blank" rel="noopener noreferrer">In Google Maps öffnen ↗</a></div><div class="doctor-detail-location-block"><strong>Entfernung zu deinem Standort</strong><span id="own-distance">${distanceText()}</span></div><div class="doctor-detail-location-block"><form id="location-form"><label for="own-location">Adresse, PLZ oder Ort</label><div class="own-location-control"><input id="own-location" name="location" type="text" placeholder="z. B. 50667 oder Köln" autocomplete="street-address" maxlength="200" value="${escape(own?.label || '')}"><button type="button" id="clear-location" aria-label="Standort entfernen"${own ? '' : ' hidden'}>×</button></div><button type="submit">Standort übernehmen</button><span role="status" aria-live="polite"></span></form>${practiceFilters()}</div></div><div id="doctor-detail-map" class="doctor-detail-map" aria-label="Karte des Praxisstandorts"></div></div></section>`;
   }
   function profileFacts() {
     if (!state.data) return `<section class="card overview-facts"><h3>Überblick</h3>${dataStatus()}</section>`;
@@ -407,7 +419,7 @@
   }
 
   function overview() {
-    return profileFacts() + dashboardScore(true) + locationCard();
+    return profileFacts() + dashboardScore(true);
   }
 
   function adaptationHelp() {
@@ -422,7 +434,7 @@
     return `<section class="adaptation-explanation" aria-label="Bedeutung deiner gewählten Stufe"><p class="adaptation-explanation-heading">Deine Auswahl: <strong>${escape(scales.adaptation[selected])}</strong> – das bedeutet:</p><div class="adaptation-facts">${adaptationCriteria.map((criterion,i)=>`<div class="adaptation-fact"><span class="adaptation-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons[i]}</svg></span><div><span class="adaptation-fact-label">${escape(criterion)}</span><strong>${escape(adaptationDetails[selected][i])}</strong></div></div>`).join('')}</div></section>`;
   }
   function adaptationResults(data) {
-    return ratingComparison('adaptation',11,5,'Vergleich: Behandler mit mindestens elf Angaben zur Termin-Anpassung.');
+    return ratingComparison('adaptation',10,5,'Vergleich: Behandler mit mindestens zehn Angaben zur Termin-Anpassung.');
   }
   function appointment() {
     const data = question('adaptation');
@@ -459,13 +471,13 @@
 
   }
   function access() {
-    return `<section class="card"><div class="cost-heading">${blockTitle('Kosten der Therapie (Eigenanteil)', 'Wie hoch waren deine eigenen Aufwendungen für alle Untersuchungen und Therapien, die du bei diesem Behandler bis zum aktuellen Zeitpunkt hast durchführen lassen?')}<span class="cost-country"><span class="country-flag flag-${escape(costSystem().code.toLowerCase())}" aria-hidden="true"></span>${costSystem().name}</span></div><div class="cost-contexts insurance-toggle" role="group" aria-label="Versicherungs- und Abrechnungskontext">${costSystem().options.map(([value,label]) => `<button type="button" data-insurance="${value}" aria-pressed="${costContext() === value}">${label}</button>`).join('')}</div>${dotScale('costs-' + costContext(), scales.costs)}</section>` +
+    return `<section class="card"><div class="cost-heading">${blockTitle('Kosten der Therapie (Eigenanteil)', 'Wie hoch waren deine eigenen Aufwendungen für alle Untersuchungen und Therapien, die du bei diesem Behandler bis zum aktuellen Zeitpunkt hast durchführen lassen?')}</div><div class="cost-contexts insurance-toggle" role="group" aria-label="Versicherungs- und Abrechnungskontext">${costSystem().options.map(([value,label]) => `<button type="button" data-insurance="${value}" aria-pressed="${state.insurance === value}">${label}</button>`).join('')}</div>${dotScale('costs-' + costContext(), scales.costs.map(label=>window.LCNCost?.amount(label,costSystem().code==='CH'?'CHF':'EUR')||label))}</section>` +
       `<section class="card">${blockTitle('Wartezeit auf den Ersttermin', 'Wie lange musstest du auf deinen ersten Termin warten?')}${dotScale('wait', scales.wait)}</section>` +
       `<section class="card">${blockTitle('Wartezeit auf Folgetermine', 'Wie lange musstest du bei diesem Behandler auf einen Folgetermin warten?')}${dotScale('wait-followup', scales.wait)}</section>`;
   }
 
   function effect() {
-    return `<section class="card"><div class="chart-heading"><div><h3>Community-Bewertung</h3><p>Subjektive Erfahrungen nach der Therapie.</p></div><span>${communityNote('effect')}</span></div><div class="effect-chart" role="group" aria-label="Zustandsveränderung: Community und deine Auswahl">${scales.effect.map((label, i) => { const value = percent('effect',i); return `<button type="button" class="effect-column" data-choice="effect" data-value="${i}" aria-pressed="${state.selections.effect === i}" aria-label="${label}: ${percentText(value)}. Als eigene Erfahrung auswählen"><span class="bar-area"><strong>${percentText(value)}</strong><span class="effect-bar effect-${i}" style="height:${(value || 0) * 1.5}px"></span></span><span class="effect-label">${label}</span></button>`; }).join('')}</div>${effectComparison()}</section>` + treatmentSection();
+    return `<section class="card"><div class="chart-heading"><div><h3>Community-Bewertung</h3><p>Subjektive Erfahrungen nach der Therapie.</p></div><span>${communityNote('effect')}</span></div><div class="effect-chart" role="group" aria-label="Zustandsveränderung: Community und deine Auswahl">${scales.effect.map((label, i) => { const value = percent('effect',i); return `<button type="button" class="effect-column" data-choice="effect" data-value="${i}" aria-pressed="${state.selections.effect === i}" aria-label="${label}: ${percentText(value)}. Als eigene Erfahrung auswählen"><span class="bar-area"><strong>${percentText(value)}</strong><span class="effect-bar effect-${i}" style="height:${(value || 0) * 1.5}px"></span></span><span class="effect-label">${label}</span></button>`; }).join('')}</div>${effectComparison()}</section>` + '<section class="card ux-symptom-help" data-doctor-symptom-help><h3>Bei welchen Symptomen hat dir der Behandler geholfen?</h3><p>Klicke die Symptome an, bei denen dir die Behandlung geholfen hat. Erneutes Anklicken nimmt deine Stimme zurück.</p><ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol><div class="ux-symptom-picker" data-symptom-combobox><label for="doctor-symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="doctor-symptom-search" type="text" role="combobox" data-symptom-search placeholder="Symptom auswählen oder eintippen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="doctor-symptom-picker"><button type="button" data-symptom-toggle aria-label="Symptomliste öffnen" aria-controls="doctor-symptom-picker" aria-expanded="false">⌄</button></div><div id="doctor-symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div></section>' + treatmentSection();
   }
   function treatmentSection() {
     if (!state.data) return '<section class="card"><h3>Therapien</h3>'+dataStatus()+'</section>';
@@ -561,11 +573,11 @@
     return '<div class="score-comparison"><span class="score-comparison-label">Vergleich mit anderen Behandlern</span><div class="score-comparison-highlights"><strong>'+(difference==null?'Keine Einordnung möglich':Math.abs(difference)<.005?'Im Durchschnitt':format(Math.abs(difference))+' Punkte '+(difference>0?'über':'unter')+' dem Durchschnitt')+'</strong>'+(top==null?'':'<strong class="score-percentile">Top '+top+' %</strong>')+'</div><div class="comparison-values">'+(own.mean==null?'Noch keine Angaben.':'<span>Dieser Behandler:</span><strong>Ø '+format(own.mean)+' / '+unit+'</strong>')+(average==null?'':'<span>Durchschnitt:</span><strong>Ø '+format(average)+' / '+unit+'</strong>')+'</div><small>'+reference+' ('+values.length+' Behandler)'+(!eligible&&minimum>1?' Für diesen Behandler sind dafür noch zu wenige Bewertungen vorhanden.':'')+'</small></div>';
   }
   function effectComparison() {
-    return ratingComparison('effect',11,4,'Vergleich: Behandler mit mehr als zehn Community-Bewertungen.');
+    return ratingComparison('effect',10,4,'Vergleich: Behandler mit mindestens zehn Community-Bewertungen.');
   }
   function totalComparison(result) {
     const referenceNote='Vergleich: Behandler mit auswertbaren Angaben in mindestens 70 % der neun Bereiche. Das Therapieprofil zählt als ein Bereich. Gesamtwerte auf 100 Punkte umgerechnet.';
-    if(result.dataCoverage<70)return '<div class="score-comparison"><strong>Keine Einordnung möglich</strong><p class="score-comparison-selection">Weniger als 70 % der neun Bereiche sind auswertbar. Community-Bereiche zählen ab elf Angaben.</p></div>';
+    if(result.dataCoverage<70)return '<div class="score-comparison"><strong>Keine Einordnung möglich</strong><p class="score-comparison-selection">Weniger als 70 % der neun Bereiche sind auswertbar. Community-Bereiche zählen ab zehn Angaben.</p></div>';
     const ownLocation=savedLocation();
     const values=(state.community?.comparison_profiles||[]).flatMap(profile=>{
       let distance=null;
@@ -586,7 +598,7 @@
   }
   function dashboardCalculation() {
     const groups=Object.entries(state.data?.treatments_grouped||{}),editorial=state.data?.analysis?.editorial;
-    const result=window.lcnDashboardScore({questions:state.community?.questions,costKey:'costs-'+costContext(),distance:distanceKm(),treatmentCount:new Set(groups.flatMap(([,items])=>items.map(t=>t.treat_id))).size,categoryCount:groups.filter(([name,items])=>items.length&&name!=='Ohne Kategorie').length,editorialCount:editorial?.matched_count,editorialTotal:editorial?.total});
+    const result=window.lcnDashboardScore({questions:state.community?.questions,costKey:'costs-'+costContext(),distance:distanceKm(),onlineFirst:onlineAppointments().first,treatmentCount:new Set(groups.flatMap(([,items])=>items.map(t=>t.treat_id))).size,categoryCount:groups.filter(([name,items])=>items.length&&name!=='Ohne Kategorie').length,editorialCount:editorial?.matched_count,editorialTotal:editorial?.total});
     return result;
   }
   function scoreClassification(result) {
@@ -607,14 +619,14 @@
     return '';
   }
   function scoreMissingText(row) {
-    return row?.answerCount>0?'Weniger als elf Angaben':'Keine Angaben';
+    return row?.answerCount>0?'Weniger als zehn Angaben':'Keine Angaben';
   }
   function dashboardScore(overview = false) {
     const status=scoreDataStatus();
     if(status)return status;
     const result=dashboardCalculation();
     const number=n=>n.toLocaleString('de-DE',{maximumFractionDigits:1});
-    return '<section class="card dashboard-score"><div class="score-top"><div><h3>Gesamtauswertung</h3><p>Persönlicher Orientierungsscore</p></div><strong class="score-number">'+(result.coverage?number(result.earned):'–')+'<small> / '+result.coverage+' Punkte</small></strong></div><div class="score-track" role="img" aria-label="'+(result.coverage?number(result.earned)+' von '+result.coverage+' bewertbaren Punkten':'Noch keine Angaben für den Gesamtwert')+'"><span style="width:'+(result.score||0)+'%"></span></div>'+scoreClassification(result)+totalComparison(result)+'<p class="field-note">Der Gesamtwert beschreibt praktische Passung und dokumentierte Angebote, keine medizinische Qualität.</p>'+(overview?'<a class="dashboard-detail" href="#dashboard">Detaillierte Aufschlüsselung im Dashboard →</a>':'<details><summary>Gewichtung und Teilwerte ansehen</summary><div class="score-explanation"><p>Insgesamt sind 100 Punkte möglich. Bereiche ohne Angaben werden vollständig aus der Gewichtung genommen. Oben stehen die erreichten Punkte im Verhältnis zu den aktuell bewertbaren Punkten. Community-Bereiche zählen ab elf Angaben. Therapieanzahl, Kategorienvielfalt und Top-Therapien bilden zusammen einen Bereich; ihre Teilpunkte bleiben einzeln sichtbar.</p><p>Anreise und Kassensystem sorgen für ein individuelles Ergebnis.</p></div><div class="score-parts">'+result.rows.map(row=>'<div><strong>'+escape(row.label)+'</strong><span>'+(row.value==null?scoreMissingText(row):number(row.value*row.weight)+' / '+row.weight+' Punkte')+'</span><small>'+escape(row.reason)+'</small></div>').join('')+'</div><p>Der Balken zeigt den Anteil der erreichten an den bewertbaren Punkten. Die Ferntermin-Werte beschreiben Zustimmung pro Terminform, keine zusammengeführte Wahrscheinlichkeit.</p></details>')+'</section>';
+    return '<section class="card dashboard-score"><div class="score-top"><div><h3>Gesamtauswertung</h3><p>Persönlicher Orientierungsscore</p></div><strong class="score-number">'+(result.coverage?number(result.earned):'–')+'<small> / '+result.coverage+' Punkte</small></strong></div><div class="score-track" role="img" aria-label="'+(result.coverage?number(result.earned)+' von '+result.coverage+' bewertbaren Punkten':'Noch keine Angaben für den Gesamtwert')+'"><span style="width:'+(result.score||0)+'%"></span></div>'+scoreClassification(result)+totalComparison(result)+'<p class="field-note">Der Gesamtwert beschreibt praktische Passung und dokumentierte Angebote, keine medizinische Qualität.</p>'+(overview?'<a class="dashboard-detail" href="#dashboard">Detaillierte Aufschlüsselung im Dashboard →</a>':'<details><summary>Gewichtung und Teilwerte ansehen</summary><div class="score-explanation"><p>Insgesamt sind 100 Punkte möglich. Bereiche ohne Angaben werden vollständig aus der Gewichtung genommen. Oben stehen die erreichten Punkte im Verhältnis zu den aktuell bewertbaren Punkten. Community-Bereiche zählen ab zehn Angaben. Therapieanzahl, Kategorienvielfalt und Top-Therapien bilden zusammen einen Bereich; ihre Teilpunkte bleiben einzeln sichtbar.</p><p>Anreise und Kassensystem sorgen für ein individuelles Ergebnis.</p></div><div class="score-parts">'+result.rows.map(row=>'<div><strong>'+escape(row.label)+'</strong><span>'+(row.value==null?scoreMissingText(row):number(row.value*row.weight)+' / '+row.weight+' Punkte')+'</span><small>'+escape(row.reason.replace('Euro',costSystem().code==='CH'?'Schweizer Franken':'Euro'))+'</small></div>').join('')+'</div><p>Der Balken zeigt den Anteil der erreichten an den bewertbaren Punkten. Die Ferntermin-Werte beschreiben Zustimmung pro Terminform, keine zusammengeführte Wahrscheinlichkeit.</p></details>')+'</section>';
   }
   function dashboard() {
     const status=scoreDataStatus();
@@ -629,7 +641,7 @@
       return '<section class="card dashboard-card"><div class="assessment-header"><h3>'+title+'</h3><span class="assessment-count">'+communityNote(key)+'</span></div>'+points(row)+extra+dist(key,labels,row)+(key==='effect'?effectComparison():'')+'<p class="dashboard-score-reason">Die Anteile der Community gewichten die Stufenwerte zum angezeigten Punktwert.</p><a class="dashboard-detail" href="#'+view+'">Details ansehen →</a></section>';
     };
     const costKey='costs-'+costContext();
-    const costChoices='<div class="insurance-toggle dashboard-insurance" aria-label="Versicherungskontext">'+costSystem().options.map(([value,label])=>'<button type="button" data-insurance="'+value+'" aria-pressed="'+(costContext()===value)+'">'+label+'</button>').join('')+'</div>';
+    const costChoices='<div class="insurance-toggle dashboard-insurance" aria-label="Versicherungskontext">'+costSystem().options.map(([value,label])=>'<button type="button" data-insurance="'+value+'" aria-pressed="'+(state.insurance===value)+'">'+label+'</button>').join('')+'</div>';
     const appointments='<section class="card dashboard-card"><div class="assessment-header"><h3>Terminform</h3><span class="assessment-count">'+appointmentCountNote()+'</span></div><div class="dashboard-appointments">'+['Ersttermin','Folgetermin'].map((type,r)=>{
       const row=scoreRow(r?'Folgetermin aus der Ferne':'Ersttermin aus der Ferne');
       return '<section><div class="dashboard-appointment-heading"><h4>'+type+'</h4>'+points(row)+'</div><div class="dashboard-term-distribution"><div class="dashboard-term-head"><span>Terminform</span><span>Nicht möglich · möglich</span><span>Stufenwert</span></div>'+['Vor Ort','Telefon','Video'].map((label,c)=>{
@@ -643,8 +655,8 @@
     const treatmentEarned=treatmentRows.reduce((sum,row)=>sum+(row.value??0)*row.weight,0),treatmentAvailable=treatmentRows.reduce((sum,row)=>sum+(row.value==null?0:row.weight),0);
     const treatments='<section class="card dashboard-card"><div class="assessment-header"><h3>Therapien</h3><span class="assessment-count">'+count+' Einträge</span></div><div class="dashboard-points"><strong>'+(treatmentAvailable?number(treatmentEarned)+' <small>/ '+treatmentAvailable+' Punkte</small>':'Keine Angaben')+'</strong></div><div class="dashboard-treatment-points">'+treatmentRows.map((row,i)=>'<div><span>'+['Anzahl: '+count+' Therapien','Vielfalt: '+groups.filter(([name,items])=>items.length&&name!=='Ohne Kategorie').length+' Kategorien','Top-Therapien: '+(editorial?editorial.matched_count+' von '+editorial.total:'Keine Angaben')][i]+'</span><strong>'+(row.value==null?scoreMissingText(row):number(row.value*row.weight)+' / '+row.weight+' P.')+'</strong></div>').join('')+'</div><p class="dashboard-score-reason">60 Therapien ergeben 10 Punkte, acht Kategorien 2 Punkte. Ab vier zugeordneten Top-Therapien gibt es 1 Zusatzpunkt, sonst 0 Punkte. Bei Anzahl und Vielfalt zählt der jeweilige Anteil.</p><a class="dashboard-detail" href="#wirkung">Therapien ansehen →</a></section>';
     const km=distanceKm(),band=km===null?null:travelBands.find(([limit])=>km<=limit),travelRow=scoreRow('Persönliche Anreise');
-    const travel='<section class="card dashboard-card"><h3>Anreise</h3>'+points(travelRow)+'<strong class="dashboard-result">'+(km===null?'Standort für die Entfernung ergänzen':distanceText())+'</strong>'+(band?'<p>'+band[2]+' · grobe Orientierung</p>':'')+'<p class="dashboard-score-reason">Bis 20 km: 7 P. · bis 50 km: 5,6 P. · bis 100 km: 4,2 P. · bis 300 km: 2,8 P. · bis 800 km: 1,4 P. · darüber: 0 P.</p><a class="dashboard-detail" href="#termin">Standort und Einordnung ansehen →</a></section>';
-    return dashboardScore()+'<div class="dashboard-grid dashboard-columns"><div class="dashboard-column">'+card('Long-Covid-gerechter Termin','adaptation',scales.adaptation,'termin')+card('Therapiekosten',costKey,scales.costs,'zugang',costChoices)+card('Wartezeit auf den Ersttermin','wait',scales.wait,'zugang')+card('Wartezeit auf Folgetermine','wait-followup',scales.wait,'zugang')+'</div><div class="dashboard-column">'+appointments+card('Zustandsveränderung','effect',scales.effect,'wirkung')+treatments+travel+'</div></div>';
+    const travel='<section class="card dashboard-card"><h3>Anreise</h3>'+points(travelRow)+'<strong class="dashboard-result">'+(onlineAppointments().first?'Online-Ersttermin · keine Anreise zum Ersttermin':km===null?'Standort für die Entfernung ergänzen':distanceText())+'</strong>'+(band&&!onlineAppointments().first?'<p>'+band[2]+' · grobe Orientierung</p>':'')+'<p class="dashboard-score-reason">Online-Ersttermin: 7 P. · bis 20 km: 5,6 P. · bis 50 km: 4,2 P. · bis 100 km: 2,8 P. · bis 300 km: 1,4 P. · bis 800 km: 0,7 P. · darüber: 0 P.</p><a class="dashboard-detail" href="#termin">Standort und Einordnung ansehen →</a></section>';
+    return dashboardScore()+'<div class="dashboard-grid dashboard-columns"><div class="dashboard-column">'+card('Long-Covid-gerechter Termin','adaptation',scales.adaptation,'termin')+card('Therapiekosten',costKey,scales.costs.map(label=>window.LCNCost?.amount(label,costSystem().code==='CH'?'CHF':'EUR')||label),'zugang',costChoices)+card('Wartezeit auf den Ersttermin','wait',scales.wait,'zugang')+card('Wartezeit auf Folgetermine','wait-followup',scales.wait,'zugang')+'</div><div class="dashboard-column">'+appointments+card('Zustandsveränderung','effect',scales.effect,'wirkung')+treatments+travel+'</div></div>';
   }
   const views = { ueberblick: overview, termin: appointment, zugang: access, wirkung: effect, dashboard: dashboard };
   function render(focus = false) {
@@ -658,8 +670,16 @@
       return;
     }
     content.innerHTML = views[state.view]();
+    content.querySelectorAll('.cost-contexts,.dashboard-insurance').forEach(node=>{
+      const control=document.createElement('div');control.className='cost-preferences';control.innerHTML=(window.LCNCost?.countryControl()||'')+(window.LCNCost?.currencyControl()||'')+'<small>'+(window.LCNCost?.rateNote(costSystem().code==='CH'?'CHF':'EUR')||'')+'</small>';node.closest('.card').append(control);
+    });
+    content.querySelectorAll('.cost-contexts,.dashboard-insurance').forEach(node=>{
+      const card=node.closest('.card'),base=costSystem().code==='CH'?'CHF':'EUR';
+      card.querySelectorAll('[data-choice^="costs-"]').forEach((button,i)=>{const text=window.LCNCost?.converted(scales.costs[i],base);if(text){const conversion=document.createElement('small');conversion.className='cost-converted';conversion.textContent=text;button.append(conversion);}});
+    });
     alignCommunityCounters();
     decorateBoxHeadings();
+    window.dispatchEvent(new Event('lcn-doctor-rendered'));
     profileMap?.invalidateSize();
     updateAnswerControls();
     detailMap = createMap(document.getElementById('doctor-detail-map'));
@@ -670,6 +690,10 @@
 
     if (focus) { content.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'instant' }); }
   }
+  window.addEventListener('lcn-online-ready',()=>{if(state.data)render();});
+  window.addEventListener('lcn-exchange-rates',()=>{if(state.data)render();});
+  async function changeDoctorCostPreferences(patch){if(state.saving||communityLoading)return;const previous=window.LCNCost.get(),insurance=state.insurance,before=costContext();window.LCNCost.set(patch);state.insurance=window.LCNCost.get().insurance.toLowerCase();const next=costContext();if(before!==next&&Object.keys(state.selections).some(k=>k.startsWith('costs-'))){if(!await saveAnswer({action:'move_cost_context',question:'costs-'+next})){window.LCNCost.set(previous);state.insurance=insurance;}}render();}
+  content.addEventListener('change',event=>{const target=event.target;if(target.matches('[data-doctor-city]')){locationCity=target.value;render();return;}if(target.matches('[data-doctor-radius-enabled]')){locationRadiusEnabled=target.checked;render();return;}if(target.matches('[data-doctor-radius]')){if(target.validity.valid){locationRadius=Number(target.value);render();}return;}if(state.saving)return;if(event.target.matches('[data-cost-country]'))changeDoctorCostPreferences({country:event.target.value});else if(event.target.matches('[data-cost-currency]'))changeDoctorCostPreferences({currency:event.target.value});});
   function navigate(focus) {
     const view = location.hash.slice(1);
     state.view = Object.hasOwn(views, view) ? view : 'ueberblick';
@@ -773,9 +797,7 @@
       const key = button.dataset.choice, value = Number(button.dataset.value);
       saveAnswer(state.selections[key] === value ? {action:'clear',question:key} : {question:key,value:value+1});
     } else if (button.dataset.insurance) {
-      state.insurance = button.dataset.insurance;
-      render();
-      content.querySelector(`[data-insurance="${state.insurance}"]`).focus();
+      changeDoctorCostPreferences({insurance:button.dataset.insurance.toUpperCase()});
       } else if(button.id==='treatment-reset-filters') {
       Object.assign(state,{treatmentQuery:'',treatmentFilterCategories:null,treatmentOnlyRated:false,treatmentPositiveMin:0,treatmentNegativeMax:100,treatmentCategory:null,treatmentSort:null,treatmentSortDirection:'desc'});
       refreshTreatmentControls('treatment-reset-filters');
