@@ -1,45 +1,17 @@
-const assert=require('node:assert/strict');
-const calculate=require('../scripts/doctor_dashboard_score.js');
-const options=(count,index,size)=>({options:Array.from({length:size},(_,i)=>({count:i===index?count:0}))});
-const input={questions:{},costKey:'costs-gkv',treatmentCount:60,categoryCount:8,editorialCount:4,editorialTotal:29,distance:10};
-for(const [key,size] of [['adaptation',5],['costs-gkv',6],['wait',5],['wait-followup',5],['effect',4],['appointment-0-1',2],['appointment-1-2',2]])input.questions[key]=options(9,0,size);
-let result=calculate(input);
-assert.equal(result.fieldCount,9);
-assert.equal(result.availableFieldCount,2); // Therapy profile and personal travel only.
-for(const row of result.rows.filter(row=>row.answerCount))assert.equal(row.value,null);
-for(const q of Object.values(input.questions))q.options[0].count=10;
-result=calculate(input);
-assert.equal(result.availableFieldCount,9);
-assert.equal(result.coverage,100);
-assert.equal(result.rows.reduce((sum,row)=>sum+row.weight,0),100);
-for(const [index,points] of [[0,0],[1,5],[2,10],[3,15]]){
- input.questions.effect=options(10,index,4);
- const row=calculate(input).rows.find(row=>row.key==='effect');
- assert.equal(row.value*row.weight,points);
- assert.equal(row.scalePoints[index],points);
-}
-input.questions['appointment-0-1']=options(9,0,2);
-input.questions['appointment-0-2']=options(10,1,2);
-assert.equal(calculate(input).rows.find(row=>row.label==='Ersttermin aus der Ferne').value,0); // Nine yes votes must not override ten no votes.
-delete input.questions['appointment-0-2'];
-assert.equal(calculate(input).rows.find(row=>row.label==='Ersttermin aus der Ferne').value,null);
-for(const key of ['wait','wait-followup'])delete input.questions[key];
-result=calculate(input);
-assert.equal(result.availableFieldCount,6);
-assert(result.dataCoverage<70);
-input.questions.wait=options(10,0,5);
-result=calculate(input);
-assert.equal(result.availableFieldCount,7);
-assert(result.dataCoverage>=70);
-console.log('PASS: ten-answer threshold, equal effect scale, grouped therapy field, remote eligibility, 70% boundary, 100-point weights.');
-
-const travel = data => calculate(data).rows.find(row=>row.label==='Persönliche Anreise');
-assert.equal(travel({questions:{},onlineFirst:true}).value,1);
-assert.equal(travel({questions:{},distance:10}).value,.8);
-assert.equal(travel({questions:{'appointment-0-2':options(10,0,2)}}).value,null);
-assert.equal(travel({questions:{'appointment-0-2':options(10,0,2),'appointment-1-2':options(10,0,2)}}).value,1);
-assert.equal(travel({questions:{'appointment-0-2':options(10,0,2),'appointment-1-2':options(10,1,2)},distance:10}).value,.8);
-assert.equal(travel({questions:{'appointment-0-2':options(10,1,2)},onlineFirst:true}).value,null);
-assert.equal(travel({questions:{'appointment-0-3':options(10,0,2)}}).value,null);
-
-const costEight={questions:{'costs-gkv':{options:Array.from({length:8},(_,i)=>({count:i===7?10:0}))}},costKey:'costs-gkv'};assert.equal(calculate(costEight).rows.find(r=>r.label==='Eigene Therapiekosten').value,0);costEight.questions['costs-gkv'].options[7].count=0;costEight.questions['costs-gkv'].options[0].count=10;assert.equal(calculate(costEight).rows.find(r=>r.label==='Eigene Therapiekosten').value,1);
+const assert=require('node:assert/strict'),calculate=require('../scripts/doctor_dashboard_score');
+const options=(n,i,size)=>({options:Array.from({length:size},(_,j)=>({count:j===i?n:0}))});
+const base={questions:{adaptation:options(10,4,5),'costs-gkv':options(10,0,8),wait:options(10,0,5),'wait-followup':options(10,0,5),effect:options(10,3,4),'appointment-0-2':options(10,1,2),'appointment-1-2':options(10,1,2)},costKey:'costs-gkv',treatmentCount:60,categoryCount:8,distance:10};
+let r=calculate(base);assert.equal(r.coverage,100);assert.equal(r.rows.reduce((n,r)=>n+r.weight,0),100);assert(!r.rows.some(r=>r.label==='Redaktionelle Auswahl'));
+const row=(data,label)=>calculate(data).rows.find(r=>r.label===label);
+assert.equal(row(base,'Termin-Anpassung').weight,6);assert.equal(row(base,'Ersttermin aus der Ferne').weight,3);assert.equal(row(base,'Folgetermin aus der Ferne').weight,3);assert.equal(row(base,'Persönliche Anreise').weight,18);assert.equal(row(base,'Eigene Therapiekosten').weight,20);assert.equal(row(base,'Anzahl Therapien').weight,7);assert.equal(row(base,'Vielfalt der Kategorien').weight,3);
+for(const [i,points] of [[0,0],[1,10],[2,20],[3,30]])assert.equal(row({...base,questions:{...base.questions,effect:options(10,i,4)}},'Berichtete Zustandsveränderung').value*30,points);
+const remote={...base,distance:5000,questions:{...base.questions,adaptation:options(10,0,5),'appointment-0-2':options(10,0,2),'appointment-1-2':options(10,0,2)}};
+r=calculate(remote);assert(r.remoteComplete);assert.equal(r.earned,100);assert.equal(r.rows.filter(r=>r.remoteOverride).reduce((n,r)=>n+r.value*r.weight,0),30);
+assert.equal(calculate({...remote,questions:{...remote.questions,'appointment-1-2':options(10,1,2)}}).remoteComplete,false);
+assert.equal(calculate({...remote,questions:{...remote.questions,'appointment-0-2':options(9,0,2)}}).remoteComplete,false);
+assert.equal(calculate({questions:{},onlineFirst:true}).earned,30);
+assert.equal(calculate({questions:{'appointment-0-2':options(10,1,2)},onlineFirst:true}).remoteComplete,false);
+assert.equal(calculate({questions:{'appointment-0-1':options(10,0,2),'appointment-1-1':options(10,0,2)}}).remoteComplete,true);
+assert.equal(calculate({questions:{}}).score,null);assert.equal(row({questions:{},distance:10},'Persönliche Anreise').value,.8);
+assert.equal(row({...base,treatmentCount:600},'Anzahl Therapien').value,1);assert.equal(row({...base,categoryCount:99},'Vielfalt der Kategorien').value,1);
+console.log('PASS: 30/30/40 weights; full remote replaces entire burden block; only one remote visit insufficient; thresholds, distances, cost and therapy caps.');

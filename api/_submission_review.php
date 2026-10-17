@@ -20,6 +20,11 @@ function lcnNullable(array $payload, string $key): ?string {
 }
 
 function lcnMigrateCommunitySubmissionVotes(PDO $pdo, int $submissionId, string $entityType, int $targetId, ?string $treatmentName = null): void {
+    if ($entityType === 'doctor') {
+        // Keep answers already collected on the provisional detail page.
+        // Existing answers on a merged catalog entry take precedence.
+        $pdo->prepare('INSERT IGNORE INTO doctor_community_answers(dr_id,respondent_key,question_key,context_key,option_value) SELECT ?,respondent_key,question_key,context_key,option_value FROM community_doctor_answers WHERE submission_id=?')->execute([$targetId,$submissionId]);
+    }
     $votes=$pdo->prepare('SELECT voter_key,vote FROM community_submission_votes WHERE submission_id=:id AND migrated_target_id IS NULL FOR UPDATE');
     $votes->execute([':id'=>$submissionId]);
     foreach($votes as $row){
@@ -33,6 +38,10 @@ function lcnMigrateCommunitySubmissionVotes(PDO $pdo, int $submissionId, string 
     }
     $mark=$pdo->prepare('UPDATE community_submission_votes SET migrated_entity_type=:type,migrated_target_id=:target,migrated_at=NOW() WHERE submission_id=:id AND migrated_target_id IS NULL');
     $mark->execute([':type'=>$entityType,':target'=>$targetId,':id'=>$submissionId]);
+}
+
+function lcnMigrateRelationFeedback(PDO $pdo, int $submissionId, int $doctorId, int $treatmentId): void {
+    $pdo->prepare('INSERT IGNORE INTO catalog_relation_feedback(relation_key,respondent_key,stance) SELECT ?,respondent_key,stance FROM catalog_relation_feedback WHERE relation_key=?')->execute(['d:'.$doctorId.':t:'.$treatmentId,'s:'.$submissionId]);
 }
 
 function lcnUniqueTreatmentSlug(PDO $pdo, string $name): string {
@@ -68,7 +77,7 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
     }
     $hasLocation = array_filter([$payload['street']??'', $payload['postal_code']??'', $payload['city']??'', $row['phone']??'']);
     if ($hasLocation) {
-        $country = strtoupper(trim((string)($payload['country'] ?? ''))); $country = in_array($country,['DE','DEUTSCHLAND','GERMANY'],true)?'DE':null;
+        $country = strtoupper(trim((string)($payload['country'] ?? ''))); $country = ['DEUTSCHLAND'=>'DE','GERMANY'=>'DE','ÖSTERREICH'=>'AT','AUSTRIA'=>'AT','SCHWEIZ'=>'CH','SWITZERLAND'=>'CH'][$country]??$country; $country=in_array($country,['DE','AT','CH'],true)?$country:null;
         $lat=filter_var($payload['lat']??null,FILTER_VALIDATE_FLOAT);$lng=filter_var($payload['lng']??null,FILTER_VALIDATE_FLOAT);
         $locationParams=[':id'=>$drId,':label'=>$row['name'],':country'=>$country,':plz'=>lcnNullable($payload,'postal_code'),':city'=>lcnNullable($payload,'city'),':street'=>lcnNullable($payload,'street'),':house'=>lcnNullable($payload,'house_number'),':phone'=>$row['phone']?:null,':email'=>$row['email']?:null,':website'=>$row['website']?:null,':lat'=>$lat===false?null:$lat,':lng'=>$lng===false?null:$lng];
         if((int)($row['existing_target_id']??0)>0){
@@ -94,7 +103,7 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
         $marks=implode(',',array_fill(0,count($treatmentIds),'?'));
         $valid=$pdo->prepare("SELECT treat_id FROM v_lcn_treatments WHERE treat_id IN ($marks)");$valid->execute($treatmentIds);
         $link=$pdo->prepare('INSERT INTO tbl_cpl_entities2treatments_nd (lcn_id,treat_nd_id,note,anbieter_label,dedupe_hash) SELECT :dr,:treat,:note,e.anzeigename,SHA2(CONCAT(CHAR(112,114,111,118,105,100,101,114,58),:dr),256) FROM tbl_entities_nd e WHERE e.lcn_id=:dr AND NOT EXISTS(SELECT 1 FROM tbl_cpl_entities2treatments_nd c WHERE c.lcn_id=:dr AND c.treat_nd_id=:treat)');
-        foreach($valid->fetchAll(PDO::FETCH_COLUMN) as $treatId)$link->execute([':dr'=>$drId,':treat'=>$treatId,':note'=>'Community-Vorschlag #'.$row['submission_id']]);
+        foreach($valid->fetchAll(PDO::FETCH_COLUMN) as $treatId){$link->execute([':dr'=>$drId,':treat'=>$treatId,':note'=>'Community-Vorschlag #'.$row['submission_id']]);lcnMigrateRelationFeedback($pdo,(int)$row['submission_id'],$drId,(int)$treatId);}
     }
     lcnMigrateCommunitySubmissionVotes($pdo,(int)$row['submission_id'],'doctor',$drId);
     return $drId;
@@ -113,7 +122,7 @@ function lcnApproveTreatmentSubmission(PDO $pdo, array $row, array $payload): in
         $marks=implode(',',array_fill(0,count($doctorIds),'?'));
         $valid=$pdo->prepare("SELECT dr_id FROM v_lcn_doctors WHERE dr_id IN ($marks)");$valid->execute($doctorIds);
         $link=$pdo->prepare('INSERT INTO tbl_cpl_entities2treatments_nd (lcn_id,treat_nd_id,note,anbieter_label,dedupe_hash) SELECT :dr,:treat,:note,e.anzeigename,SHA2(CONCAT(CHAR(112,114,111,118,105,100,101,114,58),:dr),256) FROM tbl_entities_nd e WHERE e.lcn_id=:dr AND NOT EXISTS(SELECT 1 FROM tbl_cpl_entities2treatments_nd c WHERE c.lcn_id=:dr AND c.treat_nd_id=:treat)');
-        foreach($valid->fetchAll(PDO::FETCH_COLUMN) as $drId)$link->execute([':dr'=>$drId,':treat'=>$id,':note'=>'Community-Vorschlag #'.$row['submission_id']]);
+        foreach($valid->fetchAll(PDO::FETCH_COLUMN) as $drId){$link->execute([':dr'=>$drId,':treat'=>$id,':note'=>'Community-Vorschlag #'.$row['submission_id']]);lcnMigrateRelationFeedback($pdo,(int)$row['submission_id'],(int)$drId,$id);}
     }
     $nameStmt=$pdo->prepare('SELECT behandlung FROM v_lcn_treatments WHERE treat_id=:id');$nameStmt->execute([':id'=>$id]);
     lcnMigrateCommunitySubmissionVotes($pdo,(int)$row['submission_id'],'treatment',$id,(string)$nameStmt->fetchColumn());

@@ -44,6 +44,8 @@ function lcnTreatmentComparisonProfiles(PDO $p): array {
  foreach(lcnNdRows($p,"SELECT c.treat_nd_id,COUNT(DISTINCT c.lcn_id) n FROM tbl_cpl_entities2treatments_nd c JOIN tbl_entities_nd e ON e.lcn_id=c.lcn_id AND e.aktiv=1 WHERE c.relation_status IN ('bestand','belegt') GROUP BY c.treat_nd_id") as $row){$id=(int)$row['treat_nd_id'];if(isset($profiles[$id]))$profiles[$id]['provider_count']=(int)$row['n'];}
  $remote=lcnDoctorOnlineAccess($p);
  foreach(lcnNdRows($p,"SELECT treat_nd_id,lcn_id FROM tbl_cpl_entities2treatments_nd WHERE relation_status IN ('bestand','belegt') AND lcn_id IS NOT NULL") as $provider){$id=(int)$provider['treat_nd_id'];if(isset($profiles[$id])&&$profiles[$id]['home_delivery']&&($remote[(int)$provider['lcn_id']]['complete']??false))$profiles[$id]['online_at_home']=true;}
+ foreach($profiles as &$profile)$profile['providers']=[];unset($profile);
+ foreach(lcnNdRows($p,"SELECT DISTINCT c.treat_nd_id,c.lcn_id,l.loc_lat,l.loc_lng,e.hausbesuche FROM tbl_cpl_entities2treatments_nd c JOIN tbl_entities_nd e ON e.lcn_id=c.lcn_id AND e.aktiv=1 LEFT JOIN tbl_drs_locations_03 l ON l.dr_id=e.lcn_id WHERE c.relation_status IN ('bestand','belegt')") as $provider){$id=(int)$provider['treat_nd_id'];if(isset($profiles[$id]))$profiles[$id]['providers'][]=['id'=>(int)$provider['lcn_id'],'lat'=>$provider['loc_lat']===null?null:(float)$provider['loc_lat'],'lng'=>$provider['loc_lng']===null?null:(float)$provider['loc_lng'],'home_visit'=>$provider['hausbesuche']==='ja'];}
  return array_values($profiles);
 }
 function lcnSaveTreatmentAnswer(PDO $p,int $id,string $respondent,string $key,string $context,?string $value): void {

@@ -114,6 +114,15 @@
     if(demo)Object.entries(profile.dummy_counts||{}).forEach(([key,values])=>{const field=key+(key.includes('cost')?':'+context:'');const real=counts[field]||[];counts[field]=values.map((n,i)=>Number(n)+Number(real[i]||0));});
     return {...profile,counts};
   }
+  function scoreProfile(profile,counts,context){
+    let origin=null;try{origin=JSON.parse(localStorage.getItem('lcn_shared_location_preference'));}catch{}
+    const valid=v=>v&&v.lat!=null&&v.lng!=null&&Number.isFinite(Number(v.lat))&&Number.isFinite(Number(v.lng))&&Math.abs(Number(v.lat))<=90&&Math.abs(Number(v.lng))<=180;
+    const providers=profile?.providers||[];
+    const distances=valid(origin)?providers.filter(valid).map(p=>{const rad=v=>Number(v)*Math.PI/180,h=Math.sin(rad(p.lat-origin.lat)/2)**2+Math.cos(rad(origin.lat))*Math.cos(rad(p.lat))*Math.sin(rad(p.lng-origin.lng)/2)**2;return 6371*2*Math.asin(Math.sqrt(Math.min(1,h)));}):[];
+    const independent=Boolean(profile?.independent_at_home);
+    const noTravel=independent||Boolean(profile?.home_delivery&&providers.some(p=>p.home_visit||window.LCNOnline?.get(p.id).complete));
+    return window.lcnTreatmentScore(counts,context,null,independent,{distance:distances.length?Math.min(...distances):null,noTravel});
+  }
   function renderSummaries(){
     if(!root.querySelector('[data-treatment-dashboard]'))return;
     const context=window.LCNCost.context();const contextLabel=window.LCNCost.label();
@@ -121,29 +130,30 @@
     // Both cost rows use the same context in the overall score.
     ['unit_cost','total_cost'].forEach(k=>{const card=questions.find(c=>c.dataset.question===k);counts[k+':'+context]=displayedCounts(card,k+':'+context);});
     const ownProfile=comparisonProfiles.find(p=>p.id===Number(root.dataset.treatmentId));
-    const result=window.lcnTreatmentScore(counts,context,ownProfile?.provider_count??null,root.dataset.independentAtHome==='1');
+    const result=scoreProfile(ownProfile||{independent_at_home:root.dataset.independentAtHome==='1'},counts,context);
     const others=comparisonProfiles.filter(p=>p.id!==Number(root.dataset.treatmentId)).map(p=>referenceProfile(p,context));
-    const eligible=others.map(p=>window.lcnTreatmentScore(p.counts,context,p.provider_count??null,Boolean(p.independent_at_home))).filter(r=>r.dataCoverage>70);
+    const eligible=others.map(p=>scoreProfile(p,p.counts,context)).filter(r=>r.dataCoverage>70);
     const comparisonHtml=comparison(result.score,eligible.map(r=>r.score),'Vergleich mit anderen Therapien',(demo||loaded)&&result.dataCoverage>70);
     const explanations={
-      effect:'Verschlechterung: 0 · keine Veränderung: 8,3 · Verbesserung: 16,7 · Heilung: 25 Punkte.',
-      pem:'Keines: 20 · niedrig: 13,3 · mittel: 6,7 · hoch: 0 Punkte.',
+      effect:'Verschlechterung: 0 · keine Veränderung: 10 · Verbesserung: 20 · Heilung: 30 Punkte.',
+      pem:'Keines: 10 · niedrig: 6,7 · mittel: 3,3 · hoch: 0 Punkte.',
       gamechanger:'Der Anteil der Ja-Antworten bestimmt den Teilwert: alle Ja = 10 Punkte, alle Nein = 0 Punkte.',
-      unit_cost:'Kostenlos und komplett übernommen: 10 Punkte. Höhere Eigenanteile ergeben schrittweise weniger Punkte. „Nicht anwendbar“ wird ausgelassen.',
-      total_cost:'Bisherige Gesamtkosten: kostenlos oder komplett übernommen = 10 Punkte. Höhere Eigenanteile ergeben schrittweise weniger Punkte. „Nicht anwendbar“ wird ausgelassen.',
-      setting:'Selbstständig zu Hause: 10 · Hausbesuch: 6,7 · ambulant: 3,3 · stationär: 0 Punkte.',
+      unit_cost:'Kostenlos und komplett übernommen: 20 Punkte. Höhere Eigenanteile ergeben schrittweise weniger Punkte. „Nicht anwendbar“ wird ausgelassen.',
+      total_cost:'Bisherige Gesamtkosten: kostenlos oder komplett übernommen = 20 Punkte. Höhere Eigenanteile ergeben schrittweise weniger Punkte. „Nicht anwendbar“ wird ausgelassen.',
+      setting:'Selbstständig zu Hause: 5 · Hausbesuch: 3,3 · ambulant: 1,7 · stationär: 0 Punkte.',
       access:'Selbstmanagement: 10 · frei erhältlich / privater Behandler: 6,7 · ärztliche Verordnung: 3,3 · nur Studie: 0 Punkte.',
-      providers:result.rows.find(r=>r.key==='providers').reason
+      distance:result.rows.find(r=>r.key==='distance').reason
     };
     const rows=result.rows.map(r=>{
-      const missing=r.key==='providers'?(root.dataset.independentAtHome==='1'?'Nicht anwendbar bei Selbstmanagement':'Anbieterzahl nicht verfügbar'):r.total===0?'Keine Angaben':'Weniger als zehn Angaben ('+r.total+' von 10)';
+      const missing=r.key==='distance'?'Standort oder bestätigte Anbieter fehlen':r.total===0?'Keine Angaben':r.total<10?'Weniger als zehn Angaben ('+r.total+' von 10)':'Nicht zuverlässig auswertbar';
       const value=r.value==null?missing:number(r.value*r.weight)+' / '+number(r.weight)+' Punkte';
       const status=r.value==null?'Nicht in die Gesamtauswertung aufgenommen.':'In die Gesamtauswertung aufgenommen.';
-      return '<div><strong>'+escape(r.label)+'</strong><span>'+value+'</span><small>'+status+' '+escape(explanations[r.key])+'</small></div>';
+      return '<div><strong>'+escape(r.label)+'</strong><span>'+value+'</span><small>'+status+' '+escape((r.reason||'')+' '+(explanations[r.key]||''))+'</small></div>';
     }).join('');
-    const explanation='<div class="score-explanation"><p><strong>Bis zu 100 Punkte</strong></p><p>Jeder Community-Bereich zählt ab zehn auswertbaren Antworten. Fehlende Bereiche werden ausgelassen; oben stehen die erreichten Punkte im Verhältnis zu den aktuell bewertbaren Punkten.</p><p>Die Anbieterzahl stammt aus den hinterlegten Zuordnungen. Für den Gesamtvergleich brauchen andere Therapien mindestens fünf von sieben ausreichend beantworteten Community-Feldern. Jede Therapie zählt gleich.</p></div>';
+    const explanation='<div class="score-explanation"><p><strong>Bis zu 100 Punkte: Belastung 30 · Zugang 30 · Erfahrungen 40</strong></p><p>Community-Teilwerte zählen ab zehn auswertbaren Antworten. Fehlende Teilwerte werden ausgelassen. Entfernung: nächstgelegener bestätigter Anbieter, unabhängig vom Listenfilter. Selbstmanagement zu Hause benötigt keine Anreise.</p><p>Kosten zählen einmal mit 20 Punkten. Gesamtkosten haben Vorrang; Einzelkosten übernehmen bei unzureichenden Gesamtkosten oder mindestens 20 zusätzlichen auswertbaren Angaben. Verwendete Kostenbasis: <strong>'+escape(result.rows.find(r=>r.key===result.costBasis).label)+'</strong>.</p><p>Die reine Anbieteranzahl gibt keine Punkte. Für den Vergleich müssen über 70 % der sieben Teilwerte auswertbar sein; jede Therapie zählt gleich.</p></div>';
+
     root.querySelectorAll('[data-treatment-score]').forEach(node=>{
-      node.innerHTML='<section class="card dashboard-score"><div class="score-top"><div><h3>Gesamtauswertung</h3></div><strong class="score-number">'+(result.coverage?number(result.earned):'–')+'<small> / '+number(result.coverage)+' Punkte</small></strong></div><div class="score-track"><span style="width:'+(result.score||0)+'%"></span></div><p>Für '+result.available+' von 7 Bereichen liegen ausreichend Angaben vor.</p>'+comparisonHtml+'<p class="field-note">Praktische Orientierung aus subjektiven Erfahrungen, kein Nachweis medizinischer Wirksamkeit oder Eignung.</p>'+(node.dataset.treatmentScore==='overview'?'<a href="#dashboard">Aufschlüsselung im Dashboard →</a>':'<div class="ux-dashboard-insurance-settings"><div class="cost-preferences dashboard-country-preferences">'+window.LCNCost.countryControl()+'</div><div class="insurance-toggle" aria-label="Versicherung für die Gesamtauswertung">'+window.LCNCost.systems[window.LCNCost.get().country].map(([c,label])=>'<button type="button" data-dashboard-context="'+c+'" aria-pressed="'+(c===window.LCNCost.get().insurance)+'">'+label+'</button>').join('')+'</div></div><details><summary>Gewichtung und Teilwerte</summary>'+explanation+'<div class="score-parts">'+rows+'</div></details>')+'</section>';
+      node.innerHTML='<section class="card dashboard-score"><div class="score-top"><div><h3>Gesamtauswertung</h3></div><strong class="score-number">'+(result.coverage?number(result.earned):'–')+'<small> / '+number(result.coverage)+' Punkte</small></strong></div><div class="score-track"><span style="width:'+(result.score||0)+'%"></span></div><p>Für '+result.available+' von '+result.fieldCount+' Teilwerten liegen ausreichend Angaben vor.</p>'+comparisonHtml+'<p class="field-note">Praktische Orientierung aus subjektiven Erfahrungen, kein Nachweis medizinischer Wirksamkeit oder Eignung.</p>'+(node.dataset.treatmentScore==='overview'?'<a href="#dashboard">Aufschlüsselung im Dashboard →</a>':'<div class="ux-dashboard-insurance-settings"><div class="cost-preferences dashboard-country-preferences">'+window.LCNCost.countryControl()+'</div><div class="insurance-toggle" aria-label="Versicherung für die Gesamtauswertung">'+window.LCNCost.systems[window.LCNCost.get().country].map(([c,label])=>'<button type="button" data-dashboard-context="'+c+'" aria-pressed="'+(c===window.LCNCost.get().insurance)+'">'+label+'</button>').join('')+'</div></div><details><summary>Gewichtung und Teilwerte</summary>'+explanation+'<div class="score-parts">'+rows+'</div></details>')+'</section>';
     });
     const grid=root.querySelector('[data-treatment-dashboard]');
     grid.innerHTML=questions.filter(c=>!c.dataset.question.startsWith('symptom-')).sort((a,b)=>{const order=['setting','access','pem','unit_cost','total_cost','effect','gamechanger'];return order.indexOf(a.dataset.question)-order.indexOf(b.dataset.question);}).map(card=>{
@@ -172,16 +182,16 @@
         const order=options.map((_,i)=>i).sort((a,b)=>(card.dataset.question==='access'?(a===3?-1:a):a)-(card.dataset.question==='access'?(b===3?-1:b):b));
         graphic='<div class="ux-dashboard-rows">'+order.map(i=>'<div><span>'+label(i)+'</span><div class="dashboard-track"><span style="width:'+percentage(i)+'%"></span></div><strong>'+share(i)+'</strong><b>'+stage(i)+'</b></div>').join('')+'</div>';
       }
-      return '<section class="card ux-dashboard-card" data-dashboard-question="'+card.dataset.question+'"><div class="assessment-header"><h3>'+escape(card.querySelector('h3').childNodes[0].textContent)+'</h3><span class="assessment-count">'+(total?total+' Angaben':'Noch keine Community-Angaben')+'</span></div>'+points+graphic+(scoreRow?'<p class="ux-dashboard-score-note">'+(scoreRow.total<10?'Punktwert ab zehn auswertbaren Angaben.':'Die Community-Anteile gewichten die dargestellten Stufenwerte.')+'</p>':'')+'<a class="dashboard-detail" href="#'+card.closest('.nd-panel').id+'">Details ansehen →</a></section>';
+      return '<section class="card ux-dashboard-card" data-dashboard-question="'+card.dataset.question+'"><div class="assessment-header"><h3>'+escape(card.querySelector('h3').childNodes[0].textContent)+'</h3><span class="assessment-count">'+(total?total+' Angaben':'Noch keine Community-Angaben')+'</span></div>'+points+graphic+(scoreRow?'<p class="ux-dashboard-score-note">'+escape(scoreRow.reason||(scoreRow.total<10?'Punktwert ab zehn auswertbaren Angaben.':'Die Community-Anteile gewichten die dargestellten Stufenwerte.'))+'</p>':card.dataset.kind==='cost'?'<p class="ux-dashboard-score-note">Nicht zusätzlich gewertet. Kostenbasis im Gesamtscore: '+escape(result.rows.find(r=>r.key===result.costBasis).label)+'.</p>':'')+'<a class="dashboard-detail" href="#'+card.closest('.nd-panel').id+'">Details ansehen →</a></section>';
     }).join('');
-    const providerRow=result.rows.find(r=>r.key==='providers');
-    const providerScale=providerRow.value==null?'':'<div class="ux-provider-scale"><div class="ux-provider-progress" role="progressbar" aria-label="Anbieterzahl: volle fünf Punkte ab zehn Anbietern" aria-valuemin="0" aria-valuemax="10" aria-valuenow="'+Math.min(providerRow.providerCount,10)+'" aria-valuetext="'+providerRow.providerCount+' Anbieter, '+number(providerRow.value*5)+' von 5 Punkten"><span style="width:'+providerRow.value*100+'%"></span></div><div class="ux-provider-scale-ticks">'+[0,2,4,6,8,10].map(n=>'<div class="'+(providerRow.providerCount>=n?'is-reached':'')+'"><strong>'+n+(n===10?'+':'')+'</strong><small>'+number(n/2)+' P.</small></div>').join('')+'</div><p>Ab 10 Anbietern: volle 5 Punkte</p></div>';
-    grid.insertAdjacentHTML('beforeend','<section class="card ux-dashboard-card" data-dashboard-question="providers"><h3>Erfasste Anbieter</h3><div class="dashboard-points"><strong>'+(providerRow.value==null?'Nicht gewertet':number(providerRow.value*providerRow.weight)+' <small>/ 5 Punkte</small>')+'</strong></div><strong class="dashboard-result">'+(providerRow.providerCount==null?'Anbieterzahl nicht verfügbar':providerRow.providerCount+' Anbieter')+'</strong>'+providerScale+'<p class="ux-dashboard-score-note">'+escape(providerRow.reason)+'</p><a class="dashboard-detail" href="#termin">Standorte und Anbieter ansehen →</a></section>');
+    const travel=result.rows.find(r=>r.key==='distance');
+    grid.insertAdjacentHTML('beforeend','<section class="card ux-dashboard-card" data-dashboard-question="distance"><h3>Persönliche Anreise</h3><div class="dashboard-points"><strong>'+(travel.value==null?'Noch nicht auswertbar':number(travel.value*15)+' <small>/ 15 Punkte</small>')+'</strong></div><p>'+(travel.noTravel?'Keine Anreise erforderlich':travel.distance==null?'Standort für die Entfernung ergänzen':number(travel.distance)+' km Luftlinie zum nächstgelegenen bestätigten Anbieter')+'</p><p class="ux-dashboard-score-note">'+escape(travel.reason)+'</p><a href="#termin">Standorte ansehen →</a></section>');
+    for(const [title,keys] of [['Welche Belastungshürden gibt es bei der Therapie? · 30 Punkte',['setting','pem','distance']],['Wie zugänglich ist die Therapie? · 30 Punkte',['access','total_cost','unit_cost']],['Welche Erfahrungen gibt es? · 40 Punkte',['effect','gamechanger']]]){const h=document.createElement('h3');h.style.gridColumn='1 / -1';h.textContent=title;grid.append(h);for(const key of keys){const node=grid.querySelector('[data-dashboard-question="'+key+'"]');if(node)grid.append(node);}}
     const rating=result.rows.find(r=>r.key==='effect');
-    const values=others.map(p=>window.lcnTreatmentScore(p.counts,context,p.provider_count??null,Boolean(p.independent_at_home)).rows[0]).filter(r=>r.value!=null).map(r=>1+3*r.value);
+    const values=others.map(p=>scoreProfile(p,p.counts,context).rows[0]).filter(r=>r.value!=null).map(r=>1+3*r.value);
     root.querySelector('[data-rating-comparison]').innerHTML=comparison(rating.value==null?null:1+3*rating.value,values,'Community-Bewertung im Vergleich',(demo||loaded)&&rating.total>=10,4)+'<p class="field-note">Skala 1–4: Verschlechterung bis Heilung. Vergleich mit anderen Therapien ab zehn Bewertungen je Therapie; jede Therapie zählt gleich.</p>';
     const gamechanger=result.rows.find(r=>r.key==='gamechanger');
-    const gameValues=others.map(p=>window.lcnTreatmentScore(p.counts,context,p.provider_count??null,Boolean(p.independent_at_home)).rows.find(r=>r.key==='gamechanger')).filter(r=>r.value!=null).map(r=>100*r.value);
+    const gameValues=others.map(p=>scoreProfile(p,p.counts,context).rows.find(r=>r.key==='gamechanger')).filter(r=>r.value!=null).map(r=>100*r.value);
     const gameCard=questions.find(card=>card.dataset.question==='gamechanger');
     if(gameCard){
       let target=gameCard.querySelector('[data-gamechanger-comparison]');
@@ -189,7 +199,7 @@
       target.innerHTML=comparison(gamechanger.value==null?null:100*gamechanger.value,gameValues,'Gamechanger im Vergleich',(demo||loaded)&&gamechanger.total>=10,100,false,' zur Gamechanger-Frage').replaceAll('Punkte ','Prozentpunkte ').replaceAll(' / 100',' %')+'<p class="field-note">Anteil der Ja-Antworten. Vergleich mit allen anderen Therapien ab zehn Gamechanger-Antworten; jede Therapie zählt gleich.</p>';
     }
     const pem=result.rows.find(r=>r.key==='pem');
-    const pemValues=others.map(p=>window.lcnTreatmentScore(p.counts,context,p.provider_count??null,Boolean(p.independent_at_home)).rows.find(r=>r.key==='pem')).filter(r=>r.value!=null).map(r=>4-3*r.value);
+    const pemValues=others.map(p=>scoreProfile(p,p.counts,context).rows.find(r=>r.key==='pem')).filter(r=>r.value!=null).map(r=>4-3*r.value);
     root.querySelector('[data-pem-comparison]').innerHTML=comparison(pem.value==null?null:4-3*pem.value,pemValues,'Crash-/PEM-Risiko im Vergleich',(demo||loaded)&&pem.total>=10,4,true)+'<p class="field-note">Skala 1–4: keines bis hohes Risiko. Niedrigere Werte bedeuten weniger berichtetes Risiko. Vergleich ab zehn Angaben je Therapie; jede Therapie zählt gleich.</p>';
   }
   async function changeCostPreferences(patch){if(busy)return;const previous=window.LCNCost.get(),before=window.LCNCost.context();window.LCNCost.set(patch);const context=window.LCNCost.context();if(before!==context&&Object.keys(draft).some(k=>k.startsWith('unit_cost:')||k.startsWith('total_cost:'))){if(!await sync({action:'move_cost_context',context}))window.LCNCost.set(previous);}renderAll();}
@@ -262,6 +272,8 @@
     }
   }
   toggle.addEventListener('click',()=>{if(busy)return;demo=!demo;const url=new URL(location.href);url.searchParams.set('demo',demo?'1':'0');history.replaceState(null,'',url);renderAll();});
+  window.addEventListener('storage',event=>{if(['lcn_shared_location_preference','lcn_shared_location_cleared'].includes(event.key))renderSummaries();});
+  window.addEventListener('homepage:location-changed',()=>renderSummaries());
   window.addEventListener('lcn-online-ready',()=>renderAll());
   window.addEventListener('lcn-exchange-rates',()=>{renderCostControls();});
   renderAll();

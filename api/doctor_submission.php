@@ -8,20 +8,28 @@ try {
     $id=filter_var($body['id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
     $pdo=lcnDoctorDatabase();
     $pdo->beginTransaction();
-    $query=$pdo->prepare("SELECT submission_id,name,website,payload,review_status FROM community_submissions WHERE submission_id=? AND entity_type='doctor' AND review_status IN ('pending','reviewing','approved') FOR UPDATE");$query->execute([$id]);$row=$query->fetch();
+    $query=$pdo->prepare("SELECT submission_id,name,website,payload,review_status,approved_target_id FROM community_submissions WHERE submission_id=? AND entity_type='doctor' AND review_status IN ('pending','reviewing','approved') FOR UPDATE");$query->execute([$id]);$row=$query->fetch();
     if(!$row){$pdo->rollBack();lcnSendVoteJson(['ok'=>false,'error'=>'Eintrag nicht verfügbar.'],404);}
+    if($row['review_status']==='approved'&&(int)$row['approved_target_id']>0){$pdo->commit();lcnSendVoteJson(['ok'=>true,'approved_target_id'=>(int)$row['approved_target_id']]);}
     $definitions=lcnDoctorCommunityQuestions();
     if($method==='POST' && ($body['action']??'')==='reset'){
         $delete=$pdo->prepare('DELETE FROM community_doctor_answers WHERE submission_id=? AND respondent_key=?');$delete->execute([$id,lcnVoterKey()]);
+    } elseif($method==='POST' && ($body['action']??'')==='move_cost_context'){
+        $definition=$definitions[$body['question']??'']??null;
+        if(!$definition||$definition['question']!=='costs_total_v2')throw new InvalidArgumentException('Ungültiger Kostenkontext.');
+        $old=$pdo->prepare("SELECT option_value FROM community_doctor_answers WHERE submission_id=? AND respondent_key=? AND question_key='costs_total_v2' ORDER BY updated_at DESC LIMIT 1");$old->execute([$id,lcnVoterKey()]);$value=$old->fetchColumn();
+        if($value!==false){$pdo->prepare("DELETE FROM community_doctor_answers WHERE submission_id=? AND respondent_key=? AND question_key='costs_total_v2'")->execute([$id,lcnVoterKey()]);$pdo->prepare('INSERT INTO community_doctor_answers(submission_id,respondent_key,question_key,context_key,option_value) VALUES(?,?,?,?,?)')->execute([$id,lcnVoterKey(),$definition['question'],$definition['context'],$value]);}
     } elseif($method==='POST' && ($body['action']??'')==='clear'){
         $key=$body['question']??null;
         if(!is_string($key)||!isset($definitions[$key])){$pdo->rollBack();lcnSendVoteJson(['ok'=>false,'error'=>'Ungültige Frage.'],422);}
         $definition=$definitions[$key];
+        if($definition['question']==='costs_total_v2')$pdo->prepare("DELETE FROM community_doctor_answers WHERE submission_id=? AND respondent_key=? AND question_key='costs_total_v2'")->execute([$id,lcnVoterKey()]);
         $delete=$pdo->prepare('DELETE FROM community_doctor_answers WHERE submission_id=? AND respondent_key=? AND question_key=? AND context_key=?');$delete->execute([$id,lcnVoterKey(),$definition['question'],$definition['context']]);
     } elseif($method==='POST'){
         $key=$body['question']??null;$value=$body['value']??null;
         if(!is_string($key)||!isset($definitions[$key])||!is_int($value)||$value<1||$value>count($definitions[$key]['labels'])){$pdo->rollBack();lcnSendVoteJson(['ok'=>false,'error'=>'Ungültige Antwort.'],422);}
         $definition=$definitions[$key];
+        if($definition['question']==='costs_total_v2')$pdo->prepare("DELETE FROM community_doctor_answers WHERE submission_id=? AND respondent_key=? AND question_key='costs_total_v2'")->execute([$id,lcnVoterKey()]);
         $save=$pdo->prepare('INSERT INTO community_doctor_answers(submission_id,respondent_key,question_key,context_key,option_value) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE option_value=VALUES(option_value)');$save->execute([$id,lcnVoterKey(),$definition['question'],$definition['context'],$value]);
     }
     $query=$pdo->prepare('SELECT question_key,context_key,option_value,COUNT(*) n FROM community_doctor_answers WHERE submission_id=? GROUP BY question_key,context_key,option_value');$query->execute([$id]);$counts=$query->fetchAll();

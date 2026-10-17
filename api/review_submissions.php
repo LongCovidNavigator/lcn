@@ -15,21 +15,23 @@ try {
         if (!in_array($status,['pending','reviewing','approved','rejected','duplicate','all'],true)) $status='pending';
         $sql='SELECT submission_id,entity_type,existing_target_id,submission_kind,review_status,triage_status,triage_score,duplicate_target_id,triage_reasons,name,website,email,phone,city,experience,payload,created_at,reviewed_at,approved_target_id,reviewer_note FROM community_submissions';
         $params=[]; if($status!=='all'){ $sql.=' WHERE review_status=:status'; $params[':status']=$status; }
-        $sql.=' ORDER BY created_at DESC LIMIT 200'; $stmt=$pdo->prepare($sql); $stmt->execute($params);
-        $items=$stmt->fetchAll(); foreach($items as &$item){$item['payload']=lcnSubmissionPayload($item);$item['triage_reasons']=json_decode((string)($item['triage_reasons']??'[]'),true)?:[];$item['submission_id']=(int)$item['submission_id'];$item['triage_score']=(int)$item['triage_score'];$item['existing_target_id']=$item['existing_target_id']!==null?(int)$item['existing_target_id']:null;$item['duplicate_target_id']=$item['duplicate_target_id']!==null?(int)$item['duplicate_target_id']:null;}
+        $offset=max(0,(int)($_GET['offset']??0));
+        $sql.=' ORDER BY created_at DESC, submission_id DESC LIMIT 201 OFFSET '.$offset; $stmt=$pdo->prepare($sql); $stmt->execute($params);
+        $items=$stmt->fetchAll();$hasMore=count($items)>200;if($hasMore)array_pop($items); foreach($items as &$item){$item['payload']=lcnSubmissionPayload($item);$item['triage_reasons']=json_decode((string)($item['triage_reasons']??'[]'),true)?:[];$item['submission_id']=(int)$item['submission_id'];$item['triage_score']=(int)$item['triage_score'];$item['existing_target_id']=$item['existing_target_id']!==null?(int)$item['existing_target_id']:null;$item['duplicate_target_id']=$item['duplicate_target_id']!==null?(int)$item['duplicate_target_id']:null;}
         unset($item);
         $feedbackQuery=$pdo->prepare('SELECT COALESCE(SUM(stance=1),0) confirmations,COALESCE(SUM(stance=-1),0) objections FROM catalog_relation_feedback WHERE relation_key IN (?,?)');
-        foreach($items as &$item){$relation=$item['payload']['relationship']??[];$key=isset($relation['doctor_id'],$relation['treatment_id'])?'d:'.(int)$relation['doctor_id'].':t:'.(int)$relation['treatment_id']:'';$feedbackQuery->execute([$key,'s:'.$item['submission_id']]);$votes=$feedbackQuery->fetch(PDO::FETCH_ASSOC);$item['payload']['community_feedback']=(int)$votes['confirmations'].' Bestätigungen · '.(int)$votes['objections'].' Widersprüche';}unset($item);
-        lcnSendVoteJson(['ok'=>true,'items'=>$items]);
+        foreach($items as &$item){$relation=$item['payload']['relationship']??[];$key=isset($relation['doctor_id'],$relation['treatment_id'])?'d:'.(int)$relation['doctor_id'].':t:'.(int)$relation['treatment_id']:'';$feedbackQuery->execute([$key,'s:'.$item['submission_id']]);$votes=$feedbackQuery->fetch(PDO::FETCH_ASSOC);$item['community_feedback']=['confirm'=>(int)$votes['confirmations'],'oppose'=>(int)$votes['objections']];$item['payload']['community_feedback']=(int)$votes['confirmations'].' Bestätigungen · '.(int)$votes['objections'].' Widersprüche';}unset($item);
+        lcnSendVoteJson(['ok'=>true,'items'=>$items,'has_more'=>$hasMore]);
     }
     if (($_SERVER['REQUEST_METHOD']??'')!=='POST') lcnSendVoteJson(['ok'=>false,'error'=>'Method not allowed.'],405);
     $input=json_decode((string)file_get_contents('php://input'),true,16,JSON_THROW_ON_ERROR);
     $id=filter_var($input['submission_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]); $action=(string)($input['action']??''); $note=trim((string)($input['note']??''));
-    if($id===false||!in_array($action,['reviewing','approve','merge','reject','duplicate'],true)||mb_strlen($note)>3000) lcnSendVoteJson(['ok'=>false,'error'=>'Ungültige Aktion.'],422);
+    if($id===false||!in_array($action,['approve','merge','reject','duplicate'],true)||mb_strlen($note)>3000) lcnSendVoteJson(['ok'=>false,'error'=>'Ungültige Aktion.'],422);
     $pdo->beginTransaction();
     $stmt=$pdo->prepare('SELECT * FROM community_submissions WHERE submission_id=:id FOR UPDATE');$stmt->execute([':id'=>$id]);$row=$stmt->fetch();
     if(!$row) throw new DomainException('Vorschlag nicht gefunden.');
-    $targetId=null;$status=['reviewing'=>'reviewing','reject'=>'rejected','duplicate'=>'duplicate','approve'=>'approved','merge'=>'approved'][$action];
+    if(!in_array($row['review_status'],['pending','reviewing'],true))throw new DomainException('Dieser Antrag wurde bereits abgeschlossen. Bitte die Übersicht neu laden.');
+    $targetId=null;$status=['reject'=>'rejected','duplicate'=>'duplicate','approve'=>'approved','merge'=>'approved'][$action];
     if($action==='merge'){
         $duplicateId=(int)($row['duplicate_target_id']??0);
         if($duplicateId<1)throw new DomainException('Für diesen Vorschlag wurde kein bestehender Zieleintrag erkannt.');

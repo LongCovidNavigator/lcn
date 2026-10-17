@@ -143,7 +143,7 @@
         setOrigin(data.result,query);
       }catch{host.querySelector('[data-map-status]').textContent='Ausgangsort konnte nicht gefunden werden. Bitte Ort oder PLZ prüfen und erneut versuchen.';}finally{button.disabled=false;}
     });
-    host.querySelector('[data-map-clear]').addEventListener('click',()=>{entry.dismiss();origin=null;try{localStorage.removeItem(sharedKey);localStorage.setItem('lcn_shared_location_cleared','1');}catch{}entries.forEach(render);});
+    host.querySelector('[data-map-clear]').addEventListener('click',()=>{entry.dismiss();origin=null;try{localStorage.removeItem(sharedKey);localStorage.setItem('lcn_shared_location_cleared','1');}catch{}entries.forEach(render);window.dispatchEvent(new CustomEvent('homepage:location-changed'));});
   });
   function setOrigin(result,label){
     origin={lat:Number(result.lat),lng:Number(result.lng),label:result.formatted||result.label||label,city:result.city||''};
