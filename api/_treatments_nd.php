@@ -57,7 +57,9 @@ function lcnNdDetail(PDO $pdo, int $id): ?array
         WHERE c.treat_nd_id = ? ORDER BY p.name', [$id]);
     $item['relations'] = lcnNdRows($pdo, 'SELECT r.*, COALESCE(n.treat_nd_id, mapped.treat_nd_id) AS resolved_nd_id,
         COALESCE(n.treatmentname, mapped.treatmentname, r.target_label, old.behandlung) AS resolved_name,
-        old.treat_id AS resolved_legacy_id
+        old.treat_id AS resolved_legacy_id,
+        COALESCE(n.typ, mapped.typ) AS resolved_category,
+        COALESCE(n.unterkategorie, mapped.unterkategorie) AS resolved_subcategory
         FROM tbl_cpl_treatments_nd_relations r
         LEFT JOIN tbl_treatments_nd n ON n.treat_nd_id = r.target_treat_nd_id
         LEFT JOIN tbl_treatments_nd mapped ON r.target_treat_nd_id IS NULL AND mapped.legacy_treat_id = r.target_legacy_treat_id

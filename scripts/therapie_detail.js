@@ -1607,6 +1607,8 @@ function translateAliasType(aliasType) {
         generic_name: "Wirkstoffname",
         spelling_variant: "Schreibvariante",
         umbrella_term: "Oberbegriff",
+        application_form: "Anwendungsform",
+        combination_component: "Kombinationsbestandteil",
         long_name: "Langname",
         combo_alias_for_single_search: "Kombi-Suchbegriff",
         combo_alias_for_single_search_de: "Kombi-Suchbegriff"

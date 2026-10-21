@@ -2,6 +2,7 @@
 require_once __DIR__.'/_symptom_proposals.php';
 require_once __DIR__ . '/_submission_treatments.php';
 require_once __DIR__ . '/_catalog_relations.php';
+require_once __DIR__ . '/_treatment_relationship_proposals.php';
 require_once __DIR__ . '/_voting.php';
 require_once __DIR__ . '/_site_auth.php';
 
@@ -110,6 +111,7 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
 }
 
 function lcnApproveTreatmentSubmission(PDO $pdo, array $row, array $payload): int {
+    if(isset($payload['treatment_relationship']))return lcnApproveTreatmentRelationship($pdo,$row,$payload);
     if(isset($payload['symptom_proposal']))return lcnApproveSymptomProposal($pdo,$row,$payload);
     $id=(int)($row['existing_target_id']??0);
     if($id>0){$exists=$pdo->prepare('SELECT 1 FROM v_lcn_treatments WHERE treat_id=:id');$exists->execute([':id'=>$id]);if(!$exists->fetchColumn())throw new DomainException('Die zu ergänzende Therapie existiert nicht mehr.');

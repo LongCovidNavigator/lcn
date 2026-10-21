@@ -70,7 +70,10 @@ function lcnLoadEnvFile(): void
             putenv($key . '=' . $value);
         }
 
-        $_ENV[$key] = getenv($key) !== false ? (string)getenv($key) : $value;
+        // Keep a request-local snapshot: another Apache thread may restore its
+        // putenv values while this request is still serving parallel API calls.
+        $_ENV[$key] = $environmentValue !== false && trim((string)$environmentValue) !== ''
+            ? (string)$environmentValue : $value;
     }
 
     $loaded = true;
@@ -83,7 +86,8 @@ function lcnEnv(string $key, ?string $default = null): ?string
     $value = getenv($key);
 
     if ($value === false || trim((string)$value) === '') {
-        return $default;
+        $value = $_ENV[$key] ?? null;
+        if ($value === null || trim((string)$value) === '') return $default;
     }
 
     return (string)$value;

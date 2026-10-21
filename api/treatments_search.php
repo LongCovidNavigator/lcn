@@ -575,8 +575,8 @@ try {
                 ORDER BY
                     CASE WHEN {$normalizedAliasSql} = :suggest_exact THEN 0 ELSE 1 END,
                     a.alias ASC,
-                    c.sort_order ASC,
-                    t.behandlung ASC
+                    t.behandlung ASC,
+                    t.treat_id ASC
                 LIMIT 500
             ");
 

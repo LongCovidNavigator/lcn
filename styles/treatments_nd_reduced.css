@@ -188,6 +188,8 @@ body.ux-page{background:radial-gradient(ellipse at 35% 0,#e4f7ff 0,transparent 6
 .ux-symptom-groups>section{padding:13px;background:#fbfdff;border-color:#ddecf9;border-radius:7px}
 .ux-symptom-groups h4{font-size:12px;color:#0b50bd;margin:0 0 13px}
 .ux-alternatives{gap:12px}
+.ux-alternatives.ux-alternatives-unified{grid-template-columns:minmax(0,1fr)}
+.ux-peer-grid .ux-unlinked-entry{border:1px solid #ddebf7;border-radius:7px;padding:13px;background:#fcfeff}
 .ux-alternatives .card{padding:16px;margin-bottom:0}
 .ux-alternatives .card h3{font-size:13px;border-bottom:1px solid #e4edf8;padding-bottom:10px}
 .ux-empty-relation>span{width:32px;height:32px;display:grid;place-items:center;color:#719ece;border:1px dashed #bed5eb;border-radius:50%;margin:17px 0 12px;font-size:17px}

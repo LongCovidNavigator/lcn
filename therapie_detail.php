@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/api/_treatments_nd.php';
+require_once __DIR__ . '/api/_treatment_discovery.php';
 require_once __DIR__ . '/api/_treatment_id_migration.php';
 if (isset($_GET['nd_id']) && !isset($_GET['treatment_id'])) {
     $previous = filter_var($_GET['nd_id'], FILTER_VALIDATE_INT);
@@ -17,6 +18,8 @@ if (isset($_GET['nd_id']) && !isset($_GET['treatment_id'])) {
 }
 require_once __DIR__ . '/components/treatments_nd_view.php';
 require_once __DIR__ . '/components/treatments_nd_reduced.php';
+require_once __DIR__ . '/components/treatment_relationship_stages.php';
+require_once __DIR__ . '/components/treatment_combinations.php';
 require_once __DIR__ . '/components/treatments_nd_map.php';
 $id = filter_var($_GET['treatment_id'] ?? null, FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]);
 $legacyId = filter_var($_GET['treat_id'] ?? null, FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]);
@@ -78,36 +81,36 @@ $views = ['ueberblick'=>'Überblick','termin'=>'Welche Belastungshürden gibt es
 <ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol>
 <div class="ux-symptom-picker" data-symptom-combobox><label for="symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="symptom-search" type="text" role="combobox" data-symptom-search placeholder="Symptom auswählen oder eintippen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="symptom-picker"><button type="button" data-symptom-toggle aria-label="Symptomliste öffnen" aria-controls="symptom-picker" aria-expanded="false">⌄</button></div><div id="symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div>
 </section></section>
-<section id="alternativen" class="nd-panel" aria-label="Therapiealternativen" hidden><p>Verknüpfte Therapien entdecken · keine Empfehlung oder Rangliste.</p><div class="ux-alternatives">
+<section id="alternativen" class="nd-panel" aria-label="Therapiealternativen" hidden>
+<p>Verknüpfte Therapien entdecken.</p>
+<section class="card ux-discovery ux-alternative-section"><h3>Alternative Therapien</h3>
+<div class="ux-alternative-strip" role="group" aria-label="Aktuelle Therapie und Alternativen">
+<article class="ux-alternative-tile ux-alternative-current"><small>Aktuelle Therapie</small><strong><?= ndEscape($item['treatmentname']) ?></strong>
+<?php if(ndHas($item['typ'])): ?><span class="ux-alternative-category"><?= ndEscape($item['typ']) ?></span><?php endif; ?>
+<?php if(ndHas($item['unterkategorie'])): ?><span class="ux-alternative-subcategory"><?= ndEscape($item['unterkategorie']) ?></span><?php endif; ?>
+</article>
+<div class="ux-alternative-options" role="region" aria-label="Alternativen – horizontal scrollbar" tabindex="0">
+<?php $seen=[]; $relationCount=0; foreach ($item['relations'] as $relation):
+if (!$relation['resolved_name']) continue;
+$href=$relation['resolved_nd_id'] ? 'therapie_detail.php?treatment_id='.(int)$relation['resolved_nd_id'].'#alternativen' : ($relation['resolved_legacy_id'] ? 'therapie_detail.html?treat_id='.(int)$relation['resolved_legacy_id'] : null);
+$key=$href ?? $relation['resolved_name']; if(isset($seen[$key]))continue; $seen[$key]=true; $relationCount++;
+?><article class="ux-alternative-tile ux-feedback-relation">
+<div class="ux-alternative-categories"><?php if(ndHas($relation['resolved_category'] ?? null)): ?><span class="ux-alternative-category"><?= ndEscape($relation['resolved_category']) ?></span><?php endif; ?>
+<?php if(ndHas($relation['resolved_subcategory'] ?? null)): ?><span class="ux-alternative-subcategory"><?= ndEscape($relation['resolved_subcategory']) ?></span><?php endif; ?></div>
+<?php if($href): ?><a class="ux-alternative-name" href="<?= ndEscape($href) ?>"><?= ndEscape($relation['resolved_name']) ?></a><?php else: ?><strong class="ux-alternative-name"><?= ndEscape($relation['resolved_name']) ?></strong><?php endif; ?>
+<?php $relationStatement='„'.$relation['resolved_name'].'“ ist als alternative Therapie zu „'.$item['treatmentname'].'“ eingetragen.'; ?>
+<div class="ux-alternative-feedback"><small class="ux-feedback-statement"><?= ndEscape($relationStatement) ?></small><span data-treatment-relation-feedback="tr:<?= (int)$relation['relation_id'] ?>" data-feedback-statement="<?= ndEscape($relationStatement) ?>" data-feedback-standard="1"></span></div></article>
+<?php endforeach; ?>
+<button type="button" class="ux-alternative-tile ux-alternative-add" data-treatment-relation-add data-kind="alternative"><span aria-hidden="true">＋</span><span>Weitere Therapie hinzufügen</span></button>
+</div></div>
+<?php if(!$relationCount): ?><p class="ux-alternative-empty">Noch keine Alternative hinterlegt.</p><?php endif; ?>
+</section>
 <?php
-foreach (['verwandte Behandlung'=>'Verwandte Therapien','alternative Behandlung'=>'Alternative Therapien','alternatives Präparat'=>'Alternative Präparate'] as $type=>$label) {
-    $entries='';
-    foreach ($item['relations'] as $relation) {
-        if ($relation['beziehungstyp'] !== $type || !$relation['resolved_name']) continue;
-        $href=$relation['resolved_nd_id'] ? 'therapie_detail.php?treatment_id='.(int)$relation['resolved_nd_id'] : ($relation['resolved_legacy_id'] ? 'therapie_detail.html?treat_id='.(int)$relation['resolved_legacy_id'] : null);
-        if ($href) $entries.='<li><a href="'.ndEscape($href).'">'.ndEscape($relation['resolved_name']).' →</a></li>';
-    }
-    $content = $entries ? '<ul class="nd-directory">'.$entries.'</ul>' : '<div class="ux-empty-relation"><span aria-hidden="true">↗</span><strong>Noch keine Verknüpfung hinterlegt</strong><p>Für diese Therapie ist dieser Beziehungstyp bisher nicht dokumentiert.</p></div>';
-    echo ndCard($label, $content);
-} ?>
-</div>
-<?php
-$aliasPeers=[];
-foreach ($item['alias_peers'] as $peer) {
-    $peerKey=$peer['resolved_nd_id'] ? 'nd:'.$peer['resolved_nd_id'] : 'legacy:'.$peer['resolved_legacy_id'];
-    $aliasPeers[$peerKey]['peer']=$peer;
-    $aliasPeers[$peerKey]['aliases'][]=$peer['alias'];
-}
-if ($aliasPeers): ?>
-<section class="card ux-discovery ux-alias-discovery"><div class="ux-discovery-heading"><div><span class="ux-eyebrow">Vorhandene Verknüpfungen</span><h3>Über gemeinsame Bezeichnungen verbunden</h3></div><span class="ux-count">Alias-System</span></div><p>Diese Einträge teilen eine Alias-Bezeichnung mit dieser Therapie. Eine gemeinsame Bezeichnung kann auch auf eine Kombination verweisen und belegt keine Austauschbarkeit.</p><div class="ux-peer-grid">
-<?php foreach ($aliasPeers as $entry): $peer=$entry['peer']; $href=$peer['resolved_nd_id'] ? 'therapie_detail.php?treatment_id='.(int)$peer['resolved_nd_id'] : 'therapie_detail.html?treat_id='.(int)$peer['resolved_legacy_id']; ?>
-<a href="<?= ndEscape($href) ?>"><strong><?= ndEscape($peer['resolved_name']) ?><span aria-hidden="true">↗</span></strong><small>Gemeinsame Alias-Bezeichnung<?= $peer['resolved_nd_id'] ? '' : ' · bisheriger Katalog' ?></small><?= ndChips(array_unique($entry['aliases'])) ?></a>
-<?php endforeach; ?></div></section><?php endif;
-$peers=[];
-foreach ($item['symptom_peers'] as $peer) { $peers[$peer['treat_nd_id']]['name']=$peer['treatmentname']; $peers[$peer['treat_nd_id']]['symptoms'][]=$peer['sym_name']; }
-if ($peers): ?>
-<section class="card ux-discovery"><div class="ux-discovery-heading"><div><span class="ux-eyebrow">Navigation über Symptombezüge</span><h3>Über gemeinsame Symptome entdecken</h3></div><span class="ux-count"><?= count($peers) ?> Therapien</span></div><p>Diese Therapien sind einigen derselben Symptome zugeordnet. Das belegt weder eine vergleichbare Wirkung noch eine Eignung als Ersatz.</p><div class="ux-peer-grid">
-<?php foreach ($peers as $peerId=>$peer): ?><a href="therapie_detail.php?treatment_id=<?= (int)$peerId ?>"><strong><?= ndEscape($peer['name']) ?><span aria-hidden="true">↗</span></strong><small>Gemeinsame Symptombezüge</small><?= ndChips($peer['symptoms']) ?></a><?php endforeach; ?>
-</div></section><?php endif; ?>
+$graph=lcnTreatmentDiscoveryGraph(lcnTreatmentsNdDatabase());
+echo ndRenderRelationshipStages($graph,(int)$id);
+echo ndRenderTreatmentCombinations($graph,(int)$id);
+?>
+<section class="card ux-discovery" data-treatment-relation-pending hidden><h3>Vorgeschlagene Verknüpfungen</h3><div class="ux-relationship-scroll"><table class="ux-relationship-table"><thead><tr><th scope="col">Verknüpfung</th><th scope="col">Status</th><th scope="col">Rückmeldungen</th></tr></thead><tbody></tbody></table></div></section>
+<p data-treatment-relation-status role="status"></p>
 </section><section id="dashboard" class="nd-panel" aria-label="Dashboard" hidden><div data-treatment-score="full"></div><div class="ux-dashboard-grid" data-treatment-dashboard></div></section></div></div><?php ndEnd(); ?>
 

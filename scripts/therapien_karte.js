@@ -680,15 +680,18 @@ function bindTreatmentSmartSearchEvents() {
             }
 
 			if (query === "") {
+				treatmentAliasSmartSuggestController?.abort();
 				treatmentSmartSearchOverride = null;
 				treatmentAliasSmartSuggestions = [];
 				hideTreatmentAliasSmartSuggestions();
 				setTreatmentAliasSmartStatus("Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
+				if (validateLocationDependentFilters()) loadTreatmentResults();
 
 				return;
 			}
 
 			if (query.length < 2) {
+				treatmentAliasSmartSuggestController?.abort();
 				treatmentAliasSmartSuggestions = [];
 				hideTreatmentAliasSmartSuggestions();
 				return;
@@ -765,6 +768,7 @@ async function loadTreatmentAliasSmartSuggestions(query) {
             return;
         }
 
+        if (String(document.getElementById("treatment-alias-smart-input")?.value || "").trim() !== query) return false;
         treatmentAliasSmartSuggestions = data.suggestions;
         renderTreatmentAliasSmartSuggestions(treatmentAliasSmartSuggestions, query);
         return true;

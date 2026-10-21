@@ -1,0 +1,71 @@
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+const {randomBytes}=require('node:crypto');
+const {execFileSync}=require('node:child_process');
+const path=require('node:path');
+const os=require('node:os');
+(async()=>{
+ const marker='codex-relation-ui-'+randomBytes(12).toString('hex');
+ const browser=await chromium.launch({channel:'msedge',headless:true});
+ const context=await browser.newContext({viewport:{width:1440,height:1050}}),page=await context.newPage();
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const open=async id=>{const loaded=page.waitForResponse(r=>r.url().includes('api/treatment_relationship_proposals.php?id='+id)&&r.request().method()==='GET');await page.goto(`http://localhost/lcn/therapie_detail.php?treatment_id=${id}#alternativen`,{waitUntil:'domcontentloaded'});await page.locator('#alternativen').waitFor({state:'visible'});const data=await(await loaded).json();assert.equal(data.ok,true,data.error);};
+ try{
+  await open(5);
+  await page.getByRole('button',{name:'＋ Alternative Therapie vorschlagen',exact:true}).click();
+  let dialog=page.locator('.treatment-relation-dialog');await dialog.waitFor();
+  await dialog.getByRole('combobox',{name:'Alternative Therapie auswählen',exact:true}).fill('Cetirizin');
+  await dialog.getByRole('option',{name:/^Cetirizin ·/}).click();
+  await dialog.locator('summary').click();await dialog.getByLabel('Begründung (optional)').fill(marker);
+  const saved=page.waitForResponse(r=>r.url().includes('treatment_relationship_proposals.php')&&r.request().method()==='POST');
+  await dialog.getByRole('button',{name:'Vorschlagen',exact:true}).click();
+  const result=await (await saved).json();assert.equal(result.ok,true,result.error);
+  await dialog.getByRole('heading',{name:'Verknüpfung vorgeschlagen'}).waitFor();
+  await dialog.getByRole('button',{name:'Schließen',exact:true}).click();
+  const pending=page.locator('[data-treatment-relation-pending]');await pending.waitFor({state:'visible'});
+  assert.match(await pending.innerText(),/Cetirizin als alternative Therapie zu Ivabradin/);
+  assert.match(await pending.innerText(),/Prüfung ausstehend/);
+  assert.equal(await page.locator('#alternativen>.ux-discovery').first().getByRole('link',{name:'Cetirizin',exact:true}).count(),0,'Pending link must not be a researched relation.');
+  const duplicate=await context.request.post('http://localhost/lcn/api/treatment_relationship_proposals.php',{headers:{Origin:'http://localhost'},data:{source_id:5,target_id:25,kind:'alternative',note:marker}});
+  const dup=await duplicate.json();assert.equal(dup.duplicate,true);assert.equal(dup.submission_id,result.submission_id);
+  await open(515);
+  await page.locator('#alternativen>section').filter({has:page.getByRole('heading',{name:'Weitere Verknüpfung ergänzen',exact:true})}).getByRole('button',{name:'＋ Andere Verknüpfung vorschlagen',exact:true}).click();
+  dialog=page.locator('.treatment-relation-dialog');await dialog.waitFor();
+  assert.equal(await dialog.getByLabel('Zusammenhang',{exact:true}).locator('option').count(),9);
+  await dialog.getByRole('combobox',{name:'Gruppe auswählen',exact:true}).fill('Testgruppe '+marker);
+  await dialog.getByRole('button',{name:/^Nicht gefunden\? Neu anlegen:/}).click();
+  await dialog.locator('summary').click();await dialog.getByLabel('Begründung (optional)').fill(marker);
+  const groupSaved=page.waitForResponse(r=>r.url().includes('treatment_relationship_proposals.php')&&r.request().method()==='POST');
+  await dialog.getByRole('button',{name:'Vorschlagen',exact:true}).click();
+  const groupResult=await (await groupSaved).json();assert.equal(groupResult.ok,true,groupResult.error);
+  await dialog.getByRole('heading',{name:'Verknüpfung vorgeschlagen'}).waitFor();await dialog.getByRole('button',{name:'Schließen',exact:true}).click();
+  await page.locator('[data-treatment-relation-pending]').waitFor({state:'visible'});
+  await open(176);
+  await page.locator('.ux-alias-section').first().getByRole('button',{name:'＋ Verknüpfung vorschlagen',exact:true}).click();
+  dialog=page.locator('.treatment-relation-dialog');await dialog.waitFor();
+  assert.equal(await dialog.locator('select').count(),0,'Context must fix the relationship kind.');
+  assert.equal(await dialog.getByRole('combobox').count(),1,'Known group must not need selecting again.');
+  assert.match(await dialog.innerText(),/Gruppe: Atemtherapie/);
+  const member=dialog.getByRole('combobox',{name:'Eintrag auswählen',exact:true});
+  await member.fill('4-7-8');await dialog.getByRole('option',{name:/^4-7-8-Atmung/}).click();
+  assert.equal(await member.inputValue(),'4-7-8-Atmung','Selected item disappeared.');
+  assert.equal(await dialog.getByRole('button',{name:'Vorschlagen',exact:true}).isEnabled(),true);
+  await member.fill('changed query');assert.equal(await dialog.getByRole('button',{name:'Vorschlagen',exact:true}).isDisabled(),true,'Edited text kept a stale target.');
+  await member.fill('4-7-8');await dialog.getByRole('option',{name:/^4-7-8-Atmung/}).waitFor();await member.press('ArrowDown');await member.press('Enter');
+  assert.equal(await member.inputValue(),'4-7-8-Atmung');
+  assert.equal(await dialog.getByRole('button',{name:'Vorschlagen',exact:true}).isEnabled(),true);
+  await dialog.getByRole('button',{name:'Abbrechen',exact:true}).click();
+  for(const bad of [{source_id:5,target_id:5,kind:'alternative'},{source_id:5,target_id:25,kind:'unknown'},{source_id:5,target_id:25,kind:'alternative',source_url:'javascript:alert(1)'}]){
+   const response=await context.request.post('http://localhost/lcn/api/treatment_relationship_proposals.php',{headers:{Origin:'http://localhost'},data:bad});assert.equal(response.status(),400);
+  }
+  for(const width of [390,768,1440]){await page.setViewportSize({width,height:950});for(const id of [5,84,693,169,515,65,23,451]){await open(id);assert.ok(await page.locator('.ux-relationship-table').count()>0);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`Overflow ${id}/${width}`);}}
+  await open(84);const screenshot=path.join(os.tmpdir(),'lcn-relationship-tables.png');await page.screenshot({path:screenshot,fullPage:true});console.log(screenshot);
+  await page.locator('.ux-alias-section [data-treatment-relation-add]').first().click();
+  await page.locator('.treatment-relation-dialog').waitFor();
+  const formScreenshot=path.join(os.tmpdir(),'lcn-relationship-form.png');await page.screenshot({path:formScreenshot,fullPage:true});console.log(formScreenshot);
+  await page.setViewportSize({width:390,height:844});
+  const bounds=await page.locator('.treatment-relation-dialog').boundingBox();assert.ok(bounds.x>=0&&bounds.x+bounds.width<=390,'Dialog extends outside mobile viewport.');
+  assert.deepEqual(errors,[]);
+  console.log('PASS: relationship tables, actual pending submissions, custom group, German directions, duplicate detection, invalid input, 24 responsive checks, no JS errors.');
+ }finally{await browser.close();console.log(execFileSync('C:/xampp/php/php.exe',[path.join(__dirname,'treatment_relationship_proposals_cleanup.php'),marker],{encoding:'utf8'}).trim());}
+})().catch(e=>{console.error(e);process.exitCode=1;});

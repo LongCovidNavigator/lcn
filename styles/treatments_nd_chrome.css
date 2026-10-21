@@ -121,3 +121,12 @@ body.compact-doctor-header #header-placeholder .profile>.detail-menu-toggle{righ
 .ux-dashboard-risk-blocks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-radius:7px;overflow:hidden}.ux-dashboard-risk-blocks>div{border-top:13px solid var(--risk-color);display:flex;flex-direction:column;align-items:center;text-align:center;gap:9px;padding:14px 6px;font-size:13px}.ux-dashboard-risk-blocks strong{color:#17365d;font-size:16px}.ux-dashboard-risk-blocks b{font-weight:400;font-size:11px;color:#6a7f9e}
 
 .ux-provider-scale{margin:18px 0 4px;padding:0 10px}.ux-provider-progress{height:12px;background:#e5edf4;border-radius:8px;overflow:hidden}.ux-provider-progress>span{display:block;height:100%;border-radius:8px;background:#0878db}.ux-provider-scale-ticks{display:flex;justify-content:space-between;margin:9px -10px 0}.ux-provider-scale-ticks>div{width:24px;position:relative;text-align:center;color:#6a7f9e}.ux-provider-scale-ticks>div:before{content:'';position:absolute;top:-13px;left:50%;width:1px;height:5px;background:#a4b7ca}.ux-provider-scale-ticks strong{font-size:12px}.ux-provider-scale-ticks small{display:block;font-size:10px;margin-top:5px;white-space:nowrap}.ux-provider-scale-ticks .is-reached strong{color:#0878db}.ux-provider-scale p{margin:12px 0 0!important;font-size:11px!important;color:#6a7f9e!important}
+
+/* Keep dashboard rows complete: short burden cards together, broad distributions across both columns. */
+[data-treatment-dashboard]{align-items:start}
+[data-treatment-dashboard]>.ux-dashboard-card[data-dashboard-question="access"]{grid-column:1/-1}
+[data-treatment-dashboard]>.ux-dashboard-card .dashboard-detail{margin-top:16px;padding-top:0}
+[data-treatment-dashboard]>h3{margin:12px 0 0}
+[data-treatment-dashboard]>.ux-dashboard-card{padding:20px}
+
+@media(max-width:650px){#dashboard .score-top{flex-wrap:wrap;gap:12px}#dashboard .score-number{max-width:100%;white-space:normal}}
