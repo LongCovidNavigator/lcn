@@ -6,7 +6,7 @@
   const endpoint = 'api/treatment_answer.php';
   const statusNode = document.createElement('p');statusNode.setAttribute('role','status');statusNode.className='ux-test-notice ux-answer-status';root.querySelector('#view-content').prepend(statusNode);
   let feedbackTimer;
-  function notify(message,expire=false){clearTimeout(feedbackTimer);statusNode.textContent=message;if(expire)feedbackTimer=setTimeout(()=>{statusNode.textContent='';},4000);}
+  function notify(message,expire=false){clearTimeout(feedbackTimer);statusNode.textContent=message;if(expire)feedbackTimer=setTimeout(()=>{statusNode.textContent='';},2000);}
   async function sync(payload) {
     if(busy || (payload && !loaded))return;busy=true;
     root.querySelectorAll('[data-option],[data-clear],[data-segment],[data-symptom-id],[data-symptom-search],[data-symptom-toggle]').forEach(b=>{b.disabled=true;b.setAttribute('aria-disabled','true');});
@@ -18,7 +18,7 @@
     }catch(error){notify(error.message+' Deine letzte bestätigte Auswahl bleibt unverändert.');return false;}
     finally{busy=false;root.querySelectorAll('[data-option],[data-clear],[data-segment],[data-symptom-id],[data-symptom-search],[data-symptom-toggle]').forEach(b=>{b.disabled=!loaded;b.setAttribute('aria-disabled',String(!loaded));});filterSymptomPicker();if(!payload&&loaded&&Object.keys(draft).some(k=>(k.startsWith('unit_cost:')||k.startsWith('total_cost:'))&&k.split(':')[1]!==window.LCNCost.context()))sync({action:'move_cost_context',context:window.LCNCost.context()});}
   }
-  let demo = new URLSearchParams(location.search).get('demo') === '1';
+  let demo = window.LCNDummy.get();
   const questions = [...root.querySelectorAll('[data-question]')];
   const toggle = document.getElementById('nd-demo-header-toggle');
   const number = value => value.toLocaleString('de-DE', {maximumFractionDigits:1});
@@ -103,11 +103,29 @@
     if(key==='pem'){const node=document.createElement('div');node.dataset.pemComparison='';card.append(node);}
   });
   function currentCounts(){return Object.fromEntries(questions.map(card=>[key(card),countsFor(card).counts]));}
-  function comparison(own,values,label,eligible=true,unit=100,lowerIsBetter=false,referenceRule=null){
+  function topPercentLabel(percent){
+    if(percent==null||percent>50)return null;
+    if(percent<1)return percent<=0?'unter 0,01':(Math.ceil(percent*100)/100).toLocaleString('de-DE',{maximumFractionDigits:2});
+    return String([1,3,5,10,20,30,40,50].find(step=>percent<=step));
+  }
+  function relativeRank(own,values,lowerIsBetter=false){
+    if(own==null||!values.length)return null;
+    // Midranks keep equal scores together, including a completely tied group.
+    const better=values.filter(value=>lowerIsBetter?value<own:value>own).length;
+    const equal=values.filter(value=>value===own).length;
+    return 100*(better+(equal+1)/2)/(values.length+1);
+  }
+  function relativeScoreLevel(rank){
+    return rank<=20?4:rank<=40?3:rank<=60?2:rank<=80?1:0;
+  }
+  function comparison(own,values,label,eligible=true,unit=100,lowerIsBetter=false,referenceRule=null,classificationHtml=''){
     const avg=values.length?values.reduce((n,v)=>n+v,0)/values.length:null;
     const delta=own==null||avg==null?null:own-avg;
-    const top=own==null||!values.length?null:Math.max(1,Math.ceil(100*values.filter(v=>lowerIsBetter?v<=own:v>=own).length/values.length));
-    return '<div class="score-comparison"><span class="score-comparison-label">'+label+'</span><div class="score-comparison-highlights"><strong>'+(!eligible?'Noch zu wenige Angaben':delta==null?'Noch keine Vergleichsdaten':Math.abs(delta)<.05?'Im Durchschnitt':number(Math.abs(delta))+' Punkte '+(delta>0?'über':'unter')+' dem Durchschnitt')+'</strong>'+(eligible&&top!=null?'<strong class="score-percentile">Top '+top+' %</strong>':'')+'</div><div class="comparison-values">'+(own==null?'Noch keine Angaben.':'<span>Diese Therapie:</span><strong>Ø '+number(own)+' / '+unit+'</strong>')+(avg==null?'':'<span>Durchschnitt:</span><strong>Ø '+number(avg)+' / '+unit+'</strong>')+'</div><small>'+values.length+' andere Therapien · jeweils mindestens zehn auswertbare Antworten'+(referenceRule|| (unit===100?' in über 70 % der Bewertungsfelder':' zur jeweiligen Frage'))+'</small></div>';
+    const rank=relativeRank(own,values,lowerIsBetter);
+    const top=topPercentLabel(rank);
+    const badgeLevel=classificationHtml&&rank!=null?' score-percentile-level-'+relativeScoreLevel(rank):'';
+    const basis=classificationHtml?'':'<small>'+values.length+' andere Therapien · jeweils mindestens zehn auswertbare Antworten'+(referenceRule|| (unit===100?' in über 70 % der Bewertungsfelder':' zur jeweiligen Frage'))+'</small>';
+    return '<div class="score-comparison'+(classificationHtml?' score-comparison-overall':'')+'"><span class="score-comparison-label">'+label+'</span><div class="score-comparison-highlights">'+(classificationHtml?'':'<strong>'+(!eligible?'Noch zu wenige Angaben':delta==null?'Noch keine Vergleichsdaten':Math.abs(delta)<.05?'Im Durchschnitt':number(Math.abs(delta))+' Punkte '+(delta>0?'über':'unter')+' dem Durchschnitt')+'</strong>')+(!classificationHtml&&eligible&&top!=null?'<strong class="score-percentile'+badgeLevel+'">Top '+top+' %</strong>':'')+'</div>'+(classificationHtml?'':'<div class="comparison-values">'+(own==null?'Noch keine Angaben.':'<span>Diese Therapie:</span><strong>Ø '+number(own)+' / '+unit+'</strong>')+(avg==null?'':'<span>Durchschnitt:</span><strong>Ø '+number(avg)+' / '+unit+'</strong>')+'</div>')+classificationHtml+basis+'</div>';
   }
   function referenceProfile(profile,context){
     const counts={...profile.counts};
@@ -123,6 +141,38 @@
     const noTravel=independent||Boolean(profile?.home_delivery&&providers.some(p=>p.home_visit||window.LCNOnline?.get(p.id).complete));
     return window.lcnTreatmentScore(counts,context,null,independent,{distance:distances.length?Math.min(...distances):null,noTravel});
   }
+  function comparisonRange(own,values){
+    const sorted=[...values,own].filter(Number.isFinite).sort((a,b)=>a-b);
+    if(!sorted.length)return null;
+    const min=sorted[0],max=sorted[sorted.length-1];
+    const quantile=fraction=>{const i=(sorted.length-1)*fraction,low=Math.floor(i);return sorted[low]+(sorted[Math.ceil(i)]-sorted[low])*(i-low);};
+    return {min,max,cuts:[min,...[.2,.4,.6,.8].map(quantile),max],position:value=>max===min?50:100*(value-min)/(max-min)};
+  }
+  const wholePoints=value=>String(Math.round(value));
+  function rankPreview(own,values){
+    const rank=relativeRank(own,values);
+    if(rank==null)return '';
+    const range=comparisonRange(own,values),level=relativeScoreLevel(rank),top=topPercentLabel(rank);
+    const labels=['Deutlich weniger passend','Weniger passend','Durchschnittlich passend','Passend','Sehr passend'];
+    const widths=range.max===range.min?[20,20,20,20,20]:range.cuts.slice(1).map((cut,i)=>100*(cut-range.cuts[i])/(range.max-range.min));
+    const position=range.position(own);
+    // The full precision controls position and classification; only displayed points are rounded.
+    const ticks=range.cuts.map((value,i)=>({value,position:range.position(value),i})).filter((tick,i,all)=>i===0||i===5||(tick.position-all[i-1].position>=8&&100-tick.position>=8));
+    const legend=[4,3,2,1,0].map(i=>'<div class="therapy-precise-legend-row'+(i===level?' is-current':'')+'"><i class="score-level-'+i+'" aria-hidden="true"></i><span class="therapy-precise-name">'+labels[i]+'</span><span class="therapy-precise-tier"><span>Top</span> <span class="therapy-precise-tier-number">'+(100-i*20)+'</span> <span>%</span></span><span class="therapy-precise-range"><span>'+wholePoints(range.cuts[i])+'</span><span aria-hidden="true">–</span><span>'+wholePoints(range.cuts[i+1])+'</span></span><span class="therapy-precise-unit">Punkte</span></div>').join('');
+    return '<figure class="therapy-precise-chart" aria-label="'+labels[level]+', '+wholePoints(own)+' Punkte im Therapievergleich"><div class="therapy-precise-pin-row"><div class="therapy-precise-pin" style="--position:'+position+'%;--label-position:'+Math.max(16,Math.min(84,position))+'%"><small>Diese Therapie</small>'+(top!=null?'<strong class="therapy-final-top score-percentile-level-'+level+'">Top '+top+' %</strong>':'<strong>'+labels[level]+'</strong>')+'</div><i class="therapy-precise-pointer" style="left:'+position+'%" aria-hidden="true"></i></div><div class="therapy-precise-band" aria-hidden="true">'+widths.map((width,i)=>'<span class="score-level-'+i+'" style="width:'+width+'%"></span>').join('')+'</div><div class="therapy-precise-axis">'+ticks.map(tick=>'<span class="'+(tick.i===0?'is-first':tick.i===5?'is-last':'is-inner')+'" style="left:'+tick.position+'%">'+wholePoints(tick.value)+'</span>').join('')+'</div><figcaption>Punktebereiche · je 20 % der Therapien</figcaption></figure><div class="therapy-precise-legend" aria-label="Passungsstufen von sehr passend bis deutlich weniger passend">'+legend+'</div>';
+  }
+  function scoreClassification(result,values,ready) {
+    const valid=ready&&result.dataCoverage>70&&result.score!=null&&values.length;
+    const range=valid?comparisonRange(result.score,values):null;
+    const average=valid?values.reduce((sum,value)=>sum+value,0)/values.length:null;
+    return '<section class="therapy-final-comparison therapy-precise-comparison"><h3>'+(valid?'Vergleich mit anderen Therapien':'Gesamtauswertung')+'</h3><div class="therapy-precise-summary"><div><span>Gesamtauswertung</span><strong class="score-number">'+(result.coverage?wholePoints(result.earned):'–')+'<small> / '+wholePoints(result.coverage)+' Punkte</small></strong></div>'+(valid?'<dl><div><dt>Minimum</dt><dd>'+wholePoints(range.min)+'</dd></div><div><dt>Durchschnitt</dt><dd>'+wholePoints(average)+'</dd></div><div><dt>Maximum</dt><dd>'+wholePoints(range.max)+'</dd></div></dl>':'')+'</div>'+(valid?rankPreview(result.score,values):'<div class="score-track" role="img" aria-label="'+(result.coverage?wholePoints(result.earned)+' von '+wholePoints(result.coverage)+' auswertbaren Punkten':'Noch keine auswertbaren Punkte')+'"><span style="width:'+(result.score||0)+'%"></span></div><p class="field-note">Für einen Therapievergleich liegen noch nicht genügend Angaben vor.</p>')+'</section>';
+  }
+
+  function comparisonExplanation(result,values,ready){
+    const valid=ready&&result.dataCoverage>70&&result.score!=null&&values.length>0;
+    return '<p class="field-note therapy-final-explanation">'+(valid?'Es geht darum, wie die Therapien im Vergleich abschneiden, nicht um die absolute Punktzahl. ':'')+'Wir vergleichen nur Therapien, zu denen genügend Erfahrungen vorliegen: '+values.length+' andere '+(values.length===1?'Therapie':'Therapien')+' mit ausreichend Community-Angaben.</p>';
+  }
+
   function renderSummaries(){
     if(!root.querySelector('[data-treatment-dashboard]'))return;
     const context=window.LCNCost.context();const contextLabel=window.LCNCost.label();
@@ -133,7 +183,9 @@
     const result=scoreProfile(ownProfile||{independent_at_home:root.dataset.independentAtHome==='1'},counts,context);
     const others=comparisonProfiles.filter(p=>p.id!==Number(root.dataset.treatmentId)).map(p=>referenceProfile(p,context));
     const eligible=others.map(p=>scoreProfile(p,p.counts,context)).filter(r=>r.dataCoverage>70);
-    const comparisonHtml=comparison(result.score,eligible.map(r=>r.score),'Vergleich mit anderen Therapien',(demo||loaded)&&result.dataCoverage>70);
+    const comparisonValues=eligible.map(r=>r.score);
+    const comparisonReady=(demo||loaded)&&result.dataCoverage>70;
+    const comparisonHtml=scoreClassification(result,comparisonValues,comparisonReady);
     const explanations={
       effect:'Verschlechterung: 0 · keine Veränderung: 10 · Verbesserung: 20 · Heilung: 30 Punkte.',
       pem:'Keines: 10 · niedrig: 6,7 · mittel: 3,3 · hoch: 0 Punkte.',
@@ -153,7 +205,7 @@
     const explanation='<div class="score-explanation"><p><strong>Bis zu 100 Punkte: Belastung 30 · Zugang 30 · Erfahrungen 40</strong></p><p>Community-Teilwerte zählen ab zehn auswertbaren Antworten. Fehlende Teilwerte werden ausgelassen. Entfernung: nächstgelegener bestätigter Anbieter, unabhängig vom Listenfilter. Selbstmanagement zu Hause benötigt keine Anreise.</p><p>Kosten zählen einmal mit 20 Punkten. Gesamtkosten haben Vorrang; Einzelkosten übernehmen bei unzureichenden Gesamtkosten oder mindestens 20 zusätzlichen auswertbaren Angaben. Verwendete Kostenbasis: <strong>'+escape(result.rows.find(r=>r.key===result.costBasis).label)+'</strong>.</p><p>Die reine Anbieteranzahl gibt keine Punkte. Für den Vergleich müssen über 70 % der sieben Teilwerte auswertbar sein; jede Therapie zählt gleich.</p></div>';
 
     root.querySelectorAll('[data-treatment-score]').forEach(node=>{
-      node.innerHTML='<section class="card dashboard-score"><div class="score-top"><div><h3>Gesamtauswertung</h3></div><strong class="score-number">'+(result.coverage?number(result.earned):'–')+'<small> / '+number(result.coverage)+' Punkte</small></strong></div><div class="score-track"><span style="width:'+(result.score||0)+'%"></span></div><p>Für '+result.available+' von '+result.fieldCount+' Teilwerten liegen ausreichend Angaben vor.</p>'+comparisonHtml+'<p class="field-note">Praktische Orientierung aus subjektiven Erfahrungen, kein Nachweis medizinischer Wirksamkeit oder Eignung.</p>'+(node.dataset.treatmentScore==='overview'?'<a href="#dashboard">Aufschlüsselung im Dashboard →</a>':'<div class="ux-dashboard-insurance-settings"><div class="cost-preferences dashboard-country-preferences">'+window.LCNCost.countryControl()+'</div><div class="insurance-toggle" aria-label="Versicherung für die Gesamtauswertung">'+window.LCNCost.systems[window.LCNCost.get().country].map(([c,label])=>'<button type="button" data-dashboard-context="'+c+'" aria-pressed="'+(c===window.LCNCost.get().insurance)+'">'+label+'</button>').join('')+'</div></div><details><summary>Gewichtung und Teilwerte</summary>'+explanation+'<div class="score-parts">'+rows+'</div></details>')+'</section>';
+      node.innerHTML='<section class="card dashboard-score therapy-final-summary">'+comparisonHtml+'<details class="therapy-more-info"><summary>Weitere Infos</summary>'+comparisonExplanation(result,comparisonValues,comparisonReady)+'<p class="field-note therapy-orientation-note">Praktische Orientierung aus subjektiven Erfahrungen, kein Nachweis medizinischer Wirksamkeit oder Eignung.</p></details>'+(node.dataset.treatmentScore==='overview'?'':'<div class="ux-dashboard-insurance-settings"><div class="cost-preferences dashboard-country-preferences">'+window.LCNCost.countryControl()+'</div><div class="insurance-toggle" aria-label="Versicherung für die Gesamtauswertung">'+window.LCNCost.systems[window.LCNCost.get().country].map(([c,label])=>'<button type="button" data-dashboard-context="'+c+'" aria-pressed="'+(c===window.LCNCost.get().insurance)+'">'+label+'</button>').join('')+'</div></div><details><summary>Gewichtung und Teilwerte</summary>'+explanation+'<div class="score-parts">'+rows+'</div></details>')+'</section>';
     });
     const grid=root.querySelector('[data-treatment-dashboard]');
     grid.innerHTML=questions.filter(c=>!c.dataset.question.startsWith('symptom-')).sort((a,b)=>{const order=['setting','access','pem','unit_cost','total_cost','effect','gamechanger'];return order.indexOf(a.dataset.question)-order.indexOf(b.dataset.question);}).map(card=>{
@@ -170,7 +222,7 @@
       const points=scoreRow?'<div class="dashboard-points"><strong>'+(scoreRow.value==null?'Noch nicht auswertbar':number(scoreRow.value*scoreRow.weight)+' <small>/ '+number(scoreRow.weight)+' Punkte</small>')+'</strong></div>':'';
       let graphic='';
       if(card.dataset.question==='effect'){
-        graphic='<div class="ux-dashboard-effect" role="img" aria-label="Verteilung der Community-Bewertung">'+options.map((_,i)=>'<div><strong>'+share(i)+'</strong><div class="ux-dashboard-bar-area"><span class="effect-'+i+'" style="height:'+percentage(i)+'%"></span></div><span>'+label(i)+'</span><b>'+stage(i)+'</b></div>').join('')+'</div>';
+        graphic='<div class="ux-dashboard-effect" role="img" aria-label="Verteilung der Community-Bewertung">'+[3,2,1,0].map(i=>'<div><strong>'+share(i)+'</strong><div class="ux-dashboard-bar-area"><span class="effect-'+i+'" style="height:'+percentage(i)+'%"></span></div><span>'+(i===1?'Neutral':label(i))+'</span><b>'+stage(i)+'</b></div>').join('')+'</div>';
       }else if(card.dataset.kind==='donut'){
         graphic='<div class="ux-dashboard-gamechanger"><div class="ux-dashboard-ring" style="--yes:'+percentage(0)+'%" role="img" aria-label="Gamechanger: '+(total?number(percentage(0))+' Prozent Ja':'noch keine Angaben')+'"><strong>'+(total?number(percentage(0))+' %':'–')+'<small>Ja</small></strong></div><div>'+options.map((_,i)=>'<div class="ux-dashboard-legend"><i style="background:'+(i===0?'#4caf91':'#d2ddeb')+'"></i><span>'+label(i)+'</span><strong>'+share(i)+'</strong><b>'+stage(i)+'</b></div>').join('')+'</div></div>';
       }else if(card.dataset.question==='pem'){
@@ -186,7 +238,16 @@
     }).join('');
     const travel=result.rows.find(r=>r.key==='distance');
     grid.insertAdjacentHTML('beforeend','<section class="card ux-dashboard-card" data-dashboard-question="distance"><h3>Persönliche Anreise</h3><div class="dashboard-points"><strong>'+(travel.value==null?'Noch nicht auswertbar':number(travel.value*15)+' <small>/ 15 Punkte</small>')+'</strong></div><p>'+(travel.noTravel?'Keine Anreise erforderlich':travel.distance==null?'Standort für die Entfernung ergänzen':number(travel.distance)+' km Luftlinie zum nächstgelegenen bestätigten Anbieter')+'</p><p class="ux-dashboard-score-note">'+escape(travel.reason)+'</p><a href="#termin">Standorte ansehen →</a></section>');
-    for(const [title,keys] of [['Welche Belastungshürden gibt es bei der Therapie? · 30 Punkte',['setting','distance','pem']],['Wie zugänglich ist die Therapie? · 30 Punkte',['access','total_cost','unit_cost']],['Welche Erfahrungen gibt es? · 40 Punkte',['effect','gamechanger']]]){const h=document.createElement('h3');h.style.gridColumn='1 / -1';h.textContent=title;grid.append(h);for(const key of keys){const node=grid.querySelector('[data-dashboard-question="'+key+'"]');if(node)grid.append(node);}}
+    for(const [sectionNumber,title,maximum,keys] of [[2,'Welche Belastungshürden gibt es bei der Therapie?',30,['setting','distance','pem']],[3,'Wie zugänglich ist die Therapie?',30,['access','total_cost','unit_cost']],[4,'Welche Erfahrungen gibt es?',40,['effect','gamechanger']]]){
+      const rows=result.rows.filter(row=>keys.includes(row.key));
+      const available=rows.filter(row=>row.value!=null);
+      const earned=available.reduce((sum,row)=>sum+row.value*row.weight,0);
+      const group=document.createElement('section');group.className='dashboard-score-group';
+      group.innerHTML='<h2 class="dashboard-group-heading"><span class="dashboard-group-number">'+sectionNumber+'</span><span>'+title+'</span><small>'+(available.length?number(earned)+' von '+maximum+' Punkten':'Noch nicht auswertbar · maximal '+maximum+' Punkte')+(available.length&&available.length<rows.length?' · Angaben unvollständig':'')+'</small></h2><div class="dashboard-grid"></div>';
+      const cards=group.querySelector('.dashboard-grid');
+      for(const key of keys){const node=grid.querySelector('[data-dashboard-question="'+key+'"]');if(node)cards.append(node);}
+      grid.append(group);
+    }
     const rating=result.rows.find(r=>r.key==='effect');
     const values=others.map(p=>scoreProfile(p,p.counts,context).rows[0]).filter(r=>r.value!=null).map(r=>1+3*r.value);
     root.querySelector('[data-rating-comparison]').innerHTML=comparison(rating.value==null?null:1+3*rating.value,values,'Community-Bewertung im Vergleich',(demo||loaded)&&rating.total>=10,4)+'<p class="field-note">Skala 1–4: Verschlechterung bis Heilung. Vergleich mit anderen Therapien ab zehn Bewertungen je Therapie; jede Therapie zählt gleich.</p>';
@@ -263,16 +324,11 @@
 
 
     questions.forEach(render);renderSummaries();renderSymptomHelp();
-    const effect = questions.find(card => card.dataset.question === 'effect');
-    const summary = root.querySelector('[data-community-summary]');
-    if (effect && summary) {
-      const {counts, local} = countsFor(effect);
-      const total = counts.reduce((a,b) => a+b, 0);
-      summary.textContent = 'Community-Bewertungen ansehen →';
-    }
+
   }
-  toggle.addEventListener('click',()=>{if(busy)return;demo=!demo;const url=new URL(location.href);url.searchParams.set('demo',demo?'1':'0');history.replaceState(null,'',url);renderAll();});
-  window.addEventListener('storage',event=>{if(['lcn_shared_location_preference','lcn_shared_location_cleared'].includes(event.key))renderSummaries();});
+  toggle.addEventListener('click',()=>{if(busy)return;demo=!demo;window.LCNDummy.set(demo);const url=new URL(location.href);url.searchParams.set('demo',demo?'1':'0');history.replaceState(null,'',url);renderAll();});
+  window.addEventListener('storage',event=>{if(event.key===window.LCNDummy.key){demo=window.LCNDummy.get();renderAll();}if(['lcn_shared_location_preference','lcn_shared_location_cleared'].includes(event.key))renderSummaries();});
+  window.addEventListener('lcn-dummy-change',()=>{const next=window.LCNDummy.get();if(next!==demo){demo=next;renderAll();}});
   window.addEventListener('homepage:location-changed',()=>renderSummaries());
   window.addEventListener('lcn-online-ready',()=>renderAll());
   window.addEventListener('lcn-exchange-rates',()=>{renderCostControls();});

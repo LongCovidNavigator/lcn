@@ -46,7 +46,7 @@
 .lcn-public-page :is(.doctor-map-header,.treatment-map-header):hover{background:#e7f3ff}
 .lcn-public-page :is(.doctor-location-mode-button,.treatment-location-mode-button).is-active{background:#e7f3ff;color:#0878e3;border-color:#b6d8f8}
 .lcn-public-page :is(.quick-start-card,.flow-card,.path-card){border:1px solid #e1eafa;border-radius:10px;box-shadow:none}
-.lcn-public-page .home-hero{background:#f7fbfe}
+/* The homepage hero keeps its image background from homepage.css. */
 @media(min-width:1000px){
   .lcn-public-page #header-placeholder:has(>.site-header){display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid #e5eef8;box-shadow:0 3px 12px #17365d09}
   .lcn-public-page #header-placeholder>.site-header{border:0;flex-shrink:0}

@@ -359,3 +359,200 @@ body.ux-page{background:radial-gradient(ellipse at 35% 0,#e4f7ff 0,transparent 6
 .ux-alias-groups>section{padding:14px;border:1px solid #dcebf9;border-radius:7px;background:#f8fcff}
 .ux-alias-groups h4{font-size:13px;color:#17529c;margin:0 0 10px}
 @media(max-width:650px){.ux-alias-groups{grid-template-columns:1fr}}
+
+/* Match the overall ranking badge to the selected relative fit level. */
+.ux-detail .score-comparison-highlights .score-percentile-level-0 { background:#e5a5ad;color:#542029; }
+.ux-detail .score-comparison-highlights .score-percentile-level-1 { background:#dfb09e;color:#542c1e; }
+.ux-detail .score-comparison-highlights .score-percentile-level-2 { background:#e5cf9b;color:#514019; }
+.ux-detail .score-comparison-highlights .score-percentile-level-3 { background:#9fd3b6;color:#18452e; }
+.ux-detail .score-comparison-highlights .score-percentile-level-4 { background:#63af94;color:#10392c; }
+
+.ux-detail .score-classification .score-fit-help { margin:12px 0 0; }
+
+.ux-detail .score-average-row { position:relative;height:34px;margin-top:3px; }
+.ux-detail .score-average-marker { position:relative;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;padding:0;border:0;background:transparent;color:#6a7f9e;font:inherit;font-size:12px;cursor:help;min-width:0; }
+.ux-detail .score-average-marker i { width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:8px solid #8a9bb0; }
+.ux-detail .score-average-marker:focus-visible { outline:2px solid #8a9bb0;outline-offset:3px;border-radius:3px; }
+.ux-detail .score-comparison-highlights:has(>.score-percentile:only-child) { justify-content:flex-end; }
+.ux-detail .score-comparison-highlights:empty { display:none; }
+
+body.compact-doctor-header .score-average-row .score-average-help { position:absolute;top:0; }
+body.compact-doctor-header .score-average-help>button.score-average-marker { display:flex;padding:0;font-size:12px;line-height:1.4; }
+body.compact-doctor-header .score-average-row .score-average-help>p { left:0;right:auto;top:100%;transform:translateX(-50%);margin:10px 0 0;width:260px;max-width:calc(100vw - 48px);text-align:center;pointer-events:none; }
+
+.ux-detail .score-comparison-overall { display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px; }
+.ux-detail .score-comparison-overall>.score-comparison-highlights { margin:0; }
+.ux-detail .score-comparison-overall>.score-classification { grid-column:1/-1;margin:0; }
+.ux-detail .score-comparison-overall .score-classification h4 { margin:0 0 12px; }
+@media(max-width:450px){.ux-detail .score-comparison-overall{gap:12px 8px}.ux-detail .score-comparison-overall .score-percentile{font-size:17px;padding:5px 8px}}
+
+
+.ux-detail .therapy-rank-chart { margin:18px 0 20px; }
+.ux-detail .therapy-rank-pin { position:relative;height:68px; }
+.ux-detail .therapy-rank-pin-label { position:absolute;left:var(--label-position);transform:translateX(-50%);display:flex;align-items:center;flex-direction:column;gap:5px;white-space:nowrap;color:#526b80;font-size:12px; }
+.ux-detail .therapy-rank-pin-label b { padding:4px 12px;border-radius:8px;line-height:1.4;font-size:16px;box-shadow:0 3px 10px #17365d0a; }
+.ux-detail .therapy-rank-pin i { position:absolute;bottom:5px;left:var(--rank-position);transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #17365d; }
+.ux-detail .therapy-rank-band { display:flex;height:12px;border-radius:999px;overflow:hidden;gap:3px; }
+.ux-detail .therapy-rank-band span { flex:1;min-width:0;opacity:.65; }
+.ux-detail .therapy-rank-band span.is-current { opacity:1; }
+.ux-detail .therapy-rank-labels { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px;text-align:center;font-size:12px;line-height:1.5;color:#6a7f9e; }
+.ux-detail .therapy-rank-labels .is-current { color:#17365d;font-weight:700; }
+.ux-detail .therapy-rank-pin-label .score-percentile-level-0 { background:#e5a5ad;color:#542029; }
+.ux-detail .therapy-rank-pin-label .score-percentile-level-1 { background:#dfb09e;color:#542c1e; }
+.ux-detail .therapy-rank-pin-label .score-percentile-level-2 { background:#e5cf9b;color:#514019; }
+.ux-detail .therapy-rank-pin-label .score-percentile-level-3 { background:#9fd3b6;color:#18452e; }
+.ux-detail .therapy-rank-pin-label .score-percentile-level-4 { background:#63af94;color:#10392c; }
+@media(max-width:600px){.ux-detail .therapy-rank-labels{gap:4px;font-size:10px;hyphens:auto;overflow-wrap:anywhere}.ux-detail .therapy-rank-chart{margin-top:12px}}
+
+.ux-detail .score-range-extremes { position:relative;height:32px;margin-top:7px;color:#6a7f9e;font-size:10px; }
+.ux-detail .score-range-extremes span { position:absolute;bottom:5px;transform:translateX(-50%);white-space:nowrap; }
+.ux-detail .score-range-extremes span::after { content:"";position:absolute;top:100%;left:50%;height:6px;border-left:1px solid #8a9bb0; }
+.ux-detail .score-range-extremes b { color:#526b80;font-weight:600; }
+.ux-detail .score-comparison-overall { gap:8px; }
+.ux-detail .therapy-range-chart { margin:4px 0 12px; }
+.ux-detail .therapy-range-origin,.ux-detail .therapy-range-limits { display:flex;justify-content:space-between;color:#6a7f9e;font-size:10px; }
+.ux-detail .therapy-range-funnel { display:block;width:100%;height:48px;overflow:visible; }
+.ux-detail .range-full-axis { stroke:#ccdbea;stroke-width:1;vector-effect:non-scaling-stroke;fill:none; }
+.ux-detail .range-expansion { fill:#dceaf8;fill-opacity:.65; }
+.ux-detail .range-expansion-edge { fill:none;stroke:#aac5df;stroke-width:1;vector-effect:non-scaling-stroke; }
+.ux-detail .therapy-range-chart .therapy-rank-pin { height:57px;margin-top:-2px; }
+.ux-detail .therapy-range-chart .therapy-rank-band { gap:1px; }
+.ux-detail .therapy-range-caption { margin-top:8px;text-align:center;color:#526b80;font-size:12px; }
+@media(max-width:600px){.ux-detail .score-range-extremes{font-size:9px}.ux-detail .score-range-extremes span:first-child{transform:translateX(-20%)}.ux-detail .score-range-extremes span:last-child{transform:translateX(-80%)}}
+
+/* The actual score range expands directly from the main bar into the comparison box. */
+.ux-detail .score-scale-markers { position:relative;height:34px;margin-top:10px; }
+.ux-detail .score-scale-markers .score-average-row { position:absolute;inset:0;height:auto;margin:0; }
+body.compact-doctor-header .score-scale-markers .score-average-help { top:auto;bottom:3px; }
+body.compact-doctor-header .score-scale-markers .score-average-marker { flex-direction:column-reverse;gap:4px; }
+.ux-detail .score-scale-markers .score-average-marker i { border-bottom:0;border-top:8px solid #8a9bb0; }
+body.compact-doctor-header .score-scale-markers .score-average-help>p { top:auto;bottom:100%;margin:0 0 10px; }
+.ux-detail .score-range-end { position:absolute;bottom:3px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:#6a7f9e; }
+.ux-detail .score-range-end i { width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #8a9bb0; }
+.ux-detail .score-range-bridge { display:block;width:100%;height:48px;margin:0; }
+.ux-detail .score-range-bridge .range-expansion { fill:#f0f7fd;fill-opacity:1; }
+.ux-detail .score-range-bridge+.score-comparison-overall { margin-top:0;border-top-left-radius:0;border-top-right-radius:0; }
+@media(max-width:450px){.ux-detail .score-range-end,body.compact-doctor-header .score-scale-markers .score-average-marker{font-size:10px}.ux-detail .score-range-bridge{height:36px}}
+
+
+.ux-detail .score-scale-markers { height:40px; }
+.ux-detail .score-scale-markers b { font-weight:600; }
+.ux-detail .score-comparison-overall { border:1px solid #aac5df; }
+.ux-detail .score-range-bridge .range-expansion { fill:none; }
+.ux-detail .score-range-bridge .range-expansion-edge { stroke:#aac5df; }
+.ux-detail .therapy-range-chart .therapy-rank-band { height:auto;min-height:58px;border-radius:8px;gap:1px; }
+.ux-detail .therapy-range-chart .therapy-rank-band>span { display:flex;align-items:center;justify-content:center;opacity:1;padding:9px 3px;box-sizing:border-box; }
+.ux-detail .therapy-range-chart .therapy-rank-band>span>span { width:auto;flex:initial;background:none;text-align:center;font-size:11px;line-height:1.4;color:#17365d;overflow-wrap:anywhere;hyphens:auto; }
+.ux-detail .therapy-range-chart .therapy-rank-band>span.is-current { box-shadow:inset 0 0 0 2px #17365d55; }
+.ux-detail .therapy-points-axis { position:relative;height:24px;margin-top:5px;color:#526b80;font-size:11px; }
+.ux-detail .therapy-points-axis>span { position:absolute;transform:translateX(-50%);padding-top:5px; }
+.ux-detail .therapy-points-axis>span::before { content:"";height:4px;border-left:1px solid #8a9bb0;position:absolute;top:0;left:50%; }
+.ux-detail .therapy-points-axis>span.is-first { transform:none; }
+.ux-detail .therapy-points-axis>span.is-last { transform:translateX(-100%); }
+.ux-detail .therapy-points-average { position:relative;height:22px;font-size:11px;color:#6a7f9e; }
+.ux-detail .therapy-points-average>span { position:absolute;transform:translateX(-50%);white-space:nowrap; }
+.ux-detail .therapy-range-caption { margin-top:0;font-size:11px; }
+@media(max-width:600px){.ux-detail .therapy-range-chart .therapy-rank-band>span>span{font-size:9px}.ux-detail .score-range-end span,.ux-detail .score-average-marker span{display:flex;flex-direction:column;align-items:center}.ux-detail .score-scale-markers{height:49px}}
+
+/* Equal-width rank groups with point boundaries beneath each transition. */
+.ux-detail .therapy-range-chart .therapy-rank-band { height:9px;min-height:0;gap:8px;overflow:visible;border-radius:0; }
+.ux-detail .therapy-range-chart .therapy-rank-band>span { flex:1;min-width:0;padding:0;border:0;border-radius:999px;box-shadow:none; }
+.ux-detail .therapy-range-chart .therapy-rank-band>span.is-current { box-shadow:0 0 0 3px #ffffffb3; }
+.ux-detail .therapy-range-chart .therapy-rank-labels { margin:0 0 10px;gap:8px;min-height:36px;align-items:end; }
+.ux-detail .therapy-range-chart .therapy-rank-pin { height:78px;margin-top:0; }
+.ux-detail .therapy-range-chart .therapy-rank-pin-label { gap:5px; }
+.ux-detail .therapy-range-chart .therapy-rank-pin-label b { padding:5px 13px;border-radius:9px;font-size:17px;line-height:1.35; }
+.ux-detail .therapy-range-chart .therapy-rank-pin i { bottom:8px; }
+.ux-detail .therapy-points-axis { margin-top:8px; }
+@media(max-width:600px){.ux-detail .therapy-range-chart .therapy-rank-labels{font-size:10px;gap:5px;min-height:44px}.ux-detail .therapy-range-chart .therapy-rank-band{gap:5px}}
+
+/* Approved layout: relative rank first, absolute score with references below. */
+.ux-detail .therapy-final-heading { display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px; }
+.ux-detail .therapy-final-heading h3 { font-size:20px;margin:0 0 12px; }
+.ux-detail .therapy-final-result { font-size:27px;line-height:1.2; }
+.ux-detail .therapy-final-top { padding:7px 14px;border-radius:9px;font-size:21px;white-space:nowrap; }
+.ux-detail .therapy-final-top.score-percentile-level-0 { background:#e5a5ad;color:#542029; }
+.ux-detail .therapy-final-top.score-percentile-level-1 { background:#dfb09e;color:#542c1e; }
+.ux-detail .therapy-final-top.score-percentile-level-2 { background:#e5cf9b;color:#514019; }
+.ux-detail .therapy-final-top.score-percentile-level-3 { background:#9fd3b6;color:#18452e; }
+.ux-detail .therapy-final-top.score-percentile-level-4 { background:#63af94;color:#10392c; }
+.ux-detail .therapy-final-scale { margin:0; }
+.ux-detail .therapy-final-groups { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px; }
+.ux-detail .therapy-final-label { min-height:70px;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;margin-bottom:12px;text-align:center;color:#6a7f9e;font-size:12px;line-height:1.4; }
+.ux-detail .therapy-final-label small { font-size:11px; }
+.ux-detail .therapy-final-group.is-current .therapy-final-label { color:#17365d;font-weight:700; }
+.ux-detail .therapy-final-group>span { display:block;height:9px;border-radius:999px; }
+.ux-detail .therapy-final-axis { position:relative;height:42px;margin-top:8px;font-size:11px;color:#6a7f9e; }
+.ux-detail .therapy-final-axis>span { position:absolute;transform:translateX(-50%);padding-top:15px; }
+.ux-detail .therapy-final-axis>span.is-first { transform:none; }
+.ux-detail .therapy-final-axis>span.is-last { transform:translateX(-100%); }
+.ux-detail .therapy-final-axis small { position:absolute;top:0;font-size:10px; }
+.ux-detail .therapy-final-axis .is-last small { right:0; }
+.ux-detail .therapy-final-scorebox { padding:22px 20px 8px;margin:20px 0;background:#f0f7fd;border-radius:12px; }
+.ux-detail .therapy-final-scorebox .score-top { margin-bottom:20px; }
+.ux-detail .therapy-final-scorebox .score-top h3 { font-size:18px; }
+.ux-detail .therapy-final-markers { position:relative;height:62px;margin-top:6px; }
+.ux-detail .therapy-final-markers .score-range-end { top:0;bottom:auto;flex-direction:column-reverse;gap:5px;font-size:11px; }
+.ux-detail .therapy-final-markers .score-range-end>span { display:flex;flex-direction:column;align-items:center; }
+.ux-detail .therapy-final-markers .score-range-end i { border-top:0;border-bottom:7px solid #8a9bb0; }
+.ux-detail .therapy-final-markers .score-average-row { position:absolute;inset:0;height:auto;margin:0; }
+body.compact-doctor-header .therapy-final-markers .score-average-help { top:0; }
+body.compact-doctor-header .therapy-final-markers .score-average-marker { flex-direction:column;gap:5px;font-size:11px; }
+.ux-detail .therapy-final-markers .score-average-marker>span { display:flex;flex-direction:column;align-items:center; }
+.ux-detail .therapy-final-markers .score-average-marker i { border-top:0;border-bottom:7px solid #8a9bb0; }
+.ux-detail .therapy-final-explanation { margin:12px 0; }
+@media(max-width:600px){.ux-detail .therapy-final-heading h3{font-size:17px}.ux-detail .therapy-final-top{font-size:17px;padding:6px 10px}.ux-detail .therapy-final-label{font-size:11px;overflow-wrap:anywhere;hyphens:auto;min-height:95px}.ux-detail .therapy-final-label small{font-size:10px}.ux-detail .therapy-final-groups{gap:5px}.ux-detail .therapy-final-scorebox{padding:16px 12px 6px}.ux-detail .therapy-final-scorebox .score-top{gap:10px}.ux-detail .therapy-final-scorebox .score-number{font-size:30px}.ux-detail .therapy-final-scorebox .score-number small{font-size:12px}}
+
+/* Single points scale and aligned, descending legend. */
+.ux-detail .therapy-precise-comparison>h3 { margin:0 0 22px;font-size:21px; }
+.ux-detail .therapy-precise-summary { display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:14px; }
+.ux-detail .therapy-precise-summary>div>span { display:block;font-size:13px;color:#6a7f9e;margin-bottom:5px; }
+.ux-detail .therapy-precise-summary .score-number { display:block; }
+.ux-detail .therapy-precise-summary dl { margin:0;display:grid;gap:5px;font-size:12px; }
+.ux-detail .therapy-precise-summary dl>div { display:grid;grid-template-columns:auto 3ch;gap:16px; }
+.ux-detail .therapy-precise-summary dt { color:#6a7f9e;font-weight:400;text-align:right; }
+.ux-detail .therapy-precise-summary dd { margin:0;text-align:right;font-variant-numeric:tabular-nums; }
+.ux-detail .therapy-precise-chart { margin:0; }
+.ux-detail .therapy-precise-pin-row { position:relative;height:82px; }
+.ux-detail .therapy-precise-pin { position:absolute;left:var(--label-position);transform:translateX(-50%);text-align:center; }
+.ux-detail .therapy-precise-pin small { display:block;font-size:11px;color:#6a7f9e;margin-bottom:6px;white-space:nowrap; }
+.ux-detail .therapy-precise-pin .therapy-final-top { display:block;font-size:19px;padding:6px 14px; }
+.ux-detail .therapy-precise-pointer { position:absolute;bottom:7px;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #17365d; }
+.ux-detail .therapy-precise-band { display:flex;height:14px;border-radius:999px;overflow:hidden; }
+.ux-detail .therapy-precise-band>span { flex:none;height:100%;box-sizing:border-box; }
+.ux-detail .therapy-precise-band>span+span { border-left:2px solid #fff; }
+.ux-detail .therapy-precise-axis { position:relative;height:28px;margin-top:8px;font-size:12px;color:#6a7f9e;font-variant-numeric:tabular-nums; }
+.ux-detail .therapy-precise-axis>span { position:absolute;transform:translateX(-50%); }
+.ux-detail .therapy-precise-axis>.is-first { transform:none; }
+.ux-detail .therapy-precise-axis>.is-last { transform:translateX(-100%); }
+.ux-detail .therapy-precise-chart figcaption { margin:0 0 18px;font-size:12px;color:#6a7f9e; }
+.ux-detail .therapy-precise-legend { display:grid;gap:10px; }
+.ux-detail .therapy-precise-legend-row { display:grid;grid-template-columns:8px minmax(0,1fr) 9ch 8ch 40px;gap:12px;align-items:center;font-size:13px;color:#6a7f9e; }
+.ux-detail .therapy-precise-legend-row>i { width:8px;height:8px;border-radius:50%; }
+.ux-detail .therapy-precise-legend-row.is-current { color:#17365d;font-weight:700; }
+.ux-detail .therapy-precise-tier { text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums; }
+.ux-detail .therapy-precise-range { display:grid;grid-template-columns:3ch 1ch 3ch;justify-content:end;column-gap:.5ch;font-variant-numeric:tabular-nums;white-space:nowrap; }
+.ux-detail .therapy-precise-range>span { text-align:right; }
+.ux-detail .therapy-precise-range>span:nth-child(2) { text-align:center; }
+.ux-detail .therapy-precise-unit { font-size:12px; }
+@media(max-width:600px){.ux-detail .therapy-precise-comparison>h3{font-size:18px}.ux-detail .therapy-precise-legend-row{grid-template-columns:7px minmax(0,1fr) 8ch 8ch;gap:7px;font-size:12px}.ux-detail .therapy-precise-unit{display:none}.ux-detail .therapy-precise-name{overflow-wrap:normal;hyphens:auto}.ux-detail .therapy-precise-summary{gap:12px}.ux-detail .therapy-precise-summary .score-number{font-size:32px}.ux-detail .therapy-precise-summary .score-number small{display:block;font-size:12px}.ux-detail .therapy-precise-summary dl>div{gap:8px}.ux-detail .therapy-precise-axis>.is-inner{display:none}}
+
+.ux-detail .therapy-precise-legend-row { grid-template-columns:8px minmax(0,1fr) minmax(9ch,1fr) 8ch 40px; }
+.ux-detail .therapy-precise-tier { text-align:center; }
+.ux-detail .dashboard-score .therapy-orientation-note { margin-bottom:1.5em; }
+@media(max-width:600px){.ux-detail .therapy-precise-legend-row{grid-template-columns:7px minmax(0,1.4fr) minmax(8ch,1fr) 8ch}}
+
+.ux-detail .therapy-precise-tier { display:grid;grid-template-columns:3ch 3ch 1ch;column-gap:.5ch;justify-content:center;align-items:baseline;font-variant-numeric:tabular-nums; }
+.ux-detail .therapy-precise-tier>span:first-child { text-align:left; }
+.ux-detail .therapy-precise-tier-number { text-align:right; }
+.ux-detail .therapy-precise-tier>span:last-child { text-align:left; }
+
+.ux-detail .therapy-more-info { margin-top:28px; }
+.ux-detail .therapy-more-info>summary { color:#526b80;font-size:14px;cursor:pointer; }
+.ux-detail .therapy-more-info>.therapy-final-explanation { margin-top:16px; }
+.ux-detail .therapy-more-info>.therapy-orientation-note { margin:14px 0 0; }
+
+/* Keep the collapsed information area close to the card's bottom edge. */
+.ux-page .ux-overview-summary .card.therapy-final-summary { padding-bottom:12px; }
+.ux-detail .therapy-final-summary>.therapy-more-info { margin-bottom:0;padding-bottom:0; }
+.ux-detail .therapy-more-info:not([open])>summary { margin-bottom:0; }

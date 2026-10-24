@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_search_normalization.php';
+require_once __DIR__ . '/_catalog_redirect.php';
 
 function lcnNdCanTreatAtHome(array $item): bool
 {
@@ -48,7 +49,8 @@ function lcnNdSearch(PDO $pdo, string $search = ''): array
 
 function lcnNdDetail(PDO $pdo, int $id): ?array
 {
-    $rows = lcnNdRows($pdo, 'SELECT * FROM tbl_treatments_nd WHERE treat_nd_id = ?', [$id]);
+    $id=lcnMergedCatalogId($pdo,'treatment',$id);
+    $rows = lcnNdRows($pdo, 'SELECT * FROM tbl_treatments_nd WHERE treat_nd_id = ? AND review_status<>\'rejected_group\'', [$id]);
     if (!$rows) return null;
     $item = $rows[0];
     $item['costs'] = lcnNdRows($pdo, 'SELECT * FROM tbl_treatment_costs_nd WHERE treat_nd_id = ? ORDER BY land, treatment_cost_id', [$id]);

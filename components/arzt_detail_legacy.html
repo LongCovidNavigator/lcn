@@ -7,13 +7,13 @@
     <title>Long Covid Navigator - Arzt-Steckbrief</title>
 
     <link rel="stylesheet" href="styles/general.css">
-    <link rel="stylesheet" href="styles/navigation.css?v=menu-icon-20261016">
+    <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/aerzte_karte.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="styles/arzt_detail.css?v=48">
     <script src="scripts/image-registry.js?v=5"></script>
-    <script src="scripts/access-nav.js?v=2" defer></script>
+    <script src="scripts/access-nav.js?v=chapters-20261024" defer></script>
 </head>
 
 <script>
@@ -309,7 +309,7 @@
 
                                     <div class="doctor-detail-treatment-range-grid">
                                         <label class="doctor-detail-treatment-range-label">
-                                            <span>Positive Erfahrungen (mind.)</span>
+                                            <span>Verbesserung (mind.)</span>
 
                                             <div class="doctor-detail-treatment-range-row">
                                                 <input
@@ -329,6 +329,38 @@
                                                         step="1"
                                                         value="0"
                                                         data-treatment-positive-min="1"
+                                                    >
+                                                    <span>%</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="doctor-detail-treatment-range-scale">
+                                                <span>0</span>
+                                                <span>50</span>
+                                                <span>100</span>
+                                            </div>
+                                        </label>
+<label class="doctor-detail-treatment-range-label">
+                                            <span>Heilung (mind.)</span>
+
+                                            <div class="doctor-detail-treatment-range-row">
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    step="1"
+                                                    value="0"
+                                                    data-treatment-healing-min="1"
+                                                >
+
+                                                <div class="doctor-detail-treatment-percent-input">
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        max="100"
+                                                        step="1"
+                                                        value="0"
+                                                        data-treatment-healing-min="1"
                                                     >
                                                     <span>%</span>
                                                 </div>
@@ -443,7 +475,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>window.LCNImages.configureLeaflet(window.L);</script>
     <script src="scripts/doctor_hybrid_detail.js?v=2"></script>
-    <script src="scripts/arzt_detail.js?v=38"></script>
+    <script src="scripts/arzt_detail.js?v=no-sort-arrows-20261024"></script>
 
     <div id="footer-placeholder"></div>
 
@@ -456,7 +488,7 @@
     </script>
 
     <script>
-        fetch("components/header.html?v=menu-icon-20261016")
+        fetch("components/header.html?v=chapters-20261024")
             .then(response => response.text())
             .then(data => {
                 document.getElementById("header-placeholder").innerHTML = data;

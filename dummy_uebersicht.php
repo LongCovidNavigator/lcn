@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LCN – Dummy-Übersicht</title>
     <link rel="stylesheet" href="styles/general.css">
-    <link rel="stylesheet" href="styles/navigation.css?v=menu-icon-20261016">
+    <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/dummy_uebersicht.css?v=1">
-    <script src="scripts/access-nav.js?v=compact-20261016" defer></script>
+    <script src="scripts/access-nav.js?v=chapters-20261024" defer></script>
 </head>
 <body>
 <div id="header-placeholder"></div>
@@ -38,5 +38,5 @@
     </div></section>
 </main>
 <div id="footer-placeholder"></div>
-<script>fetch('components/header.html?v=menu-icon-20261016').then(r=>r.text()).then(html=>document.getElementById('header-placeholder').innerHTML=html);fetch('components/footer.html').then(r=>r.text()).then(html=>document.getElementById('footer-placeholder').innerHTML=html);</script>
+<script>fetch('components/header.html?v=chapters-20261024').then(r=>r.text()).then(html=>document.getElementById('header-placeholder').innerHTML=html);fetch('components/footer.html').then(r=>r.text()).then(html=>document.getElementById('footer-placeholder').innerHTML=html);</script>
 </body></html>

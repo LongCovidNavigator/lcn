@@ -335,7 +335,7 @@ const featuredExperts = [
     ["Priv.-Doz. Dr. Dr. Valentina O. Puntmann", "DE", "Frankfurt am Main"],
     ["Prof. Dr. Uta Behrends", "DE", "München"],
     ["Dr. Herbert Renz-Polster", "DE", "Deutschland"],
-    ["Dr. Kristina Schultheiß", "DE", "Immenstadt / online"],
+    ["Dr. Kristina Schultheiß", "DE", "Immenstadt"],
     ["Dr. Astrid Weber", "DE", "Koblenz"],
     ["Dr. Kirsten Wittke", "DE", "Berlin"],
     ["Dr. Judith Bellmann-Strobl", "DE", "Berlin"],
@@ -404,10 +404,12 @@ async function loadFeaturedExperts() {
         });
     });
 
-    const initialCount = editorialList.length;
+    const initialCount = list.closest(".home-recommendation-teasers") ? 10 : editorialList.length;
     const initialEntries = editorialList.slice(0, initialCount);
     const longlist = editorialList.slice(initialCount);
-    list.innerHTML = buildFeaturedExpertsHtml(initialEntries, 0, false);
+    list.innerHTML = list.closest(".home-recommendation-teasers")
+        ? buildHomepageRankingTable(initialEntries, "doctor")
+        : buildFeaturedExpertsHtml(initialEntries, 0, false);
     if (isFullExpertsPage) {
         bindFeaturedExpertViewSwitch(list, initialEntries);
     }
@@ -417,7 +419,7 @@ async function loadFeaturedExperts() {
     }
 
     if (!moreButton) return;
-    moreButton.hidden = longlist.length === 0;
+    moreButton.hidden = !!list.closest(".home-recommendation-teasers") || longlist.length === 0;
     alignHomepageRecommendations();
 
     moreButton.onclick = function () {
@@ -492,7 +494,7 @@ function buildFeaturedExpertsHtml(doctors, rankOffset, isLonglist, forceCards) {
         const classes = ["featured-expert", "is-featured"];
         if (isLonglist) classes.push("is-longlist");
 
-        const name = escapeHomepageHtml(doctor.dr_display_name || "");
+        const name = escapeHomepageHtml(LCNDoctorNames.compact(doctor.dr_display_name));
         const institution = escapeHomepageHtml(doctor.loc_label || doctor.dr_org_name || doctor.specialty_labels || "");
         const location = `${getCountryFlag(doctor.editorial_flag)}<span>${escapeHomepageHtml(doctor.editorial_location)}</span>`;
         const ownVote = ["pro", "neutral", "contra"].includes(doctor.own_vote) ? doctor.own_vote : "";
@@ -560,7 +562,7 @@ function buildFeaturedExpertCardVoteButton(drId, type, label, prefix, ratio, cou
 function buildFeaturedExpertTableRowsHtml(doctors, rankOffset, isLonglist) {
     return doctors.map(function (doctor, index) {
         const rank = rankOffset + index + 1;
-        const name = escapeHomepageHtml(doctor.dr_display_name || "");
+        const name = escapeHomepageHtml(LCNDoctorNames.compact(doctor.dr_display_name));
         const institution = escapeHomepageHtml(doctor.loc_label || doctor.dr_org_name || doctor.specialty_labels || "");
         const ownVote = ["pro", "neutral", "contra"].includes(doctor.own_vote) ? doctor.own_vote : "";
         const profileHref = doctor.dr_id
@@ -759,6 +761,12 @@ function initNearbyGps() {
     const form = document.getElementById("nearby-gps-form");
     if (!form) return;
     form.addEventListener("submit", searchNearbyGps);
+    const input = document.getElementById('nearby-gps-location');
+    const clear = document.getElementById('nearby-gps-location-clear');
+    const syncClear = () => { if (clear) clear.hidden = !input.value.trim(); };
+    input.addEventListener('input', syncClear);
+    clear?.addEventListener('click', () => { resetHomepageMapLocation(); input.focus(); });
+    new MutationObserver(syncClear).observe(document.getElementById('nearby-gps-status'), {childList:true});
     window.addEventListener("storage", handleHomepageLocationStorageChange);
     restoreHomepageLocationAndLoadGps();
 }
@@ -840,7 +848,7 @@ async function searchNearbyGps(event) {
     const radiusInput = document.getElementById("nearby-gps-radius");
     const query = String(input.value || "").trim();
     const radiusKm = Math.min(2000, Math.max(1, Number(radiusInput?.value || 50)));
-    if (!query) return;
+    if (!query) { await resetHomepageMapLocation(); return; }
     if (radiusInput) radiusInput.value = String(radiusKm);
 
     submitButton.disabled = true;
@@ -863,6 +871,15 @@ async function searchNearbyGps(event) {
     }
 }
 
+async function resetHomepageMapLocation() {
+    document.getElementById('nearby-gps-location').value = '';
+    document.getElementById('nearby-gps-location-clear').hidden = true;
+    for (const key of ['lcn_shared_location_preference','lcn_doctor_location_preference','lcn_treatment_location_preference']) localStorage.removeItem(key);
+    localStorage.setItem(homepageSharedLocationClearedStorageKey, String(Date.now()));
+    window.dispatchEvent(new CustomEvent('homepage:location-changed'));
+    await loadGpsAcrossGermany();
+}
+
 async function loadGpsAcrossGermany() {
     const status = document.getElementById("nearby-gps-status");
     status.classList.remove("is-error");
@@ -881,6 +898,10 @@ async function loadGpsAcrossGermany() {
     }
 }
 
+function usesNearbyDiscovery() {
+    return document.getElementById('nearby-gps-form')?.dataset.mode === 'nearest';
+}
+
 async function loadNearbyGpsForLocation(location, restored, requestedRadiusKm) {
     const status = document.getElementById("nearby-gps-status");
     const radiusInput = document.getElementById("nearby-gps-radius");
@@ -890,11 +911,22 @@ async function loadNearbyGpsForLocation(location, restored, requestedRadiusKm) {
     if (radiusInput) radiusInput.value = String(radiusKm);
     status.classList.remove("is-error");
     status.textContent = restored ? "Hausärztliche Anlaufstellen am gespeicherten Standort werden geladen …" : "Hausärzt:innen in der Nähe werden geladen …";
-    const response = await fetch(buildHomepagePrimaryCareUrl(location, radiusKm));
+    const discovery = usesNearbyDiscovery();
+    const response = await fetch(buildHomepagePrimaryCareUrl(location, discovery ? undefined : radiusKm));
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error("Die hausärztlichen Therapien sind gerade nicht verfügbar.");
-    const gps = getHomepagePrimaryCareProviders(data, true);
-    renderNearbyGps(location, gps, true, radiusKm);
+    let gps = getHomepagePrimaryCareProviders(data, true);
+    if (discovery) {
+        const seen = new Set();
+        gps = gps.filter(doctor => { if (seen.has(doctor.dr_id)) return false; seen.add(doctor.dr_id); return true; }).slice(0, 10);
+    }
+    renderNearbyGps(location, gps, true, discovery ? 50 : radiusKm);
+    if (discovery) {
+        status.textContent = gps.length
+            ? `Die ${gps.length} nächsten erfassten Anlaufstellen · nach Entfernung sortiert. Der 50-km-Kreis dient zur Orientierung; weiter entfernte Praxen werden ebenfalls angezeigt.`
+            : 'Hier sind noch keine Anlaufstellen erfasst. Hilf mit und ergänze eine Hausarztpraxis.';
+        return;
+    }
     status.textContent = gps.length
         ? `${gps.length} Behandler der hausärztlichen Therapie im Umkreis von ${radiusKm} km gefunden.`
         : `Im Umkreis von ${radiusKm} km wurden aktuell keine Behandler der hausärztlichen Therapie gefunden.`;
@@ -949,7 +981,14 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     const heading = document.getElementById("nearby-gps-results-heading");
     results.hidden = false;
     heading.textContent = hasUserLocation ? "Die nächsten Anlaufstellen" : "Hausärztliche Anlaufstellen in Deutschland";
-    list.innerHTML = doctors.length ? doctors.map(function (doctor) { return buildNearbyGpCard(doctor, hasUserLocation); }).join("")
+    if (usesNearbyDiscovery()) {
+        const count = document.createElement('span');
+        count.className = 'nearby-gps-result-count';
+        count.textContent = String(doctors.length);
+        count.setAttribute('aria-label', doctors.length + ' angezeigte Anlaufstellen');
+        heading.append(count);
+    }
+    list.innerHTML = doctors.length ? doctors.map(function (doctor, index) { return buildNearbyGpCard(doctor, hasUserLocation, index + 1); }).join("")
         : '<p class="nearby-gps-status">Versuche alternativ die vollständige Behandlersuche.</p>';
     allLink.href = `therapie_detail.html?treat_id=${homepagePrimaryCareTreatmentId}`;
 
@@ -997,9 +1036,15 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
             .bindPopup(`<strong>Dein Standort</strong><br>${escapeHomepageHtml(location.formatted || location.label || "")}`).addTo(nearbyGpsMarkers);
         nearbyGpsRadiusCircle = L.circle([location.lat, location.lng], {
             radius: Number(radiusKm || 50) * 1000,
-            color: "#3388ff", weight: 2, opacity: .9,
-            fillColor: "#3388ff", fillOpacity: .10, interactive: false
+            color: "#4387b5", weight: 2, opacity: .75,
+            fillColor: "#4387b5", fillOpacity: .05, interactive: false
         }).addTo(nearbyGpsMap);
+        if (usesNearbyDiscovery()) {
+            L.marker([Number(location.lat) + 50 / 111.195, Number(location.lng)], {
+                icon: L.divIcon({className:'nearby-gps-radius-label', html:'50 km', iconSize:[52,24], iconAnchor:[26,12]}),
+                interactive:false, keyboard:false
+            }).addTo(nearbyGpsMarkers);
+        }
     }
     const providerGroups = groupNearbyGpsProviders(doctors);
     providerGroups.forEach(function (group) {
@@ -1011,18 +1056,23 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
         nearbyGpsMarkersByLocation.set(group.key, marker);
     });
     bindNearbyGpCardHighlights(list);
-    if (hasUserLocation && nearbyGpsRadiusCircle) nearbyGpsMap.fitBounds(nearbyGpsRadiusCircle.getBounds(), { padding: [28, 28] });
+    if (hasUserLocation && nearbyGpsRadiusCircle && usesNearbyDiscovery()) {
+        const area = L.latLngBounds(bounds);
+        area.extend(nearbyGpsRadiusCircle.getBounds());
+        nearbyGpsMap.fitBounds(area, {padding:[32,32], maxZoom:9});
+    }
+    else if (hasUserLocation && nearbyGpsRadiusCircle) nearbyGpsMap.fitBounds(nearbyGpsRadiusCircle.getBounds(), { padding: [28, 28] });
     else if (bounds.length > 0) nearbyGpsMap.fitBounds(bounds, { padding: [28, 28], maxZoom: 7 });
     else nearbyGpsMap.setView([homepageGermanyCenter.lat, homepageGermanyCenter.lng], 6);
     setTimeout(function () { nearbyGpsMap.invalidateSize(); }, 0);
 }
 
-function buildNearbyGpCard(doctor, showDistance) {
+function buildNearbyGpCard(doctor, showDistance, position) {
     const href = `arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}`;
     const distance = showDistance && Number.isFinite(Number(doctor.distance_km))
         ? `${Number(doctor.distance_km).toLocaleString("de-DE", { maximumFractionDigits: 1 })} km`
         : "Versorgung";
-    return `<article class="nearby-gp-card" data-location-key="${escapeHomepageHtml(getNearbyGpsLocationKey(doctor))}"><span class="nearby-gp-distance">${distance}</span><div><h4><a href="${href}">${escapeHomepageHtml(doctor.dr_display_name || "Hausärztliche Praxis")}</a></h4><p>${escapeHomepageHtml(formatDoctorAddress(doctor) || "Hausärztliche Therapie")}</p></div></article>`;
+    return `<article class="nearby-gp-card" data-location-key="${escapeHomepageHtml(getNearbyGpsLocationKey(doctor))}">${usesNearbyDiscovery() ? `<span class="nearby-gp-position" aria-label="Eintrag ${position}">${position}</span>` : ''}<span class="nearby-gp-distance">${distance}</span><div><h4><a href="${href}">${escapeHomepageHtml(doctor.dr_display_name || "Hausärztliche Praxis")}</a></h4><p>${escapeHomepageHtml(formatDoctorAddress(doctor) || "Hausärztliche Therapie")}</p></div></article>`;
 }
 
 function getNearbyGpsLocationKey(doctor) {
@@ -1090,11 +1140,11 @@ async function loadHomepageEditorialSelection(list, moreButton) {
     try {
         const response=await fetch('api/editorial_treatments.php');
         const payload=await response.json();
-        if(!response.ok||!payload.ok)throw new Error('Editorial selection unavailable');
+        if(!response.ok||!payload.ok||payload.catalog_available===false)throw new Error(payload.message || 'Die Therapien konnten gerade nicht geladen werden.');
         const entries=payload.topics.map(topic=>({editorial:{id:topic.items.length===1?Number(topic.items[0].treat_id):0,name:topic.label},data:topic.items.length===1?topic.items[0]:{typ:[...new Set(topic.items.map(i=>i.typ).filter(Boolean))].join(' · ')},topic}));
         const render=expanded=>{
-            const visible=entries;
-            list.innerHTML=buildFeaturedTreatmentsHtml(visible);
+            const visible=list.closest(".home-recommendation-teasers") ? entries.slice(0, 10) : entries;
+            list.innerHTML=list.closest(".home-recommendation-teasers") ? buildHomepageRankingTable(visible, "treatment") : buildFeaturedTreatmentsHtml(visible);
             const elements=list.querySelectorAll('.featured-treatment, .featured-treatment-table-row');
             elements.forEach((element,index)=>{
                 const entry=visible[index],single=entry.topic.items.length===1;
@@ -1110,18 +1160,23 @@ async function loadHomepageEditorialSelection(list, moreButton) {
         };
         render(true);
         alignHomepageRecommendations();
-    }catch(error){list.innerHTML='<p class="featured-treatments-status">Die Therapien konnten gerade nicht geladen werden.</p>';}
+    }catch(error){
+        console.error('Top-Therapien für die Startseite konnten nicht geladen werden:', error);
+        list.innerHTML='<p class="featured-treatments-status"></p>';
+        list.firstElementChild.textContent=error.message || 'Die Therapien konnten gerade nicht geladen werden.';
+        if(moreButton)moreButton.hidden=true;
+    }
 }
 
 function alignHomepageRecommendations() {
     const area=document.querySelector('.home-recommendation-teasers');
     if(!area)return;
     area.querySelectorAll('table').forEach(table=>{const headers=table.querySelectorAll('th');if(headers[0])headers[0].textContent='#';if(headers.length===6)headers[5].textContent='Entfernung';});
-    const pairs=[['.featured-treatments-heading','.featured-experts-heading'],['#featured-treatments-list .featured-treatment','#featured-experts-list .featured-expert'],['.featured-treatments-table thead tr','.featured-experts-table thead tr'],['.featured-treatments-table tbody tr','.featured-experts-table tbody tr']];
+    const pairs=[['.featured-treatments-heading','.featured-experts-heading'],['#featured-treatments-list .featured-treatment','#featured-experts-list .featured-expert'],['.featured-treatments-table thead tr','.featured-experts-table thead tr'],['.featured-treatments-table tbody tr','.featured-experts-table tbody tr'],['.home-ranking-treatment tbody tr','.home-ranking-doctor tbody tr'],['.home-ranking-treatment .home-top-card','.home-ranking-doctor .home-top-card']];
     for(const [left,right] of pairs){
         const a=area.querySelectorAll(left),b=area.querySelectorAll(right);
         [...a,...b].forEach(el=>el.style.height='');
-        if(window.innerWidth<=760)continue;
+        if(window.innerWidth<=1000)continue;
         for(let i=0;i<Math.min(a.length,b.length);i++){
             const height=Math.ceil(Math.max(a[i].getBoundingClientRect().height,b[i].getBoundingClientRect().height));
             a[i].style.height=b[i].style.height=height+'px';
@@ -1129,4 +1184,47 @@ function alignHomepageRecommendations() {
     }
 }
 window.addEventListener('resize',alignHomepageRecommendations);
+window.addEventListener('lcn-online-ready',alignHomepageRecommendations);
 document.fonts?.ready.then(alignHomepageRecommendations);
+
+// Both homepage columns share a renderer and the smaller available selection.
+const homepageRankingEntries = new Map();
+function buildHomepageRankingTable(entries, type) {
+    homepageRankingEntries.set(type, entries);
+    const count = Math.min(10, ...Array.from(homepageRankingEntries.values(), items => items.length));
+    for (const [otherType, items] of homepageRankingEntries) {
+        if (otherType === type) continue;
+        const list = document.getElementById(otherType === 'treatment' ? 'featured-treatments-list' : 'featured-experts-list');
+        if (list) list.innerHTML = buildHomepageRankingContent(items.slice(0, count), otherType);
+    }
+    return buildHomepageRankingContent(entries.slice(0, count), type);
+}
+
+function buildHomepageRankingContent(entries, type) {
+    const treatment = type === 'treatment';
+    const details = entries.map(entry => {
+        const topic = entry.topic;
+        const name = treatment ? entry.editorial.name : LCNDoctorNames.compact(entry.dr_display_name);
+        const ids = treatment ? topic.items.map(item => item.treat_id).join(',') : entry.dr_id;
+        const href = treatment
+            ? (topic.items.length === 1 ? `therapie_detail.php?treatment_id=${encodeURIComponent(ids)}` : `therapien_karte.html?search=${encodeURIComponent(name)}`)
+            : (entry.dr_id ? `arzt_detail.html?id=${encodeURIComponent(entry.dr_id)}` : `aerzte_karte.html?search=${encodeURIComponent(name)}`);
+        const country = entry.editorial_flag || entry.loc_country || '';
+        const countryName = {DE:'Deutschland',AT:'Österreich',CH:'Schweiz',CY:'Zypern'}[country] || country;
+        const city = entry.editorial_location || entry.loc_city || entry.loc_label || '';
+        const locationText = city && city !== countryName ? city : ''; 
+        const detailHtml = treatment ? escapeHomepageHtml(entry.data.typ || 'Therapieauswahl')
+            : `<span class="home-ranking-location" title="${escapeHomepageHtml(countryName)}" aria-label="${escapeHomepageHtml([countryName, locationText].filter(Boolean).join(', '))}">${getCountryFlag(country)}${locationText ? `<span>${escapeHomepageHtml(locationText)}</span>` : ''}</span>`;
+        const specialty = String(entry.specialty_labels || '').trim();
+        const cardInfo = !treatment && specialty ? `<span class="home-top-specialty">${escapeHomepageHtml(specialty)}</span>` : '';
+        const count = treatment ? topic.provider_count : entry.treatment_count;
+        const countLabel = treatment ? 'Behandler im Katalog' : 'Therapien im Katalog';
+        const countHtml = `<div class="home-ranking-fact"><strong>${count !== null && count !== undefined ? Number(count).toLocaleString('de-DE') : '—'}</strong><span>${countLabel}</span></div>`;
+        return {name: escapeHomepageHtml(name), href, detailHtml, cardInfo, countHtml};
+    });
+    const cards = details.slice(0, 3).map((entry, index) => `<article class="home-top-card${treatment ? '' : ' home-top-card-doctor'}">
+        <div class="home-top-card-heading"><span class="home-top-rank">${String(index + 1).padStart(2, '0')}</span><div><span class="home-top-kind">${treatment ? 'Therapie' : 'Behandler'}</span><h3><a href="${entry.href}">${entry.name}</a></h3></div></div>
+        ${treatment ? '' : `<div class="home-top-place">${entry.detailHtml}</div>`}<div class="home-top-experience">${entry.countHtml}</div><div class="home-top-meta">${treatment ? `<span class="home-top-detail">${entry.detailHtml}</span>` : entry.cardInfo}</div></article>`).join('');
+    const rows = details.slice(3).map((entry, index) => `<tr><td class="home-ranking-number">${String(index + 4).padStart(2, '0')}</td><th scope="row"><a href="${entry.href}">${entry.name}</a>${treatment ? `<small>${entry.detailHtml}</small>` : ''}</th>${treatment ? '' : `<td class="home-ranking-city">${entry.detailHtml}</td>`}<td>${entry.countHtml}</td></tr>`).join('');
+    return `<div class="home-ranking-content home-ranking-${type}"><div class="home-top-cards">${cards}</div>${rows ? `<div class="home-ranking-scroll"><table class="home-ranking-table"><thead><tr><th scope="col">#</th><th scope="col">${treatment ? 'Therapie / Kategorie' : 'Behandler'}</th>${treatment ? '' : '<th scope="col">Ort</th>'}<th scope="col">${treatment ? 'Behandler' : 'Therapien'}</th></tr></thead><tbody>${rows}</tbody></table></div>` : ''}</div>`;
+}

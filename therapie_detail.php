@@ -25,6 +25,7 @@ $id = filter_var($_GET['treatment_id'] ?? null, FILTER_VALIDATE_INT, ['options'=
 $legacyId = filter_var($_GET['treat_id'] ?? null, FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]);
 $item = null; $error = null;
 try {
+    if($id){$merged=lcnMergedCatalogId(lcnTreatmentsNdDatabase(),'treatment',(int)$id);if($merged!==(int)$id){$params=$_GET;$params['treatment_id']=$merged;header('Location: therapie_detail.php?'.http_build_query($params),true,302);exit;}}
     if (!$id && $legacyId) {
         $mapped = lcnNdRows(lcnTreatmentsNdDatabase(), 'SELECT treat_nd_id FROM tbl_treatments_nd WHERE treat_nd_id = ?', [$legacyId]);
         if (!$mapped) { header('Location: therapie_detail.html?treat_id='.$legacyId.'&source=priority'); exit; }
@@ -45,6 +46,7 @@ $views = ['ueberblick'=>'Überblick','termin'=>'Welche Belastungshürden gibt es
 <?php $n=0; foreach ($views as $view=>$label): ?><a href="#<?= $view ?>" data-view="<?= $view ?>"><span class="nav-number"><?= ++$n ?></span><span><strong><?= str_replace("Therapiealternativen", "Therapie&shy;alternativen", ndEscape($label)) ?></strong></span></a><?php endforeach; ?>
 </div></nav>
 <div id="view-content" tabindex="-1">
+<?php if (($item['review_status'] ?? '') === 'pending_group'): ?><p class="ux-test-notice" role="status">Community-Vorschlag · Prüfung ausstehend</p><?php endif; ?>
 
 <noscript>Bitte JavaScript aktivieren, um zwischen den Ansichten zu wechseln und eigene Angaben auszuwählen.</noscript>
 <section id="ueberblick" class="nd-panel" aria-label="Überblick">
@@ -56,7 +58,6 @@ $views = ['ueberblick'=>'Überblick','termin'=>'Welche Belastungshürden gibt es
 <?php if (ndHas($item['typ'])): ?><div class="ux-identity-field"><span>Kategorie</span><strong><?= ndEscape($item['typ']) ?></strong></div><?php endif; ?>
 <?php if (ndHas($item['unterkategorie'])): ?><div class="ux-identity-field"><span>Unterkategorie</span><strong><?= ndEscape($item['unterkategorie']) ?></strong></div><?php endif; ?>
 
-<a class="ux-identity-experiences" href="#wirkung" data-community-summary>Community-Bewertungen ansehen →</a>
 </aside>
 <div data-treatment-score="overview"></div>
 </div></section>
@@ -82,8 +83,7 @@ $views = ['ueberblick'=>'Überblick','termin'=>'Welche Belastungshürden gibt es
 <div class="ux-symptom-picker" data-symptom-combobox><label for="symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="symptom-search" type="text" role="combobox" data-symptom-search placeholder="Symptom auswählen oder eintippen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="symptom-picker"><button type="button" data-symptom-toggle aria-label="Symptomliste öffnen" aria-controls="symptom-picker" aria-expanded="false">⌄</button></div><div id="symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div>
 </section></section>
 <section id="alternativen" class="nd-panel" aria-label="Therapiealternativen" hidden>
-<p>Verknüpfte Therapien entdecken.</p>
-<section class="card ux-discovery ux-alternative-section"><h3>Alternative Therapien</h3>
+<section class="card ux-discovery ux-alternative-section"><h3>Alternative Therapien <span class="ux-heading-info"><button type="button" aria-label="Information zu alternativen Therapien" aria-describedby="therapy-alternatives-help">ⓘ</button><p id="therapy-alternatives-help" role="tooltip">Welche anderen Behandlungen kommen für einen ähnlichen Einsatz infrage? Hier sammelt die Community mögliche Alternativen zu dieser Therapie. Du kannst weitere Optionen ergänzen. Ein Eintrag bedeutet nicht, dass die Behandlungen gleich wirksam oder für jede Person austauschbar sind. Noch ungeprüfte Vorschläge sind gekennzeichnet.</p></span></h3>
 <div class="ux-alternative-strip" role="group" aria-label="Aktuelle Therapie und Alternativen">
 <article class="ux-alternative-tile ux-alternative-current"><small>Aktuelle Therapie</small><strong><?= ndEscape($item['treatmentname']) ?></strong>
 <?php if(ndHas($item['typ'])): ?><span class="ux-alternative-category"><?= ndEscape($item['typ']) ?></span><?php endif; ?>
@@ -110,7 +110,6 @@ $graph=lcnTreatmentDiscoveryGraph(lcnTreatmentsNdDatabase());
 echo ndRenderRelationshipStages($graph,(int)$id);
 echo ndRenderTreatmentCombinations($graph,(int)$id);
 ?>
-<section class="card ux-discovery" data-treatment-relation-pending hidden><h3>Vorgeschlagene Verknüpfungen</h3><div class="ux-relationship-scroll"><table class="ux-relationship-table"><thead><tr><th scope="col">Verknüpfung</th><th scope="col">Status</th><th scope="col">Rückmeldungen</th></tr></thead><tbody></tbody></table></div></section>
 <p data-treatment-relation-status role="status"></p>
 </section><section id="dashboard" class="nd-panel" aria-label="Dashboard" hidden><div data-treatment-score="full"></div><div class="ux-dashboard-grid" data-treatment-dashboard></div></section></div></div><?php ndEnd(); ?>
 

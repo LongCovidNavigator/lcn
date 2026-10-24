@@ -9,11 +9,11 @@ header('Cache-Control: no-store, private');
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Freigaben – LCN</title>
     <link rel="stylesheet" href="styles/general.css">
-    <link rel="stylesheet" href="styles/navigation.css?v=menu-icon-20261016">
+    <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="styles/footer-style.css">
-    <link rel="stylesheet" href="styles/freigaben.css?v=4">
+    <link rel="stylesheet" href="styles/freigaben.css?v=merge-choice-20261022">
     <script src="scripts/image-registry.js?v=5"></script>
-    <script src="scripts/access-nav.js?v=compact-20261016" defer></script>
+    <script src="scripts/access-nav.js?v=chapters-20261024" defer></script>
 </head>
 <body>
     <div id="header-placeholder"></div>
@@ -35,7 +35,7 @@ header('Cache-Control: no-store, private');
         <section id="review-list"></section>
     </main>
     <div id="footer-placeholder"></div>
-    <script src="scripts/freigaben.js?v=combination-create-20261021"></script>
+    <script src="scripts/freigaben.js?v=no-sort-arrows-20261024"></script>
     <script>function toggleMobileMenu(){document.querySelector('.main-nav ul')?.classList.toggle('show');}</script>
 </body>
 </html>

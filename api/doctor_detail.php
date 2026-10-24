@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/_voting.php';
+require_once __DIR__ . '/_catalog_redirect.php';
 require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_editorial_treatments.php';
 require_once __DIR__ . '/_doctor_treatment_ratings.php';
@@ -166,6 +167,7 @@ function buildTreatmentAnalysis($treatments) {
 
 try {
     $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    if($id){$merged=lcnMergedCatalogId(lcnDoctorDatabase(),'doctor',(int)$id);if($merged!==(int)$id)sendJson(['ok'=>true,'merged_target_id'=>$merged]);}
 
     if (!$id || $id <= 0) {
         throw new InvalidArgumentException("Keine gültige Arzt-ID übergeben.");

@@ -7,7 +7,7 @@
     <title>Long Covid Navigator - Behandler-Suche</title>
 
     <link rel="stylesheet" href="styles/general.css">
-    <link rel="stylesheet" href="styles/navigation.css?v=menu-icon-20261016">
+    <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/lcnprotocol_table.css">
 
@@ -17,8 +17,8 @@
     >
 	<link rel="stylesheet" href="styles/aerzte_karte.css?v=13">
     <script src="scripts/image-registry.js?v=5"></script>
-    <script src="scripts/access-nav.js?v=compact-20261016" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=2"><script src="scripts/maps_shared.js?v=1" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=2"><script src="scripts/experience_summary.js?v=1"></script></head>
+    <script src="scripts/access-nav.js?v=chapters-20261024" defer></script>
+<link rel="stylesheet" href="styles/maps_shared.css?v=quiet-controls-20261024"><script src="scripts/maps_shared.js?v=map-clear-20261024" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=5"><script src="scripts/experience_summary.js?v=rating-order-20261024"></script></head>
 
 <script>
     function toggleMobileMenu() {
@@ -41,10 +41,10 @@
 				aria-controls="doctor-navigation-content"
 			>
 				<span class="doctor-navigation-header-left">
-					<span class="doctor-navigation-header-icon" aria-hidden="true">☷</span>
+					<span class="doctor-navigation-header-icon" aria-hidden="true">&#x2637;</span>
 					<span>Navigation</span>
 				</span>
-				<span class="doctor-navigation-chevron" aria-hidden="true">⌃</span>
+				<span class="doctor-navigation-chevron" aria-hidden="true">&#x2303;</span>
 			</button>
 
 			<div id="doctor-navigation-content" class="doctor-navigation-content">
@@ -59,14 +59,14 @@
 						<select id="doctor-sort-select" class="doctor-nav-select">
 							<option value="name:asc">Name A–Z</option>
 							<option value="name:desc">Name Z–A</option>
-							<option value="distance:asc">Entfernung ↑</option>
-							<option value="distance:desc">Entfernung ↓</option>
-							<option value="positive_ratio:desc">Positive Erfahrungen [%] ↓</option>
-							<option value="positive_ratio:asc">Positive Erfahrungen [%] ↑</option>
-							<option value="negative_ratio:asc">Negative Erfahrungen [%] ↑</option>
-							<option value="negative_ratio:desc">Negative Erfahrungen [%] ↓</option>
-							<option value="total_votes:desc">Anzahl Bewertungen ↓</option>
-							<option value="total_votes:asc">Anzahl Bewertungen ↑</option>
+							<option value="distance:asc">Entfernung &#x2191;</option>
+							<option value="distance:desc">Entfernung &#x2193;</option>
+							<option value="positive_ratio:desc">Positive Erfahrungen [%] &#x2193;</option>
+							<option value="positive_ratio:asc">Positive Erfahrungen [%] &#x2191;</option>
+							<option value="negative_ratio:asc">Negative Erfahrungen [%] &#x2191;</option>
+							<option value="negative_ratio:desc">Negative Erfahrungen [%] &#x2193;</option>
+							<option value="total_votes:desc">Anzahl Bewertungen &#x2193;</option>
+							<option value="total_votes:asc">Anzahl Bewertungen &#x2191;</option>
 						</select>
 					</section>
 
@@ -85,12 +85,12 @@
 					<section class="doctor-nav-section doctor-nav-section-rating">
 						<h3 class="doctor-nav-heading">
 							Bewertung
-							<span class="doctor-nav-info" data-tooltip="Filtert Ärztinnen und Ärzte nach Erfahrungswerten: positive Erfahrungen mindestens X %, negative Erfahrungen höchstens Y %." tabindex="0" aria-label="Info: Bewertung">i</span>
+							<span class="doctor-nav-info" data-tooltip="Filtert Ärztinnen und Ärzte nach Erfahrungswerten: Verbesserung und Heilung jeweils mindestens X %, negative Erfahrungen höchstens Y %." tabindex="0" aria-label="Info: Bewertung">i</span>
 						</h3>
 
 						<div class="doctor-rating-control">
 							<label class="doctor-nav-label" for="doctor-min-positive-input">
-								Positive Erfahrungen (mind.)
+								Verbesserung (mind.)
 							</label>
 
 							<div class="doctor-range-row">
@@ -113,6 +113,42 @@
 
 								<input
 									id="doctor-min-positive-input"
+									class="doctor-nav-number"
+									type="number"
+									min="0"
+									max="100"
+									step="1"
+									value="0"
+								>
+								<span class="doctor-percent-label">%</span>
+							</div>
+						</div>
+
+						<div class="doctor-rating-control">
+							<label class="doctor-nav-label" for="doctor-min-healing-input">
+								Heilung (mind.)
+							</label>
+
+							<div class="doctor-range-row">
+								<div class="doctor-range-wrap">
+									<input
+										id="doctor-min-healing-range"
+										class="doctor-nav-range"
+										type="range"
+										min="0"
+										max="100"
+										step="1"
+										value="0"
+									>
+									<div class="doctor-range-scale">
+										<span>0</span>
+										<span>50</span>
+										<span>100</span>
+									</div>
+								</div>
+
+								<input
+									id="doctor-min-healing-input"
 									class="doctor-nav-number"
 									type="number"
 									min="0"
@@ -304,10 +340,10 @@
 				aria-controls="doctor-map-content"
 			>
 				<span class="doctor-map-header-left">
-					<span class="doctor-map-header-icon" aria-hidden="true">▦</span>
+					<span class="doctor-map-header-icon" aria-hidden="true">&#x25A6;</span>
 					<span>Karte</span>
 				</span>
-				<span class="doctor-map-chevron" aria-hidden="true">⌃</span>
+				<span class="doctor-map-chevron" aria-hidden="true">&#x2303;</span>
 			</button>
 
 			<div id="doctor-map-content" class="doctor-map-content">
@@ -324,7 +360,7 @@
 		<section class="doctor-results-panel" aria-label="Ärztinnen und Ärzte">
 			<div class="doctor-results-header">
 				<span class="doctor-results-header-left">
-					<span class="doctor-results-header-icon" aria-hidden="true">▤</span>
+					<span class="doctor-results-header-icon" aria-hidden="true">&#x25A4;</span>
 					<span>Behandler</span>
 				</span>
 
@@ -366,14 +402,14 @@
 						<select id="doctor-results-sort-select" class="doctor-results-search-input doctor-results-sort-select">
 							<option value="name:asc">Name A–Z</option>
 							<option value="name:desc">Name Z–A</option>
-							<option value="distance:asc">Entfernung ↑</option>
-							<option value="distance:desc">Entfernung ↓</option>
-							<option value="positive_ratio:desc">Positive Erfahrungen [%] ↓</option>
-							<option value="positive_ratio:asc">Positive Erfahrungen [%] ↑</option>
-							<option value="negative_ratio:asc">Negative Erfahrungen [%] ↑</option>
-							<option value="negative_ratio:desc">Negative Erfahrungen [%] ↓</option>
-							<option value="total_votes:desc">Anzahl Bewertungen ↓</option>
-							<option value="total_votes:asc">Anzahl Bewertungen ↑</option>
+							<option value="distance:asc">Entfernung &#x2191;</option>
+							<option value="distance:desc">Entfernung &#x2193;</option>
+							<option value="positive_ratio:desc">Positive Erfahrungen [%] &#x2193;</option>
+							<option value="positive_ratio:asc">Positive Erfahrungen [%] &#x2191;</option>
+							<option value="negative_ratio:asc">Negative Erfahrungen [%] &#x2191;</option>
+							<option value="negative_ratio:desc">Negative Erfahrungen [%] &#x2193;</option>
+							<option value="total_votes:desc">Anzahl Bewertungen &#x2193;</option>
+							<option value="total_votes:asc">Anzahl Bewertungen &#x2191;</option>
 						</select>
 					</div>
 					<div class="doctor-results-sort-field">
@@ -437,12 +473,12 @@
             <table class="doctor-map-results-table">
 				<thead>
 					<tr>
-						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="rank"><span class="table-rank-label-full">Platz</span><span class="table-rank-label-short">#</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
-						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="name">Behandler <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
-						<th><button id="doctor-table-experience-button" class="doctor-table-sort-button" type="button" data-table-sort-key="experience"><span id="doctor-table-experience-heading">Erfahrung</span> <span class="doctor-table-header-note">(n = Angaben)</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
-						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="location">Standort <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
-						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="insurance">Versorgung <span class="doctor-table-insurance-note">(GKV, PKV)</span> <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
-						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="contact">Kontakt <span class="doctor-table-sort-indicator" aria-hidden="true"></span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="rank"><span class="table-rank-label-full">Platz</span><span class="table-rank-label-short">#</span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="name">Behandler</button></th>
+						<th><button id="doctor-table-experience-button" class="doctor-table-sort-button" type="button" data-table-sort-key="experience"><span id="doctor-table-experience-heading">Erfahrung</span> <span class="doctor-table-header-note">(n = Angaben)</span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="location">Standort</button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="insurance">Versorgung <span class="doctor-table-insurance-note">(GKV, PKV)</span></button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="contact">Kontakt</button></th>
 					</tr>
 				</thead>
 
@@ -457,7 +493,8 @@
 
     <script src="assets/vendor/leaflet/leaflet.js"></script>
 	<script>window.LCNImages.configureLeaflet(window.L);</script>
-		<script src="scripts/aerzte_karte.js?v=online-20261016"></script>
+		<script src="scripts/dummy_preferences.js?v=global-dummy-20261024"></script>
+    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/aerzte_karte.js?v=map-clear-20261024"></script>
 
     <div id="footer-placeholder"></div>
 

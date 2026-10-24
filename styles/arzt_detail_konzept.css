@@ -547,3 +547,30 @@ body.compact-doctor-header #header-placeholder .profile>.contact{grid-column:2;g
 body.ux-page #header-placeholder .profile>#nd-demo-header-toggle{grid-column:2;grid-row:2;margin-right:54px}
 body.compact-doctor-header #header-placeholder .profile>.detail-menu-toggle{right:12px;top:auto;bottom:12px;transform:none}
 }
+
+/* Dashboard sections follow the numbering in the detail navigation. */
+.dashboard-score-group{margin-top:56px;padding-top:36px;border-top:1px solid #d5e3f2}
+.dashboard-score-group>.dashboard-group-heading{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:800px;margin:0 auto 32px;text-align:center;line-height:1.35;text-wrap:balance}
+.dashboard-group-number{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #d5e8ff;border-radius:50%;background:#e7f3ff;color:#087df0;font-size:20px;font-weight:700}
+.dashboard-group-heading small{font-size:14px;font-weight:400;color:#607c9f}
+.dashboard-group-heading::after{content:'';width:64px;height:3px;margin-top:4px;border-radius:2px;background:#75afe8}
+@media(max-width:600px){.dashboard-score-group{margin-top:40px;padding-top:28px}.dashboard-score-group>.dashboard-group-heading{gap:10px;margin-bottom:24px;font-size:23px}}
+
+/* Four equal experience fields in therapy cards. */
+.treatment-card-ratings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:14px;}
+.treatment-card-rating{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:5px;min-width:0;color:var(--rating-text);text-align:center;}
+.treatment-card-rating strong{display:flex;align-items:center;justify-content:center;box-sizing:border-box;height:34px;padding:5px 2px;border-top:2px solid var(--rating-accent);border-radius:4px;background:var(--rating-background);font-size:14px;font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.treatment-card-rating>span{display:flex;align-items:flex-start;justify-content:center;min-height:27px;font-size:10.5px;line-height:1.25;word-break:normal;overflow-wrap:normal;hyphens:manual;}
+.treatment-card-rating-healing{--rating-border:#b8dacc;--rating-accent:#299a77;--rating-background:#eef8f3;--rating-text:#17634b;}
+.treatment-card-rating-improvement{--rating-border:#c9e6d5;--rating-accent:#75cba5;--rating-background:#f3faf6;--rating-text:#287553;}
+.treatment-card-rating-neutral{--rating-border:#dbe3ed;--rating-accent:#aabbd1;--rating-background:#f5f7fa;--rating-text:#526681;}
+.treatment-card-rating-negative{--rating-border:#eed0d7;--rating-accent:#d8778e;--rating-background:#fdf3f5;--rating-text:#a43e57;}
+.treatment-result-card .treatment-card-rating-total{margin:8px 0;font-size:12px;}
+
+.treatment-categories.treatment-rating-cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));}
+
+.treatment-rating-cards .treatment-result-card{padding:14px 16px;border-radius:9px;}
+.treatment-rating-cards .treatment-result-card h4{margin:0;font-size:16px;line-height:1.4;}
+.treatment-rating-cards .treatment-result-card>p{margin:5px 0 0;font-size:13px;line-height:1.4;color:var(--muted);}
+.treatment-rating-cards .treatment-result-card>small{font-size:12px;margin-top:5px;}
+.treatment-rating-cards .treatment-result-card .treatment-card-rating-total{margin:8px 0 0;font-size:11px;}

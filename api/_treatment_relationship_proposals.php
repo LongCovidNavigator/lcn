@@ -12,6 +12,10 @@ const LCN_TREATMENT_RELATION_KINDS=[
  'detail_of'=>'Ist detaillierteres Verfahren von', 'has_detail'=>'Hat das detailliertere Verfahren',
  'component_of'=>'Ist Bestandteil von', 'has_component'=>'Hat den Bestandteil'
 ];
+/** Serialize proposal publication so simultaneous requests reuse the same catalog identity. */
+function lcnLockTreatmentProposals(PDO $p): void {
+ if((int)$p->query("SELECT GET_LOCK('lcn-treatment-proposals',10)")->fetchColumn()!==1)throw new RuntimeException('Vorschlagskatalog wird gerade aktualisiert.');
+}
 function lcnTreatmentRelationshipContextAllows(array $g,int $context,int $source): bool {
  if($context===$source)return true;
  if(isset($g['generics'][$context][$source],$g['entries'][$source]))return true;
@@ -30,7 +34,8 @@ function lcnNormalizeTreatmentRelationship(PDO $p,array $input,?array $graph=nul
   else {if(mb_strlen($name)<2||mb_strlen($name)>255)throw new InvalidArgumentException('Bitte einen Gruppennamen mit 2 bis 255 Zeichen eingeben.');foreach($g['groups'] as $group)if(lcnDiscoveryName($group['name'])===lcnDiscoveryName($name)){$aid=$group['alias_id'];break;}}
   $member=$kind==='group_contains'?$target:$source;
   if(!isset($g['entries'][$member])||($kind==='group_contains'&&$member===$source)||lcnDiscoveryName($g['entries'][$member]['treatmentname'])===lcnDiscoveryName($name))throw new InvalidArgumentException('Bitte einen anderen Gruppeneintrag auswählen.');
-  if(isset($g['generics'][$member])||isset($g['comboIds'][$member]))throw new InvalidArgumentException('Bitte einen einzelnen Wirkstoff oder ein Verfahren statt eines Handelsnamens oder einer Kombination auswählen.');
+  if(isset($g['generics'][$member]))throw new InvalidArgumentException('Bitte den zugehörigen Wirkstoff statt eines Handelsnamens auswählen.');
+  if(isset($g['comboIds'][$member])&&$aid&&($g['groups'][$aid]['relation_type']??'umbrella_term')!=='umbrella_term')throw new InvalidArgumentException('Eine Kombination kann einer Gruppe, aber nicht als Anwendungsform oder Stoffvariante zugeordnet werden.');
   if($aid&&isset($g['groups'][$aid]['members'][$member]))throw new InvalidArgumentException('Diese Gruppenzuordnung ist bereits vorhanden.');
   $r+=['group_alias_id'=>$aid,'group_name'=>$name];$r['kind']='group';$r['left_id']=$member;$r['right_id']=0;
   $r['description']=$g['entries'][$member]['treatmentname'].' gehört zur Gruppe „'.$name.'“';
@@ -74,6 +79,38 @@ function lcnTreatmentProposalAlias(PDO $p,string $name,string $type): int {
 function lcnTreatmentProposalLink(PDO $p,int $id,int $alias,int $submission): void {
  if(!lcnNdRows($p,'SELECT 1 FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$id,$alias]))$p->prepare('INSERT INTO tbl_cpl_treatments_nd2aliases(treat_nd_id,alias_id,note) VALUES(?,?,?)')->execute([$id,$alias,'Geprüfter Verknüpfungsvorschlag #'.$submission]);
 }
+/** Flag similar group names for review, excluding the group's own provisional page. */
+function lcnTreatmentGroupDuplicate(PDO $p,array $r,int $submissionId=0): ?array {
+ if(($r['kind']??'')!=='group')return null;
+ require_once __DIR__.'/_treatment_duplicates.php';
+ // A selected existing group is reused, rather than considered a duplicate of itself.
+ if(!empty($r['group_alias_id']))return null;
+ if($submissionId){$roots=lcnNdRows($p,"SELECT notes_internal FROM tbl_treatments_nd WHERE LOWER(TRIM(treatmentname))=LOWER(TRIM(?)) AND review_status='pending_group'",[$r['group_name']??'']);if($roots&&($roots[0]['notes_internal']??'')!=='Gruppenvorschlag #'.$submissionId)return null;}
+ $matches=lcnTreatmentDuplicateCandidates($p,(string)($r['group_name']??''));
+ foreach($matches as $match){
+  if($match['rank']===0)continue; // Existing exact group page is already reused.
+  return ['id'=>$match['id'],'name'=>$match['label'],'score'=>$match['rank']===1?95:75,'reason'=>$match['meta']];
+ }
+ return null;
+}
+/** A proposed umbrella group already has a searchable page; membership stays under review. */
+function lcnEnsureProposedTreatmentGroup(PDO $p,array $r,int $sid): ?int {
+ if(($r['kind']??'')!=='group')return null;
+ $name=trim((string)($r['group_name']??''));if($name==='')return null;
+ $alias=(int)($r['group_alias_id']??0);
+ if($alias){$rows=lcnNdRows($p,'SELECT alias_type FROM tbl_aliases_03 WHERE alias_id=?',[$alias]);if(($rows[0]['alias_type']??'')!=='umbrella_term')return null;}
+ else $alias=lcnTreatmentProposalAlias($p,$name,'umbrella_term');
+ $matches=lcnNdRows($p,'SELECT treat_nd_id FROM tbl_treatments_nd WHERE LOWER(TRIM(treatmentname))=LOWER(TRIM(?)) ORDER BY treat_nd_id LIMIT 1',[$name]);
+ if($matches){$id=(int)$matches[0]['treat_nd_id'];$p->prepare("UPDATE tbl_treatments_nd SET review_status='pending_group' WHERE treat_nd_id=? AND review_status='rejected_group'")->execute([$id]);}
+ else {
+  $source=lcnNdRows($p,'SELECT typ FROM tbl_treatments_nd WHERE treat_nd_id=?',[(int)$r['source_id']]);
+  $p->prepare("INSERT INTO tbl_treatments_nd(treatmentname,typ,legacy_match_status,review_status,datenstand,notes_internal) VALUES(?,?,'new','pending_group',CURRENT_DATE,?)")->execute([$name,$source[0]['typ']??null,'Gruppenvorschlag #'.$sid]);$id=(int)$p->lastInsertId();
+ }
+ foreach([$alias,lcnTreatmentProposalAlias($p,$name,'primary_name')] as $aid){
+  if(!lcnNdRows($p,'SELECT 1 FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$id,$aid]))$p->prepare('INSERT INTO tbl_cpl_treatments_nd2aliases(treat_nd_id,alias_id,note) VALUES(?,?,?)')->execute([$id,$aid,'Gruppeneintrag zu Vorschlag #'.$sid.'; Prüfung ausstehend']);
+ }
+ return $id;
+}
 /** Called only by authenticated moderation, within its transaction. */
 function lcnApproveTreatmentRelationship(PDO $p,array $row,array $payload): int {
  $r=$payload['treatment_relationship']??[];$source=(int)($r['source_id']??0);$left=(int)($r['left_id']??0);$right=(int)($r['right_id']??0);$kind=$r['kind']??'';$sid=(int)$row['submission_id'];
@@ -86,6 +123,8 @@ function lcnApproveTreatmentRelationship(PDO $p,array $row,array $payload): int 
   $existing=lcnNdRows($p,'SELECT relation_id FROM tbl_cpl_treatments_nd_relations WHERE source_treat_nd_id=? AND target_treat_nd_id=?',[$left,$right]);
   if($existing)$rid=(int)$existing[0]['relation_id'];else{$p->prepare('INSERT INTO tbl_cpl_treatments_nd_relations(source_treat_nd_id,target_treat_nd_id,target_label,begruendung,quelle_url,review_note) VALUES(?,?,?,?,?,?)')->execute([$left,$right,$g['entries'][$right]['treatmentname'],$payload['review_note']??null,$payload['source_url']??null,'Community-Vorschlag #'.$sid.' geprüft']);$rid=(int)$p->lastInsertId();}$key='tr:'.$rid;
  }elseif($kind==='group'){
+  $groupId=lcnEnsureProposedTreatmentGroup($p,$r,$sid);
+  if($groupId)$p->prepare("UPDATE tbl_treatments_nd SET review_status='approved' WHERE treat_nd_id=? AND review_status='pending_group'")->execute([$groupId]);
   $alias=(int)($r['group_alias_id']??0);if($alias&&!isset($g['groups'][$alias]))throw new DomainException('Die Gruppe existiert nicht mehr.');
   if(!$alias)$alias=lcnTreatmentProposalAlias($p,(string)$r['group_name'],'umbrella_term');
   if(!empty($g['groups'][$alias]['forms']))$p->prepare("UPDATE tbl_aliases_03 SET alias_type='application_form' WHERE alias_id=?")->execute([$alias]);

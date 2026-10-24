@@ -1,0 +1,44 @@
+/* One outer edge for every homepage tool; keep the image hero full width. */
+.home-page { --home-content-width:1080px; }
+.home-page > :is(.quick-start,.home-recommendation-teasers,.nearby-gps,.path-section,.home-contribution,.project-intro) {
+    box-sizing:border-box; width:calc(100% - 40px); max-width:var(--home-content-width)!important;
+    margin-left:auto; margin-right:auto; padding-left:0!important; padding-right:0!important;
+}
+.home-page :is(.quick-start-card,.path-grid,.nearby-gps-panel,.home-contribution-panel,.project-grid) { box-sizing:border-box; width:100%; max-width:none; margin-left:0; margin-right:0; }
+.home-page > :is(#empfehlung,#hausarzt,#suche,#ergaenzung,#projekt) { scroll-margin-top:60px; }
+
+/* A shared invitation with two compact action rows, distinct from search cards. */
+.home-page .home-contribution-panel { display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:32px; padding:28px 32px; border:1px solid #cde3e6; border-radius:14px; background:linear-gradient(115deg,#edf8f6,#f5f9fd); }
+.home-contribution-intro { display:flex; align-items:flex-start; gap:18px; }
+.home-contribution-symbol { display:grid; place-items:center; flex:0 0 48px; width:48px; height:48px; border-radius:50%; background:#d9eeeb; color:#007f7b; font-size:30px; }
+.home-contribution-intro h3 { margin:0 0 8px; font-size:23px; line-height:1.3; }
+.home-contribution-intro p { margin:0; color:#536b89; font-size:15px; line-height:1.6; }
+.home-contribution-actions { display:grid; gap:10px; min-width:0; }
+.home-contribution-actions a { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:72px; padding:14px 18px; border:1px solid #d8e5ed; border-radius:9px; background:white; color:#17365d; text-decoration:none; transition:border-color .15s,background .15s; }
+.home-contribution-actions a:hover { border-color:#00817d; background:#f8fdfc; }
+.home-contribution-actions strong { display:block; font-size:16px; }
+.home-contribution-actions small { display:block; margin-top:4px; font-size:13px; line-height:1.4; color:#536b89; }
+.home-contribution-actions a>span:last-child { color:#007f7b; font-size:23px; }
+
+/* Compact sticky chapter navigation; on wide screens it sits in the gutter. */
+.home-section-nav { position:sticky; top:0; z-index:90; display:flex; align-items:center; justify-content:center; gap:5px; padding:7px 12px; margin:0; border:0; border-bottom:1px solid #e1eafa; background:#fff; font:14px/1.4 Arial,sans-serif; }
+.home-section-nav-title { display:none; }
+.home-section-nav a { display:block; flex-shrink:0; padding:10px 12px; border-radius:7px; color:#536b89; text-decoration:none; }
+.home-section-nav a:hover { background:#f0f6fa; color:#17365d; }
+.home-section-nav a[aria-current="location"] { background:#e8f4f4; color:#006d69; font-weight:700; box-shadow:inset 3px 0 #00817d; }
+.home-section-nav a:focus-visible,.home-contribution-actions a:focus-visible { outline:3px solid #0878e3; outline-offset:3px; }
+@media(min-width:1440px) {
+    .home-section-nav { position:fixed; top:190px; left:max(12px,calc((100vw - 1420px)/2)); width:150px; box-sizing:border-box; display:block; padding:12px 6px; border:1px solid #e1eafa; border-radius:12px; box-shadow:0 3px 16px #17365d08; }
+    .home-section-nav-title { display:block; padding:6px 10px 12px; color:#6b7e91; font-size:11px; }
+    .home-section-nav a { padding:11px 10px; font-size:13px; }
+    .home-section-nav-top { margin-top:10px; border-top:1px solid #e1eafa; border-radius:0!important; }
+    .home-page > :is(#empfehlung,#hausarzt,#suche,#ergaenzung,#projekt) { scroll-margin-top:30px; }
+}
+@media(max-width:760px) {
+    .home-page > :is(.quick-start,.home-recommendation-teasers,.nearby-gps,.path-section,.home-contribution,.project-intro) { width:calc(100% - 32px); }
+    .home-page .home-contribution-panel { grid-template-columns:1fr; gap:22px; padding:22px 18px; }
+    .home-contribution-intro { gap:12px; }
+    .home-contribution-intro h3 { font-size:21px; }
+    .home-section-nav { justify-content:flex-start; overflow-x:auto; }
+    .home-section-nav a { padding:10px; font-size:12px; }
+}

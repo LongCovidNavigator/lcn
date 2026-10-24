@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/_voting.php';
+require_once __DIR__ . '/_experience_search.php';
 require_once __DIR__ . '/_doctor_hybrid.php';
+require_once __DIR__ . '/_search_normalization.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -204,6 +206,7 @@ try {
     $drId = getOptionalIntParam('dr_id', 0, 0, 999999);
 
     $minPositiveRatio = getOptionalFloatParam('minPositiveRatio', 0, 0, 100);
+    $minHealingRatio = getOptionalFloatParam('minHealingRatio', 0, 0, 100);
     $maxNegativeRatio = getOptionalFloatParam('maxNegativeRatio', 100, 0, 100);
 
     $acceptsGkv = getOptionalBoolParam('acceptsGkv');
@@ -242,6 +245,26 @@ try {
     $pdo = lcnDoctorDatabase();
     $doctorSource = lcnDoctorSourceSql();
 
+    $fuzzyDoctorIds=[];
+    if ($drId === 0 && mb_strlen($searchNormalized,'UTF-8') >= 4) {
+        $names=$pdo->query("SELECT dr_id, dr_display_name, dr_firstname, dr_lastname, dr_org_name FROM {$doctorSource} fuzzy_names")->fetchAll();
+        $values=[]; $hasLiteral=false;
+        foreach ($names as $row) {
+            foreach (['dr_display_name','dr_firstname','dr_lastname','dr_org_name'] as $field) {
+                $value=(string)($row[$field] ?? ''); $values[]=$value;
+                if (str_contains(lcnNormalizeSearchTerm($value),$searchNormalized)) $hasLiteral=true;
+            }
+        }
+        if (!$hasLiteral) {
+            $matches=lcnFuzzySearchTerms($search,$values);
+            foreach ($names as $row) {
+                foreach (['dr_display_name','dr_firstname','dr_lastname','dr_org_name'] as $field) {
+                    if (in_array($row[$field],$matches,true)) { $fuzzyDoctorIds[]=(int)$row['dr_id']; break; }
+                }
+            }
+        }
+    }
+    $fuzzyDoctorSql=$fuzzyDoctorIds ? ' OR dr_id IN ('.implode(',',array_unique($fuzzyDoctorIds)).')' : '';
     $whereParts = [];
     if (($_GET['priority'] ?? '') === '1') $whereParts[] = 'dr_id IN (SELECT lcn_id FROM tbl_entities_nd WHERE is_priority_doctor=1)';
 
@@ -257,6 +280,8 @@ try {
         }
 
         $whereParts[] = "positive_ratio >= :minPositiveRatio";
+        $whereParts[] = "healing_ratio >= :minHealingRatio";
+        if ($minPositiveRatio > 0 || $minHealingRatio > 0 || $maxNegativeRatio < 100) $whereParts[] = "total_votes > 0";
         $whereParts[] = "negative_ratio <= :maxNegativeRatio";
 
         if ($acceptsGkv && $acceptsPkv) {
@@ -342,6 +367,7 @@ try {
                         'ß', 'ss'
                     )
                 ) LIKE :searchNormalized
+                {$fuzzyDoctorSql}
             )";
         }
     }
@@ -350,6 +376,7 @@ try {
         ? "WHERE " . implode(" AND ", $whereParts)
         : "";
 
+    $experienceSql = lcnExperienceSearchSql('doctor', ($_GET['include_dummy'] ?? '') === '1');
     $sql = "
         SELECT *
         FROM (
@@ -361,6 +388,7 @@ try {
                     THEN ROUND((base.pro / base.total_votes) * 100)
                     ELSE 0
                 END AS positive_ratio,
+                CASE WHEN base.total_votes > 0 THEN ROUND(base.healing * 100 / base.total_votes) ELSE 0 END AS healing_ratio,
 
                 CASE
                     WHEN base.total_votes > 0
@@ -378,6 +406,7 @@ try {
                 SELECT
                     d.dr_id,
                     d.dr_display_name,
+                    (SELECT COUNT(DISTINCT pt.treat_id) FROM v_lcn_provider_treatments pt WHERE pt.dr_id = d.dr_id) AS treatment_count,
                     d.dr_type,
                     d.dr_is_dr,
                     d.dr_title_raw,
@@ -464,31 +493,14 @@ try {
                         ELSE NULL
                     END AS distance_km,
 
-                    (
-                        COALESCE(rv.pro, 0)
-                        + COALESCE(wv.vote_improved, 0)
-                    ) AS pro,
-
-                    (
-                        COALESCE(rv.neutral, 0)
-                        + COALESCE(wv.vote_neutral, 0)
-                    ) AS neutral,
-
-                    (
-                        COALESCE(rv.contra, 0)
-                        + COALESCE(wv.vote_worsened, 0)
-                    ) AS contra,
-
-                    (
-                        COALESCE(rv.pro, 0)
-                        + COALESCE(wv.vote_improved, 0)
-                        + COALESCE(rv.neutral, 0)
-                        + COALESCE(wv.vote_neutral, 0)
-                        + COALESCE(rv.contra, 0)
-                        + COALESCE(wv.vote_worsened, 0)
-                    ) AS total_votes
+                    COALESCE(experience.pro, 0) AS pro,
+                    COALESCE(experience.neutral, 0) AS neutral,
+                    COALESCE(experience.contra, 0) AS contra,
+                    COALESCE(experience.healing, 0) AS healing,
+                    COALESCE(experience.total_votes, 0) AS total_votes
 
                 FROM {$doctorSource} d
+                LEFT JOIN {$experienceSql} experience ON experience.id = d.dr_id
 
                 LEFT JOIN tbl_drs_locations_03 l
                     ON d.dr_id = l.dr_id
@@ -522,6 +534,7 @@ try {
         $stmt->bindValue(':dr_id', $drId);
     } else {
         $stmt->bindValue(':minPositiveRatio', $minPositiveRatio);
+        $stmt->bindValue(':minHealingRatio', $minHealingRatio);
         $stmt->bindValue(':maxNegativeRatio', $maxNegativeRatio);
 
         if ($radiusEnabled) {
@@ -598,6 +611,7 @@ try {
         'filters' => [
             'dr_id' => $drId,
             'minPositiveRatio' => $minPositiveRatio,
+            'minHealingRatio' => $minHealingRatio,
             'maxNegativeRatio' => $maxNegativeRatio,
             'acceptsGkv' => $acceptsGkv,
             'acceptsPkv' => $acceptsPkv,

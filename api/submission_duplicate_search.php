@@ -2,12 +2,14 @@
 require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_lcn_db.php';
 require_once __DIR__ . '/_search_normalization.php';
+require_once __DIR__ . '/_treatment_duplicates.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
     $type=(string)($_GET['type']??'');$query=trim((string)($_GET['q']??''));
     if(!in_array($type,['doctor','treatment'],true)||mb_strlen($query)<2){echo json_encode(['ok'=>true,'items'=>[]]);exit;}
     $pdo=lcnDoctorDatabase();
+    if($type==='treatment'){echo json_encode(['ok'=>true,'items'=>lcnTreatmentDuplicateCandidates($pdo,$query)],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);exit;}
     if($type==='doctor' && ($_GET['catalog']??'')==='current'){
         $normalized=lcnNormalizeSearchTerm(mb_substr($query,0,180));
         $tokens=preg_split('/[^\p{L}\p{N}]+/u',$normalized,-1,PREG_SPLIT_NO_EMPTY);
@@ -39,12 +41,13 @@ try {
         $normalizeAlias=lcnNormalizedSearchSql("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(TRIM(a.alias),'.',''),'-',''),' ',''),'/',''),'(',''),')','')");
         $stmt=$pdo->prepare("
             SELECT t.treat_id AS id,t.behandlung AS label,COALESCE(t.wiki_url_path,'') AS website,
-                CONCAT_WS(' · ',NULLIF(CONCAT('Alias: ',MIN(CASE WHEN {$normalizeAlias} LIKE :normalized_query THEN a.alias END)),'Alias: '),t.typ,t.unterkategorie) AS meta
+                CONCAT_WS(' · ',NULLIF(CONCAT('Alias: ',MIN(CASE WHEN {$normalizeAlias} LIKE :normalized_query THEN a.alias END)),'Alias: '),t.typ,t.unterkategorie,IF(n.review_status='pending_group','Prüfung ausstehend',NULL)) AS meta
             FROM v_lcn_treatments t
+            JOIN tbl_treatments_nd n ON n.treat_nd_id=t.treat_id AND n.review_status<>'rejected_group'
             LEFT JOIN v_lcn_treatment_aliases cta ON cta.treat_id=t.treat_id
             LEFT JOIN tbl_aliases_03 a ON a.alias_id=cta.alias_id
             WHERE {$normalizeTreatment} LIKE :normalized_query OR {$normalizeAlias} LIKE :normalized_query
-            GROUP BY t.treat_id,t.behandlung,t.wiki_url_path,t.typ,t.unterkategorie
+            GROUP BY t.treat_id,t.behandlung,t.wiki_url_path,t.typ,t.unterkategorie,n.review_status
             ORDER BY CASE WHEN {$normalizeTreatment}=:normalized_exact THEN 0 ELSE 1 END,t.behandlung
             LIMIT 8
         ");

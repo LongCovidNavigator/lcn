@@ -23,6 +23,7 @@ let treatmentSortMode = "name_asc";
 let treatmentOnlyRated = false;
 let treatmentViewMode = "categories";
 let treatmentPositiveMin = 0;
+let treatmentHealingMin = 0;
 let treatmentVotesMin = 0;
 let treatmentNegativeMax = 100;
 let treatmentCategoryDropdownOpen = false;
@@ -114,6 +115,7 @@ function resetTreatmentControlsState() {
     treatmentOnlyRated = false;
     treatmentViewMode = getSavedDoctorDetailTreatmentView();
     treatmentPositiveMin = 0;
+    treatmentHealingMin = 0;
     treatmentVotesMin = 0;
     treatmentNegativeMax = 100;
     treatmentCategoryDropdownOpen = false;
@@ -224,6 +226,7 @@ function setupTreatmentAnalysisFilters() {
             treatmentSortMode = "positive_desc";
         } else if (filterType === "frequent") {
             treatmentPositiveMin = 0;
+    treatmentHealingMin = 0;
             treatmentVotesMin = threshold;
             treatmentSortMode = "votes_desc";
         }
@@ -303,6 +306,11 @@ function setupTreatmentControlEvents() {
             syncTreatmentRangeInputs(controlsElement, "[data-treatment-positive-min]", treatmentPositiveMin);
             return;
         }
+        if (target.matches("[data-treatment-healing-min]")) {
+            treatmentHealingMin = clampPercentage(target.value);
+            syncTreatmentRangeInputs(controlsElement, "[data-treatment-healing-min]", treatmentHealingMin);
+            return;
+        }
 
         if (target.matches("[data-treatment-negative-max]")) {
             treatmentNegativeMax = clampPercentage(target.value);
@@ -315,6 +323,12 @@ function setupTreatmentControlEvents() {
 
         if (target.matches("[data-treatment-positive-min]")) {
             treatmentPositiveMin = clampPercentage(target.value);
+            treatmentSpectrumExpanded = false;
+            renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
+            return;
+        }
+        if (target.matches("[data-treatment-healing-min]")) {
+            treatmentHealingMin = clampPercentage(target.value);
             treatmentSpectrumExpanded = false;
             renderTreatmentSpectrum(currentDoctorTreatmentsGrouped);
             return;
@@ -1204,6 +1218,7 @@ function activateTreatmentCategoryCard(categoryCard) {
     treatmentSearchQuery = "";
     treatmentOnlyRated = false;
     treatmentPositiveMin = 0;
+    treatmentHealingMin = 0;
     treatmentNegativeMax = 100;
     treatmentSpectrumExpanded = false;
     treatmentCategoryDropdownOpen = false;
@@ -1350,7 +1365,7 @@ function renderTreatmentSpectrum(treatmentsGrouped) {
         treatmentSearchQuery.trim() !== "" ||
         treatmentOnlyRated ||
         treatmentCategorySelectionMode === "custom" ||
-        treatmentPositiveMin > 0 ||
+        treatmentPositiveMin > 0 || treatmentHealingMin > 0 ||
         treatmentVotesMin > 0 ||
         treatmentNegativeMax < 100;
 
@@ -1433,6 +1448,7 @@ function renderTreatmentControlsState() {
     setFormValue("doctor-detail-treatment-search", treatmentSearchQuery);
     setFormValue("doctor-detail-treatment-category-search", treatmentCategorySearchQuery);
     syncTreatmentRangeInputs(document, "[data-treatment-positive-min]", treatmentPositiveMin);
+    syncTreatmentRangeInputs(document, "[data-treatment-healing-min]", treatmentHealingMin);
     syncTreatmentRangeInputs(document, "[data-treatment-negative-max]", treatmentNegativeMax);
 
     document.querySelectorAll("[data-treatment-view]").forEach(function (button) {
@@ -1577,11 +1593,11 @@ function getFilteredAndSortedTreatmentEntries(entries) {
                 return false;
             }
 
-            if (treatmentOnlyRated && stats.totalVotes === 0) {
+            if ((treatmentOnlyRated || treatmentPositiveMin > 0 || treatmentHealingMin > 0 || treatmentNegativeMax < 100) && stats.totalVotes === 0) {
                 return false;
             }
 
-            if (stats.positiveRatio < treatmentPositiveMin) {
+            if (stats.healingRatio < treatmentHealingMin || stats.positiveRatio < treatmentPositiveMin) {
                 return false;
             }
 
@@ -1679,23 +1695,7 @@ function setTreatmentTableSort(sortKey) {
 }
 
 function buildTreatmentTableSortHeader(label, sortKey) {
-    const sortModes = {
-        name: ["name_asc", "name_desc"],
-        category: ["category_asc", "category_desc"],
-        experience: ["positive_desc", "positive_asc"],
-        votes: ["votes_desc", "votes_asc"],
-        providers: ["providers_desc", "providers_asc"]
-    };
-    const modes = sortModes[sortKey] || [];
-    const activeIndex = modes.indexOf(treatmentSortMode);
-    const descendingFirst = sortKey === "experience" || sortKey === "votes" || sortKey === "providers";
-    const arrow = activeIndex === 0
-        ? (descendingFirst ? "↓" : "↑")
-        : activeIndex === 1
-            ? (descendingFirst ? "↑" : "↓")
-            : "↕";
-
-    return `<button type="button" class="doctor-detail-treatment-table-sort" data-treatment-table-sort="${sortKey}">${label}<span aria-hidden="true">${arrow}</span></button>`;
+    return `<button type="button" class="doctor-detail-treatment-table-sort" data-treatment-table-sort="${sortKey}">${label}</button>`;
 }
 
 function flattenTreatmentGroups(groups) {
@@ -1934,13 +1934,15 @@ function getTreatmentVoteStats(treatment) {
     const pro = Number(treatment?.pro || 0);
     const neutral = Number(treatment?.neutral || 0);
     const contra = Number(treatment?.contra || 0);
-    const totalVotes = pro + neutral + contra;
+    const healing = Number(treatment?.healing || 0);
+    const totalVotes = pro + neutral + contra + healing;
 
     return {
         pro,
         neutral,
         contra,
         totalVotes,
+        healingRatio: totalVotes > 0 ? Math.round(healing * 100 / totalVotes) : 0,
         positiveRatio: totalVotes > 0 ? Math.round((pro / totalVotes) * 100) : 0,
         neutralRatio: totalVotes > 0 ? Math.round((neutral / totalVotes) * 100) : 0,
         negativeRatio: totalVotes > 0 ? Math.round((contra / totalVotes) * 100) : 0

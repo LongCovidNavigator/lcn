@@ -10,7 +10,7 @@
   const toggle = document.getElementById('nd-demo-toggle');
   const select = document.getElementById('nd-demo-profile');
   const params = new URLSearchParams(location.search);
-  toggle.checked = params.get('demo') !== '0';
+  toggle.checked = window.LCNDummy.get();
   select.value = Object.hasOwn(profiles, params.get('demo_profile')) ? params.get('demo_profile') : (document.querySelector('[data-treatment-id]').dataset.treatmentId === '5' ? 'ivabradin' : 'ldn');
   function render() {
     const p = profiles[select.value];
@@ -28,6 +28,7 @@
     document.getElementById('nd-demo-state').textContent = toggle.checked ? 'Nutzer-Dummydaten eingeschaltet. Eigene Eingaben und Recherchewerte bleiben unverändert.' : 'Nutzer-Dummydaten ausgeschaltet. Es werden keine simulierten Ergebnisse gezeigt.';
   }
   function change() {
+    window.LCNDummy.set(toggle.checked);
     const url = new URL(location.href);
     url.searchParams.set('demo', toggle.checked ? '1' : '0');
     url.searchParams.set('demo_profile', select.value);
@@ -37,6 +38,9 @@
   document.getElementById('nd-demo-header-toggle').addEventListener('click', () => { toggle.checked = !toggle.checked; change(); });
   toggle.addEventListener('change',change);
   select.addEventListener('change',change);
+  const syncPreference=()=>{toggle.checked=window.LCNDummy.get();render();};
+  window.addEventListener('lcn-dummy-change',syncPreference);
+  window.addEventListener('storage',event=>{if(event.key===window.LCNDummy.key||event.key===null)syncPreference();});
   toolbar.hidden = false;
   render();
 })();

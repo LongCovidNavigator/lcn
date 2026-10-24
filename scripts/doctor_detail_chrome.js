@@ -62,7 +62,7 @@
   new ResizeObserver(()=>{
     document.documentElement.style.setProperty('--detail-header-height',host.getBoundingClientRect().height+'px');
   }).observe(host);
-  fetch('components/header.html?v=menu-icon-20261016').then(r=>{if(!r.ok)throw Error();return r.text();}).then(html=>{
+  fetch('components/header.html?v=chapters-20261024').then(r=>{if(!r.ok)throw Error();return r.text();}).then(html=>{
     const parsed=new DOMParser().parseFromString(html,'text/html');
     const list=parsed.querySelector('.main-nav > ul');
     if(list){list.querySelectorAll('[class]').forEach(el=>el.removeAttribute('class'));menu.replaceChildren(list);}

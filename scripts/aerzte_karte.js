@@ -16,6 +16,7 @@ let currentDoctorTableSortKey = null;
 let currentDoctorTableSortDirection = "asc";
 
 let currentMinPositiveRatio = 0;
+let currentMinHealingRatio = 0;
 let currentMaxNegativeRatio = 100;
 let currentAcceptsGkv = false;
 let currentAcceptsPkv = false;
@@ -237,19 +238,24 @@ function setupDoctorRatingAndFilterControls() {
     const resetButton = document.getElementById("doctor-filter-reset-button");
 
     const minPositiveInput = document.getElementById("doctor-min-positive-input");
+    const minHealingInput = document.getElementById("doctor-min-healing-input");
     const maxNegativeInput = document.getElementById("doctor-max-negative-input");
     const minPositiveRange = document.getElementById("doctor-min-positive-range");
+    const minHealingRange = document.getElementById("doctor-min-healing-range");
     const maxNegativeRange = document.getElementById("doctor-max-negative-range");
     const searchInput = document.getElementById("doctor-search-input");
     const specialtySelect = document.getElementById("doctor-specialty-select");
 
     syncRangeAndNumber(minPositiveRange, minPositiveInput);
+    syncRangeAndNumber(minHealingRange, minHealingInput);
     syncRangeAndNumber(maxNegativeRange, maxNegativeInput);
 
     [
         minPositiveInput,
+        minHealingInput,
         maxNegativeInput,
         minPositiveRange,
+        minHealingRange,
         maxNegativeRange,
         searchInput,
         document.getElementById("doctor-location-input"),
@@ -363,6 +369,7 @@ function applyDoctorFiltersFromControls() {
     }
 
     currentMinPositiveRatio = filterSettings.minPositiveRatio;
+    currentMinHealingRatio = filterSettings.minHealingRatio;
     currentMaxNegativeRatio = filterSettings.maxNegativeRatio;
     currentAcceptsGkv = filterSettings.acceptsGkv;
     currentAcceptsPkv = filterSettings.acceptsPkv;
@@ -376,7 +383,7 @@ function applyDoctorFiltersFromControls() {
 
     saveDoctorLocationPreference();
     renderDoctorCompareSelection();
-    applySearchFromControls();
+    applySearchFromControls(true);
 }
 
 function setupDoctorCompareControls() {
@@ -450,8 +457,10 @@ function setupDoctorResultEventDelegation() {
 function setupDoctorDirtyFilterHint() {
     const dirtyFilterElements = [
         document.getElementById("doctor-min-positive-input"),
+        document.getElementById("doctor-min-healing-input"),
         document.getElementById("doctor-max-negative-input"),
         document.getElementById("doctor-min-positive-range"),
+        document.getElementById("doctor-min-healing-range"),
         document.getElementById("doctor-max-negative-range"),
         document.getElementById("doctor-accepts-gkv-input"),
         document.getElementById("doctor-accepts-pkv-input"),
@@ -498,8 +507,10 @@ function setupDoctorAutoApplyControls() {
 
     const debouncedElements = [
         document.getElementById("doctor-min-positive-input"),
+        document.getElementById("doctor-min-healing-input"),
         document.getElementById("doctor-max-negative-input"),
         document.getElementById("doctor-min-positive-range"),
+        document.getElementById("doctor-min-healing-range"),
         document.getElementById("doctor-max-negative-range"),
         document.getElementById("doctor-radius-input")
     ].filter(Boolean);
@@ -701,6 +712,7 @@ function saveDoctorLocationPreference() {
     if (locationValue === "") {
         try {
             localStorage.removeItem(doctorLocationStorageKey);
+            localStorage.removeItem("lcn_treatment_location_preference");
             localStorage.removeItem(sharedLocationStorageKey);
             localStorage.setItem(sharedLocationClearedStorageKey, "1");
         } catch (error) {
@@ -784,6 +796,7 @@ function restoreDoctorLocationPreference() {
 function removeDoctorLocationPreference(clearCurrentLocation) {
     try {
         localStorage.removeItem(doctorLocationStorageKey);
+        localStorage.removeItem("lcn_treatment_location_preference");
         localStorage.removeItem(sharedLocationStorageKey);
         localStorage.setItem(sharedLocationClearedStorageKey, "1");
     } catch (error) {
@@ -822,8 +835,10 @@ function updateDoctorLocationClearButton() {
 function resetDoctorNavigationControls() {
     const sortSelect = document.getElementById("doctor-sort-select");
     const minPositiveInput = document.getElementById("doctor-min-positive-input");
+    const minHealingInput = document.getElementById("doctor-min-healing-input");
     const maxNegativeInput = document.getElementById("doctor-max-negative-input");
     const minPositiveRange = document.getElementById("doctor-min-positive-range");
+    const minHealingRange = document.getElementById("doctor-min-healing-range");
     const maxNegativeRange = document.getElementById("doctor-max-negative-range");
     const acceptsGkvInput = document.getElementById("doctor-accepts-gkv-input");
     const acceptsPkvInput = document.getElementById("doctor-accepts-pkv-input");
@@ -840,6 +855,7 @@ function resetDoctorNavigationControls() {
     currentDoctorSortKey = "name";
     currentDoctorSortDirection = "asc";
     currentMinPositiveRatio = 0;
+    currentMinHealingRatio = 0;
     currentMaxNegativeRatio = 100;
     currentAcceptsGkv = false;
     currentAcceptsPkv = false;
@@ -854,8 +870,10 @@ function resetDoctorNavigationControls() {
 
     if (sortSelect) sortSelect.value = "name:asc";
     if (minPositiveInput) minPositiveInput.value = "0";
+    if (minHealingInput) minHealingInput.value = "0";
     if (maxNegativeInput) maxNegativeInput.value = "100";
     if (minPositiveRange) minPositiveRange.value = "0";
+    if (minHealingRange) minHealingRange.value = "0";
     if (maxNegativeRange) maxNegativeRange.value = "100";
     if (acceptsGkvInput) acceptsGkvInput.checked = false;
     if (acceptsPkvInput) acceptsPkvInput.checked = false;
@@ -896,6 +914,7 @@ function updateSortSelectValue() {
 
 function getRatingFilterSettingsFromControls() {
     const minPositiveInput = document.getElementById("doctor-min-positive-input");
+    const minHealingInput = document.getElementById("doctor-min-healing-input");
     const maxNegativeInput = document.getElementById("doctor-max-negative-input");
     const acceptsGkvInput = document.getElementById("doctor-accepts-gkv-input");
     const acceptsPkvInput = document.getElementById("doctor-accepts-pkv-input");
@@ -908,11 +927,14 @@ function getRatingFilterSettingsFromControls() {
     const cityModeButton = document.getElementById("doctor-location-mode-city-button");
 
     const minPositiveRatio = Number(minPositiveInput ? minPositiveInput.value : 0);
+    const minHealingRatio = Number(minHealingInput ? minHealingInput.value : 0);
     const maxNegativeRatio = Number(maxNegativeInput ? maxNegativeInput.value : 100);
     const searchTerm = searchInput ? searchInput.value.trim() : "";
     const isCityMode = cityModeButton ? cityModeButton.classList.contains("is-active") : false;
     const city = isCityMode && locationInput ? locationInput.value.trim() : "";
     const specialtyTermId = Number(specialtySelect ? specialtySelect.value : 0);
+
+    if (!Number.isFinite(minHealingRatio) || minHealingRatio < 0 || minHealingRatio > 100) { alert("Bitte bei Heilung einen Wert zwischen 0 und 100 eingeben."); return null; }
 
     if (Number.isNaN(minPositiveRatio) || minPositiveRatio < 0 || minPositiveRatio > 100) {
         alert("Bitte bei positiven Erfahrungen einen Wert zwischen 0 und 100 eingeben.");
@@ -931,6 +953,7 @@ function getRatingFilterSettingsFromControls() {
 
     return {
         minPositiveRatio,
+        minHealingRatio,
         maxNegativeRatio,
         acceptsGkv: acceptsGkvInput ? acceptsGkvInput.checked : false,
         acceptsPkv: acceptsPkvInput ? acceptsPkvInput.checked : false,
@@ -982,7 +1005,19 @@ function getSearchSettingsFromControls() {
     };
 }
 
-async function applySearchFromControls() {
+async function applySearchFromControls(resetEmptyLocation = false) {
+    const locationField = document.getElementById('doctor-location-input');
+    if (resetEmptyLocation && locationField && !locationField.value.trim()) {
+        removeDoctorLocationPreference(false);
+        currentLocation = null;
+        currentCityFilter = '';
+        setLocationMode('radius');
+        doctorLocationSuggestionController?.abort();
+        const radius = document.getElementById('doctor-radius-enabled-input');
+        if (radius) radius.checked = false;
+        hideDoctorLocationSuggestions();
+        updateRadiusInputState();
+    }
     const settings = getSearchSettingsFromControls();
 
     if (!settings) {
@@ -1074,7 +1109,9 @@ async function loadDoctorsFromSearchApi(settings) {
         `api/doctors_search.php?lat=${encodeURIComponent(centerForApi.lat)}` +
         `&lng=${encodeURIComponent(centerForApi.lng)}` +
         `&radiusKm=${radiusParam}` +
+        `&include_dummy=${window.LCNDummy?.get() ? "1" : "0"}` +
         `&minPositiveRatio=${encodeURIComponent(currentMinPositiveRatio)}` +
+        `&minHealingRatio=${encodeURIComponent(currentMinHealingRatio)}` +
         `&maxNegativeRatio=${encodeURIComponent(currentMaxNegativeRatio)}` +
         `&acceptsGkv=${currentAcceptsGkv ? "1" : "0"}` +
         `&acceptsPkv=${currentAcceptsPkv ? "1" : "0"}` +
@@ -1109,7 +1146,7 @@ async function loadDoctorsFromSearchApi(settings) {
         const response=await fetch('api/community_public.php?entity_type=doctor&search='+encodeURIComponent(currentDoctorSearchTerm)+ '&city='+encodeURIComponent(currentCityFilter));
         const community=await response.json();
         if(!response.ok||!community.ok)throw Error('Community-Einträge konnten nicht geladen werden.');
-        const matches=(community.items||[]).filter(d=>!currentSpecialtyTermId&&!currentAcceptsGkv&&!currentAcceptsPkv&&(!currentHasWebsite||d.dr_website)&&(!currentHasEmail||d.dr_email)&&(!currentHasPhone||d.loc_phone)&&d.positive_ratio>=currentMinPositiveRatio&&d.negative_ratio<=currentMaxNegativeRatio&&(!settings.radiusEnabled||currentIncludeNoCoords));
+        const matches=(community.items||[]).filter(d=>!currentSpecialtyTermId&&!currentAcceptsGkv&&!currentAcceptsPkv&&(!currentHasWebsite||d.dr_website)&&(!currentHasEmail||d.dr_email)&&(!currentHasPhone||d.loc_phone)&&d.positive_ratio>=currentMinPositiveRatio&&Number(d.healing_ratio||0)>=currentMinHealingRatio&&d.negative_ratio<=currentMaxNegativeRatio&&(!settings.radiusEnabled||currentIncludeNoCoords));
         apiDoctors.push(...matches);
       } catch(error) { console.error(error); setMapStatus('Community-Einträge konnten nicht geladen werden.'); }
     }
@@ -1201,7 +1238,7 @@ function buildActiveFilterStatusText() {
 
     if (currentDoctorSearchTerm !== "") parts.push(`Suche „${currentDoctorSearchTerm}“`);
     if (showOnlyCompareSelection) parts.push("Vergleichsansicht");
-    if (currentMinPositiveRatio !== 0 || currentMaxNegativeRatio !== 100) parts.push(`positive Erfahrungen ≥ ${currentMinPositiveRatio} %, negative Erfahrungen ≤ ${currentMaxNegativeRatio} %`);
+    if (currentMinHealingRatio !== 0 || currentMinPositiveRatio !== 0 || currentMaxNegativeRatio !== 100) parts.push(`Verbesserung ≥ ${currentMinPositiveRatio} %, Heilung ≥ ${currentMinHealingRatio} %, negative Erfahrungen ≤ ${currentMaxNegativeRatio} %`);
     if (currentAcceptsGkv) parts.push("GKV");
     if (currentAcceptsPkv) parts.push("PKV/Selbstzahler");
 	if (currentHasWebsite) parts.push("hat Website");
@@ -1424,7 +1461,7 @@ function renderDoctorCards(doctors) {
 }
 
 function buildDoctorCardHtml(doctor, index) {
-    const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
+    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannter Arzt"));
     const label = escapeHtml(doctor.loc_label || "");
     const plz = escapeHtml(doctor.loc_plz || "");
     const city = escapeHtml(doctor.loc_city || "");
@@ -1624,7 +1661,7 @@ function renderDoctorResultsTable(doctors) {
 }
 
 function buildDoctorTableRowHtml(doctor, rank) {
-    const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
+    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannter Arzt"));
 
     return `
         <tr data-dr-id="${escapeHtml(doctor.dr_id)}">
@@ -1649,18 +1686,12 @@ function buildDoctorTableRowHtml(doctor, rank) {
 function updateDoctorTableSortHeaders() {
     document.querySelectorAll("[data-table-sort-key]").forEach(function (button) {
         const isActive = button.dataset.tableSortKey === currentDoctorTableSortKey;
-        const indicator = button.querySelector(".doctor-table-sort-indicator");
 
         button.classList.toggle("is-active", isActive);
         button.setAttribute("aria-sort", isActive
             ? (currentDoctorTableSortDirection === "asc" ? "ascending" : "descending")
             : "none");
 
-        if (indicator) {
-            indicator.textContent = isActive
-                ? (currentDoctorTableSortDirection === "asc" ? "▲" : "▼")
-                : "↕";
-        }
     });
 }
 
@@ -1913,7 +1944,7 @@ function renderDoctorCompareSelection() {
             ? selectedDoctorsForCompare.map(function (doctor) {
                 return `
                     <span class="doctor-compare-chip">
-                        <span class="doctor-compare-chip-name">${escapeHtml(doctor.dr_display_name || "Unbekannt")}</span>
+                        <span class="doctor-compare-chip-name">${escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannt"))}</span>
                         <button type="button" class="doctor-compare-chip-remove" data-dr-id="${escapeHtml(doctor.dr_id)}" aria-label="${escapeHtml(doctor.dr_display_name || "Eintrag")} aus Vergleich entfernen">×</button>
                     </span>
                 `;
@@ -2107,7 +2138,7 @@ function getDoctorVoteStats(doctor) {
 }
 
 function buildDoctorPopupHtml(doctor) {
-    const name = escapeHtml(doctor.dr_display_name || "Unbekannter Arzt");
+    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannter Arzt"));
     const plz = escapeHtml(doctor.loc_plz || "");
     const city = escapeHtml(doctor.loc_city || "");
     const stats = getDoctorVoteStats(doctor);
@@ -2245,3 +2276,6 @@ function updateDoctorMobileTablePresentation() {
 
     heading.textContent = currentDoctorSortKey === "negative_ratio" ? "Negativ" : "Positiv";
 }
+
+window.addEventListener('lcn-dummy-change', () => applySearchFromControls());
+window.addEventListener('storage', event => { if (event.key === 'lcn_dummy_data_enabled' || event.key === null) applySearchFromControls(); });

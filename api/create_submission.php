@@ -3,6 +3,7 @@ require_once __DIR__ . '/_submission_treatments.php';
 require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_search_normalization.php';
 require_once __DIR__ . '/_voting.php';
+require_once __DIR__ . '/_pending_treatments.php';
 
 lcnRequireVotingRequest();
 
@@ -21,7 +22,12 @@ function buildSubmissionTriage(PDO $pdo,string $type,string $name,string $websit
     else{$stmt=$pdo->prepare("SELECT treat_id FROM v_lcn_treatments WHERE ".lcnNormalizedSearchSql('TRIM(behandlung)')."=:name OR (:website<>'' AND LOWER(TRIM(COALESCE(wiki_url_path,'')))=LOWER(TRIM(:website))) LIMIT 1");}
     $stmt->execute([':name'=>lcnNormalizeSearchTerm($name),':website'=>$website]);$match=$stmt->fetchColumn();
     if($match!==false){$duplicateId=(int)$match;$score=95;$reasons[]='Name oder Website stimmt mit einem bestehenden Eintrag überein.';}
-    if($duplicateId===null&&mb_strlen($name)>=5){
+    if($type==='treatment'){
+        require_once __DIR__.'/_treatment_duplicates.php';
+        $matches=lcnTreatmentDuplicateCandidates($pdo,$name);$identity=array_values(array_filter($matches,fn($m)=>$m['match_kind']==='identity'));
+        $duplicateId=$identity[0]['id']??null;$score=$duplicateId?95:0;$reasons=$duplicateId?[$identity[0]['meta']]:[];
+    }
+    if($type==='doctor'&&$duplicateId===null&&mb_strlen($name)>=5){
         $candidateSql=$type==='doctor'?'SELECT dr_id AS id,dr_display_name AS label FROM v_lcn_doctors':'SELECT treat_id AS id,behandlung AS label FROM v_lcn_treatments';
         $needle=(string)preg_replace('/[^\pL\pN]+/u','',lcnNormalizeSearchTerm($name));$bestPercent=0.0;$bestId=null;
         foreach($pdo->query($candidateSql) as $candidate){$candidateName=(string)preg_replace('/[^\pL\pN]+/u','',lcnNormalizeSearchTerm((string)$candidate['label']));if($candidateName==='')continue;similar_text($needle,$candidateName,$percent);if($percent>$bestPercent){$bestPercent=$percent;$bestId=(int)$candidate['id'];}}
@@ -87,6 +93,7 @@ try {
     $payload = array_intersect_key($input, array_flip($allowed));
     $pdo = lcnDoctorDatabase();
     $voterKey = lcnVoterKey();
+    if($type==='treatment'){lcnLockTreatmentProposals($pdo);$proposalLock=true;}
 
     $recent = $pdo->prepare('SELECT COUNT(*) FROM community_submissions WHERE submitter_key = :key AND created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)');
     $recent->execute([':key' => $voterKey]);
@@ -98,12 +105,18 @@ try {
         if(!$exists->fetchColumn())lcnSendVoteJson(['ok'=>false,'error'=>'Der ausgewählte bestehende Eintrag wurde nicht gefunden.'],422);
     }
     $triage=buildSubmissionTriage($pdo,$type,$name,$website,$existingTargetId,$input);
+    $pdo->beginTransaction();
     $stmt = $pdo->prepare('INSERT INTO community_submissions (entity_type,existing_target_id,submission_kind,name,website,email,phone,city,experience,payload,submitter_key,triage_status,triage_score,duplicate_target_id,triage_reasons) VALUES (:type,:existing,:kind,:name,:website,:email,:phone,:city,:experience,:payload,:key,:triage_status,:score,:duplicate_id,:reasons)');
     $stmt->execute([':type'=>$type,':existing'=>$existingTargetId,':kind'=>$triage['kind'],':name'=>$name,':website'=>$website,':email'=>$email?:null,':phone'=>$phone?:null,':city'=>$city?:null,':experience'=>$experience?:null,':payload'=>json_encode($payload,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR),':key'=>$voterKey,':triage_status'=>$triage['status'],':score'=>$triage['score'],':duplicate_id'=>$triage['duplicate_id'],':reasons'=>json_encode($triage['reasons'],JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR)]);
     $submissionId=(int)$pdo->lastInsertId();
+    if($type==='treatment'&&$existingTargetId===null)lcnPublishPendingTreatment($pdo,$submissionId,$name,$payload);
     if($experience!==''){$initialVote=$pdo->prepare('INSERT INTO community_submission_votes(submission_id,voter_key,vote) VALUES(:id,:key,:vote)');$initialVote->execute([':id'=>$submissionId,':key'=>$voterKey,':vote'=>$experience]);}
+    $pdo->commit();
     lcnSendVoteJson(['ok'=>true,'submission_id'=>$submissionId,'submission_kind'=>$triage['kind'],'triage_status'=>$triage['status']],201);
 } catch (Throwable $error) {
+    if(isset($pdo)&&$pdo->inTransaction())$pdo->rollBack();
     lcnLogApiError('create_submission', $error);
     lcnSendVoteJson(['ok' => false, 'error' => 'Der Vorschlag konnte derzeit nicht gespeichert werden.'], 500);
 }
+
+finally { if(!empty($proposalLock))$pdo->query("SELECT RELEASE_LOCK('lcn-treatment-proposals')"); }

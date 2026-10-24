@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const duplicateStyles=document.createElement('link');duplicateStyles.rel='stylesheet';duplicateStyles.href='styles/duplicate_check.css?v=2';document.head.append(duplicateStyles);
     const refinementStyles=document.createElement('link');refinementStyles.rel='stylesheet';refinementStyles.href='styles/entry_refinements.css?v=1';document.head.append(refinementStyles);
     const doctorNameStyles=document.createElement('link');doctorNameStyles.rel='stylesheet';doctorNameStyles.href='styles/doctor_name_fields.css?v=1';document.head.append(doctorNameStyles);
-    fragment('header-placeholder', 'components/header.html?v=menu-icon-20261016');
+    fragment('header-placeholder', 'components/header.html?v=chapters-20261024');
     fragment('footer-placeholder', 'components/footer.html');
     const form = document.getElementById('entry-form');
     const message = document.getElementById('entry-message');

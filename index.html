@@ -9,21 +9,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="styles/general.css">
-    <link rel="stylesheet" href="styles/navigation.css?v=menu-icon-20261016">
+    <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="styles/homepage.css?v=30">
+    <link rel="stylesheet" href="styles/homepage.css?v=48">
+    <link rel="stylesheet" href="styles/homepage_alignment.css?v=1">
+    <script src="scripts/homepage_sections.js?v=1" defer></script>
     <link rel="stylesheet" href="styles/footer-style.css">
     <script src="scripts/image-registry.js?v=5"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="scripts/homepage.js?v=experience4-20261006-2" defer></script>
-    <script src="scripts/access-nav.js?v=compact-20261016" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=2"><script src="scripts/maps_shared.js?v=1" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=2"><script src="scripts/experience_summary.js?v=1"></script></head>
+    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/homepage.js?v=numbered-discovery-20261024" defer></script>
+    <script src="scripts/access-nav.js?v=contribution-20261024" defer></script>
+<link rel="stylesheet" href="styles/maps_shared.css?v=quiet-controls-20261024"><script src="scripts/maps_shared.js?v=map-clear-20261024" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=hero-image-20261024"><link rel="stylesheet" href="styles/experience_summary.css?v=2"><script src="scripts/experience_summary.js?v=rating-order-20261024"></script></head>
 
 <body class="lcn-public-page">
     <div id="header-placeholder" data-lcn-header></div>
 
-    <main class="home-page">
+    <nav class="home-section-nav" aria-label="Bereiche der Startseite">
+        <span class="home-section-nav-title">Auf dieser Seite</span>
+        <a href="#empfehlung">Empfehlung</a>
+        <a href="#hausarzt">Hausärzte</a>
+        <a href="#suche">Suche</a>
+        <a href="#ergaenzung">Ergänzung</a>
+        <a href="#projekt">Über das Projekt</a>
+        <a href="#start" class="home-section-nav-top">Nach oben ↑</a>
+    </nav>
+    <main class="home-page" id="start">
 
         <section class="home-hero">
             <div class="home-hero-inner">
@@ -47,20 +58,15 @@
                 </div>
 
                 <div class="quick-start-actions">
-                    <a href="therapien_karte.html" class="home-button primary-button">
-                        <span class="button-icon search-icon" aria-hidden="true"></span>
-                        Therapien suchen
-                    </a>
-
-                    <a href="aerzte_karte.html" class="home-button secondary-button">
-                        <span class="button-icon group-icon" aria-hidden="true"></span>
-                        Behandler finden
-                    </a>
+                    <a href="#empfehlung" class="home-button quick-start-recommendation">Empfehlung</a>
+                    <a href="#hausarzt" class="home-button quick-start-gps">Hausärzte</a>
+                    <a href="#suche" class="home-button quick-start-search">Suche</a>
+                    <a href="#ergaenzung" class="home-button quick-start-contribute">Ergänzung</a>
                 </div>
             </div>
         </section>
 
-        <section class="simple-flow" aria-labelledby="flow-heading">
+        <section class="simple-flow" hidden aria-labelledby="flow-heading">
             <div class="section-heading compact-heading">
                 <h2 id="flow-heading">So geht es</h2>
             </div>
@@ -189,7 +195,7 @@
             </div>
         </section>
 
-        <section class="lcn-philosophy" aria-labelledby="lcn-philosophy-heading">
+        <section class="lcn-philosophy" hidden aria-labelledby="lcn-philosophy-heading">
             <span class="eyebrow">Unsere Grundidee</span>
             <h2 id="lcn-philosophy-heading">Therapien finden, die dir helfen können.</h2>
             <p>Das ist unser Ziel als Team des Long Covid Navigators. Was infrage kommt, hängt auch davon ab, was du im Alltag leisten kannst und welche Unterstützung für dich erreichbar ist. Deshalb betrachten wir Therapien aus drei Perspektiven – und verbinden sie mit passenden Behandlern.</p>
@@ -220,9 +226,93 @@
             <a class="home-button card-button" href="aerzte_karte.html">Behandler finden →</a>
         </section>
 
-        <section class="path-section" aria-labelledby="path-heading">
-            <div class="section-heading selection-heading">
-                <h2 id="path-heading">1. Auswahl</h2>
+        <section class="home-recommendation-teasers" id="empfehlung" aria-labelledby="editorial-heading">
+            <div class="section-heading home-editorial-heading home-area-heading">
+                <h2 id="editorial-heading">Empfehlung</h2>
+                <p>Unsere redaktionellen Top-Einträge</p>
+            </div>
+        <section class="featured-treatments" aria-labelledby="featured-treatments-heading">
+            <div class="featured-treatments-panel">
+                <div class="section-heading featured-treatments-heading">
+                    <h3 id="featured-treatments-heading"><a href="top_behandlungen.html">Therapien im Fokus</a></h3>
+                    <p>Redaktionell zusammengestellt zur Orientierung – kein Wirksamkeitsranking.</p>
+                </div>
+
+                <div id="featured-treatments-list" class="featured-treatments-list" data-editorial-selection="true" data-list-mode="teaser" data-initial-count="10" aria-live="polite">
+                    <p class="featured-treatments-status">Therapien werden geladen …</p>
+                </div>
+
+                <div class="featured-treatments-actions">
+                    <button id="featured-treatments-more" class="featured-treatments-more" type="button"
+                            aria-expanded="false" aria-controls="featured-treatments-list" hidden>
+                        Weitere anzeigen
+                    </button>
+                    <a class="home-button card-button featured-treatments-all" href="top_behandlungen.html">
+                        Top-Therapien ansehen <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="featured-experts" aria-labelledby="featured-experts-heading">
+            <div class="featured-experts-panel">
+                <div class="section-heading featured-experts-heading">
+                    <h3 id="featured-experts-heading"><a href="top_behandler.html">Behandler im Fokus</a></h3>
+                    <p>Redaktionell zusammengestellt zur Orientierung – keine Rangfolge nach Bewertungen.</p>
+                </div>
+
+                <div id="featured-experts-list" class="featured-experts-list" data-list-mode="teaser" data-initial-count="10" aria-live="polite">
+                    <p class="featured-experts-loading">Einträge werden geladen …</p>
+                </div>
+
+                <div class="featured-experts-more-wrap">
+                    <button id="featured-experts-more" class="featured-experts-more" type="button"
+                            aria-expanded="false" hidden>
+                        <span>Weitere anzeigen</span>
+                        <span class="featured-experts-chevron" aria-hidden="true">⌄</span>
+                    </button>
+                    <a class="home-button card-button featured-experts-all" href="top_behandler.html">
+                        Top-Behandler ansehen <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+        </section>
+
+        <section class="nearby-gps nearby-gps-discovery" id="hausarzt" aria-labelledby="nearby-gps-heading">
+            <div class="nearby-gps-panel">
+                <div class="section-heading nearby-gps-heading home-area-heading">
+                    <h2 id="nearby-gps-heading">Hausärzte</h2>
+                    <p>Hausärztliche Versorgung</p>
+                    <p class="home-area-hint">Schau nach, ob deine Hausarztpraxis schon dabei ist. Falls sie fehlt, ergänze sie.</p>
+                </div>
+                <form id="nearby-gps-form" class="nearby-gps-search" data-mode="nearest">
+                    <label for="nearby-gps-location">Dein Ausgangsort</label>
+                    <div class="nearby-gps-search-row">
+                        <div class="nearby-gps-location-field"><input id="nearby-gps-location" type="text" autocomplete="street-address" placeholder="Adresse, PLZ oder Ort eingeben"><button id="nearby-gps-location-clear" type="button" aria-label="Standort löschen und alle anzeigen" hidden>×</button></div>
+                        <button class="home-button primary-button" type="submit">Anlaufstellen finden</button>
+                    </div>
+                    <p id="nearby-gps-status" class="nearby-gps-status" aria-live="polite">Hausärztliche Anlaufstellen in Deutschland werden geladen …</p>
+                </form>
+                <div id="nearby-gps-results" class="nearby-gps-results" hidden>
+                    <div class="nearby-gps-map-column">
+                        <div id="nearby-gps-map" class="nearby-gps-map" aria-label="Karte mit Hausärzt:innen in der Nähe"></div>
+                    </div>
+                    <div class="nearby-gps-sidebar">
+                        <h3 id="nearby-gps-results-heading">Hausärztliche Anlaufstellen in Deutschland</h3>
+                        <div id="nearby-gps-list" class="nearby-gps-list"></div>
+                        <div class="nearby-gps-actions"><a id="nearby-gps-all" class="home-button card-button nearby-gps-all" href="hausarzt_suche.html" data-preserve-href="true">Hausärztliche Suche öffnen <span aria-hidden="true">→</span></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="nearby-gps-contribute"><div><h3>Deine Hausarztpraxis fehlt?</h3><p>Die Karte wächst mit euren Hinweisen. Ergänze eine Praxis, damit andere sie leichter finden.</p></div><a class="home-button card-button" href="arzt_vorschlagen.html">Praxis ergänzen <span aria-hidden="true">＋</span></a></div>
+            </div>
+        </section>
+
+        <section class="path-section" id="suche" aria-labelledby="path-heading">
+            <div class="section-heading selection-heading home-area-heading">
+                <h2 id="path-heading">Suche</h2>
+                <p>Nutze unsere Suchfunktion</p>
             </div>
 
             <div class="path-grid">
@@ -262,7 +352,7 @@
                             </p>
 
                             <a href="aerzte_karte.html" class="home-button card-button">
-                                Fachpersonen finden
+                                Fachbehandler finden
                                 <span aria-hidden="true">→</span>
                             </a>
                         </div>
@@ -275,88 +365,21 @@
             </div>
         </section>
 
-        <section class="nearby-gps" aria-labelledby="nearby-gps-heading">
-            <div class="nearby-gps-panel">
-                <div class="section-heading nearby-gps-heading">
-                    <p class="eyebrow">Hilfe vor Ort</p>
-                    <h2 id="nearby-gps-heading">Hausärztliche Versorgung in deiner Nähe</h2>
-                    <p>Gib deine Adresse oder deinen Ort ein und finde Behandler der Therapie „Hausärztliche Therapie“ im Umkreis.</p>
+        <section class="home-contribution" id="ergaenzung" aria-labelledby="contribution-heading">
+            <div class="section-heading home-area-heading">
+                <h2 id="contribution-heading">Ergänzung</h2>
+            </div>
+            <div class="home-contribution-panel">
+                <div class="home-contribution-intro">
+                    <span class="home-contribution-symbol" aria-hidden="true">＋</span>
+                    <div><h3>Dein Hinweis hilft weiter.</h3><p>Fehlt eine Behandlung oder eine Anlaufstelle? Hilf mit, den Katalog zu erweitern.</p></div>
                 </div>
-                <form id="nearby-gps-form" class="nearby-gps-search">
-                    <label for="nearby-gps-location">Adresse oder Ort</label>
-                    <div class="nearby-gps-search-row">
-                        <input id="nearby-gps-location" type="text" autocomplete="street-address" placeholder="z. B. 50677 Köln" required>
-                        <label class="nearby-gps-radius" for="nearby-gps-radius">
-                            <span>Radius</span>
-                            <span class="nearby-gps-radius-input-wrap">
-                                <input id="nearby-gps-radius" type="number" min="1" max="2000" step="1" value="50" inputmode="numeric">
-                                <span>km</span>
-                            </span>
-                        </label>
-                        <button class="home-button primary-button" type="submit">In der Nähe suchen</button>
-                    </div>
-                    <p id="nearby-gps-status" class="nearby-gps-status" aria-live="polite">Hausärztliche Anlaufstellen in Deutschland werden geladen …</p>
-                </form>
-                <div id="nearby-gps-results" class="nearby-gps-results" hidden>
-                    <div id="nearby-gps-map" class="nearby-gps-map" aria-label="Karte mit Hausärzt:innen in der Nähe"></div>
-                    <div class="nearby-gps-sidebar">
-                        <h3 id="nearby-gps-results-heading">Hausärztliche Anlaufstellen in Deutschland</h3>
-                        <div id="nearby-gps-list" class="nearby-gps-list"></div>
-                        <div class="nearby-gps-actions"><a id="nearby-gps-all" class="home-button card-button nearby-gps-all" href="hausarzt_suche.html" data-preserve-href="true">Hausärztliche Suche öffnen <span aria-hidden="true">→</span></a>
-                        <a class="home-button card-button nearby-gps-all nearby-gps-suggest" href="arzt_vorschlagen.html">Hausarzt-Vorschlag ergänzen <span aria-hidden="true">＋</span></a></div>
-                    </div>
+                <div class="home-contribution-actions">
+                    <a href="behandlung_vorschlagen.html"><span><strong>Behandlung ergänzen</strong><small>Eine fehlende Behandlung vorschlagen</small></span><span aria-hidden="true">→</span></a>
+                    <a href="arzt_vorschlagen.html"><span><strong>Behandler ergänzen</strong><small>Eine Praxis oder Fachperson vorschlagen</small></span><span aria-hidden="true">→</span></a>
                 </div>
             </div>
         </section>
-
-        <div class="home-recommendation-teasers">
-        <section class="featured-treatments" aria-labelledby="featured-treatments-heading">
-            <div class="featured-treatments-panel">
-                <div class="section-heading featured-treatments-heading">
-                    <h2 id="featured-treatments-heading"><a href="top_behandlungen.html">Top 30 Therapien + IHHT</a></h2>
-                    <p>Unsere redaktionelle Auswahl zur Orientierung – kein Wirksamkeitsranking.</p>
-                </div>
-
-                <div id="featured-treatments-list" class="featured-treatments-list" data-editorial-selection="true" data-list-mode="teaser" data-initial-count="10" aria-live="polite">
-                    <p class="featured-treatments-status">Therapien werden geladen …</p>
-                </div>
-
-                <div class="featured-treatments-actions">
-                    <button id="featured-treatments-more" class="featured-treatments-more" type="button"
-                            aria-expanded="false" aria-controls="featured-treatments-list" hidden>
-                        Weitere anzeigen
-                    </button>
-                    <a class="home-button card-button featured-treatments-all" href="top_behandlungen.html">
-                        Top-Therapien ansehen <span aria-hidden="true">→</span>
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <section class="featured-experts" aria-labelledby="featured-experts-heading">
-            <div class="featured-experts-panel">
-                <div class="section-heading featured-experts-heading">
-                    <h2 id="featured-experts-heading"><a href="top_behandler.html">Häufig genannte Behandler</a></h2>
-                    <p>Kompakte Auswahl zur Orientierung.</p>
-                </div>
-
-                <div id="featured-experts-list" class="featured-experts-list" data-list-mode="teaser" data-initial-count="10" aria-live="polite">
-                    <p class="featured-experts-loading">Einträge werden geladen …</p>
-                </div>
-
-                <div class="featured-experts-more-wrap">
-                    <button id="featured-experts-more" class="featured-experts-more" type="button"
-                            aria-expanded="false" hidden>
-                        <span>Weitere anzeigen</span>
-                        <span class="featured-experts-chevron" aria-hidden="true">⌄</span>
-                    </button>
-                    <a class="home-button card-button featured-experts-all" href="top_behandler.html">
-                        Top-Behandler ansehen <span aria-hidden="true">→</span>
-                    </a>
-                </div>
-            </div>
-        </section>
-        </div>
 
         <section class="project-intro" id="projekt" aria-labelledby="project-heading">
             <div class="section-heading project-heading">
@@ -403,8 +426,6 @@
                     </div>
                 </article>
             </div>
-        </section>
-
         <section class="notice-section" aria-label="Hinweise">
             <div class="notice-grid">
                 <article class="notice-card mvp-notice">
@@ -433,6 +454,8 @@
             </div>
         </section>
 
+        </section>
+
     </main>
 
     <div id="footer-placeholder"></div>
@@ -446,3 +469,4 @@
     </script>
 </body>
 </html>
+

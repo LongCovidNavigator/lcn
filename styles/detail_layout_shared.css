@@ -41,8 +41,8 @@ body.compact-doctor-header .ux-heading-info>:is(summary,button),body.compact-doc
 body.compact-doctor-header .ux-heading-info{position:relative;display:inline-block;margin:0}
 body.compact-doctor-header .ux-heading-info>:is(summary,button){padding:4px;list-style:none;cursor:help}
 body.compact-doctor-header .ux-heading-info>:is(summary,button)::-webkit-details-marker{display:none}
-body.compact-doctor-header .ux-heading-info>p{display:none;position:absolute;left:100%;right:auto;top:0;margin:0 0 0 8px;z-index:30;width:340px;max-width:calc(100vw - 90px);box-sizing:border-box;background:#fff;border:1px solid #e1eafa;border-radius:8px;padding:16px;color:#526b80;font:400 14px/1.6 Arial,sans-serif;box-shadow:0 6px 22px #17365d20}
-body.compact-doctor-header .ux-heading-info:hover>p,body.compact-doctor-header .ux-heading-info:focus-within>p,body.compact-doctor-header .ux-heading-info[open]>p{display:block}
+body.compact-doctor-header .ux-heading-info>p{display:block;visibility:hidden;opacity:0;transition:opacity .12s ease,visibility 0s;position:absolute;left:100%;right:auto;top:0;margin:0 0 0 8px;z-index:30;width:340px;max-width:calc(100vw - 90px);box-sizing:border-box;background:#fff;border:1px solid #e1eafa;border-radius:8px;padding:16px;color:#526b80;font:400 14px/1.6 Arial,sans-serif;box-shadow:0 6px 22px #17365d20}
+body.compact-doctor-header .ux-heading-info:hover>p,body.compact-doctor-header .ux-heading-info:focus-within>p,body.compact-doctor-header .ux-heading-info[open]>p{display:block;visibility:visible;opacity:1;transition-delay:.35s}
 body.compact-doctor-header .adaptation-heading-help:has(.heading-help-trigger:hover)>.heading-help-info,body.compact-doctor-header .adaptation-heading-help:focus-within>.heading-help-info{display:block}
 @media(max-width:650px){body.compact-doctor-header .ux-heading-info>p{left:auto;right:0;top:100%;margin:6px 0 0}}
 
@@ -239,3 +239,5 @@ body.compact-doctor-header #view-content .ux-dashboard-insurance-settings .insur
 body.compact-doctor-header #view-content .ux-dashboard-insurance-settings .insurance-toggle button{flex:0 1 auto;min-width:90px;min-height:38px;height:auto;padding:8px 12px;line-height:1.4}
 @media(max-width:1400px){.ux-dashboard-insurance-settings{grid-template-columns:1fr}.ux-dashboard-insurance-settings .dashboard-country-preferences{grid-column:1!important;grid-row:2!important;justify-self:end}.ux-dashboard-insurance-settings .insurance-toggle{grid-column:1;grid-row:1}}
 @media(max-width:650px){body.compact-doctor-header .ux-dashboard-insurance-settings .dashboard-country-preferences{justify-content:flex-end;justify-self:end}}
+
+body.compact-doctor-header .ux-heading-info:focus-within>p,body.compact-doctor-header .ux-heading-info[open]>p{transition-delay:0s}

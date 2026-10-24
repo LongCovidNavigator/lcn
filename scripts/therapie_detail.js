@@ -714,9 +714,10 @@ function buildProviderViewSwitchHtml() {
                         <button
                             type="button"
                             class="treatment-detail-provider-location-reset-button"
+                            aria-label="Standort löschen und alle anzeigen"
                             ${currentProviderLocation ? "" : "disabled"}
                         >
-                            Zurücksetzen
+                            ×
                         </button>
                     </div>
 
@@ -1057,8 +1058,13 @@ async function handleProviderLocationSubmit() {
     const query = input.value.trim();
 
     if (!query) {
-        alert("Bitte gib eine PLZ oder einen Ort ein.");
-        input.focus();
+        currentProviderLocation = null;
+        clearSavedSharedTreatmentLocation();
+        if (currentProviderSortMode === 'distance') currentProviderSortMode = 'name';
+        if (currentTreatmentDetail) {
+            renderTreatmentProviders(currentTreatmentDetail.providers);
+            renderTreatmentProviderMap(currentTreatmentDetail.providers);
+        }
         return;
     }
 
@@ -1671,11 +1677,10 @@ function getProviderContactScore(provider) {
 
 function buildProviderTableSortHeader(label, sortMode) {
     const isActive = currentProviderSortMode === sortMode;
-    const arrow = isActive ? (currentProviderSortDirection === "asc" ? "↑" : "↓") : "↕";
 
     return `
         <button type="button" class="treatment-detail-provider-table-sort ${isActive ? "is-active" : ""}" data-provider-table-sort="${sortMode}">
-            ${label}<span aria-hidden="true">${arrow}</span>
+            ${label}
         </button>
     `;
 }
@@ -1880,3 +1885,10 @@ function refreshTreatmentDetailStickyHeader() {
     treatmentStickyActivationPoint = header.getBoundingClientRect().bottom + window.scrollY;
     header._requestTreatmentStickyUpdate?.();
 }
+
+document.addEventListener('input', event => {
+    if (event.target.id === 'treatment-detail-provider-location-input') {
+        const clear = document.querySelector('.treatment-detail-provider-location-reset-button');
+        if (clear) clear.disabled = !event.target.value.trim();
+    }
+});

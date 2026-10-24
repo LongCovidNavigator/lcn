@@ -98,3 +98,8 @@ nav ul li a:hover {
 /* Same menu control as doctor and therapy details, on every shared header. */
 .lcn-header.lcn-header .lcn-menu-toggle{box-sizing:border-box;min-width:44px;min-height:44px;width:44px;height:44px;padding:10px;border-color:#d7e3ee;line-height:1}
 .lcn-header.lcn-header .lcn-menu-toggle svg{display:block;width:24px;height:24px;flex-shrink:0}
+/* The shared data switch remains visible beside the menu, including on mobile. */
+.lcn-header .lcn-dummy-toggle { margin-left:auto; flex-shrink:0; border:1px solid #dce7ef; border-radius:8px; padding:9px 12px; min-height:40px; background:#f5f8fb; color:#536b83; font:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+.lcn-header .lcn-dummy-toggle[aria-pressed="true"] { background:#fff5df; border-color:#e9c875; color:#805b13; }
+.lcn-header .lcn-dummy-toggle:disabled { opacity:.6; cursor:wait; }
+@media(max-width:450px) { .lcn-header.lcn-header { gap:10px; padding-inline:14px; } .lcn-header .lcn-dummy-toggle { padding:8px; font-size:11px; } }

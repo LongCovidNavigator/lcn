@@ -5,7 +5,7 @@
   const toggle = document.querySelector('.nd-detail .detail-menu-toggle');
   if (toggle && menu) {
     menu.classList.add('detail-main-menu');
-    fetch('components/header.html?v=menu-icon-20261016').then(response => {
+    fetch('components/header.html?v=chapters-20261024').then(response => {
       if (!response.ok) throw new Error('Navigation konnte nicht geladen werden');
       return response.text();
     }).then(html => {

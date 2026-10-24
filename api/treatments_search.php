@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/_voting.php';
+require_once __DIR__ . '/_experience_search.php';
 require_once __DIR__ . '/_treatment_routes.php';
 require_once __DIR__ . '/_search_normalization.php';
 
@@ -132,7 +133,8 @@ function enrichItemsWithNearestProviders(
     string $providerCity = '',
     bool $hasProviderRadius = false,
     ?float $radiusKm = null,
-    bool $acceptsGkv = false
+    bool $acceptsGkv = false,
+    bool $allProviders = false
 ) {
     $providerSourceSql = lcnTreatmentSearchProvidersSql();
     if (empty($items)) {
@@ -159,7 +161,7 @@ function enrichItemsWithNearestProviders(
     }
 
     $treatIds = array_values(array_unique($treatIds));
-    $showAllMatchingProviders = count($treatIds) > 0 && count($treatIds) <= 5;
+    $showAllMatchingProviders = $allProviders || (count($treatIds) > 0 && count($treatIds) <= 5);
 
     if (empty($treatIds)) {
         return [
@@ -406,6 +408,7 @@ try {
     }
 
     $minPositive = getIntParam('min_positive', 0, 0, 100);
+    $minHealing = getIntParam('min_healing', 0, 0, 100);
     $maxNegative = getIntParam('max_negative', 100, 0, 100);
 
     $minProvider = getIntParam('min_provider', 0, 0, 9999);
@@ -525,6 +528,23 @@ try {
 
     if ($aliasSuggest === 'smart') {
         $suggestions = [];
+        $correctedTerms = [];
+        if (mb_strlen($normalizedAliasSuggestQuery, 'UTF-8') >= 4) {
+            $terms = $pdo->query("SELECT behandlung AS term FROM {$catalogSql} t UNION SELECT a.alias FROM tbl_aliases_03 a INNER JOIN v_lcn_treatment_aliases c ON c.alias_id=a.alias_id INNER JOIN {$catalogSql} t ON t.treat_id=c.treat_id")->fetchAll(PDO::FETCH_COLUMN);
+            $hasLiteral=false;
+            foreach ($terms as $term) {
+                if (str_contains(lcnNormalizeSearchTerm($term), $normalizedAliasSuggestQuery)) { $hasLiteral=true; break; }
+            }
+            if (!$hasLiteral) $correctedTerms=lcnFuzzySearchTerms($aliasSuggestQuery,$terms);
+        }
+        $smartNamePredicate="{$normalizedTreatmentNameSql} LIKE :suggest_search";
+        $smartAliasPredicate="{$normalizedAliasSql} LIKE :suggest_search";
+        if ($correctedTerms) {
+            $quoted=array_map(fn($term)=>$pdo->quote(lcnNormalizeSearchTerm($term)), $correctedTerms);
+            $smartNamePredicate="({$smartNamePredicate} OR {$normalizedTreatmentNameSql} IN (".implode(',',$quoted)."))";
+            $smartAliasPredicate="({$smartAliasPredicate} OR {$normalizedAliasSql} IN (".implode(',',$quoted)."))";
+        }
+
 
         if ($aliasSuggestQuery !== '') {
             $directStmt = $pdo->prepare("
@@ -533,7 +553,7 @@ try {
                     t.behandlung,
                     t.typ
                 FROM {$catalogSql} t
-                WHERE {$normalizedTreatmentNameSql} LIKE :suggest_search
+                WHERE {$smartNamePredicate}
                 ORDER BY
                     CASE WHEN {$normalizedTreatmentNameSql} = :suggest_exact THEN 0 ELSE 1 END,
                     t.behandlung ASC
@@ -571,7 +591,7 @@ try {
                     ON c.alias_id = a.alias_id
                 INNER JOIN {$catalogSql} t
                     ON t.treat_id = c.treat_id
-                WHERE {$normalizedAliasSql} LIKE :suggest_search
+                WHERE {$smartAliasPredicate}
                 ORDER BY
                     CASE WHEN {$normalizedAliasSql} = :suggest_exact THEN 0 ELSE 1 END,
                     a.alias ASC,
@@ -656,6 +676,13 @@ try {
             }
         }
 
+        if ($correctedTerms) {
+            foreach ($suggestions as &$suggestion) {
+                $suggestion['description']='Ähnlicher Suchbegriff · '.$suggestion['description'];
+                $suggestion['fuzzy_match']=true;
+            }
+            unset($suggestion);
+        }
         echo json_encode([
             'ok' => true,
             'query' => $aliasSuggestQuery,
@@ -665,6 +692,7 @@ try {
         exit;
     }
 
+    $experienceSql = lcnExperienceSearchSql('treatment', ($_GET['include_dummy'] ?? '') === '1');
     $baseSql = "
         FROM (
             SELECT
@@ -675,6 +703,7 @@ try {
                     THEN ROUND((calculated.pro / calculated.total_votes) * 100)
                     ELSE 0
                 END AS positive_ratio,
+                CASE WHEN calculated.total_votes > 0 THEN ROUND(calculated.healing * 100 / calculated.total_votes) ELSE 0 END AS healing_ratio,
 
                 CASE
                     WHEN calculated.total_votes > 0
@@ -704,29 +733,11 @@ try {
                     t.wirkmechanismus,
                     t.indikationen_anwendungsgebiete,
 
-                    (
-                        COALESCE(lv.pro, 0)
-                        + COALESCE(rv.pro, 0)
-                    ) AS pro,
-
-                    (
-                        COALESCE(lv.neutral, 0)
-                        + COALESCE(rv.neutral, 0)
-                    ) AS neutral,
-
-                    (
-                        COALESCE(lv.contra, 0)
-                        + COALESCE(rv.contra, 0)
-                    ) AS contra,
-
-                    (
-                        COALESCE(lv.pro, 0)
-                        + COALESCE(rv.pro, 0)
-                        + COALESCE(lv.neutral, 0)
-                        + COALESCE(rv.neutral, 0)
-                        + COALESCE(lv.contra, 0)
-                        + COALESCE(rv.contra, 0)
-                    ) AS total_votes,
+                    COALESCE(experience.pro, 0) AS pro,
+                    COALESCE(experience.neutral, 0) AS neutral,
+                    COALESCE(experience.contra, 0) AS contra,
+                    COALESCE(experience.healing, 0) AS healing,
+                    COALESCE(experience.total_votes, 0) AS total_votes,
 
                     COALESCE(pc.provider_count, 0) AS total_provider_count,
 
@@ -740,6 +751,7 @@ try {
                     ,COALESCE(upc.unlocated_provider_count, 0) AS unlocated_provider_count
 
                 FROM {$catalogSql} t
+                LEFT JOIN {$experienceSql} experience ON experience.id = t.treat_id
 
                 LEFT JOIN (
                     SELECT treat_id,
@@ -955,6 +967,9 @@ try {
 		}
 
 		$whereParts[] = "results.positive_ratio >= :min_positive";
+        $whereParts[] = "results.healing_ratio >= :min_healing";
+        $params[':min_healing'] = $minHealing;
+        if ($minPositive > 0 || $minHealing > 0 || $maxNegative < 100) $whereParts[] = "results.total_votes > 0";
 		$params[':min_positive'] = $minPositive;
 
 		$whereParts[] = "results.negative_ratio <= :max_negative";
@@ -1088,7 +1103,8 @@ try {
             $providerCity,
             $hasProviderRadius,
             $radiusKm,
-            $acceptsGkv
+            $acceptsGkv,
+            getBoolParam('map_all', false)
         );
     } elseif ($includeMap) {
         foreach ($items as &$item) {
@@ -1118,6 +1134,7 @@ try {
             'provider_lng' => $hasProviderRadius ? (float)$providerLng : null,
             'radius_km' => $hasProviderRadius ? (float)$radiusKm : null,
             'min_positive' => $minPositive,
+            'min_healing' => $minHealing,
             'max_negative' => $maxNegative,
             'min_provider' => $minProvider,
             'only_with_provider' => $onlyWithProvider,

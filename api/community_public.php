@@ -17,6 +17,7 @@ try {
             FROM community_submissions s
             LEFT JOIN community_submission_votes v ON v.submission_id=s.submission_id AND v.migrated_target_id IS NULL
             WHERE s.entity_type=:entity AND s.review_status IN ('pending','reviewing')";
+    if($entity==='treatment')$sql .= ' AND s.existing_target_id IS NULL';
     $params = [':entity' => $entity];
     if ($search !== '') { $sql .= " AND ".lcnNormalizedSearchSql('s.name')." LIKE :search"; $params[':search'] = '%'.lcnNormalizeSearchTerm($search).'%'; }
     if ($city !== '') { $sql .= " AND LOWER(COALESCE(s.city,''))=LOWER(:city)"; $params[':city'] = $city; }

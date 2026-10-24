@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const label=document.querySelector('label[for="'+input.id+'"]');if(label)label.textContent='Adresse, PLZ oder Ort';
   input.placeholder='z. B. 50667 oder Köln';
   const button=document.createElement('button');button.type='button';button.className='lcn-map-submit';button.textContent='Standort übernehmen';
-  button.addEventListener('click',()=>{if(prefix==='doctor')applySearchFromControls();else applyTreatmentLocationFromInput();});
+  button.addEventListener('click',()=>{if(prefix==='doctor')applySearchFromControls(true);else applyTreatmentLocationFromInput();});
   input.closest('div').after(button);
   const hint=document.createElement('p');hint.className='lcn-map-help';hint.textContent='Entfernung als Luftlinie. Dieser Standort wird auf den übrigen LCN-Seiten übernommen.';button.after(hint);
  }

@@ -7,9 +7,17 @@
 .lcn-experience .lcn-effect-3{border-left:4px solid #299a77}
 .lcn-experience small{grid-column:1/-1;color:#536b89;font-size:12px}
 .lcn-experience a:hover{background:#f0f7ff}
-td .lcn-experience{grid-template-columns:1fr;gap:3px}
-td .lcn-experience .lcn-effect{flex-direction:row;justify-content:space-between;align-items:center;padding:4px 7px}
-td .lcn-experience .lcn-effect strong{font-size:13px;white-space:nowrap}
+/* Four percentages in one quiet row; full category names remain accessible. */
+td .lcn-experience{display:grid;grid-template-columns:repeat(4,5ch) 9ch;align-items:center;column-gap:12px;min-width:0;width:max-content;white-space:nowrap;font-variant-numeric:tabular-nums}
+td .lcn-experience .lcn-effect{display:block;text-align:right;padding:0;border:0;border-radius:0;background:transparent;line-height:1.4}
+td .lcn-experience .lcn-effect>span{display:none}
+td .lcn-experience .lcn-effect strong{display:block;width:100%;text-align:right;font-size:13px;font-weight:700;white-space:nowrap}
+td .lcn-experience .lcn-effect-0{color:#a43e57}
+td .lcn-experience .lcn-effect-1{color:#60718e}
+td .lcn-experience .lcn-effect-2{color:#287553}
+td .lcn-experience .lcn-effect-3{color:#17634b}
+td .lcn-experience small{grid-column:auto;font-size:11px;white-space:nowrap;line-height:1.4;text-align:right}
+td .lcn-experience a:hover{text-decoration:underline;background:transparent}
 .featured-treatment-votes:has(.lcn-experience){display:block}
 .lcn-philosophy{max-width:1200px;margin:40px auto;padding:28px;background:white;border:1px solid #e1eafa;border-radius:10px;color:#17365d}
 .lcn-philosophy>p{max-width:850px;line-height:1.65}

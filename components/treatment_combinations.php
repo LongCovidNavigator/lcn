@@ -10,7 +10,7 @@ function ndRenderTreatmentCombinations(array $g,int $id): string {
     };
     ob_start(); ?>
 <section class="card ux-combinations" data-combination-section>
-<h3><?= $diagnostic?'Kombinierte Untersuchungen':'Kombinationstherapien' ?></h3>
+<h3><?= $diagnostic?'Kombinierte Untersuchungen':'Kombinationstherapien' ?> <span class="ux-heading-info"><button type="button" aria-label="Information zu Kombinationen" aria-describedby="therapy-combinations-help">ⓘ</button><p id="therapy-combinations-help" role="tooltip"><?= $diagnostic?'Hier sammelt die Community Untersuchungen, die gemeinsam durchgeführt werden, und zeigt die Bestandteile solcher Kombinationen. Eine Zuordnung bedeutet nicht, dass alle Untersuchungen immer zusammen nötig sind.':'Welche anderen Behandlungen werden zusammen mit dieser Therapie eingesetzt? Hier sammelt die Community solche Kombinationen und ihre Bestandteile. Du kannst eine vorhandene Kombination zuordnen oder eine neue ergänzen. Die gemeinsame Anwendung ist eine Möglichkeit, keine Pflicht: Ein Eintrag bedeutet weder, dass die Kombination für dich geeignet ist, noch dass sie zusammen angewendet werden muss.' ?> Noch ungeprüfte Vorschläge sind gekennzeichnet.</p></span></h3>
 <p class="ux-combination-intro"><?= isset($g['comboIds'][$id])?'Diese Kombination und ihre Bestandteile.':'Kombinationen, mit denen diese Therapie verknüpft ist.' ?></p>
 <?php if(!$ids): ?><p class="ux-combination-empty">Noch keine Kombination hinterlegt. Du kannst eine vorhandene Kombination verknüpfen oder eine neue vorschlagen.</p><?php endif; ?>
 <?php foreach($ids as $combo):
@@ -21,14 +21,7 @@ function ndRenderTreatmentCombinations(array $g,int $id): string {
 ?>
 <div class="ux-combination-tree" data-combination-tree="<?= $combo ?>"><div class="ux-combination-drawing" style="--combination-columns:<?= max(1,$count) ?>">
 <svg class="ux-combination-lines" aria-hidden="true"></svg>
-<article class="ux-combination-parent<?= $combo===$id?' is-current':'' ?>" data-combination-parent data-combination-entry="<?= $combo ?>"><?php $renderName($combo,$g['entries'][$combo]['treatmentname']); ?><small>Kombination<?= $parts?' aus '.count($parts).' verknüpften Einträgen':'' ?></small>
-<?php if(!isset($g['comboIds'][$id])&&$combo!==$id):
-    // Same saved membership as the current component below, not a second rating of the combination entry.
-    $aliasLink=!isset($g['components'][$combo][$id]);
-    $combinationStatement='„'.$g['entries'][$id]['treatmentname'].'“ '.($aliasLink?'ist über eine Alias-Verknüpfung verbunden mit':'ist Bestandteil von').' „'.$g['entries'][$combo]['treatmentname'].'“.';
-?>
-<div class="ux-combination-assertion" data-combination-membership-feedback><small>Verknüpfung dieser Therapie prüfen</small><p><?= ndEscape($combinationStatement) ?></p><span data-treatment-relation-feedback="cp:<?= $combo ?>:<?= $id ?>" data-feedback-statement="<?= ndEscape($combinationStatement) ?>" data-feedback-standard="1"></span></div>
-<?php endif; ?>
+<article class="ux-combination-parent<?= $combo===$id?' is-current':'' ?>" data-combination-parent data-combination-entry="<?= $combo ?>"><?php $renderName($combo,$g['entries'][$combo]['treatmentname']); ?><div class="ux-combination-assertion"><span data-treatment-relation-feedback="combo:<?= $combo ?>" data-feedback-statement="<?= ndEscape('„'.$g['entries'][$combo]['treatmentname'].'“ ist eine Kombination aus den angezeigten Bestandteilen.') ?>" data-feedback-standard="1"></span></div>
 </article>
 <p class="ux-combination-parts-label">Bestandteile<?= array_filter($parts,fn($p)=>$p['alias'])?' und weitere Alias-Verknüpfungen':'' ?></p>
 <div class="ux-combination-parts">
@@ -37,7 +30,7 @@ function ndRenderTreatmentCombinations(array $g,int $id): string {
 ?>
 <article class="ux-combination-part ux-relation-entry<?= $part['id']===$id?' is-current':'' ?>" data-combination-part data-component-id="<?= (int)$part['id'] ?>"><?php $renderName($part['id'],$part['name']); ?>
 <?php if(!$part['id']): ?><small>Noch keine eigene Detailseite zugeordnet.</small><?php endif; ?>
-<div class="ux-combination-assertion"><small>Verknüpfung prüfen</small><p><?= ndEscape($statement) ?></p><span data-treatment-relation-feedback="<?= ndEscape($part['key']) ?>" data-feedback-statement="<?= ndEscape($statement) ?>" data-feedback-standard="1"></span></div>
+<div class="ux-combination-assertion"><span data-treatment-relation-feedback="<?= ndEscape($part['key']) ?>" data-feedback-statement="<?= ndEscape($statement) ?>" data-feedback-standard="1"></span></div>
 </article>
 <?php endforeach; ?>
 <?php if($addPart): ?><button type="button" class="ux-combination-add-part" data-combination-add-part data-treatment-relation-add data-kind="has_component" data-source-id="<?= $combo ?>" data-dialog-title="Bestandteil hinzufügen">＋ Bestandteil hinzufügen</button><?php endif; ?>

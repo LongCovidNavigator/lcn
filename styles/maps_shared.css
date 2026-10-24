@@ -19,3 +19,104 @@
 .top-map-location-controls p{display:block}
 @media(max-width:650px){.top-map-location-controls form{grid-template-columns:1fr}}
 @media(max-width:650px){:is(.nd-location-filters,.lcn-map-filters){gap:10px}:is(.nd-location-filters,.lcn-map-filters)>label{flex:1 1 150px}}
+
+/* Explicit catalog layout also reserves space for the shared submit action. */
+.doctor-nav-section-location.doctor-nav-section-location{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-rows:auto auto auto auto auto auto;gap:10px 18px;align-content:start;align-items:center;height:auto}
+.doctor-nav-section-location.doctor-nav-section-location > .doctor-nav-heading{grid-column:1 / -1;grid-row:1;margin:0;min-width:0;max-width:none;top:auto}
+.doctor-nav-section-location.doctor-nav-section-location > label[for="doctor-location-input"]{grid-column:1;grid-row:2;margin:0;min-width:0;max-width:none;top:auto}
+.doctor-nav-section-location.doctor-nav-section-location > .doctor-location-input-row{grid-column:1;grid-row:3;margin:0;min-width:0;max-width:none;top:auto}
+.doctor-nav-section-location.doctor-nav-section-location > .lcn-map-submit{grid-column:2;grid-row:3;margin:0;min-width:0;max-width:none;top:auto}
+.doctor-nav-section-location.doctor-nav-section-location > .doctor-location-mode-switch{grid-column:2;grid-row:2;margin:0;min-width:0;max-width:none;top:auto}
+.doctor-nav-section-location.doctor-nav-section-location > label[for="doctor-radius-enabled-input"]{grid-column:1;grid-row:4;margin:0;min-width:0;max-width:none;top:auto}
+.doctor-nav-section-location.doctor-nav-section-location > label[for="doctor-include-no-coords-input"]{grid-column:1;grid-row:5;margin:0;min-width:0;max-width:none;top:auto}
+.doctor-nav-section-location.doctor-nav-section-location > label[for="doctor-radius-input"]{grid-column:2;grid-row:4;margin:0;min-width:0;max-width:none;top:auto}
+.doctor-nav-section-location.doctor-nav-section-location > #doctor-radius-input{grid-column:2;grid-row:5;margin:0;min-width:0;max-width:none;top:auto}
+.doctor-nav-section-location.doctor-nav-section-location > .lcn-map-help{grid-column:1 / -1;grid-row:6;margin:0;min-width:0;max-width:none;top:auto}
+.doctor-nav-section-location.doctor-nav-section-location > .doctor-location-input-row{height:auto;min-height:44px}
+.doctor-nav-section-location.doctor-nav-section-location > .doctor-location-mode-switch{height:40px;width:100%}
+.doctor-nav-section-location.doctor-nav-section-location > .lcn-map-submit{width:100%;min-height:44px;align-self:stretch}
+.doctor-nav-section-location.doctor-nav-section-location > .doctor-location-status{display:none}
+@media(max-width:760px){
+.doctor-nav-section-location.doctor-nav-section-location{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+.doctor-nav-section-location.doctor-nav-section-location > .doctor-nav-heading{grid-column:1;grid-row:1}
+.doctor-nav-section-location.doctor-nav-section-location > label[for="doctor-location-input"]{grid-column:1;grid-row:2}
+.doctor-nav-section-location.doctor-nav-section-location > .doctor-location-input-row{grid-column:1;grid-row:3}
+.doctor-nav-section-location.doctor-nav-section-location > .lcn-map-submit{grid-column:1;grid-row:4}
+.doctor-nav-section-location.doctor-nav-section-location > .doctor-location-mode-switch{grid-column:1;grid-row:5}
+.doctor-nav-section-location.doctor-nav-section-location > label[for="doctor-radius-enabled-input"]{grid-column:1;grid-row:6}
+.doctor-nav-section-location.doctor-nav-section-location > label[for="doctor-include-no-coords-input"]{grid-column:1;grid-row:7}
+.doctor-nav-section-location.doctor-nav-section-location > label[for="doctor-radius-input"]{grid-column:1;grid-row:8}
+.doctor-nav-section-location.doctor-nav-section-location > #doctor-radius-input{grid-column:1;grid-row:9}
+.doctor-nav-section-location.doctor-nav-section-location > .lcn-map-help{grid-column:1;grid-row:10}
+}
+.treatment-nav-section-location.treatment-nav-section-location{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-rows:auto auto auto auto auto auto;gap:10px 18px;align-content:start;align-items:center;height:auto}
+.treatment-nav-section-location.treatment-nav-section-location > .treatment-nav-heading{grid-column:1 / -1;grid-row:1;margin:0;min-width:0;max-width:none;top:auto}
+.treatment-nav-section-location.treatment-nav-section-location > label[for="treatment-location-input"]{grid-column:1;grid-row:2;margin:0;min-width:0;max-width:none;top:auto}
+.treatment-nav-section-location.treatment-nav-section-location > .treatment-location-input-row{grid-column:1;grid-row:3;margin:0;min-width:0;max-width:none;top:auto}
+.treatment-nav-section-location.treatment-nav-section-location > .lcn-map-submit{grid-column:2;grid-row:3;margin:0;min-width:0;max-width:none;top:auto}
+.treatment-nav-section-location.treatment-nav-section-location > .treatment-location-mode-switch{grid-column:2;grid-row:2;margin:0;min-width:0;max-width:none;top:auto}
+.treatment-nav-section-location.treatment-nav-section-location > label[for="treatment-radius-enabled-input"]{grid-column:1;grid-row:4;margin:0;min-width:0;max-width:none;top:auto}
+.treatment-nav-section-location.treatment-nav-section-location > label[for="treatment-include-no-coords-input"]{grid-column:1;grid-row:5;margin:0;min-width:0;max-width:none;top:auto}
+.treatment-nav-section-location.treatment-nav-section-location > label[for="treatment-radius-input"]{grid-column:2;grid-row:4;margin:0;min-width:0;max-width:none;top:auto}
+.treatment-nav-section-location.treatment-nav-section-location > #treatment-radius-input{grid-column:2;grid-row:5;margin:0;min-width:0;max-width:none;top:auto}
+.treatment-nav-section-location.treatment-nav-section-location > .lcn-map-help{grid-column:1 / -1;grid-row:6;margin:0;min-width:0;max-width:none;top:auto}
+.treatment-nav-section-location.treatment-nav-section-location > .treatment-location-input-row{height:auto;min-height:44px}
+.treatment-nav-section-location.treatment-nav-section-location > .treatment-location-mode-switch{height:40px;width:100%}
+.treatment-nav-section-location.treatment-nav-section-location > .lcn-map-submit{width:100%;min-height:44px;align-self:stretch}
+.treatment-nav-section-location.treatment-nav-section-location > .treatment-location-status{display:none}
+@media(max-width:760px){
+.treatment-nav-section-location.treatment-nav-section-location{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+.treatment-nav-section-location.treatment-nav-section-location > .treatment-nav-heading{grid-column:1;grid-row:1}
+.treatment-nav-section-location.treatment-nav-section-location > label[for="treatment-location-input"]{grid-column:1;grid-row:2}
+.treatment-nav-section-location.treatment-nav-section-location > .treatment-location-input-row{grid-column:1;grid-row:3}
+.treatment-nav-section-location.treatment-nav-section-location > .lcn-map-submit{grid-column:1;grid-row:4}
+.treatment-nav-section-location.treatment-nav-section-location > .treatment-location-mode-switch{grid-column:1;grid-row:5}
+.treatment-nav-section-location.treatment-nav-section-location > label[for="treatment-radius-enabled-input"]{grid-column:1;grid-row:6}
+.treatment-nav-section-location.treatment-nav-section-location > label[for="treatment-include-no-coords-input"]{grid-column:1;grid-row:7}
+.treatment-nav-section-location.treatment-nav-section-location > label[for="treatment-radius-input"]{grid-column:1;grid-row:8}
+.treatment-nav-section-location.treatment-nav-section-location > #treatment-radius-input{grid-column:1;grid-row:9}
+.treatment-nav-section-location.treatment-nav-section-location > .lcn-map-help{grid-column:1;grid-row:10}
+}
+
+/* Match the catalog's existing navy controls and restrained field borders. */
+:is(.doctor-nav-section-location,.treatment-nav-section-location):has(:is(#doctor-location-input,#treatment-location-input)) .lcn-map-submit {
+ background:#003878;border-color:#003878;color:#fff;border-radius:7px;
+ font-size:.82rem;font-weight:800;padding:8px 14px;box-shadow:none;
+}
+:is(.doctor-nav-section-location,.treatment-nav-section-location):has(:is(#doctor-location-input,#treatment-location-input)) .lcn-map-submit:hover {background:#002e63;border-color:#002e63}
+:is(.doctor-nav-section-location,.treatment-nav-section-location):has(:is(#doctor-location-input,#treatment-location-input)) :is(input[type=text],input[type=number]) {
+ border-color:#c6d0df;border-radius:7px;color:#003878;font-size:.82rem;
+}
+.lcn-public-page :is(.doctor-nav-section-location,.treatment-nav-section-location):has(:is(#doctor-location-input,#treatment-location-input)) :is(.doctor-location-mode-button,.treatment-location-mode-button) {
+ border-radius:0;background:#fff;color:#3f5575;font-size:.82rem;min-height:32px;box-shadow:none;
+}
+.lcn-public-page :is(.doctor-nav-section-location,.treatment-nav-section-location):has(:is(#doctor-location-input,#treatment-location-input)) :is(.doctor-location-mode-button,.treatment-location-mode-button).is-active {
+ background:#003878;color:#fff;border-color:#003878;box-shadow:none;
+}
+:is(.doctor-nav-section-location,.treatment-nav-section-location):has(:is(#doctor-location-input,#treatment-location-input)) .lcn-map-help {color:#60718e;font-size:.72rem;line-height:1.45}
+/* Quiet, consistent location controls across all maps. */
+:is(#nearby-gps-location-clear,#doctor-location-clear-button,#treatment-location-clear-button,#top-map-location-clear,#clear-location,#doctor-detail-own-location-clear,[data-map-clear],.treatment-detail-provider-location-reset-button) {
+ box-sizing:border-box!important; display:inline-flex; align-items:center; justify-content:center; width:28px!important; min-width:28px!important; height:28px!important; min-height:28px!important; padding:0!important; border:1px solid #bdcbd0!important; border-radius:50%!important; background:transparent!important; color:#657a83!important; box-shadow:none!important; font:400 20px/1 Arial,sans-serif!important; cursor:pointer;
+}
+:is(#nearby-gps-location-clear,#doctor-location-clear-button,#treatment-location-clear-button,#top-map-location-clear,#clear-location,#doctor-detail-own-location-clear,[data-map-clear],.treatment-detail-provider-location-reset-button):hover {
+ background:transparent!important; border-color:#708b90!important; color:#385e63!important;
+}
+:is(#nearby-gps-location-clear,#doctor-location-clear-button,#treatment-location-clear-button,#top-map-location-clear,#clear-location,#doctor-detail-own-location-clear,[data-map-clear])[hidden],
+:is(#doctor-location-clear-button,#treatment-location-clear-button,#top-map-location-clear,#doctor-detail-own-location-clear,[data-map-clear]).is-hidden { display:none!important; }
+#clear-location { top:7px; right:7px; }
+:is(.nearby-gps-search button[type="submit"],.nearby-gps-all,.top-map-location-submit,.lcn-map-submit,#location-form button[type="submit"],.treatment-detail-provider-location-set-button) {
+ background:#007f7b!important; border:1px solid #007f7b!important; color:#fff!important; border-radius:8px; box-shadow:none!important;
+}
+:is(.nearby-gps-search button[type="submit"],.nearby-gps-all,.top-map-location-submit,.lcn-map-submit,#location-form button[type="submit"],.treatment-detail-provider-location-set-button):hover {
+ background:#006966!important; border-color:#006966!important; color:#fff!important;
+}
+.nearby-gps-actions .nearby-gps-suggest { background:#f0f7f5!important; border-color:#d3e5df!important; color:#28625d!important; }
+.nearby-gps-actions .nearby-gps-suggest:hover { background:#e3f0eb!important; border-color:#abcfc1!important; color:#20574f!important; }
+:is(.doctor-location-mode-button,.treatment-location-mode-button).is-active { background:#007f7b!important; border-color:#007f7b!important; color:white!important; }
+.nearby-gps-radius-input-wrap { border:1px solid #c4d5d9; border-radius:8px; background:white; min-height:44px; }
+.nearby-gps-radius-input-wrap:focus-within { border-color:#007f7b; outline:2px solid #007f7b26; outline-offset:1px; }
+.nearby-gps-search .nearby-gps-radius-input-wrap input { border:0!important; border-radius:0!important; box-shadow:none!important; background:transparent!important; outline:none!important; width:76px; min-width:0; min-height:44px; height:auto; padding:9px 4px 9px 12px; text-align:right; color:#17365d; }
+.nearby-gps-radius-input-wrap>span { padding:0 12px 0 6px; color:#657a83; }
+:is(.nearby-gps-search,.top-map-location-controls,#location-form) :is(input,select,button):focus-visible { outline:2px solid #007f7b; outline-offset:2px; }
+#nearby-gps-results .nearby-gps-actions .nearby-gps-suggest { background:#f0f7f5!important; border-color:#d3e5df!important; color:#28625d!important; }
+#nearby-gps-results .nearby-gps-actions .nearby-gps-suggest:hover { background:#e3f0eb!important; border-color:#abcfc1!important; color:#20574f!important; }

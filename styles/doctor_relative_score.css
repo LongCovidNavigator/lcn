@@ -1,0 +1,60 @@
+/* Single points scale and aligned, descending legend. */
+.doctor-score-relative .therapy-precise-comparison>h3 { margin:0 0 22px;font-size:21px; }
+.doctor-score-relative .therapy-precise-summary { display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:14px; }
+.doctor-score-relative .therapy-precise-summary>div>span { display:block;font-size:13px;color:#6a7f9e;margin-bottom:5px; }
+.doctor-score-relative .therapy-precise-summary .score-number { display:block; }
+.doctor-score-relative .therapy-precise-summary dl { margin:0;display:grid;gap:5px;font-size:12px; }
+.doctor-score-relative .therapy-precise-summary dl>div { display:grid;grid-template-columns:auto 3ch;gap:16px; }
+.doctor-score-relative .therapy-precise-summary dt { color:#6a7f9e;font-weight:400;text-align:right; }
+.doctor-score-relative .therapy-precise-summary dd { margin:0;text-align:right;font-variant-numeric:tabular-nums; }
+.doctor-score-relative .therapy-precise-chart { margin:0; }
+.doctor-score-relative .therapy-precise-pin-row { position:relative;height:82px; }
+.doctor-score-relative .therapy-precise-pin { position:absolute;left:var(--label-position);transform:translateX(-50%);text-align:center; }
+.doctor-score-relative .therapy-precise-pin small { display:block;font-size:11px;color:#6a7f9e;margin-bottom:6px;white-space:nowrap; }
+.doctor-score-relative .therapy-precise-pin .therapy-final-top { display:block;font-size:19px;padding:6px 14px; }
+.doctor-score-relative .therapy-precise-pointer { position:absolute;bottom:7px;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #17365d; }
+.doctor-score-relative .therapy-precise-band { display:flex;height:14px;border-radius:999px;overflow:hidden; }
+.doctor-score-relative .therapy-precise-band>span { flex:none;height:100%;box-sizing:border-box; }
+.doctor-score-relative .therapy-precise-band>span+span { border-left:2px solid #fff; }
+.doctor-score-relative .therapy-precise-axis { position:relative;height:28px;margin-top:8px;font-size:12px;color:#6a7f9e;font-variant-numeric:tabular-nums; }
+.doctor-score-relative .therapy-precise-axis>span { position:absolute;transform:translateX(-50%); }
+.doctor-score-relative .therapy-precise-axis>.is-first { transform:none; }
+.doctor-score-relative .therapy-precise-axis>.is-last { transform:translateX(-100%); }
+.doctor-score-relative .therapy-precise-chart figcaption { margin:0 0 18px;font-size:12px;color:#6a7f9e; }
+.doctor-score-relative .therapy-precise-legend { display:grid;gap:10px; }
+.doctor-score-relative .therapy-precise-legend-row { display:grid;grid-template-columns:8px minmax(0,1fr) 9ch 8ch 40px;gap:12px;align-items:center;font-size:13px;color:#6a7f9e; }
+.doctor-score-relative .therapy-precise-legend-row>i { width:8px;height:8px;border-radius:50%; }
+.doctor-score-relative .therapy-precise-legend-row.is-current { color:#17365d;font-weight:700; }
+.doctor-score-relative .therapy-precise-tier { text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums; }
+.doctor-score-relative .therapy-precise-range { display:grid;grid-template-columns:3ch 1ch 3ch;justify-content:end;column-gap:.5ch;font-variant-numeric:tabular-nums;white-space:nowrap; }
+.doctor-score-relative .therapy-precise-range>span { text-align:right; }
+.doctor-score-relative .therapy-precise-range>span:nth-child(2) { text-align:center; }
+.doctor-score-relative .therapy-precise-unit { font-size:12px; }
+@media(max-width:600px){.doctor-score-relative .therapy-precise-comparison>h3{font-size:18px}.doctor-score-relative .therapy-precise-legend-row{grid-template-columns:7px minmax(0,1fr) 8ch 8ch;gap:7px;font-size:12px}.doctor-score-relative .therapy-precise-unit{display:none}.doctor-score-relative .therapy-precise-name{overflow-wrap:normal;hyphens:auto}.doctor-score-relative .therapy-precise-summary{gap:12px}.doctor-score-relative .therapy-precise-summary .score-number{font-size:32px}.doctor-score-relative .therapy-precise-summary .score-number small{display:block;font-size:12px}.doctor-score-relative .therapy-precise-summary dl>div{gap:8px}.doctor-score-relative .therapy-precise-axis>.is-inner{display:none}}
+
+.doctor-score-relative .therapy-precise-legend-row { grid-template-columns:8px minmax(0,1fr) minmax(9ch,1fr) 8ch 40px; }
+.doctor-score-relative .therapy-precise-tier { text-align:center; }
+.doctor-score-relative .dashboard-score .therapy-orientation-note { margin-bottom:1.5em; }
+@media(max-width:600px){.doctor-score-relative .therapy-precise-legend-row{grid-template-columns:7px minmax(0,1.4fr) minmax(8ch,1fr) 8ch}}
+
+.doctor-score-relative .therapy-precise-tier { display:grid;grid-template-columns:3ch 3ch 1ch;column-gap:.5ch;justify-content:center;align-items:baseline;font-variant-numeric:tabular-nums; }
+.doctor-score-relative .therapy-precise-tier>span:first-child { text-align:left; }
+.doctor-score-relative .therapy-precise-tier-number { text-align:right; }
+.doctor-score-relative .therapy-precise-tier>span:last-child { text-align:left; }
+
+.doctor-score-relative .therapy-more-info { margin-top:28px; }
+.doctor-score-relative .therapy-more-info>summary { color:#526b80;font-size:14px;cursor:pointer; }
+.doctor-score-relative .therapy-more-info>.therapy-final-explanation { margin-top:16px; }
+.doctor-score-relative .therapy-more-info>.therapy-orientation-note { margin:14px 0 0; }
+
+
+.doctor-score-relative .therapy-final-top { border-radius:9px;white-space:nowrap; }
+.doctor-score-relative .therapy-final-top.score-percentile-level-0 { background:#e5a5ad;color:#542029; }
+.doctor-score-relative .therapy-final-top.score-percentile-level-1 { background:#dfb09e;color:#542c1e; }
+.doctor-score-relative .therapy-final-top.score-percentile-level-2 { background:#e5cf9b;color:#514019; }
+.doctor-score-relative .therapy-final-top.score-percentile-level-3 { background:#9fd3b6;color:#18452e; }
+.doctor-score-relative .therapy-final-top.score-percentile-level-4 { background:#63af94;color:#10392c; }
+.doctor-relative-summary { padding-bottom:12px; }
+.doctor-score-relative>.therapy-more-info { margin-bottom:0;padding-bottom:0; }
+.doctor-score-relative .therapy-more-info:not([open])>summary { margin-bottom:0; }
+.doctor-relative-summary>details { margin-top:24px; }

@@ -37,6 +37,24 @@ try{
   proposalCheck(count(lcnNdRows($p,"SELECT relation_key FROM catalog_relation_feedback WHERE respondent_key=? AND relation_key NOT LIKE 's:%'",[$user]))>=1,'Proposal votes not migrated.');
   lcnApproveTreatmentSubmission($p,$row,$payload); // Re-applying must not duplicate couplings or relations.
  }
+ // Combinations are valid umbrella-group members and remain visible after approval.
+ $comboGroup=lcnNormalizeTreatmentRelationship($p,['source_id'=>$generic,'kind'=>'group_contains','target_id'=>$combo,'group_name'=>'Kombinationsgruppe '.$suffix]);
+ proposalCheck($comboGroup['left_id']===$combo,'Combination group member rejected.');
+ $proposedId=lcnEnsureProposedTreatmentGroup($p,$comboGroup,$sid);
+ proposalCheck($proposedId===lcnEnsureProposedTreatmentGroup($p,$comboGroup,$sid),'Duplicate provisional group created.');
+ proposalCheck(lcnNdRows($p,'SELECT review_status FROM tbl_treatments_nd WHERE treat_nd_id=?',[$proposedId])[0]['review_status']==='pending_group','Provisional group approved too early.');
+ proposalCheck(count(lcnNdRows($p,'SELECT 1 FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=?',[$proposedId]))===2,'Provisional name/group aliases missing.');
+ $comboGroupPayload=['treatment_relationship'=>$comboGroup];
+ lcnApproveTreatmentRelationship($p,['submission_id'=>$sid,'existing_target_id'=>$generic],$comboGroupPayload);
+ $afterGroup=lcnTreatmentDiscoveryGraph($p);
+ proposalCheck(count(array_filter($afterGroup['groups'],fn($group)=>$group['name']==='Kombinationsgruppe '.$suffix&&isset($group['members'][$combo])))===1,'Approved combination hidden from group.');
+ $singular='Gruppenprobe '.$suffix.' Blutwäsche';$plural=$singular.'n';
+ $p->prepare("INSERT INTO tbl_treatments_nd(treatmentname,typ) VALUES(?,'Medizinische Prozeduren')")->execute([$singular]);$singularId=(int)$p->lastInsertId();
+ $pluralRelation=['kind'=>'group','group_name'=>$plural,'group_alias_id'=>0,'source_id'=>$generic];
+ $pluralId=lcnEnsureProposedTreatmentGroup($p,$pluralRelation,$sid);
+ $groupDuplicate=lcnTreatmentGroupDuplicate($p,$pluralRelation);
+ proposalCheck(($groupDuplicate['id']??0)===$singularId,'Singular/plural group duplicate not detected or self matched.');
+ proposalCheck($groupDuplicate['id']!==$pluralId,'Provisional group matched itself.');
  $pairs=lcnNdRows($p,'SELECT treat_nd_id,alias_id,COUNT(*) n FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id IN (?,?,?,?) GROUP BY treat_nd_id,alias_id HAVING COUNT(*)>1',$ids);
  proposalCheck(!$pairs,'Duplicate alias couplings.');
  foreach([['source_id'=>$generic,'kind'=>'has_trade','target_id'=>$brand],['source_id'=>$combo,'kind'=>'has_component','target_id'=>$generic],['source_id'=>$form,'kind'=>'form_of','target_id'=>$generic],['source_id'=>$generic,'kind'=>'alternative','target_id'=>$generic],['source_id'=>$generic,'kind'=>'unknown','target_id'=>$form]] as $invalid){$failed=false;try{lcnNormalizeTreatmentRelationship($p,$invalid);}catch(InvalidArgumentException $e){$failed=true;}proposalCheck($failed,'Invalid/duplicate proposal accepted.');}

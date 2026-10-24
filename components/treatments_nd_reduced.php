@@ -41,12 +41,13 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
     $html .= '<p class="community-label" data-community-note></p><div class="ux-chart '.($kind==='effect'?'effect-chart':($kind==='cost'?'interactive-dot-scale':'ux-'.$kind)).'" style="--count:'.count($options).'" role="group" aria-label="'.ndEscape($title).'">';
     if ($kind === 'donut') $html .= '<svg viewBox="0 0 160 160" class="ux-donut" aria-label="Gamechanger-Verteilung"><circle cx="80" cy="80" r="60" class="ux-donut-track"/><g transform="rotate(-90 80 80)"><circle cx="80" cy="80" r="60" pathLength="100" data-segment="0" role="button" tabindex="0" aria-label="Ja auswählen"/><circle cx="80" cy="80" r="60" pathLength="100" data-segment="1" role="button" tabindex="0" aria-label="Nein auswählen"/></g><text x="80" y="78" text-anchor="middle" data-donut-value>–</text><text x="80" y="98" text-anchor="middle" class="ux-donut-caption">Ja</text></svg>';
     $displayOptions = $cost ? [8 => $options[8], 9 => $options[9]] + $options : ($key === 'access' ? [3 => $options[3]] + $options : $options);
+    if ($kind === 'effect') $displayOptions = array_reverse($options, true);
     foreach ($displayOptions as $i => $label) {
         $html .= '<button type="button" data-option="'.$i.'" data-value="'.ndEscape($label).'" aria-pressed="false" class="'.($kind==='effect'?'effect-column':'ux-choice').'">';
         if ($kind==='effect') $html .= '<span class="bar-area"><strong data-percent>–</strong><span class="effect-bar effect-'.$i.'" data-bar></span></span>';
         elseif ($kind==='cost') $html .= '<span class="dot" aria-hidden="true"></span><strong class="scale-percent" data-percent>–</strong>';
         else $html .= '<strong data-percent>–</strong><span class="ux-track" aria-hidden="true"><span data-bar></span></span>';
-        $html .= '<span>'.ndEscape(str_replace('Anbieter', 'Behandler', $label)).'</span><small class="ux-selected">Deine Auswahl</small></button>';
+        $html .= '<span>'.ndEscape($kind === 'effect' && $i === 1 ? 'Neutral' : str_replace('Anbieter', 'Behandler', $label)).'</span><small class="ux-selected">Deine Auswahl</small></button>';
     }
     return $html.'</div><p class="ux-own" role="status"></p></section>';
 }

@@ -130,3 +130,9 @@ body.compact-doctor-header #header-placeholder .profile>.detail-menu-toggle{righ
 [data-treatment-dashboard]>.ux-dashboard-card{padding:20px}
 
 @media(max-width:650px){#dashboard .score-top{flex-wrap:wrap;gap:12px}#dashboard .score-number{max-width:100%;white-space:normal}}
+
+/* Keep the numbered dashboard areas together across the full content width. */
+[data-treatment-dashboard]>.dashboard-score-group{grid-column:1/-1}
+[data-treatment-dashboard] .ux-dashboard-card[data-dashboard-question="access"]{grid-column:1/-1}
+[data-treatment-dashboard] .ux-dashboard-card{padding:20px}
+[data-treatment-dashboard] .ux-dashboard-card .dashboard-detail{margin-top:16px;padding-top:0}

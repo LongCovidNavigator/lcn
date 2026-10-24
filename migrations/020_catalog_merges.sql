@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS catalog_merges (
+ entity_type VARCHAR(16) NOT NULL, source_id BIGINT NOT NULL, target_id INT UNSIGNED NOT NULL,
+ submission_id INT UNSIGNED NOT NULL, snapshot LONGTEXT NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY(entity_type,source_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

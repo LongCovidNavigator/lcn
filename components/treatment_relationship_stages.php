@@ -50,7 +50,7 @@ function ndRelationshipStages(array $g,int $id): array {
             $stages[1]['nodes'][$mid]=$node($mid);
             foreach($g['groups'] as $group){if(!isset($group['members'][$mid]))continue;
                 if($group['root']){$root=$group['root'];$stages[0]['nodes'][$root]=$node($root);$stages[0]['nodes'][$root]['preview']=array_slice(array_values(array_filter($group['members'],fn($m)=>$m!==$mid)),0,2);$stages[1]['nodes'][$mid]['feedback']='ag:'.$group['alias_id'].':t:'.$mid;$edges[]=[0,$root,1,$mid];}
-                $stages[1]['adds'][]=$add(($group['forms']?'Weitere Anwendungsform':($drug?'Weiteren Wirkstoff':'Weiteres Verfahren')).' zu „'.$group['name'].'“ hinzufügen','group_contains',$mid,$group['alias_id']);
+                if($group['root'])$stages[1]['adds'][]=$add(($group['forms']?'Weitere Anwendungsform':($drug?'Weiteren Wirkstoff':'Weiteres Verfahren')).' zu „'.$group['name'].'“ hinzufügen','group_contains',$mid,$group['alias_id']);
             }
             $stages[0]['adds'][]=$add($drug?'Medikamentengruppe zuordnen':'Gruppe zuordnen','belongs_to_group',$mid);
         }
@@ -95,7 +95,6 @@ function ndRelationshipStages(array $g,int $id): array {
     $found=false;foreach([0,1] as $stage)foreach($stages[$stage]['nodes'] as &$n){$n['current']=$n['id']===$id&&!$found;if($n['current'])$found=true;}unset($n);
     foreach($stages[2]['blocks'] as &$b)foreach($b['nodes'] as &$n){$n['current']=$n['id']===$id&&!$found;if($n['current']){$found=true;$selected=$b['focus'];}}unset($b,$n);
     if(!$found)throw new LogicException('Current entry missing from relationship stages: '.$id);
-    if(!$stages[1]['adds'])$stages[1]['adds'][]=$add($drug?'Weiteren Wirkstoff einer Gruppe zuordnen':'Weiteren Eintrag einer Gruppe zuordnen','group_contains',$id);
     // Attach a separate, named assertion to every saved edge. Multiple parents must not overwrite each other.
     foreach($edges as [$from,$parent,$to,$child])if($from===0&&$to===1){
         $keys=[];foreach($g['groups'] as $group)if($group['root']===$parent&&isset($group['members'][$child]))$keys[]='ag:'.$group['alias_id'].':t:'.$child;
@@ -117,8 +116,7 @@ function ndRenderRelationshipStages(array $g,int $id): string {
     $m=ndRelationshipStages($g,$id);ob_start();
     ?>
 <section class="card ux-discovery ux-stage-section" data-relationship-stages data-selected-branch="<?= $m['selected'] ?>">
-<h3><?= ndEscape($m['title']) ?></h3>
-<p class="ux-stage-help">Klicke auf einen anderen Eintrag, um seine Detailseite zu öffnen. Gestrichelte Kacheln ergänzen neue Zuordnungen.</p>
+<h3><?= ndEscape($m['title']) ?> <span class="ux-heading-info"><button type="button" aria-label="Information zur Einordnung der Therapie" aria-describedby="therapy-classification-help">ⓘ</button><p id="therapy-classification-help" role="tooltip">Was gehört zu welcher Gruppe, und welche Handelsnamen, Varianten oder Anwendungsformen gibt es? Hier findest du die Einordnung dieser Therapie. Die Community kann fehlende Zuordnungen ergänzen. Diese Angaben beschreiben Zusammenhänge; mögliche Alternativen und gemeinsam eingesetzte Therapien findest du in den eigenen Bereichen.</p></span></h3>
 <p class="ux-stage-vote-help">Mit deiner Rückmeldung bestätigst oder widersprichst du der jeweils genannten Verknüpfung – nicht dem Therapieeintrag selbst.</p>
 <div class="ux-stage-canvas"><svg class="ux-stage-lines" aria-hidden="true"></svg><div class="ux-stage-columns">
 <?php foreach($m['stages'] as $index=>$stage): ?>
@@ -140,8 +138,8 @@ else foreach($stage['blocks'] as $b):
     $multiple=count($m['stages'][1]['nodes'])>1;
     $visible=$currentOnRight ? $b['focus']===$m['selected'] : (!$multiple || ($hasKnown ? (bool)$b['nodes'] : $b['focus']===$m['selected']));
 ?>
-<div class="ux-stage-block" data-branch="<?= $b['focus'] ?>"<?= !$visible?' hidden':'' ?>><h5><?= ndEscape($b['heading'].($multiple?' für '.$g['entries'][$b['focus']]['treatmentname']:'')) ?></h5>
-<?php foreach($b['nodes'] as $n)$renderNode($n,2);if(!$b['nodes']): ?><p class="ux-stage-empty">Noch keine Zuordnung hinterlegt.</p><?php endif; ?>
+<div class="ux-stage-block" data-branch="<?= $b['focus'] ?>"<?= !$visible?' hidden':'' ?>><?php if($multiple||$b['heading']!==$stage['title']): ?><h5><?= ndEscape($b['heading'].($multiple?' für '.$g['entries'][$b['focus']]['treatmentname']:'')) ?></h5><?php endif; ?>
+<?php foreach($b['nodes'] as $n)$renderNode($n,2); ?>
 <?= ndStageAdd($b['add']) ?>
 </div>
 <?php endforeach; ?>

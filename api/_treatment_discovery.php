@@ -4,7 +4,7 @@ function lcnDiscoveryName(string $name): string {
     return mb_strtolower(trim(preg_replace('/\s+/u', ' ', str_replace('⁺', '+', $name))));
 }
 function lcnTreatmentDiscoveryGraph(PDO $pdo): array {
-    return lcnBuildTreatmentDiscoveryGraph(lcnNdRows($pdo, 'SELECT t.treat_nd_id,t.treatmentname,t.typ,a.alias_id,a.alias,a.alias_type FROM tbl_treatments_nd t LEFT JOIN tbl_cpl_treatments_nd2aliases c ON c.treat_nd_id=t.treat_nd_id LEFT JOIN tbl_aliases_03 a ON a.alias_id=c.alias_id ORDER BY t.treat_nd_id,a.alias_id'));
+    return lcnBuildTreatmentDiscoveryGraph(lcnNdRows($pdo, 'SELECT t.treat_nd_id,t.treatmentname,t.typ,t.review_status,a.alias_id,a.alias,a.alias_type FROM tbl_treatments_nd t LEFT JOIN tbl_cpl_treatments_nd2aliases c ON c.treat_nd_id=t.treat_nd_id LEFT JOIN tbl_aliases_03 a ON a.alias_id=c.alias_id WHERE t.review_status<>\'rejected_group\' ORDER BY t.treat_nd_id,a.alias_id'));
 }
 /** Existing typed aliases only; primary names alone never establish brand or group roles. */
 function lcnBuildTreatmentDiscoveryGraph(array $rows): array {
@@ -14,6 +14,7 @@ function lcnBuildTreatmentDiscoveryGraph(array $rows): array {
         $entries[$id]['treat_nd_id']=$id;
         $entries[$id]['treatmentname']=$r['treatmentname'];
         $entries[$id]['typ']=$r['typ'];
+        $entries[$id]['review_pending']=($r['review_status']??'')==='pending_group';
         $names[lcnDiscoveryName($r['treatmentname'])][$id]=$id;
         if ($r['alias_id']!==null) {
             $aid=(int)$r['alias_id'];
@@ -67,7 +68,8 @@ function lcnBuildTreatmentDiscoveryGraph(array $rows): array {
     }
     unset($ids);
     foreach ($groups as &$g) {
-        $g['members']=array_diff_key($g['members'],$generics,$comboIds);
+        $g['members']=array_diff_key($g['members'],$generics);
+        if(($g['relation_type']??'umbrella_term')!=='umbrella_term')$g['members']=array_diff_key($g['members'],$comboIds);
         if ($g['root']) unset($g['members'][$g['root']]);
         $prefix=lcnDiscoveryName($g['name']); $g['forms']=count($g['members'])>1;
         foreach ($g['members'] as $id) {
@@ -200,6 +202,11 @@ function lcnValidateTreatmentDiscoveryFeedback(PDO $pdo,string $key,?array $grap
         $rows=lcnNdRows($pdo,'SELECT source_treat_nd_id FROM tbl_cpl_treatments_nd_relations WHERE relation_id=?',[(int)$m[1]]);
         if ($rows) return (int)$rows[0]['source_treat_nd_id'];
         throw new InvalidArgumentException('Zuordnung nicht gefunden.');
+    }
+    if (preg_match('/^combo:([1-9][0-9]*)$/D',$key,$m)) {
+        $graph=$graph ?? lcnTreatmentDiscoveryGraph($pdo);
+        if (isset($graph['comboIds'][(int)$m[1]])) return (int)$m[1];
+        throw new InvalidArgumentException('Kombination nicht gefunden.');
     }
     if (!preg_match('/^(?:ag:[1-9][0-9]*:t:[1-9][0-9]*|(?:bn|bs|cp):[1-9][0-9]*:[1-9][0-9]*|cn:[1-9][0-9]*:[a-f0-9]{24})$/D',$key)) throw new InvalidArgumentException('Ungültige Zuordnung.');
     $graph=$graph ?? lcnTreatmentDiscoveryGraph($pdo);

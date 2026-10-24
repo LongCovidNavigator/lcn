@@ -1,5 +1,5 @@
 <?php
-function lcnExperienceSummary(PDO $pdo): array {
+function lcnExperienceSummary(PDO $pdo, bool $includeDummy = false): array {
     $result = ['doctor' => [], 'treatment' => []];
     $labels = ['Verschlechterung','Keine Veränderung','Verbesserung','Heilung'];
     foreach ($pdo->query("SELECT dr_id AS id, option_value, COUNT(*) AS n FROM doctor_community_answers WHERE question_key='effect' AND context_key='' AND option_value BETWEEN 1 AND 4 GROUP BY dr_id,option_value") as $row) {
@@ -13,6 +13,18 @@ function lcnExperienceSummary(PDO $pdo): array {
         $id = (int)$row['id'];
         $result['treatment'][$id] ??= [0,0,0,0];
         $result['treatment'][$id][$index] += (int)$row['n'];
+    }
+    if ($includeDummy) {
+        foreach ($pdo->query("SELECT dr_id AS id, option_value, COUNT(*) AS n FROM doctor_community_dummy_answers WHERE question_key='effect' AND context_key='' AND option_value BETWEEN 1 AND 4 GROUP BY dr_id,option_value") as $row) {
+            $id = (int)$row['id'];
+            $result['doctor'][$id] ??= [0,0,0,0];
+            $result['doctor'][$id][(int)$row['option_value']-1] += (int)$row['n'];
+        }
+        foreach ($pdo->query("SELECT treat_nd_id AS id, option_index, SUM(answer_count) AS n FROM tbl_treatment_dummy_counts_nd WHERE question_key='effect' AND option_index BETWEEN 0 AND 3 GROUP BY treat_nd_id,option_index") as $row) {
+            $id = (int)$row['id'];
+            $result['treatment'][$id] ??= [0,0,0,0];
+            $result['treatment'][$id][(int)$row['option_index']] += (int)$row['n'];
+        }
     }
     return $result;
 }

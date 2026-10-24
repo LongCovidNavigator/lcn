@@ -1,3 +1,32 @@
+// Load the same persisted dummy preference on every page using the shared header.
+(() => {
+    function syncDummyToggle() {
+        document.querySelectorAll('[data-lcn-dummy-toggle]').forEach(button => {
+            const enabled = window.LCNDummy?.get() || false;
+            button.disabled = !window.LCNDummy;
+            button.setAttribute('aria-pressed', String(enabled));
+            const label = 'Dummy-Daten: ' + (enabled ? 'an' : 'aus');
+            if (button.textContent !== label) button.textContent = label;
+        });
+    }
+    if (!window.LCNDummy) {
+        let script = document.querySelector('script[src*="scripts/dummy_preferences.js"]');
+        if (!script) {
+            script = document.createElement('script');
+            script.src = new URL('dummy_preferences.js?v=2', document.currentScript.src).href;
+            document.head.append(script);
+        }
+        script.addEventListener('load', syncDummyToggle, {once:true});
+    }
+    document.addEventListener('click', event => {
+        if (event.target.closest('[data-lcn-dummy-toggle]') && window.LCNDummy) window.LCNDummy.set(!window.LCNDummy.get());
+    });
+    window.addEventListener('lcn-dummy-change', syncDummyToggle);
+    window.addEventListener('storage', event => { if (event.key === 'lcn_dummy_data_enabled' || event.key === null) syncDummyToggle(); });
+    new MutationObserver(syncDummyToggle).observe(document.documentElement, {childList:true, subtree:true});
+    syncDummyToggle();
+})();
+
 (function () {
     let requested = false;
     async function revealAdminNavigation() {
@@ -72,7 +101,7 @@
         const placeholder = document.querySelector('[data-lcn-header]');
         if (placeholder && !placeholder.dataset.loading) {
             placeholder.dataset.loading = 'true';
-            fetch('components/header.html?v=menu-icon-20261016').then(response => {
+            fetch('components/header.html?v=contribution-20261024').then(response => {
                 if (!response.ok) throw new Error('Header konnte nicht geladen werden.');
                 return response.text();
             }).then(html => { placeholder.innerHTML = html; }).catch(() => {
@@ -89,3 +118,4 @@
     else initialize();
     new MutationObserver(initialize).observe(document.documentElement, {childList:true, subtree:true});
 })();
+
