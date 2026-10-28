@@ -24,7 +24,7 @@ window.LCNExperience = (() => {
       const ids=[...new Set(node.dataset.experienceIds.split(',').map(Number).filter(Boolean))],type=node.dataset.experienceType;
       const values=[0,0,0,0];ids.forEach(id=>(counts[type]?.[id]||[0,0,0,0]).forEach((n,i)=>values[i]+=Number(n)));
       const total=values.reduce((a,b)=>a+b,0);
-      [3,2,1,0].forEach(i=>{
+      [0,1,2,3].forEach(i=>{
         const label=labels[i];
         const item=document.createElement(ids.length===1?'a':'span');item.className='lcn-effect lcn-effect-'+i;
         if(ids.length===1)item.href=type==='doctor'?`arzt_detail.html?id=${ids[0]}#wirkung`:`therapie_detail.php?treatment_id=${ids[0]}#wirkung`;

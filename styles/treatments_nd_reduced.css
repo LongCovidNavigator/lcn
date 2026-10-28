@@ -1,5 +1,5 @@
 /* Reduced treatment view: reuses doctor navigation, effect-chart and dot-scale. */
-.ux-detail {--ux-line:#dce9f3;--ux-blue:#0865d9;--ux-green:#49ad8c}
+.ux-detail {--ux-line:#dce9f3;--ux-blue:#0865d9;--ux-green:#729fc5}
 .ux-detail #view-content{min-width:0}
 .ux-detail .nd-panel[hidden]{display:none!important}
 .ux-detail .nd-panel{display:block}
@@ -25,9 +25,9 @@
 .ux-rows{display:grid;grid-template-columns:1fr}
 .ux-rows .ux-choice{display:grid;grid-template-columns:65px 1fr minmax(190px,1.5fr) 90px;gap:16px;align-items:center;text-align:left}
 .ux-segments{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
-.ux-segments .ux-choice:nth-child(2) [data-bar]{background:#e7bd5a}
-.ux-segments .ux-choice:nth-child(3) [data-bar]{background:#ea976b}
-.ux-segments .ux-choice:nth-child(4) [data-bar]{background:#dc6a7a}
+.ux-segments .ux-choice:nth-child(2) [data-bar]{background:#9fd3b6}
+.ux-segments .ux-choice:nth-child(3) [data-bar]{background:#e5cf9b}
+.ux-segments .ux-choice:nth-child(4) [data-bar]{background:#e5a5ad}
 .ux-question .effect-chart{height:auto;min-height:240px;grid-template-columns:repeat(4,minmax(0,1fr));display:grid}
 .ux-question .effect-column{border-radius:8px;min-width:0;padding:8px;background:transparent;cursor:pointer}
 .ux-question .bar-area{height:160px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
@@ -40,7 +40,7 @@
 .ux-donut{height:190px;width:190px;grid-row:span 2}
 .ux-donut circle{fill:none;stroke-width:20}
 .ux-donut-track{stroke:#e1e8ef}
-.ux-donut [data-segment]{stroke:#32b98c;cursor:pointer}
+.ux-donut [data-segment]{stroke:#729fc5;cursor:pointer}
 .ux-donut [data-segment="1"]{stroke:#8ba3ba}
 .ux-donut [data-segment],.ux-donut [data-segment][aria-pressed=true]{stroke-width:20;transform:none;stroke-linecap:butt;transition:stroke-dasharray .25s ease,stroke-dashoffset .25s ease}
 @media(prefers-reduced-motion:reduce){.ux-donut [data-segment]{transition:none}}
@@ -142,21 +142,21 @@ body.ux-page{background:radial-gradient(ellipse at 35% 0,#e4f7ff 0,transparent 6
 .ux-research p{font-size:11px!important;line-height:1.5;margin:0;color:#3a6595}
 .ux-chart{margin:13px 0;gap:9px}
 .ux-rows{gap:7px}
-.ux-rows .ux-choice{position:relative;padding:10px 12px 10px 42px;grid-template-columns:minmax(210px,1.15fr) minmax(120px,1fr) 44px;gap:18px;border-color:#dcebf9;background:#fcfeff;font-size:12px;border-radius:6px}
-.ux-rows .ux-choice:before{content:'';position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;border:1px solid #83acf0;border-radius:50%;background:white}
-.ux-rows .ux-choice[aria-pressed=true]:before{border:5px solid #087bff;box-shadow:0 0 0 3px #e0efff}
+.ux-rows .ux-choice{position:relative;padding:10px 12px 10px 48px;grid-template-columns:minmax(210px,1.15fr) minmax(120px,1fr) 44px;gap:18px;border-color:#dcebf9;background:#fcfeff;font-size:12px;border-radius:6px}
+.ux-rows .ux-choice:before{content:'';position:absolute;left:12px;top:50%;transform:translateY(-50%);box-sizing:border-box;width:18px;height:18px;border:1px solid #a4b5c6;border-radius:50%;background:white}
+.ux-rows .ux-choice[aria-pressed=true]:before{border-color:#6f8eac;background:radial-gradient(circle,#6f8eac 0 4px,#fff 4.5px);box-shadow:none}
 .ux-choice[aria-pressed=true],.ux-question .effect-column[aria-pressed=true]{outline:0;background:#edf7ff;border-color:#8dc3ff;box-shadow:0 0 0 1px #8dc3ff}
 .ux-rows .ux-choice .ux-selected{display:none}
 .ux-track{height:13px;border-radius:4px;background:#e5edf4;margin:0;box-shadow:inset 0 1px 2px #1c497b03}
-.ux-track>span{background:linear-gradient(90deg,#49b393,#51ae94);border-radius:4px}
+.ux-track>span{background:#75afe8;border-radius:4px}
 .ux-choice>[data-percent]{font-size:12px;color:#0954b9}
 .ux-choice:hover{background:#f2f9ff;border-color:#aacef5}
 .ux-own{font-size:11px!important;display:inline;color:#5f80a0;min-height:0;margin:0}
 .ux-question [data-clear]{font-size:10px;color:#668bac;float:right;padding:2px 0;text-decoration:none}
 .ux-question:after{content:'';display:block;clear:both}
 .ux-segments{gap:0;border-radius:7px;overflow:hidden;padding-top:0}
-.ux-segments .ux-choice{position:relative;background:transparent;border:0;border-top:13px solid #35b891;border-radius:0;padding:12px 6px 5px;font-size:12px;color:#1a5299}
-.ux-segments .ux-choice:nth-child(2){border-top-color:#f2ca68}.ux-segments .ux-choice:nth-child(3){border-top-color:#f89976}.ux-segments .ux-choice:nth-child(4){border-top-color:#ef6b81}
+.ux-segments .ux-choice{position:relative;background:transparent;border:0;border-top:13px solid #63af94;border-radius:0;padding:12px 6px 5px;font-size:12px;color:#1a5299}
+.ux-segments .ux-choice:nth-child(2){border-top-color:#9fd3b6}.ux-segments .ux-choice:nth-child(3){border-top-color:#e5cf9b}.ux-segments .ux-choice:nth-child(4){border-top-color:#e5a5ad}
 .ux-segments .ux-choice .ux-track{display:none}
 .ux-segments .ux-choice>strong{display:block;margin-bottom:4px}
 .ux-segments .ux-selected{margin-top:3px;font-size:10px;min-height:13px}
@@ -166,7 +166,7 @@ body.ux-page{background:radial-gradient(ellipse at 35% 0,#e4f7ff 0,transparent 6
 .ux-question .bar-area{height:112px;border-bottom:1px solid #d8e7f3;margin-bottom:9px}
 .ux-question .bar-area strong{font-size:12px;margin-bottom:5px}
 .ux-question .effect-bar{width:72%;max-width:140px;flex-shrink:0;border-radius:4px 4px 0 0}
-.ux-question .effect-0{background:linear-gradient(110deg,#eb91aa,#efa8b8)}.ux-question .effect-1{background:#d2ddeb}.ux-question .effect-2{background:linear-gradient(110deg,#7cd5b1,#a1e1c5)}.ux-question .effect-3{background:#4caf91}
+.ux-question .effect-0{background:#e5a5ad}.ux-question .effect-1{background:#d9e1ea}.ux-question .effect-2{background:#9fd3b6}.ux-question .effect-3{background:#63af94}
 .ux-question .ux-selected{font-size:10px;font-weight:500;margin-top:4px}
 .ux-question .insurance-toggle{margin:8px 0 14px auto;width:fit-content;max-width:100%;border:1px solid #d8e9f9;background:#f2f9ff;border-radius:6px;overflow:hidden}
 .ux-question .insurance-toggle button{padding:8px 18px;border:0;border-radius:4px;font-size:11px;min-width:83px;background:transparent;color:#4d75ab}
@@ -226,7 +226,7 @@ body.ux-page{background:radial-gradient(ellipse at 35% 0,#e4f7ff 0,transparent 6
 .ux-page #footer-placeholder{margin-top:32px;opacity:.8}
 @media(max-width:1200px){.ux-treatment-art{display:none}.ux-hero{grid-template-columns:minmax(0,1.35fr) minmax(250px,1fr)}.ux-page .ux-detail{grid-template-columns:180px minmax(0,1fr);gap:18px}.ux-peer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ux-detail .nd-provider-map{grid-template-columns:1fr}.ux-detail .top-map-panel,.ux-detail .doctor-results-panel{grid-column:1;grid-row:auto}.ux-detail .nd-map-canvas{height:320px}.ux-rows .ux-choice{grid-template-columns:minmax(160px,1fr) minmax(70px,.8fr) 35px;gap:12px}}
 @media(max-width:900px){.ux-page .ux-site-header{gap:20px;padding:10px 18px}.ux-site-header nav{gap:18px}.ux-brand strong{display:none}.ux-page .ux-detail{grid-template-columns:165px minmax(0,1fr);gap:16px}.ux-page.nd-detail .nd-shell{padding:18px}.ux-hero{grid-template-columns:1fr}.ux-glance .nd-facts>div{grid-template-columns:160px 1fr}.ux-glance{padding:12px 16px}.ux-glance .nd-facts>div{padding:6px 0}.ux-treatment-context{padding-bottom:0}.ux-overview-links,.ux-alternatives{grid-template-columns:1fr}.ux-overview-links>a>span{margin-bottom:12px}.ux-overview-links p{min-height:0}.ux-rows .ux-choice{grid-template-columns:minmax(120px,1fr) minmax(60px,.5fr) 30px;gap:10px}.ux-research{display:block}.ux-research p{margin-top:4px}}
-@media(max-width:650px){.ux-page .ux-site-header{min-height:56px;padding:8px 12px;gap:14px}.ux-brand>span{width:32px;height:32px;font-size:13px}.ux-site-header nav{gap:14px}.ux-site-header nav a{font-size:11px}.ux-site-header nav a:last-child{display:none}.ux-header-tools{gap:0}.ux-header-tools>span{display:none}.ux-header-tools button{font-size:10px;padding:6px}.ux-page.nd-detail .nd-shell{padding:12px}.ux-page .ux-detail{display:block}.ux-page .side-nav{position:static;padding:5px;margin-bottom:18px}.ux-page .side-nav .nav-items{display:flex;overflow-x:auto;gap:5px;padding:2px}.ux-page .side-nav a{min-width:147px;min-height:51px;padding:8px;border:0;border-bottom:2px solid transparent;gap:8px}.ux-page .side-nav a[aria-current]{border-bottom-color:#187bff}.ux-page .side-nav strong{font-size:11px}.ux-page .nav-number{width:22px;height:22px;flex-basis:22px;font-size:12px}.ux-hero{gap:14px}.ux-treatment-context h1{font-size:28px;letter-spacing:-.8px}.ux-treatment-context p{font-size:12px}.ux-glance .nd-facts>div{grid-template-columns:118px 1fr}.ux-test-notice{font-size:10px;margin:12px 0 19px}.ux-detail .nd-panel>h2{font-size:19px;gap:8px;margin-bottom:15px}.ux-detail .nd-panel>h2:before{width:28px;height:28px;flex-basis:28px;font-size:16px}.ux-detail .card{padding:16px 13px}.ux-detail .card h3{font-size:15px}.ux-rows .ux-choice{grid-template-columns:minmax(0,1fr) 36px;padding:10px 10px 10px 37px;gap:8px}.ux-rows .ux-choice>span:last-of-type{grid-column:1/-1;grid-row:1}.ux-rows .ux-choice>.ux-track{grid-column:1;grid-row:2}.ux-rows .ux-choice>[data-percent]{grid-column:2;grid-row:2}.ux-rows .ux-choice:before{left:10px;top:19px;transform:none;width:14px;height:14px}.ux-segments{grid-template-columns:repeat(4,minmax(0,1fr))}.ux-segments .ux-choice{padding:10px 2px 4px;font-size:11px}.ux-segments .ux-selected{font-size:8px}.ux-question .effect-chart{gap:4px}.ux-question .effect-column{font-size:10px;padding:6px 2px}.ux-question .bar-area{height:100px}.ux-question .effect-chart .ux-selected{font-size:8px}.ux-question .insurance-toggle{margin-left:0}.ux-question .insurance-toggle button{min-width:70px;padding:8px 12px;font-size:10px}.ux-question .interactive-dot-scale{grid-template-columns:repeat(9,78px)}.ux-question .ux-chart.ux-donut{grid-template-columns:140px 1fr;margin-left:0;gap:10px}.ux-question svg.ux-donut{width:135px;height:135px}.ux-question [data-clear]{float:none;display:block;margin-top:7px}.ux-own{display:block}.ux-peer-grid{grid-template-columns:1fr}.ux-discovery-heading{align-items:start}.ux-count{font-size:9px;padding:5px 7px}.ux-discovery-heading h3{font-size:14px}.ux-symptom-groups{grid-template-columns:1fr}.ux-detail .nd-map-canvas{height:290px}}
+@media(max-width:650px){.ux-page .ux-site-header{min-height:56px;padding:8px 12px;gap:14px}.ux-brand>span{width:32px;height:32px;font-size:13px}.ux-site-header nav{gap:14px}.ux-site-header nav a{font-size:11px}.ux-site-header nav a:last-child{display:none}.ux-header-tools{gap:0}.ux-header-tools>span{display:none}.ux-header-tools button{font-size:10px;padding:6px}.ux-page.nd-detail .nd-shell{padding:12px}.ux-page .ux-detail{display:block}.ux-page .side-nav{position:static;padding:5px;margin-bottom:18px}.ux-page .side-nav .nav-items{display:flex;overflow-x:auto;gap:5px;padding:2px}.ux-page .side-nav a{min-width:147px;min-height:51px;padding:8px;border:0;border-bottom:2px solid transparent;gap:8px}.ux-page .side-nav a[aria-current]{border-bottom-color:#187bff}.ux-page .side-nav strong{font-size:11px}.ux-page .nav-number{width:22px;height:22px;flex-basis:22px;font-size:12px}.ux-hero{gap:14px}.ux-treatment-context h1{font-size:28px;letter-spacing:-.8px}.ux-treatment-context p{font-size:12px}.ux-glance .nd-facts>div{grid-template-columns:118px 1fr}.ux-test-notice{font-size:10px;margin:12px 0 19px}.ux-detail .nd-panel>h2{font-size:19px;gap:8px;margin-bottom:15px}.ux-detail .nd-panel>h2:before{width:28px;height:28px;flex-basis:28px;font-size:16px}.ux-detail .card{padding:16px 13px}.ux-detail .card h3{font-size:15px}.ux-rows .ux-choice{grid-template-columns:minmax(0,1fr) 36px;padding:10px 10px 10px 44px;gap:8px}.ux-rows .ux-choice>span:last-of-type{grid-column:1/-1;grid-row:1}.ux-rows .ux-choice>.ux-track{grid-column:1;grid-row:2}.ux-rows .ux-choice>[data-percent]{grid-column:2;grid-row:2}.ux-rows .ux-choice:before{left:12px;top:11px;transform:none;width:18px;height:18px}.ux-segments{grid-template-columns:repeat(4,minmax(0,1fr))}.ux-segments .ux-choice{padding:10px 2px 4px;font-size:11px}.ux-segments .ux-selected{font-size:8px}.ux-question .effect-chart{gap:4px}.ux-question .effect-column{font-size:10px;padding:6px 2px}.ux-question .bar-area{height:100px}.ux-question .effect-chart .ux-selected{font-size:8px}.ux-question .insurance-toggle{margin-left:0}.ux-question .insurance-toggle button{min-width:70px;padding:8px 12px;font-size:10px}.ux-question .interactive-dot-scale{grid-template-columns:repeat(9,78px)}.ux-question .ux-chart.ux-donut{grid-template-columns:140px 1fr;margin-left:0;gap:10px}.ux-question svg.ux-donut{width:135px;height:135px}.ux-question [data-clear]{float:none;display:block;margin-top:7px}.ux-own{display:block}.ux-peer-grid{grid-template-columns:1fr}.ux-discovery-heading{align-items:start}.ux-count{font-size:9px;padding:5px 7px}.ux-discovery-heading h3{font-size:14px}.ux-symptom-groups{grid-template-columns:1fr}.ux-detail .nd-map-canvas{height:290px}}
 .ux-page .ux-site-header nav{background:transparent;padding:0;margin:0;box-shadow:none;border:0}
 .ux-page .side-nav{min-height:0;display:block}
 .ux-page .side-nav strong{overflow-wrap:anywhere}
@@ -556,3 +556,24 @@ body.compact-doctor-header .therapy-final-markers .score-average-marker { flex-d
 .ux-page .ux-overview-summary .card.therapy-final-summary { padding-bottom:12px; }
 .ux-detail .therapy-final-summary>.therapy-more-info { margin-bottom:0;padding-bottom:0; }
 .ux-detail .therapy-more-info:not([open])>summary { margin-bottom:0; }
+
+/* Access uses columns; setting retains horizontal distribution rows. */
+.ux-question[data-question="access"] .ux-rows{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.ux-question[data-question="access"] .ux-rows .ux-choice{display:grid;grid-template-columns:1fr;grid-template-rows:100px 24px 1fr 18px;gap:8px;padding:10px 6px;text-align:center;justify-items:center;align-items:start;border:0;border-radius:7px;background:transparent;box-shadow:none}
+.ux-question[data-question="access"] .ux-rows .ux-choice:hover:not(:disabled){background:#f0f7fd}
+.ux-question[data-question="access"] .ux-rows .ux-choice[aria-pressed=true]{background:#e7f3ff;box-shadow:inset 0 -2px #0878e3}
+.ux-question[data-question="access"] .ux-choice:before{display:none}
+.ux-question[data-question="access"] .ux-rows .ux-choice>[data-percent]{grid-column:1;grid-row:2;font-size:14px}
+.ux-question[data-question="access"] .ux-rows .ux-choice>.ux-track{grid-column:1;grid-row:1;display:flex;align-items:flex-end;justify-content:center;width:100%;height:100px;margin:0;background:transparent;border-radius:0;border-bottom:1px solid #d5e5f5;box-shadow:none;overflow:hidden}
+.ux-question[data-question="access"] .ux-track>[data-bar]{width:72%;max-width:140px;background:#75afe8;border-radius:5px 5px 0 0}
+.ux-question[data-question="access"] .ux-rows .ux-choice>span:last-of-type{grid-column:1;grid-row:3;text-align:center;font-size:14px;line-height:1.5}
+.ux-question[data-question="access"] .ux-rows .ux-choice>.ux-selected{display:block;grid-column:1;grid-row:4;margin:0;font-size:11px;visibility:hidden}
+.ux-question[data-question="access"] .ux-choice[aria-pressed=true]>.ux-selected{visibility:visible}
+.ux-dashboard-access-chart{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
+.ux-dashboard-access-chart>div{display:grid;grid-template-rows:auto 100px 1fr auto;gap:12px;justify-items:center;text-align:center;font-size:13px;line-height:1.5;min-width:0}
+.ux-dashboard-access-chart strong{font-size:17px;color:#0954b9}.ux-dashboard-access-chart b{font-size:12px;color:#526b80}
+.access-column-track{display:flex;align-items:flex-end;justify-content:center;width:100%;height:100px;border-bottom:1px solid #d5e5f5}
+.access-column-track>span{display:block;width:56%;max-width:60px;background:#75afe8;border-radius:5px 5px 0 0}
+@media(max-width:650px){.ux-question[data-question="access"] .ux-rows,.ux-dashboard-access-chart{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.ux-question[data-question="pem"] .ux-segments .ux-choice+.ux-choice{border-left:2px solid #fff}

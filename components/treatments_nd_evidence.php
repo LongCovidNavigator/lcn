@@ -4,7 +4,7 @@ declare(strict_types=1);
 function ndAccessScales(array $item, ?array $only = null): string
 {
     $definitions = [
-        'zugang' => ['Zugang', ['Frei erhältlich / privater Anbieter', 'Ärztliche Verordnung / Rezept erforderlich', 'Nur im Rahmen einer Studie']],
+        'zugang' => ['Zugang', ['Frei erhältlich / privater Anbieter', 'Ärztliche Verordnung / Rezept erforderlich', 'Nur im Rahmen einer Studie möglich']],
         'zulassung_long_covid_mecfs' => ['Zulassung für Long COVID / ME/CFS', ['Nein', 'Ja', 'Nicht anwendbar']],
         'off_label_status' => ['Off-Label-Status', ['Kein Off-Label', 'Off-Label', 'Nicht anwendbar']],
         'gkv_kostenuebernahme_status' => ['GKV-Kostenübernahme', ['Ja', 'Nein']],
@@ -39,7 +39,7 @@ function ndAccessScales(array $item, ?array $only = null): string
         $html .= '<section class="nd-research-scale" data-research-scale="' . $field . '"><div class="nd-scale-heading"><h4>' . ndEscape($title) . '</h4><span>Redaktionell recherchiert</span></div><ol class="nd-option-line" style="--options:' . count($options) . '">';
         foreach ($options as $index => $option) {
             $active = $selected === $index;
-            $html .= '<li' . ($active ? ' class="is-current"' : '') . '><span class="nd-option-dot" aria-hidden="true">' . ($active ? '✓' : '') . '</span><span>' . ndEscape(str_replace('Anbieter', 'Behandler', $option)) . '</span>' . ($active ? '<strong>Recherchierter Wert</strong>' : '') . '</li>';
+            $html .= '<li' . ($active ? ' class="is-current"' : '') . '><span class="nd-option-dot" aria-hidden="true">' . ($active ? '✓' : '') . '</span><span>' . ($field === 'zugang' && $index === 2 ? 'Nur im Rahmen einer<br>Studie möglich' : ndEscape(str_replace('Anbieter', 'Behandler', $option))) . '</span>' . ($active ? '<strong>Recherchierter Wert</strong>' : '') . '</li>';
         }
         $display = $field === 'gkv_kostenuebernahme_status' && $selected !== null ? ($selected === 0 ? 'Grundsätzlich erstattungsfähig – Voraussetzungen beachten.' : 'Keine reguläre Erstattung im recherchierten Einsatzkontext.') : $raw;
         $html .= '</ol><p class="nd-researched-value"><strong>' . ($notApplicable ? 'Nicht anwendbar' : ($selected === null ? 'Differenzierte Angabe' : 'Einordnung')) . ':</strong> ' . ndEscape(str_replace('Anbieter', 'Behandler', $display)) . '</p>';

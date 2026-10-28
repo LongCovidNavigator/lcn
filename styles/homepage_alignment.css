@@ -27,13 +27,6 @@
 .home-section-nav a:hover { background:#f0f6fa; color:#17365d; }
 .home-section-nav a[aria-current="location"] { background:#e8f4f4; color:#006d69; font-weight:700; box-shadow:inset 3px 0 #00817d; }
 .home-section-nav a:focus-visible,.home-contribution-actions a:focus-visible { outline:3px solid #0878e3; outline-offset:3px; }
-@media(min-width:1440px) {
-    .home-section-nav { position:fixed; top:190px; left:max(12px,calc((100vw - 1420px)/2)); width:150px; box-sizing:border-box; display:block; padding:12px 6px; border:1px solid #e1eafa; border-radius:12px; box-shadow:0 3px 16px #17365d08; }
-    .home-section-nav-title { display:block; padding:6px 10px 12px; color:#6b7e91; font-size:11px; }
-    .home-section-nav a { padding:11px 10px; font-size:13px; }
-    .home-section-nav-top { margin-top:10px; border-top:1px solid #e1eafa; border-radius:0!important; }
-    .home-page > :is(#empfehlung,#hausarzt,#suche,#ergaenzung,#projekt) { scroll-margin-top:30px; }
-}
 @media(max-width:760px) {
     .home-page > :is(.quick-start,.home-recommendation-teasers,.nearby-gps,.path-section,.home-contribution,.project-intro) { width:calc(100% - 32px); }
     .home-page .home-contribution-panel { grid-template-columns:1fr; gap:22px; padding:22px 18px; }
@@ -42,3 +35,75 @@
     .home-section-nav { justify-content:flex-start; overflow-x:auto; }
     .home-section-nav a { padding:10px; font-size:12px; }
 }
+
+/* The chapter bar starts below the landing banner and remains horizontal. */
+.home-page { overflow:visible; }
+.home-section-nav { top:0; width:100%; box-sizing:border-box; }
+.home-section-nav a[aria-current="location"] { box-shadow:inset 0 -3px #00817d; }
+.home-page > :is(#empfehlung,#hausarzt,#suche,#ergaenzung,#projekt) { scroll-margin-top:var(--home-nav-height,64px); }
+.home-ranking-table tr[hidden] { display:none!important; }
+.home-recommendation-teasers .home-ranking-table tbody tr.home-ranking-highlight { background:#edf7f5; }
+.home-ranking-highlight .home-ranking-number { color:#007c76; font-weight:800; }
+.home-ranking-highlight th[scope="row"] { border-left:3px solid #00817d; }
+.home-ranking-toggle { display:block; width:100%; padding:13px; margin:8px 0 0; border:1px solid #cddfe5; border-radius:7px; background:#f5fafb; color:#006d69; font:inherit; font-size:14px; cursor:pointer; }
+
+/* Match the chapter mockup: outlined icons, stacked labels, pale blue open header. */
+.home-page { padding-bottom:0; }
+.home-page > :is(#empfehlung,#hausarzt,#suche,#ergaenzung) { display:block; margin-top:14px; }
+.home-page > #empfehlung { margin-top:28px; }
+.home-chapter-disclosure { border:1px solid #bccfe1; border-radius:8px; background:#fff; overflow:hidden; }
+.home-chapter-disclosure > summary { display:flex; align-items:center; gap:22px; padding:15px 24px; cursor:pointer; list-style:none; text-align:left; color:#17365d; background:linear-gradient(110deg,#f5f9fd,#fcfdff); }
+.home-chapter-disclosure > summary::-webkit-details-marker { display:none; }
+.home-chapter-icon { width:36px; height:36px; flex:0 0 36px; color:#17365d; }
+.home-chapter-icon svg { width:100%; height:100%; display:block; }
+.home-chapter-label { flex:1; min-width:0; }
+.home-chapter-label strong { display:block; font-size:23px; line-height:1.25; font-weight:800; }
+.home-chapter-label > span { display:block; margin-top:3px; color:#536b89; font-size:14px; line-height:1.4; }
+.home-chapter-disclosure > summary::after { content:''; width:11px; height:11px; flex:0 0 11px; margin:0 4px 6px 12px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); }
+.home-chapter-disclosure[open] { border-color:#86b7e8; }
+.home-chapter-disclosure[open] > summary { background:linear-gradient(110deg,#e3f2ff,#edf7ff); border-bottom:1px solid #d5e7f6; }
+.home-chapter-disclosure[open] > summary .home-chapter-icon { color:#0077d9; }
+.home-chapter-disclosure[open] > summary::after { transform:rotate(225deg); margin-top:10px; }
+.home-chapter-body { padding:22px; }
+.home-chapter-body > .section-heading,.home-chapter-body .nearby-gps-heading { display:none; }
+#empfehlung > details > .home-chapter-body { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:20px; }
+.home-recommendation-teasers .home-chapter-body > :is(.featured-treatments,.featured-experts) { margin:0; padding:0; min-width:0; width:100%; max-width:none; }
+.home-recommendation-teasers :is(.featured-treatments-panel,.featured-experts-panel) { padding:16px; border:1px solid #dce7ef; border-radius:6px; box-shadow:none; background:#fff; }
+.home-recommendation-teasers :is(.featured-treatments-heading,.featured-experts-heading) { margin:0 0 12px; padding:0; text-align:left; }
+.home-recommendation-teasers :is(.featured-treatments-heading,.featured-experts-heading) h3 { font-size:19px; }
+.home-recommendation-teasers :is(.featured-treatments-heading,.featured-experts-heading) p { font-size:11px; margin-top:4px; }
+.home-recommendation-teasers .home-ranking-table tbody tr { height:auto; }
+.home-recommendation-teasers .home-ranking-table tbody :is(td,th) { padding:9px 7px; }
+.home-recommendation-teasers .home-ranking-table th small { display:none; }
+.home-ranking-number { white-space:nowrap; }
+.home-recommendation-teasers .home-ranking-table thead th:first-child { width:30px; }
+.home-recommendation-teasers .home-ranking-doctor .home-ranking-table thead th:first-child { width:9%; }
+.home-recommendation-teasers .home-ranking-doctor .home-ranking-table thead th:nth-child(2) { width:44%; }
+.home-recommendation-teasers .home-ranking-content .home-ranking-fact { min-width:38px; width:42px; height:25px; border-radius:4px; }
+.home-recommendation-teasers .home-ranking-content .home-ranking-fact strong { font-size:13px; }
+.home-ranking-toggle { background:transparent; border:0; border-top:1px solid #dce7ef; border-radius:0; margin-top:0; padding:11px 4px; text-align:left; color:#005ca8; font-size:12px; font-weight:700; }
+.home-recommendation-teasers :is(.featured-treatments-actions,.featured-experts-more-wrap) { margin-top:8px; justify-content:flex-start; }
+.home-recommendation-teasers :is(.featured-treatments-all,.featured-experts-all) { min-height:0; padding:4px 0; border:0; background:transparent; color:#005ca8; font-size:12px; box-shadow:none; }
+.home-page > #projekt { margin-top:40px; padding-top:28px; padding-bottom:24px; }
+.home-page .home-contribution-panel { padding:20px; gap:20px; border-radius:6px; }
+.home-ranking-toggle:focus-visible,.home-chapter-disclosure > summary:focus-visible { outline:3px solid #0878e3; outline-offset:-3px; }
+@media(max-width:760px) {
+ .home-page > #empfehlung { margin-top:18px; }
+ .home-chapter-disclosure > summary { gap:14px; padding:14px 16px; }
+ .home-chapter-icon { width:28px; height:28px; flex-basis:28px; }
+ .home-chapter-label strong { font-size:19px; }
+ .home-chapter-label > span { font-size:12px; }
+ .home-chapter-disclosure > summary::after { width:9px; height:9px; flex-basis:9px; margin-left:4px; }
+ .home-chapter-body { padding:14px; }
+ #empfehlung > details > .home-chapter-body { grid-template-columns:1fr; gap:14px; }
+ .home-recommendation-teasers :is(.featured-treatments-panel,.featured-experts-panel) { padding:12px; }
+ .home-recommendation-teasers .home-ranking-table tbody :is(td,th) { padding:8px 4px; }
+ .home-recommendation-teasers .home-ranking-doctor .home-ranking-table th a { font-size:12px; }
+ .home-page > #projekt { margin-top:28px; }
+}
+
+/* Remove the old full-section spacing inside the compact chapter stack. */
+.home-page > :is(#empfehlung,#hausarzt,#suche,#ergaenzung) { padding-top:0!important; padding-bottom:0!important; }
+.home-page .home-chapter-body > :is(.featured-treatments,.featured-experts) { padding:0!important; margin:0!important; height:auto; }
+.home-page .home-chapter-body :is(.featured-treatments-panel,.featured-experts-panel) { height:100%; padding:16px; }
+.home-recommendation-teasers :is(.featured-treatments-actions,.featured-experts-more-wrap) { padding-top:6px; margin-top:6px; }

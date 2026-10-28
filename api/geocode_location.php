@@ -60,9 +60,16 @@ try {
         throw new Exception("GEOAPIFY_API_KEY fehlt in der .env-Datei.");
     }
 
+    $suggestions = ($_GET['suggest'] ?? '') === '1';
+    $type = '';
+    if ($suggestions) {
+        if (preg_match('/^\d{2,5}$/', $query)) $type = 'postcode';
+        elseif (!preg_match('/[\d,]|(?:straße|strasse|str\.|weg|platz|allee|gasse|ring|ufer|damm)\b|^(?:am|im|auf|an der|an den|unter den)\s/iu', $query)) $type = 'city';
+    }
     $url =
-        'https://api.geoapify.com/v1/geocode/search' .
+        'https://api.geoapify.com/v1/geocode/' . ($suggestions ? 'autocomplete' : 'search') .
         '?text=' . urlencode($query) .
+        ($type !== '' ? '&type=' . $type : '') .
         '&format=json' .
         '&limit=5' .
         '&filter=countrycode:de' .
@@ -71,6 +78,15 @@ try {
 
     $data = fetchJsonWithCurl($url);
     $results = $data['results'] ?? [];
+    if ($suggestions && $type === 'city' && !$results) {
+        $type = '';
+        $data = fetchJsonWithCurl(str_replace('&type=city', '', $url));
+        $results = $data['results'] ?? [];
+    }
+    if ($suggestions && $type === '') {
+        $results = array_values(array_filter($results, static fn($row) => in_array($row['result_type'] ?? '', ['city','postcode','street','building','suburb'], true)));
+        usort($results, static fn($a,$b) => (($a['result_type'] ?? '') === 'city' ? 0 : 1) <=> (($b['result_type'] ?? '') === 'city' ? 0 : 1));
+    }
 
     if (count($results) === 0) {
         http_response_code(404);

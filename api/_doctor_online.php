@@ -3,8 +3,12 @@ require_once __DIR__.'/_doctor_hybrid.php';
 
 function lcnDoctorOnlineAccess(PDO $pdo,bool $dummy=false): array {
     $result=[];
-    foreach($pdo->query('SELECT lcn_id,ersttermin_video,folgetermin_video FROM tbl_entities_nd WHERE aktiv=1') as $row){
-        $result[(int)$row['lcn_id']]=['first'=>mb_strtolower(trim((string)$row['ersttermin_video']))==='ja','follow'=>mb_strtolower(trim((string)$row['folgetermin_video']))==='ja'];
+    foreach($pdo->query('SELECT lcn_id,ersttermin_video,ersttermin_telefon,folgetermin_video,folgetermin_telefon FROM tbl_entities_nd WHERE aktiv=1') as $row){
+        $yes=static fn($value)=>mb_strtolower(trim((string)$value))==='ja';
+        $verified=in_array((int)$row['lcn_id'],LCN_VERIFIED_ONLINE_ONLY_DOCTOR_IDS,true);
+        $first=$verified&&($yes($row['ersttermin_video'])||$yes($row['ersttermin_telefon']));
+        $follow=$verified&&($yes($row['folgetermin_video'])||$yes($row['folgetermin_telefon']));
+        $result[(int)$row['lcn_id']]=['first'=>$first,'follow'=>$follow,'researchedFirst'=>$first,'researchedFollow'=>$follow,'researchedComplete'=>$first&&$follow];
     }
     $counts=[];
     foreach($dummy?['doctor_community_answers','doctor_community_dummy_answers']:['doctor_community_answers'] as $table){
@@ -15,7 +19,7 @@ function lcnDoctorOnlineAccess(PDO $pdo,bool $dummy=false): array {
     }
     foreach($counts as $id=>$questions){
         $result[$id]??=['first'=>false,'follow'=>false];
-        foreach($questions as $kind=>$options){$yes=$options[1]??0;$no=$options[2]??0;if($yes+$no>=10)$result[$id][$kind]=$yes>$no;}
+        foreach($questions as $kind=>$options){$yes=$options[1]??0;$no=$options[2]??0;if($yes+$no>=10)$result[$id][$kind]=($result[$id][$kind==='first'?'researchedFirst':'researchedFollow']??false)||$yes>$no;}
     }
     foreach($result as &$row)$row['complete']=$row['first']&&$row['follow'];unset($row);
     return $result;

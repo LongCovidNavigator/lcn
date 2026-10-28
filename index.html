@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<script src="scripts/online_access.js?v=open-map-20261016" defer></script>
+<script src="scripts/online_access.js?v=contextual-map-legend-20261027" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long Covid Navigator</title>
@@ -12,28 +12,19 @@
     <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="styles/homepage.css?v=48">
-    <link rel="stylesheet" href="styles/homepage_alignment.css?v=1">
-    <script src="scripts/homepage_sections.js?v=1" defer></script>
+    <link rel="stylesheet" href="styles/homepage_alignment.css?v=3">
+    <script src="scripts/homepage_sections.js?v=3" defer></script>
     <link rel="stylesheet" href="styles/footer-style.css">
     <script src="scripts/image-registry.js?v=5"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/homepage.js?v=numbered-discovery-20261024" defer></script>
+    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/homepage.js?v=collapsible-20261026" defer></script>
     <script src="scripts/access-nav.js?v=contribution-20261024" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=quiet-controls-20261024"><script src="scripts/maps_shared.js?v=map-clear-20261024" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=hero-image-20261024"><link rel="stylesheet" href="styles/experience_summary.css?v=2"><script src="scripts/experience_summary.js?v=rating-order-20261024"></script></head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=unified-blue-location-search-20261027"><script src="scripts/maps_shared.js?v=map-clear-20261024" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=hero-image-20261024"><link rel="stylesheet" href="styles/experience_summary.css?v=2"><script src="scripts/experience_summary.js?v=effect-order-muted-colors-20261026"></script></head>
 
 <body class="lcn-public-page">
     <div id="header-placeholder" data-lcn-header></div>
 
-    <nav class="home-section-nav" aria-label="Bereiche der Startseite">
-        <span class="home-section-nav-title">Auf dieser Seite</span>
-        <a href="#empfehlung">Empfehlung</a>
-        <a href="#hausarzt">Hausärzte</a>
-        <a href="#suche">Suche</a>
-        <a href="#ergaenzung">Ergänzung</a>
-        <a href="#projekt">Über das Projekt</a>
-        <a href="#start" class="home-section-nav-top">Nach oben ↑</a>
-    </nav>
     <main class="home-page" id="start">
 
         <section class="home-hero">
@@ -49,22 +40,15 @@
             </div>
         </section>
 
-        <section class="quick-start" aria-label="Direkter Einstieg">
-            <div class="quick-start-card">
-                <div class="quick-start-icon" aria-hidden="true"></div>
-
-                <div class="quick-start-text">
-                    <h2>Wenn du schon weißt, was du suchst, starte hier.</h2>
-                </div>
-
-                <div class="quick-start-actions">
-                    <a href="#empfehlung" class="home-button quick-start-recommendation">Empfehlung</a>
-                    <a href="#hausarzt" class="home-button quick-start-gps">Hausärzte</a>
-                    <a href="#suche" class="home-button quick-start-search">Suche</a>
-                    <a href="#ergaenzung" class="home-button quick-start-contribute">Ergänzung</a>
-                </div>
-            </div>
-        </section>
+    <nav class="home-section-nav" aria-label="Bereiche der Startseite">
+        <span class="home-section-nav-title">Auf dieser Seite</span>
+        <a href="#empfehlung">Empfehlung</a>
+        <a href="#hausarzt">Hausärzte</a>
+        <a href="#suche">Suche</a>
+        <a href="#ergaenzung">Ergänzung</a>
+        <a href="#projekt">Über das Projekt</a>
+        <a href="#start" class="home-section-nav-top">Nach oben ↑</a>
+    </nav>
 
         <section class="simple-flow" hidden aria-labelledby="flow-heading">
             <div class="section-heading compact-heading">

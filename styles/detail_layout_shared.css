@@ -162,6 +162,22 @@ body.compact-doctor-header #view-content .card h3{font-family:Arial,Helvetica,sa
 .ux-detail .top-map-location-layout .nd-map-canvas{height:430px}
 .doctor-location-filters{display:grid;gap:12px;margin-top:20px}.doctor-location-filters label{display:grid;gap:6px;color:#62769a;font-size:13px}.doctor-location-filters .nd-radius-toggle{display:flex;align-items:center;gap:8px}.doctor-location-filters select,.doctor-location-filters input[type=number]{box-sizing:border-box;max-width:100%;width:100%;padding:9px;border:1px solid #cddfec;border-radius:6px;background:#fff;color:#17365d;font:inherit}.doctor-location-filters p{font-size:12px!important;line-height:1.5}
 .doctor-detail-location-grid>.lcn-online-legend{grid-column:2}
+/* Keep the practice map and its compact controls flush on desktop. */
+.doctor-detail-location-grid{align-items:stretch}
+.doctor-detail-location-grid>.doctor-detail-location-address{grid-template-rows:repeat(3,max-content);align-content:start}
+.doctor-detail-location-address .doctor-detail-location-block{padding:10px 14px;justify-content:flex-start}
+.doctor-detail-location-address .doctor-location-filters{display:grid;gap:10px;margin-top:12px;align-items:stretch}
+.doctor-detail-location-address .doctor-location-filters>label{margin:0;min-width:0}
+.doctor-detail-location-address .doctor-location-filters .nd-radius-toggle{display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:8px}
+.doctor-detail-location-address .nd-radius-toggle input[type=checkbox]{flex:0 0 auto;width:16px;height:16px;min-height:0;margin:0;accent-color:#0878e3}
+.doctor-detail-location-address .doctor-location-filters>label:has([data-doctor-radius]){display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
+.doctor-detail-location-address .doctor-location-filters input[data-doctor-radius]{width:90px;min-height:38px}
+.doctor-detail-location-address .doctor-location-filters select{min-height:40px;border:1px solid #cddfec;border-radius:6px}
+.doctor-detail-location-address .doctor-location-filters p{margin:0}
+.doctor-detail-location-address #location-form button[type=submit]{background:#0878e3!important;border-color:#0878e3!important;color:#fff;margin:8px 0 0;min-height:42px}
+.doctor-detail-location-address #location-form button[type=submit]:hover{background:#0666c3!important;border-color:#0666c3!important}
+.doctor-detail-location-grid>#doctor-detail-map{height:auto;max-height:none;min-height:360px;align-self:stretch}
+@media(max-width:800px){.doctor-detail-location-grid>#doctor-detail-map{height:300px;min-height:300px}}
 @media(max-width:1000px){.ux-detail .nd-provider-map .top-map-location-layout{grid-template-columns:1fr}.ux-detail .top-map-location-layout .nd-location-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.ux-detail .top-map-location-layout .nd-map-canvas{height:340px}}
 @media(max-width:800px){.doctor-detail-location-grid>.lcn-online-legend{grid-column:1}}
 
@@ -216,6 +232,25 @@ body.ux-page .ux-question[data-kind="cost"] button[data-option="8"][aria-pressed
 
 .ux-detail .top-map-location-layout .nd-map-canvas{max-height:none}
 
+/* Use the provider detail proportions and compact filter rows for therapy locations. */
+.ux-page .ux-detail .nd-provider-map>.top-map-location-layout{grid-template-columns:minmax(230px,.65fr) minmax(480px,2.35fr);gap:16px}
+.ux-page .ux-detail .top-map-location-layout>.top-map-location-controls{padding:14px;gap:10px}
+.ux-page .ux-detail .top-map-location-layout .nd-location-filters{display:grid;grid-template-columns:1fr;gap:10px;padding-top:12px}
+.ux-page .ux-detail .top-map-location-layout .nd-radius-toggle{display:flex;flex-direction:row;align-items:center;gap:8px}
+.ux-page .ux-detail .top-map-location-layout .nd-radius-toggle input{width:16px;height:16px;min-height:0;margin:0;accent-color:#0878e3}
+.ux-page .ux-detail .top-map-location-layout label:has(>[data-radius]){display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
+.ux-page .ux-detail .top-map-location-layout input[data-radius]{width:90px;min-width:0;flex:0 0 90px;min-height:38px}
+.ux-page .ux-detail .top-map-location-layout :is(input,select,button):focus-visible{outline:2px solid #0878e3;outline-offset:2px}
+.ux-page .ux-detail .top-map-location-layout .nd-map-canvas{min-height:360px}
+.ux-page .ux-detail .top-map-location-layout .location-enter-hint{display:block;margin-top:5px;color:#60718e;font-size:11px}
+@media(max-width:1200px){.ux-page .ux-detail .nd-provider-map>.top-map-location-layout{grid-template-columns:minmax(180px,.8fr) minmax(0,1.5fr)}}
+@media(max-width:800px){
+.ux-page .ux-detail .nd-provider-map>.top-map-location-layout{grid-template-columns:1fr}
+.ux-page .ux-detail .top-map-location-layout>.top-map-panel{grid-column:1;grid-row:2}
+.ux-page .ux-detail .top-map-location-layout .nd-map-canvas{height:300px;min-height:300px}
+}
+@media(min-width:801px){.ux-page .ux-detail .top-map-location-layout>.top-map-panel{grid-column:2;grid-row:1}}
+
 #view-content .top-map-location-layout .nd-map-canvas{max-height:none}
 
 .ux-dashboard-insurance-settings{display:flex;flex-direction:column;align-items:flex-end;gap:10px;margin:18px 0 20px;margin-left:auto;max-width:100%}
@@ -241,3 +276,334 @@ body.compact-doctor-header #view-content .ux-dashboard-insurance-settings .insur
 @media(max-width:650px){body.compact-doctor-header .ux-dashboard-insurance-settings .dashboard-country-preferences{justify-content:flex-end;justify-self:end}}
 
 body.compact-doctor-header .ux-heading-info:focus-within>p,body.compact-doctor-header .ux-heading-info[open]>p{transition-delay:0s}
+
+/* Dashboard rows follow the space needed by their content. */
+.doctor-detail-location-grid>#doctor-detail-map.map-position-missing{display:flex;align-items:center;justify-content:center;padding:28px;text-align:center;background:#f5f9fd;color:#526b80;line-height:1.6}
+.map-location-message{max-width:470px;overflow-wrap:anywhere}
+.map-online-label{display:inline-block;padding:5px 12px;border-radius:6px;background:#e6f5ec;color:#176748;font-size:14px;font-weight:700}
+.map-location-message h4{margin:16px 0 10px;color:#17365d;font-size:23px;line-height:1.3}
+.map-location-message p{margin:8px 0;font-size:15px}
+.map-postal-address{margin:22px 0;padding:18px 12px;border-top:1px solid #dbe5f1;border-bottom:1px solid #dbe5f1}
+.map-postal-address strong{color:#17365d;font-size:14px}
+.map-postal-address a,.map-location-message small{font-size:13px}
+.dashboard-cost-scale{display:grid;grid-template-columns:repeat(8,minmax(94px,1fr));overflow-x:auto;gap:0;margin:22px 0 16px;padding:6px 0 12px}
+.dashboard-cost-scale>div{display:grid;grid-template-rows:auto 110px 1fr auto;justify-items:center;gap:10px;padding:0 8px;text-align:center;font-size:13px;line-height:1.45;min-width:0}
+.dashboard-cost-share{color:#0878e3;font-size:17px;line-height:24px}
+.dashboard-cost-bar-area{display:flex;align-items:flex-end;justify-content:center;width:100%;height:110px;border-bottom:1px solid #d5e5f5}
+.dashboard-cost-bar{display:block;width:62%;max-width:60px;background:#75afe8;border-radius:5px 5px 0 0}
+.dashboard-cost-label{color:#17365d;overflow-wrap:break-word}
+.dashboard-cost-points{color:#526b80;font-size:12px}
+.dashboard-score-group .dashboard-grid{align-items:stretch}
+.dashboard-grid>.dashboard-card-wide,
+.dashboard-grid>.dashboard-card[data-dashboard-question^="costs-"],
+.dashboard-grid>.ux-dashboard-card:is([data-dashboard-question="pem"],[data-dashboard-question="access"],[data-dashboard-question$="cost"]){grid-column:1/-1}
+.dashboard-card-wide .dashboard-appointments{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.dashboard-card-wide .dashboard-appointments>section{min-width:0;margin:0}
+.dashboard-card-wide .dashboard-appointments>section+section{margin-top:0}
+@media(max-width:800px){.dashboard-card-wide .dashboard-appointments{grid-template-columns:1fr}}
+
+
+.nd-provider-online-explanation[hidden]{display:none!important}.nd-provider-empty{padding:16px}.nd-provider-empty p{margin:0 0 10px;font-size:15px}.nd-provider-empty a{font-size:14px}
+
+.dashboard-grid>.ux-dashboard-card[data-dashboard-question$="cost"]{grid-column:auto}
+.ux-dashboard-cost-columns{display:grid;grid-template-columns:repeat(var(--stages),minmax(0,1fr));gap:5px;margin:22px 0;align-items:stretch}
+.ux-dashboard-cost-columns>div{display:grid;grid-template-rows:20px 100px 1fr auto;gap:10px;justify-items:center;text-align:center;font-size:11px;line-height:1.45;min-width:0;overflow-wrap:anywhere}
+.ux-dashboard-cost-columns strong{color:#0954b9;font-size:12px;white-space:nowrap}
+.ux-dashboard-cost-columns b{color:#526b80;font-size:11px;font-weight:400}
+.ux-dashboard-cost-columns .cost-not-applicable{height:22px;width:22px;align-self:center;background:#8096ad;color:#fff;border-radius:4px;line-height:22px;font-size:20px}
+
+/* Gamechanger: comparison left; ring and both answers right. */
+.ux-gamechanger-layout{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+.ux-page .ux-gamechanger-answer .ux-chart.ux-donut{grid-template-columns:145px minmax(0,1fr);grid-template-rows:1fr 1fr;gap:8px 16px;margin:12px 0;justify-content:stretch}
+.ux-page .ux-gamechanger-answer svg.ux-donut{grid-column:1;grid-row:1/3;width:145px;height:145px}
+.ux-page .ux-gamechanger-answer .ux-chart.ux-donut [data-option]{grid-column:2;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;text-align:left;padding:10px;align-self:center}
+.ux-page .ux-gamechanger-answer .ux-chart.ux-donut [data-option="0"]{grid-row:1}
+.ux-page .ux-gamechanger-answer .ux-chart.ux-donut [data-option="1"]{grid-row:2}
+.ux-page .ux-gamechanger-answer .ux-chart.ux-donut [data-percent]{grid-column:2;grid-row:1;font-size:16px;margin:0;white-space:nowrap}
+.ux-page .ux-gamechanger-answer .ux-chart.ux-donut [data-option]>span:last-of-type{grid-column:1;grid-row:1}
+.ux-page .ux-gamechanger-answer .ux-chart.ux-donut .ux-selected{grid-column:1/-1;font-size:11px}
+@media(max-width:1100px){.ux-gamechanger-layout{grid-template-columns:1fr}}
+@media(max-width:450px){.ux-page .ux-gamechanger-answer .ux-chart.ux-donut{grid-template-columns:125px minmax(0,1fr);column-gap:10px}.ux-page .ux-gamechanger-answer svg.ux-donut{width:125px;height:125px}}
+.researched-online-notice{margin:8px 0 14px;color:#526b80;font-size:12px;line-height:1.5}
+
+.dashboard-travel-scale{list-style:none;margin:16px 0;padding:0;display:grid;gap:4px}
+.dashboard-travel-scale>li{display:grid;grid-template-columns:6px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 8px;border:1px solid transparent;border-radius:6px;font-size:12px;line-height:1.35}
+.dashboard-travel-color{align-self:stretch;min-height:28px;border-radius:4px}
+.dashboard-travel-scale strong{display:block;color:#17365d;font-size:12px;font-weight:500}
+.dashboard-travel-scale small{display:block;color:#62769a;font-size:11px;margin-top:2px}
+.dashboard-travel-scale b{color:#315579;font-size:12px;white-space:nowrap}
+.dashboard-travel-scale .is-current{background:#eaf4ff;border-color:#8dc3ff}
+.dashboard-travel-scale .is-current strong,.dashboard-travel-scale .is-current b{font-weight:700;color:#0865d9}
+
+.score-comparison .comparison-basis{margin-top:14px;color:#62769a;font-size:13px;line-height:1.6}.comparison-basis>summary{cursor:pointer}.score-comparison .comparison-basis>p{margin:8px 0 0;font-size:13px;line-height:1.6}
+
+/* Compact aligned location controls beside treatment maps. */
+.ux-detail .top-map-location-layout>.top-map-location-controls{padding:14px;gap:14px;min-width:0}
+.ux-detail .top-map-location-layout .nd-map-location{margin:0;gap:6px;min-width:0}
+.ux-detail .top-map-location-layout .top-map-location-controls label{font-size:13px;line-height:1.4}
+.ux-detail .top-map-location-layout .top-map-location-controls input:not([type=checkbox]),.ux-detail .top-map-location-layout .top-map-location-controls select{box-sizing:border-box;min-height:38px;height:38px;font-size:14px;font-weight:400;line-height:1.4}
+.ux-detail .top-map-location-layout .top-map-location-input-row>input{padding:8px 36px 8px 10px;min-width:0;width:100%;margin:0}
+.ux-detail .top-map-location-layout .nd-location-filters{display:flex;flex-direction:column;align-items:stretch;gap:14px;padding-top:14px;margin:0}
+.ux-detail .top-map-location-layout .nd-radius-inline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ux-detail .top-map-location-layout .nd-radius-toggle{display:flex;flex-direction:row;align-items:center;gap:7px;white-space:nowrap;margin:0}
+.ux-detail .top-map-location-layout .nd-radius-toggle input{width:16px;height:16px;margin:0;accent-color:#0878e3}
+.ux-detail .top-map-location-layout .nd-radius-value{display:flex;flex-direction:row;align-items:center;gap:5px;flex:0 0 auto;margin:0}
+.ux-detail .top-map-location-layout .nd-radius-value input{width:66px;max-width:66px;padding:7px 5px 7px 8px}
+.ux-detail .top-map-location-layout [data-provider-city]{padding:7px 9px;width:100%;margin:0}
+.ux-detail .top-map-location-layout [data-location-filter-note]:empty{display:none}
+.ux-detail .top-map-location-suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:1100;max-height:240px;overflow-y:auto;background:#fff;border:1px solid #cbdce9;border-radius:8px;box-shadow:0 4px 16px #17365d18}
+.ux-detail .top-map-location-suggestions .location-suggestion-status{padding:10px 12px;margin:0;font-size:13px;color:#62769a}
+.ux-detail .top-map-location-suggestions button{display:block;width:100%;text-align:left;border:0;background:#fff;color:#17365d;padding:10px 12px;font:inherit;font-size:13px;cursor:pointer}
+.ux-detail .top-map-location-suggestions button:hover,.ux-detail .top-map-location-suggestions button[aria-selected=true]{background:#eaf4ff}
+
+/* Keep a useful map height and compact, single-line radius controls. */
+.ux-page .ux-detail .top-map-location-layout .nd-map-canvas{height:450px;min-height:450px}
+.ux-page .ux-detail .top-map-location-layout .nd-radius-inline{display:flex;flex-flow:row nowrap;align-items:center;justify-content:space-between;gap:8px;width:100%}
+.ux-page .ux-detail .top-map-location-layout .nd-radius-inline>.nd-radius-toggle{display:flex;flex-direction:row;flex:0 1 auto;font-size:12px;gap:6px}
+.ux-page .ux-detail .top-map-location-layout .nd-radius-inline>.nd-radius-value{display:flex;flex-direction:row;flex:0 0 auto;width:auto;gap:4px;align-items:center}
+.ux-page .ux-detail .top-map-location-layout .nd-radius-value input{width:58px;max-width:58px;min-height:34px;height:34px;padding:6px;font-size:13px}
+.ux-page .ux-detail .top-map-location-layout .top-map-location-controls input[name=location],.ux-page .ux-detail .top-map-location-layout .top-map-location-controls select{height:36px;min-height:36px;font-size:13px;padding-top:7px;padding-bottom:7px}
+@media(max-width:650px){.ux-page .ux-detail .top-map-location-layout .nd-map-canvas{height:380px;min-height:380px}}
+
+/* Override the ID-specific shared map rules at the treatment page boundary. */
+#view-content .nd-provider-map .top-map-location-layout .nd-map-canvas{height:450px;min-height:450px;max-height:none;flex:1 0 450px}
+#view-content .nd-provider-map .top-map-location-controls{box-sizing:border-box;min-width:0}
+#view-content .nd-provider-map .nd-location-filters,#view-content .nd-provider-map .nd-location-filters>label{min-width:0;max-width:100%;width:100%;box-sizing:border-box}
+#view-content .nd-provider-map .nd-radius-inline{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;min-width:0;width:100%;box-sizing:border-box}
+#view-content .nd-provider-map .nd-radius-inline>.nd-radius-toggle{display:flex;flex-direction:row;align-items:center;gap:6px;flex:1 1 auto;min-width:0;width:auto;margin:0}
+#view-content .nd-provider-map .nd-radius-inline>.nd-radius-value{display:flex;flex-direction:row;align-items:center;gap:5px;flex:0 0 auto;min-width:0;width:auto;margin:0}
+#view-content .nd-provider-map .nd-radius-value input[data-radius]{width:58px;min-width:58px;max-width:58px;flex:0 0 58px;height:36px;min-height:36px;padding:6px;box-sizing:border-box}
+#view-content .nd-provider-map select[data-provider-city]{width:100%;min-width:0;max-width:100%;height:36px;min-height:36px;box-sizing:border-box}
+@media(max-width:650px){#view-content .nd-provider-map .top-map-location-layout .nd-map-canvas{height:380px;min-height:380px;flex-basis:380px}}
+
+/* Refined sidebar: clear action in heading, two tidy radius rows. */
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-location-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:24px}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-location-heading>label{margin:0;min-width:0}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-location-heading [data-map-clear]{position:static;transform:none;width:24px!important;min-width:24px!important;height:24px!important;min-height:24px!important;flex:0 0 24px;border:0!important;font-size:18px}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .top-map-location-controls input[name=location]{width:100%;min-width:0;max-width:100%;height:32px;min-height:32px;border-radius:5px;padding:5px 8px;box-sizing:border-box}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) select[data-provider-city]{height:32px;min-height:32px;border-radius:5px;padding:5px 8px}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-radius-inline{flex-direction:column;align-items:stretch;gap:10px}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-radius-inline>.nd-radius-toggle{flex:none;width:100%;font-size:13px}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-radius-inline>.nd-radius-value{display:grid;grid-template-columns:minmax(0,1fr) 58px auto;gap:7px;width:100%;font-size:13px}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-radius-value input[data-radius]{height:30px;min-height:30px;border-radius:5px;text-align:center;padding:4px;appearance:textfield;-moz-appearance:textfield}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-radius-value input::-webkit-inner-spin-button,#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-radius-value input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-location-summary{display:flex;flex-direction:column;gap:3px;margin-top:auto;padding-top:16px;border-top:1px solid #dbe5f1;color:#62769a;font-size:12px}
+#view-content :is(.nd-provider-map,.doctor-detail-location-grid) .nd-location-summary strong{font-size:20px;line-height:1.4;color:#17365d;font-weight:600}
+
+/* Provider details share the current treatment location controls. */
+#view-content .doctor-detail-location-address.top-map-location-controls{display:flex;flex-direction:column;gap:14px;padding:14px;box-sizing:border-box;min-width:0}
+#view-content .doctor-detail-location-address #location-form{display:flex;flex-direction:column;gap:6px;margin:0}
+#view-content .doctor-detail-location-address .nd-location-heading>label{font:600 13px/1.4 Arial,sans-serif;color:#173d74}
+#view-content .doctor-detail-location-address #clear-location{position:static;transform:none;width:24px!important;min-width:24px!important;height:24px!important;min-height:24px!important;flex:0 0 24px;border:0!important;font-size:18px}
+#view-content .doctor-detail-location-address #clear-location[hidden]{display:none!important}
+#view-content .doctor-detail-location-address #own-location{height:32px;min-height:32px;border-radius:5px;padding:5px 8px;font:400 13px/1.4 Arial,sans-serif}
+#view-content .doctor-detail-location-address .doctor-location-filters{display:block;border-top:1px solid #dbe5f1;margin:0;padding-top:14px}
+#view-content .doctor-detail-location-address .nd-radius-toggle{font:600 13px/1.4 Arial,sans-serif;color:#173d74}
+#view-content .doctor-detail-location-address .nd-radius-toggle input{width:16px;height:16px;min-height:0;margin:0;accent-color:#0878e3}
+#view-content .doctor-detail-location-address .nd-radius-value input[data-doctor-radius]{width:58px;min-width:58px;max-width:58px;height:30px;min-height:30px;padding:4px;border-radius:5px;text-align:center;appearance:textfield;-moz-appearance:textfield}
+#view-content .doctor-detail-location-address .nd-radius-value input::-webkit-inner-spin-button,#view-content .doctor-detail-location-address .nd-radius-value input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#view-content .doctor-detail-location-address .nd-radius-value{font:600 13px/1.4 Arial,sans-serif;color:#173d74}
+#view-content .doctor-detail-location-grid>#doctor-detail-map{height:450px;min-height:450px;max-height:none}
+@media(max-width:650px){#view-content .doctor-detail-location-grid>#doctor-detail-map{height:380px;min-height:380px}}
+
+#view-content .doctor-detail-location-address .nd-radius-value{align-items:center}
+.doctor-location-cluster{display:grid;place-items:center;border:2px solid white;border-radius:50%;background:#2485ce;color:white;box-shadow:0 1px 5px #17365d66;font:700 15px/1 Arial,sans-serif}
+
+/* Use the catalog location-search pattern within the narrow detail sidebar. */
+#view-content .nd-provider-map .nd-location-mode-switch{display:grid;grid-template-columns:1fr 1fr;border:1px solid #cbdce9;border-radius:5px;overflow:hidden}
+#view-content .nd-provider-map .nd-location-mode-switch button{border:0;background:#fff;color:#315579;font:600 13px/1.4 Arial,sans-serif;padding:8px;cursor:pointer}
+#view-content .nd-provider-map .nd-location-mode-switch button+button{border-left:1px solid #cbdce9}
+#view-content .nd-provider-map .nd-location-mode-switch button[aria-pressed=true]{background:#0878e3;color:#fff}
+#view-content .nd-provider-map .nd-location-submit{height:34px;min-height:34px;width:100%;padding:6px 8px;margin-top:4px;border:1px solid #0878e3;border-radius:5px;background:#0878e3;color:#fff;font:600 13px/1.4 Arial,sans-serif;cursor:pointer}
+#view-content .nd-provider-map .nd-location-submit:hover{background:#0666c3}
+#view-content .nd-provider-map [hidden]{display:none!important}
+#view-content .nd-provider-map .nd-radius-inline>.nd-include-unlocated{display:flex;flex-direction:row;align-items:flex-start;gap:7px;margin:2px 0 0;font-size:12px;font-weight:400;line-height:1.5;white-space:normal;min-width:0}
+#view-content .nd-provider-map .nd-include-unlocated input{flex:0 0 16px;width:16px;height:16px;min-height:16px;margin:2px 0 0;accent-color:#0878e3}
+#view-content .nd-provider-map .nd-radius-toggle{position:relative;padding-right:38px;cursor:pointer;min-height:24px}
+#view-content .nd-provider-map .nd-radius-toggle input{position:absolute;right:0;width:30px;height:18px;min-height:18px;appearance:none;border:1px solid #a8bbd1;border-radius:12px;background:#dce6f0;cursor:pointer}
+#view-content .nd-provider-map .nd-radius-toggle input::after{content:'';display:block;width:12px;height:12px;margin:2px;background:#fff;border-radius:50%;box-shadow:0 1px 3px #17365d30;transition:transform .12s ease}
+#view-content .nd-provider-map .nd-radius-toggle input:checked{background:#0878e3;border-color:#0878e3}
+#view-content .nd-provider-map .nd-radius-toggle input:checked::after{transform:translateX(12px)}
+#view-content .nd-provider-map .nd-radius-toggle input:focus-visible{outline:2px solid #0878e3;outline-offset:3px}
+
+/* Stable ordering and balanced spacing throughout the location sidebar. */
+#view-content .nd-provider-map .top-map-location-layout>.top-map-location-controls{display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+#view-content .nd-provider-map .nd-location-title{margin:0;font-size:16px;line-height:1.4;font-weight:700;color:#17365d}
+#view-content .nd-provider-map .nd-location-summary{margin-top:0}
+#view-content .nd-provider-map .nd-radius-toggle input{top:50%;right:0;transform:translateY(-50%);width:30px;min-width:30px;max-width:30px;height:18px;min-height:18px;padding:0!important;margin:0!important;box-sizing:border-box;line-height:normal;display:block;vertical-align:middle}
+#view-content .nd-provider-map .nd-radius-toggle input::after{position:absolute;top:2px;left:2px;width:12px;height:12px;margin:0;transform:none}
+#view-content .nd-provider-map .nd-radius-toggle input:checked::after{transform:translateX(12px)}
+
+/* Fixed sidebar sections keep common controls stationary when switching modes. */
+#view-content .nd-provider-map .top-map-location-layout>.top-map-location-controls{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto minmax(142px,1fr) auto;align-content:stretch;justify-content:normal;gap:14px}
+#view-content .nd-provider-map .nd-location-mode-switch{padding-top:14px;border:0;border-top:1px solid #dbe5f1;border-radius:0;overflow:visible}
+#view-content .nd-provider-map .nd-location-mode-switch button{border:1px solid #cbdce9}
+#view-content .nd-provider-map .nd-location-mode-switch button:first-child{border-radius:5px 0 0 5px}
+#view-content .nd-provider-map .nd-location-mode-switch button:last-child{border-left:0;border-radius:0 5px 5px 0}
+#view-content .nd-provider-map .nd-location-filters{align-self:stretch;justify-content:flex-start;border-top:0;padding-top:0;margin:0;min-height:142px}
+#view-content .nd-provider-map .nd-radius-inline>.nd-radius-value{grid-template-columns:minmax(0,1fr) 58px;align-items:center}
+#view-content .nd-provider-map .nd-location-summary{align-self:end;margin:0}
+
+/* Keep each settings block compact; place surplus space before the mode tabs. */
+#view-content .nd-provider-map .top-map-location-layout>.top-map-location-controls{grid-template-rows:auto auto minmax(52px,1fr) 114px auto;gap:16px}
+#view-content .nd-provider-map .nd-location-title{text-align:center;margin:0 0 8px}
+#view-content .nd-provider-map .nd-location-mode-switch{align-self:end;padding-top:16px}
+#view-content .nd-provider-map .nd-location-filters{height:114px;min-height:114px;align-self:start;gap:0}
+#view-content .nd-provider-map .nd-location-filters>.nd-radius-inline{flex:0 0 auto;justify-content:flex-start;gap:12px}
+#view-content .nd-provider-map .nd-radius-inline>.nd-radius-toggle,#view-content .nd-provider-map .nd-radius-inline>.nd-radius-value,#view-content .nd-provider-map .nd-radius-inline>.nd-include-unlocated{flex:0 0 auto;margin:0}
+#view-content .nd-provider-map .nd-location-summary{padding-top:16px}
+
+/* Location search on provider details follows the treatment map controls. */
+#view-content .doctor-detail-location-address .nd-location-title{margin:0 0 8px;text-align:center;font-size:16px;line-height:1.4;color:#17365d}
+#view-content .doctor-detail-location-address .nd-location-submit{width:100%;min-height:34px;margin-top:4px;padding:6px 8px;border-radius:5px;font:600 13px/1.4 Arial,sans-serif}
+#view-content .doctor-detail-location-address .top-map-location-suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:240px;overflow-y:auto}
+#view-content .doctor-detail-location-address .top-map-location-suggestions.is-hidden{display:none}
+#view-content .doctor-detail-location-address .top-map-location-suggestions button{display:block;width:100%;border:0;background:#fff;color:#17365d;font:400 13px/1.4 Arial,sans-serif;cursor:pointer}
+#view-content .doctor-detail-location-address .top-map-location-suggestions button:is(:hover,[aria-selected=true]){background:#eaf4ff}
+#view-content .doctor-detail-location-address .location-suggestion-status{padding:10px 12px;margin:0;font-size:13px}
+
+.nd-map-notes [data-map-status]:empty{display:none}
+
+#view-content .nd-provider-map>.top-map-location-layout{row-gap:6px}
+#view-content .nd-provider-map .nd-map-notes{grid-column:2;grid-row:2;margin:0;padding:0}
+#view-content .nd-provider-map .nd-map-notes .lcn-online-legend{justify-content:flex-start;margin:0;font-size:12px;line-height:1.5}
+.lcn-online-legend[hidden]{display:none!important}
+@media(max-width:1000px){#view-content .nd-provider-map .nd-map-notes{grid-column:1;grid-row:3}}
+
+/* Identical map dimensions and right-aligned legends on both detail pages. */
+#view-content .doctor-detail-location-grid>#doctor-detail-map,
+#view-content .nd-provider-map .top-map-location-layout .nd-map-canvas{box-sizing:border-box;height:460px;min-height:460px;max-height:460px;flex:0 0 460px}
+#view-content .doctor-detail-location-address.top-map-location-controls{box-sizing:border-box;min-height:460px}
+#view-content .doctor-detail-location-address .nd-radius-inline{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+#view-content .doctor-detail-location-address .nd-radius-inline>.nd-radius-value{display:grid;grid-template-columns:minmax(0,1fr) 58px;align-items:center;gap:8px;margin:0;width:100%}
+#view-content .doctor-detail-location-address .nd-radius-inline>.nd-radius-toggle{display:flex;align-items:center;box-sizing:border-box;width:100%;margin:0}
+#view-content .doctor-detail-location-address .nd-radius-value>span{white-space:nowrap;font-size:13px}
+#view-content .doctor-detail-location-address .nd-location-submit{height:34px;min-height:34px;box-sizing:border-box;line-height:20px}
+#view-content .doctor-detail-location-grid>.lcn-online-legend,
+#view-content .nd-provider-map .nd-map-notes .lcn-online-legend{justify-content:flex-end;text-align:right;width:100%;margin:0}
+@media(max-width:1000px){#view-content .doctor-detail-location-address.top-map-location-controls{min-height:0}}
+@media(max-width:650px){
+#view-content .doctor-detail-location-grid>#doctor-detail-map,
+#view-content .nd-provider-map .top-map-location-layout .nd-map-canvas{height:380px;min-height:380px;max-height:380px;flex-basis:380px}
+}
+#view-content .doctor-detail-location-address .nd-radius-toggle{position:relative;padding-right:38px;cursor:pointer;min-height:24px}
+#view-content .doctor-detail-location-address .nd-radius-toggle input{position:absolute;right:0;width:30px;height:18px;min-height:18px;appearance:none;border:1px solid #a8bbd1;border-radius:12px;background:#dce6f0;cursor:pointer}
+#view-content .doctor-detail-location-address .nd-radius-toggle input::after{content:'';display:block;width:12px;height:12px;margin:2px;background:#fff;border-radius:50%;box-shadow:0 1px 3px #17365d30;transition:transform .12s ease}
+#view-content .doctor-detail-location-address .nd-radius-toggle input:checked{background:#0878e3;border-color:#0878e3}
+#view-content .doctor-detail-location-address .nd-radius-toggle input:checked::after{transform:translateX(12px)}
+#view-content .doctor-detail-location-address .nd-radius-toggle input:focus-visible{outline:2px solid #0878e3;outline-offset:3px}
+#view-content .doctor-detail-location-address .nd-radius-toggle input{top:50%;right:0;transform:translateY(-50%);width:30px;min-width:30px;max-width:30px;height:18px;min-height:18px;padding:0!important;margin:0!important;box-sizing:border-box;line-height:normal;display:block;vertical-align:middle}
+#view-content .doctor-detail-location-address .nd-radius-toggle input::after{position:absolute;top:2px;left:2px;width:12px;height:12px;margin:0;transform:none}
+#view-content .doctor-detail-location-address .nd-radius-toggle input:checked::after{transform:translateX(12px)}
+
+/* Use the regular 16px box gap below the travel estimate, without stacked margins. */
+#view-content .nd-provider-map>[data-travel-estimate]{margin:0}
+#view-content .nd-provider-map>[data-travel-estimate]+.top-map-location-layout{margin-top:0}
+
+/* Separate the expanded travel explanation from its disclosure heading. */
+#view-content .travel-estimate details[open]>summary{margin-bottom:0}
+#view-content .travel-estimate details[open]>summary+p{margin-top:0;padding-top:12px}
+
+#view-content .nd-provider-filter-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 24px;margin-top:18px}
+#view-content .nd-provider-filter-panel>label{display:flex;flex-direction:column;gap:8px;font:600 13px/1.5 Arial,sans-serif;color:#173d74;min-width:0}
+#view-content .nd-provider-filter-panel select{width:100%;height:36px;border:1px solid #cbdce9;border-radius:6px;background:#fff;color:#17365d;padding:6px;font:inherit}
+#view-content .nd-provider-rating-row{display:grid;grid-template-columns:minmax(0,1fr) 58px auto;gap:8px;align-items:center}
+#view-content .nd-provider-rating-row input[type=range]{width:100%;min-width:0;min-height:24px;margin:0;accent-color:#0878e3;cursor:pointer}
+#view-content .nd-provider-rating-row input[type=number]{width:58px;box-sizing:border-box;height:34px;border:1px solid #cbdce9;border-radius:6px;text-align:center;color:#17365d}
+@media(max-width:650px){#view-content .nd-provider-filter-panel{grid-template-columns:1fr}}
+
+/* Match the treatment cards on provider detail pages. */
+#view-content .nd-provider-map .treatment-card-ratings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:14px;}
+#view-content .nd-provider-map .treatment-card-rating{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:5px;min-width:0;color:var(--rating-text);text-align:center;}
+#view-content .nd-provider-map .treatment-card-rating strong{display:flex;align-items:center;justify-content:center;box-sizing:border-box;height:34px;padding:5px 2px;border-top:2px solid var(--rating-accent);border-radius:4px;background:var(--rating-background);font-size:14px;font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums;white-space:nowrap;}
+#view-content .nd-provider-map .treatment-card-rating>span{display:flex;align-items:flex-start;justify-content:center;min-height:27px;font-size:10.5px;line-height:1.25;word-break:normal;overflow-wrap:normal;hyphens:manual;}
+#view-content .nd-provider-map .treatment-card-rating-healing{--rating-border:#b8dacc;--rating-accent:#299a77;--rating-background:#eef8f3;--rating-text:#17634b;}
+#view-content .nd-provider-map .treatment-card-rating-improvement{--rating-border:#c9e6d5;--rating-accent:#75cba5;--rating-background:#f3faf6;--rating-text:#287553;}
+#view-content .nd-provider-map .treatment-card-rating-neutral{--rating-border:#dbe3ed;--rating-accent:#aabbd1;--rating-background:#f5f7fa;--rating-text:#526681;}
+#view-content .nd-provider-map .treatment-card-rating-negative{--rating-border:#eed0d7;--rating-accent:#d8778e;--rating-background:#fdf3f5;--rating-text:#a43e57;}
+#view-content .nd-provider-map .nd-provider-rating-summary{margin-top:auto}
+#view-content .nd-provider-map .treatment-card-rating-total{display:block;margin:10px 0 0;font-size:11px;color:#62769a}
+#view-content .nd-provider-map .nd-map-results.doctor-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+#view-content .nd-provider-map .nd-map-results .doctor-card{display:flex;flex-direction:column;padding:16px;min-width:0}
+#view-content .nd-provider-map .nd-provider-place{margin-bottom:0}
+#view-content .nd-provider-map .nd-provider-footer{margin-top:12px}
+@media(max-width:1200px){#view-content .nd-provider-map .nd-map-results.doctor-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){#view-content .nd-provider-map .nd-map-results.doctor-card-grid{grid-template-columns:1fr}}
+
+/* Compact provider controls with a single, clearly grouped rating block. */
+#view-content .nd-provider-filter-panel{grid-template-columns:minmax(220px,.8fr) minmax(0,1.4fr);align-items:start;gap:18px;margin-top:0}
+#view-content .nd-provider-search-fields{display:flex;flex-direction:column;gap:8px;min-width:0}
+#view-content .nd-provider-search-fields>label{display:flex;flex-direction:column;gap:3px;min-width:0;font:600 12px/1.4 Arial,sans-serif;color:#173d74}
+#view-content .nd-provider-search-fields .doctor-results-search-label{margin:0}
+#view-content .nd-provider-search-fields :is(input,select){box-sizing:border-box;width:100%;min-height:32px;height:32px;padding:4px 8px;font:400 13px/1.4 Arial,sans-serif}
+#view-content .nd-provider-rating-block{box-sizing:border-box;min-width:0;margin:0;padding:6px 12px 10px;border:1px solid #dbe7f280;border-radius:6px;background:rgba(247,251,254,.35);display:flex;flex-direction:column;gap:8px}
+#view-content .nd-provider-rating-block legend{padding:0 5px;font:600 13px/1.4 Arial,sans-serif;color:#173d74}
+#view-content .nd-provider-rating-block>label{display:flex;flex-direction:column;gap:2px;font:600 12px/1.4 Arial,sans-serif;color:#173d74;min-width:0}
+@media(max-width:750px){#view-content .nd-provider-filter-panel{grid-template-columns:1fr;gap:16px}}
+
+#view-content .nd-provider-map .doctor-results-search-panel{padding:12px 16px}
+#view-content .nd-provider-rating-block .nd-provider-rating-row input[type=number]{height:28px;font-size:12px}
+#view-content .nd-provider-rating-block .nd-provider-rating-row input[type=range]{min-height:20px}
+
+/* Equal, unboxed filter groups with aligned headings and control rows. */
+#view-content .nd-provider-filter-panel{position:relative;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;align-items:stretch}
+#view-content .nd-provider-filter-panel::after{content:'';position:absolute;left:50%;top:12px;bottom:12px;width:1px;background:#dbe5f1;pointer-events:none}
+#view-content .nd-provider-search-fields,
+#view-content .nd-provider-rating-block{display:grid;grid-template-rows:repeat(3,52px);align-content:start;gap:8px;min-width:0;min-inline-size:0;margin:0;padding:0;border:0;border-radius:0;background:transparent}
+#view-content .nd-provider-search-fields>legend,
+#view-content .nd-provider-rating-block>legend{float:none;box-sizing:border-box;width:100%;margin:0 0 10px;padding:0;font:600 13px/1.4 Arial,sans-serif;color:#173d74}
+#view-content .nd-provider-search-fields>label,
+#view-content .nd-provider-rating-block>label{display:grid;grid-template-rows:17px 32px;gap:3px;align-content:center;min-width:0;margin:0;font:600 12px/1.4 Arial,sans-serif;color:#173d74}
+#view-content .nd-provider-rating-block .nd-provider-rating-row{height:32px;align-items:center}
+#view-content .nd-provider-rating-block .nd-provider-rating-row input[type=range]{align-self:center;margin:0}
+@media(max-width:750px){
+#view-content .nd-provider-filter-panel{grid-template-columns:1fr;gap:16px}
+#view-content .nd-provider-filter-panel::after{display:none}
+#view-content .nd-provider-rating-block{padding-top:12px;border-top:1px solid #dbe5f1}
+}
+
+/* Shared compact point scales, with clear space below the selection halo. */
+body.compact-doctor-header #view-content .interactive-dot-scale{display:grid;grid-auto-flow:column;grid-template-columns:repeat(var(--count,10),minmax(82px,1fr));gap:0;overflow-x:auto;overflow-y:hidden;margin:12px 0 16px;padding:8px 0 12px}
+body.compact-doctor-header #view-content .interactive-dot-scale>button{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;min-width:0;min-height:116px;padding:10px 5px;font-size:12px;line-height:1.4}
+body.compact-doctor-header #view-content .interactive-dot-scale>button::before{left:0;right:0;top:17px;bottom:auto;width:auto;height:2px}
+body.compact-doctor-header #view-content .interactive-dot-scale>button:first-child::before{left:50%}
+body.compact-doctor-header #view-content .interactive-dot-scale>button:last-child::before{right:50%}
+body.compact-doctor-header #view-content .interactive-dot-scale>button>.dot{flex:0 0 13px;width:13px;height:13px;box-sizing:border-box;z-index:1}
+body.compact-doctor-header #view-content .interactive-dot-scale>button>.scale-percent{margin-top:5px;font-size:13px;line-height:1.4;color:#203a77}
+body.compact-doctor-header #view-content .interactive-dot-scale>button>.ux-selected{font-size:11px}
+body.ux-page #view-content .ux-question[data-kind="cost"] button[data-option="8"] .dot{flex-basis:16px;width:16px;height:16px}
+
+/* Anchor the Gamechanger graphic independently of expanded comparison details. */
+#view-content .ux-gamechanger-layout{align-items:start}
+#view-content .ux-gamechanger-answer{align-self:start;padding-top:44px}
+@media(max-width:1100px){#view-content .ux-gamechanger-answer{padding-top:0}}
+
+/* Two symptom columns on therapy details; retain a readable mobile list. */
+body.ux-page #view-content .ux-symptom-ranking{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+body.ux-page #view-content .ux-symptom-ranking>li{min-width:0}
+body.ux-page #view-content .ux-symptom-ranking button{height:100%}
+@media(max-width:750px){body.ux-page #view-content .ux-symptom-ranking{grid-template-columns:1fr}}
+
+body.compact-doctor-header .cost-preference input[data-cost-custom-country]{box-sizing:border-box;width:185px;min-height:32px;padding:5px 8px;border:1px solid #e1eafa;border-radius:6px;background:#fff;color:#526b80;font:inherit}
+
+/* Keep symptom search inline as the next open tile in the two-column list. */
+body.ux-page #view-content .ux-symptom-grid{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;margin:18px 0 0;align-items:start}
+body.ux-page #view-content .ux-symptom-grid::before{content:'';position:absolute;left:50%;top:12px;bottom:12px;width:1px;background:#dbe5f1;pointer-events:none}
+body.ux-page #view-content .ux-symptom-grid>.ux-symptom-ranking{display:contents}
+body.ux-page #view-content .ux-symptom-grid>.ux-symptom-picker{margin:0;max-width:none;min-width:0;align-self:start;gap:4px}
+body.ux-page #view-content .ux-symptom-grid>.ux-symptom-picker>label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+body.ux-page #view-content .ux-symptom-grid .ux-symptom-input-wrap{min-height:54px;border:1px dashed #cddfec;border-radius:8px;background:transparent}
+body.ux-page #view-content .ux-symptom-grid .ux-symptom-input-wrap input{font-size:14px}
+body.ux-page #view-content .ux-symptom-grid .catalog-new-entry{align-self:flex-start;font-size:12px}
+@media(max-width:750px){body.ux-page #view-content .ux-symptom-grid{grid-template-columns:1fr}body.ux-page #view-content .ux-symptom-grid::before{display:none}}
+
+.cost-country-dialog{width:440px;max-width:calc(100vw - 32px);box-sizing:border-box;padding:20px;border:1px solid #dbe5f1;border-radius:10px;box-shadow:0 12px 40px #17365d30;color:#17365d;background:#fff}
+.cost-country-dialog::backdrop{background:#17365d55}
+.cost-country-dialog h3{margin:0 0 14px;font-size:20px}
+.cost-country-dialog input{box-sizing:border-box;width:100%;padding:10px 12px;border:1px solid #cbdce9;border-radius:6px;font:inherit}
+.cost-country-options{max-height:340px;overflow:auto;margin:12px 0}
+.cost-country-options button{display:block;width:100%;padding:9px 12px;border:0;border-radius:5px;background:transparent;color:#17365d;text-align:left;font:inherit;cursor:pointer}
+.cost-country-options button:is(:hover,:focus-visible){background:#eaf4ff}
+.cost-country-dialog>button{padding:8px 14px;border:1px solid #cbdce9;border-radius:6px;background:#f5f9fd;color:#17365d;cursor:pointer}
+
+body.ux-page #view-content .ux-symptom-grid [data-new-symptom]{display:none}

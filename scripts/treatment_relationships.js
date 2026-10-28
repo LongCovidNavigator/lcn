@@ -20,9 +20,9 @@
   if([...options.querySelectorAll('a[href*="treatment_id="]')].some(a=>Number(new URL(a.href).searchParams.get('treatment_id'))===other))return true;
   const tile=make('article'),link=make('a',entry.name),feedback=make('div'),host=make('span');
   tile.className='ux-alternative-tile ux-feedback-relation';tile.dataset.pendingAlternative=item.submission_id;
-  tile.append(make('small','Vorschlag · Prüfung ausstehend'));
-  if(entry.meta){const category=make('span',entry.meta);category.className='ux-alternative-category';tile.append(category);}
+  tile.append(make('small','Alternative Therapie · Prüfung ausstehend'));
   link.className='ux-alternative-name';link.href='therapie_detail.php?treatment_id='+other+'#alternativen';tile.append(link);
+  if(entry.meta){const category=make('span',entry.meta);category.className='ux-alternative-category';tile.append(category);}
   feedback.className='ux-alternative-feedback';host.dataset.treatmentRelationFeedback='s:'+item.submission_id;host.dataset.feedbackStandard='1';host.dataset.feedbackStatement=item.description+' (Vorschlag · Prüfung ausstehend)';feedback.append(host);tile.append(feedback);
   options.insertBefore(tile,options.querySelector('.ux-alternative-add'));return true;
  }

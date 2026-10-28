@@ -21,7 +21,7 @@ for(const rank of [1,20,20.01,40,40.01,60,60.01,80,80.01,100]) {
   assert.equal(view.relativeScoreLevel(rank),expected);
 }
 assert.equal(view.relativeRank(50,[50,50]),50);
-for(const [percent,label] of [[.12,'0,12'],[1,'1'],[2,'3'],[4,'5'],[37,'40'],[50,'50'],[51,null]]) {
+for(const [percent,label] of [[.12,'0,12'],[1,'1'],[2,'3'],[4,'5'],[37,'40'],[50,'50'],[51,'60'],[80,'80'],[100,'100']]) {
   assert.equal(view.topPercentLabel(percent),label);
 }
 for(const [own,others] of [[{...result,dataCoverage:50},values],[result,[]],[{earned:0,coverage:0,score:null,dataCoverage:0},[]]]) {
@@ -34,4 +34,9 @@ for(const [own,others] of [[{...result,dataCoverage:50},values],[result,[]],[{ea
 const partial=view.render({...result,earned:26.01,coverage:50},values);
 assert.equal(partial.match(/--position:([^;]+)/)[1],html.match(/--position:([^;]+)/)[1]);
 assert(!view.render({...result,earned:50},[50,50]).includes('NaN'));
+const lowerTier=view.render({...result,earned:39,score:39},[23,35,41,46,52,72]);
+assert(lowerTier.includes('<strong class="therapy-final-top score-percentile-level-1">Top 80 %</strong>'));
+assert(!lowerTier.includes('<strong>Weniger passend</strong>'));
 console.log('PASS: provider quintiles, descending aligned legend, unrounded comparison, ties, Top steps and score-only fallback.');
+
+assert(view.render({...result,earned:0,score:0},[50,60]).includes('therapy-final-top score-percentile-level-0'));

@@ -58,3 +58,12 @@
 .doctor-score-relative>.therapy-more-info { margin-bottom:0;padding-bottom:0; }
 .doctor-score-relative .therapy-more-info:not([open])>summary { margin-bottom:0; }
 .doctor-relative-summary>details { margin-top:24px; }
+
+/* Use the matching suitability tier for every provider comparison badge. */
+:is(.score-comparison-highlights,.treatment-profile-summary) .score-percentile.score-percentile-level-0{background:#e5a5ad;color:#542029}
+:is(.score-comparison-highlights,.treatment-profile-summary) .score-percentile.score-percentile-level-1{background:#dfb09e;color:#542c1e}
+:is(.score-comparison-highlights,.treatment-profile-summary) .score-percentile.score-percentile-level-2{background:#e5cf9b;color:#514019}
+:is(.score-comparison-highlights,.treatment-profile-summary) .score-percentile.score-percentile-level-3{background:#9fd3b6;color:#18452e}
+:is(.score-comparison-highlights,.treatment-profile-summary) .score-percentile.score-percentile-level-4{background:#63af94;color:#10392c}
+
+.treatment-profile-summary .score-percentile{width:fit-content;padding:6px 10px;border-radius:6px}

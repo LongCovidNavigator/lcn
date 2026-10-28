@@ -39,10 +39,16 @@
     }
   }
   document.addEventListener('click', event => {
+    if (event.defaultPrevented) return;
     const link = event.target.closest('a[href^="#"]');
     if (!link || !document.querySelector('.nd-detail .detail-layout').contains(link)) return;
-    event.preventDefault();
     const hash = link.getAttribute('href');
+    // Map controls also use href="#"; only route actual content links.
+    if (!hash || hash === '#') return;
+    const aliases = { '#ablauf': 'termin', '#fuer-wen': 'ueberblick' };
+    const target = document.getElementById(aliases[hash] || hash.slice(1));
+    if (!target?.closest('.nd-panel')) return;
+    event.preventDefault();
     history.pushState(null, '', hash);
     show(hash, true);
   });

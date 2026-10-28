@@ -51,12 +51,14 @@ $views = ['ueberblick'=>'Überblick','termin'=>'Welche Belastungshürden gibt es
 <noscript>Bitte JavaScript aktivieren, um zwischen den Ansichten zu wechseln und eigene Angaben auszuwählen.</noscript>
 <section id="ueberblick" class="nd-panel" aria-label="Überblick">
 <?php if (($item['review_status'] ?? '') === 'altbestand_ungeprueft'): ?><p class="ux-test-notice">Übernommener Bestand · Angaben noch nicht geprüft.</p><?php endif; ?>
-<section class="card ux-overview-frame"><div class="ux-overview-heading"><h2>Überblick</h2><span class="ux-heading-info"><button type="button" aria-label="Information zum Überblick" aria-describedby="therapy-overview-help">ⓘ</button><p id="therapy-overview-help" role="tooltip">Hier findest du die Kategorie der Therapie, die Gesamtauswertung. Die einzelnen Bewertungen und ihre Gewichtung kannst du im Dashboard ansehen.</p></span></div>
+<section class="card ux-overview-frame"><div class="ux-overview-heading"><h2>Überblick</h2><span class="ux-heading-info"><button type="button" aria-label="Information zum Überblick" aria-describedby="therapy-overview-help">ⓘ</button><p id="therapy-overview-help" role="tooltip">Wie ist die Therapie eingeordnet, und wie schneidet sie im Vergleich ab? Hier findest du ihre Kategorisierung und den Vergleich mit anderen Therapien.</p></span></div>
 <div class="ux-overview-summary">
 <aside class="card ux-treatment-identity"><div class="overview-icon ux-treatment-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/><path d="M3 12h4l2-4 4 8 2-4h6"/></svg></div>
 <h3><?= ndEscape($item['treatmentname']) ?></h3>
-<?php if (ndHas($item['typ'])): ?><div class="ux-identity-field"><span>Kategorie</span><strong><?= ndEscape($item['typ']) ?></strong></div><?php endif; ?>
-<?php if (ndHas($item['unterkategorie'])): ?><div class="ux-identity-field"><span>Unterkategorie</span><strong><?= ndEscape($item['unterkategorie']) ?></strong></div><?php endif; ?>
+<div class="ux-identity-fields">
+<?php if (ndHas($item['typ'])): ?><div class="ux-identity-field ux-identity-category-field"><span>Kategorie</span><strong><?= ndEscape($item['typ']) ?></strong></div><?php endif; ?>
+<?php if (ndHas($item['unterkategorie'])): ?><div class="ux-identity-field ux-identity-subcategory-field"><span>Unterkategorie</span><strong><?= ndEscape($item['unterkategorie']) ?></strong></div><?php endif; ?>
+</div>
 
 </aside>
 <div data-treatment-score="overview"></div>
@@ -77,10 +79,9 @@ $views = ['ueberblick'=>'Überblick','termin'=>'Welche Belastungshürden gibt es
 <?= ndReducedChart($item,'effect','Community-Bewertung','effect') ?>
 <?= ndReducedChart($item,'gamechanger','Gamechanger','donut') ?>
 <section class="card ux-symptom-help" aria-labelledby="symptom-help-heading">
-<h3 id="symptom-help-heading">Wobei hat dir die Therapie geholfen?</h3>
-<p>Klicke die Symptome an, bei denen dir die Therapie geholfen hat. Erneutes Anklicken nimmt deine Stimme zurück.</p>
-<ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol>
-<div class="ux-symptom-picker" data-symptom-combobox><label for="symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="symptom-search" type="text" role="combobox" data-symptom-search placeholder="Symptom auswählen oder eintippen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="symptom-picker"><button type="button" data-symptom-toggle aria-label="Symptomliste öffnen" aria-controls="symptom-picker" aria-expanded="false">⌄</button></div><div id="symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div>
+<h3 id="symptom-help-heading">Symptome</h3>
+<div class="ux-symptom-grid"><ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol>
+<div class="ux-symptom-picker" data-symptom-combobox><label for="symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="symptom-search" type="text" role="combobox" data-symptom-search placeholder="＋ Weiteres Symptom hinzufügen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="symptom-picker"></div><div id="symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div></div>
 </section></section>
 <section id="alternativen" class="nd-panel" aria-label="Therapiealternativen" hidden>
 <section class="card ux-discovery ux-alternative-section"><h3>Alternative Therapien <span class="ux-heading-info"><button type="button" aria-label="Information zu alternativen Therapien" aria-describedby="therapy-alternatives-help">ⓘ</button><p id="therapy-alternatives-help" role="tooltip">Welche anderen Behandlungen kommen für einen ähnlichen Einsatz infrage? Hier sammelt die Community mögliche Alternativen zu dieser Therapie. Du kannst weitere Optionen ergänzen. Ein Eintrag bedeutet nicht, dass die Behandlungen gleich wirksam oder für jede Person austauschbar sind. Noch ungeprüfte Vorschläge sind gekennzeichnet.</p></span></h3>
@@ -95,11 +96,12 @@ if (!$relation['resolved_name']) continue;
 $href=$relation['resolved_nd_id'] ? 'therapie_detail.php?treatment_id='.(int)$relation['resolved_nd_id'].'#alternativen' : ($relation['resolved_legacy_id'] ? 'therapie_detail.html?treat_id='.(int)$relation['resolved_legacy_id'] : null);
 $key=$href ?? $relation['resolved_name']; if(isset($seen[$key]))continue; $seen[$key]=true; $relationCount++;
 ?><article class="ux-alternative-tile ux-feedback-relation">
+<small class="ux-alternative-role">Alternative Therapie</small>
+<?php if($href): ?><a class="ux-alternative-name" href="<?= ndEscape($href) ?>"><?= ndEscape($relation['resolved_name']) ?></a><?php else: ?><strong class="ux-alternative-name"><?= ndEscape($relation['resolved_name']) ?></strong><?php endif; ?>
 <div class="ux-alternative-categories"><?php if(ndHas($relation['resolved_category'] ?? null)): ?><span class="ux-alternative-category"><?= ndEscape($relation['resolved_category']) ?></span><?php endif; ?>
 <?php if(ndHas($relation['resolved_subcategory'] ?? null)): ?><span class="ux-alternative-subcategory"><?= ndEscape($relation['resolved_subcategory']) ?></span><?php endif; ?></div>
-<?php if($href): ?><a class="ux-alternative-name" href="<?= ndEscape($href) ?>"><?= ndEscape($relation['resolved_name']) ?></a><?php else: ?><strong class="ux-alternative-name"><?= ndEscape($relation['resolved_name']) ?></strong><?php endif; ?>
 <?php $relationStatement='„'.$relation['resolved_name'].'“ ist als alternative Therapie zu „'.$item['treatmentname'].'“ eingetragen.'; ?>
-<div class="ux-alternative-feedback"><small class="ux-feedback-statement"><?= ndEscape($relationStatement) ?></small><span data-treatment-relation-feedback="tr:<?= (int)$relation['relation_id'] ?>" data-feedback-statement="<?= ndEscape($relationStatement) ?>" data-feedback-standard="1"></span></div></article>
+<div class="ux-alternative-feedback"><span data-treatment-relation-feedback="tr:<?= (int)$relation['relation_id'] ?>" data-feedback-statement="<?= ndEscape($relationStatement) ?>" data-feedback-standard="1"></span></div></article>
 <?php endforeach; ?>
 <button type="button" class="ux-alternative-tile ux-alternative-add" data-treatment-relation-add data-kind="alternative"><span aria-hidden="true">＋</span><span>Weitere Therapie hinzufügen</span></button>
 </div></div>

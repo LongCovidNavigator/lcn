@@ -105,18 +105,21 @@
 :is(#doctor-location-clear-button,#treatment-location-clear-button,#top-map-location-clear,#doctor-detail-own-location-clear,[data-map-clear]).is-hidden { display:none!important; }
 #clear-location { top:7px; right:7px; }
 :is(.nearby-gps-search button[type="submit"],.nearby-gps-all,.top-map-location-submit,.lcn-map-submit,#location-form button[type="submit"],.treatment-detail-provider-location-set-button) {
- background:#007f7b!important; border:1px solid #007f7b!important; color:#fff!important; border-radius:8px; box-shadow:none!important;
+ background:#0878e3!important; border:1px solid #0878e3!important; color:#fff!important; border-radius:8px; box-shadow:none!important;
 }
 :is(.nearby-gps-search button[type="submit"],.nearby-gps-all,.top-map-location-submit,.lcn-map-submit,#location-form button[type="submit"],.treatment-detail-provider-location-set-button):hover {
- background:#006966!important; border-color:#006966!important; color:#fff!important;
+ background:#0666c3!important; border-color:#0666c3!important; color:#fff!important;
 }
-.nearby-gps-actions .nearby-gps-suggest { background:#f0f7f5!important; border-color:#d3e5df!important; color:#28625d!important; }
-.nearby-gps-actions .nearby-gps-suggest:hover { background:#e3f0eb!important; border-color:#abcfc1!important; color:#20574f!important; }
-:is(.doctor-location-mode-button,.treatment-location-mode-button).is-active { background:#007f7b!important; border-color:#007f7b!important; color:white!important; }
+.nearby-gps-actions .nearby-gps-suggest { background:#f0f7ff!important; border-color:#d3e5f8!important; color:#2862a0!important; }
+.nearby-gps-actions .nearby-gps-suggest:hover { background:#e3f0ff!important; border-color:#abcff5!important; color:#20578f!important; }
+:is(.doctor-location-mode-button,.treatment-location-mode-button).is-active { background:#0878e3!important; border-color:#0878e3!important; color:white!important; }
 .nearby-gps-radius-input-wrap { border:1px solid #c4d5d9; border-radius:8px; background:white; min-height:44px; }
-.nearby-gps-radius-input-wrap:focus-within { border-color:#007f7b; outline:2px solid #007f7b26; outline-offset:1px; }
+.nearby-gps-radius-input-wrap:focus-within { border-color:#0878e3; outline:2px solid #0878e326; outline-offset:1px; }
 .nearby-gps-search .nearby-gps-radius-input-wrap input { border:0!important; border-radius:0!important; box-shadow:none!important; background:transparent!important; outline:none!important; width:76px; min-width:0; min-height:44px; height:auto; padding:9px 4px 9px 12px; text-align:right; color:#17365d; }
 .nearby-gps-radius-input-wrap>span { padding:0 12px 0 6px; color:#657a83; }
-:is(.nearby-gps-search,.top-map-location-controls,#location-form) :is(input,select,button):focus-visible { outline:2px solid #007f7b; outline-offset:2px; }
-#nearby-gps-results .nearby-gps-actions .nearby-gps-suggest { background:#f0f7f5!important; border-color:#d3e5df!important; color:#28625d!important; }
-#nearby-gps-results .nearby-gps-actions .nearby-gps-suggest:hover { background:#e3f0eb!important; border-color:#abcfc1!important; color:#20574f!important; }
+:is(.nearby-gps-search,.top-map-location-controls,#location-form) :is(input,select,button):focus-visible { outline:2px solid #0878e3; outline-offset:2px; }
+#nearby-gps-results .nearby-gps-actions .nearby-gps-suggest { background:#f0f7ff!important; border-color:#d3e5f8!important; color:#2862a0!important; }
+#nearby-gps-results .nearby-gps-actions .nearby-gps-suggest:hover { background:#e3f0ff!important; border-color:#abcff5!important; color:#20578f!important; }
+
+/* Share the detail filter's blue slider color across both search navigations. */
+:is(.doctor-nav-section,.treatment-nav-section) input[type=range]{accent-color:#0878e3}

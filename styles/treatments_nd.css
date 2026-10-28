@@ -33,3 +33,4 @@
 .nd-local-origin span{background:#d74d63}
 .nd-detail #header-placeholder #nd-main-menu{left:auto;right:24px;top:calc(100% + 8px);width:300px;max-width:calc(100vw - 24px)}
 @media(max-width:800px){.nd-detail #header-placeholder #nd-main-menu{right:12px}}
+.nd-provider-map .travel-estimate details[open]>summary{margin-bottom:12px}

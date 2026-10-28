@@ -105,7 +105,7 @@ body.compact-doctor-header #header-placeholder .profile>.contact>a,body.compact-
 #treatment-section .doctor-detail-treatment-table .catalog-feedback button{min-width:30px;padding:4px!important}
 #treatment-section .doctor-detail-treatment-table th{overflow-wrap:normal;word-break:normal;hyphens:manual;font-size:12px}
 #treatment-section .doctor-detail-treatment-table th button>.table-heading-label{min-width:0;overflow-wrap:normal;hyphens:manual}
-.nd-provider-table th.nd-provider-map-column,.nd-provider-table td:nth-child(7){text-align:center!important}
+.nd-provider-table th.nd-provider-map-column,.nd-provider-table td:nth-child(8){text-align:center!important}
 .nd-provider-table thead th>button{display:inline-flex;align-items:center;gap:4px;background:transparent;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
 .nd-provider-table thead th{vertical-align:middle}.nd-provider-table thead th:last-child button{font-size:11px}
 .nd-provider-table thead .catalog-report-column{color:#17365d!important;font-weight:600!important}
@@ -121,16 +121,16 @@ body.compact-doctor-header #header-placeholder .profile>.contact>a,body.compact-
 #treatment-section .doctor-detail-treatment-table :is(th,td):nth-child(3),#treatment-section .doctor-detail-treatment-category-inline{overflow-wrap:normal!important;word-break:normal!important;hyphens:auto;white-space:normal}
 .ux-detail .nd-provider-table{table-layout:fixed;width:100%}
 .ux-detail .nd-provider-table :is(th,td){box-sizing:border-box;min-width:0!important;padding-left:10px!important;padding-right:10px!important}
-.ux-detail .nd-provider-table :is(th,td):nth-child(1){width:5%!important;text-align:left!important}
-.ux-detail .nd-provider-table :is(th,td):nth-child(2){width:27%!important;text-align:left!important}
-.ux-detail .nd-provider-table :is(th,td):nth-child(3){width:13%!important;text-align:left!important}
-.ux-detail .nd-provider-table :is(th,td):nth-child(4){width:15%!important;text-align:left!important}
-.ux-detail .nd-provider-table :is(th,td):nth-child(5){width:12%!important;text-align:center!important}
-.ux-detail .nd-provider-table :is(th,td):nth-child(6){width:9%!important;text-align:center!important}
-.ux-detail .nd-provider-table :is(th,td):nth-child(7){width:7%!important;text-align:center!important}
-.ux-detail .nd-provider-table :is(th,td):nth-child(8){width:12%!important;text-align:center!important}
+.ux-detail .nd-provider-table :is(th,td):nth-child(1){width:4%!important;text-align:left!important}
+.ux-detail .nd-provider-table :is(th,td):nth-child(2){width:24%!important;text-align:left!important}
+.ux-detail .nd-provider-table :is(th,td):nth-child(3){width:8%!important;text-align:left!important}
+.ux-detail .nd-provider-table :is(th,td):nth-child(4){width:10%!important;text-align:left!important}
+.ux-detail .nd-provider-table :is(th,td):nth-child(5){width:13%!important;text-align:center!important}
+.ux-detail .nd-provider-table :is(th,td):nth-child(6){width:12%!important;text-align:center!important}
+.ux-detail .nd-provider-table :is(th,td):nth-child(7){width:8%!important;text-align:center!important}
+.ux-detail .nd-provider-table :is(th,td):nth-child(8){width:7%!important;text-align:center!important}
 .ux-detail .nd-provider-table thead th:nth-child(n+5)>button{justify-content:center;text-align:center}
-.ux-detail .nd-provider-table tbody td:nth-child(7)>.nd-show-provider{display:inline-block;width:auto;padding:4px 8px!important;font-size:12px;line-height:20px;min-height:0;margin:0}
+.ux-detail .nd-provider-table tbody td:nth-child(8)>.nd-show-provider{display:inline-block;width:auto;padding:4px 8px!important;font-size:12px;line-height:20px;min-height:0;margin:0}
 .ux-detail .nd-provider-table .catalog-feedback{justify-content:center;gap:2px}
 .ux-detail .nd-provider-table .catalog-feedback button{min-width:30px;padding:4px!important}
 .ux-detail .nd-provider-table .nd-provider-group-row th{width:auto!important;text-align:left!important}
@@ -138,8 +138,8 @@ body.compact-doctor-header #header-placeholder .profile>.contact>a,body.compact-
 
 /* Alternative therapies: a quiet horizontal card strip; only target cards carry votes. */
 .ux-alternative-strip{display:flex;align-items:stretch;gap:20px;padding:18px;border:1px solid #e1edf8;border-radius:10px;background:#fbfdff;max-width:100%;box-sizing:border-box}
-.ux-alternative-options{display:flex;flex:1;min-width:0;align-items:stretch;gap:14px;border-left:4px solid #bdcfe0;padding-left:20px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-padding-inline:20px;padding-bottom:8px}
-.ux-alternative-strip .ux-alternative-tile{box-sizing:border-box;flex:0 0 215px;width:215px;min-width:215px;min-height:168px;padding:15px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:8px;border:1px solid #dce9f3;border-radius:8px;background:#fff;color:#173b62;text-align:left;font:400 13px/1.45 Arial,Helvetica,sans-serif;overflow-wrap:anywhere}
+.ux-alternative-options{display:flex;flex:1;min-width:0;align-items:stretch;gap:14px;border-left:4px solid #bdcfe0;padding-left:20px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-padding-inline:20px;padding-bottom:0}
+.ux-alternative-strip .ux-alternative-tile{box-sizing:border-box;flex:0 0 215px;width:215px;min-width:215px;min-height:0;padding:15px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:8px;border:1px solid #dce9f3;border-radius:8px;background:#fff;color:#173b62;text-align:left;font:400 13px/1.45 Arial,Helvetica,sans-serif;overflow-wrap:anywhere}
 .ux-alternative-strip .ux-alternative-current{background:#f2f7fb;border-left:3px solid #6997c2}
 .ux-alternative-current small{color:#547baa;font-size:11px}
 .ux-alternative-current strong,.ux-alternative-strip .ux-alternative-name{font-size:15px;font-weight:600;line-height:1.4;color:#173b62}
@@ -253,11 +253,18 @@ body.compact-doctor-header #header-placeholder .profile>.contact>a,body.compact-
 .treatment-relation-preview:has(.treatment-relation-selection){display:flex;flex-wrap:wrap;gap:8px}.treatment-relation-selection{display:inline-flex;align-items:center;gap:8px;padding:5px 9px;background:#fff;border:1px solid #d5e2ef;border-radius:6px;font-size:14px}.treatment-relation-selection>button{padding:0 4px!important;min-width:24px;border:0!important;background:transparent!important;font-size:18px!important}.treatment-relation-dialog{max-height:90dvh;overflow-y:auto}
 
 /* Compact combination cards: identity is indicated by the badge alone. */
+.ux-combination-parts{grid-auto-rows:auto}
+.ux-combinations .ux-combination-parts>.ux-combination-part{grid-row:span 3;grid-template-rows:subgrid;row-gap:6px}
+.ux-combinations .ux-combination-part>.ux-combination-current{grid-row:1}
+.ux-combinations .ux-combination-part>a,.ux-combinations .ux-combination-part>strong{grid-column:1;grid-row:2;align-self:start}
+.ux-combinations .ux-combination-part>small:not(.ux-combination-current){grid-row:3}
+.ux-combinations .ux-combination-parts>.ux-combination-add-part{grid-row:span 3}
 .ux-combinations .ux-combination-parent,.ux-combinations .ux-combination-part{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 12px;min-height:64px;padding:12px}
 .ux-combinations .ux-combination-parent{width:360px;text-align:left}
 .ux-combinations .ux-combination-current{grid-column:1 / -1;justify-self:start}
 .ux-combinations .ux-combination-part>small:not(.ux-combination-current),.ux-combinations .ux-combination-parent>small:not(.ux-combination-current){grid-column:1 / -1}
 .ux-combinations .ux-combination-assertion{grid-column:2;grid-row:auto;align-self:center;margin:0;border:0;padding:0;min-width:0}
+.ux-combinations .ux-combination-part>.ux-combination-assertion{grid-row:2;align-self:start}
 .ux-combinations .ux-combination-assertion .catalog-feedback{flex-wrap:nowrap;justify-content:flex-end;gap:2px}
 .ux-combinations .ux-combination-assertion .catalog-feedback button{padding:4px 5px;min-width:28px;font-size:11px}
 .ux-combinations .ux-combination-add-part{min-height:64px}
@@ -289,3 +296,23 @@ body #feedback,body.ux-page .ux-answer-status,.catalog-feedback-notice,.catalog-
 .catalog-feedback-notice[data-tone=confirm] .catalog-feedback-action{color:#287553;}
 .catalog-feedback-notice[data-tone=oppose] .catalog-feedback-action{color:#a43e57;}
 
+
+.ux-detail .nd-provider-table :is(th,td):nth-child(9){width:14%!important;text-align:center!important}
+
+.ux-alternative-strip .ux-alternative-role{color:#547baa;font-size:11px;line-height:1.45}
+
+/* Center numeric groups while keeping digits and units vertically aligned. */
+.ux-detail .nd-provider-table .provider-numeric-value{display:inline-flex;align-items:baseline;justify-content:flex-end;gap:.5ch;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ux-detail .nd-provider-table .provider-value-number{display:inline-block;flex:0 0 var(--number-width,3ch);width:var(--number-width,3ch);text-align:right}
+.ux-detail .nd-provider-table .provider-value-unit{display:inline-block;text-align:left}
+.ux-detail .nd-provider-table .catalog-rating-number.catalog-rating-negative{color:#a43e57}
+.ux-detail .nd-provider-table :is(th,td):nth-child(4){text-align:center!important}
+.ux-detail .nd-provider-table thead th:nth-child(4)>button{justify-content:center;text-align:center;width:100%}
+
+.ux-detail .nd-provider-table .provider-value-number{min-width:0}
+
+/* Center the feedback heading and both choices on the same column axis. */
+#view-content .nd-provider-table .catalog-report-column{box-sizing:border-box;width:120px!important;min-width:120px!important;max-width:140px!important;padding:10px 12px!important;text-align:center!important}
+#view-content .nd-provider-table th.catalog-report-column button{display:block;width:100%;text-align:center;white-space:nowrap}
+#view-content .nd-provider-table td.catalog-report-column .catalog-feedback{width:100%;justify-content:center;align-items:center;gap:6px;margin:0}
+#view-content .nd-provider-table td.catalog-report-column .catalog-feedback button{min-width:34px;padding:5px!important}

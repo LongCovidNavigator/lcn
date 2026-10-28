@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<script src="scripts/online_access.js?v=open-map-20261016" defer></script>
+<script src="scripts/online_access.js?v=contextual-map-legend-20261027" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LCN – Testansicht Therapie-Detail</title>

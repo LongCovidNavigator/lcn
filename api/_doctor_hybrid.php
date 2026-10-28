@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . '/_lcn_db.php';
 
+// Explicit editorial exception, verified 2026-10-26:
+// https://www.dr-med-kristina-schultheiss.de/faqs (no in-person appointments).
+// All other providers' online access is evaluated from community answers only.
+const LCN_VERIFIED_ONLINE_ONLY_DOCTOR_IDS = [609];
+
 // Development selection: keep the original LCN IDs for routes and relationships.
 const LCN_PRIORITY_DOCTOR_IDS = [2,542,581,589,608,609,613,627,645,673,676,679,686,690,694,775,1056,1057,1059,1074,1111,1112,1147,1148,1149,1150,1151,1152,1153,1154,1155,1156,1157,1158,1159,1160,1161,1162,1163];
 
@@ -41,7 +46,7 @@ function lcnDoctorResearch(PDO $pdo, int $id): array
 {
     $stmt = $pdo->prepare('SELECT * FROM tbl_entities_nd WHERE lcn_id = ?');
     $stmt->execute([$id]);
-    $result = ['entity' => $stmt->fetch()];
+    $result = ['entity' => $stmt->fetch(), 'online_only_verified' => in_array($id, LCN_VERIFIED_ONLINE_ONLY_DOCTOR_IDS, true)];
     foreach (['specialty' => ['tbl_fachrichtungen_nd', 'fachrichtung'], 'qualifications' => ['tbl_zusatzqualifikationen_nd', 'zusatzqualifikation'], 'specializations' => ['tbl_spezialisierungen_nd', 'spezialisierung']] as $key => [$table, $column]) {
         $stmt = $pdo->prepare("SELECT id AS term_id, $column AS term_label FROM $table WHERE lcn_id = ? ORDER BY $column");
         $stmt->execute([$id]);

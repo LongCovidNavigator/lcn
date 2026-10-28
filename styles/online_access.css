@@ -5,3 +5,11 @@
 .nd-provider-table th button{background:none;border:0;color:inherit;font:inherit;font-weight:700;padding:0;cursor:pointer;text-align:left}
 
 .travel-scale{grid-template-columns:repeat(7,minmax(85px,1fr))!important;overflow-x:auto}.travel-online-level .travel-scale-bar{background:#176748!important}.travel-online-level{color:#176748}.travel-level-6 .travel-scale-bar{background:#bd4949!important}
+/* Share the label row height so wrapped online text keeps every bar aligned. */
+.travel-scale{grid-template-rows:auto auto auto auto}
+.travel-scale>li{display:grid;grid-row:span 4;grid-template-rows:subgrid;row-gap:0}
+
+.lcn-shared-tooltip{position:fixed;z-index:10000;width:420px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:16px;background:#fff;border:1px solid #dbe5f1;box-shadow:0 6px 22px #17365d20;border-radius:8px;font:400 14px/1.6 Arial,sans-serif;color:#62769a;pointer-events:none}
+.lcn-shared-tooltip[hidden]{display:none}
+#view-content .nd-provider-heading>.lcn-online-badge{flex:0 1 auto;max-width:155px;margin:0 0 0 auto;text-align:center;font-size:11px}
+#view-content .nd-provider-heading>h4{min-width:0}

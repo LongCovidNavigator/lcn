@@ -106,7 +106,7 @@ function lcnDoctorComparisonProfiles(PDO $pdo, bool $includeDummy): array
         $id=(int)$row['dr_id'];if(!isset($profiles[$id])||isset($located[$id]))continue;
         $profiles[$id]['lat']=(float)$row['loc_lat'];$profiles[$id]['lng']=(float)$row['loc_lng'];$located[$id]=true;
     }
-    $remote=lcnDoctorOnlineAccess($pdo,$includeDummy);foreach($profiles as $id=>&$profile)$profile['onlineFirst']=$remote[$id]['complete']??false;unset($profile);
+    $remote=lcnDoctorOnlineAccess($pdo,$includeDummy);foreach($profiles as $id=>&$profile){$profile['onlineFirst']=$remote[$id]['complete']??false;$profile['researchedOnlineComplete']=$remote[$id]['researchedComplete']??false;$profile['researchedRemoteFirst']=$remote[$id]['researchedFirst']??false;$profile['researchedRemoteFollow']=$remote[$id]['researchedFollow']??false;}unset($profile);
     return array_values($profiles);
 }
 

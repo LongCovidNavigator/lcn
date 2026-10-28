@@ -3,7 +3,7 @@ const options=(n,i,size)=>({options:Array.from({length:size},(_,j)=>({count:j===
 const base={questions:{adaptation:options(10,4,5),'costs-gkv':options(10,0,8),wait:options(10,0,5),'wait-followup':options(10,0,5),effect:options(10,3,4),'appointment-0-2':options(10,1,2),'appointment-1-2':options(10,1,2)},costKey:'costs-gkv',treatmentCount:60,categoryCount:8,distance:10};
 let r=calculate(base);assert.equal(r.coverage,100);assert.equal(r.rows.reduce((n,r)=>n+r.weight,0),100);assert(!r.rows.some(r=>r.label==='Redaktionelle Auswahl'));
 const row=(data,label)=>calculate(data).rows.find(r=>r.label===label);
-assert.equal(row(base,'Termin-Anpassung').weight,6);assert.equal(row(base,'Ersttermin aus der Ferne').weight,3);assert.equal(row(base,'Folgetermin aus der Ferne').weight,3);assert.equal(row(base,'Persönliche Anreise').weight,18);assert.equal(row(base,'Eigene Therapiekosten').weight,20);assert.equal(row(base,'Anzahl Therapien').weight,7);assert.equal(row(base,'Vielfalt der Kategorien').weight,3);
+assert.equal(row(base,'Termin-Anpassung').weight,6);assert.equal(row(base,'Ersttermin aus der Ferne').weight,3);assert.equal(row(base,'Folgetermin aus der Ferne').weight,3);assert.equal(row(base,'Persönliche Anreise').weight,18);assert.equal(row(base,'Eigene Behandlungskosten').weight,20);assert.equal(row(base,'Anzahl Therapien').weight,7);assert.equal(row(base,'Vielfalt der Kategorien').weight,3);
 for(const [i,points] of [[0,0],[1,10],[2,20],[3,30]])assert.equal(row({...base,questions:{...base.questions,effect:options(10,i,4)}},'Berichtete Zustandsveränderung').value*30,points);
 const remote={...base,distance:5000,questions:{...base.questions,adaptation:options(10,0,5),'appointment-0-2':options(10,0,2),'appointment-1-2':options(10,0,2)}};
 r=calculate(remote);assert(r.remoteComplete);assert.equal(r.earned,100);assert.equal(r.rows.filter(r=>r.remoteOverride).reduce((n,r)=>n+r.value*r.weight,0),30);
@@ -14,4 +14,20 @@ assert.equal(calculate({questions:{'appointment-0-2':options(10,1,2)},onlineFirs
 assert.equal(calculate({questions:{'appointment-0-1':options(10,0,2),'appointment-1-1':options(10,0,2)}}).remoteComplete,true);
 assert.equal(calculate({questions:{}}).score,null);assert.equal(row({questions:{},distance:10},'Persönliche Anreise').value,.8);
 assert.equal(row({...base,treatmentCount:600},'Anzahl Therapien').value,1);assert.equal(row({...base,categoryCount:99},'Vielfalt der Kategorien').value,1);
-console.log('PASS: 30/30/40 weights; full remote replaces entire burden block; only one remote visit insufficient; thresholds, distances, cost and therapy caps.');
+const researchQuestions={};
+const researched=calculate({questions:researchQuestions,researchedOnlineComplete:true});
+assert.equal(researched.remoteComplete,true);
+assert.equal(researched.earned,30);
+assert.equal(researched.coverage,30);
+for(const label of ['Termin-Anpassung','Ersttermin aus der Ferne','Folgetermin aus der Ferne','Persönliche Anreise']){
+ const item=researched.rows.find(r=>r.label===label);
+ assert.equal(item.value,1);assert.equal(item.researchConfirmed,true);
+ assert(item.reason.includes('Redaktion / Recherche'));
+}
+assert.deepEqual(researchQuestions,{},'Research must not generate community answers');
+const followOnly=calculate({questions:{},researchedRemoteFollow:true});
+assert.equal(followOnly.remoteComplete,false);
+assert.equal(followOnly.earned,3);
+assert.equal(followOnly.rows.find(r=>r.label==='Ersttermin aus der Ferne').value,null);
+assert.equal(followOnly.rows.find(r=>r.label==='Folgetermin aus der Ferne').researchConfirmed,true);
+console.log('PASS: 30/30/40 weights; researched online practice scores 30 burden points without community answers; remote thresholds, distances, cost and therapy caps.');

@@ -2,9 +2,9 @@
 (function(root){
   'use strict';
   function topPercentLabel(percent){
-    if(percent==null||percent>50)return null;
+    if(percent==null)return null;
     if(percent<1)return percent<=0?'unter 0,01':(Math.ceil(percent*100)/100).toLocaleString('de-DE',{maximumFractionDigits:2});
-    return String([1,3,5,10,20,30,40,50].find(step=>percent<=step));
+    return String([1,3,5,10,20,30,40,50,60,80,100].find(step=>percent<=step));
   }
   function relativeRank(own,values,lowerIsBetter=false){
     if(own==null||!values.length)return null;
