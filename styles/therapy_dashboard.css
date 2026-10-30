@@ -1,0 +1,263 @@
+/* Compact therapy dashboard, matching the detail page's normal type scale. */
+.ux-detail [data-treatment-dashboard] .dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-card{padding:18px;grid-column:auto;margin:0;min-width:0}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-card:is([data-dashboard-question="distance"],[data-dashboard-question="access"],[data-dashboard-question$="cost"]){grid-column:1/-1}
+.ux-detail [data-treatment-dashboard] .assessment-header{flex-wrap:wrap;gap:5px 12px;margin-bottom:8px;align-items:center}
+.ux-detail [data-treatment-dashboard] h3{font-size:17px;line-height:1.35;margin:0}
+.ux-detail [data-treatment-dashboard] .assessment-count{font-size:12px;text-align:left;margin:0 0 0 auto!important}
+.ux-detail [data-treatment-dashboard] .dashboard-points{font-size:23px;margin:6px 0 12px;line-height:1.3}
+.ux-detail [data-treatment-dashboard] .dashboard-points small{font-size:12px}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-score-note{font-size:12px!important;line-height:1.5;margin:10px 0 0!important}
+.ux-detail [data-treatment-dashboard] .dashboard-detail{font-size:13px;margin-top:auto;padding-top:10px}
+.therapy-distribution-heading,.therapy-distribution-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(60px,1fr) 70px;gap:10px;align-items:center}
+.therapy-distribution-heading{font-size:11px;color:#607795;padding-bottom:7px;border-bottom:1px solid #dce7f2}
+.therapy-distribution-heading>span:last-child{text-align:right}
+.therapy-distribution-row{font-size:13px;line-height:1.4;padding:8px 0;border-bottom:1px solid #edf2f8}
+.therapy-distribution-row>b{text-align:right;font-size:12px;font-weight:500;color:#315e8c}
+.therapy-distribution-share{display:flex;flex-direction:column;gap:4px}
+.therapy-distribution-share strong{font-size:12px;color:#17365d;font-weight:600}
+.therapy-distribution-share .dashboard-track{height:7px}
+.therapy-distribution-share .dashboard-track>span{background:#75afe8}
+.therapy-compact-columns{display:grid;grid-template-columns:repeat(var(--columns),minmax(0,1fr));gap:10px;margin:2px 0 8px}
+.therapy-compact-column{display:grid;grid-template-rows:auto 65px 1fr auto;gap:6px;text-align:center;font-size:12px;line-height:1.4;min-width:0}
+.therapy-compact-column>strong{font-size:13px;color:#17365d}
+.therapy-compact-column>b{font-size:11px;font-weight:500;color:#526b80}
+.therapy-compact-bar{display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid #dce7f2}
+.therapy-compact-bar>span{display:block;width:55%;max-width:48px;border-radius:3px 3px 0 0;background:#75afe8}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="effect"] .therapy-compact-column:nth-child(1) .therapy-compact-bar>span{background:#e5a5ad}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="effect"] .therapy-compact-column:nth-child(2) .therapy-compact-bar>span{background:#d9e1ea}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="effect"] .therapy-compact-column:nth-child(3) .therapy-compact-bar>span{background:#9fd3b6}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="effect"] .therapy-compact-column:nth-child(4) .therapy-compact-bar>span{background:#63af94}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-gamechanger{flex:1;min-height:145px;gap:16px;flex-wrap:nowrap;margin:0 0 8px}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-ring{width:110px;height:110px;flex-basis:110px}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-ring:before{inset:16px}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-ring strong{font-size:20px}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-gamechanger>div:last-child{min-width:0}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-legend{font-size:12px;grid-template-columns:8px 1fr auto;gap:6px;margin:10px 0}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-legend b{grid-column:2/-1;font-size:11px;color:#526b80}
+.ux-detail [data-treatment-dashboard] .dashboard-travel-scale{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:10px 0}
+.ux-detail [data-treatment-dashboard] .dashboard-travel-scale>li{display:flex;flex-direction:column;align-items:stretch;text-align:center;gap:7px;padding:8px 5px;margin:0;font-size:12px}
+.ux-detail [data-treatment-dashboard] .dashboard-travel-color{min-height:0;height:7px;flex-shrink:0}
+.ux-detail [data-treatment-dashboard] .dashboard-travel-scale>li>span:nth-child(2){flex:1}
+.ux-detail [data-treatment-dashboard] .dashboard-travel-scale strong,.ux-detail [data-treatment-dashboard] .dashboard-travel-scale b{font-size:12px}
+.ux-detail [data-treatment-dashboard] .dashboard-travel-scale small{font-size:11px;line-height:1.4;margin-top:4px}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="distance"]>p{font-size:12px;margin:0}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="distance"]>a{font-size:13px;margin-top:8px}
+.ux-detail [data-treatment-dashboard] .dashboard-score-group{margin-top:28px;padding-top:22px}
+.ux-detail [data-treatment-dashboard] .dashboard-group-heading{gap:8px;margin-bottom:18px;font-size:22px}
+.ux-detail [data-treatment-dashboard] .dashboard-group-heading small{font-size:13px}
+.ux-detail [data-treatment-dashboard] .dashboard-group-number{width:34px;height:34px;font-size:17px}
+@media(max-width:800px){
+ .ux-detail [data-treatment-dashboard] .dashboard-grid{grid-template-columns:1fr}
+ .therapy-compact-columns{gap:7px}
+ .ux-detail [data-treatment-dashboard] [data-dashboard-question$="cost"] .therapy-compact-columns{grid-template-columns:repeat(5,minmax(0,1fr));row-gap:14px}
+ .ux-detail [data-treatment-dashboard] .dashboard-travel-scale{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:450px){
+ .ux-detail [data-treatment-dashboard] .ux-dashboard-card{padding:14px}
+ .ux-detail [data-treatment-dashboard] [data-dashboard-question$="cost"] .therapy-compact-columns{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 5px}
+ .therapy-compact-column{font-size:11px;grid-template-rows:auto 50px 1fr auto}
+ .therapy-compact-column>b{font-size:10px}
+ .ux-detail [data-treatment-dashboard] .dashboard-travel-scale{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* One cost component, with the chosen source visibly emphasized. */
+.therapy-dashboard-cost-group{grid-column:1/-1;padding:16px;border:1px solid #cbdff2;border-radius:9px;background:#f5f9fd;min-width:0}
+.therapy-cost-group-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.therapy-cost-group-heading>strong{font-size:18px;color:#0878db;white-space:nowrap}
+.therapy-dashboard-cost-group>p{font-size:12px!important;line-height:1.6;margin:8px 0 14px;color:#526b80}
+.therapy-cost-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ux-detail [data-treatment-dashboard] .therapy-cost-pair>.ux-dashboard-card{grid-column:auto;padding:14px;background:#fff;border-color:#dbe5ee}
+.ux-detail [data-treatment-dashboard] .therapy-cost-pair>.is-cost-basis{border-color:#75afe8;box-shadow:inset 0 3px #75afe8;background:#fafdff}
+.therapy-cost-basis-label{font-size:11px!important;line-height:1.4;margin:0 0 8px!important;color:#62769a}
+.is-cost-basis .therapy-cost-basis-label{color:#0865d9;font-weight:600}
+.ux-detail [data-treatment-dashboard] .therapy-cost-pair .therapy-compact-columns{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 6px}
+.ux-detail [data-treatment-dashboard] .therapy-cost-pair .therapy-compact-column{grid-template-rows:auto 45px 1fr auto;font-size:11px}
+.ux-detail [data-treatment-dashboard] .therapy-cost-pair .therapy-compact-column>b{font-size:10px}
+.ux-detail [data-treatment-dashboard] .therapy-cost-pair h3{font-size:16px}
+@media(max-width:1000px){.therapy-cost-pair{grid-template-columns:1fr}}
+@media(max-width:450px){.therapy-dashboard-cost-group{padding:10px}.therapy-cost-group-heading{align-items:flex-start;flex-direction:column;gap:6px}}
+.therapy-cost-selection-info{font-size:12px;line-height:1.6;color:#526b80;margin:0 0 14px}
+.therapy-cost-selection-info>summary{cursor:pointer;color:#0878db}
+.therapy-cost-selection-info>p{font-size:12px!important;margin:6px 0}
+
+.ux-detail .score-parts .therapy-score-part-name{font-weight:400}
+.ux-detail .score-parts .therapy-score-part-name>strong{font-weight:700}
+.ux-detail .score-parts .therapy-score-part-status{font-size:.9em;font-weight:400}
+.ux-detail .score-parts .therapy-score-part.is-excluded,
+.ux-detail .score-parts .therapy-score-part.is-excluded small{color:#8491a1}
+
+.therapy-stage-maximum,.therapy-stage-contribution{display:block;line-height:1.45}
+.therapy-stage-maximum{font-weight:400;color:#62769a}
+.therapy-stage-contribution{font-weight:600;color:#315e8c;margin-top:3px}
+.ux-detail [data-treatment-dashboard] .therapy-distribution-row{grid-template-columns:minmax(0,1.3fr) minmax(60px,1fr) 100px}
+.ux-detail [data-treatment-dashboard] .therapy-distribution-heading{grid-template-columns:minmax(0,1.3fr) minmax(60px,1fr) 100px}
+@media(max-width:450px){.ux-detail [data-treatment-dashboard] .therapy-distribution-row,.ux-detail [data-treatment-dashboard] .therapy-distribution-heading{grid-template-columns:minmax(0,1fr) 55px 83px;gap:7px}}
+
+/* Cost bands form one readable row each; percentages sit directly beside bars. */
+.therapy-cost-table{width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 8px;font-size:12px;line-height:1.4;color:#17365d}
+.therapy-cost-table th,.therapy-cost-table td{padding:9px 5px;border-bottom:1px solid #e6edf5;vertical-align:middle;text-align:right}
+.therapy-cost-table thead th{font-size:11px;font-weight:400;color:#62769a;vertical-align:bottom}
+.therapy-cost-table th:first-child{width:30%;text-align:left;padding-left:0}
+.therapy-cost-table th:nth-child(2){width:32%;text-align:left}
+.therapy-cost-table tbody th{font-weight:400;overflow-wrap:break-word}
+.therapy-cost-table td:last-child{font-weight:600;color:#315e8c;padding-right:0}
+.therapy-cost-share{display:flex;align-items:center;gap:6px}
+.therapy-cost-share .dashboard-track{flex:1;min-width:15px;height:7px}
+.therapy-cost-share .dashboard-track>span{background:#75afe8}
+.therapy-cost-share strong{font-size:11px;font-weight:500;min-width:43px;white-space:nowrap}
+@media(max-width:450px){.therapy-cost-table{font-size:11px}.therapy-cost-table th,.therapy-cost-table td{padding:8px 3px}.therapy-cost-table thead th{font-size:10px}.therapy-cost-share{gap:4px}.therapy-cost-share strong{min-width:38px;font-size:10px}}
+
+/* Separate point columns with numeric cells only. */
+.ux-detail [data-treatment-dashboard] .therapy-distribution-heading,
+.ux-detail [data-treatment-dashboard] .therapy-distribution-row{grid-template-columns:minmax(0,1.2fr) minmax(60px,1fr) 64px 76px;gap:10px}
+.therapy-distribution-heading>span:nth-last-child(-n+2){text-align:right}
+.therapy-distribution-row>.therapy-stage-maximum,
+.therapy-distribution-row>.therapy-stage-contribution{display:block;text-align:right;margin:0;font-size:12px}
+.therapy-stage-values{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.therapy-stage-values>span{margin:0}
+.therapy-stage-key{display:flex;justify-content:flex-end;gap:16px;font-size:11px;color:#62769a;margin:0 0 8px}
+@media(max-width:600px){
+ .ux-detail [data-treatment-dashboard] .therapy-distribution-heading,
+ .ux-detail [data-treatment-dashboard] .therapy-distribution-row{grid-template-columns:minmax(0,1fr) 65px 54px 65px;gap:6px}
+ .therapy-distribution-heading{font-size:10px}
+}
+
+/* Numeric headings and values share a centered column axis. */
+.ux-detail [data-treatment-dashboard] .therapy-distribution-heading>span:nth-last-child(-n+2),
+.ux-detail [data-treatment-dashboard] .therapy-distribution-row>.therapy-stage-maximum,
+.ux-detail [data-treatment-dashboard] .therapy-distribution-row>.therapy-stage-contribution{ text-align:center; }
+.ux-detail [data-treatment-dashboard] .therapy-cost-table tr>:nth-child(3),
+.ux-detail [data-treatment-dashboard] .therapy-cost-table tr>:nth-child(4){ text-align:center;padding-left:5px;padding-right:5px; }
+.therapy-stage-maximum,.therapy-stage-contribution,.therapy-cost-table td,.therapy-cost-share strong{font-variant-numeric:tabular-nums;}
+
+.therapy-calculation-help{font-size:12px;line-height:1.6;margin:4px 0 12px;color:#526b80}
+.therapy-calculation-help>summary{cursor:pointer;color:#0878db;font-weight:400}
+.therapy-calculation-help>p{font-size:12px!important;line-height:1.65;margin:8px 0 0;padding:10px 12px;background:#f5f9fd;border-radius:6px}
+.ux-detail .score-parts .therapy-score-part>.therapy-calculation-help{grid-column:1/-1;flex-basis:100%;width:100%;margin:0}
+.ux-detail .score-parts .therapy-score-part{flex-wrap:wrap}
+.ux-detail .score-parts .is-excluded .therapy-calculation-help>summary{color:#8491a1}
+
+.therapy-score-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:14px;line-height:1.5}
+.therapy-score-table th,.therapy-score-table td{padding:13px 12px;border-bottom:1px solid #e1eafa;text-align:left;vertical-align:middle}
+.therapy-score-table th:first-child{width:40%}
+.therapy-score-table th:nth-child(2){width:26%}
+.therapy-score-table tr>:nth-child(n+3){text-align:center;font-variant-numeric:tabular-nums}
+.therapy-score-table .therapy-score-part-status small{display:block;font-size:11px;line-height:1.4;margin-top:4px}
+.therapy-score-table th,.therapy-score-table td{overflow-wrap:anywhere}
+.therapy-score-table tr>:last-child{text-align:center;font-variant-numeric:tabular-nums}
+.therapy-score-table thead th{font-size:12px;font-weight:400;color:#62769a;background:#f5f9fd}
+.therapy-score-table tbody th{font-weight:400}
+.therapy-score-table tfoot th,.therapy-score-table tfoot td{font-weight:700;background:#edf6ff;border-top:2px solid #bfd9f2;border-bottom:0;color:#17365d}
+@media(max-width:600px){.therapy-score-table{font-size:12px}.therapy-score-table th,.therapy-score-table td{padding:10px 7px}.therapy-score-table th:first-child{width:34%}.therapy-score-table th:nth-child(2){width:28%}.therapy-score-table thead th{font-size:11px}.therapy-score-table .therapy-score-part-status{font-size:11px}}
+
+.therapy-score-scroll{max-width:100%;overflow-x:auto}
+.therapy-score-scroll:focus-visible{outline:2px solid #0878e3;outline-offset:3px}
+@media(max-width:600px){.therapy-score-table{min-width:620px}.therapy-score-table th:first-child{width:40%}.therapy-score-table th:nth-child(2){width:26%}}
+
+.therapy-data-requirement{font-size:12px!important;line-height:1.6;margin:4px 0 8px;padding:9px 12px;color:#526b80;background:#f5f9fd;border-radius:6px}
+
+.therapy-calculation-cases{margin:8px 0 0;padding:12px 16px;background:#f5f9fd;border-radius:6px;font-size:12px;line-height:1.65}
+.therapy-calculation-cases p{font-size:12px!important;line-height:1.65;margin:0 0 10px}
+.therapy-calculation-cases p:last-child{margin-bottom:0}
+.therapy-travel-cases{padding-left:22px;margin:0 0 12px}
+.ux-detail [data-treatment-dashboard] .therapy-travel-cases>li{margin:0 0 10px;padding-left:3px}
+
+.therapy-dashboard-title-link{color:inherit;text-decoration:none}
+.therapy-dashboard-title-link:hover{text-decoration:underline;text-underline-offset:3px}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-card>.therapy-calculation-help{margin:12px 0 0;padding-top:4px}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-gamechanger{flex:0 0 auto}
+.therapy-dashboard-cost-group>.therapy-cost-selection-info{margin:12px 0 0}
+
+.therapy-travel-cases:has(>li[data-case-number]){list-style:none;padding-left:30px}
+.therapy-travel-cases>li[data-case-number]{position:relative}
+.therapy-travel-cases>li[data-case-number]::before{content:attr(data-case-number) ".";position:absolute;right:calc(100% + 7px);white-space:nowrap}
+
+.ux-detail [data-treatment-dashboard] .ux-dashboard-card:is([data-dashboard-question="effect"],[data-dashboard-question="gamechanger"])>.therapy-calculation-help{margin-top:auto;padding-top:16px}
+
+/* Center the Gamechanger graphic and keep the legend close to the ring. */
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-gamechanger{display:grid;grid-template-columns:160px minmax(130px,190px);justify-content:center;align-items:center;gap:28px;min-height:215px;margin:8px 0 16px}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring{width:160px;height:160px}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring:before{inset:22px}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring strong{font-size:28px}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring small{font-size:14px}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-legend{font-size:14px;gap:10px;margin:18px 0}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-legend>strong{font-size:19px;color:#17365d}
+@media(max-width:1300px){.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-gamechanger{grid-template-columns:140px minmax(100px,160px);gap:18px}.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring{width:140px;height:140px}}
+@media(max-width:450px){.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-gamechanger{grid-template-columns:130px minmax(100px,140px);gap:16px;min-height:180px}.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring{width:130px;height:130px}.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring:before{inset:18px}.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-legend>strong{font-size:17px}}
+
+/* Cards in the same row grow together when either explanation is expanded. */
+.ux-detail [data-treatment-dashboard] .dashboard-grid>.ux-dashboard-card{align-self:stretch}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-card>.therapy-calculation-help{flex:0 0 auto;overflow-anchor:none}
+
+/* Natural card heights and one consistent distance to each explanation. */
+.ux-detail [data-treatment-dashboard] .ux-dashboard-card>.therapy-calculation-help,
+.ux-detail [data-treatment-dashboard] .ux-dashboard-card:is([data-dashboard-question="effect"],[data-dashboard-question="gamechanger"])>.therapy-calculation-help{margin:12px 0 0;padding:0}
+.ux-detail [data-treatment-dashboard] .dashboard-grid:has(>[data-dashboard-question="gamechanger"]){grid-template-columns:minmax(0,2fr) minmax(0,1fr);align-items:stretch}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-gamechanger{grid-template-columns:120px minmax(105px,145px);gap:18px;min-height:0;margin:4px 0 0}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring{width:120px;height:120px}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring:before{inset:17px}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring strong{font-size:24px}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-legend{grid-template-columns:8px auto auto;justify-content:end;column-gap:8px;margin:12px 0}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-legend>strong{font-size:17px;min-width:45px;text-align:right}
+@media(min-width:801px) and (max-width:1500px){
+ .ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-gamechanger{grid-template-columns:1fr;gap:8px;justify-items:center}
+ .ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-gamechanger>div:last-child{width:145px}
+}
+@media(max-width:800px){.ux-detail [data-treatment-dashboard] .dashboard-grid:has(>[data-dashboard-question="gamechanger"]){grid-template-columns:1fr}}
+
+/* Matching chart regions keep the experience cards aligned without moving on expansion. */
+.ux-detail [data-treatment-dashboard] .dashboard-grid:has(>[data-dashboard-question="gamechanger"]){grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-card:is([data-dashboard-question="effect"],[data-dashboard-question="gamechanger"]) .assessment-header{min-height:42px;margin-bottom:8px}
+.therapy-effect-columns{display:grid;grid-template-columns:100px repeat(4,minmax(0,1fr));grid-template-rows:100px 38px 24px 28px;gap:4px 10px;height:220px;box-sizing:border-box;padding-top:10px;align-items:center;text-align:center;font-size:12px;line-height:1.35}
+.therapy-effect-bar-area{height:100px;display:flex;justify-content:center;align-items:flex-end;border-bottom:1px solid #dce7f2}
+.therapy-effect-bar{display:block;width:55%;max-width:60px;min-height:0;position:relative;border-radius:4px 4px 0 0}
+.therapy-effect-bar>strong{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);white-space:nowrap;color:#17365d;font-size:13px}
+.therapy-effect-bar.effect-0{background:#e5a5ad}.therapy-effect-bar.effect-1{background:#d9e1ea}.therapy-effect-bar.effect-2{background:#9fd3b6}.therapy-effect-bar.effect-3{background:#63af94}
+.therapy-effect-row-heading{text-align:left;color:#62769a;font-size:11px}
+.therapy-effect-number{color:#315e8c;font-variant-numeric:tabular-nums}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-gamechanger{height:220px;min-height:0;margin:0;grid-template-columns:120px minmax(85px,125px);gap:12px}
+.ux-detail [data-treatment-dashboard] .ux-dashboard-card:is([data-dashboard-question="effect"],[data-dashboard-question="gamechanger"])>.therapy-calculation-help{margin:12px 0 0;padding:0}
+@media(min-width:801px) and (max-width:1500px){.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-gamechanger{grid-template-columns:1fr;grid-template-rows:130px 70px;gap:0;justify-items:center}}
+@media(max-width:800px){.ux-detail [data-treatment-dashboard] .dashboard-grid:has(>[data-dashboard-question="gamechanger"]){grid-template-columns:1fr}}
+@media(max-width:450px){.therapy-effect-columns{grid-template-columns:65px repeat(4,minmax(0,1fr));gap:4px;font-size:10px}.therapy-effect-row-heading{font-size:10px}.therapy-effect-bar>strong{font-size:11px}}
+
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-legend{grid-template-columns:8px minmax(35px,1fr) 45px;justify-content:stretch}
+.ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-legend>span{text-align:left}
+
+/* Use the full chart width; put point-row labels in a narrow right-hand key. */
+.therapy-effect-columns{grid-template-columns:repeat(4,minmax(0,1fr)) 76px}
+.therapy-effect-columns>span:empty{display:none}
+.therapy-effect-columns>.therapy-effect-bar-area:nth-child(2){grid-column:1;grid-row:1}
+.therapy-effect-columns>.therapy-effect-bar-area:nth-child(3){grid-column:2;grid-row:1}
+.therapy-effect-columns>.therapy-effect-bar-area:nth-child(4){grid-column:3;grid-row:1}
+.therapy-effect-columns>.therapy-effect-bar-area:nth-child(5){grid-column:4;grid-row:1}
+.therapy-effect-columns>.therapy-effect-label:nth-child(7){grid-column:1;grid-row:2}
+.therapy-effect-columns>.therapy-effect-label:nth-child(8){grid-column:2;grid-row:2}
+.therapy-effect-columns>.therapy-effect-label:nth-child(9){grid-column:3;grid-row:2}
+.therapy-effect-columns>.therapy-effect-label:nth-child(10){grid-column:4;grid-row:2}
+.therapy-effect-columns>.therapy-effect-row-heading:nth-child(11){grid-column:5;grid-row:3}
+.therapy-effect-columns>.therapy-effect-number:nth-child(12){grid-column:1;grid-row:3}
+.therapy-effect-columns>.therapy-effect-number:nth-child(13){grid-column:2;grid-row:3}
+.therapy-effect-columns>.therapy-effect-number:nth-child(14){grid-column:3;grid-row:3}
+.therapy-effect-columns>.therapy-effect-number:nth-child(15){grid-column:4;grid-row:3}
+.therapy-effect-columns>.therapy-effect-row-heading:nth-child(16){grid-column:5;grid-row:4}
+.therapy-effect-columns>.therapy-effect-number:nth-child(17){grid-column:1;grid-row:4}
+.therapy-effect-columns>.therapy-effect-number:nth-child(18){grid-column:2;grid-row:4}
+.therapy-effect-columns>.therapy-effect-number:nth-child(19){grid-column:3;grid-row:4}
+.therapy-effect-columns>.therapy-effect-number:nth-child(20){grid-column:4;grid-row:4}
+.therapy-effect-columns>.therapy-effect-row-heading{font-size:10px;line-height:1.3}
+@media(max-width:450px){.therapy-effect-columns{grid-template-columns:repeat(4,minmax(0,1fr)) 58px}}
+
+/* Give Gamechanger a little more room and tighten the chart's right-hand key. */
+@media(min-width:801px){
+ .ux-detail [data-treatment-dashboard] .dashboard-grid:has(>[data-dashboard-question="gamechanger"]){grid-template-columns:minmax(0,1.8fr) minmax(0,1fr)}
+ .ux-detail [data-treatment-dashboard] [data-dashboard-question="effect"]{padding-right:12px}
+}
+.therapy-effect-columns{grid-template-columns:repeat(4,minmax(0,1fr)) 64px;column-gap:6px}
+@media(max-width:450px){.therapy-effect-columns{grid-template-columns:repeat(4,minmax(0,1fr)) 56px;column-gap:4px}}
+
+/* Four identical plot columns; the right-hand key does not widen the last one. */
+.therapy-effect-columns{grid-template-columns:repeat(4,minmax(0,1fr)) 64px;column-gap:6px}
+.therapy-effect-bar{width:68%;max-width:84px}
+@media(max-width:450px){.therapy-effect-columns{grid-template-columns:repeat(4,minmax(0,1fr)) 56px;column-gap:4px}.therapy-effect-bar{width:65%;max-width:60px}}

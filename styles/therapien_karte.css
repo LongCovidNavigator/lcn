@@ -750,6 +750,24 @@
     font-weight: 600;
 }
 
+.treatment-alias-smart-item-button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    padding: 3px 4px;
+    border-radius: 4px;
+}
+
+.treatment-alias-smart-item-button:hover,
+.treatment-alias-smart-item-button:focus-visible {
+    background: #e3efff;
+    text-decoration: underline;
+}
+
 .treatment-alias-smart-item-empty {
     color: #60718e;
     font-style: italic;

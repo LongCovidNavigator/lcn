@@ -11,6 +11,11 @@ function lcnNdCanTreatAtHome(array $item): bool
     return lcnNdIndependentAtHome($item) || (mb_stripos($setting,'selbstständig')!==false && mb_stripos($setting,'Hause')!==false);
 }
 
+function lcnNdRequiresPrescription(array $item): bool
+{
+    return preg_match('/ärztliche Verordnung|Rezept erforderlich|verschreibungspflichtig/iu', (string)($item['zugang'] ?? '')) === 1;
+}
+
 function lcnNdIndependentAtHome(array $item): bool
 {
     return mb_stripos((string)($item['typ'] ?? ''), 'Selbstmanagement') !== false;

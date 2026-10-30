@@ -51,7 +51,7 @@ function lcnNormalizeTreatmentRelationship(PDO $p,array $input,?array $graph=nul
    $r['kind']='brand';$r['description']=$g['entries'][$left]['treatmentname'].' ist Handelsname von '.$g['entries'][$right]['treatmentname'];
   }elseif(in_array($kind,['form_of','has_form'],true)){
    if(isset($g['generics'][$left])||isset($g['comboIds'][$left]))throw new InvalidArgumentException('Bitte eine Anwendungsform statt eines Handelsnamens oder einer Kombination auswählen.');
-   foreach($g['groups'] as $group)if($group['forms']&&$group['root']===$right&&isset($group['members'][$left]))throw new InvalidArgumentException('Diese Anwendungsform ist bereits zugeordnet.');
+   foreach($g['groups'] as $group)if($group['root']===$right&&isset($group['members'][$left]))throw new InvalidArgumentException('Dieser Eintrag ist bereits zugeordnet.');
    $r['kind']='form';$r['description']=$g['entries'][$left]['treatmentname'].' ist Anwendungsform von '.$g['entries'][$right]['treatmentname'];
   }elseif(in_array($kind,['variant_of','has_variant','detail_of','has_detail'],true)){
    $type=in_array($kind,['variant_of','has_variant'],true)?'substance_variant':'detailed_method';
@@ -76,8 +76,13 @@ function lcnTreatmentProposalAlias(PDO $p,string $name,string $type): int {
  if($rows)return (int)$rows[0]['alias_id'];
  $p->prepare('INSERT INTO tbl_aliases_03(alias,alias_type) VALUES(?,?)')->execute([$name,$type]);return (int)$p->lastInsertId();
 }
-function lcnTreatmentProposalLink(PDO $p,int $id,int $alias,int $submission): void {
+function lcnTreatmentProposalLink(PDO $p,int $id,int $alias,int $submission,?string $relation=null): void {
  if(!lcnNdRows($p,'SELECT 1 FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$id,$alias]))$p->prepare('INSERT INTO tbl_cpl_treatments_nd2aliases(treat_nd_id,alias_id,note) VALUES(?,?,?)')->execute([$id,$alias,'Geprüfter Verknüpfungsvorschlag #'.$submission]);
+ if($relation!==null){
+  $existing=lcnNdRows($p,'SELECT relation_type FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$id,$alias])[0]['relation_type'];
+  if($existing!==null&&$existing!==$relation)throw new DomainException('Die Kopplung hat bereits eine andere Verbindungsart.');
+  $p->prepare('UPDATE tbl_cpl_treatments_nd2aliases SET relation_type=? WHERE treat_nd_id=? AND alias_id=?')->execute([$relation,$id,$alias]);
+ }
 }
 /** Flag similar group names for review, excluding the group's own provisional page. */
 function lcnTreatmentGroupDuplicate(PDO $p,array $r,int $submissionId=0): ?array {
@@ -127,22 +132,22 @@ function lcnApproveTreatmentRelationship(PDO $p,array $row,array $payload): int 
   if($groupId)$p->prepare("UPDATE tbl_treatments_nd SET review_status='approved' WHERE treat_nd_id=? AND review_status='pending_group'")->execute([$groupId]);
   $alias=(int)($r['group_alias_id']??0);if($alias&&!isset($g['groups'][$alias]))throw new DomainException('Die Gruppe existiert nicht mehr.');
   if(!$alias)$alias=lcnTreatmentProposalAlias($p,(string)$r['group_name'],'umbrella_term');
-  if(!empty($g['groups'][$alias]['forms']))$p->prepare("UPDATE tbl_aliases_03 SET alias_type='application_form' WHERE alias_id=?")->execute([$alias]);
-  lcnTreatmentProposalLink($p,$left,$alias,$sid);$key='ag:'.$alias.':t:'.$left;
+  if($groupId)lcnTreatmentProposalLink($p,$groupId,$alias,$sid,'reference');
+  lcnTreatmentProposalLink($p,$left,$alias,$sid,'group_member');$key='ag:'.$alias.':t:'.$left;
  }elseif($kind==='brand'){
   if(($g['entries'][$left]['typ']??'')!=='Arzneimittel'||($g['entries'][$right]['typ']??'')!=='Arzneimittel'||isset($g['roots'][$left])||isset($g['roots'][$right]))throw new DomainException('Ungültige Wirkstoff-/Handelsnamen-Zuordnung.');
   lcnTreatmentProposalLink($p,$right,lcnTreatmentProposalAlias($p,$g['entries'][$left]['treatmentname'],'trade_name'),$sid);
   lcnTreatmentProposalLink($p,$left,lcnTreatmentProposalAlias($p,$g['entries'][$right]['treatmentname'],'generic_name'),$sid);$key='bn:'.$right.':'.$left;
  }elseif($kind==='form'){
-  $alias=0;foreach($g['groups'] as $group)if($group['root']===$right&&$group['forms']){$alias=$group['alias_id'];break;}
-  if($alias)$p->prepare("UPDATE tbl_aliases_03 SET alias_type='application_form' WHERE alias_id=?")->execute([$alias]);
-  else $alias=lcnTreatmentProposalAlias($p,$g['entries'][$right]['treatmentname'],'application_form');
-  foreach([$left,$right] as $id)lcnTreatmentProposalLink($p,$id,$alias,$sid);$key='ag:'.$alias.':t:'.$left;
+  $alias=lcnTreatmentProposalAlias($p,$g['entries'][$right]['treatmentname'],'umbrella_term');
+  lcnTreatmentProposalLink($p,$right,$alias,$sid,'reference');
+  lcnTreatmentProposalLink($p,$left,$alias,$sid,'application_form');$key='ag:'.$alias.':t:'.$left;
  }elseif(in_array($kind,['variant','detail'],true)){
   $type=$kind==='variant'?'substance_variant':'detailed_method';
-  foreach($g['groups'] as $group)if($group['root']===$right&&isset($group['members'][$left])&&($group['relation_type']??'')!==$type)throw new DomainException('Diese Zuordnung besteht bereits mit einer anderen Beziehungsart.');
-  $alias=lcnTreatmentProposalAlias($p,$g['entries'][$right]['treatmentname'],$type);
-  foreach([$left,$right] as $id)lcnTreatmentProposalLink($p,$id,$alias,$sid);$key='ag:'.$alias.':t:'.$left;
+  foreach($g['groups'] as $group)if($group['root']===$right&&isset($group['members'][$left])&&lcnGroupMemberRelation($group,$left)!=='unspecified'&&lcnGroupMemberRelation($group,$left)!==$type)throw new DomainException('Diese Zuordnung besteht bereits mit einer anderen Beziehungsart.');
+  $alias=lcnTreatmentProposalAlias($p,$g['entries'][$right]['treatmentname'],'umbrella_term');
+  lcnTreatmentProposalLink($p,$right,$alias,$sid,'reference');
+  lcnTreatmentProposalLink($p,$left,$alias,$sid,$type);$key='ag:'.$alias.':t:'.$left;
  }elseif($kind==='component'){
   $alias=lcnTreatmentProposalAlias($p,$g['entries'][$left]['treatmentname'],'combination_component');
   foreach([$left,$right] as $id)lcnTreatmentProposalLink($p,$id,$alias,$sid);$key='cp:'.$right.':'.$left;

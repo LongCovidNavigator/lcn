@@ -20,13 +20,37 @@
  // One bracket joins the combination to its components. Dashed branches are additions only.
  function initializeTrees(){document.querySelectorAll('[data-combination-tree]').forEach(tree=>{
   if(tree.dataset.bracketInitialized)return;tree.dataset.bracketInitialized='1';
+  const group=make('details'),summary=make('summary'),title=tree.querySelector('[data-combination-parent] > a,[data-combination-parent] > strong');
+  group.className='ux-combination-group';summary.textContent=title?.textContent||'Kombination';
+  tree.before(group);group.append(summary,tree);
+
   const drawing=tree.querySelector('.ux-combination-drawing'),parent=tree.querySelector('[data-combination-parent]'),svg=tree.querySelector('svg');let frame;
-  function draw(){frame=0;if(!drawing.getBoundingClientRect().width)return;const r=drawing.getBoundingClientRect(),p=parent.getBoundingClientRect(),parts=[...tree.querySelectorAll('[data-combination-part]')],add=tree.querySelector('[data-combination-add-part]'),children=[...parts,...(add?[add]:[])];svg.setAttribute('viewBox','0 0 '+drawing.offsetWidth+' '+drawing.offsetHeight);const paths=[];const px=p.left+p.width/2-r.left,py=p.bottom-r.top;const rail=(children[0]?.getBoundingClientRect().top||p.bottom+38)-r.top-18;
-   const path=(d,extra='')=>{const node=document.createElementNS('http://www.w3.org/2000/svg','path');node.setAttribute('d',d);if(extra)node.setAttribute('class',extra);paths.push(node);};
-   if(parts.length){const centers=parts.map(n=>{const b=n.getBoundingClientRect();return b.left+b.width/2-r.left;});path(`M${px},${py} V${rail} M${Math.min(...centers)},${rail} H${Math.max(...centers)}`);parts.forEach((n,i)=>path(`M${centers[i]},${rail} V${n.getBoundingClientRect().top-r.top}`));}
-   if(add){const a=add.getBoundingClientRect(),x=a.left+a.width/2-r.left;const start=parts.length?(()=>{const last=parts.at(-1).getBoundingClientRect();return last.left+last.width/2-r.left;})():px;path(`M${start},${parts.length?rail:py} V${rail} H${x} V${a.top-r.top}`,'is-add');}svg.replaceChildren(...paths);
+  function draw(){frame=0;if(!drawing.getBoundingClientRect().width)return;
+   const children=[...tree.querySelectorAll('[data-combination-part], [data-combination-add-part]')];
+   drawing.style.setProperty('--combination-columns',Math.max(1,children.length));
+   const r=drawing.getBoundingClientRect(),p=parent.getBoundingClientRect();
+   svg.setAttribute('width',r.width);svg.setAttribute('height',r.height);
+   svg.setAttribute('viewBox','0 0 '+r.width+' '+r.height);const paths=[],px=p.left+p.width/2-r.left,py=p.bottom-r.top;
+   const path=(d,dashed=false)=>{const node=document.createElementNS('http://www.w3.org/2000/svg','path');node.setAttribute('d',d);if(dashed)node.setAttribute('class','is-add');paths.push(node);};
+   if(children.length){
+    const boxes=children.map(n=>n.getBoundingClientRect()),centers=boxes.map(b=>b.left+b.width/2-r.left),rail=Math.min(...boxes.map(b=>b.top))-r.top-18;
+    path(`M${px},${py} V${rail}`);
+    const accepted=children.filter(n=>!n.hasAttribute('data-combination-add-part'));
+    const solid=accepted.map(n=>{const b=n.getBoundingClientRect();return b.left+b.width/2-r.left;});
+    if(solid.length)path(`M${Math.min(px,...solid)},${rail} H${Math.max(px,...solid)}`);
+    children.forEach((n,i)=>{const dashed=n.hasAttribute('data-combination-add-part'),start=centers[i]>=px?Math.max(px,...solid):Math.min(px,...solid);path(dashed?`M${start},${rail} H${centers[i]} V${boxes[i].top-r.top}`:`M${centers[i]},${rail} V${boxes[i].top-r.top}`,dashed);});
+   }svg.replaceChildren(...paths);
   }
-  const schedule=()=>{if(!frame)frame=requestAnimationFrame(draw);};new ResizeObserver(schedule).observe(drawing);new MutationObserver(schedule).observe(drawing.querySelector('.ux-combination-parts'),{childList:true,subtree:true});window.addEventListener('hashchange',schedule);schedule();
+  const schedule=()=>{if(!frame)frame=requestAnimationFrame(draw);};new ResizeObserver(schedule).observe(drawing);new MutationObserver(schedule).observe(drawing.querySelector('.ux-combination-parts'),{childList:true,subtree:true});window.addEventListener('hashchange',schedule);group.addEventListener('toggle',schedule);schedule();
+ });
+ document.querySelectorAll('[data-combination-section]').forEach(section=>{
+  const groups=[...section.querySelectorAll('.ux-combination-group')],multiple=groups.length>1;
+  groups.forEach(group=>{
+   const wasSingle=group.classList.contains('is-single');
+   group.classList.toggle('is-single',!multiple);
+   group.querySelector('summary').hidden=!multiple;
+   if(!multiple)group.open=true;else if(wasSingle)group.open=false;
+  });
  });}
  document.addEventListener('lcn-combination-diagrams-changed',initializeTrees);initializeTrees();
 });})();

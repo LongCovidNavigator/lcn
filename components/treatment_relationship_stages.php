@@ -1,11 +1,12 @@
 <?php
+require_once __DIR__.'/treatment_relationship_vocabulary.php';
 /** A vote always addresses this saved relationship key, never the therapy record. */
 function ndRelationshipAssertion(array $g,string $key): array {
     $parts=explode(':',$key);$parent=0;$child=0;$meaning='gehört zu';
     if($parts[0]==='ag'){
         $group=$g['groups'][(int)$parts[1]];$parent=(int)$group['root'];$child=(int)$parts[3];
         $parentName=$parent?$g['entries'][$parent]['treatmentname']:$group['name'];
-        $meaning=match($group['relation_type']??'umbrella_term'){'application_form'=>'ist eine Anwendungsform von','substance_variant'=>'ist eine Stoffvariante von','detailed_method'=>'ist ein detaillierteres Verfahren von',default=>'gehört zu'};
+        $meaning=match(lcnGroupMemberRelation($group,$child)){'application_form'=>'ist eine Anwendungsform von','substance_variant'=>'ist eine Stoffvariante von','detailed_method'=>'ist ein detaillierteres Verfahren von','group_member'=>'gehört zur Gruppe',default=>'ist zugeordnet zu'};
     }elseif($parts[0]==='bn'){$parent=(int)$parts[1];$child=(int)$parts[2];$meaning='ist ein Handelsname von';}
     elseif($parts[0]==='bs'){$child=(int)$parts[1];$parent=(int)$parts[2];$meaning='ist zugeordnet zu';}
     else throw new LogicException('Unsupported stage relationship key: '.$key);
@@ -14,33 +15,32 @@ function ndRelationshipAssertion(array $g,string $key): array {
 }
 /** Three stable stages. Relationship types stay separate; the page ID alone is current. */
 function ndRelationshipStages(array $g,int $id): array {
+    $vocabulary=ndRelationshipVocabulary();
     $own=$g['entries'][$id];$parents=[];$children=[];
     foreach($g['groups'] as $group){if(isset($group['members'][$id]))$parents[]=$group;if($group['root']===$id)$children[]=$group;}
     $isTrade=!empty($g['generics'][$id]);
-    $isSubstance=in_array($own['typ']??'', ['Arzneimittel','Nahrungsergänzungsmittel','Infusionen'],true);
-    foreach($children as $group)if($group['forms']||in_array($group['relation_type']??'',['application_form','substance_variant'],true))$isSubstance=true;
-    $formParent=null;$variantParent=null;foreach($parents as $group){if($group['forms']){$isSubstance=true;$formParent=$group;}if(($group['relation_type']??'')==='substance_variant'){$isSubstance=true;$variantParent=$group;}}
+    // A combination is still a therapy, not automatically a single substance.
+    $isSubstance=!isset($g['comboIds'][$id])&&in_array($own['typ']??'', $vocabulary['substance_types'],true);
+    foreach($children as $group)if(lcnGroupHasRelation($group,['application_form','substance_variant']))$isSubstance=true;
+    $formParent=null;$variantParent=null;foreach($parents as $group){$relation=lcnGroupMemberRelation($group,$id);if($relation==='application_form'){$isSubstance=true;$formParent=$group;}if($relation==='substance_variant'){$isSubstance=true;$variantParent=$group;}}
     $isClass=false;
-    foreach($children as $group)if($group['medication']&&!$group['forms']&&($group['relation_type']??'umbrella_term')==='umbrella_term'){
-        $sharesName=false;foreach($group['members'] as $member)if(str_starts_with(lcnDiscoveryName($g['entries'][$member]['treatmentname']),lcnDiscoveryName($own['treatmentname'])))$sharesName=true;
-        if(!$parents&&!$sharesName)$isClass=true;
-    }
+    foreach($children as $group)if($group['medication']&&lcnGroupHasRelation($group,['group_member']))$isClass=true;
     $drug=$isTrade||(($own['typ']??'')==='Arzneimittel'&&!$children)||$isClass;
     if($children&&!$isClass)$drug=false;
     if($formParent||$variantParent)$drug=false;
-    $title=$drug?'Medikamentengruppe, Wirkstoff und Handelsnamen':'Einordnung und detailliertere Verfahren';
+    $title=$drug?'Medikamentengruppe, Wirkstoff und Handelsnamen':'Gruppen, Therapien und zugehörige Einträge';
     $stages=[['title'=>$drug?'Medikamentengruppe':'Zugeordnete Gruppen','nodes'=>[],'adds'=>[]],['title'=>$drug?'Wirkstoffe':'Therapie / Verfahren','nodes'=>[],'adds'=>[]],['title'=>$drug?'Handelsnamen':'Detailliertere Verfahren','blocks'=>[]]];
     $edges=[];$selected=0;
     $node=static function(int $key,string $feedback='')use($g,$id):array{return ['id'=>$key,'name'=>$g['entries'][$key]['treatmentname'],'current'=>$key===$id,'feedback'=>$feedback];};
     $add=static fn(string $label,string $kind,int $source,int $group=0)=>['label'=>$label,'kind'=>$kind,'source'=>$source,'group'=>$group];
-    $block=static fn(string $heading,int $source,string $kind)=>['heading'=>$heading,'source'=>$source,'nodes'=>[],'add'=>$add($heading==='Handelsnamen'?'Handelsnamen hinzufügen':($kind==='has_form'?'Anwendungsform hinzufügen':($kind==='has_variant'?'Stoffvariante hinzufügen':'Detaillierteres Verfahren hinzufügen')),$kind,$source)];
+    $block=static fn(string $heading,int $source,string $kind)=>['heading'=>$heading,'source'=>$source,'nodes'=>[],'add'=>$add($heading==='Handelsnamen'?'Handelsnamen hinzufügen':($kind==='has_form'?'Anwendungsform hinzufügen':($kind==='has_variant'?'Stoffvariante hinzufügen':($kind==='group_contains'?'Zugehörigen Eintrag hinzufügen':'Detaillierteres Verfahren hinzufügen'))),$kind,$source)];
     // Medication classes keep their position on the left. A brand always stays on the right.
-    $hasGroupChildren=false;foreach($children as $group)if(($group['relation_type']??'umbrella_term')==='umbrella_term'&&!$group['forms'])$hasGroupChildren=true;
+    $hasGroupChildren=false;foreach($children as $group)if(lcnGroupHasRelation($group,['group_member']))$hasGroupChildren=true;
     $isRootPage=$hasGroupChildren&&!$parents&&!$isTrade&&!($isSubstance&&!$isClass);
     if($isRootPage){
         $stages[0]['nodes'][$id]=$node($id);$stages[0]['adds'][]=$add('Weitere Gruppe zuordnen','belongs_to_group',$id);
         foreach($children as $group){
-            foreach($group['members'] as $member){$stages[1]['nodes'][$member]=$node($member,'ag:'.$group['alias_id'].':t:'.$member);$edges[]=[0,$id,1,$member];}
+            foreach($group['members'] as $member){if(!in_array(lcnGroupMemberRelation($group,$member),['group_member','unspecified'],true))continue;$stages[1]['nodes'][$member]=$node($member,'ag:'.$group['alias_id'].':t:'.$member);$edges[]=[0,$id,1,$member];}
             $stages[1]['adds'][]=$add($drug?'Wirkstoff hinzufügen':'Verfahren hinzufügen','group_contains',$id,$group['alias_id']);
         }
         $selected=(int)array_key_first($stages[1]['nodes']);
@@ -57,8 +57,9 @@ function ndRelationshipStages(array $g,int $id): array {
         if($isTrade)$stages[1]['adds'][]=$add('Wirkstoff zuordnen','trade_of',$id);
     }
     // A substance with forms/variants remains in the middle, not in the class slot.
-    if(!$drug&&$isSubstance){$stages[1]['title']='Substanz';$stages[2]['title']='Varianten und Anwendungsformen';$title='Einordnung, Varianten und Anwendungsformen';}
+    if(!$drug&&$isSubstance){$stages[1]['title']=$vocabulary['substance_title'];$stages[2]['title']=$vocabulary['variants_title'];$title=$vocabulary['section_title'];}
     if($formParent){$stages[0]['title']='Übergeordnete Substanz';$stages[1]['title']='Anwendungsform';$stages[2]['title']='Weitere Anwendungsformen';}
+    if($variantParent){$stages[0]['title']='Übergeordnete Substanz';$stages[1]['title']='Stoffvariante';}
     foreach($stages[1]['nodes'] as $mid=>$middleNode){
         $blocks=[];
         if($drug){
@@ -68,23 +69,25 @@ function ndRelationshipStages(array $g,int $id): array {
         }else{
             if($formParent&&$formParent['root']){
                 $b=$block('Anwendungsformen',$formParent['root'],'has_form');
-                foreach($formParent['members'] as $member)if($member!==$id){$b['nodes'][$member]=$node($member,'ag:'.$formParent['alias_id'].':t:'.$member);$edges[]=[1,$mid,2,$member];}
+                foreach($formParent['members'] as $member)if($member!==$id&&lcnGroupMemberRelation($formParent,$member)==='application_form'){$b['nodes'][$member]=$node($member,'ag:'.$formParent['alias_id'].':t:'.$member);$edges[]=[1,$mid,2,$member];}
                 $blocks['has_form']=$b;
             }
             foreach($g['groups'] as $group){if($group['root']!==$mid)continue;
                 foreach($group['members'] as $member){
                     $name=$g['entries'][$member]['treatmentname'];
-                    $kind=$group['forms']?'has_form':(($group['relation_type']??'')==='substance_variant'?'has_variant':(($group['relation_type']??'')==='detailed_method'?'has_detail':($isSubstance?(preg_match('/Infusion|\(oral\)|\(subkutan\)|intraven|inhal|intranas/iu',$name)?'has_form':'has_variant'):'has_detail')));
-                    $heading=$kind==='has_form'?'Anwendungsformen':($kind==='has_variant'?'Stoffvarianten':'Detailliertere Verfahren');
-                    if(!isset($blocks[$kind]))$blocks[$kind]=$block($heading,$mid,$kind);
+                    $relation=lcnGroupMemberRelation($group,$member);
+                    $kind=match($relation){'application_form'=>'has_form','substance_variant'=>'has_variant','detailed_method'=>'has_detail',default=>'group_contains'};
+                    $heading=match($relation){'application_form'=>'Anwendungsformen','substance_variant'=>'Stoffvarianten','detailed_method'=>'Detailliertere Verfahren','group_member'=>'Therapien / Verfahren dieser Gruppe',default=>'Zugeordnete Einträge (Art offen)'};
+                    $blockKey=$relation;
+                    if(!isset($blocks[$blockKey])){$blocks[$blockKey]=$block($heading,$mid,$kind);if($kind==='group_contains')$blocks[$blockKey]['add']['group']=$group['alias_id'];}
                     $n=$node($member,'ag:'.$group['alias_id'].':t:'.$member);
-                    if(($group['relation_type']??'')==='umbrella_term'&&in_array($kind,['has_variant','has_form'],true))$n['note']='Als zugehöriger Eintrag hinterlegt';
-                    $blocks[$kind]['nodes'][$member]=$n;$edges[]=[1,$mid,2,$member];
+                    if($relation==='unspecified')$n['note']='Verbindungsart noch nicht spezifiziert';
+                    $blocks[$blockKey]['nodes'][$member]=$n;$edges[]=[1,$mid,2,$member];
                 }
             }
             // A specific formulation can link back to its base without creating a fake drug class.
             foreach($g['bases'][$mid]??[] as $base){$stages[0]['nodes'][$base]=$node($base);$stages[1]['nodes'][$mid]['feedback']='bs:'.$mid.':'.$base;$edges[]=[0,$base,1,$mid];}
-            if($isSubstance&&!$formParent){foreach(['has_variant'=>'Stoffvarianten','has_form'=>'Anwendungsformen'] as $kind=>$heading)if(!isset($blocks[$kind]))$blocks[$kind]=$block($heading,$mid,$kind);}
+            if($isSubstance&&!$formParent){foreach(['substance_variant'=>['has_variant','Stoffvarianten'],'application_form'=>['has_form','Anwendungsformen']] as $key=>[$kind,$heading])if(!isset($blocks[$key]))$blocks[$key]=$block($heading,$mid,$kind);}
             elseif(!$blocks)$blocks[]=$block('Detailliertere Verfahren',$mid,'has_detail');
             // Brands of a nested substance remain a separate relationship block.
             if(!empty($g['brands'][$mid])){$b=$block('Handelsnamen',$mid,'has_trade');foreach($g['brands'][$mid] as $brand){$b['nodes'][$brand]=$node($brand,'bn:'.$mid.':'.$brand);$edges[]=[1,$mid,2,$brand];}$blocks[]=$b;}
@@ -107,42 +110,65 @@ function ndRelationshipStages(array $g,int $id): array {
         else $n['assertions'][$key]=$assertion;
     }unset($b,$n);
     foreach([0,1] as $stage){$unique=[];foreach($stages[$stage]['adds'] as $a)$unique[implode('|',[$a['kind'],$a['source'],$a['group']])]=$a;$stages[$stage]['adds']=array_values($unique);}
-    return compact('title','stages','edges','selected');
+    return compact('title','stages','edges','selected','drug');
 }
 function ndStageAdd(array $a): string {
-    return '<button type="button" class="ux-stage-add" data-treatment-relation-add data-kind="'.ndEscape($a['kind']).'" data-source-id="'.$a['source'].'" data-group-id="'.$a['group'].'" data-dialog-title="'.ndEscape($a['label']).'">＋ '.ndEscape($a['label']).'</button>';
+    return '<button type="button" class="ux-stage-add" data-treatment-relation-add'.(!empty($a['sources'])?' data-source-options="'.ndEscape(json_encode($a['sources'],JSON_UNESCAPED_UNICODE)).'"':'').' data-kind="'.ndEscape($a['kind']).'" data-source-id="'.$a['source'].'" data-group-id="'.$a['group'].'" data-dialog-title="'.ndEscape($a['label']).'">＋ '.ndEscape($a['label']).'</button>';
 }
 function ndRenderRelationshipStages(array $g,int $id): string {
-    $m=ndRelationshipStages($g,$id);ob_start();
+    $m=ndRelationshipStages($g,$id);
+    $vocabulary=ndRelationshipVocabulary();
+    $middleCurrent=!empty($m['stages'][1]['nodes'][$id]['current']);
+    $rightCurrent=false;foreach($m['stages'][2]['blocks'] as $block)foreach($block['nodes'] as $n)if($n['current'])$rightCurrent=true;
+    $hasAssertions=false;
+    foreach($m['stages'] as $stage){
+        foreach($stage['nodes']??[] as $n)if(!empty($n['assertions']))$hasAssertions=true;
+        foreach($stage['blocks']??[] as $b)foreach($b['nodes'] as $n)if(!empty($n['assertions']))$hasAssertions=true;
+    }
+    ob_start();
     ?>
 <section class="card ux-discovery ux-stage-section" data-relationship-stages data-selected-branch="<?= $m['selected'] ?>">
 <h3><?= ndEscape($m['title']) ?> <span class="ux-heading-info"><button type="button" aria-label="Information zur Einordnung der Therapie" aria-describedby="therapy-classification-help">ⓘ</button><p id="therapy-classification-help" role="tooltip">Was gehört zu welcher Gruppe, und welche Handelsnamen, Varianten oder Anwendungsformen gibt es? Hier findest du die Einordnung dieser Therapie. Die Community kann fehlende Zuordnungen ergänzen. Diese Angaben beschreiben Zusammenhänge; mögliche Alternativen und gemeinsam eingesetzte Therapien findest du in den eigenen Bereichen.</p></span></h3>
-<p class="ux-stage-vote-help">Mit deiner Rückmeldung bestätigst oder widersprichst du der jeweils genannten Verknüpfung – nicht dem Therapieeintrag selbst.</p>
+<?php if($m['title']===$vocabulary['section_title']): ?>
+<details class="ux-relationship-help"><summary><?= ndEscape($vocabulary['help_title']) ?></summary>
+<dl><?php foreach($vocabulary['help'] as $term=>$explanation): ?><dt><strong><?= ndEscape($term) ?></strong></dt><dd><?= ndEscape($explanation) ?></dd><?php endforeach; ?></dl>
+<p><?= ndEscape($vocabulary['example_note']) ?></p></details>
+<?php endif; ?>
 <div class="ux-stage-canvas"><svg class="ux-stage-lines" aria-hidden="true"></svg><div class="ux-stage-columns">
 <?php foreach($m['stages'] as $index=>$stage): ?>
 <section class="ux-stage-column ux-stage-column-<?= $index ?>" data-stage="<?= $index ?>" aria-label="<?= ndEscape($stage['title']) ?>"><h4><?= ndEscape($stage['title']) ?></h4><div class="ux-stage-stack">
 <?php
-$renderNode=static function(array $n,int $level)use($g):void{ ?>
+$renderNode=static function(array $n,int $level)use($g,$m):void{ ?>
 <article class="ux-stage-node ux-relation-entry<?= $n['current']?' is-current':' is-linked' ?>" data-stage-node="<?= $n['id'] ?>" data-node-level="<?= $level ?>"<?= $n['current']?' aria-current="page"':'' ?>>
+<div class="ux-stage-node-header">
 <?php if($n['current']): ?><small class="ux-stage-current">Du bist hier</small><?php endif; ?>
+<?php if($n['current']&&$m['drug']): ?><button type="button" class="ux-classification-open" data-treatment-classification="<?= $n['id'] ?>" data-classification-current="<?= ['group','ingredient','brand'][$level] ?>" data-classification-name="<?= ndEscape($n['name']) ?>" aria-label="Einordnung von <?= ndEscape($n['name']) ?> prüfen">Einordnung</button><?php endif; ?>
+<?php foreach($n['assertions']??[] as $assertion): ?><div class="ux-stage-assertion" data-relationship-key="<?= ndEscape($assertion['key']) ?>"><span data-treatment-relation-feedback="<?= ndEscape($assertion['key']) ?>" data-feedback-statement="<?= ndEscape($assertion['statement']) ?>"></span></div><?php endforeach; ?>
+</div>
 <?php if($n['current']): ?><strong class="ux-stage-name"><?= ndEscape($n['name']) ?></strong><?php else: ?><a class="ux-stage-name" href="therapie_detail.php?treatment_id=<?= $n['id'] ?>#alternativen"><?= ndEscape($n['name']) ?></a><?php endif; ?>
 <?php if(!empty($n['note'])): ?><small><?= ndEscape($n['note']) ?></small><?php endif; ?>
-<?php if(!empty($n['preview'])): ?><small>Weitere Einträge: <?= ndEscape(implode(', ',array_map(fn($key)=>$g['entries'][$key]['treatmentname'],$n['preview']))) ?></small><?php endif; ?>
-<?php foreach($n['assertions']??[] as $assertion): ?><div class="ux-stage-assertion" data-relationship-key="<?= ndEscape($assertion['key']) ?>"><small class="ux-stage-assertion-label">Verknüpfung prüfen</small><p><?= ndEscape($assertion['statement']) ?></p><span data-treatment-relation-feedback="<?= ndEscape($assertion['key']) ?>" data-feedback-statement="<?= ndEscape($assertion['statement']) ?>"></span></div><?php endforeach; ?>
+
 </article>
 <?php };
-if($index<2){foreach($stage['nodes'] as $n)$renderNode($n,$index);foreach($stage['adds'] as $a)echo ndStageAdd($a);}
-else foreach($stage['blocks'] as $b):
+if($index<2){foreach($stage['nodes'] as $n)$renderNode($n,$index);foreach($stage['adds'] as $a){if($a['kind']==='group_contains'&&($g['groups'][$a['group']]['root']??0)!==$id)continue;if($a['source']===$id)echo ndStageAdd($a);}}
+else foreach($stage['blocks'] as $blockIndex=>$b):
     $currentOnRight=false;foreach($stage['blocks'] as $candidate)foreach($candidate['nodes'] as $n)if($n['current'])$currentOnRight=true;
     $hasKnown=false;foreach($stage['blocks'] as $candidate)if($candidate['nodes'])$hasKnown=true;
     $multiple=count($m['stages'][1]['nodes'])>1;
     $visible=$currentOnRight ? $b['focus']===$m['selected'] : (!$multiple || ($hasKnown ? (bool)$b['nodes'] : $b['focus']===$m['selected']));
 ?>
-<div class="ux-stage-block" data-branch="<?= $b['focus'] ?>"<?= !$visible?' hidden':'' ?>><?php if($multiple||$b['heading']!==$stage['title']): ?><h5><?= ndEscape($b['heading'].($multiple?' für '.$g['entries'][$b['focus']]['treatmentname']:'')) ?></h5><?php endif; ?>
+<?php if($multiple){$b['add']['sources']=array_values(array_map(static fn($n)=>['id'=>$n['id'],'name'=>$n['name']],$m['stages'][1]['nodes']));} ?>
+<div class="ux-stage-block" data-branch="<?= $b['focus'] ?>" data-relationship-kind="<?= ndEscape($b['add']['kind']) ?>"<?= !$visible?' hidden':'' ?>><?php if(!$multiple&&$b['heading']!==$stage['title']): ?><h5><?= ndEscape($b['heading'].($multiple&&$b['nodes']?' für '.$g['entries'][$b['focus']]['treatmentname']:'')) ?></h5><?php endif; ?>
 <?php foreach($b['nodes'] as $n)$renderNode($n,2); ?>
-<?= ndStageAdd($b['add']) ?>
+<?php if(!$multiple&&$b['add']['source']===$id): ?><?= ndStageAdd($b['add']) ?><?php endif; ?>
 </div>
 <?php endforeach; ?>
+<?php if($index===2&&!$middleCurrent&&!$rightCurrent&&$stage['blocks']): ?>
+<div class="ux-stage-add-hint">Wähle <?= $m['drug']?'einen Wirkstoff':'eine Therapie oder ein Verfahren' ?> in der mittleren Spalte aus, um gezielt <?= ndEscape(match($stage['title']){'Handelsnamen'=>'Handelsnamen','Varianten und Anwendungsformen'=>'Varianten oder Anwendungsformen','Weitere Anwendungsformen'=>'weitere Anwendungsformen',default=>'detailliertere Verfahren'}) ?> hinzuzufügen.</div>
+<?php endif; ?>
+<?php if($index===0&&$rightCurrent): ?>
+<div class="ux-stage-add-hint">Wähle <?= $m['drug']?'einen Wirkstoff':'eine Therapie oder ein Verfahren' ?> in der mittleren Spalte aus, um gezielt eine Gruppe zuzuordnen.</div>
+<?php endif; ?>
 </div></section><?php endforeach; ?>
 </div></div><script type="application/json" data-stage-edges><?= json_encode($m['edges'],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?></script>
 </section>

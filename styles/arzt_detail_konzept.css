@@ -574,3 +574,155 @@ body.compact-doctor-header #header-placeholder .profile>.detail-menu-toggle{righ
 .treatment-rating-cards .treatment-result-card>p{margin:5px 0 0;font-size:13px;line-height:1.4;color:var(--muted);}
 .treatment-rating-cards .treatment-result-card>small{font-size:12px;margin-top:5px;}
 .treatment-rating-cards .treatment-result-card .treatment-card-rating-total{margin:8px 0 0;font-size:11px;}
+
+/* Compact distance graphic in the provider dashboard. */
+.doctor-dashboard-travel-scale{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:0;margin:14px 0}
+.dashboard-grid .doctor-dashboard-travel-scale>li{display:flex;flex-direction:column;gap:5px;min-width:0;text-align:center;padding:8px 5px;margin:0;border:1px solid transparent;border-radius:6px;font-size:11px;line-height:1.4}
+.doctor-dashboard-travel-scale i{display:block;height:7px;border-radius:4px;margin-bottom:2px}
+.doctor-dashboard-travel-scale strong{font-size:12px;color:#17365d}
+.doctor-dashboard-travel-scale span{flex:1;color:#62769a}
+.doctor-dashboard-travel-scale b{font-size:12px;color:#315579}
+.doctor-dashboard-travel-scale .is-current{background:#eaf4ff;border-color:#8dc3ff!important}
+.doctor-dashboard-travel-scale .is-current strong,.doctor-dashboard-travel-scale .is-current b{color:#0865d9}
+.doctor-dashboard-travel-result{font-size:13px;line-height:1.5;margin:8px 0;color:#526b80}
+@media(max-width:500px){.doctor-dashboard-travel-scale{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Older profile headers wrap contact links instead of widening narrow pages. */
+body:not(.compact-doctor-header) .profile .contact{min-width:0;max-width:100%;flex-wrap:wrap}
+body:not(.compact-doctor-header) .profile .profile-copy{min-width:0;overflow-wrap:anywhere}
+
+/* Consistent score tables and calculation help across detail dashboards. */
+.doctor-score-scroll,.doctor-distribution-scroll{max-width:100%;overflow-x:auto}
+.doctor-score-table,.doctor-distribution-table{width:100%;border-collapse:collapse;font-size:13px;line-height:1.5}
+.doctor-score-table{min-width:600px}
+.doctor-distribution-table{min-width:390px}
+.doctor-score-table th,.doctor-score-table td,.doctor-distribution-table th,.doctor-distribution-table td{padding:12px 8px;text-align:left;border-bottom:1px solid #e1eafa;vertical-align:middle;overflow-wrap:anywhere}
+.doctor-score-table thead th,.doctor-distribution-table thead th{font-size:11px;font-weight:400;color:#62769a;background:#f5f9fd}
+.doctor-score-table tr>:nth-child(n+3),.doctor-distribution-table tr>:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums}
+.doctor-score-table tbody th,.doctor-distribution-table tbody th{font-weight:400}
+.doctor-score-table .is-included th{font-weight:700}
+.doctor-score-table .is-excluded{color:#8491a1}
+.doctor-score-table small{display:block;font-size:11px;margin-top:4px}
+.doctor-score-table tfoot{font-weight:700;background:#edf6ff;color:#17365d}
+.doctor-distribution-table .dashboard-bar-value{min-width:90px}
+.doctor-calculation-help{margin:16px 0;font-size:13px;line-height:1.6}
+.doctor-calculation-help summary{cursor:pointer;color:#1768b2}
+.doctor-score-scroll:focus-visible{outline:2px solid #0878e3;outline-offset:3px}
+
+/* Match the therapy dashboard's four equal outcome columns and compact side card. */
+.doctor-effect-columns{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) 64px;grid-template-rows:100px 38px 24px 28px;gap:4px 6px;height:220px;box-sizing:border-box;padding-top:10px;align-items:center;text-align:center;font-size:12px;line-height:1.35}
+.doctor-effect-bar-area{height:100px;display:flex;justify-content:center;align-items:flex-end;border-bottom:1px solid #dce7f2}
+.doctor-effect-bar{display:block;width:68%;max-width:84px;position:relative;border-radius:4px 4px 0 0}
+.doctor-effect-bar>strong{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);white-space:nowrap;color:#17365d;font-size:13px}
+.doctor-effect-bar.effect-0{background:#e5a5ad}.doctor-effect-bar.effect-1{background:#d9e1ea}.doctor-effect-bar.effect-2{background:#9fd3b6}.doctor-effect-bar.effect-3{background:#63af94}
+.doctor-effect-row-heading{text-align:left;color:#62769a;font-size:10px;line-height:1.3}
+.doctor-effect-number{color:#315e8c;font-variant-numeric:tabular-nums}
+.doctor-experience-grid{align-items:start}
+@media(min-width:1101px){.doctor-experience-grid{grid-template-columns:minmax(0,1.8fr) minmax(0,1fr)}}
+@media(max-width:450px){.doctor-effect-columns{grid-template-columns:repeat(4,minmax(0,1fr)) 56px;column-gap:4px;font-size:10px}.doctor-effect-bar>strong{font-size:11px}.doctor-effect-bar{width:65%;max-width:60px}}
+
+#view-content .doctor-experience-grid{align-items:start}
+#view-content .doctor-experience-grid>.card{height:auto;min-height:0;align-self:start}
+
+/* Costs: compact horizontal overview with one column per cost band. */
+.doctor-cost-scroll{max-width:100%;overflow-x:auto;margin:14px 0}
+.doctor-cost-horizontal{width:100%;min-width:690px;table-layout:fixed;border-collapse:collapse;font-size:12px;line-height:1.35;text-align:center}
+.doctor-cost-horizontal th,.doctor-cost-horizontal td{padding:7px 5px;border-bottom:1px solid #e1eafa;vertical-align:middle}
+.doctor-cost-horizontal th:first-child{width:100px;text-align:left;color:#62769a;font-size:11px;font-weight:400}
+.doctor-cost-horizontal thead th{height:36px;font-weight:400;color:#315e8c;background:#f5f9fd}
+.doctor-cost-horizontal td{font-variant-numeric:tabular-nums;color:#315e8c}
+.doctor-cost-bar-area{height:65px;display:flex;align-items:flex-end;justify-content:center;padding-top:20px;box-sizing:content-box}
+.doctor-cost-bar-area>span{display:block;width:60%;max-width:64px;background:#75afe8;border-radius:4px 4px 0 0;position:relative}
+.doctor-cost-bar-area strong{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:600}
+.doctor-cost-scroll:focus-visible{outline:2px solid #0878e3;outline-offset:3px}
+#view-content [data-dashboard-question^="costs-"] .dashboard-insurance{flex:0 0 auto;align-self:flex-start;width:fit-content;height:auto;min-height:0;margin:12px 0;max-width:100%}
+#view-content [data-dashboard-question^="costs-"] .dashboard-insurance button{padding:8px 12px;font-size:13px}
+#view-content [data-dashboard-question^="costs-"] .dashboard-score-reason{margin-top:10px}
+
+/* Burden: two compact appointment cards, followed by full-width personal travel. */
+#view-content .doctor-burden-grid>.doctor-dashboard-travel{grid-column:1/-1}
+#view-content .doctor-dashboard-appointments .dashboard-appointments{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:18px}
+#view-content .doctor-dashboard-appointments .dashboard-appointments>section{min-width:0;margin:0}
+#view-content .doctor-dashboard-appointments .dashboard-appointment-heading h4{margin:0 0 8px;font-size:14px}
+#view-content .doctor-dashboard-appointments .dashboard-term-head,#view-content .doctor-dashboard-appointments .dashboard-term-row{grid-template-columns:52px minmax(0,1fr);gap:6px}
+#view-content .doctor-dashboard-appointments .dashboard-term-head{font-size:10px;margin:0 0 10px;min-height:28px}
+#view-content .doctor-dashboard-appointments .dashboard-term-row{font-size:12px;margin:12px 0}
+#view-content .doctor-dashboard-appointments .dashboard-term-percent{font-size:11px}
+#view-content .doctor-dashboard-appointments .dashboard-term-meter{height:9px}
+#view-content .doctor-dashboard-appointments .dashboard-score-reason{font-size:12px;margin-top:10px}
+@media(min-width:801px){#view-content .doctor-burden-grid .doctor-dashboard-travel-scale{grid-template-columns:repeat(7,minmax(0,1fr))}}
+@media(max-width:450px){#view-content .doctor-dashboard-appointments .dashboard-appointments{grid-template-columns:1fr;gap:14px}}
+
+#view-content .doctor-burden-grid{align-items:start}
+#view-content .doctor-burden-grid>.doctor-dashboard-appointments{height:auto;min-height:0;align-self:start}
+
+/* Shared title navigation and aligned calculation disclosures. */
+.doctor-dashboard-title-link{color:inherit;text-decoration:none}
+.doctor-dashboard-title-link:hover{text-decoration:underline;text-underline-offset:4px}
+.doctor-dashboard-title-link:focus-visible{outline:2px solid #0878e3;outline-offset:4px;border-radius:2px}
+#view-content .dashboard-score-group>.dashboard-grid{align-items:stretch}
+#view-content .dashboard-score-group>.dashboard-grid>.dashboard-card{display:flex;flex-direction:column;height:auto;align-self:stretch}
+#view-content .dashboard-score-group>.dashboard-grid>.dashboard-card>.doctor-calculation-help{margin: auto 0 0;padding-top:16px}
+#view-content .dashboard-score-group>.dashboard-grid>.dashboard-card>.dashboard-points{flex-shrink:0}
+
+/* Balance adaptation and appointment-form cards in the burden dashboard. */
+#view-content .doctor-burden-grid>.dashboard-card:not(.doctor-dashboard-travel){align-self:stretch}
+#view-content .doctor-burden-grid [data-dashboard-question="adaptation"] .doctor-distribution-table{font-size:12px;line-height:1.4;table-layout:fixed}
+#view-content .doctor-burden-grid [data-dashboard-question="adaptation"] .doctor-distribution-table th,
+#view-content .doctor-burden-grid [data-dashboard-question="adaptation"] .doctor-distribution-table td{padding:10px 7px}
+#view-content .doctor-burden-grid [data-dashboard-question="adaptation"] .doctor-distribution-table th:first-child{width:31%}
+#view-content .doctor-burden-grid [data-dashboard-question="adaptation"] .doctor-distribution-table th:nth-child(2){width:31%}
+#view-content .doctor-burden-grid [data-dashboard-question="adaptation"] .dashboard-bar-value{display:flex;flex-direction:row;align-items:center;gap:7px;min-width:0}
+#view-content .doctor-burden-grid [data-dashboard-question="adaptation"] .dashboard-bar-value .dashboard-track{flex:1;min-width:20px;height:9px}
+#view-content .doctor-burden-grid [data-dashboard-question="adaptation"] .dashboard-bar-value>strong{min-width:32px;font-size:11px;font-weight:400;text-align:right;white-space:nowrap}
+#view-content .doctor-burden-grid [data-dashboard-question="adaptation"]>.dashboard-score-reason{display:none}
+#view-content .doctor-dashboard-appointments .dashboard-term-row{font-size:13px;margin:18px 0}
+#view-content .doctor-dashboard-appointments .dashboard-term-percent{font-size:12px;margin-top:6px}
+#view-content .doctor-dashboard-appointments .dashboard-term-meter{height:11px}
+#view-content .doctor-dashboard-appointments .dashboard-appointment-heading h4{font-size:15px;margin-bottom:12px}
+#view-content .doctor-dashboard-appointments .dashboard-term-head{font-size:11px;margin-bottom:12px}
+
+/* Calculation disclosures use the same blue information panel as therapies. */
+.doctor-calculation-help{font-size:12px;line-height:1.6;color:#526b80}
+.doctor-calculation-help>summary{cursor:pointer;color:#0878db;font-weight:400}
+.doctor-calculation-box{margin:8px 0 0;padding:10px 12px;background:#f5f9fd;border-radius:6px;font-size:12px;line-height:1.65}
+#view-content .doctor-calculation-box>p{font-size:12px;line-height:1.65;margin:0 0 10px}
+#view-content .doctor-calculation-box>p:last-child{margin-bottom:0}
+
+/* Align disclosure tops independently of their open content heights. */
+#view-content .dashboard-score-group>.dashboard-grid>.dashboard-card{display:grid;grid-template-rows:subgrid;grid-row:span 2;row-gap:0;align-content:start}
+.doctor-dashboard-card-body{min-width:0;display:flow-root}
+#view-content .dashboard-score-group>.dashboard-grid>.dashboard-card>.doctor-calculation-help{margin:0;padding-top:16px;align-self:start;min-width:0}
+
+.therapy-data-requirement{font-size:12px!important;line-height:1.6;margin:4px 0 8px;padding:9px 12px;color:#526b80;background:#f5f9fd;border-radius:6px}
+
+/* Point rows in the horizontal cost chart remain visually unruled. */
+.doctor-cost-horizontal tbody th,.doctor-cost-horizontal tbody td{border-bottom:0}
+
+/* Relative therapy offer: label and rank, bar, then earned points. */
+.doctor-offer-metrics{display:grid;gap:18px;margin:14px 0 8px}
+.doctor-offer-metric{min-width:0;padding:0 0 6px}
+.doctor-offer-metric-heading{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin-bottom:8px}
+.doctor-offer-metric-heading strong{display:block;font-size:14px;color:#17365d}
+.doctor-offer-rank{font-size:13px;font-weight:600;color:#0878db;white-space:nowrap}
+.doctor-offer-track{height:8px;overflow:hidden;background:#edf2f8;border-radius:6px}
+.doctor-offer-track>span{display:block;height:100%;background:#75afe8;border-radius:6px}
+
+.doctor-offer-points{font-size:12px;color:#526b80;margin-top:6px;text-align:right}
+
+/* Center the offer graphics in the space beside the outcome chart. */
+@media(min-width:1101px){
+ .doctor-dashboard-offer .doctor-offer-metrics{margin:42px 0 30px;gap:28px}
+ .doctor-dashboard-offer .doctor-offer-track{height:10px}
+}
+
+/* Share header and notice rows so the two burden scores start on one baseline. */
+
+
+.doctor-card-header-slot,.doctor-card-notice-slot,.doctor-card-chart-slot{min-width:0;display:flow-root}
+.doctor-card-notice-slot{display:flex;flex-direction:column}
+.doctor-card-notice-slot>.therapy-data-requirement{flex:1}
+#view-content .doctor-appointment-requirement>p{font-size:12px;line-height:1.6;margin:0 0 8px}
+#view-content .doctor-appointment-requirement>p:last-child{margin-bottom:0}
+
+#view-content .doctor-card-notice-slot>.therapy-data-requirement{margin:4px 0 8px}

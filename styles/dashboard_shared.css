@@ -1,0 +1,25 @@
+/* Shared by provider and therapy dashboards: one distribution and card format. */
+#view-content .dashboard-shared-card{padding:18px;border-radius:10px}
+#view-content .dashboard-shared-card .assessment-header{display:flex;flex-wrap:wrap;align-items:center;gap:5px 12px;margin-bottom:8px}
+#view-content .dashboard-shared-card h3{font-size:17px;line-height:1.35;margin:0}
+#view-content .dashboard-shared-card .assessment-count{font-size:12px;text-align:left;margin:0 0 0 auto!important}
+#view-content .dashboard-shared-card .dashboard-points{font-size:23px;margin:6px 0 12px;line-height:1.3}
+#view-content .dashboard-shared-card .dashboard-points small{font-size:12px;font-weight:400}
+#view-content .dashboard-shared-card .therapy-distribution-heading,#view-content .dashboard-shared-card .therapy-distribution-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(60px,1fr) 64px 76px;gap:10px;align-items:center}
+#view-content .dashboard-shared-card .therapy-distribution-heading{font-size:11px;font-weight:400;color:#607795;padding-bottom:7px;border-bottom:1px solid #dce7f2;background:transparent}
+#view-content .dashboard-shared-card .therapy-distribution-row{font-size:13px;line-height:1.4;padding:8px 0;border-bottom:1px solid #edf2f8}
+#view-content .dashboard-shared-card .therapy-distribution-heading>span:nth-last-child(-n+2),#view-content .dashboard-shared-card .therapy-stage-maximum,#view-content .dashboard-shared-card .therapy-stage-contribution{text-align:center}
+#view-content .dashboard-shared-card .therapy-distribution-share{display:flex;flex-direction:column;gap:4px}
+#view-content .dashboard-shared-card .therapy-distribution-share strong{font-size:12px;color:#17365d;font-weight:600}
+#view-content .dashboard-shared-card .therapy-distribution-share .dashboard-track{height:7px;background:#edf2f8;border-radius:6px;overflow:hidden}
+#view-content .dashboard-shared-card .therapy-distribution-share .dashboard-track>span{display:block;height:100%;border-radius:6px;background:#75afe8}
+#view-content .dashboard-shared-card .therapy-stage-maximum,#view-content .dashboard-shared-card .therapy-stage-contribution{display:block;margin:0;font-size:12px;line-height:1.45;font-variant-numeric:tabular-nums}
+#view-content .dashboard-shared-card .therapy-stage-maximum{font-weight:400;color:#62769a}
+#view-content .dashboard-shared-card .therapy-stage-contribution{font-weight:600;color:#315e8c}
+@media(max-width:600px){#view-content .dashboard-shared-card .therapy-distribution-heading,#view-content .dashboard-shared-card .therapy-distribution-row{grid-template-columns:minmax(0,1fr) 65px 54px 65px;gap:6px}#view-content .dashboard-shared-card .therapy-distribution-heading{font-size:10px}}
+@media(max-width:450px){#view-content .dashboard-shared-card{padding:14px}}
+
+#view-content .dashboard-shared-card h3>a:hover{text-underline-offset:3px}
+
+.dashboard-travel-cases{padding-left:22px;margin:0 0 12px}
+#view-content .dashboard-travel-cases>li{margin:0 0 10px;padding-left:3px}

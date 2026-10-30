@@ -67,7 +67,7 @@ foreach([169,84,693,461,271,515,176,479,65,869,22,23,94,95,98,451,78,447,1,2] as
     discoveryCheck(str_contains($http_response_header[0],'200'),'HTTP failure: '.$id);
     discoveryCheck(!str_contains($html,'ux-symptom-discovery') && !str_contains($html,'Über gemeinsame Symptome'),'Symptom discovery still visible.');
     discoveryCheck(!str_contains($html,'ux-alias-discovery'),'Unclassified alias discovery remains.');
-    discoveryCheck(substr_count($html,'<h3>Alternative Therapien</h3>')===1,'Unified relationships missing.');
+    discoveryCheck(preg_match_all('/<h3>Alternative Therapien(?:\s|<)/u',$html)===1,'Unified relationships missing.');
     discoveryCheck(!str_contains($html,'treatment_id=0'),'Unresolved target has fake link.');
 }
 echo 'PASS: medication/group/brand/form/combination logic, missing targets, all graph targets, 20 HTTP details. '.json_encode($counts,JSON_UNESCAPED_UNICODE)."\n";

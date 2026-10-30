@@ -190,7 +190,7 @@
         ,"Carotis-Sonographie": ["Diagnostik", "Bildgebung"]
         ,"CH50 (Labor)": ["Diagnostik", "Labordiagnostik"]
         ,"Elektromyographie (EMG)": ["Diagnostik", "Funktionsdiagnostik"]
-        ,"H1-Antihistaminika": ["Arzneimittel", "Allergie und Mastzellaktivierung"]
+        ,"H1-Antihistaminika": ["Arzneimittel", "Allergien und Mastzellaktivierung"]
         ,"Hautbiopsie bei Small-Fiber-Neuropathie": ["Diagnostik", "Klinische und fachärztliche Untersuchung"]
         ,"Kompressionshosen": ["Hilfsmittel", null]
         ,"MRT (Wirbelsäule)": ["Diagnostik", "Bildgebung"]

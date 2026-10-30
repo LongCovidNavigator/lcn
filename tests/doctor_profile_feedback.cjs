@@ -1,0 +1,27 @@
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({channel:'msedge',headless:true});try{
+ const page=await browser.newPage({viewport:{width:1536,height:1000}});
+ await page.goto('http://localhost/lcn/arzt_detail.html?id=613&demo=1#ueberblick');
+ await page.locator('[data-profile-confirm="medical"]').waitFor();
+ await page.waitForTimeout(700);
+ assert.equal(await page.locator('[data-profile-feedback]').count(),4);
+ await page.locator('[data-profile-confirm="medical"]').click();
+ await page.waitForFunction(()=>document.querySelector('[data-profile-confirm="medical"]').getAttribute('aria-pressed')==='true');
+ await page.locator('[data-profile-oppose="medical"]').hover();
+ await page.locator('.lcn-tooltip-action').click();
+ await page.locator('#add-qualifications').fill('Testqualifikation (automatischer Funktionstest)');
+ await page.locator('[data-add-term="Testqualifikation (automatischer Funktionstest)"]').click();
+ await page.locator('dialog [type="submit"]').click();
+ await page.waitForFunction(()=>!document.querySelector('dialog'));
+ assert.equal(await page.locator('[data-profile-oppose="medical"]').getAttribute('aria-pressed'),'true');
+ await page.screenshot({path:'output/doctor-profile-feedback-1536.png',fullPage:false});
+ const result=await page.evaluate(async()=>{const r=await fetch('api/doctor_profile_feedback.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:613,section:'medical',stance:0})});return r.json();});assert.equal(result.ok,true);
+ await page.setViewportSize({width:390,height:900});
+ await page.locator('[data-profile-oppose="identity"]').click();
+ assert.equal(await page.locator('dialog select option').count()>=4,true);
+ assert.equal(await page.locator('dialog').evaluate(d=>d.scrollWidth<=d.clientWidth && d.getBoundingClientRect().right<=innerWidth),true);
+ await page.screenshot({path:'output/doctor-profile-feedback-390.png'});
+ await page.keyboard.press('Escape');
+ console.log('PASS: four boxes, confirmation, correction persistence, reset, mobile dialog without overflow');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1});

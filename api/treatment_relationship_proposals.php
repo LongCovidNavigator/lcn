@@ -31,7 +31,7 @@ try{
   if(!in_array($id,array_merge([(int)$r['source_id'],(int)$r['left_id'],(int)$r['right_id'],(int)($r['context_id']??0),$groupRoot],$r['component_ids']??[]),true))continue;
   $pending[]=['submission_id'=>(int)$row['submission_id'],'description'=>$r['description'],'kind'=>$r['kind'],'left_id'=>(int)$r['left_id'],'right_id'=>(int)$r['right_id'],'group_alias_id'=>(int)($r['group_alias_id']??0),'group_name'=>$r['group_name']??null,'group_root_id'=>$groupRoot,'combination'=>$r['kind']==='new_combination'?['name'=>$r['name'],'component_ids'=>array_values($r['component_ids'])]:null];
  }
- $items=[];foreach($g['entries'] as $entry)$items[]=['id'=>$entry['treat_nd_id'],'name'=>$entry['treatmentname'],'meta'=>($entry['typ']??'').(!empty($entry['review_pending'])?' · Prüfung ausstehend':''),'review_pending'=>!empty($entry['review_pending']),'is_combination'=>isset($g['comboIds'][$entry['treat_nd_id']])];
+ $items=[];foreach($g['entries'] as $entry)$items[]=['id'=>$entry['treat_nd_id'],'name'=>$entry['treatmentname'],'meta'=>($entry['typ']??'').(!empty($entry['review_pending'])?' · Prüfung ausstehend':''),'review_pending'=>!empty($entry['review_pending']),'component_ids'=>array_values($g['components'][$entry['treat_nd_id']]??[]),'is_combination'=>isset($g['comboIds'][$entry['treat_nd_id']])];
  usort($items,fn($a,$b)=>strnatcasecmp($a['name'],$b['name']));
  $groups=[];foreach($g['groups'] as $group)$groups[]=['id'=>$group['alias_id'],'name'=>$group['name'],'meta'=>($group['forms']?'Anwendungsformen':'Gruppe').(!empty($g['entries'][$group['root']]['review_pending'])?' · Prüfung ausstehend':'')];
  lcnSendVoteJson(['ok'=>true,'items'=>$items,'groups'=>$groups,'kinds'=>LCN_TREATMENT_RELATION_KINDS,'pending'=>$pending]);

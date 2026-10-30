@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');const assert=require('node:assert/strict');
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});try{const p=await b.newPage({viewport:{width:1920,height:1080}});await p.goto('http://localhost/lcn/arzt_detail.html?id=613&demo=1#ueberblick');await p.locator('[data-profile-confirm="medical"]').waitFor();await p.waitForTimeout(1200);
+const sizes=await p.locator('.overview-group,.overview-identity').evaluateAll(els=>els.map(e=>({height:e.offsetHeight,padding:getComputedStyle(e).paddingTop})));
+await p.locator('[data-profile-confirm="medical"]').hover();await p.locator('.lcn-feedback-tooltip:not([hidden])').waitFor();assert.equal(await p.locator('.lcn-feedback-tooltip .catalog-feedback-action').textContent(),'Bestätigen:');
+await p.screenshot({path:'output/doctor-profile-feedback-compact-1920.png'});
+await p.locator('[data-profile-oppose="medical"]').hover();assert.ok((await p.locator('.lcn-feedback-tooltip .catalog-feedback-subject').textContent()).includes('nicht korrekt'));
+await p.locator('[data-profile-oppose="medical"]').click();await p.locator('dialog[open]').waitFor();await p.keyboard.press('Escape');
+await p.addStyleTag({content:'.profile-feedback{display:none!important}'});
+assert.deepEqual(await p.locator('.overview-group,.overview-identity').evaluateAll(els=>els.map(e=>({height:e.offsetHeight,padding:getComputedStyle(e).paddingTop}))),sizes);
+await p.setViewportSize({width:390,height:900});await p.addStyleTag({content:'.profile-feedback{display:block!important}'});await p.screenshot({path:'output/doctor-profile-feedback-compact-390.png'});console.log('PASS: original box proportions, shared buttons and hover tooltip, correction dialog; desktop sizes',sizes);
+}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});

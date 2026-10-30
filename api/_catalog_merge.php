@@ -63,7 +63,14 @@ function lcnApplyCatalogMerge(PDO $p,array $plan,array $choices,int $sid): int {
  if($plan['type']==='treatment'){
   foreach(lcnNdRows($p,"SELECT alias_id,alias_type FROM tbl_aliases_03 WHERE alias=? AND alias_type IN ('umbrella_term','application_form','substance_variant','detailed_method','combination_definition','combination_component','trade_name','generic_name')",[$plan['source_name']]) as $oldAlias){
    $newAlias=lcnTreatmentProposalAlias($p,$plan['target_name'],$oldAlias['alias_type']);if($newAlias===(int)$oldAlias['alias_id'])continue;
-   foreach(lcnNdRows($p,'SELECT treat_nd_id FROM tbl_cpl_treatments_nd2aliases WHERE alias_id=?',[$oldAlias['alias_id']]) as $member)if(!lcnNdRows($p,'SELECT 1 FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$member['treat_nd_id'],$newAlias]))$p->prepare('INSERT INTO tbl_cpl_treatments_nd2aliases(treat_nd_id,alias_id) VALUES(?,?)')->execute([$member['treat_nd_id'],$newAlias]);
+   foreach(lcnNdRows($p,'SELECT treat_nd_id,relation_type FROM tbl_cpl_treatments_nd2aliases WHERE alias_id=?',[$oldAlias['alias_id']]) as $member){
+    $existing=lcnNdRows($p,'SELECT relation_type FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$member['treat_nd_id'],$newAlias]);
+    if(!$existing)$p->prepare('INSERT INTO tbl_cpl_treatments_nd2aliases(treat_nd_id,alias_id,relation_type) VALUES(?,?,?)')->execute([$member['treat_nd_id'],$newAlias,$member['relation_type']]);
+    elseif($member['relation_type']!==null){
+     if($existing[0]['relation_type']!==null&&$existing[0]['relation_type']!==$member['relation_type'])throw new DomainException('Widersprüchliche Verbindungsarten beim Zusammenführen der Aliasse.');
+     $p->prepare('UPDATE tbl_cpl_treatments_nd2aliases SET relation_type=? WHERE treat_nd_id=? AND alias_id=?')->execute([$member['relation_type'],$member['treat_nd_id'],$newAlias]);
+    }
+   }
    $p->prepare('DELETE FROM tbl_cpl_treatments_nd2aliases WHERE alias_id=?')->execute([$oldAlias['alias_id']]);
   }
   $alias=lcnTreatmentProposalAlias($p,$plan['source_name'],'alternate_name');if(!lcnNdRows($p,'SELECT 1 FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$target,$alias]))$p->prepare('INSERT INTO tbl_cpl_treatments_nd2aliases(treat_nd_id,alias_id) VALUES(?,?)')->execute([$target,$alias]);

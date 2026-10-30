@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict'),calculate=require('../scripts/doctor_dashboard_score');
 const options=(n,i,size)=>({options:Array.from({length:size},(_,j)=>({count:j===i?n:0}))});
-const base={questions:{adaptation:options(10,4,5),'costs-gkv':options(10,0,8),wait:options(10,0,5),'wait-followup':options(10,0,5),effect:options(10,3,4),'appointment-0-2':options(10,1,2),'appointment-1-2':options(10,1,2)},costKey:'costs-gkv',treatmentCount:60,categoryCount:8,distance:10};
+const base={comparisonProfiles:Array.from({length:10},(_,i)=>({id:i+1,treatmentCount:i+1,categoryCount:i%7+1})),questions:{adaptation:options(10,4,5),'costs-gkv':options(10,0,8),wait:options(10,0,5),'wait-followup':options(10,0,5),effect:options(10,3,4),'appointment-0-2':options(10,1,2),'appointment-1-2':options(10,1,2)},costKey:'costs-gkv',treatmentCount:60,categoryCount:8,distance:10};
 let r=calculate(base);assert.equal(r.coverage,100);assert.equal(r.rows.reduce((n,r)=>n+r.weight,0),100);assert(!r.rows.some(r=>r.label==='Redaktionelle Auswahl'));
 const row=(data,label)=>calculate(data).rows.find(r=>r.label===label);
 assert.equal(row(base,'Termin-Anpassung').weight,6);assert.equal(row(base,'Ersttermin aus der Ferne').weight,3);assert.equal(row(base,'Folgetermin aus der Ferne').weight,3);assert.equal(row(base,'Persönliche Anreise').weight,18);assert.equal(row(base,'Eigene Behandlungskosten').weight,20);assert.equal(row(base,'Anzahl Therapien').weight,7);assert.equal(row(base,'Vielfalt der Kategorien').weight,3);
@@ -12,7 +12,7 @@ assert.equal(calculate({...remote,questions:{...remote.questions,'appointment-0-
 assert.equal(calculate({questions:{},onlineFirst:true}).earned,30);
 assert.equal(calculate({questions:{'appointment-0-2':options(10,1,2)},onlineFirst:true}).remoteComplete,false);
 assert.equal(calculate({questions:{'appointment-0-1':options(10,0,2),'appointment-1-1':options(10,0,2)}}).remoteComplete,true);
-assert.equal(calculate({questions:{}}).score,null);assert.equal(row({questions:{},distance:10},'Persönliche Anreise').value,.8);
+assert.equal(calculate({questions:{}}).score,null);assert.equal(row({questions:{},distance:10},'Persönliche Anreise').value,17/18);
 assert.equal(row({...base,treatmentCount:600},'Anzahl Therapien').value,1);assert.equal(row({...base,categoryCount:99},'Vielfalt der Kategorien').value,1);
 const researchQuestions={};
 const researched=calculate({questions:researchQuestions,researchedOnlineComplete:true});
@@ -31,3 +31,41 @@ assert.equal(followOnly.earned,3);
 assert.equal(followOnly.rows.find(r=>r.label==='Ersttermin aus der Ferne').value,null);
 assert.equal(followOnly.rows.find(r=>r.label==='Folgetermin aus der Ferne').researchConfirmed,true);
 console.log('PASS: 30/30/40 weights; researched online practice scores 30 burden points without community answers; remote thresholds, distances, cost and therapy caps.');
+const conflicting={questions:{'appointment-0-1':options(10,1,2),'appointment-1-2':options(10,1,2)},researchedOnlineComplete:true,distance:10};
+let priority=calculate(conflicting);
+assert.equal(priority.remoteComplete,false,'Sufficient community no answers override research and prevent full burden points');
+for(const label of ['Ersttermin aus der Ferne','Folgetermin aus der Ferne']){const item=priority.rows.find(r=>r.label===label);assert.equal(item.value,0);assert.notEqual(item.researchConfirmed,true);}
+const fallback=calculate({...conflicting,questions:{'appointment-0-1':options(9,1,2),'appointment-1-2':options(9,1,2)}});
+assert.equal(fallback.remoteComplete,true,'Below ten answers research remains the fallback');
+const mixed=calculate({...conflicting,questions:{'appointment-0-1':options(10,1,2),'appointment-1-2':options(9,1,2)}});
+assert.equal(mixed.remoteComplete,false);
+assert.equal(mixed.rows.find(r=>r.label==='Ersttermin aus der Ferne').value,0);
+assert.equal(mixed.rows.find(r=>r.label==='Folgetermin aus der Ferne').value,1);
+const partial=calculate({...conflicting,questions:{'appointment-0-1':{options:[{count:4},{count:6}]},'appointment-1-2':options(10,1,2)}});
+assert.equal(partial.rows.find(r=>r.label==='Ersttermin aus der Ferne').value,.4);
+assert.equal(partial.rows.find(r=>r.label==='Ersttermin aus der Ferne').researchConfirmed,undefined);
+console.log('PASS: community overrides research at ten answers, nine-answer fallback, mixed sources and proportional community score.');
+for(const [distance,expected] of [[10,17.5],[40,14.4],[70,12.6],[200,10.8],[500,9.9],[900,9]]){
+ const data={distance,questions:{'appointment-0-2':options(10,1,2),'appointment-1-2':options(10,0,2)}};
+ const travel=row(data,'Persönliche Anreise');assert.ok(Math.abs(travel.value*18-expected)<1e-9);assert.equal(travel.oneOffTravel,true);
+ const reverse=row({...data,questions:{'appointment-0-2':options(10,0,2),'appointment-1-2':options(10,1,2)}},'Persönliche Anreise');assert.equal(reverse.oneOffTravel,false);assert.ok(Math.abs(reverse.value*18-(2*expected-18))<1e-9);
+}
+assert.equal(row({researchedRemoteFollow:true},'Persönliche Anreise').value,null);
+assert.equal(row({researchedOnlineComplete:true},'Persönliche Anreise').value,1);
+assert.equal(row({distance:900,researchedRemoteFollow:true},'Persönliche Anreise').value,.5);
+console.log('PASS: one-off first visit halves all distance deductions; recurring follow-ups retain full deductions; missing location and remote exemptions.');
+const offerProfiles=Array.from({length:100},(_,i)=>({id:i+1,treatmentCount:i+1,categoryCount:100-i}));
+const offer=(id,treatmentCount,categoryCount)=>calculate({id,treatmentCount,categoryCount,comparisonProfiles:offerProfiles});
+assert.equal(offer(100,100,1).rows.find(r=>r.label==='Anzahl Therapien').value,1);
+assert.equal(offer(100,100,1).rows.find(r=>r.label==='Vielfalt der Kategorien').value,0);
+assert.equal(offer(1,1,100).rows.find(r=>r.label==='Anzahl Therapien').value,0);
+assert.equal(offer(1,1,100).rows.find(r=>r.label==='Vielfalt der Kategorien').value,1);
+assert.ok(Math.abs(offer(50,50,51).rows.find(r=>r.label==='Anzahl Therapien').value-(.495-.1)/.8)<1e-9);
+const tiedOffer=calculate({id:1,treatmentCount:5,categoryCount:2,comparisonProfiles:[{id:1,treatmentCount:999,categoryCount:999},{id:2,treatmentCount:5,categoryCount:2}]});
+assert.equal(tiedOffer.rows.find(r=>r.label==='Anzahl Therapien').value,.5);
+assert.equal(tiedOffer.rows.find(r=>r.label==='Vielfalt der Kategorien').value,.5);
+assert.equal(tiedOffer.rows.find(r=>r.label==='Anzahl Therapien').comparisonCount,2);
+assert.equal(row({treatmentCount:5,categoryCount:2},'Anzahl Therapien').value,null);
+assert.equal(row({treatmentCount:0,categoryCount:0,comparisonProfiles:offerProfiles},'Anzahl Therapien').value,null);
+assert.equal(row({treatmentCount:5,categoryCount:2,comparisonProfiles:[{id:2,treatmentCount:0,categoryCount:0}]},'Anzahl Therapien').value,null);
+console.log('PASS: independent relative offer metrics; decile extremes, linear interpolation, ties, self exclusion and missing comparison data.');

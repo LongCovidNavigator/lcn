@@ -525,8 +525,8 @@
     const icon=name=>`<span class="overview-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons[name]}</svg></span>`;
     const fields=rows=>`<dl>${rows.map(([label,value])=>`<div><dt>${label}</dt><dd${!value ? ' class="overview-missing"' : ''}>${value||'Noch keine Angabe'}</dd></div>`).join('')}</dl>`;
     const section=(title,symbol,rows)=>`<section class="overview-group">${icon(symbol)}<div class="overview-group-content"><h3>${title}</h3>${fields(rows)}</div></section>`;
-    const type=({doctor:'Arzt',practice:'Praxis',clinic:'Klinik',other:'Anlaufstelle'})[doctor.dr_type]||doctor.dr_type||'Noch keine Angabe';
-    const country=({AT:'Österreich',DE:'Deutschland',CH:'Schweiz'})[doctor.loc_country]||doctor.loc_country;
+    const type=window.LCNDoctorEntryTypes?.format(doctor.dr_type)||({doctor:'Ärzt:innen',practice:'Praxis',clinic:'Klinik',other:'Anlaufstelle'})[doctor.dr_type]||doctor.dr_type||'Noch keine Angabe';
+    const country=window.LCNDoctorCountryLabel?.(doctor.loc_country)||({AT:'Österreich',DE:'Deutschland',CH:'Schweiz'})[doctor.loc_country]||doctor.loc_country;
     const locations=[['Adresse',escape(address())],['Land',escape(country)]];
     const additionalLocations=(research.locations||[]).filter(location=>Number(location.loc_id)!==Number(doctor.loc_id));
     if(additionalLocations.length)locations.push(['Weitere Standorte',additionalLocations.map(location=>escape([location.loc_label,address(location)].filter(Boolean).join(' · '))).join('<br>')]);
@@ -713,14 +713,14 @@
         const rad=v=>v*Math.PI/180,a=Math.sin(rad(profile.lat-ownLocation.lat)/2)**2+Math.cos(rad(ownLocation.lat))*Math.cos(rad(profile.lat))*Math.sin(rad(profile.lng-ownLocation.lng)/2)**2;
         distance=6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(Math.max(0,1-a)));
       }
-      const candidate=window.lcnDashboardScore({...profile,costKey:'costs-'+costContext(),distance});
+      const candidate=window.lcnDashboardScore({...profile,comparisonProfiles:state.community?.comparison_profiles,costKey:'costs-'+costContext(),distance});
       if(candidate.dataCoverage<70||!candidate.coverage)return [];
       return [100*candidate.earned/candidate.coverage];
     });
   }
   function dashboardCalculation() {
     const groups=Object.entries(state.data?.treatments_grouped||{}),editorial=state.data?.analysis?.editorial;
-    const result=window.lcnDashboardScore({questions:state.community?.questions,costKey:'costs-'+costContext(),distance:distanceKm(),onlineFirst:onlineAppointments().complete,researchedOnlineComplete:researchedRemoteAccess().complete,researchedRemoteFirst:researchedRemoteAccess().first,researchedRemoteFollow:researchedRemoteAccess().follow,treatmentCount:new Set(groups.flatMap(([,items])=>items.map(t=>t.treat_id))).size,categoryCount:groups.filter(([name,items])=>items.length&&name!=='Ohne Kategorie').length,editorialCount:editorial?.matched_count,editorialTotal:editorial?.total});
+    const result=window.lcnDashboardScore({id:doctorId,comparisonProfiles:state.community?.comparison_profiles,questions:state.community?.questions,costKey:'costs-'+costContext(),distance:distanceKm(),onlineFirst:onlineAppointments().complete,researchedOnlineComplete:researchedRemoteAccess().complete,researchedRemoteFirst:researchedRemoteAccess().first,researchedRemoteFollow:researchedRemoteAccess().follow,treatmentCount:new Set(groups.flatMap(([,items])=>items.map(t=>t.treat_id))).size,categoryCount:groups.filter(([name,items])=>items.length&&name!=='Ohne Kategorie').length,editorialCount:editorial?.matched_count,editorialTotal:editorial?.total});
     return result;
   }
   function scoreDataStatus() {
@@ -729,56 +729,111 @@
     return '';
   }
   function scoreMissingText(row) {
-    return row?.answerCount>0?'Weniger als zehn Angaben':'Keine Angaben';
+    return row?.relativeOffer?(row.rawValue==null?'Keine Therapieeinträge':'Keine Vergleichsdaten'):row?.label==='Persönliche Anreise'?'Standort oder Praxiskoordinaten fehlen':row?.answerCount>0?'Weniger als zehn Angaben ('+row.answerCount+' von 10)':'Keine Angaben';
   }
   function dashboardScore(overview = false) {
     const status=scoreDataStatus();
     if(status)return status;
     const result=dashboardCalculation();
     const number=n=>n.toLocaleString('de-DE',{maximumFractionDigits:1});
-    return '<section class="card dashboard-score doctor-relative-summary">'+window.lcnDoctorRelativeScore.render(result,totalComparisonValues())+(overview?'':'<details><summary>Gewichtung und Teilwerte ansehen</summary><div class="score-explanation"><p>Insgesamt sind 100 Punkte möglich: Belastung 30, Zugang 30, Erfahrungen und Angebot 40. Sind Erst- und Folgetermin aus der Ferne bestätigt, erhält der gesamte Belastungsbereich 30 Punkte; Wartezimmer und Entfernung verursachen keinen Abzug. Bereiche ohne Angaben werden vollständig aus der Gewichtung genommen. Oben stehen die erreichten Punkte im Verhältnis zu den aktuell bewertbaren Punkten. Community-Bereiche zählen ab zehn Angaben. Therapieanzahl und Kategorienvielfalt bilden zusammen einen Bereich; ihre Teilpunkte bleiben einzeln sichtbar.</p><p>Anreise und Kassensystem sorgen für ein individuelles Ergebnis.</p></div><div class="score-parts">'+[...result.rows].sort((a,b)=>['Termin-Anpassung','Ersttermin aus der Ferne','Folgetermin aus der Ferne','Persönliche Anreise','Eigene Behandlungskosten','Wartezeit auf Ersttermin','Wartezeit auf Folgetermine','Berichtete Zustandsveränderung','Anzahl Therapien','Vielfalt der Kategorien'].indexOf(a.label)-['Termin-Anpassung','Ersttermin aus der Ferne','Folgetermin aus der Ferne','Persönliche Anreise','Eigene Behandlungskosten','Wartezeit auf Ersttermin','Wartezeit auf Folgetermine','Berichtete Zustandsveränderung','Anzahl Therapien','Vielfalt der Kategorien'].indexOf(b.label)).map(row=>'<div><strong>'+escape(row.label)+'</strong><span>'+(row.value==null?scoreMissingText(row):number(row.value*row.weight)+' / '+row.weight+' Punkte')+'</span><small>'+escape(row.reason.replace('Euro',costSystem().code==='CH'?'Schweizer Franken':'Euro'))+'</small></div>').join('')+'</div><p>Die Gesamtpunktzahl bezieht sich auf die aktuell bewertbaren Punkte. Die Ferntermin-Werte beschreiben Zustimmung pro Terminform, keine zusammengeführte Wahrscheinlichkeit.</p></details>')+'</section>';
+    const order=['Termin-Anpassung','Ersttermin aus der Ferne','Folgetermin aus der Ferne','Persönliche Anreise','Eigene Behandlungskosten','Wartezeit auf Ersttermin','Wartezeit auf Folgetermine','Berichtete Zustandsveränderung','Anzahl Therapien','Vielfalt der Kategorien'];
+    const rows=[...result.rows].sort((a,b)=>order.indexOf(a.label)-order.indexOf(b.label)).map(row=>'<tr class="'+(row.value==null?'is-excluded':'is-included')+'"><th scope="row">'+escape(row.label)+'</th><td>'+(row.value==null?'Nicht aufgenommen<small>'+escape(scoreMissingText(row))+'</small>':'Aufgenommen')+'</td><td>'+number(row.weight)+'</td><td>'+(row.value==null?'—':number(row.value*row.weight))+'</td></tr>').join('');
+    return '<section class="card dashboard-score doctor-relative-summary">'+window.lcnDoctorRelativeScore.render(result,totalComparisonValues())+(overview?'':'<details><summary>Gewichtung und Teilwerte</summary><div class="score-explanation"><p><strong>Bis zu 100 Punkte: Belastung 30 · Zugang 30 · Erfahrungen und Angebot 40</strong></p><p>Für den Vergleich mit anderen Behandlern brauchen wir genügend Daten: Mindestens sieben der neun Bereiche müssen berechnet werden können. Therapieanzahl und Kategorienvielfalt bilden dabei zusammen einen Bereich. Teilwerte ohne ausreichende Angaben lassen wir weg. Damit die Ergebnisse trotzdem vergleichbar bleiben, rechnen wir die erreichten Punkte auf eine gemeinsame Skala von 0 bis 100 um.</p><p>Das Gewicht zeigt den maximalen Beitrag eines Teilwerts. Der Beitrag zeigt die tatsächlich erreichten Punkte. Wie ein einzelner Teilwert berechnet wird, erfährst du unter „Wie wird der Wert ermittelt?“.</p></div><div class="doctor-score-scroll" role="region" aria-label="Gewichtung und Teilwerte" tabindex="0"><table class="doctor-score-table"><thead><tr><th scope="col">Teilwert</th><th scope="col">Berücksichtigung</th><th scope="col">Gewicht</th><th scope="col">Beitrag</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><th scope="row">Gesamtwert</th><td>'+result.availableFieldCount+' von '+result.fieldCount+' Bereichen</td><td>'+number(result.coverage)+'</td><td>'+(result.coverage?number(result.earned):'—')+'</td></tr></tfoot></table></div></details>')+'</section>';
   }
   function dashboard() {
     const status=scoreDataStatus();
     if(status)return status;
     const result=dashboardCalculation();
     const number=n=>n.toLocaleString('de-DE',{maximumFractionDigits:1});
-    const points=row=>'<div class="dashboard-points"><strong>'+(row?.value==null?scoreMissingText(row):number(row.value*row.weight)+' <small>/ '+row.weight+' Punkte</small>')+'</strong></div>';
+    const dataRequirement=count=>'Der Teilwert wird ab 10 auswertbaren Antworten berechnet. '+(count===1?'Bisher liegt 1 Antwort von 10 vor.':'Bisher liegen '+count+' von 10 Antworten vor.');
+    const missingNotice=row=>row?.value==null&&row?.answerCount!=null?'<p class="therapy-data-requirement" role="status">'+dataRequirement(row.answerCount)+'</p>':'';
+    const points=row=>missingNotice(row)+'<div class="dashboard-points"><strong>'+(row?.value==null?'Noch nicht auswertbar':number(row.value*row.weight)+' <small>/ '+row.weight+' Punkte</small>')+'</strong></div>';
     const scoreRow=label=>result.rows.find(row=>row.label===label);
-    const dist=(key,labels,row)=>'<div class="dashboard-distribution dashboard-scored-distribution"><div class="dashboard-distribution-head"><span>Ausprägung</span><span>Community</span><span>Stufenwert</span></div>'+labels.map((label,i)=>'<div><span>'+escape(label)+'</span><div class="dashboard-bar-value"><div class="dashboard-track"><span class="'+(key==='effect'?'effect-'+i:'dashboard-blue')+'" style="width:'+(percent(key,i)||0)+'%"></span></div><strong>'+percentText(percent(key,i))+'</strong></div><span class="dashboard-level-points">'+number(row.scalePoints[i])+' P.</span></div>').join('')+'</div>';
-    const costDistribution=(key,labels,row)=>'<div class="dashboard-cost-scale" role="list" aria-label="Behandlungskosten: Community-Anteil und Stufenwert">'+labels.map((label,i)=>'<div role="listitem"><strong class="dashboard-cost-share">'+percentText(percent(key,i))+'</strong><span class="dashboard-cost-bar-area" aria-hidden="true"><span class="dashboard-cost-bar" style="height:'+Math.max(0,Math.min(100,percent(key,i)||0))+'%"></span></span><span class="dashboard-cost-label">'+escape(label)+'</span><b class="dashboard-cost-points">'+number(row.scalePoints[i])+' P.</b></div>').join('')+'</div>';
+    const weightedRule='Für jede Antwort berechnen wir einen gewichteten Beitrag: Dazu multiplizieren wir den Stufenwert der Antwort mit dem prozentualen Anteil dieser Antwort. Die Summe aller Beiträge ergibt den Teilwert. Der Teilwert wird ab 10 auswertbaren Antworten berechnet.';
+    const calculationHelp=text=>'<details class="doctor-calculation-help"><summary>Wie wird der Wert ermittelt?</summary><div class="doctor-calculation-box"><p>'+escape(text).replace(/ ([123])\. /g,'</p><p><strong>Fall $1:</strong> ')+'</p></div></details>';
+    const dist=(key,labels,row)=>'<div class="therapy-dashboard-distribution"><div class="therapy-distribution-heading"><span>Antwort</span><span>Anteil der Antworten</span><span>Stufenwert</span><span>Gewichteter<br>Beitrag</span></div>'+labels.map((label,i)=>'<div class="therapy-distribution-row"><span>'+escape(label)+'</span><div class="therapy-distribution-share"><strong>'+percentText(percent(key,i))+'</strong><div class="dashboard-track"><span style="width:'+(percent(key,i)||0)+'%"></span></div></div><span class="therapy-stage-maximum">'+number(row.scalePoints[i])+'</span><span class="therapy-stage-contribution">'+(row.value==null?'–':number(row.scalePoints[i]*percent(key,i)/100))+'</span></div>').join('')+'</div>';
+    const costGraphic=(key,labels,row)=>'<div class="doctor-cost-scroll" role="region" aria-label="Behandlungskosten: Anteile, Stufenwerte und gewichtete Beiträge" tabindex="0"><table class="doctor-cost-horizontal"><thead><tr><th scope="col">Kostenstufe</th>'+labels.map(label=>'<th scope="col">'+escape(label)+'</th>').join('')+'</tr></thead><tbody><tr class="doctor-cost-chart"><th scope="row">Anteil der Antworten</th>'+labels.map((_,i)=>'<td><div class="doctor-cost-bar-area"><span style="height:'+(percent(key,i)||0)+'%"><strong>'+percentText(percent(key,i))+'</strong></span></div></td>').join('')+'</tr><tr><th scope="row">Stufenwert</th>'+labels.map((_,i)=>'<td>'+number(row.scalePoints[i])+'</td>').join('')+'</tr><tr><th scope="row">Gewichteter Beitrag</th>'+labels.map((_,i)=>'<td><strong>'+(row.value==null?'–':number(row.scalePoints[i]*percent(key,i)/100))+'</strong></td>').join('')+'</tr></tbody></table></div>';
+    const effectGraphic=row=>{
+      const labels=scales.effect;
+      const bars=labels.map((label,i)=>'<div class="doctor-effect-bar-area"><span class="doctor-effect-bar effect-'+i+'" style="height:'+(percent('effect',i)||0)+'%"><strong>'+percentText(percent('effect',i))+'</strong></span></div>').join('');
+      const numbers=labels.map((_,i)=>'<span class="doctor-effect-number">'+number(row.scalePoints[i])+'</span>').join('');
+      const contributions=labels.map((_,i)=>'<strong class="doctor-effect-number">'+(row.value==null?'–':number(row.scalePoints[i]*percent('effect',i)/100))+'</strong>').join('');
+      return '<div class="doctor-effect-columns" role="group" aria-label="Zustandsveränderung: Community-Anteile, Stufenwerte und gewichtete Beiträge">'+bars+'<span></span>'+labels.map(label=>'<span class="doctor-effect-label">'+escape(label)+'</span>').join('')+'<span></span>'+numbers+'<span class="doctor-effect-row-heading">Stufenwert</span>'+contributions+'<span class="doctor-effect-row-heading">Gewichteter<br>Beitrag</span></div>';
+    };
+    const dashboardHelp=(title,text)=>{const id='doctor-dashboard-help-'+(++helpSequence);return '<span class="ux-heading-info"><button type="button" aria-label="'+escape('Information zu '+title)+'" aria-describedby="'+id+'">ⓘ</button><p id="'+id+'" role="tooltip">'+escape(text)+'</p></span>';};
     const card=(title,key,labels,view,extra='')=>{
       const row=result.rows.find(row=>row.key===key);
-      return '<section class="card dashboard-card" data-dashboard-question="'+key+'"><div class="assessment-header"><h3>'+title+'</h3><span class="assessment-count">'+communityNote(key)+'</span></div>'+points(row)+extra+(key.startsWith('costs-')?costDistribution(key,labels,row):dist(key,labels,row))+'<p class="dashboard-score-reason">'+(row?.remoteOverride?escape(row.reason):'Die Anteile der Community gewichten die Stufenwerte zum angezeigten Punktwert.')+'</p><a class="dashboard-detail" href="#'+view+'">Details ansehen →</a></section>';
+      return '<section class="card dashboard-shared-card dashboard-card" data-dashboard-question="'+key+'"><div class="assessment-header"><h3><a class="doctor-dashboard-title-link" href="#'+view+'">'+title+'</a> '+dashboardHelp(title,'Die Übersicht zeigt die Verteilung der Community-Antworten. Über die Überschrift gelangst du zu den eigenen Angaben. Wie der Teilwert berechnet wird, erfährst du in der aufklappbaren Erklärung.')+'</h3><span class="assessment-count">'+communityNote(key)+'</span></div>'+points(row)+extra+(key==='effect'?effectGraphic(row):key.startsWith('costs-')?costGraphic(key,labels,row):dist(key,labels,row))+calculationHelp(row?.remoteOverride?'Sind Erst- und Folgetermin aus der Ferne möglich, erhält der gesamte Belastungsbereich 30 Punkte. Für diesen Teilwert gibt es deshalb die volle Punktzahl. Die Verteilung der Community-Antworten bleibt unverändert sichtbar.':weightedRule)+'</section>';
     };
     const costKey='costs-'+costContext();
     const costChoices='<div class="insurance-toggle dashboard-insurance" aria-label="Versicherungskontext">'+costSystem().options.map(([value,label])=>'<button type="button" data-insurance="'+value+'" aria-pressed="'+(state.insurance===value)+'">'+label+'</button>').join('')+'</div>';
-    const appointments='<section class="card dashboard-card dashboard-card-wide"><div class="assessment-header"><h3>Terminform</h3><span class="assessment-count">'+appointmentCountNote()+'</span></div><div class="dashboard-appointments">'+['Ersttermin','Folgetermin'].map((type,r)=>{
+    const appointmentRows=['Ersttermin aus der Ferne','Folgetermin aus der Ferne'].map(scoreRow);
+    const appointmentAvailable=appointmentRows.filter(row=>row.value!=null);
+    const appointmentPoints=appointmentAvailable.reduce((sum,row)=>sum+row.value*row.weight,0);
+    const missingAppointments=appointmentRows.map((row,i)=>({row,label:i?'Folgetermin':'Ersttermin'})).filter(({row})=>row.value==null);
+    const appointmentNotice=missingAppointments.length?'<div class="therapy-data-requirement doctor-appointment-requirement" role="status">'+missingAppointments.map(({row,label})=>'<p><strong>'+label+':</strong> '+dataRequirement(row.answerCount||0)+'</p>').join('')+'</div>':'';
+    const appointmentScore=appointmentNotice+'<div class="dashboard-points"><strong>'+(appointmentAvailable.length?number(appointmentPoints)+' <small>/ 6 Punkte</small>':'Noch nicht auswertbar')+'</strong></div>';
+    const appointments='<section class="card dashboard-shared-card dashboard-card doctor-dashboard-appointments" data-dashboard-question="appointments"><div class="assessment-header"><h3><a class="doctor-dashboard-title-link" href="#termin">Terminform</a></h3><span class="assessment-count">'+appointmentCountNote()+'</span></div>'+appointmentScore+'<div class="dashboard-appointments">'+['Ersttermin','Folgetermin'].map((type,r)=>{
       const row=scoreRow(r?'Folgetermin aus der Ferne':'Ersttermin aus der Ferne');
-      if(row?.researchConfirmed)return '<section><div class="dashboard-appointment-heading"><h4>'+type+'</h4>'+points(row)+'</div><p class="dashboard-research-note"><strong>Aus der Ferne möglich · Recherche bestätigt</strong></p><p>'+escape(r?researchedRemoteAccess().followMethod:researchedRemoteAccess().firstMethod)+'</p><p class="dashboard-score-reason">Redaktionell bestätigte Terminform. Community-Antworten werden dadurch nicht ersetzt.</p></section>';
-      return '<section><div class="dashboard-appointment-heading"><h4>'+type+'</h4>'+points(row)+'</div><div class="dashboard-term-distribution"><div class="dashboard-term-head"><span>Terminform</span><span>Nicht möglich · möglich</span><span>Stufenwert</span></div>'+['Vor Ort','Telefon','Video'].map((label,c)=>{
+      if(row?.researchConfirmed)return '<section><div class="dashboard-appointment-heading"><h4>'+type+'</h4></div><p class="dashboard-research-note"><strong>Aus der Ferne möglich · Recherche bestätigt</strong></p><p>'+escape(r?researchedRemoteAccess().followMethod:researchedRemoteAccess().firstMethod)+'</p><p class="dashboard-score-reason">Redaktionell bestätigte Terminform. Community-Antworten werden dadurch nicht ersetzt.</p></section>';
+      return '<section><div class="dashboard-appointment-heading"><h4>'+type+'</h4></div><div class="dashboard-term-distribution"><div class="dashboard-term-head"><span>Terminform</span><span>Nicht möglich · möglich</span></div>'+['Vor Ort','Telefon','Video'].map((label,c)=>{
         const q=question('appointment-'+r+'-'+c),yes=q.options[0]?.count||0,no=q.options[1]?.count||0,total=yes+no;
         const yesPercent=total?100*yes/total:null,noPercent=total?100*no/total:null;
-        return '<div class="dashboard-term-row"><span>'+label+'</span><div class="dashboard-term-bar"><div class="dashboard-term-meter" role="img" aria-label="'+(total?percentText(noPercent)+' nicht möglich, '+percentText(yesPercent)+' möglich':'Keine Angaben')+'">'+(total?'<span class="term-no" style="width:'+noPercent+'%"></span><span class="term-yes" style="width:'+yesPercent+'%"></span>':'')+'</div><div class="dashboard-term-percent"><span>'+percentText(noPercent)+'</span><span>'+percentText(yesPercent)+'</span></div></div><span class="dashboard-level-points">'+(c?'3 P.':'0 P.')+'</span></div>';
-      }).join('')+'</div><p class="dashboard-score-reason">Möglich: 3 Punkte · nicht möglich: 0 Punkte. Der höhere Möglich-Anteil von Telefon oder Video zählt, ohne Addition. Vor Ort gibt keine Punkte.</p></section>';
-    }).join('')+'</div><a class="dashboard-detail" href="#termin">Details ansehen →</a></section>';
+        return '<div class="dashboard-term-row"><span>'+label+'</span><div class="dashboard-term-bar"><div class="dashboard-term-meter" role="img" aria-label="'+(total?percentText(noPercent)+' nicht möglich, '+percentText(yesPercent)+' möglich':'Keine Angaben')+'">'+(total?'<span class="term-no" style="width:'+noPercent+'%"></span><span class="term-yes" style="width:'+yesPercent+'%"></span>':'')+'</div><div class="dashboard-term-percent"><span>'+percentText(noPercent)+'</span><span>'+percentText(yesPercent)+'</span></div></div></div>';
+      }).join('')+'</div></section>';
+    }).join('')+'</div>'+calculationHelp('Für die Bewertung ist entscheidend, ob ein Remote-Termin möglich ist. Dafür berücksichtigen wir die Antworten zu Telefon- und Videoterminen beim Ersttermin und bei Folgeterminen. Für beide sind jeweils bis zu 3 Punkte möglich. Die Punkte berechnen wir, indem wir den Stufenwert 3 mit dem Anteil der positiven Antworten multiplizieren. Je Termin zählt der höhere Wert aus Telefon und Video. Der Teilwert wird ab 10 auswertbaren Antworten berechnet.')+'</section>';
     const groups=Object.entries(state.data?.treatments_grouped||{}),count=new Set(groups.flatMap(([,items])=>items.map(t=>t.treat_id))).size,editorial=state.data?.analysis?.editorial;
     const treatmentRows=['Anzahl Therapien','Vielfalt der Kategorien'].map(scoreRow);
     const treatmentEarned=treatmentRows.reduce((sum,row)=>sum+(row.value??0)*row.weight,0),treatmentAvailable=treatmentRows.reduce((sum,row)=>sum+(row.value==null?0:row.weight),0);
-    const treatments='<section class="card dashboard-card"><div class="assessment-header"><h3>Therapien</h3><span class="assessment-count">'+count+' Einträge</span></div><div class="dashboard-points"><strong>'+(treatmentAvailable?number(treatmentEarned)+' <small>/ '+treatmentAvailable+' Punkte</small>':'Keine Angaben')+'</strong></div><div class="dashboard-treatment-points">'+treatmentRows.map((row,i)=>'<div><span>'+['Anzahl: '+count+' Therapien','Vielfalt: '+groups.filter(([name,items])=>items.length&&name!=='Ohne Kategorie').length+' Kategorien','Top-Therapien: '+(editorial?editorial.matched_count+' von '+editorial.total:'Keine Angaben')][i]+'</span><strong>'+(row.value==null?scoreMissingText(row):number(row.value*row.weight)+' / '+row.weight+' P.')+'</strong></div>').join('')+'</div><p class="dashboard-score-reason">60 Therapien ergeben 7 Punkte, acht bekannte Kategorien 3 Punkte. Redaktionelle Top-Therapien werden nicht gewertet. Bei Anzahl und Vielfalt zählt der jeweilige Anteil.</p><a class="dashboard-detail" href="#wirkung">Therapien ansehen →</a></section>';
-    const km=distanceKm(),band=km===null?null:travelBands.find(([limit])=>km<=limit),travelRow=scoreRow('Persönliche Anreise');
-    const travel='<section class="card dashboard-card"><h3>Anreise</h3>'+points(travelRow)+'<strong class="dashboard-result">'+(result.remoteComplete?'Erst- und Folgetermin aus der Ferne · keine Anreise':km===null?'Standort für die Entfernung ergänzen':distanceText())+'</strong>'+(band&&!result.remoteComplete?'<p>'+band[2]+' · grobe Orientierung</p>':'')+'<p class="dashboard-score-reason">Erst- und Folgetermin aus der Ferne: volle 30 Punkte für den gesamten Belastungsbereich. Sonst Anreise: bis 20 km 14,4 P. · bis 50 km 10,8 P. · bis 100 km 7,2 P. · bis 300 km 3,6 P. · bis 800 km 1,8 P. · darüber: 0 P.</p><a class="dashboard-detail" href="#termin">Standort und Einordnung ansehen →</a></section>';
+    const offerGraphic='<div class="doctor-offer-metrics">'+treatmentRows.map((row,i)=>{
+      const raw=row.rawValue;
+      const top=row.percentile==null?null:Math.max(1,Math.ceil(100*(1-row.percentile)));
+      return '<section class="doctor-offer-metric"><div class="doctor-offer-metric-heading"><strong>'+['Therapieanzahl','Kategorienvielfalt'][i]+': '+(raw==null?'—':number(raw))+'</strong><span class="doctor-offer-rank">'+(top==null?'Noch nicht auswertbar':'Top '+top+' %')+'</span></div><div class="doctor-offer-track" role="img" aria-label="'+escape(row.label)+': '+(row.value==null?'noch nicht auswertbar':number(row.value*row.weight)+' von '+row.weight+' Punkten')+'"><span style="width:'+((row.value??0)*100)+'%"></span></div><div class="doctor-offer-points">'+(row.value==null?'Noch nicht auswertbar':number(row.value*row.weight)+' von '+row.weight+' Punkten')+'</div></section>';
+    }).join('')+'</div>';
+    const offerComparisonText=' '+treatmentRows.map((row,i)=>{
+      const label=i?'die Kategorienvielfalt':'die Therapieanzahl';
+      if(row.value==null)return 'Für '+label+' ist aktuell kein Vergleich möglich.';
+      const others=row.comparisonCount-1;
+      return 'Für '+label+(others===1?' wird aktuell ein anderer Behandler':' werden aktuell '+number(others)+' andere Behandler')+' mit Therapieeinträgen zum Vergleich herangezogen.';
+    }).join(' ');
+    const treatments='<section class="card dashboard-shared-card dashboard-card doctor-dashboard-offer"><div class="assessment-header"><h3><a class="doctor-dashboard-title-link" href="#wirkung">Therapien</a></h3><span class="assessment-count">'+count+' Einträge</span></div><div class="dashboard-points"><strong>'+(treatmentAvailable?number(treatmentEarned)+' <small>/ 10 Punkte</small>':'Noch nicht auswertbar')+'</strong></div>'+offerGraphic+calculationHelp('Für die Bewertung vergleichen wir die Therapieanzahl und die Kategorienvielfalt der Therapien mit anderen Behandlern. Für die Therapieanzahl sind bis zu 7 Punkte möglich, für die Kategorienvielfalt bis zu 3 Punkte. Die oberen 10 % erhalten jeweils die volle Punktzahl, die unteren 10 % erhalten 0 Punkte. Dazwischen werden die Punkte linear nach der Platzierung vergeben. Gleiche Anzahlen erhalten gleich viele Punkte. Fehlen Therapieeinträge oder ausreichende Vergleichsdaten, werden die Teilwerte nicht bewertet und nicht in die Gesamtwertung einbezogen.'+offerComparisonText)+'</section>';
+
+    const km=distanceKm(),travelRow=scoreRow('Persönliche Anreise');
+    const travelLevels=[
+      [0,'Keine Anreise','Erst- und Folgetermin aus der Ferne',18,'#176748'],
+      [20,'Bis 20 km','Unter 30 Min.',17,'#9fd3b6'],
+      [50,'20–50 km','30–60 Min.',10.8,'#cadca9'],
+      [100,'50–100 km','Etwa 1–2 Std.',7.2,'#e5cf9b'],
+      [300,'100–300 km','Mehrere Stunden',3.6,'#dfb09e'],
+      [800,'300–800 km','Tagesreise',1.8,'#e5a5ad'],
+      [Infinity,'Über 800 km','Tagesreise oder länger',0,'#bd4949']
+    ];
+    const travelLevel=result.remoteComplete?0:km===null?-1:travelLevels.findIndex((level,i)=>i>0&&km<=level[0]);
+    const travelGraphic='<ol class="doctor-dashboard-travel-scale" aria-label="Anreisestufen und Punkte">'+travelLevels.map((level,i)=>'<li'+(i===travelLevel?' class="is-current" aria-current="true"':'')+'><i style="background:'+level[4]+'" aria-hidden="true"></i><strong>'+level[1]+'</strong><span>'+level[2]+'</span><b>'+number(travelRow.oneOffTravel&&i>0?18-(18-level[3])/2:level[3])+' P.</b></li>').join('')+'</ol>';
+    const travel='<section class="card dashboard-shared-card dashboard-card doctor-dashboard-travel" data-dashboard-question="distance"><h3><a class="doctor-dashboard-title-link" href="#termin">Persönliche Anreise</a></h3>'+points(travelRow)+'<p class="doctor-dashboard-travel-result">'+(result.remoteComplete?'Erst- und Folgetermin aus der Ferne · keine Anreise':km===null?(savedLocation()?'Für diese Praxis fehlen Koordinaten.':'Standort für die Entfernung ergänzen'):distanceText())+'</p>'+travelGraphic+'<p class="dashboard-score-reason">'+(result.remoteComplete?'Keine Anreise: 18 von 18 Anreisepunkten. Für den gesamten Belastungsbereich gelten volle 30 Punkte.':travelRow.oneOffTravel?'Einmalige Anreise zum Ersttermin angenommen · halber Entfernungsabzug. Markiert ist deine Entfernung als Luftlinie.':'Markiert ist deine Entfernung als Luftlinie. Die Zeitangaben dienen zur groben Orientierung.')+'</p>'+'<details class="doctor-calculation-help"><summary>Wie wird der Wert ermittelt?</summary><div class="doctor-calculation-box"><p>Für die Anreise unterscheiden wir mehrere Fälle. Dafür berücksichtigen wir, ob <u>Ersttermin</u> und <u>Folgetermine</u> aus der Ferne möglich sind:</p><ol class="dashboard-travel-cases"><li><strong>Ersttermin und Folgetermine aus der Ferne möglich.</strong><br>Es ist keine Anreise erforderlich. Für die persönliche Anreise werden alle 18 Punkte vergeben.</li><li><strong>Nur der Ersttermin vor Ort, Folgetermine aus der Ferne möglich.</strong><br>Wir nehmen eine einmalige Anreise an und halbieren deshalb den entfernungsabhängigen Abzug von den maximal 18 Punkten.</li><li><strong>Erst- und Folgetermin vor Ort bzw. noch keine ausreichenden Angaben zur Terminform.</strong><br>Wir berücksichtigen die Entfernung mit dem vollen Abzug. Je weiter die Praxis entfernt ist, desto weniger Punkte gibt es. Die Stufenwerte stehen in der Grafik.</li></ol><p>Die Entfernung ist die Luftlinie von deinem Standort zu dieser Praxis. Ob Telefon- oder Videotermine möglich sind, ergibt sich aus den Angaben unter „Terminform“.</p><p><strong>Achtung:</strong> Ist eine Anreise nötig und kein Standort angegeben, wird dieser Teilwert nicht berechnet und nicht in die Gesamtwertung einbezogen. Das gilt auch, wenn die Praxiskoordinaten fehlen.</p></div></details>'+'</section>';
+
     const group=(sectionNumber,title,maximum,body)=>{
       const labels=sectionNumber===2?['Termin-Anpassung','Ersttermin aus der Ferne','Folgetermin aus der Ferne','Persönliche Anreise']:sectionNumber===3?['Eigene Behandlungskosten','Wartezeit auf Ersttermin','Wartezeit auf Folgetermine']:['Berichtete Zustandsveränderung','Anzahl Therapien','Vielfalt der Kategorien'];
       const rows=result.rows.filter(row=>labels.includes(row.label));
       const available=rows.filter(row=>row.value!=null);
       const earned=available.reduce((sum,row)=>sum+row.value*row.weight,0);
-      return '<section class="dashboard-score-group"><h2 class="dashboard-group-heading"><span class="dashboard-group-number">'+sectionNumber+'</span><span>'+title+'</span><small>'+(available.length?number(earned)+' von '+maximum+' Punkten':'Noch nicht auswertbar · maximal '+maximum+' Punkte')+(available.length&&available.length<rows.length?' · Angaben unvollständig':'')+'</small></h2><div class="dashboard-grid">'+body+'</div></section>';
+      return '<section class="dashboard-score-group"><h2 class="dashboard-group-heading"><span class="dashboard-group-number">'+sectionNumber+'</span><span>'+title+'</span><small>'+(available.length?number(earned)+' von '+maximum+' Punkten':'Noch nicht auswertbar · maximal '+maximum+' Punkte')+(available.length&&available.length<rows.length?' · Angaben unvollständig':'')+'</small></h2><div class="dashboard-grid'+(sectionNumber===4?' doctor-experience-grid':sectionNumber===2?' doctor-burden-grid':'')+'">'+body+'</div></section>';
     };
-    return dashboardScore()+group(2,'Welche Belastungshürden gibt es bei einem Termin?',30,card('Long-Covid-gerechter Termin','adaptation',scales.adaptation,'termin')+travel+appointments)+group(3,'Wie zugänglich ist der Behandler?',30,card('Behandlungskosten',costKey,scales.costs.map(label=>window.LCNCost?.amount(label,costSystem().code==='CH'?'CHF':'EUR')||label),'zugang',costChoices)+card('Wartezeit auf den Ersttermin','wait',scales.wait,'zugang')+card('Wartezeit auf Folgetermine','wait-followup',scales.wait,'zugang'))+group(4,'Welche Erfahrungen gibt es?',40,card('Zustandsveränderung','effect',scales.effect,'wirkung')+treatments);
+    return dashboardScore()+group(2,'Welche Belastungshürden gibt es bei einem Termin?',30,card('Long-Covid-gerechter Termin','adaptation',scales.adaptation,'termin')+appointments+travel)+group(3,'Wie zugänglich ist der Behandler?',30,card('Behandlungskosten',costKey,scales.costs.map(label=>window.LCNCost?.amount(label,costSystem().code==='CH'?'CHF':'EUR')||label),'zugang',costChoices)+card('Wartezeit auf den Ersttermin','wait',scales.wait,'zugang')+card('Wartezeit auf Folgetermine','wait-followup',scales.wait,'zugang'))+group(4,'Welche Erfahrungen gibt es?',40,card('Zustandsveränderung','effect',scales.effect,'wirkung')+treatments);
 
   }
   const views = { ueberblick: overview, termin: appointment, zugang: access, wirkung: effect, dashboard: dashboard };
+  function alignDashboardStatus(){
+    const cards=[...content.querySelectorAll('.doctor-aligned-status-card')];
+    const slots=cards.map(card=>({card,header:card.querySelector('.doctor-card-header-slot'),notice:card.querySelector('.doctor-card-notice-slot')}));
+    slots.forEach(({header,notice})=>{header.style.minHeight='';notice.style.minHeight='';});
+    if(slots.length!==2||Math.abs(slots[0].card.getBoundingClientRect().top-slots[1].card.getBoundingClientRect().top)>2)return;
+    for(const key of ['header','notice']){
+      const height=Math.max(...slots.map(slot=>slot[key].getBoundingClientRect().height));
+      slots.forEach(slot=>slot[key].style.minHeight=height+'px');
+    }
+  }
+  window.addEventListener('resize',()=>requestAnimationFrame(alignDashboardStatus));
   function render(focus = false) {
     detailMap?.remove();
     detailMap = null;
@@ -799,7 +854,28 @@
     });
     alignCommunityCounters();
     decorateBoxHeadings();
-    window.dispatchEvent(new Event('lcn-doctor-rendered'));
+    window.dispatchEvent(new CustomEvent('lcn-doctor-rendered', {detail:{data:state.data,id:doctorId,submission:isSubmission}}));
+    // Separate chart content from the disclosure so grid rows can align their tops.
+    content.querySelectorAll('.dashboard-grid>.dashboard-card').forEach(card=>{
+      const help=card.querySelector(':scope>.doctor-calculation-help');
+      if(!help)return;
+      const body=document.createElement('div');body.className='doctor-dashboard-card-body';
+      [...card.children].filter(child=>child!==help).forEach(child=>body.append(child));
+      if(card.closest('.doctor-burden-grid')&&!card.classList.contains('doctor-dashboard-travel')){
+        card.classList.add('doctor-aligned-status-card');
+        const header=document.createElement('div');header.className='doctor-card-header-slot';
+        const notice=document.createElement('div');notice.className='doctor-card-notice-slot';
+        const chart=document.createElement('div');chart.className='doctor-card-chart-slot';
+        [...body.children].forEach(child=>{
+          if(child.matches('.assessment-header'))header.append(child);
+          else if(child.matches('.therapy-data-requirement'))notice.append(child);
+          else chart.append(child);
+        });
+        body.append(header,notice,chart);
+      }
+      card.prepend(body);
+    });
+    alignDashboardStatus();
     profileMap?.invalidateSize();
     updateAnswerControls();
     detailMap = createMap(document.getElementById('doctor-detail-map'));

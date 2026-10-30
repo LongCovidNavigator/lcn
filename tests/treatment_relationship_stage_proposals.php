@@ -7,7 +7,7 @@ try{
   $a=lcnNormalizeTreatmentRelationship($p,['source_id'=>$parent,'kind'=>$forward,'target_id'=>$child]);$b=lcnNormalizeTreatmentRelationship($p,['source_id'=>$child,'kind'=>$reverse,'target_id'=>$parent]);if($a['signature']!==$b['signature'])throw new Exception('Direction mismatch');
   $payload=['treatment_relationship'=>$a];$p->prepare("INSERT INTO community_submissions(entity_type,existing_target_id,submission_kind,name,payload,submitter_key) VALUES('treatment',?,'change',?,?,?)")->execute([$parent,'Transaktionstest '.$suffix,json_encode($payload),hash('sha256',$suffix)]);$row=['submission_id'=>(int)$p->lastInsertId(),'existing_target_id'=>$parent];
   lcnApproveTreatmentRelationship($p,$row,$payload);lcnApproveTreatmentRelationship($p,$row,$payload);
-  $g=lcnTreatmentDiscoveryGraph($p);$matches=array_filter($g['groups'],fn($group)=>$group['root']===$parent&&isset($group['members'][$child])&&$group['relation_type']===$type);if(count($matches)!==1)throw new Exception('Typed relationship not stored');
+  $g=lcnTreatmentDiscoveryGraph($p);$matches=array_filter($g['groups'],fn($group)=>$group['root']===$parent&&isset($group['members'][$child])&&$group['relation_type']==='umbrella_term'&&lcnGroupMemberRelation($group,$child)===$type);if(count($matches)!==1)throw new Exception('Typed coupling not stored under unchanged umbrella alias');
   if(!lcnTreatmentRelationshipContextAllows($g,$parent,$child)||lcnTreatmentRelationshipContextAllows($g,$parent,84))throw new Exception('Incorrect context validation');
   $failed=false;try{lcnNormalizeTreatmentRelationship($p,['source_id'=>$child,'kind'=>$forward,'target_id'=>$parent]);}catch(InvalidArgumentException $e){$failed=true;}if(!$failed)throw new Exception('Cycle accepted');
  }

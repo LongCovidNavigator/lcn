@@ -1,0 +1,12 @@
+const {chromium}=require('playwright');const assert=require('node:assert/strict');
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});const p=await b.newPage({viewport:{width:1536,height:1000}});try{
+await p.goto('http://localhost/lcn/arzt_detail.html?id=613#ueberblick');const yes=p.locator('[data-profile-confirm="contact"]'),no=p.locator('[data-profile-oppose="contact"]');await yes.waitFor();await p.waitForTimeout(500);await yes.click();await p.waitForFunction(()=>document.querySelector('[data-profile-confirm="contact"]').getAttribute('aria-pressed')==='true');
+await yes.click();await p.waitForFunction(()=>document.querySelector('[data-profile-confirm="contact"]').getAttribute('aria-pressed')==='false');
+await yes.click();await p.waitForFunction(()=>document.querySelector('[data-profile-confirm="contact"]').getAttribute('aria-pressed')==='true');
+await no.click();await p.locator('.profile-correction-dialog[open]').waitFor();assert.equal(await p.locator('.ux-taxonomy-withdraw[open]').count(),0);
+await p.locator('dialog [name="selected"][value="phone"]').check();await p.locator('dialog textarea[name="phone"]').fill('LCN Funktionstest');await p.locator('dialog [type="submit"]').click();await p.waitForFunction(()=>!document.querySelector('.profile-correction-dialog'));
+await no.click();await p.locator('.ux-taxonomy-withdraw[open]').waitFor();await p.getByRole('button',{name:'Änderungen behalten',exact:true}).click();assert.equal(await no.getAttribute('aria-pressed'),'true');
+await no.click();await p.getByRole('button',{name:'Änderungen ansehen',exact:true}).click();await p.locator('.profile-correction-dialog[open]').waitFor();await p.keyboard.press('Escape');assert.equal(await no.getAttribute('aria-pressed'),'true');
+await yes.click();await p.locator('.ux-taxonomy-withdraw[open]').waitFor();assert.ok((await p.locator('.ux-taxonomy-withdraw').innerText()).includes('alle deine Änderungsvorschläge'));await p.keyboard.press('Escape');assert.equal(await no.getAttribute('aria-pressed'),'true');
+console.log('PASS: repeated confirmation toggles off and on, withdrawal cancel/view/confirm, tooltip opens proposals, switch to confirmation asks before deleting corrections');
+}finally{await p.evaluate(async()=>{await fetch('api/doctor_profile_feedback.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:613,section:'contact',stance:0})});});await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});

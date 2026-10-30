@@ -5,6 +5,12 @@ try{$p=lcnDoctorDatabase();
  if(($_SERVER['REQUEST_METHOD']??'GET')==='POST'){
  lcnRequireVotingRequest();$in=lcnReadJsonBody();$key=(string)($in['key']??'');$stance=filter_var($in['stance']??null,FILTER_VALIDATE_INT);if(!in_array($stance,[-1,0,1],true))throw new InvalidArgumentException('Ungültige Rückmeldung.');
  if(preg_match('/^d:(\d+):t:(\d+)$/',$key,$m)){$doctor=(int)$m[1];$treatment=(int)$m[2];lcnValidateCatalogRelation($p,$doctor,$treatment,'add');$q=$p->prepare("SELECT 1 FROM tbl_cpl_entities2treatments_nd WHERE lcn_id=? AND treat_nd_id=? AND relation_status IN ('bestand','belegt')");$q->execute([$doctor,$treatment]);if(!$q->fetchColumn()){$q=$p->query("SELECT payload FROM community_submissions WHERE review_status IN ('pending','reviewing')");$found=false;foreach($q as $r){$x=json_decode($r['payload'],true);$rel=$x['relationship']??[];if(($rel['action']??'')==='add'&&(int)($rel['doctor_id']??0)===$doctor&&(int)($rel['treatment_id']??0)===$treatment)$found=true;}if(!$found)throw new InvalidArgumentException('Zuordnung nicht gefunden.');}}
+ elseif(preg_match('/^pc:([1-9][0-9]*):([1-9][0-9]*)$/D',$key,$m)){
+  $q=$p->prepare("SELECT payload FROM community_submissions WHERE submission_id=? AND review_status IN ('pending','reviewing')");$q->execute([(int)$m[1]]);
+  $proposal=json_decode($q->fetchColumn()?:'{}',true)['treatment_relationship']??[];
+  if(($proposal['kind']??'')!=='new_combination'||!in_array((int)$m[2],array_map('intval',$proposal['component_ids']??[]),true))throw new InvalidArgumentException('Bestandteil nicht gefunden.');
+  $feedbackTreatment=(int)$m[2];
+ }
  elseif(preg_match('/^s:(\d+)$/',$key,$m)){$q=$p->prepare("SELECT existing_target_id FROM community_submissions WHERE submission_id=? AND review_status IN ('pending','reviewing')");$q->execute([(int)$m[1]]);if($q->fetchColumn()===false)throw new InvalidArgumentException('Vorschlag nicht gefunden.');$doctor=0;}
  elseif(preg_match('/^(?:tr|ag|bn|bs|cp|cn|combo):/',$key)){$feedbackTreatment=lcnValidateTreatmentDiscoveryFeedback($p,$key);}
  else throw new InvalidArgumentException('Ungültige Zuordnung.');

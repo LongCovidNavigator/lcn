@@ -4,7 +4,15 @@ function lcnDiscoveryName(string $name): string {
     return mb_strtolower(trim(preg_replace('/\s+/u', ' ', str_replace('⁺', '+', $name))));
 }
 function lcnTreatmentDiscoveryGraph(PDO $pdo): array {
-    return lcnBuildTreatmentDiscoveryGraph(lcnNdRows($pdo, 'SELECT t.treat_nd_id,t.treatmentname,t.typ,t.review_status,a.alias_id,a.alias,a.alias_type FROM tbl_treatments_nd t LEFT JOIN tbl_cpl_treatments_nd2aliases c ON c.treat_nd_id=t.treat_nd_id LEFT JOIN tbl_aliases_03 a ON a.alias_id=c.alias_id WHERE t.review_status<>\'rejected_group\' ORDER BY t.treat_nd_id,a.alias_id'));
+    return lcnBuildTreatmentDiscoveryGraph(lcnNdRows($pdo, 'SELECT t.treat_nd_id,t.treatmentname,t.typ,t.review_status,a.alias_id,a.alias,a.alias_type,c.relation_type AS member_relation_type FROM tbl_treatments_nd t LEFT JOIN tbl_cpl_treatments_nd2aliases c ON c.treat_nd_id=t.treat_nd_id LEFT JOIN tbl_aliases_03 a ON a.alias_id=c.alias_id WHERE t.review_status<>\'rejected_group\' ORDER BY t.treat_nd_id,a.alias_id'));
+}
+/** The coupling describes the relationship; an unspecified umbrella never implies a form. */
+function lcnGroupMemberRelation(array $group,int $id): string {
+    return $group['member_relations'][$id] ?? (in_array($group['relation_type']??'', ['application_form','substance_variant','detailed_method'],true)?$group['relation_type']:'unspecified');
+}
+function lcnGroupHasRelation(array $group,array $types): bool {
+    foreach($group['members'] as $id)if(in_array(lcnGroupMemberRelation($group,$id),$types,true))return true;
+    return false;
 }
 /** Existing typed aliases only; primary names alone never establish brand or group roles. */
 function lcnBuildTreatmentDiscoveryGraph(array $rows): array {
@@ -20,6 +28,7 @@ function lcnBuildTreatmentDiscoveryGraph(array $rows): array {
             $aid=(int)$r['alias_id'];
             $aliases[$aid]['name']=$r['alias']; $aliases[$aid]['type']=$r['alias_type'];
             $aliases[$aid]['members'][$id]=$id; $entries[$id]['aliases'][$aid]=$aid;
+            if(!empty($r['member_relation_type']))$aliases[$aid]['member_relations'][$id]=$r['member_relation_type'];
         }
         if (preg_match('/\s[+&]\s|\bKombi(?:nation)?\b|\bTriple[ -]/iu',$r['treatmentname'])) $comboIds[$id]=$id;
     }
@@ -40,8 +49,10 @@ function lcnBuildTreatmentDiscoveryGraph(array $rows): array {
         if (!in_array($a['type'],['umbrella_term','application_form','substance_variant','detailed_method'],true)) continue;
         $key=lcnDiscoveryName($a['name']); $candidates=$names[$groupTitles[$key] ?? $key] ?? [];
         $root=count($candidates)===1 ? (int)reset($candidates) : null;
-        if ($root && in_array($a['type'],['umbrella_term','detailed_method'],true)) $roots[$root]=$root;
-        $groups[$aid]=['alias_id'=>$aid,'name'=>$a['name'],'root'=>$root,'members'=>$a['members'],'explicit_forms'=>$a['type']==='application_form','relation_type'=>$a['type']];
+        $references=array_keys(array_filter($a['member_relations']??[],fn($type)=>$type==='reference'));
+        if(count($references)===1)$root=(int)$references[0];
+        $groups[$aid]=['alias_id'=>$aid,'name'=>$a['name'],'root'=>$root,'members'=>$a['members'],'member_relations'=>$a['member_relations']??[],'explicit_forms'=>$a['type']==='application_form','relation_type'=>$a['type']];
+        if($root&&lcnGroupHasRelation($groups[$aid],['group_member']))$roots[$root]=$root;
     }
     $brands=[]; $generics=[]; $bases=[];
     foreach ($entries as $id=>$e) {
@@ -71,14 +82,9 @@ function lcnBuildTreatmentDiscoveryGraph(array $rows): array {
         $g['members']=array_diff_key($g['members'],$generics);
         if(($g['relation_type']??'umbrella_term')!=='umbrella_term')$g['members']=array_diff_key($g['members'],$comboIds);
         if ($g['root']) unset($g['members'][$g['root']]);
-        $prefix=lcnDiscoveryName($g['name']); $g['forms']=count($g['members'])>1;
-        foreach ($g['members'] as $id) {
-            $name=lcnDiscoveryName($entries[$id]['treatmentname']);
-            if (!str_starts_with($name,$prefix.' (') && !str_starts_with($name,$prefix.'-')) $g['forms']=false;
-        }
-        if ($g['explicit_forms']) $g['forms']=true;
-        if(in_array($g['relation_type']??'',['substance_variant','detailed_method'],true))$g['forms']=false;
-        $g['medication']=!$g['forms'] && count($g['members'])>0;
+        $g['forms']=count($g['members'])>0;
+        foreach($g['members'] as $id)if(lcnGroupMemberRelation($g,$id)!=='application_form')$g['forms']=false;
+        $g['medication']=lcnGroupHasRelation($g,['group_member']);
         foreach ($g['members'] as $id) if (($entries[$id]['typ'] ?? '')!=='Arzneimittel') $g['medication']=false;
         $g['procedures']=true;
         foreach ($g['members'] as $id) if (in_array($entries[$id]['typ'] ?? '',['Nahrungsergänzungsmittel','Ernährung und Diät','Arzneimittel'],true)) $g['procedures']=false;
@@ -153,10 +159,17 @@ function lcnTreatmentAliasNavigation(array $graph,int $id): array {
         foreach ($graph['groups'] as $g) {
             $isRoot=$g['root']===$id;
             if (!$isRoot && !isset($g['members'][$id])) continue;
-            $title=$g['forms'] ? ($isRoot ? 'Formen von ' : 'Weitere Formen von ').$g['name']
-                : ($g['medication'] ? ($isRoot ? 'Wirkstoffe dieser Medikamentengruppe' : 'Weitere Wirkstoffe dieser Medikamentengruppe')
-                : ($g['procedures'] ? ($isRoot ? 'Verfahren dieser Gruppe' : 'Weitere Verfahren dieser Gruppe') : ($isRoot ? 'Einträge dieser Gruppe' : 'Weitere Einträge dieser Gruppe')));
-            $add($title,$g['forms'] ? 'Anwendungsform' : ($g['medication'] ? 'Wirkstoff' : ($g['procedures'] ? 'Verfahren' : 'Gruppenmitglied')),$g['members'],$g['name'],$isRoot ? null : $g['root'],$g['alias_id']);
+            $buckets=[];foreach($g['members'] as $member)$buckets[lcnGroupMemberRelation($g,$member)][$member]=$member;
+            foreach($buckets as $relation=>$members){
+                [$title,$label]=match($relation){
+                    'application_form'=>[($isRoot?'Anwendungsformen von ':'Weitere Anwendungsformen von ').$g['name'],'Anwendungsform'],
+                    'substance_variant'=>[($isRoot?'Stoffvarianten von ':'Weitere Stoffvarianten von ').$g['name'],'Stoffvariante'],
+                    'detailed_method'=>['Detailliertere Verfahren von '.$g['name'],'Detaillierteres Verfahren'],
+                    'group_member'=>[$g['medication']?($isRoot?'Wirkstoffe dieser Medikamentengruppe':'Weitere Wirkstoffe dieser Medikamentengruppe'):($g['procedures']?($isRoot?'Verfahren dieser Gruppe':'Weitere Verfahren dieser Gruppe'):($isRoot?'Einträge dieser Gruppe':'Weitere Einträge dieser Gruppe')),$g['medication']?'Wirkstoff':($g['procedures']?'Verfahren':'Gruppenmitglied')],
+                    default=>['Zugeordnete Einträge – Verbindungsart offen','Zugeordneter Eintrag'],
+                };
+                $add($title,$label,$members,$g['name'],$isRoot?null:$g['root'],$g['alias_id']);
+            }
         }
         $add($role==='combination' ? 'Handelsnamen dieser Wirkstoffkombination' : 'Handelsnamen dieses Wirkstoffs','Handelsname',$graph['brands'][$id] ?? []);
     }

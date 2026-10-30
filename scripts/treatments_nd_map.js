@@ -36,7 +36,7 @@
   function renderTravel(entry,closest){
     if(entry.host.dataset.independentAtHome==='1'){entry.host.querySelector('[data-travel-estimate]')?.remove();return;}
     let box=entry.host.querySelector('[data-travel-estimate]');
-    if(!box){box=document.createElement('section');box.className='travel-estimate';box.dataset.travelEstimate='';entry.host.querySelector('.ux-nearest').after(box);}
+    if(!box){box=document.createElement('section');box.className='travel-estimate';box.dataset.travelEstimate='';entry.host.querySelector('.top-map-location-layout').before(box);}
     const online=filteredProviders(entry).find(p=>window.LCNOnline?.get(p.dr_id).complete);
     const km=closest?distance(closest):null,index=online||km===null?-1:travelBand(km);
     const heading=document.createElement('div');heading.className='travel-estimate-heading';
@@ -130,10 +130,7 @@
     host.querySelector('input').value = origin?.label || '';
     host.querySelector('[data-map-clear]').classList.toggle('is-hidden',!origin);
     renderProviders(entry);
-    let nearest=host.querySelector('.ux-nearest');
-    if(!nearest){nearest=document.createElement('p');nearest.className='ux-nearest';host.querySelector('.top-map-location-layout').before(nearest);}
     const closest=origin ? [...points].sort((a,b)=>distance(a)-distance(b))[0] : null;
-    nearest.textContent=closest ? 'Nächstgelegener Behandler im Filter mit Koordinaten: '+closest.name+' · '+distance(closest).toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie' : origin ? 'Keine Behandler mit Koordinaten im gewählten Filter.' : 'PLZ oder Ort eingeben, um den nächstgelegenen Behandler zu ermitteln.';
     renderTravel(entry,closest);
     host.querySelector('[data-map-status]').textContent='';
     if (!map) return;

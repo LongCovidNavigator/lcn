@@ -1,0 +1,37 @@
+.overview-identity,.overview-group{position:relative}
+.profile-feedback{position:absolute;right:12px;top:10px;z-index:2}
+.doctor-profile-dialog .ux-taxonomy-current,.doctor-profile-dialog .ux-taxonomy-proposals strong,.doctor-profile-dialog .ux-taxonomy-selected{white-space:pre-line}
+.doctor-profile-dialog .ux-taxonomy-name-form label{flex:1;min-width:0}
+.doctor-profile-dialog .ux-taxonomy-name-form select{margin:0;width:100%;padding:9px 11px;border:1px solid #bfd7ef;border-radius:7px;color:#17365d;background:#fff;font:inherit;min-height:40px}
+.doctor-profile-terms{display:grid;gap:8px;margin-top:12px}
+.profile-term{display:flex;align-items:center;justify-content:space-between;gap:12px;overflow-wrap:anywhere;font-size:14px}
+.profile-term button{flex:none}
+@media(max-width:600px){.overview-group .profile-feedback{top:3px;right:6px}#view-content .profile-feedback .catalog-feedback button{padding:1px 3px!important;min-width:24px;font-size:10px!important;line-height:1!important}body.doctor-detail-live .profile-copy{min-width:0;max-width:100%}}
+.ux-taxonomy-community .doctor-profile-type-form{align-items:flex-end;gap:12px}
+.doctor-profile-type-form fieldset{flex:1;min-width:0;margin:0;padding:12px;border:1px solid #bfd7ef;border-radius:7px}
+.doctor-profile-type-form legend{font-size:13px;color:#607895;padding:0 5px}
+.doctor-profile-type-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ux-taxonomy-community .doctor-profile-type-choices label{display:flex;align-items:center;gap:8px;padding:7px;margin:0;border:1px solid transparent;border-radius:5px;cursor:pointer;font-size:13px;color:#17365d}
+.ux-taxonomy-community .doctor-profile-type-choices label:has(:checked){background:#e7f2ff;border-color:#a9cbed}
+.ux-taxonomy-community .doctor-profile-type-choices input{flex:none;width:16px;height:16px;min-height:0;margin:0;padding:0;accent-color:#087deb}
+@media(max-width:520px){.doctor-profile-type-choices{grid-template-columns:1fr}}
+.doctor-profile-dialog .doctor-profile-medical-field .ux-taxonomy-editor{display:block}
+.doctor-profile-dialog .doctor-profile-medical-editor>.doctor-profile-inline-add{display:block;width:100%;max-width:none;margin:8px 0 0;padding:0;border:0}
+.doctor-profile-inline-add>label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.doctor-profile-inline-add>.catalog-new-entry{display:none!important}
+.doctor-profile-dialog .doctor-profile-inline-add input{margin:0;padding:7px 10px;min-height:34px;font-size:13px;background:#fff}
+.doctor-profile-dialog .doctor-profile-inline-add .ux-symptom-input-wrap{width:100%;max-width:none}
+.doctor-profile-dialog .doctor-profile-inline-add .ux-symptom-input-wrap>button{min-height:32px;padding:3px 8px}
+.doctor-profile-dialog .doctor-profile-medical-field .doctor-profile-terms{margin:6px 0 0;gap:3px}
+.doctor-profile-dialog .doctor-profile-medical-field .profile-term button{padding:1px 7px;border:0;background:transparent;font-size:17px}
+.doctor-profile-dialog .doctor-profile-medical-field .ux-taxonomy-current-option{padding:7px 10px;margin-top:6px}
+.doctor-profile-dialog .profile-change-label{display:inline-block;margin-left:6px;font-size:12px;font-weight:500}
+.doctor-profile-dialog .profile-change-label.remove{color:#af344c}
+.doctor-profile-dialog .profile-change-label.add{color:#24734d}
+.doctor-profile-dialog .doctor-profile-address-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(70px,.65fr) minmax(80px,.8fr) minmax(0,1.5fr);gap:10px;flex:1;min-width:0}
+.doctor-profile-dialog .doctor-profile-address-fields label{display:flex;flex-direction:column;gap:5px;margin:0;min-width:0;font-size:12px;color:#607895}
+.doctor-profile-dialog .doctor-profile-address-fields input{width:100%;min-width:0;box-sizing:border-box}
+.ux-taxonomy-community .doctor-profile-address-form{align-items:flex-end}
+@media(max-width:600px){.doctor-profile-dialog .doctor-profile-address-fields{grid-template-columns:minmax(0,1fr) minmax(75px,.6fr)}.doctor-profile-dialog .doctor-profile-address-fields label:last-child{grid-column:2;grid-row:2}}
+.doctor-profile-dialog .profile-term>span:first-child{flex:1;min-width:0}
+.doctor-profile-dialog .profile-term .profile-entry-votes{flex:none;margin-left:auto}

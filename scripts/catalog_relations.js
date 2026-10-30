@@ -64,6 +64,34 @@
    if(names.length)return short(names[0]);
    return short(statement.replace(/ \(Vorschlag.*$/, '').replace(/\.$/,''))||'diese Zuordnung';
   }
+  function feedbackTooltipSubject(box){
+   const statement=(box.dataset.feedbackStatement||'').replace(/„[^“]*“/g,'');
+   const key=box.dataset.relationFeedback||'';
+   if(key.startsWith('d:')||/^Behandler /.test(statement)||box.closest('.catalog-report-column,.catalog-card-report,.nd-provider-footer,[data-pending-relation]'))return type==='doctor'?'Die angezeigte Therapie wird von dieser Person oder Praxis angeboten.':'Die angezeigte Person oder Praxis bietet die oben genannte Therapie an.';
+   if(box.closest('.ux-alternative-tile,.ux-alternative-feedback'))return 'Die angezeigte Therapie stellt eine Alternative zur aktuell geöffneten Therapie dar.';
+   if(key.startsWith('combo:')||box.closest('[data-combination-parent]'))return 'Die angezeigte Kombination bildet eine eigenständige Therapie, die einen zusätzlichen oder anderen Effekt erzielt.';
+   if(/Alias/.test(statement))return 'Die angezeigten Einträge bezeichnen dieselbe Therapie.';
+   if(/Bestandteil/.test(statement)||box.closest('.ux-combination-part'))return 'Die angezeigte Therapie ist Bestandteil dieser Kombination.';
+   if(key.startsWith('bn:')||/Handelsname/.test(statement))return 'Die angezeigte Therapie ist ein Handelsname für den zugehörigen Wirkstoff.';
+   if(/Anwendungsform/.test(statement))return 'Die angezeigte Therapie ist eine Anwendungsform der zugehörigen Substanz.';
+   if(/Stoffvariante/.test(statement))return 'Die angezeigte Therapie ist eine Stoffvariante der zugehörigen Substanz.';
+   if(/detaillierteres Verfahren/.test(statement))return 'Die angezeigte Therapie ist ein detaillierteres Verfahren der zugehörigen Therapie.';
+   if(key.startsWith('bs:'))return 'Die angezeigte Therapie ist der zugehörigen Substanz zugeordnet.';
+   if(key.startsWith('ag:')||box.closest('[data-relationship-stages]'))return box.closest('[data-relationship-stages]')?.querySelector('[data-stage="0"] h4')?.textContent==='Medikamentengruppe'?'Der angezeigte Wirkstoff gehört zur zugehörigen Medikamentengruppe.':'Die angezeigte Therapie ist ein Verfahren der zugehörigen Gruppe.';
+   return feedbackSubject(box);
+  }
+  function negateFeedbackSubject(subject){
+   for(const [positive,negative] of [
+    [' stellt eine Alternative',' stellt nicht eine Alternative'],
+    [' bildet eine eigenständige Therapie, die einen zusätzlichen oder anderen Effekt erzielt.',' bildet keine eigenständige Therapie, die einen zusätzlichen oder anderen Effekt erzielt.'],
+    [' bezeichnen dieselbe',' bezeichnen nicht dieselbe'],
+    [' ist ',' ist nicht '],
+    [' gehört zur ',' gehört nicht zur '],
+    [' wird von dieser Person oder Praxis angeboten.',' wird von dieser Person oder Praxis nicht angeboten.'],
+    [' bietet die oben genannte Therapie an.',' bietet die oben genannte Therapie nicht an.']
+   ])if(subject.includes(positive))return subject.replace(positive,negative);
+   return 'Diese Zuordnung ist nicht korrekt.';
+  }
   function feedbackMessage(box,stance){
    return (stance===1?'Bestätige: ':'Widerspreche: ')+feedbackSubject(box);
   }
@@ -72,18 +100,24 @@
    if(!feedbackNotice){feedbackNotice=make('div',null,'catalog-feedback-notice');feedbackNotice.setAttribute('role','status');feedbackNotice.setAttribute('aria-live','polite');feedbackNotice.setAttribute('aria-atomic','true');const message=make('span'),close=make('button','×');close.type='button';close.setAttribute('aria-label','Hinweis schließen');close.addEventListener('click',()=>{clearTimeout(feedbackNoticeTimer);feedbackNotice.hidden=true;});feedbackNotice.append(message,close);document.body.append(feedbackNotice);}
    feedbackNotice.hidden=false;feedbackNotice.classList.toggle('is-error',error);feedbackNotice.dataset.tone=error?'oppose':tone;
    const message=feedbackNotice.firstElementChild,separator=text.indexOf(':');message.replaceChildren();
-   if(separator>=0){message.append(make('strong',text.slice(0,separator),'catalog-feedback-action'),make('span',text.slice(separator+1).trim(),'catalog-feedback-subject'));}
+   if(separator>=0){message.append(make('strong',text.slice(0,separator+1),'catalog-feedback-action'),make('span',text.slice(separator+1).trim(),'catalog-feedback-subject'));}
    else message.textContent=text;
    clearTimeout(feedbackNoticeTimer);feedbackNoticeTimer=setTimeout(()=>{feedbackNotice.hidden=true;},2000);
   }
+  window.LCNCatalogRelations.showFeedbackNotice=showFeedbackNotice;
   function updateFeedback(box){
    const value=feedback[box.dataset.relationFeedback]||{confirm:0,oppose:0,own:0};
    box.querySelectorAll('[data-stance]').forEach(button=>{
     const stance=Number(button.dataset.stance),count=stance===1?value.confirm:value.oppose;
     button.textContent=box.dataset.feedbackStatement&&!box.classList.contains('catalog-feedback-standard')?((stance===1?'Bestätigen':'Widersprechen')+' · '+count):(stance===1?'✓ ':'× ')+count;
     button.setAttribute('aria-pressed',String(value.own===stance));
-    const description=feedbackMessage(box,stance)+(value.own===stance?' · Erneut klicken: zurücknehmen':'');
-    button.title=description+' · '+count+' Stimmen';button.setAttribute('aria-label',description);
+    const selected=value.own===stance;
+    const action=selected?(stance===1?'Bestätigung zurücknehmen':'Widerspruch zurücknehmen'):(stance===1?'Bestätigen':'Widersprechen');
+    const positiveSubject=feedbackTooltipSubject(box),subject=stance===-1?negateFeedbackSubject(positiveSubject):positiveSubject;
+    button.dataset.feedbackAction=action;button.dataset.feedbackSubject=subject;
+    button.dataset.feedbackTone=selected?'neutral':stance===1?'confirm':'oppose';
+    const description=action+': '+subject;
+    button.dataset.lcnTooltip=description;button.removeAttribute('title');button.setAttribute('aria-label',description+' · '+count+' Stimmen');
    });
   }
   function feedbackControl(key,statement='',standardStyle=false){

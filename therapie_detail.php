@@ -105,7 +105,6 @@ $key=$href ?? $relation['resolved_name']; if(isset($seen[$key]))continue; $seen[
 <?php endforeach; ?>
 <button type="button" class="ux-alternative-tile ux-alternative-add" data-treatment-relation-add data-kind="alternative"><span aria-hidden="true">＋</span><span>Weitere Therapie hinzufügen</span></button>
 </div></div>
-<?php if(!$relationCount): ?><p class="ux-alternative-empty">Noch keine Alternative hinterlegt.</p><?php endif; ?>
 </section>
 <?php
 $graph=lcnTreatmentDiscoveryGraph(lcnTreatmentsNdDatabase());

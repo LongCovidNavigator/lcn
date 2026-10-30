@@ -12,6 +12,8 @@ let currentCategories = [];
 let currentViewMode = getSavedTreatmentResultsView();
 const treatmentCardBatchSize = 30;
 let visibleTreatmentCardCount = treatmentCardBatchSize;
+const treatmentTableBatchSize = 50;
+let visibleTreatmentTableCount = treatmentTableBatchSize;
 let selectedTreatmentsForCompare = [];
 let showOnlyTreatmentCompareSelection = false;
 const treatmentCompareMaxItems = 5;
@@ -123,7 +125,8 @@ async function loadTreatmentResults() {
     const cardResults = document.getElementById("treatment-card-results");
 
     try {
-        const loadsMapImmediately = getTreatmentFilters().sortKey === "distance";
+        // Fetch results and map together to avoid repeating the full search and render.
+        const loadsMapImmediately = true;
         const url = buildTreatmentSearchUrl(loadsMapImmediately);
         const statusFilter=document.getElementById("treatment-community-status-select")?.value||"all";
         const communitySearch=document.getElementById("treatment-alias-smart-input")?.value?.trim()||"";
@@ -150,6 +153,7 @@ async function loadTreatmentResults() {
 		let communityItems=Array.isArray(communityData.items)?communityData.items:[];
 		const activeFilters=getTreatmentFilters();
 		communityItems=communityItems.filter(function(item){
+            if (treatmentSmartSearchOverride) return false;
 			if(activeFilters.category&&String(item.typ||"")!==activeFilters.category)return false;
 			if(Number(item.positive_ratio||0)<activeFilters.minPositiveRatio||Number(item.healing_ratio||0)<activeFilters.minHealingRatio||Number(item.negative_ratio||0)>activeFilters.maxNegativeRatio)return false;
 			if(activeFilters.minProviderCount>0||activeFilters.onlyWithProvider||activeFilters.acceptsGkv)return false;
@@ -158,6 +162,7 @@ async function loadTreatmentResults() {
 		const combined=statusFilter==="approved"?regularItems:regularItems.concat(communityItems);
 		currentTreatments = combined.map(normalizeTreatment);
         visibleTreatmentCardCount = treatmentCardBatchSize;
+        visibleTreatmentTableCount = treatmentTableBatchSize;
         syncSelectedTreatmentsWithCurrentResults();
 		currentCategories = Array.isArray(data.categories) ? data.categories : [];
 		currentTreatmentMapData = data.map && typeof data.map === "object" ? data.map : null;
@@ -730,7 +735,12 @@ function bindTreatmentSmartSearchEvents() {
     }
 
     if (suggestionsBox) {
-        suggestionsBox.addEventListener("mousedown", function (event) {
+        suggestionsBox.addEventListener("click", function (event) {
+            const itemButton = event.target.closest(".treatment-alias-smart-item-button");
+            if (itemButton) {
+                applyTreatmentAliasSmartItem(Number(itemButton.dataset.treatId), itemButton.textContent.trim());
+                return;
+            }
             const groupButton = event.target.closest(".treatment-alias-smart-group-button");
 
             if (!groupButton) {
@@ -808,7 +818,7 @@ function renderTreatmentAliasSmartSuggestions(suggestions, query) {
             ? group.items.map(function (suggestion) {
                 return `
                     <li class="treatment-alias-smart-item">
-                        <span class="treatment-alias-smart-item-label">${escapeHtml(suggestion.label || "")}</span>
+                        <button type="button" class="treatment-alias-smart-item-label treatment-alias-smart-item-button" data-treat-id="${Number(suggestion.treat_id)}">${escapeHtml(suggestion.label || "")}</button>
                     </li>
                 `;
             }).join("")
@@ -883,6 +893,18 @@ function groupTreatmentAliasSmartSuggestions(suggestions, query) {
     });
 
     return groups;
+}
+
+function applyTreatmentAliasSmartItem(treatId, label) {
+    if (!Number.isInteger(treatId) || treatId <= 0) return;
+    treatmentAliasSmartSuggestController?.abort();
+    treatmentSmartSearchOverride = { treatIds: [treatId], searchTerm: label, searchMode: "exact" };
+    const input = document.getElementById("treatment-alias-smart-input");
+    if (input) input.value = label;
+    treatmentAliasSmartSuggestions = [];
+    hideTreatmentAliasSmartSuggestions();
+    setTreatmentAliasSmartStatus(`Suche aktiv: genau diese Therapie · „${label}“.`);
+    if (validateLocationDependentFilters()) loadTreatmentResults();
 }
 
 async function applyTreatmentAliasSmartGroup(groupKey) {
@@ -992,6 +1014,10 @@ function validateLocationDependentFilters() {
 }
 
 function bindTreatmentViewSwitchEvents() {
+    document.getElementById("treatment-table-load-more-button")?.addEventListener("click", function () {
+        visibleTreatmentTableCount += treatmentTableBatchSize;
+        renderTreatmentResultsTable(getDisplayedTreatments(), true);
+    });
     const cardButton = document.getElementById("treatment-card-view-button");
     const tableButton = document.getElementById("treatment-table-view-button");
 
@@ -1384,6 +1410,7 @@ function bindTreatmentTableSortControls() {
         if (!button || !table.contains(button)) return;
 
         const key = button.dataset.tableSortKey;
+        visibleTreatmentTableCount = treatmentTableBatchSize;
         if (currentTreatmentTableSortKey === key) {
             currentTreatmentTableSortDirection = currentTreatmentTableSortDirection === "asc" ? "desc" : "asc";
         } else {
@@ -1542,8 +1569,14 @@ function buildTreatmentDistanceLocationHtml(treatment) {
     `;
 }
 
-function renderTreatmentResultsTable(treatments) {
+function renderTreatmentResultsTable(treatments, append = false) {
     const tableBody = document.getElementById("treatment-results-body");
+    const loadMoreButton = document.getElementById("treatment-table-load-more-button");
+    const remainingCount = showOnlyTreatmentCompareSelection ? 0 : Math.max(0, (treatments?.length || 0) - visibleTreatmentTableCount);
+    if (loadMoreButton) {
+        loadMoreButton.classList.toggle("is-hidden", remainingCount === 0);
+        loadMoreButton.textContent = `Weitere ${Math.min(treatmentTableBatchSize, remainingCount)} Therapien laden (${remainingCount} weitere)`;
+    }
 
     if (!tableBody) {
         return;
@@ -1560,19 +1593,22 @@ function renderTreatmentResultsTable(treatments) {
         return;
     }
 
+    const ranks = new Map(currentTreatments.map((treatment, index) => [Number(treatment.treat_id), index]));
     const rows = treatments.map(function (treatment, index) {
-        const globalIndex = currentTreatments.findIndex(function (currentTreatment) {
-            return Number(currentTreatment.treat_id) === Number(treatment.treat_id);
-        });
+        const globalIndex = ranks.get(Number(treatment.treat_id)) ?? -1;
         return { treatment, rank: globalIndex >= 0 ? globalIndex + 1 : index + 1, originalIndex: index };
     });
 
     sortTreatmentTableRows(rows);
     updateTreatmentTableSortHeaders();
 
-    tableBody.innerHTML = rows.map(function (row) {
+    const visibleRows = showOnlyTreatmentCompareSelection ? rows : rows.slice(0, visibleTreatmentTableCount);
+    const startIndex = append ? tableBody.querySelectorAll("tr[data-treat-id]").length : 0;
+    const html = visibleRows.slice(startIndex).map(function (row) {
         return buildTreatmentTableRowHtml(row.treatment, row.rank, presentation);
     }).join("");
+    if (append) tableBody.insertAdjacentHTML("beforeend", html);
+    else tableBody.innerHTML = html;
 }
 
 function sortTreatmentTableRows(rows) {
@@ -2546,7 +2582,7 @@ function renderTreatmentMap(treatments, mapData) {
 		const marker = L.marker([group.lat, group.lng], markerOptions);
         window.LCNOnline?.track(marker,group.providers?group.providers.map(p=>p.provider.dr_id):group.treatments.map(t=>t.nearest_provider?.dr_id));
 
-		marker.bindPopup(
+		marker.bindPopup(() =>
 			useAllMatchingProviders
 				? buildAllMatchingProvidersPopupHtml(group)
 				: buildTreatmentMapPopupHtml(group)

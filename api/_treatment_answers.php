@@ -26,7 +26,7 @@ function lcnTreatmentAnswers(PDO $p,int $id,?string $respondent): array {
 function lcnTreatmentComparisonProfiles(PDO $p): array {
  $profiles=[];
  $definitions=ND_REDUCED_SCALES;
- foreach(lcnNdRows($p,'SELECT treat_nd_id,typ,durchfuehrungssetting FROM tbl_treatments_nd') as $r){$id=(int)$r['treat_nd_id'];$profiles[$id]=['id'=>$id,'counts'=>[],'dummy_counts'=>[],'provider_count'=>0,'independent_at_home'=>lcnNdIndependentAtHome($r),'home_delivery'=>lcnNdCanTreatAtHome($r),'online_at_home'=>false];}
+ foreach(lcnNdRows($p,'SELECT treat_nd_id,typ,durchfuehrungssetting,zugang FROM tbl_treatments_nd') as $r){$id=(int)$r['treat_nd_id'];$profiles[$id]=['id'=>$id,'counts'=>[],'dummy_counts'=>[],'provider_count'=>0,'independent_at_home'=>lcnNdIndependentAtHome($r),'home_delivery'=>lcnNdCanTreatAtHome($r),'home_visit_setting'=>mb_stripos((string)($r['durchfuehrungssetting']??''),'Hausbesuch')!==false,'freely_available'=>preg_match('/frei erhältlich|Selbstmanagement|eigenständig umsetzbar/iu',(string)($r['zugang']??''))===1,'prescription_required'=>lcnNdRequiresPrescription($r),'online_at_home'=>false];}
  foreach(lcnNdRows($p,'SELECT treat_nd_id,question_key,option_index,answer_count FROM tbl_treatment_dummy_counts_nd') as $r){$id=(int)$r['treat_nd_id'];if(!isset($profiles[$id]))continue;$key=$r['question_key'];$profiles[$id]['dummy_counts'][$key][(int)$r['option_index']]=(int)$r['answer_count'];}
  $aliases=['gesamtbewertung'=>'effect','crash_pem_risiko'=>'pem','durchfuehrungssetting'=>'setting','zugang'=>'access'];
  $rows=lcnNdRows($p,"SELECT a.treat_nd_id,t.typ,t.durchfuehrungssetting,a.question_key,a.context_key,a.answer_value,COUNT(*) AS n FROM tbl_treatment_community_answers_nd a JOIN tbl_treatments_nd t ON t.treat_nd_id=a.treat_nd_id WHERE a.review_status IN ('active','approved') GROUP BY a.treat_nd_id,t.typ,t.durchfuehrungssetting,a.question_key,a.context_key,a.answer_value");
@@ -37,7 +37,7 @@ function lcnTreatmentComparisonProfiles(PDO $p): array {
   $cost=in_array($key,['unit_cost','total_cost'],true);
   if($index===false||!in_array($r['context_key'],$cost?lcnTreatmentCostContexts():[''],true))continue;
   $id=(int)$r['treat_nd_id'];$k=$key.($cost?':'.$r['context_key']:'');
-  if(!isset($profiles[$id]))$profiles[$id]=['id'=>$id,'counts'=>[],'independent_at_home'=>lcnNdIndependentAtHome($r),'home_delivery'=>lcnNdCanTreatAtHome($r),'online_at_home'=>false];
+  if(!isset($profiles[$id]))$profiles[$id]=['id'=>$id,'counts'=>[],'independent_at_home'=>lcnNdIndependentAtHome($r),'home_delivery'=>lcnNdCanTreatAtHome($r),'home_visit_setting'=>mb_stripos((string)($r['durchfuehrungssetting']??''),'Hausbesuch')!==false,'freely_available'=>preg_match('/frei erhältlich|Selbstmanagement|eigenständig umsetzbar/iu',(string)($r['zugang']??''))===1,'prescription_required'=>lcnNdRequiresPrescription($r),'online_at_home'=>false];
   if(!isset($profiles[$id]['counts'][$k]))$profiles[$id]['counts'][$k]=array_fill(0,count($definitions[$key]),0);
   $profiles[$id]['counts'][$k][$index]+=(int)$r['n'];
  }
