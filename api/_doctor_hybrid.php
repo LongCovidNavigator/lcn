@@ -11,22 +11,8 @@ const LCN_PRIORITY_DOCTOR_IDS = [2,542,581,589,608,609,613,627,645,673,676,679,6
 
 function lcnDoctorDatabase(): PDO
 {
-    static $pdo;
-    if ($pdo instanceof PDO) return $pdo;
-    // Use the local hybrid database without changing the profile of other APIs.
-    $host = lcnEnv('LCN_DOCTORS_DB_HOST', lcnEnv('LCN_DB_LOCAL_MAIN_HOST', 'localhost'));
-    $database = lcnEnv('LCN_DOCTORS_DB_DATABASE', 'lcn_hybrid_database');
-    $user = lcnEnv('LCN_DOCTORS_DB_USERNAME', lcnEnv('LCN_DB_LOCAL_MAIN_USERNAME', lcnEnv('LCN_DB_LOCAL_MAIN_USER')));
-    $password = lcnEnv('LCN_DOCTORS_DB_PASSWORD', lcnEnv('LCN_DB_LOCAL_MAIN_PASSWORD', ''));
-    if (!$user || !preg_match('/\A[a-zA-Z0-9_]+\z/', $database) || stripos($database, 'bookstack') !== false) {
-        throw new RuntimeException('Invalid hybrid doctor database configuration.');
-    }
-    $pdo = new PDO('mysql:host=' . $host . ';port=' . lcnEnv('LCN_DOCTORS_DB_PORT', '3306') . ';dbname=' . $database . ';charset=utf8mb4', $user, $password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => true,
-    ]);
-    return $pdo;
+    // Compatibility entry point: all APIs share the centrally selected connection.
+    return lcnDatabase();
 }
 
 function lcnDoctorSourceSql(): string

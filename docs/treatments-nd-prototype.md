@@ -30,7 +30,7 @@ Header und Footer werden aus den vorhandenen Komponenten eingebunden. Keine vorh
 
 ## Datenzugriff
 
-Verwendet lcnDoctorDatabase() aus der vorhandenen Hybrid-Schicht und prüft explizit den Datenbanknamen lcn_hybrid_database. Kein Wechsel des Profils anderer APIs. Alle neuen SQL-Abfragen sind SELECTs; Eingaben werden gebunden und Ausgaben HTML-escaped. Externe Links erlauben nur HTTP/HTTPS.
+Verwendet seit 30.10.2026 die zentrale Verbindung lcnDatabase() und das in lcn.env gewählte aktive Profil. Alle neuen SQL-Abfragen sind SELECTs; Eingaben werden gebunden und Ausgaben HTML-escaped. Externe Links erlauben nur HTTP/HTTPS.
 
 Tabellen:
 

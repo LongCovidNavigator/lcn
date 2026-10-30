@@ -12,9 +12,9 @@ Seit 22.09.2026 zeigt `arzt_detail.html` das neue Vier-Ansichten-Konzept: Überb
 - Standorte: `tbl_drs_locations_03`; Hauptstandort bevorzugt, sonst erster vorhandener Standort. Weitere Standorte erscheinen auf der Detailseite.
 - Treatments: `tbl_cpl_drs2treatments_03` und `tbl_treatments_03`, über unveränderte LCN-IDs.
 - Doctor-Bewertungen: bestehende Bewertungslogik, auf derselben Hybrid-Verbindung.
-- Treatmentlinks aus diesen Profilen tragen `source=priority`. Die bestehende Treatment-Detail-API und deren Bewertungsendpunkt nutzen in diesem Kontext ebenfalls die Hybrid-Verbindung. Andere Treatment-Aufrufe behalten ihre bisherige Verbindung.
+- Treatmentlinks aus diesen Profilen tragen `source=priority`. Die bestehende Treatment-Detail-API und deren Bewertungsendpunkt nutzen in diesem Kontext ebenfalls die Hybrid-Verbindung. Alle Treatment-Aufrufe nutzen ebenfalls die zentrale Verbindung.
 
-Die Verbindung nutzt standardmäßig `lcn_hybrid_database` und die geschützten Zugangsdaten des Profils `LOCAL_MAIN`. Optionale Overrides in der bestehenden geschützten Umgebungsdatei: `LCN_DOCTORS_DB_HOST`, `LCN_DOCTORS_DB_PORT`, `LCN_DOCTORS_DB_DATABASE`, `LCN_DOCTORS_DB_USERNAME`, `LCN_DOCTORS_DB_PASSWORD`. Der globale aktive Datenbankmodus wird nicht verändert. Kein Import und keine Änderung vorhandener Daten waren nötig.
+Seit 30.10.2026 verwenden alle APIs dieselbe zentrale Verbindung aus `lcnDatabase()`. `lcnDoctorDatabase()` bleibt als kompatibler Funktionsname erhalten und gibt dieselbe PDO-Instanz zurück. Der Schalter `LCN_DB_ACTIVE_PROFILE` in der geschützten `lcn.env` wählt die Datenbank für Behandler und Behandlungen gemeinsam. `LCN_DOCTORS_DB_*` wird nicht mehr ausgewertet. Lokal muss das aktive Profil auf `lcn_hybrid_database` zeigen, online auf `d048c382`. Auch der ND-Prototyp verwendet diese Auswahl; ein bestimmter Datenbankname ist nicht mehr fest im Code vorgeschrieben.
 
 ## Prüfung am 20.09.2026
 

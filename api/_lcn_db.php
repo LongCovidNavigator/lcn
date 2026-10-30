@@ -95,7 +95,11 @@ function lcnEnv(string $key, ?string $default = null): ?string
 
 function lcnDatabaseProfile(): ?string
 {
-    $profile = strtoupper(trim((string)lcnEnv('LCN_DB_ACTIVE_PROFILE', '')));
+    $codeProfile = require __DIR__ . '/_database_profile.php';
+    if ($codeProfile !== null && (!is_string($codeProfile) || trim($codeProfile) === '')) {
+        throw new RuntimeException('Invalid database profile in _database_profile.php.');
+    }
+    $profile = strtoupper(trim((string)($codeProfile ?? lcnEnv('LCN_DB_ACTIVE_PROFILE', ''))));
 
     if ($profile === '') {
         return null;
@@ -105,8 +109,10 @@ function lcnDatabaseProfile(): ?string
         'LOCAL_MAIN',
         'LOCAL_TEST',
         'LOCAL_DUMMY',
+        'LOCAL_HYBRID',
         'ONLINE_TEST',
         'ONLINE_DUMMY',
+        'ONLINE_HYBRID',
     ];
 
     if (!in_array($profile, $allowedProfiles, true)) {

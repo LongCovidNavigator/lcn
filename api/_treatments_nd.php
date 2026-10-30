@@ -24,11 +24,7 @@ function lcnNdIndependentAtHome(array $item): bool
 /** Read-only repository for the separate ND prototype. */
 function lcnTreatmentsNdDatabase(): PDO
 {
-    $pdo = lcnDoctorDatabase();
-    if ($pdo->query('SELECT DATABASE()')->fetchColumn() !== 'lcn_hybrid_database') {
-        throw new RuntimeException('ND prototype requires lcn_hybrid_database.');
-    }
-    return $pdo;
+    return lcnDatabase();
 }
 
 function lcnNdRows(PDO $pdo, string $sql, array $params = []): array
