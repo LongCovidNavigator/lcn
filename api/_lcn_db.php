@@ -93,9 +93,36 @@ function lcnEnv(string $key, ?string $default = null): ?string
     return (string)$value;
 }
 
+function lcnProfileForEnvironment(array $configuration, string $host, bool $cli = false): string
+{
+    // CLI tools run locally by default; web requests must match a known host.
+    $hostname = parse_url('http://' . trim($host), PHP_URL_HOST);
+    $hostname = is_string($hostname) ? strtolower(rtrim(trim($hostname, '[]'), '.')) : '';
+    $environment = $cli ? 'local' : ($configuration['hosts'][$hostname] ?? null);
+    if (!is_string($environment)) {
+        throw new RuntimeException('Unknown LCN deployment host. Configure _database_profile.php.');
+    }
+    $profile = $configuration['profiles'][$environment] ?? null;
+    if (!is_string($profile) || trim($profile) === '') {
+        throw new RuntimeException('Missing database profile for LCN environment: ' . $environment);
+    }
+    $profile = strtoupper(trim($profile));
+    if ($environment !== 'local' && strncmp($profile, 'ONLINE_', 7) !== 0) {
+        throw new RuntimeException('Online LCN environments require an ONLINE database profile.');
+    }
+    return $profile;
+}
+
 function lcnDatabaseProfile(): ?string
 {
     $codeProfile = require __DIR__ . '/_database_profile.php';
+    if (is_array($codeProfile)) {
+        $codeProfile = lcnProfileForEnvironment(
+            $codeProfile,
+            (string)($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? ''),
+            PHP_SAPI === 'cli'
+        );
+    }
     if ($codeProfile !== null && (!is_string($codeProfile) || trim($codeProfile) === '')) {
         throw new RuntimeException('Invalid database profile in _database_profile.php.');
     }

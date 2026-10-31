@@ -52,7 +52,7 @@
 .home-page > :is(#empfehlung,#hausarzt,#suche,#ergaenzung) { display:block; margin-top:14px; }
 .home-page > #empfehlung { margin-top:28px; }
 .home-chapter-disclosure { border:1px solid #bccfe1; border-radius:8px; background:#fff; overflow:hidden; }
-.home-chapter-disclosure > summary { display:flex; align-items:center; gap:22px; padding:15px 24px; cursor:pointer; list-style:none; text-align:left; color:#17365d; background:linear-gradient(110deg,#f5f9fd,#fcfdff); }
+.home-chapter-disclosure > :is(summary,.home-chapter-link) { display:flex; align-items:center; gap:22px; padding:15px 24px; cursor:pointer; list-style:none; text-align:left; color:#17365d; background:linear-gradient(110deg,#f5f9fd,#fcfdff); }
 .home-chapter-disclosure > summary::-webkit-details-marker { display:none; }
 .home-chapter-icon { width:36px; height:36px; flex:0 0 36px; color:#17365d; }
 .home-chapter-icon svg { width:100%; height:100%; display:block; }
@@ -89,7 +89,7 @@
 .home-ranking-toggle:focus-visible,.home-chapter-disclosure > summary:focus-visible { outline:3px solid #0878e3; outline-offset:-3px; }
 @media(max-width:760px) {
  .home-page > #empfehlung { margin-top:18px; }
- .home-chapter-disclosure > summary { gap:14px; padding:14px 16px; }
+ .home-chapter-disclosure > :is(summary,.home-chapter-link) { gap:14px; padding:14px 16px; }
  .home-chapter-icon { width:28px; height:28px; flex-basis:28px; }
  .home-chapter-label strong { font-size:19px; }
  .home-chapter-label > span { font-size:12px; }
@@ -107,3 +107,8 @@
 .home-page .home-chapter-body > :is(.featured-treatments,.featured-experts) { padding:0!important; margin:0!important; height:auto; }
 .home-page .home-chapter-body :is(.featured-treatments-panel,.featured-experts-panel) { height:100%; padding:16px; }
 .home-recommendation-teasers :is(.featured-treatments-actions,.featured-experts-more-wrap) { padding-top:6px; margin-top:6px; }
+
+.home-chapter-link { text-decoration:none; }
+.home-chapter-link:hover { background:#e3f2ff; }
+.home-chapter-link:focus-visible { outline:3px solid #0878e3; outline-offset:-3px; }
+.home-chapter-link > span:last-child { font-size:26px; }

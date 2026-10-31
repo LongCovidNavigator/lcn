@@ -1,7 +1,21 @@
 <?php
 
-// Database switch deployed with the application. Never put credentials here.
-// Set to 'LOCAL_MAIN', 'LOCAL_TEST', 'LOCAL_DUMMY', 'LOCAL_HYBRID',
-// 'ONLINE_TEST', 'ONLINE_DUMMY' or 'ONLINE_HYBRID'.
-// null preserves the existing LCN_DB_ACTIVE_PROFILE setting in private/lcn.env.
-return 'ONLINE_HYBRID';
+// Four independent database switches. No credentials belong in this file.
+// Online environments accept ONLINE_* profiles only.
+return [
+    'profiles' => [
+        'local' => 'LOCAL_HYBRID',
+        'dev' => 'ONLINE_HYBRID',
+        'beta' => 'ONLINE_HYBRID',
+        'production' => 'ONLINE_HYBRID',
+    ],
+    'hosts' => [
+        'localhost' => 'local',
+        '127.0.0.1' => 'local',
+        '::1' => 'local',
+        'dev.lcnavi.de' => 'dev',
+        'beta.lcnavi.de' => 'beta',
+        'lcnavi.de' => 'production',
+        'www.lcnavi.de' => 'production',
+    ],
+];

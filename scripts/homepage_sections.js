@@ -3,7 +3,6 @@
     if (!navigation) return;
     const teasers = {
         empfehlung: ['Empfehlung', 'Therapien und Behandler im Fokus'],
-        hausarzt: ['Hausärzte', 'Finde hausärztliche Anlaufstellen oder ergänze deine Praxis.'],
         suche: ['Suche', 'Entdecke Therapien und passende Behandler.'],
         ergaenzung: ['Ergänzung', 'Teile eine Behandlung oder Anlaufstelle, die noch fehlt.']
     };

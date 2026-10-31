@@ -1,42 +1,41 @@
-# Datenbank auswählen
+# Datenbank je Umgebung auswählen
 
-Alle APIs verwenden dieselbe zentrale Verbindung.
+`api/_database_profile.php` enthält vier unabhängige Schalter im Abschnitt
+`profiles`: `local`, `dev`, `beta` und `production`. Die Datei wird mit dem Code
+synchronisiert. Zugangsdaten gehören ausschließlich in die geschützte `lcn.env`.
 
-Zugangsdaten bleiben ausschließlich in der geschützten `private/lcn.env` außerhalb
-des öffentlichen Website-Ordners (oder am über `LCN_ENV_FILE` konfigurierten Ort).
-Diese Datei kann einmalig mehrere Profile enthalten. Sie wird nicht hochgeladen
-oder in Git gespeichert. Profilnamen sind keine Zugangsdaten.
+Der Abschnitt `hosts` ordnet localhost/127.0.0.1/::1 der lokalen Umgebung,
+ dev.lcnavi.de der Dev-Umgebung, beta.lcnavi.de der Beta-Umgebung und
+lcnavi.de/www.lcnavi.de der Hauptseite zu. Unbekannte Hosts werden abgelehnt.
+Zusätzliche lokale Hostnamen müssen explizit eingetragen werden.
+CLI-Skripte wählen standardmäßig die lokale Umgebung.
 
-Der synchronisierte Schalter liegt in `api/_database_profile.php`. Für die
-Online-Datenbank wird dort die letzte Zeile geändert:
+Aktuelle Zuordnung:
 
-```php
-return 'ONLINE_HYBRID';
-```
+| Umgebung | Profil |
+| --- | --- |
+| lokal | LOCAL_HYBRID |
+| Dev | ONLINE_HYBRID |
+| Beta | ONLINE_HYBRID |
+| Hauptseite | ONLINE_HYBRID |
 
-Das wählt folgende vorhandene Einstellungen aus der geschützten Datei:
+Die drei Online-Zuordnungen übernehmen zunächst das bisher gewählte Profil.
+Sie sind unabhängig einstellbar: Eine Änderung an `dev` verändert weder `beta`
+noch `production`. Gleiche Profile bedeuten dieselbe Datenbank einschließlich
+aller Schreibzugriffe; sie erzeugen keine getrennten Datenbestände.
 
-```dotenv
-LCN_DB_ONLINE_HYBRID_HOST=10.9.0.1
-LCN_DB_ONLINE_HYBRID_DATABASE=d048c382
-LCN_DB_ONLINE_HYBRID_USERNAME=d048c382
-LCN_DB_ONLINE_HYBRID_PASSWORD="HIER_DAS_PASSWORT"
-```
+Erlaubte Profile: LOCAL_MAIN, LOCAL_TEST, LOCAL_DUMMY, LOCAL_HYBRID,
+ONLINE_TEST, ONLINE_DUMMY, ONLINE_HYBRID. Online sind nur ONLINE-Profile erlaubt.
+Lokal können auch Online-Profile gewählt werden, sofern die Verbindung besteht
+(zum Beispiel über VPN).
 
-Host und Benutzer müssen den Angaben des Hosters entsprechen. Der gemeinsame
-Port wird mit `LCN_DB_PORT` gesetzt (Standard: 3306).
+Für ONLINE_HYBRID werden LCN_DB_ONLINE_HYBRID_HOST, DATABASE, USERNAME und
+PASSWORD aus lcn.env gelesen (jeweils mit dem vollständigen Präfix
+LCN_DB_ONLINE_HYBRID_). Für LOCAL_HYBRID gilt entsprechend
+LCN_DB_LOCAL_HYBRID_. Der Port wird gemeinsam über LCN_DB_PORT gesetzt.
+Die jeweilige geschützte Datei auf dem Zielserver muss die ausgewählten Profile
+enthalten. Der Code enthält keine Passwörter und kopiert keine Zugangsdaten.
 
-Für die lokale Hybrid-Datenbank kann `return 'LOCAL_HYBRID';` gewählt werden,
-wenn `LCN_DB_LOCAL_HYBRID_DATABASE=lcn_hybrid_database` und die zugehörigen
-Zugangsdaten einmalig in der lokalen geschützten Datei hinterlegt wurden.
-
-Der Code-Schalter hat Vorrang vor `LCN_DB_ACTIVE_PROFILE` in der geschützten Datei.
-Mit `return null;` bleibt die bisherige Profilauswahl aus der geschützten Datei
-aktiv. Dies ist der Ausgangszustand, um eine vorhandene Installation nicht
-unbeabsichtigt auf eine andere Datenbank umzustellen.
-
-Nach der einmaligen Einrichtung der Profile reicht zum Umschalten eine Änderung
-an `api/_database_profile.php` und das Hochladen dieser Datei. Auf dem Zielserver
-muss das ausgewählte Profil vorhanden und erreichbar sein. Ein unbekannter
-Profilname wird abgelehnt; es gibt dann keinen stillen Wechsel auf eine andere
-Datenbank. `LCN_DOCTORS_DB_*` wird nicht mehr benötigt.
+Alle APIs teilen dieselbe zentrale PDO-Verbindung. LCN_DOCTORS_DB_* ist obsolet.
+LCN_DB_ACTIVE_PROFILE wird bei dieser Vier-Umgebungs-Konfiguration nicht mehr
+zur Auswahl verwendet. Bestehende skalare Konfigurationen bleiben kompatibel.
