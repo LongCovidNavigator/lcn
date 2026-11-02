@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
+<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=split-country-20261101"><script src="scripts/map_viewport.js?v=stable-view-20261102"></script>
 <script src="scripts/online_access.js?v=contextual-map-legend-20261027" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,7 +38,7 @@
 
     <div id="footer-placeholder"></div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="scripts/treatment_detail_dummy.js?v=11"></script>
+    <script src="scripts/treatment_detail_dummy.js?v=original-esri-20261102"></script>
     <script>
         fetch('components/header.html?v=chapters-20261024').then(r => r.text()).then(html => document.getElementById('header-placeholder').innerHTML = html);
         fetch('components/footer.html').then(r => r.text()).then(html => document.getElementById('footer-placeholder').innerHTML = html);

@@ -1,0 +1,36 @@
+.doctor-map-edges { position:absolute; inset:0; z-index:650; pointer-events:none; }
+.doctor-map-edge, .doctor-map-viewport-tools button, .doctor-map-viewport-tools select { background:#fff; color:#06457f; border:1px solid #a8c6e5; border-radius:20px; box-shadow:0 2px 9px #123b6330; font:600 14px/1.3 Arial,sans-serif; padding:9px 14px; cursor:pointer; }
+.doctor-map-edge { position:absolute; pointer-events:auto; }
+.doctor-map-edge:hover, .doctor-map-viewport-tools button:hover { background:#eaf4ff; border-color:#0878e3; }
+.doctor-map-edge:focus-visible, .doctor-map-viewport-tools button:focus-visible, .doctor-map-viewport-tools select:focus-visible { outline:3px solid #0878e3; outline-offset:2px; }
+.doctor-map-edge-n { top:12px; left:50%; transform:translateX(-50%); }
+.doctor-map-edge-s { bottom:30px; left:50%; transform:translateX(-50%); }
+.doctor-map-edge-e { right:12px; top:50%; transform:translateY(-50%); }
+.doctor-map-edge-w { left:12px; top:50%; transform:translateY(-50%); }
+.doctor-map-edge-ne { right:60px; top:60px; }
+.doctor-map-edge-nw { left:12px; top:60px; }
+.doctor-map-edge-se { right:12px; bottom:45px; }
+.doctor-map-edge-sw { left:12px; bottom:70px; }
+.doctor-map-viewport-tools { position:absolute; top:12px; left:12px; z-index:650; display:flex; gap:6px; }
+.doctor-map-viewport-tools button:disabled { opacity:.5; cursor:default; }
+.doctor-map-viewport-tools button[aria-pressed="true"] { background:#e0efff; border-color:#0878e3; }
+@media(max-width:600px) { .doctor-map-edge, .doctor-map-viewport-tools button, .doctor-map-viewport-tools select { font-size:12px; padding:7px 10px; } .doctor-map-edge-n { top:60px; } .doctor-map-edge-ne { right:12px; top:105px; } .doctor-map-edge-nw { top:105px; } }
+/* Keep the shared controls usable in small profile overview maps as well. */
+.leaflet-container { container-type:inline-size; }
+@container (max-width: 300px) {
+  .doctor-map-viewport-tools { top:5px; left:5px; gap:3px; }
+  .doctor-map-viewport-tools select { width:105px; }
+  .doctor-map-viewport-tools select, .doctor-map-viewport-tools button { font-size:10px; padding:5px 6px; }
+  .doctor-map-edge { font-size:10px; padding:4px 6px; }
+  .doctor-map-edge-n { top:35px; }
+}
+.map-country-control { position:relative; }
+.map-country-split { display:flex; background:white; border:1px solid #a8c6e5; border-radius:22px; box-shadow:0 2px 9px #123b6330; }
+.doctor-map-viewport-tools .map-country-split button { border:0; box-shadow:none; background:transparent; border-radius:0; }
+.doctor-map-viewport-tools .map-country-split [data-country-current] { padding-right:10px; border-radius:22px 0 0 22px; }
+.doctor-map-viewport-tools .map-country-split [data-country-toggle] { display:flex; align-items:center; justify-content:center; width:38px; padding:0 12px 0 9px; border-left:1px solid #e0eaf4; border-radius:0 22px 22px 0; }
+.doctor-map-viewport-tools .map-country-split button:hover { background:#eaf4ff; }
+.map-country-options { position:absolute; top:calc(100% + 7px); left:0; min-width:100%; padding:5px; background:white; border:1px solid #a8c6e5; border-radius:12px; box-shadow:0 4px 14px #123b6330; }
+.map-country-options[hidden] { display:none; }
+.doctor-map-viewport-tools .map-country-options button { display:block; width:100%; text-align:left; border:0; border-radius:7px; box-shadow:none; white-space:nowrap; }
+@container (max-width:300px) { .doctor-map-viewport-tools .map-country-split [data-country-toggle] { width:28px; padding:0 8px; } }

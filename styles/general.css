@@ -190,3 +190,13 @@ body {
 .detail-suggestion-button { display: inline-flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 42px; padding: 9px 16px; border: 1px solid #007f7b; border-radius: 8px; background: #eef9f7; color: #006a68; font-size: .86rem; font-weight: 800; line-height: 1.25; text-decoration: none; box-sizing: border-box; }
 .detail-suggestion-button:hover, .detail-suggestion-button:focus-visible { background: #007f7b; color: #fff; outline: 2px solid rgba(0,127,123,.2); outline-offset: 2px; }
 @media (max-width: 760px) { .detail-suggestion-actions { justify-content: stretch; } .detail-suggestion-button { width: 100%; } }
+
+/* Shared public content canvas, matching both catalog searches. */
+:root { --lcn-content-width:1240px; --lcn-content-gutter:20px; }
+body.lcn-public-page > :is(main,.container), body.lcn-public-page > main.home-page { width:100% !important; max-width:var(--lcn-content-width) !important; margin-inline:auto !important; padding-inline:var(--lcn-content-gutter) !important; box-sizing:border-box !important; }
+body.lcn-public-page > .home-page > section { width:100% !important; max-width:none !important; box-sizing:border-box; }
+@media(max-width:1100px){ :root { --lcn-content-gutter:16px; } }
+@media(max-width:760px){ :root { --lcn-content-gutter:12px; } }
+
+/* Keep recommendation and search pages on the same centered content canvas. */
+body.lcn-public-page > .home-page.recommendation-page > :is(.nearby-gps,.featured-experts,.featured-treatments,.top-recommendation-map-section) { padding-inline:0!important; max-width:none!important; margin-inline:0!important; }

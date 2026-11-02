@@ -27,3 +27,17 @@ td .lcn-experience a:hover{text-decoration:underline;background:transparent}
 .lcn-philosophy-grid p{line-height:1.6;margin:0 0 14px}
 .lcn-philosophy-number{display:inline-grid;place-items:center;width:36px;height:36px;background:#e7f3ff;color:#0878e3;border-radius:50%;font-weight:700}
 @media(max-width:650px){.lcn-philosophy{margin:24px 12px;padding:18px}.lcn-philosophy-grid{grid-template-columns:1fr}}
+
+/* Individual experience values sort the provider and therapy results tables. */
+td .lcn-experience button{font-family:inherit;cursor:pointer}
+td .lcn-experience .lcn-experience-count{padding:0;border:0;background:transparent;text-align:right;line-height:1.4}
+td .lcn-experience button:hover{text-decoration:underline}
+td .lcn-experience button:focus-visible{outline:2px solid #17634b;outline-offset:3px}
+td .lcn-experience button.is-active{text-decoration:underline}
+td .lcn-experience button[data-sort-direction="desc"]::after{content:" ↓";font-size:10px}
+td .lcn-experience button[data-sort-direction="asc"]::after{content:" ↑";font-size:10px}
+:is(#treatment-experience-sort-hint,#doctor-experience-sort-hint){padding:12px 16px;background:#eaf4fb;border:1px solid #b9d9eb;border-radius:8px;color:#17365d;white-space:normal}
+
+/* Keep the direction arrow beside the value without changing row height. */
+td .lcn-experience button[data-table-sort-key]{position:relative;white-space:nowrap}
+td .lcn-experience button[data-sort-direction]::after{position:absolute;left:100%;top:50%;transform:translateY(-50%);white-space:nowrap;line-height:1}

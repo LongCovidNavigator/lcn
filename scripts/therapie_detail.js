@@ -700,7 +700,7 @@ function buildProviderViewSwitchHtml() {
                             class="treatment-detail-provider-location-input"
                             type="text"
                             value="${escapeAttribute(locationValue)}"
-                            placeholder="PLZ oder Ort, z. B. Köln"
+                            placeholder="PLZ oder Ort, z. B. Musterstadt"
                             autocomplete="off"
                         >
 
@@ -1376,7 +1376,7 @@ function renderTreatmentProviderMap(providers) {
         });
 
         L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
-            attribution: "Tiles © Esri"
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere'
         }).addTo(treatmentProviderMap);
     }
 

@@ -1,0 +1,39 @@
+/* Both result tables follow the therapy search's understated table design. */
+.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table) :is(th,td) { font-family: Arial,Helvetica,sans-serif; padding: 6px 7px; vertical-align: middle; line-height: 1.15; border: 1px solid #e1eafa; }
+.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table) th { background: #f7fbfe; color: #17365d; font-size: .72rem; font-weight: 700; box-shadow: none; }
+.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table) td { font-size: .74rem; font-weight: 400; }
+.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table) :is(th,td):first-child { padding-left: 4px; padding-right: 4px; }
+:is(.doctor-map-results-table,.treatment-results-table) td .lcn-experience { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 5px; width: 100%; min-width: 0; box-sizing: border-box; }
+:is(.doctor-map-results-table,.treatment-results-table) td .lcn-experience :is(.lcn-effect,.lcn-effect strong,.lcn-experience-count,small) { text-align: center; }
+@media(max-width:760px) {
+ .lcn-search-table-content { max-width: 100%; min-width: 0; overflow-x: auto; }
+ .doctor-map-results-table, .treatment-results-table { min-width: 760px; }
+}
+
+:is(.doctor-map-results-table,.treatment-results-table) td .lcn-experience .lcn-experience-count { min-width: 0; }
+
+/* One classification column, with room for readable category names. */
+.treatment-results-table .treatment-table-category { text-align:center; }
+.treatment-results-table .treatment-table-category .treatment-table-badge-row { justify-content:center; }
+.treatment-results-table .treatment-table-category .treatment-table-badge { justify-content:center;text-align:center;width:max-content;max-width:100%;box-sizing:border-box;word-break:normal;overflow-wrap:normal;hyphens:manual;white-space:normal;line-height:1.35; }
+.treatment-results-table th:nth-child(1),.treatment-results-table td:nth-child(1){width:4%}
+.treatment-results-table th:nth-child(2),.treatment-results-table td:nth-child(2){width:29%}
+.treatment-results-table th:nth-child(3),.treatment-results-table td:nth-child(3){width:21%}
+.treatment-results-table th:nth-child(4),.treatment-results-table td:nth-child(4){width:25%}
+.treatment-results-table th:nth-child(5),.treatment-results-table td:nth-child(5){width:9%;text-align:center}
+.treatment-results-table th:nth-child(6),.treatment-results-table td:nth-child(6){width:12%;text-align:center}
+@media(max-width:760px){
+ .treatment-results-table{min-width:1000px}
+ .treatment-results-table :is(th,td):nth-child(n){display:table-cell}
+}
+
+/* Shared canvas, typography and table fold control for the two catalog searches. */
+:is(.doctor-map-page,.treatment-map-page) > .container { max-width: 1200px; width: auto; margin-inline: auto; padding: 20px; box-sizing: content-box; }
+:is(.doctor-map-page,.treatment-map-page), :is(.doctor-map-page,.treatment-map-page) :is(button,input,select,textarea) { font-family: Arial,Helvetica,sans-serif; }
+.lcn-search-table-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; box-sizing: border-box; margin: 0; padding: 12px 16px; border: 1px solid #e1eafa; border-radius: 10px 10px 0 0; background: #f7fbfe; color: #17365d; font: 700 16px/1.4 Arial,Helvetica,sans-serif; text-align: left; cursor: pointer; }
+.lcn-search-table-toggle[aria-expanded="false"] { border-radius: 10px; }
+.lcn-search-table-toggle:hover { background: #e7f3ff; }
+.lcn-search-table-content[hidden] { display: none !important; }
+.lcn-search-table-content > table { margin-top: 0; }
+.doctor-map-results-table .doctor-table-name a { color: #0867bc; }
+.treatment-results-table .treatment-table-detail-link, .treatment-card-title-link { color: #0867bc; }

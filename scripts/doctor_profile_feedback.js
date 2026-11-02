@@ -53,10 +53,10 @@
     if(window.LCNCatalogRelations?.showFeedbackNotice){window.LCNCatalogRelations.showFeedbackNotice(message,error,tone);return;}
     const el=document.getElementById('feedback');if(el){el.textContent=message;el.classList.add('show');}
   }
-  async function showProposals(key) {
+  async function showProposals(key, field) {
     if(busy)return;
     busy=true;paint();
-    try{await request();open(key);}catch(err){notify(err.message,true);}finally{busy=false;paint();}
+    try{await request();open(key, field);}catch(err){notify(err.message,true);}finally{busy=false;paint();}
   }
   function confirmWithdrawal(key,field) {
     return new Promise(resolve=>{
@@ -79,7 +79,7 @@
     catch(err){notify(err.message,true);}finally{busy=false;paint();}
   }
   const lines=value=>[...new Set(String(value||'').split('\n').map(v=>v.trim()).filter(Boolean))];
-  function open(key) {
+  function open(key, field) {
     const group=groups()[key],dialog=document.createElement('dialog');
     dialog.className='catalog-report-dialog ux-taxonomy-dialog ux-taxonomy-community doctor-profile-dialog';
     dialog.setAttribute('aria-labelledby','profile-correction-title');
@@ -266,8 +266,11 @@
     dialog.addEventListener('cancel',e=>{if(saving)e.preventDefault();});
     dialog.onclose=()=>{dialog.remove();const active=document.querySelector(`[data-profile-oppose="${key}"]`);(trigger?.isConnected?trigger:active)?.focus();};
     render();dialog.showModal();dialog.scrollTop=0;
+    if(field){const section=dialog.querySelector(`[data-profile-field="${field}"]`);section?.querySelector('.ux-taxonomy-edit')?.click();section?.scrollIntoView({block:'nearest'});}
   }
   document.addEventListener('click',async e=>{
+    const editType=e.target.closest('[data-profile-edit-type]');
+    if(editType){if(profile&&!busy)await showProposals('identity','type');return;}
     const oppose=e.target.closest('[data-profile-oppose]');
     if(oppose&&!busy){
       const key=oppose.dataset.profileOppose;

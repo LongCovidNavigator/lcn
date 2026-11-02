@@ -509,28 +509,28 @@
   function locationCard() {
     if (!state.data) return `<section class="card"><h3>Standort</h3>${dataStatus()}</section>`;
     const own = savedLocation();
-    return `<section class="card location-section" aria-label="Standort"><h3>Standort</h3>${travelEstimate()}${researchedRemoteNotice()}<div class="doctor-detail-location-grid"><div class="doctor-detail-location-address top-map-location-controls"><h4 class="nd-location-title">Standortsuche</h4><form id="location-form" role="search" autocomplete="off" aria-label="Standortsuche"><div class="nd-location-heading"><label for="own-location">Adresse, PLZ oder Ort</label><button type="button" id="clear-location" aria-label="Standort entfernen"${own ? '' : ' hidden'}>×</button></div><div class="own-location-control top-map-location-input-row"><input id="own-location" name="doctor_location_query" type="search" placeholder="z. B. 50667 oder Köln" autocomplete="off" data-lpignore="true" data-1p-ignore="true" spellcheck="false" enterkeyhint="search" maxlength="200" value="${escape(own?.label || '')}"><div class="top-map-location-suggestions is-hidden"></div></div><button type="submit" class="nd-location-submit">Standort übernehmen</button><span data-location-status role="status" aria-live="polite"></span></form>${practiceFilters()}<div class="nd-location-summary"><span>Entfernung zu deinem Standort</span><strong id="own-distance">${distanceText()}</strong><span data-doctor-map-status role="status"></span></div></div><div id="doctor-detail-map" class="doctor-detail-map" aria-label="Karte des Praxisstandorts"></div></div></section>`;
+    return `<section class="card location-section" aria-label="Standort"><h3>Standort</h3>${travelEstimate()}${researchedRemoteNotice()}<div class="doctor-detail-location-grid"><div class="doctor-detail-location-address top-map-location-controls"><h4 class="nd-location-title">Standortsuche</h4><form id="location-form" role="search" autocomplete="off" aria-label="Standortsuche"><div class="nd-location-heading"><label for="own-location">Adresse, PLZ oder Ort</label><button type="button" id="clear-location" aria-label="Standort entfernen"${own ? '' : ' hidden'}>×</button></div><div class="own-location-control top-map-location-input-row"><input id="own-location" name="doctor_location_query" type="search" placeholder="z. B. Musterstadt" autocomplete="off" data-lpignore="true" data-1p-ignore="true" spellcheck="false" enterkeyhint="search" maxlength="200" value="${escape(own?.label || '')}"><div class="top-map-location-suggestions is-hidden"></div></div><button type="submit" class="nd-location-submit">Standort übernehmen</button><span data-location-status role="status" aria-live="polite"></span></form>${practiceFilters()}<div class="nd-location-summary"><span>Entfernung zu deinem Standort</span><strong id="own-distance">${distanceText()}</strong><span data-doctor-map-status role="status"></span></div></div><div id="doctor-detail-map" class="doctor-detail-map" aria-label="Karte des Praxisstandorts"></div></div></section>`;
   }
   function profileFacts() {
     if (!state.data) return `<section class="card overview-facts"><h3>Überblick</h3>${dataStatus()}</section>`;
     const doctor = state.data.item;
     const research = state.data.research || {};
-    const organization = doctor.dr_org_name || '';
+    const organization = (doctor.dr_org_name || '').trim();
     const displayName = doctor.dr_display_name || '';
-    const namePosition = displayName ? organization.indexOf(displayName) : -1;
-    const organizationHtml = namePosition > 0
-      ? escape((organization.slice(0, namePosition) + organization.slice(namePosition + displayName.length)).trim())
-      : escape(organization) || 'Noch keine Angabe';
+    const normalizeName = value => value.normalize('NFKC').replace(/\s+/g, ' ').trim().toLocaleLowerCase('de');
+    const organizationHtml = organization && normalizeName(organization) === normalizeName(displayName)
+      ? ''
+      : `<div class="overview-organization"><span>Einrichtung</span><strong>${escape(organization) || '—'}</strong></div>`;
     const icons={person:'<circle cx="12" cy="8" r="4"/><path d="M4 22v-2a8 8 0 0 1 16 0v2"/>',medical:'<path d="M5 3v6a5 5 0 0 0 10 0V3M3 3h4M13 3h4M10 14v3a5 5 0 0 0 10 0v-3"/><circle cx="20" cy="11" r="3"/>',location:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',phone:'<path d="m7 3 3 5-3 3a16 16 0 0 0 6 6l3-3 5 3-1 4C10 22 2 14 3 4Z"/>'};
     const icon=name=>`<span class="overview-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons[name]}</svg></span>`;
     const fields=rows=>`<dl>${rows.map(([label,value])=>`<div><dt>${label}</dt><dd${!value ? ' class="overview-missing"' : ''}>${value||'Noch keine Angabe'}</dd></div>`).join('')}</dl>`;
     const section=(title,symbol,rows)=>`<section class="overview-group">${icon(symbol)}<div class="overview-group-content"><h3>${title}</h3>${fields(rows)}</div></section>`;
-    const type=window.LCNDoctorEntryTypes?.format(doctor.dr_type)||({doctor:'Ärzt:innen',practice:'Praxis',clinic:'Klinik',other:'Anlaufstelle'})[doctor.dr_type]||doctor.dr_type||'Noch keine Angabe';
+    const type=window.LCNDoctorEntryTypes?.format(doctor.dr_type)||({doctor:'Ärzt:innen',practice:'Praxis',clinic:'Klinik',other:'Anlaufstelle'})[doctor.dr_type]||doctor.dr_type||'';
     const country=window.LCNDoctorCountryLabel?.(doctor.loc_country)||({AT:'Österreich',DE:'Deutschland',CH:'Schweiz'})[doctor.loc_country]||doctor.loc_country;
     const locations=[['Adresse',escape(address())],['Land',escape(country)]];
     const additionalLocations=(research.locations||[]).filter(location=>Number(location.loc_id)!==Number(doctor.loc_id));
     if(additionalLocations.length)locations.push(['Weitere Standorte',additionalLocations.map(location=>escape([location.loc_label,address(location)].filter(Boolean).join(' · '))).join('<br>')]);
-    return `<section class="card overview-facts overview-structured"><h3 class="overview-heading">Überblick</h3><div class="overview-profile-grid"><aside class="overview-identity">${icon('person')}<h3>${escape(doctor.dr_display_name)}</h3><div class="overview-organization"><span>Praxis</span><strong>${organizationHtml}</strong></div>${doctor.activities?`<p class="overview-activities">${escape(doctor.activities)}</p>`:''}<span class="overview-type-badge">${escape(type)}</span></aside><div class="overview-groups">${section('Medizinisches Profil','medical',[
+    return `<section class="card overview-facts overview-structured"><h3 class="overview-heading">Überblick</h3><div class="overview-profile-grid"><aside class="overview-identity">${icon('person')}<h3>${escape(doctor.dr_display_name)}</h3>${organizationHtml}${doctor.activities?`<p class="overview-activities">${escape(doctor.activities)}</p>`:''}<button type="button" class="detail-classification-box" data-profile-edit-type aria-label="Einordnung des Behandlers ${type ? 'bearbeiten' : 'ergänzen'}"><span>Einordnung</span><strong>${escape(type)||'—'}</strong></button></aside><div class="overview-groups">${section('Medizinisches Profil','medical',[
       ['Fachrichtungen',escape(labels(research.specialty||state.data.terms?.specialty))],
       ['Spezialisierungen',escape(labels(research.specializations))],
       ['Zusatzqualifikation',escape(labels(research.qualifications))]
@@ -841,7 +841,7 @@
     document.querySelector('.side-nav').hidden = state.error;
     document.querySelector('.detail-layout').classList.toggle('has-error', state.error);
     if (state.error) {
-      content.innerHTML = '<section class="card" role="status"><h2>Praxis konnte nicht geladen werden</h2><p>Der Eintrag ist nicht in der aktuellen Auswahl enthalten oder die Daten sind gerade nicht erreichbar.</p><button type="button" id="retry-data">Erneut versuchen</button> <a href="aerzte_karte.html">Zur Behandler-Suche</a></section>';
+      content.innerHTML = '<section class="card" role="status"><h2>Praxis konnte nicht geladen werden</h2><p>Der Eintrag ist nicht in der aktuellen Auswahl enthalten oder die Daten sind gerade nicht erreichbar.</p><button type="button" id="retry-data">Erneut versuchen</button> <a href="behandler_suche.html">Zur Behandler-Suche</a></section>';
       return;
     }
     content.innerHTML = views[state.view]();
@@ -1059,7 +1059,7 @@
     document.querySelector('.profile').hidden = true;
     document.querySelector('.side-nav').hidden = true;
     document.querySelector('.detail-layout').classList.add('has-error');
-    content.innerHTML = '<section class="card" role="status"><h2>Kein gültiges Profil angegeben</h2><p>Öffne einen Behandler über die Behandler-Suche.</p><a href="aerzte_karte.html">Zur Behandler-Suche →</a></section>';
+    content.innerHTML = '<section class="card" role="status"><h2>Kein gültiges Profil angegeben</h2><p>Öffne einen Behandler über die Behandler-Suche.</p><a href="behandler_suche.html">Zur Behandler-Suche →</a></section>';
     document.getElementById('community-mode').textContent = '';
     return;
   }

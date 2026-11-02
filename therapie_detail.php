@@ -9,7 +9,7 @@ if (isset($_GET['nd_id']) && !isset($_GET['treatment_id'])) {
     if (!$target) {
         require_once __DIR__ . '/components/treatments_nd_view.php';
         http_response_code(404); ndStart('Therapie nicht gefunden', true, true);
-        echo '<section class="card" role="alert"><h1>Therapie nicht gefunden</h1><p>Dieser Link führt zu keiner verfügbaren Therapie.</p><a href="therapien_karte.html">Zur Therapiesuche</a></section>';
+        echo '<section class="card" role="alert"><h1>Therapie nicht gefunden</h1><p>Dieser Link führt zu keiner verfügbaren Therapie.</p><a href="therapien_suche.html">Zur Therapiesuche</a></section>';
         ndEnd(); exit;
     }
     $params = ['treatment_id'=>$target];
@@ -38,7 +38,7 @@ try {
     }
 } catch (Throwable $e) { lcnLogApiError('therapie_detail', $e); http_response_code(503); $error = 'Die Therapie konnte gerade nicht geladen werden.'; }
 ndStart($item['treatmentname'] ?? 'Therapie', true, true);
-if ($error) { echo '<section class="card" role="alert"><h1>Therapie nicht verfügbar</h1><p>'.ndEscape($error).'</p><a href="therapien_karte.html">Zur Therapiesuche</a></section>'; ndEnd(); return; }
+if ($error) { echo '<section class="card" role="alert"><h1>Therapie nicht verfügbar</h1><p>'.ndEscape($error).'</p><a href="therapien_suche.html">Zur Therapiesuche</a></section>'; ndEnd(); return; }
 $views = ['ueberblick'=>'Überblick','termin'=>'Welche Belastungshürden gibt es bei der Therapie?','zugang'=>'Wie zugänglich ist die Therapie?','wirkung'=>'Welche Erfahrungen gibt es?','alternativen'=>'Therapiealternativen','dashboard'=>'Dashboard'];
 ?>
 <div class="detail-layout ux-detail" data-home-delivery="<?= lcnNdCanTreatAtHome($item) ? '1' : '0' ?>" data-independent-at-home="<?= lcnNdIndependentAtHome($item) ? '1' : '0' ?>" data-treatment-id="<?= (int)$id ?>" data-previous-treatment-id="<?= (int)array_search((int)$id, LCN_PREVIOUS_ND_IDS, true) ?>">
@@ -56,7 +56,7 @@ $views = ['ueberblick'=>'Überblick','termin'=>'Welche Belastungshürden gibt es
 <aside class="card ux-treatment-identity"><div class="overview-icon ux-treatment-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/><path d="M3 12h4l2-4 4 8 2-4h6"/></svg></div>
 <h3><?= ndEscape($item['treatmentname']) ?></h3>
 <div class="ux-identity-fields">
-<?php if (ndHas($item['typ'])): ?><div class="ux-identity-field ux-identity-category-field"><span>Kategorie</span><strong><?= ndEscape($item['typ']) ?></strong></div><?php endif; ?>
+<button type="button" class="ux-identity-field ux-identity-category-field detail-classification-box" data-taxonomy-edit-category aria-label="Kategorie <?= ndHas($item['typ']) ? 'bearbeiten' : 'ergänzen' ?>"><span>Kategorie</span><strong data-category-value="<?= ndEscape($item['typ'] ?? '') ?>"><?= ndHas($item['typ']) ? ndEscape($item['typ']) : '—' ?></strong></button>
 <?php if (ndHas($item['unterkategorie'])): ?><div class="ux-identity-field ux-identity-subcategory-field"><span>Unterkategorie</span><strong><?= ndEscape($item['unterkategorie']) ?></strong></div><?php endif; ?>
 </div>
 

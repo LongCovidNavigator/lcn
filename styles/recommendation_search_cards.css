@@ -1,0 +1,1157 @@
+/* Rules copied from approved search-card styles, including their responsive breakpoints. */
+.doctor-card-results-section.is-hidden{
+    display: none;
+}
+.doctor-card-results-section h2{
+    margin-bottom: 18px;
+}
+.doctor-card{
+    background: white;
+    border: 1px solid #d8e0ea;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 32, 80, 0.10);
+}
+.doctor-card-header{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.doctor-card-city-badge{
+    display: inline-block;
+    padding: 5px 9px;
+    border: 1px solid #d8e0ea;
+    border-radius: 8px;
+    background: #f7faff;
+    color: #38547a;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+.doctor-card-tag{
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #eef3f8;
+    color: #38547a;
+    font-size: 0.85rem;
+}
+.doctor-card-info{
+    color: #3f5575;
+    line-height: 1.55;
+    margin-bottom: 18px;
+}
+.doctor-card-info-row{
+    margin-bottom: 6px;
+}
+.doctor-card-divider{
+    border: none;
+    border-top: 1px solid #dde4ed;
+    margin: 18px 0;
+}
+.doctor-card-distance{
+    color: #555;
+    font-size: 0.9rem;
+}
+.doctor-card-link{
+    color: #008f83;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.doctor-card-link:hover{
+    text-decoration: underline;
+}
+.doctor-card-v2{
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    border: 1px solid #d8e0ea;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(0, 32, 80, 0.10);
+}
+.doctor-card-accent{
+    height: 5px;
+    background: #008c95;
+}
+.doctor-card-title-area{
+    min-width: 0;
+}
+.doctor-card-info-panel{
+    min-width: 0;
+}
+.doctor-card-location-block:last-child{
+    margin-bottom: 0;
+}
+.doctor-card-rating-positive{
+    background: #f1fbf6;
+    border-color: #bfe7d1;
+}
+.doctor-card-rating-neutral{
+    background: #f3f8ff;
+    border-color: #c8dcf2;
+}
+.doctor-card-rating-negative{
+    background: #fff4f5;
+    border-color: #f3c3c7;
+}
+.doctor-card-rating-positive .doctor-card-rating-value,.doctor-card-rating-positive .doctor-card-rating-count{
+    color: #008c54;
+}
+.doctor-card-rating-neutral .doctor-card-rating-value,.doctor-card-rating-neutral .doctor-card-rating-count{
+    color: #005fa8;
+}
+.doctor-card-rating-negative .doctor-card-rating-value,.doctor-card-rating-negative .doctor-card-rating-count{
+    color: #c9333e;
+}
+.doctor-card-rating-empty{
+    padding: 16px;
+    border: 1px dashed #bbb;
+    border-radius: 10px;
+    background: #fafafa;
+    color: #666;
+}
+.doctor-card-own-rating-header .doctor-card-section-heading{
+    margin-bottom: 0;
+}
+.doctor-card-vote-positive{
+    border: 1px solid #30a46c;
+    color: #008c54;
+}
+.doctor-card-vote-neutral{
+    border: 1px solid #6d8db5;
+    color: #005fa8;
+}
+.doctor-card-vote-negative{
+    border: 1px solid #dc5661;
+    color: #c9333e;
+}
+.doctor-card-grid{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+.doctor-cards-load-more-wrap{
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+}
+.doctor-cards-load-more-button{
+    min-height: 44px;
+    padding: 10px 22px;
+    border: 1px solid #006f78;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #006f78;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.doctor-cards-load-more-button:hover,.doctor-cards-load-more-button:focus-visible{
+    background: #e9f7f7;
+}
+.doctor-card-meta{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 0;
+}
+.doctor-card-location-panel{
+    padding-right: 22px;
+}
+.doctor-card-rating-panel{
+    padding-left: 22px;
+}
+.doctor-card-rating-tiles{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.doctor-card-own-rating-header{
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+.doctor-card-vote-buttons-placeholder{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.doctor-card-main-header{
+    display: grid;
+    align-items: center;
+    border-bottom: 1px solid #dde4ed;
+    grid-template-columns: 56px 1fr auto;
+    gap: 14px;
+    padding: 14px 20px 12px 20px;
+}
+.doctor-card-avatar{
+    border-radius: 50%;
+    background: #e5f7f8;
+    color: #006b73;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    width: 46px;
+    height: 46px;
+    font-size: 0.9rem;
+}
+.doctor-card-title{
+    margin: 0 0 12px 0;
+    line-height: 1.15;
+    color: #07152f;
+    font-size: 1.2rem;
+    margin-bottom: 6px;
+}
+.doctor-card-title-link{
+    color: inherit;
+    text-decoration: none;
+}
+.doctor-card-title-link:hover,.doctor-card-title-link:focus-visible{
+    color: #008f83;
+    text-decoration: underline;
+}
+.doctor-card-tag,.doctor-card-city-badge{
+    font-size: 0.74rem;
+    padding: 3px 7px;
+}
+.doctor-card-content-grid{
+    display: grid;
+    border-bottom: 1px solid #dde4ed;
+    padding: 14px 20px;
+}
+.doctor-card-section-heading{
+    margin: 0 0 18px 0;
+    color: #004080;
+    font-weight: 800;
+    font-size: 0.86rem;
+    margin-bottom: 10px;
+}
+.doctor-card-mini-label{
+    color: #66758f;
+    font-weight: 700;
+    font-size: 0.72rem;
+    margin-bottom: 3px;
+}
+.doctor-card-main-text{
+    color: #1d2d46;
+    line-height: 1.45;
+    font-weight: 500;
+    font-size: 0.82rem;
+}
+.doctor-card-address span{
+    display: block;
+}
+.doctor-card-location-block{
+    margin-bottom: 11px;
+}
+.doctor-card-rating-tile{
+    border-radius: 10px;
+    border: 1px solid #dde4ed;
+    text-align: center;
+    padding: 8px 7px;
+}
+.doctor-card-rating-icon{
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+}
+.doctor-card-rating-value{
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+    font-size: 1.18rem;
+}
+.doctor-card-rating-label{
+    color: #1d2d46;
+    line-height: 1.3;
+    font-size: 0.7rem;
+    min-height: 28px;
+}
+.doctor-card-rating-count{
+    margin-top: 6px;
+    font-weight: 700;
+    font-size: 0.7rem;
+}
+.doctor-card-rating-total{
+    color: #3f5575;
+    font-weight: 700;
+    font-size: 0.82rem;
+    margin-top: 8px;
+}
+.doctor-card-own-rating{
+    border-bottom: 1px solid #dde4ed;
+    padding: 13px 20px;
+}
+.doctor-card-vote-placeholder-button{
+    border-radius: 10px;
+    background: white;
+    font-weight: 800;
+    cursor: not-allowed;
+    opacity: 0.75;
+    padding: 7px 10px;
+    font-size: 0.78rem;
+}
+.doctor-card-footer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fbfcfe;
+    padding: 12px 20px;
+}
+.doctor-card-footer > :last-child{
+    margin-left: auto;
+}
+.doctor-card-muted,.doctor-card-link{
+    font-size: 0.85rem;
+}
+.doctor-card-section-count{
+    font-weight: 400;
+    color: #66758f;
+    font-size: 0.82em;
+    margin-left: 6px;
+}
+.doctor-card-vote-button{
+    cursor: pointer;
+    opacity: 1;
+}
+.doctor-card-vote-button:hover{
+    filter: brightness(0.97);
+}
+.doctor-card-vote-button:active{
+    transform: scale(0.98);
+}
+.doctor-card-vote-button.is-saving{
+    opacity: 0.55;
+    cursor: wait;
+}
+.doctor-card-vote-positive.is-selected{
+    background: #ffffff;
+    color: #008c54;
+    box-shadow: none;
+}
+.doctor-card-vote-neutral.is-selected{
+    background: #ffffff;
+    color: #005fa8;
+    box-shadow: none;
+}
+.doctor-card-vote-negative.is-selected{
+    background: #ffffff;
+    color: #c9333e;
+    box-shadow: none;
+}
+.doctor-card-vote-buttons-placeholder.has-selection .doctor-card-vote-button:not(.is-selected){
+    opacity: 0.58;
+}
+.doctor-card-rank-large{
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #e5f7f8;
+    color: #006b73;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.05;
+}
+.doctor-card-rank-large strong{
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+.doctor-card-rank-large span{
+    margin-top: 3px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: #3f5575;
+}
+.doctor-card-results-section{
+    margin-bottom: 34px;
+    margin-top: 12px;
+}
+.doctor-card-results-section h2{
+    display: none;
+}
+.doctor-compare-add-button{
+    border: 1px solid #b9c8dc;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #07326f;
+    padding: 6px 9px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    line-height: 1.1;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.doctor-compare-add-button:hover{
+    background: #eef4fb;
+}
+.doctor-compare-add-button{
+    border: 1px solid #b9c8dc;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #07326f;
+    padding: 6px 9px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    line-height: 1.1;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.doctor-compare-add-button:hover{
+    background: #eef4fb;
+}
+.doctor-compare-add-button.is-selected{
+    border-color: #30a46c;
+    background: #f1fbf6;
+    color: #008c54;
+}
+.doctor-card-footer-with-compare{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.doctor-card-rating-link{
+    display: none;
+    color: #008f83;
+    font-weight: 700;
+    text-decoration: none;
+}
+.doctor-card-rating-link:hover{
+    text-decoration: underline;
+}
+.doctor-compare-add-button-table{
+    padding: 3px 6px;
+    font-size: 0.62rem;
+}
+@media (min-width: 1101px){.doctor-card-footer > :last-child{
+        margin-left: auto;
+    }
+.doctor-card-location-panel{
+        border-right: 1px solid #dde4ed;
+    }
+.doctor-card-content-grid{
+        gap: 0;
+        grid-template-columns: 0.9fr 1.4fr;
+    }
+}
+@media (min-width: 761px) and (max-width: 1100px){.doctor-card-footer > :last-child{
+        margin-left: auto;
+    }
+.doctor-card-location-panel{
+        border-right: 1px solid #dde4ed;
+    }
+.doctor-card-content-grid{
+        gap: 0;
+        grid-template-columns: 0.9fr 1.4fr;
+    }
+}
+@media (min-width: 761px) and (max-width: 900px){.doctor-card-city-badge{
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+.doctor-card-location-panel{
+        padding-right: 14px;
+        border-right: 1px solid #dde4ed;
+        border-bottom: 0;
+    }
+.doctor-card-rating-tiles,.doctor-card-vote-buttons-placeholder{
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+.doctor-card-content-grid{
+        gap: 0;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+        padding: 14px 16px;
+    }
+.doctor-card-rating-panel{
+        padding-left: 14px;
+    }
+.doctor-card-rating-tile{
+        padding: 7px 5px;
+    }
+.doctor-card-rating-label{
+        min-height: 0;
+        font-size: 0.64rem;
+    }
+.doctor-card-vote-button-placeholder{
+        padding: 6px 5px;
+        font-size: 0.7rem;
+    }
+}
+@media (min-width: 761px) and (max-width: 800px){.doctor-card-header{
+        gap: 12px;
+    }
+}
+@media (max-width: 760px){.doctor-card-header{
+        flex-direction: column;
+    }
+.doctor-card-city-badge{
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+.doctor-card-location-panel{
+        border-right: none;
+        border-bottom: 1px solid #dde4ed;
+        padding-bottom: 24px;
+    }
+.doctor-card-rating-tiles,.doctor-card-vote-buttons-placeholder{
+        grid-template-columns: 1fr;
+    }
+.doctor-card-content-grid{
+        gap: 24px;
+        grid-template-columns: 1fr;
+    }
+.doctor-compare-add-button-table{
+        max-width: 100%;
+        white-space: normal;
+    }
+.doctor-card-content-grid{
+        gap: 12px;
+    }
+.doctor-card-location-panel{
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 18px;
+        align-items: start;
+        padding-bottom: 12px;
+    }
+.doctor-card-location-panel .doctor-card-section-heading{
+        grid-column: 1 / -1;
+    }
+.doctor-card-location-panel .doctor-card-location-block{
+        margin-bottom: 0;
+    }
+.doctor-card-rating-panel{
+        padding-left: 0;
+    }
+.doctor-card-rating-tiles{
+        width: 100%;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+.doctor-card-rating-tile{
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 5px 3px;
+        text-align: center;
+    }
+.doctor-card-rating-value{
+        margin-bottom: 0;
+        font-size: 1rem;
+    }
+.doctor-card-rating-label{
+        display: none;
+    }
+.doctor-card-rating-count{
+        margin-top: 0;
+        font-size: 0.59rem;
+        white-space: nowrap;
+    }
+.doctor-card-own-rating{
+        display: none;
+    }
+.doctor-card-rating-link{
+        display: inline;
+    }
+.doctor-card-section-heading .doctor-card-section-count{
+        display: none;
+    }
+}
+.doctor-map-results-table .doctor-compare-add-button-table{ margin: 0; flex: 0 0 auto; }
+.doctor-card .doctor-search-online{ display: inline-block; margin: 0; padding: 4px 7px; border-radius: 5px; background: #e6f5ec; color: #176748; font: 500 11px/1.4 Arial,sans-serif; }
+.treatment-card-results-section{
+    margin-top: 12px;
+    margin-bottom: 34px;
+}
+.treatment-card-grid{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+.treatment-cards-load-more-wrap{
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+}
+.treatment-cards-load-more-button{
+    min-height: 44px;
+    padding: 10px 22px;
+    border: 1px solid #006f78;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #006f78;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.treatment-cards-load-more-button:hover,.treatment-cards-load-more-button:focus-visible{
+    background: #e9f7f7;
+}
+.treatment-card{
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    border: 1px solid #d8e0ea;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(0, 32, 80, 0.10);
+}
+.treatment-card-accent{
+    height: 5px;
+    background: #008c95;
+}
+.treatment-card-main-header{
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 14px 20px 12px 20px;
+    border-bottom: 1px solid #dde4ed;
+}
+.treatment-card-rank-large{
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #e5f7f8;
+    color: #006b73;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.05;
+}
+.treatment-card-rank-large strong{
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+.treatment-card-rank-large span{
+    margin-top: 3px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: #3f5575;
+}
+.treatment-card-title-area{
+    min-width: 0;
+}
+.treatment-card-title{
+    margin: 0 0 6px 0;
+    font-size: 1.2rem;
+    line-height: 1.15;
+    color: #07152f;
+}
+.treatment-card-meta{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+.treatment-card-content-grid{
+    display: grid;
+    grid-template-columns: minmax(260px, 0.85fr) minmax(360px, 1.45fr);
+    gap: 0;
+    padding: 14px 20px;
+    border-bottom: 1px solid #dde4ed;
+}
+.treatment-card-info-panel{
+    min-width: 0;
+}
+.treatment-card-note-panel,.treatment-card-classification-panel{
+    padding-right: 22px;
+    border-right: 1px solid #dde4ed;
+}
+.treatment-card-provider-summary{
+    min-width: 155px;
+    text-align: right;
+}
+.treatment-card-provider-summary-label{
+    display: block;
+    margin-bottom: 5px;
+    color: #66758f;
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.treatment-card-provider-summary .treatment-card-provider-detail{
+    justify-content: flex-end;
+}
+.treatment-card-info-block{
+    margin: 0;
+    padding: 9px 11px;
+    border: 1px solid #e1e7ef;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+.treatment-card-classification-list{
+    display: grid;
+    gap: 8px;
+}
+.treatment-card-mini-label{
+    margin-bottom: 4px;
+    color: #66758f;
+    font-size: 0.65rem;
+    font-weight: 750;
+    letter-spacing: 0.035em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+.treatment-card-classification-value{
+    color: #0b1f3a;
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+.treatment-card-provider-detail{
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #1d2d46;
+    font-size: 0.82rem;
+    font-weight: 650;
+}
+.treatment-card-rating-panel{
+    padding-left: 22px;
+}
+.treatment-card-section-heading{
+    margin: 0 0 10px 0;
+    font-size: 0.86rem;
+    color: #004080;
+    font-weight: 800;
+}
+.treatment-card-section-count{
+    font-weight: 400;
+    color: #66758f;
+    font-size: 0.82em;
+    margin-left: 6px;
+}
+.treatment-card-main-text{
+    color: #1d2d46;
+    line-height: 1.45;
+    font-weight: 500;
+    font-size: 0.82rem;
+}
+.treatment-card-muted{
+    color: #66758f;
+    font-weight: 400;
+}
+.treatment-card-rating-tiles{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.treatment-card-rating-tile{
+    padding: 8px 7px;
+    border-radius: 10px;
+    border: 1px solid #dde4ed;
+    text-align: center;
+}
+.treatment-card-rating-positive{
+    background: #f1fbf6;
+    border-color: #bfe7d1;
+}
+.treatment-card-rating-neutral{
+    background: #f3f8ff;
+    border-color: #c8dcf2;
+}
+.treatment-card-rating-negative{
+    background: #fff4f5;
+    border-color: #f3c3c7;
+}
+.treatment-card-rating-value{
+    margin-bottom: 4px;
+    font-size: 1.18rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.treatment-card-rating-positive .treatment-card-rating-value,.treatment-card-rating-positive .treatment-card-rating-count{
+    color: #008c54;
+}
+.treatment-card-rating-neutral .treatment-card-rating-value,.treatment-card-rating-neutral .treatment-card-rating-count{
+    color: #005fa8;
+}
+.treatment-card-rating-negative .treatment-card-rating-value,.treatment-card-rating-negative .treatment-card-rating-count{
+    color: #c9333e;
+}
+.treatment-card-rating-label{
+    min-height: 28px;
+    font-size: 0.7rem;
+    color: #1d2d46;
+    line-height: 1.3;
+}
+.treatment-card-rating-count{
+    margin-top: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+.treatment-card-rating-empty{
+    padding: 16px;
+    border: 1px dashed #bbb;
+    border-radius: 10px;
+    background: #fafafa;
+    color: #666;
+    font-size: 0.82rem;
+}
+.treatment-card-own-rating{
+    padding: 13px 20px;
+    border-bottom: 1px solid #dde4ed;
+}
+.treatment-card-own-rating-header{
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+.treatment-card-own-rating-header .treatment-card-section-heading{
+    margin-bottom: 0;
+}
+.treatment-card-vote-buttons{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.treatment-card-vote-button{
+    padding: 7px 10px;
+    border-radius: 10px;
+    background: white;
+    font-weight: 800;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+.treatment-card-vote-button:hover{
+    filter: brightness(0.97);
+}
+.treatment-card-vote-button:active{
+    transform: scale(0.98);
+}
+.treatment-card-vote-button.is-saving,.treatment-card-vote-button:disabled{
+    opacity: 0.55;
+    cursor: wait;
+}
+.treatment-card-vote-positive{
+    border: 1px solid #30a46c;
+    color: #008c54;
+}
+.treatment-card-vote-neutral{
+    border: 1px solid #6d8db5;
+    color: #005fa8;
+}
+.treatment-card-vote-negative{
+    border: 1px solid #dc5661;
+    color: #c9333e;
+}
+.treatment-card-vote-positive.is-selected{
+    background: #ffffff;
+    color: #008c54;
+    box-shadow: none;
+}
+.treatment-card-vote-neutral.is-selected{
+    background: #ffffff;
+    color: #005fa8;
+    box-shadow: none;
+}
+.treatment-card-vote-negative.is-selected{
+    background: #ffffff;
+    color: #c9333e;
+    box-shadow: none;
+}
+.treatment-card-vote-buttons.has-selection .treatment-card-vote-button:not(.is-selected){
+    opacity: 0.58;
+}
+.treatment-card-footer{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 12px 20px;
+    background: #fbfcfe;
+}
+.treatment-card-title-link{
+    color: inherit;
+    text-decoration: none;
+}
+.treatment-card-title-link:hover,.treatment-card-title-link:focus-visible{
+    text-decoration: underline;
+}
+@media (max-width: 760px){.treatment-card-content-grid{
+        grid-template-columns: 1fr;
+    }
+.treatment-card-note-panel,.treatment-card-classification-panel{
+        padding-right: 0;
+        border-right: none;
+        border-bottom: 1px solid #dde4ed;
+        padding-bottom: 14px;
+    }
+.treatment-card-rating-panel{
+        padding-left: 0;
+    }
+.treatment-card-rating-tiles,.treatment-card-vote-buttons{
+        grid-template-columns: 1fr;
+    }
+}
+.treatment-compare-add-button{
+    border: 1px solid #b9c8dc;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #07326f;
+    padding: 6px 9px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    line-height: 1.1;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.treatment-compare-add-button:hover{
+    background: #eef4fb;
+}
+.treatment-compare-add-button.is-selected{
+    border-color: #30a46c;
+    background: #f1fbf6;
+    color: #008c54;
+}
+.treatment-card-footer-with-compare{
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.treatment-compare-add-button-table{
+    padding: 3px 6px;
+    font-size: 0.62rem;
+}
+@media (max-width: 760px){.treatment-card-main-header{
+        grid-template-columns: 46px minmax(0, 1fr);
+        gap: 10px;
+        padding: 11px 14px 10px;
+    }
+.treatment-card-provider-summary{
+        grid-column: 2;
+        min-width: 0;
+        text-align: left;
+    }
+.treatment-card-provider-summary .treatment-card-provider-detail{
+        justify-content: flex-start;
+    }
+.treatment-card-rank-large{
+        width: 44px;
+        height: 44px;
+    }
+.treatment-card-content-grid{
+        gap: 10px;
+        padding: 11px 14px;
+    }
+.treatment-card-note-panel,.treatment-card-classification-panel{
+        padding-bottom: 10px;
+    }
+.treatment-card-rating-tiles{
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+.treatment-card-rating-tile{
+        padding: 6px 3px;
+    }
+.treatment-card-rating-label{
+        display: none;
+    }
+.treatment-card-rating-value{
+        margin-bottom: 2px;
+        font-size: 1rem;
+    }
+.treatment-card-rating-count{
+        margin-top: 2px;
+        font-size: 0.62rem;
+    }
+.treatment-card-own-rating{
+        display: none;
+    }
+.treatment-card-footer{
+        padding: 9px 14px;
+    }
+}
+.treatment-card-accent{background:#0878e3}
+.treatment-card-rank-large{background:#e7f3ff;color:#0878e3}
+.treatment-card-classification-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.treatment-card-info-block{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:100px;padding:14px 10px;background:#fff;border:1px solid #cddff1;border-left:4px solid #0878e3;text-align:center}
+.treatment-card-mini-label{margin:0;text-transform:none;letter-spacing:normal;font-size:14px;line-height:1.45;color:#315579;font-weight:600}
+.treatment-card-mini-label::after{content:'';display:block;width:30px;height:2px;margin:6px auto 0;background:#c5def6;border-radius:2px}
+.treatment-card-classification-value{font-size:14px;line-height:1.5;font-weight:400;color:#17365d;overflow-wrap:anywhere}
+.treatment-card .lcn-experience{grid-template-columns:repeat(4,minmax(0,1fr));min-width:0;gap:10px}
+.treatment-card .lcn-experience .lcn-effect{display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;border:0;border-radius:0;background:transparent;text-align:center;min-width:0;font-size:12px}
+.treatment-card .lcn-experience .lcn-effect>span:first-child{white-space:normal;overflow-wrap:anywhere;min-height:32px}
+.treatment-card .lcn-experience .lcn-effect strong{font-size:14px}
+.treatment-card .lcn-experience .lcn-effect-track{display:flex;align-items:flex-end;width:30px;height:64px;background:#edf4fb;border-bottom:1px solid #bbd3eb;border-radius:4px 4px 0 0;overflow:hidden}
+.treatment-card .lcn-experience .lcn-effect-bar{display:block;width:100%;background:#0878e3;border-radius:3px 3px 0 0}
+.treatment-card .lcn-experience small{text-align:right}
+@media(max-width:480px){.treatment-card .lcn-experience{gap:6px}
+.treatment-card .lcn-experience .lcn-effect{font-size:10px}
+.treatment-card-classification-list{gap:8px}
+.treatment-card-info-block{padding:12px 8px}
+}
+@media(max-width:480px){.treatment-card .lcn-experience .lcn-effect>span:first-child{font-size:9px;overflow-wrap:normal;hyphens:auto}
+}
+.treatment-card .treatment-card-content-grid{grid-template-columns:minmax(280px,.8fr) minmax(0,1.4fr);padding:14px 20px;align-items:start}
+.treatment-card .treatment-card-classification-list{gap:14px}
+.treatment-card .treatment-card-info-block{display:block;min-height:0;padding:10px 12px;border:1px solid #cddff1;border-left:3px solid #0878e3;border-radius:6px;text-align:left;box-shadow:none}
+.treatment-card .treatment-card-mini-label{font-size:12px;line-height:1.4;margin:0 0 5px;color:#62769a;font-weight:400}
+.treatment-card .treatment-card-mini-label::after{display:none}
+.treatment-card .treatment-card-classification-value{font-size:14px;line-height:1.4;font-weight:500}
+.treatment-card .treatment-card-provider-detail{justify-content:flex-end}
+.treatment-card .lcn-experience{gap:8px}
+.treatment-card .lcn-experience .lcn-effect{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:20px 54px 30px;gap:4px;justify-items:center;align-items:end;font-size:12px}
+.treatment-card .lcn-experience .lcn-effect strong{grid-row:1;line-height:20px;font-size:13px}
+.treatment-card .lcn-experience .lcn-effect-track{grid-row:2;width:100%;height:54px;justify-content:center;align-items:flex-end;background:transparent;border-bottom:1px solid #d8e7f3;border-radius:0}
+.treatment-card .lcn-experience .lcn-effect-bar{width:65%;max-width:90px;border-radius:4px 4px 0 0}
+.treatment-card .lcn-experience .lcn-effect-0 .lcn-effect-bar{background:#e5a5ad}
+.treatment-card .lcn-experience .lcn-effect-1 .lcn-effect-bar{background:#d9e1ea}
+.treatment-card .lcn-experience .lcn-effect-2 .lcn-effect-bar{background:#9fd3b6}
+.treatment-card .lcn-experience .lcn-effect-3 .lcn-effect-bar{background:#63af94}
+.treatment-card .lcn-experience .lcn-effect>span:first-child{grid-row:3;min-height:0;align-self:start;font-size:12px;line-height:1.35;overflow-wrap:normal;hyphens:auto}
+.treatment-card .lcn-experience small{margin:0;line-height:16px}
+@media(max-width:1000px){.treatment-card .treatment-card-content-grid{grid-template-columns:minmax(0,1fr);gap:14px}
+.treatment-card .treatment-card-classification-panel{padding:0 0 14px;border-right:0;border-bottom:1px solid #dde4ed}
+.treatment-card .treatment-card-rating-panel{padding:0}
+}
+@media(max-width:480px){.treatment-card .treatment-card-content-grid{padding:12px 14px}
+.treatment-card .treatment-card-classification-list{gap:8px}
+.treatment-card .treatment-card-info-block{padding:8px}
+.treatment-card .treatment-card-classification-value{font-size:13px}
+.treatment-card .lcn-experience .lcn-effect>span:first-child{font-size:10px}
+.treatment-card .lcn-experience{gap:6px}
+}
+@media(max-width:760px){.treatment-card .treatment-card-provider-detail{justify-content:flex-start}
+}
+.treatment-card .lcn-experience .lcn-effect{grid-template-rows:20px var(--experience-bar-height,54px) auto;gap:3px}
+.treatment-card .lcn-experience .lcn-effect-track{height:var(--experience-bar-height,54px)}
+.treatment-card .lcn-experience .lcn-effect>span:first-child{min-height:0}
+.treatment-card .treatment-card-content-grid{padding-top:12px;padding-bottom:12px}
+.treatment-card .treatment-card-section-heading{margin-bottom:8px}
+.treatment-card .treatment-card-section-count{font-size:12px;font-weight:400;color:#62769a;white-space:nowrap}
+@media(min-width:761px) and (max-width:1100px){.treatment-card-main-header{grid-template-columns:44px minmax(0,1fr) auto;gap:12px}
+.treatment-card-provider-summary{min-width:70px}
+.treatment-card-title{overflow-wrap:anywhere}
+}
+@media(max-width:760px){.treatment-card .treatment-card-section-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px}
+.treatment-card .treatment-card-section-count{margin-left:0}
+.treatment-card .treatment-card-title{overflow-wrap:anywhere}
+.treatment-card .treatment-card-provider-summary{display:flex;align-items:center;gap:8px}
+.treatment-card .treatment-card-provider-summary-label{margin:0}
+.treatment-card .treatment-card-footer{padding:8px 14px}
+.treatment-card .treatment-compare-add-button{min-height:40px;padding:8px 12px}
+}
+.lcn-public-page :is(.doctor-card,.treatment-card,.featured-expert,.featured-treatment){background:#fff;border:1px solid #e1eafa;border-radius:10px;box-shadow:none}
+.lcn-public-page :is(.doctor-card,.treatment-card,.featured-expert,.featured-treatment):hover{border-color:#c5daef;box-shadow:0 3px 12px #17365d09}
+.doctor-card-grid{ display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.doctor-card.doctor-card-v2{ padding: 0; border: 1px solid #bdd8f2; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 12px #17365d09; }
+.doctor-card .doctor-card-accent{ height: 5px; background: #0878e3; }
+.doctor-card .doctor-card-main-header{ display: flex; align-items: center; gap: 18px; padding: 14px 20px; border-bottom: 1px solid #d8e7f3; }
+.doctor-card .doctor-card-rank-large{ flex: 0 0 52px; width: 52px; height: 52px; min-height: 0; padding: 0; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #e7f3ff; color: #0878e3; }
+.doctor-card .doctor-card-rank-large strong{ font-size: 18px; line-height: 1.2; }
+.doctor-card .doctor-card-rank-large span{ font-size: 10px; line-height: 1.3; }
+.doctor-card .doctor-card-title-area{ min-width: 0; flex: 1; }
+.doctor-card .doctor-card-title{ margin: 0 0 6px; font-size: 18px; line-height: 1.3; }
+.doctor-card .doctor-card-title a{ color: #17365d; text-decoration: none; }
+.doctor-card .doctor-card-title a:hover{ text-decoration: underline; }
+.doctor-card .doctor-card-meta{ display: flex; flex-direction: row; flex-wrap: wrap; gap: 5px; margin: 0; }
+.doctor-card .doctor-card-tag,.doctor-card .doctor-card-city-badge{ padding: 3px 7px; font-size: 11px; line-height: 1.3; border: 1px solid #cddff1; background: #f7fbfe; color: #315579; }
+.doctor-card .doctor-card-city-badge{ flex: 0 1 auto; max-width: 24%; white-space: normal; text-align: center; }
+.doctor-card .doctor-card-content-grid{ display: grid; grid-template-columns: minmax(260px,.8fr) minmax(0,1.4fr); gap: 22px; padding: 12px 20px; align-items: start; }
+.doctor-card .doctor-card-info-panel{ min-width: 0; min-height: 0 !important; }
+.doctor-card .doctor-card-location-panel{ display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px 12px; padding: 0 22px 0 0; border-right: 1px solid #d8e7f3; border-bottom: 0; }
+.doctor-card .doctor-card-section-heading{ margin: 0 0 8px; font-size: 14px; line-height: 1.4; color: #17365d; }
+.doctor-card .doctor-card-location-panel > .doctor-card-section-heading{ grid-column: 1 / -1; margin: 0; }
+.doctor-card .doctor-card-location-block{ min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.doctor-card .doctor-card-mini-label{ margin: 0 0 5px; color: #62769a; font-size: 11px; font-weight: 400; text-transform: none; }
+.doctor-card .doctor-card-main-text{ font-size: 13px; line-height: 1.4; font-weight: 500; overflow-wrap: anywhere; }
+.doctor-card .doctor-card-address{ margin: 0; font-style: normal; font-weight: 400; }
+.doctor-card .doctor-card-address span{ display: block; }
+.doctor-card .doctor-card-rating-panel{ padding: 0; }
+.doctor-card .doctor-card-section-count{ display: inline; color: #62769a; font-size: 12px; font-weight: 400; white-space: nowrap; }
+.doctor-card .doctor-card-rating-link{ display: inline; font-size: 11px; font-weight: 400; }
+.doctor-card .lcn-experience{ display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); min-width: 0; gap: 8px; }
+.doctor-card .lcn-experience .lcn-effect{ display: grid; grid-template-columns: minmax(0,1fr); grid-template-rows: 20px var(--experience-bar-height,54px) auto; gap: 3px; justify-items: center; align-items: end; min-width: 0; padding: 0; border: 0; border-radius: 0; background: transparent; text-align: center; font-size: 12px; }
+.doctor-card .lcn-experience .lcn-effect strong{ grid-row: 1; font-size: 13px; line-height: 20px; }
+.doctor-card .lcn-experience .lcn-effect-track{ grid-row: 2; display: flex; align-items: flex-end; justify-content: center; width: 100%; height: var(--experience-bar-height,54px); border-bottom: 1px solid #d8e7f3; }
+.doctor-card .lcn-experience .lcn-effect-bar{ display: block; width: 65%; max-width: 90px; border-radius: 4px 4px 0 0; }
+.doctor-card .lcn-effect-0 .lcn-effect-bar{ background: #e5a5ad; }
+.doctor-card .lcn-effect-1 .lcn-effect-bar{ background: #d9e1ea; }
+.doctor-card .lcn-effect-2 .lcn-effect-bar{ background: #9fd3b6; }
+.doctor-card .lcn-effect-3 .lcn-effect-bar{ background: #63af94; }
+.doctor-card .lcn-experience .lcn-effect > span:first-child{ grid-row: 3; min-height: 0; align-self: start; font-size: 12px; line-height: 1.35; white-space: normal; overflow-wrap: normal; hyphens: auto; }
+.doctor-card .doctor-card-footer{ display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 20px; border-top: 1px solid #d8e7f3; background: #f7fbfe; }
+.doctor-card .doctor-card-footer > :last-child{ margin-left: auto; }
+.doctor-card .doctor-compare-add-button{ min-height: 0; padding: 5px 9px; font-size: 11px; line-height: 1.3; }
+.doctor-card .doctor-card-link{ font-size: 12px; }
+@media(max-width:1000px){.doctor-card .doctor-card-content-grid{ grid-template-columns: minmax(0,1fr); gap: 14px; }
+.doctor-card .doctor-card-location-panel{ padding: 0 0 14px; border-right: 0; border-bottom: 1px solid #d8e7f3; }
+}
+@media(max-width:480px){.doctor-card .doctor-card-main-header{ padding: 12px 14px; gap: 10px; flex-wrap: wrap; }
+.doctor-card .doctor-card-rank-large{ flex-basis: 42px; width: 42px; height: 42px; }
+.doctor-card .doctor-card-title{ font-size: 16px; }
+.doctor-card .doctor-card-city-badge{ max-width: 100%; margin-left: 52px; }
+.doctor-card .doctor-card-content-grid{ padding: 12px 14px; }
+.doctor-card .doctor-card-location-panel{ gap: 8px; }
+.doctor-card .doctor-card-location-block{ padding: 0; }
+.doctor-card .lcn-experience{ gap: 6px; }
+.doctor-card .lcn-experience .lcn-effect > span:first-child{ font-size: 10px; }
+.doctor-card .doctor-card-footer{ padding: 10px 14px; }
+}
+.doctor-card .doctor-card-rating-link,.doctor-card .doctor-card-link{ color: #0867bc; text-decoration: none; }
+.doctor-card .doctor-card-rating-link:hover,.doctor-card .doctor-card-link:hover{ text-decoration: underline; }
+.doctor-card .doctor-card-location-summary{flex:0 1 30%;min-width:0;text-align:right;color:#315579;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.doctor-card .doctor-card-distance{margin-top:5px;color:#62769a;font-size:12px}
+.doctor-card .doctor-card-location-panel{align-items:stretch}
+.doctor-card .doctor-card-offer-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:14px 10px;min-width:0;background:#f7fbfe;border:1px solid #cddff1;border-radius:8px;text-align:center}
+.doctor-card .doctor-card-offer-stat>span{font-size:13px;color:#315579;overflow-wrap:anywhere}
+.doctor-card .doctor-card-offer-stat>strong{font-size:22px;color:#0878e3}
+@media(max-width:480px){.doctor-card .doctor-card-location-summary{flex-basis:100%;margin-left:52px;text-align:left}
+}
+.doctor-card .doctor-card-footer > .doctor-compare-add-button{ margin-left: 0; }
+@media(max-width:1100px){.lcn-public-page :is(.doctor-navigation-header,.doctor-map-header,.lcn-search-table-toggle,.doctor-view-switch-button,.doctor-cards-load-more-button,.doctor-navigation-reset-button,.doctor-compare-action-button,.doctor-results-mode-button){ min-height: 44px; }
+.lcn-public-page .doctor-map-results-table .doctor-compare-add-button-table{ min-height: 36px; padding: 6px 10px; font-size: 12px; }
+.lcn-public-page .doctor-card .doctor-compare-add-button{ min-height: 44px; padding: 8px 12px; font-size: 13px; }
+.lcn-public-page .doctor-card .doctor-card-rating-link{ display: inline-block; padding-block: 8px; font-size: 12px; }
+.lcn-public-page .doctor-card .doctor-card-title{ font-size: 18px; }
+.lcn-public-page .doctor-card .doctor-card-meta{ flex-direction: row; }
+.lcn-public-page .doctor-card .doctor-card-tag{ font-size: 12px; }
+}
+@media(max-width:760px){.lcn-public-page .doctor-card .doctor-card-main-header{ flex-wrap: wrap; align-items: flex-start; gap: 10px; padding: 14px; }
+.lcn-public-page .doctor-card .doctor-card-rank-large{ flex: 0 0 42px; width: 42px; height: 42px; }
+.lcn-public-page .doctor-card .doctor-card-title-area{ flex: 1 1 calc(100% - 52px); }
+.lcn-public-page .doctor-card .doctor-card-location-summary{ flex: 1 1 100%; margin-left: 52px; text-align: left; font-size: 14px; }
+.lcn-public-page .doctor-card .doctor-card-content-grid{ padding: 14px; }
+.lcn-public-page .doctor-card .doctor-card-section-heading{ font-size: 15px; }
+.lcn-public-page .doctor-card .lcn-experience .lcn-effect > span:first-child{ font-size: 11px; }
+.lcn-public-page .doctor-card .doctor-card-offer-stat{ padding: 12px 8px; }
+.lcn-public-page .doctor-card .doctor-card-footer{ padding: 10px 14px; }
+}
+@media(max-width:360px){.lcn-public-page .doctor-card .lcn-experience .lcn-effect > span:first-child{ font-size: 10px; }
+}
+.recommendation-search-cards{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:18px;min-width:0}
+.recommendation-search-cards .doctor-card section,.recommendation-search-cards .treatment-card section{max-width:none;margin:0;box-sizing:border-box}
+.recommendation-search-cards article[hidden]{display:none!important}
+.recommendation-card-compare-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;font:13px Arial,sans-serif}
+.recommendation-card-compare-bar button{padding:8px 12px;border:1px solid #bdd8f2;border-radius:6px;background:#e7f3ff;color:#0867bc;cursor:pointer}
+@media(min-width:1101px){.recommendation-search-cards.is-comparing{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+/* The landing page also has an unrelated doctor teaser; suppress its image overlays here. */
+body.lcn-public-page .recommendation-search-cards .doctor-card::before,body.lcn-public-page .recommendation-search-cards .doctor-card::after{content:none;display:none}
+body.lcn-public-page .recommendation-search-cards .doctor-card{background:#fff;grid-column:auto;margin:0}
+body.lcn-public-page .recommendation-search-cards .doctor-card h3{position:static;transform:none;color:#17365d;font-size:18px;line-height:1.3;margin:0 0 6px}
+.recommendation-search-cards .doctor-card-address{font-style:normal}
+.recommendation-search-cards .treatment-provider-bubble{display:inline-flex;align-items:center;justify-content:center;min-width:28px;padding:4px 8px;border:1px solid #c8def5;border-radius:999px;background:#f3f8fe;color:#0867bc;font-size:14px;font-weight:700}
+body.lcn-public-page .recommendation-search-cards .doctor-card::before,body.lcn-public-page .recommendation-search-cards .doctor-card::after{content:none!important;display:none!important}
+body.lcn-public-page .recommendation-search-cards .doctor-card{background:#fff!important}
+/* Match the search cards: do not inherit landing-page section padding. */
+body.lcn-public-page .recommendation-search-cards .treatment-card .treatment-card-classification-panel{padding:0 22px 0 0;box-sizing:content-box}
+body.lcn-public-page .recommendation-search-cards .treatment-card .treatment-card-rating-panel{padding:0 0 0 22px;box-sizing:content-box}
+@media(max-width:1000px){body.lcn-public-page .recommendation-search-cards .treatment-card .treatment-card-classification-panel{padding:0 0 14px}body.lcn-public-page .recommendation-search-cards .treatment-card .treatment-card-rating-panel{padding:0}}
+body.lcn-public-page .recommendation-search-cards .treatment-card .treatment-provider-bubble{min-width:26px;height:22px;padding:0 7px;border:1px solid #c8dcf2;background:#f3f8ff;color:#005fa8;font-size:.72rem;font-weight:800;line-height:1}
+body.lcn-public-page .recommendation-search-cards .treatment-card .treatment-provider-bubble-empty{border-color:#d8e0ea;background:#f4f6f9;color:#66758f}

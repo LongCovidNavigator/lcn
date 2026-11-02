@@ -1,0 +1,29 @@
+/* Explicitly requested shared typography, column sizing and distance presentation. */
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table){table-layout:fixed;width:100%;border-collapse:collapse}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) :is(th,td){box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;font-size:.74rem;line-height:1.15}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) th{font-size:.72rem;font-weight:700}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) td:nth-child(2) :is(.doctor-table-name-stack>a,.featured-expert-table-name>a,.treatment-table-detail-link,.featured-treatment-table-name>a){font:600 .74rem/1.15 Arial,Helvetica,sans-serif}
+body.lcn-public-page :is(.gp-directory-table,.featured-treatments-table) td:nth-child(2)>a{font:600 .74rem/1.15 Arial,Helvetica,sans-serif}
+body.lcn-public-page :is(.doctor-distance-cell,.treatment-table-stacked-cell,.featured-treatment-table-location){display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;line-height:1.15}
+body.lcn-public-page :is(.doctor-distance-cell>strong,.treatment-table-main-value,.featured-treatment-table-location>strong){font:700 .74rem/1.15 Arial,Helvetica,sans-serif;color:#17365d}
+body.lcn-public-page :is(.doctor-distance-place,.treatment-table-stacked-cell>.treatment-table-muted,.featured-treatment-table-location>small){font:400 .7rem/1.15 Arial,Helvetica,sans-serif;color:#60718e}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(1){width:4%!important}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(2){width:20%!important}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(3){width:13%!important}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(4){width:24%!important}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(5){width:15%!important}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(6){width:6%!important}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(7){width:7%!important}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(8){width:11%!important}
+body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(1){width:4%!important}
+body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(2){width:29%!important}
+body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(3){width:21%!important}
+body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(4){width:25%!important}
+body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(5){width:9%!important}
+body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(6){width:12%!important}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) td:nth-child(2) a:not(.doctor-compare-add-button):not(.treatment-compare-add-button){font-size:.74rem!important;font-weight:600!important;line-height:1.15!important}
+
+/* Keep all three contact badges on one line in every provider table. */
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) { white-space:nowrap; }
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) .doctor-table-badge-row { display:flex;flex-wrap:nowrap;align-items:center;gap:3px;white-space:nowrap; }
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) .doctor-table-badge { flex:0 0 auto; }

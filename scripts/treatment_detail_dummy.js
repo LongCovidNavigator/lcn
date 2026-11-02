@@ -280,7 +280,7 @@
         const mappedProviders = providers.filter(provider => Number.isFinite(provider.lat) && Number.isFinite(provider.lng));
         if (!mapElement || !window.L || !mappedProviders.length) return;
         const map = window.L.map(mapElement, { scrollWheelZoom: false });
-        window.L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: 'Tiles © Esri' }).addTo(map);
+        window.L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: 'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere' }).addTo(map);
         const bounds = [];
         mappedProviders.forEach(p => { const point=[p.lat,p.lng]; bounds.push(point); window.L.marker(point).addTo(map).bindPopup(`<strong>${escape(p.name)}</strong><br>${escape(p.postal_code)} ${escape(p.location)}`); });
         map.fitBounds(bounds, { padding: [28, 28], maxZoom: 7 });

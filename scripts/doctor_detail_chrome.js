@@ -13,7 +13,7 @@
   const brandGroup=document.createElement('div');
   brandGroup.className='detail-brand-group';
   const back=document.createElement('a');
-  back.href='aerzte_karte.html';
+  back.href='behandler_suche.html';
   back.className='detail-back-link';
   back.setAttribute('aria-label','Zurück zur Ärzt:innen-Suche');
   back.title='Zurück zur Ärzt:innen-Suche';
@@ -43,7 +43,7 @@
   menu.className = 'detail-main-menu';
   menu.setAttribute('aria-label','Hauptnavigation');
   menu.hidden = true;
-  menu.innerHTML = '<ul><li><a href="index.html">Startseite</a></li><li><a href="aerzte_karte.html">Ärzt:innen suchen</a></li></ul>';
+  menu.innerHTML = '<ul><li><a href="index.html">Startseite</a></li><li><a href="behandler_suche.html">Ärzt:innen suchen</a></li></ul>';
   host.append(menu);
   function close(restoreFocus=false) {
     menu.hidden=true; toggle.setAttribute('aria-expanded','false');

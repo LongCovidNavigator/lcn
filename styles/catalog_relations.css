@@ -524,3 +524,12 @@ body #feedback,body.ux-page .ux-answer-status,.catalog-feedback-notice,.catalog-
 .ux-taxonomy-proposals .ux-taxonomy-current-option{border-left:3px solid #63a185;background:#f3faf6}
 .ux-taxonomy-proposals .ux-taxonomy-current-option small{color:#527562}
 .ux-taxonomy-community .ux-taxonomy-no-alternatives{margin-top:10px;font-size:12px;color:#7b8fa7}
+
+
+/* Shared category field for provider and treatment identities. */
+.detail-classification-box{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:9px;margin:24px 0 0;padding:16px 14px;min-height:100px;width:100%;box-sizing:border-box;background:#fff;border:1px solid #cddff1;border-left:4px solid #0878e3;border-radius:8px;text-align:center;box-shadow:0 2px 8px rgb(23 54 93 / 4%);font:inherit;cursor:pointer}
+.detail-classification-box>span{font-size:14px;line-height:1.45;font-weight:600;color:#315579}
+.detail-classification-box>span::after{content:'';display:block;width:30px;height:2px;margin:6px auto 0;background:#c5def6;border-radius:2px}
+.detail-classification-box>strong{font-size:14px;line-height:1.5;font-weight:400;color:#17365d;overflow-wrap:anywhere}
+.detail-classification-box:hover{border-color:#0878e3;background:#f5faff}
+.detail-classification-box:focus-visible{outline:3px solid #0878e3;outline-offset:3px}

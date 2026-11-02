@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
  const make=(tag,text)=>{const el=document.createElement(tag);if(text)el.textContent=text;return el;};
 
- const fields={treatmentname:['Name',host.querySelector('h3')?.textContent||''],typ:['Kategorie',host.querySelector('.ux-identity-category-field strong')?.textContent||''],unterkategorie:['Unterkategorie',host.querySelector('.ux-identity-subcategory-field strong')?.textContent||'']};
+ const fields={treatmentname:['Name',host.querySelector('h3')?.textContent||''],typ:['Kategorie',host.querySelector('.ux-identity-category-field strong')?.dataset.categoryValue??host.querySelector('.ux-identity-category-field strong')?.textContent??''],unterkategorie:['Unterkategorie',host.querySelector('.ux-identity-subcategory-field strong')?.textContent||'']};
 
  const controls=make('div'),notice=make('small');controls.className='catalog-feedback catalog-feedback-standard ux-taxonomy-feedback';controls.setAttribute('aria-label','Angaben zur Therapie prüfen');notice.className='ux-taxonomy-notice';notice.setAttribute('role','status');host.prepend(controls);
 
@@ -12,7 +12,22 @@ document.addEventListener('DOMContentLoaded',()=>{
 
  const notify=(text,error=false,tone='neutral')=>window.LCNCatalogRelations.showFeedbackNotice(text,error,tone);
 
- function paint(){for(const [button,stance] of [[confirm,1],[oppose,-1]]){const count=(stance===1?data.confirm:data.oppose)||0,selected=data.own===stance,action=selected?(stance===1?'Bestätigung zurücknehmen':'Widerspruch zurücknehmen'):(stance===1?'Bestätigen':'Widersprechen'),subject=stance===1?'Name und Kategorien der angezeigten Therapie sind korrekt.':'Name oder Kategorien der angezeigten Therapie sind nicht korrekt.';button.textContent=(stance===1?'✓ ':'× ')+count;button.setAttribute('aria-pressed',String(selected));button.dataset.stance=String(stance);button.dataset.feedbackAction=action;button.dataset.feedbackSubject=subject;button.dataset.feedbackTone=selected?'neutral':stance===1?'confirm':'oppose';button.dataset.lcnTooltip=action+': '+subject;button.removeAttribute('title');button.setAttribute('aria-label',action+': '+subject+' · '+count+' Stimmen');button.disabled=busy;}}
+ function paintSuggestedCategories(){
+  const container=host.querySelector('.ux-identity-fields');if(!container)return;
+  container.querySelectorAll('[data-taxonomy-preview]').forEach(el=>el.remove());
+  const missing=value=>!String(value||'').trim();
+  const suggestions=data.suggestions||[];
+  const category=fields.typ[1]||suggestions.find(s=>s.field==='typ')?.choice||'';
+  const categorySuggested=missing(fields.typ[1])&&!!category;
+  const subcategory=missing(fields.unterkategorie[1])?suggestions.find(s=>s.field==='unterkategorie'&&s.category===category)?.choice: null;
+  for(const [field,value] of [['typ',categorySuggested?category:null],['unterkategorie',subcategory]]){
+   if(!value)continue;
+   const row=make('div'),label=make('span',fields[field][0]),name=make('strong',value);
+   row.className='ux-identity-field';row.dataset.taxonomyPreview=field;row.append(label,name);container.append(row);
+  }
+ }
+
+ function paint(){paintSuggestedCategories();for(const [button,stance] of [[confirm,1],[oppose,-1]]){const count=(stance===1?data.confirm:data.oppose)||0,selected=data.own===stance,action=selected?(stance===1?'Bestätigung zurücknehmen':'Widerspruch zurücknehmen'):(stance===1?'Bestätigen':'Widersprechen'),subject=stance===1?'Name und Kategorien der angezeigten Therapie sind korrekt.':'Name oder Kategorien der angezeigten Therapie sind nicht korrekt.';button.textContent=(stance===1?'✓ ':'× ')+count;button.setAttribute('aria-pressed',String(selected));button.dataset.stance=String(stance);button.dataset.feedbackAction=action;button.dataset.feedbackSubject=subject;button.dataset.feedbackTone=selected?'neutral':stance===1?'confirm':'oppose';button.dataset.lcnTooltip=action+': '+subject;button.removeAttribute('title');button.setAttribute('aria-label',action+': '+subject+' · '+count+' Stimmen');button.disabled=busy;}}
 
  async function vote(stance){if(stance===1&&data.own===-1&&!await confirmWithdrawal())return false;busy=true;paint();try{data=await request('overview',{stance});notify((stance===0?'Zurückgenommen: ':stance===1?'Bestätige: ':'Widerspreche: ')+fields.treatmentname[1],false,stance===0?'neutral':stance===1?'confirm':'oppose');return true;}catch(error){notify(error.message,true);return false;}finally{busy=false;paint();}}
 
@@ -20,7 +35,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
  const alreadyVoted=()=>notify('Bereits abgestimmt: Du hast hier bereits abgestimmt. Über × kannst du deine Stimme zurücknehmen.',false,'neutral');
 
- confirm.addEventListener('click',()=>vote(data.own===1?0:1));
+ confirm.addEventListener('click',()=>{if(host.querySelector('[data-taxonomy-preview]')){openDialog();return;}vote(data.own===1?0:1);});
 
  for(const button of [confirm,oppose])button.lcnTooltipAction={label:'Vorschläge ansehen',onClick:openDialog};
 
@@ -40,7 +55,9 @@ document.addEventListener('DOMContentLoaded',()=>{
 
  oppose.addEventListener('click',async()=>{if(data.own===-1){if(await confirmWithdrawal())await vote(0);return;}openDialog();});
 
- function openDialog(){
+ host.querySelector('[data-taxonomy-edit-category]')?.addEventListener('click',()=>{if(!busy)openDialog('typ');});
+
+ function openDialog(initialField){
 
   const dialog=make('dialog');dialog.className='catalog-report-dialog ux-taxonomy-dialog ux-taxonomy-community';
 
@@ -100,7 +117,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   }
 
-  render();
+  render().then(()=>{if(typeof initialField==='string')dialog.querySelector(`[data-taxonomy-field="${initialField}"] .ux-taxonomy-edit`)?.click();});
 
  }
 

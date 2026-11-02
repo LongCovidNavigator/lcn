@@ -1,0 +1,21 @@
+/* Recommendation pages use the same canvas and blue accents as the searches. */
+.top-search-page { --home-teal: #0878e3; --home-teal-dark: #0867bc; --home-soft-mint: #e7f3ff; }
+.top-search-page .recommendation-page { padding: 20px 20px 60px; background: #f7fafc; }
+.top-search-page .recommendation-page > :is(.featured-experts,.featured-treatments,.top-recommendation-map-section) { width: 100%; max-width: none !important; margin: 0 auto 18px; padding: 0 !important; box-sizing: border-box; }
+.top-search-page :is(.featured-experts-panel,.featured-treatments-panel) { padding: 16px; }
+.top-search-page :is(.featured-ranking-group,.featured-ranking-group.is-top) { background: #fff; border-color: #e1eafa; }
+.top-search-page :is(.featured-expert,.featured-treatment) { border: 1px solid #bdd8f2; border-top: 5px solid #0878e3; border-radius: 10px; box-shadow: 0 3px 12px #17365d09; }
+.top-search-page :is(.featured-expert-avatar,.featured-treatment-icon,.featured-treatment-rank) { background: #e7f3ff; color: #0878e3; border-color: #cddff1; }
+.top-search-page :is(.featured-expert-card-facts,.featured-treatment-card-facts) > span { background: #f7fbfe; border-color: #cddff1; }
+.top-search-page :is(.featured-expert-table-name,.featured-treatment-table-name) a,
+.top-search-page :is(.featured-expert,.featured-treatment) h3 a { color: #0867bc; }
+.top-search-page :is(.featured-experts-table,.featured-treatments-table) :is(th,td) { font-family: Arial,Helvetica,sans-serif; padding: 6px 7px; vertical-align: middle; line-height: 1.15; border: 1px solid #e1eafa; }
+.top-search-page :is(.featured-experts-table,.featured-treatments-table) th { background: #f7fbfe; color: #17365d; font-size: .72rem; font-weight: 700; box-shadow: none; }
+.top-search-page :is(.featured-experts-table,.featured-treatments-table) td { font-size: .74rem; font-weight: 400; }
+.top-search-page :is(.featured-experts-table-wrap,.featured-treatments-table-wrap) { border-radius: 10px; }
+.top-search-page .top-map-location-controls { border-color: #e1eafa; border-radius: 10px; }
+@media(max-width:760px) {
+ .top-search-page :is(.featured-experts-table,.featured-treatments-table) { min-width: 900px; }
+ .top-search-page :is(.featured-experts-panel,.featured-treatments-panel) { padding: 12px; }
+ .top-search-page :is(.featured-experts-list,.featured-treatments-list,.featured-ranking-group) { min-width: 0; }
+}

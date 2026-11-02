@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  for(const prefix of ['doctor','treatment']){
   const input=document.getElementById(prefix+'-location-input');if(!input)continue;
   const label=document.querySelector('label[for="'+input.id+'"]');if(label)label.textContent='Adresse, PLZ oder Ort';
-  input.placeholder='z. B. 50667 oder Köln';
+  input.placeholder='z. B. Musterstadt';
   const button=document.createElement('button');button.type='button';button.className='lcn-map-submit';button.textContent='Standort übernehmen';
   button.addEventListener('click',()=>{if(prefix==='doctor')applySearchFromControls(true);else applyTreatmentLocationFromInput();});
   input.closest('div').after(button);

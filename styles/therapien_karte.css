@@ -1287,24 +1287,24 @@
     width: 17%;
 }
 
-.treatment-results-table th:nth-child(4),
-.treatment-results-table td:nth-child(4) {
-    width: 22%;
-}
-
 .treatment-results-table th:nth-child(5),
 .treatment-results-table td:nth-child(5) {
-    width: 9%;
-    text-align: center;
+    width: 22%;
 }
 
 .treatment-results-table th:nth-child(6),
 .treatment-results-table td:nth-child(6) {
+    width: 9%;
+    text-align: center;
+}
+
+.treatment-results-table th:nth-child(7),
+.treatment-results-table td:nth-child(7) {
     width: 14%;
     text-align: center;
 }
 
-.treatment-results-table td:nth-child(6) .treatment-table-stacked-cell {
+.treatment-results-table td:nth-child(7) .treatment-table-stacked-cell {
     align-items: center;
 }
 
@@ -2320,22 +2320,22 @@ button.treatment-table-experience-value.is-saving { cursor: wait; opacity: .55; 
     .treatment-results-table td:nth-child(1) { width: 7%; }
     .treatment-results-table th:nth-child(2),
     .treatment-results-table td:nth-child(2) { width: 43%; }
-    .treatment-results-table th:nth-child(4),
-    .treatment-results-table td:nth-child(4) { width: 25%; }
-    .treatment-results-table th:nth-child(6),
-    .treatment-results-table td:nth-child(6) { width: 25%; }
+    .treatment-results-table th:nth-child(5),
+    .treatment-results-table td:nth-child(5) { width: 25%; }
+    .treatment-results-table th:nth-child(7),
+    .treatment-results-table td:nth-child(7) { width: 25%; }
 
-    .treatment-results-table th:nth-child(4),
-    .treatment-results-table td:nth-child(4),
-    .treatment-results-table th:nth-child(6),
-    .treatment-results-table td:nth-child(6) {
+    .treatment-results-table th:nth-child(5),
+    .treatment-results-table td:nth-child(5),
+    .treatment-results-table th:nth-child(7),
+    .treatment-results-table td:nth-child(7) {
         text-align: center;
     }
 
     .treatment-results-table th:nth-child(3),
     .treatment-results-table td:nth-child(3),
-    .treatment-results-table th:nth-child(5),
-    .treatment-results-table td:nth-child(5) {
+    .treatment-results-table th:nth-child(6),
+    .treatment-results-table td:nth-child(6) {
         display: none;
     }
 
@@ -2377,7 +2377,7 @@ button.treatment-table-experience-value.is-saving { cursor: wait; opacity: .55; 
     .treatment-nav-section-category,
     .treatment-nav-section-provider {
         min-height: 113px !important;
-        height: 113px;
+        height: auto;
     }
 
     .treatment-nav-section-location {
@@ -2566,7 +2566,7 @@ body.treatment-map-page {
     .treatment-nav-section-category,
     .treatment-nav-section-provider {
         min-height: 124px !important;
-        height: 124px;
+        height: auto;
     }
 
     .treatment-nav-section-provider {
@@ -2633,3 +2633,86 @@ body.treatment-map-page {
 /* Keep both kinds of review status beside the name with the same spacing. */
 .treatment-table-name-line{display:flex;align-items:center;flex-wrap:wrap;gap:6px 16px;min-width:0}
 .treatment-table-name-line>.community-preview-badge{margin:0;flex:none}
+
+/* Unterkategorie bleibt innerhalb der automatisch mitwachsenden Filterbox. */
+#treatment-subcategory-field:not([hidden]) { margin-top: 12px; }
+
+/* Therapy cards use the same blue identity fields as the detail page. */
+.treatment-card-accent{background:#0878e3}
+.treatment-card-rank-large{background:#e7f3ff;color:#0878e3}
+.treatment-card-classification-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.treatment-card-info-block{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:100px;padding:14px 10px;background:#fff;border:1px solid #cddff1;border-left:4px solid #0878e3;text-align:center}
+.treatment-card-mini-label{margin:0;text-transform:none;letter-spacing:normal;font-size:14px;line-height:1.45;color:#315579;font-weight:600}
+.treatment-card-mini-label::after{content:'';display:block;width:30px;height:2px;margin:6px auto 0;background:#c5def6;border-radius:2px}
+.treatment-card-classification-value{font-size:14px;line-height:1.5;font-weight:400;color:#17365d;overflow-wrap:anywhere}
+.treatment-card .lcn-experience{grid-template-columns:repeat(4,minmax(0,1fr));min-width:0;gap:10px}
+.treatment-card .lcn-experience .lcn-effect{display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;border:0;border-radius:0;background:transparent;text-align:center;min-width:0;font-size:12px}
+.treatment-card .lcn-experience .lcn-effect>span:first-child{white-space:normal;overflow-wrap:anywhere;min-height:32px}
+.treatment-card .lcn-experience .lcn-effect strong{font-size:14px}
+.treatment-card .lcn-experience .lcn-effect-track{display:flex;align-items:flex-end;width:30px;height:64px;background:#edf4fb;border-bottom:1px solid #bbd3eb;border-radius:4px 4px 0 0;overflow:hidden}
+.treatment-card .lcn-experience .lcn-effect-bar{display:block;width:100%;background:#0878e3;border-radius:3px 3px 0 0}
+.treatment-card .lcn-experience small{text-align:right}
+@media(max-width:480px){.treatment-card .lcn-experience{gap:6px}.treatment-card .lcn-experience .lcn-effect{font-size:10px}.treatment-card-classification-list{gap:8px}.treatment-card-info-block{padding:12px 8px}}
+
+@media(max-width:480px){.treatment-card .lcn-experience .lcn-effect>span:first-child{font-size:9px;overflow-wrap:normal;hyphens:auto}}
+
+/* Search, sorting and review status share one balanced desktop row. */
+.treatment-results-search-panel .treatment-alias-smart-search-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media(max-width:1000px){.treatment-results-search-panel .treatment-alias-smart-search-row{grid-template-columns:minmax(0,1fr)} }
+
+/* Compact classification and the detail page's four coloured experience bars. */
+.treatment-card .treatment-card-content-grid{grid-template-columns:minmax(280px,.8fr) minmax(0,1.4fr);padding:14px 20px;align-items:start}
+.treatment-card .treatment-card-classification-list{gap:14px}
+.treatment-card .treatment-card-info-block{display:block;min-height:0;padding:10px 12px;border:1px solid #cddff1;border-left:3px solid #0878e3;border-radius:6px;text-align:left;box-shadow:none}
+.treatment-card .treatment-card-mini-label{font-size:12px;line-height:1.4;margin:0 0 5px;color:#62769a;font-weight:400}
+.treatment-card .treatment-card-mini-label::after{display:none}
+.treatment-card .treatment-card-classification-value{font-size:14px;line-height:1.4;font-weight:500}
+.treatment-card .treatment-card-provider-detail{justify-content:flex-end}
+.treatment-card .lcn-experience{gap:8px}
+.treatment-card .lcn-experience .lcn-effect{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:20px 54px 30px;gap:4px;justify-items:center;align-items:end;font-size:12px}
+.treatment-card .lcn-experience .lcn-effect strong{grid-row:1;line-height:20px;font-size:13px}
+.treatment-card .lcn-experience .lcn-effect-track{grid-row:2;width:100%;height:54px;justify-content:center;align-items:flex-end;background:transparent;border-bottom:1px solid #d8e7f3;border-radius:0}
+.treatment-card .lcn-experience .lcn-effect-bar{width:65%;max-width:90px;border-radius:4px 4px 0 0}
+.treatment-card .lcn-experience .lcn-effect-0 .lcn-effect-bar{background:#e5a5ad}
+.treatment-card .lcn-experience .lcn-effect-1 .lcn-effect-bar{background:#d9e1ea}
+.treatment-card .lcn-experience .lcn-effect-2 .lcn-effect-bar{background:#9fd3b6}
+.treatment-card .lcn-experience .lcn-effect-3 .lcn-effect-bar{background:#63af94}
+.treatment-card .lcn-experience .lcn-effect>span:first-child{grid-row:3;min-height:0;align-self:start;font-size:12px;line-height:1.35;overflow-wrap:normal;hyphens:auto}
+.treatment-card .lcn-experience small{margin:0;line-height:16px}
+@media(max-width:1000px){.treatment-card .treatment-card-content-grid{grid-template-columns:minmax(0,1fr);gap:14px}.treatment-card .treatment-card-classification-panel{padding:0 0 14px;border-right:0;border-bottom:1px solid #dde4ed}.treatment-card .treatment-card-rating-panel{padding:0}}
+@media(max-width:480px){.treatment-card .treatment-card-content-grid{padding:12px 14px}.treatment-card .treatment-card-classification-list{gap:8px}.treatment-card .treatment-card-info-block{padding:8px}.treatment-card .treatment-card-classification-value{font-size:13px}.treatment-card .lcn-experience .lcn-effect>span:first-child{font-size:10px}.treatment-card .lcn-experience{gap:6px}}
+
+@media(max-width:760px){.treatment-card .treatment-card-provider-detail{justify-content:flex-start}}
+
+/* Keep the common percentage line just above the tallest bar. */
+.treatment-card .lcn-experience .lcn-effect{grid-template-rows:20px var(--experience-bar-height,54px) auto;gap:3px}
+.treatment-card .lcn-experience .lcn-effect-track{height:var(--experience-bar-height,54px)}
+.treatment-card .lcn-experience .lcn-effect>span:first-child{min-height:0}
+.treatment-card .treatment-card-content-grid{padding-top:12px;padding-bottom:12px}
+.treatment-card .treatment-card-section-heading{margin-bottom:8px}
+.treatment-card .treatment-card-section-count{font-size:12px;font-weight:400;color:#62769a;white-space:nowrap}
+
+/* Touch layouts for the completed therapy search. */
+@media(min-width:761px) and (max-width:1100px){
+ .treatment-navigation-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"sort category" "provider rating" "location location";gap:12px}
+ .treatment-navigation-grid>.treatment-nav-section{padding:14px;min-height:0!important;height:auto}
+ .treatment-nav-section-provider{align-content:start}
+ .treatment-results-search-panel .treatment-alias-smart-search-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .treatment-results-search-panel .treatment-alias-smart-input-wrap{grid-column:1/-1}
+ .treatment-results-search-input{font-size:14px;min-height:44px}
+ .treatment-card-main-header{grid-template-columns:44px minmax(0,1fr) auto;gap:12px}
+ .treatment-card-provider-summary{min-width:70px}
+ .treatment-card-title{overflow-wrap:anywhere}
+}
+@media(max-width:760px){
+ .treatment-results-search-panel .treatment-alias-smart-search-row{gap:12px}
+ .treatment-results-search-input{min-height:44px;font-size:16px}
+ .treatment-card .treatment-card-section-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px}
+ .treatment-card .treatment-card-section-count{margin-left:0}
+ .treatment-card .treatment-card-title{overflow-wrap:anywhere}
+ .treatment-card .treatment-card-provider-summary{display:flex;align-items:center;gap:8px}
+ .treatment-card .treatment-card-provider-summary-label{margin:0}
+ .treatment-card .treatment-card-footer{padding:8px 14px}
+ .treatment-card .treatment-compare-add-button{min-height:40px;padding:8px 12px}
+ .treatment-results-view-button,.treatment-results-mode-button{min-height:44px}
+}

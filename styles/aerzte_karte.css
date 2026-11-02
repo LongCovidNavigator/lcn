@@ -1513,24 +1513,21 @@
 }
 
 .doctor-map-results-table th:nth-child(2), .doctor-map-results-table td:nth-child(2) {
-    width: 29%;
+    width: 34%;
 }
 
 .doctor-map-results-table th:nth-child(3), .doctor-map-results-table td:nth-child(3) {
-    width: 22%;
+    width: 27%;
 }
 
 .doctor-map-results-table th:nth-child(4), .doctor-map-results-table td:nth-child(4) {
-    width: 19%;
+    width: 22%;
 }
 
 .doctor-map-results-table th:nth-child(5), .doctor-map-results-table td:nth-child(5) {
     width: 13%;
 }
 
-.doctor-map-results-table th:nth-child(6), .doctor-map-results-table td:nth-child(6) {
-    width: 12%;
-}
 
 .doctor-table-rank {
     color: #003878;
@@ -2063,7 +2060,7 @@ button.doctor-table-experience-value.is-saving { cursor: wait; opacity: .55; }
 
 @media (hover: hover) {
     #doctor-map:not(.is-scroll-zoom-active)::after {
-        content: "Klicken, um mit dem Mausrad zu zoomen";
+        content: "Strg + Mausrad zum Zoomen";
         position: absolute;
         left: 16px;
         bottom: 16px;
@@ -2249,7 +2246,7 @@ button.doctor-table-experience-value.is-saving { cursor: wait; opacity: .55; }
     .doctor-navigation-grid {
         gap: 12px !important;
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        grid-template-areas: "sort specialty insurance contact"
+        grid-template-areas: "sort specialty offer contact"
         "rating rating location location" !important;
     }
 }
@@ -2486,7 +2483,7 @@ button.doctor-table-experience-value.is-saving { cursor: wait; opacity: .55; }
 
     .doctor-navigation-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        grid-template-areas: "sort specialty insurance contact"
+        grid-template-areas: "sort specialty offer contact"
             "rating rating location location" !important;
         gap: 10px !important;
     }
@@ -2776,9 +2773,7 @@ button.doctor-table-experience-value.is-saving { cursor: wait; opacity: .55; }
     }
 
     .doctor-map-results-table th:nth-child(5),
-    .doctor-map-results-table td:nth-child(5),
-    .doctor-map-results-table th:nth-child(6),
-    .doctor-map-results-table td:nth-child(6) {
+    .doctor-map-results-table td:nth-child(5) {
         display: none;
     }
 
@@ -2855,7 +2850,7 @@ button.doctor-table-experience-value.is-saving { cursor: wait; opacity: .55; }
         grid-template-columns: 1fr !important;
         grid-template-areas: "sort"
             "specialty"
-            "insurance"
+            "offer"
             "contact"
             "rating"
             "location" !important;
@@ -2956,3 +2951,89 @@ button.doctor-table-experience-value.is-saving { cursor: wait; opacity: .55; }
 .doctor-suggest-entry{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:18px 0 24px;padding:20px 22px;border:1px solid #bcd9e6;border-radius:12px;background:linear-gradient(135deg,#e7f5f5,#fff);color:#173b55}.doctor-suggest-entry strong,.doctor-suggest-entry span{display:block}.doctor-suggest-entry span{margin-top:4px;color:#5c7381;font-size:.84rem}.doctor-suggest-entry a{flex:none;padding:11px 15px;border-radius:8px;background:#123f63;color:#fff;font-weight:800;text-decoration:none}@media(max-width:620px){.doctor-suggest-entry{align-items:stretch;flex-direction:column}.doctor-suggest-entry a{text-align:center}}
 .community-preview-badge{display:inline-flex;align-items:center;width:max-content;max-width:100%;margin-top:4px;padding:3px 8px;border:1px solid #d69b2d;border-radius:999px;background:#fff5d9;color:#7a4d00;font-size:.68rem;font-weight:800;line-height:1.25}
 .is-community-preview{border-color:#e1b75f!important;background:linear-gradient(135deg,#fffdf7,#fff9e8)!important}
+
+.doctor-profile-filter-label { margin-top: 12px; }
+
+.doctor-nav-section-offer { grid-area: offer !important; padding: 12px 14px; }
+.doctor-distance-place { display: inline; font-weight: 400; }
+.doctor-offer-count { text-align: center; }
+.doctor-mobile-offer-counts { display: none; }
+@media (min-width: 761px) {
+    .doctor-map-results-table th:nth-child(1), .doctor-map-results-table td:nth-child(1) { width: 4%; }
+    .doctor-map-results-table th:nth-child(2), .doctor-map-results-table td:nth-child(2) { width: 25%; }
+    .doctor-map-results-table th:nth-child(3), .doctor-map-results-table td:nth-child(3) { width: 24%; }
+    .doctor-map-results-table th:nth-child(4), .doctor-map-results-table td:nth-child(4) { width: 17%; }
+    .doctor-map-results-table th:nth-child(5), .doctor-map-results-table td:nth-child(5),
+    .doctor-map-results-table th:nth-child(6), .doctor-map-results-table td:nth-child(6) { width: 8%; }
+    .doctor-map-results-table th:nth-child(7), .doctor-map-results-table td:nth-child(7) { width: 14%; }
+}
+@media (max-width: 760px) {
+    .doctor-mobile-offer-counts { display: block; color: #536b89; font-size: .65rem; line-height: 1.4; }
+    .doctor-map-results-table th:nth-child(5), .doctor-map-results-table td:nth-child(5),
+    .doctor-map-results-table th:nth-child(6), .doctor-map-results-table td:nth-child(6),
+    .doctor-map-results-table th:nth-child(7), .doctor-map-results-table td:nth-child(7) { display: none; }
+}
+
+/* Dedicated profile column and compact name/action line. */
+.doctor-map-results-table .doctor-table-name-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.doctor-map-results-table .doctor-compare-add-button-table { margin: 0; flex: 0 0 auto; }
+.doctor-table-specialty { font-weight: 400; font-size: .72rem; overflow-wrap: anywhere; }
+.doctor-distance-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; }
+.doctor-distance-place { font-weight: 400; font-size: .7rem; color: #60718e; }
+.doctor-search-online { display: block; color: #176748; font-size: .72rem; font-weight: 600; line-height: 1.25; }
+.doctor-map-results-table th:nth-child(5), .doctor-map-results-table td:nth-child(5) { text-align: center; }
+@media (min-width: 761px) {
+    .doctor-map-results-table th:nth-child(1), .doctor-map-results-table td:nth-child(1) { width: 4%; }
+    .doctor-map-results-table th:nth-child(2), .doctor-map-results-table td:nth-child(2) { width: 22%; }
+    .doctor-map-results-table th:nth-child(3), .doctor-map-results-table td:nth-child(3) { width: 13%; }
+    .doctor-map-results-table th:nth-child(4), .doctor-map-results-table td:nth-child(4) { width: 24%; }
+    .doctor-map-results-table th:nth-child(5), .doctor-map-results-table td:nth-child(5) { width: 15%; }
+    .doctor-map-results-table th:nth-child(6), .doctor-map-results-table td:nth-child(6) { width: 6%; }
+    .doctor-map-results-table th:nth-child(7), .doctor-map-results-table td:nth-child(7) { width: 7%; }
+    .doctor-map-results-table th:nth-child(8), .doctor-map-results-table td:nth-child(8) { width: 9%; }
+}
+@media (max-width: 760px) {
+    .doctor-map-results-table th:nth-child(1), .doctor-map-results-table td:nth-child(1) { width: 7%; }
+    .doctor-map-results-table th:nth-child(2), .doctor-map-results-table td:nth-child(2) { width: 40%; }
+    .doctor-map-results-table th:nth-child(3), .doctor-map-results-table td:nth-child(3) { display: none; }
+    .doctor-map-results-table th:nth-child(4), .doctor-map-results-table td:nth-child(4) { width: 28%; }
+    .doctor-map-results-table th:nth-child(5), .doctor-map-results-table td:nth-child(5) { display: table-cell; width: 25%; }
+    .doctor-map-results-table th:nth-child(8), .doctor-map-results-table td:nth-child(8) { display: none; }
+    .doctor-mobile-offer-counts { flex-basis: 100%; }
+}
+
+.doctor-mobile-specialty { display: none; }
+@media(max-width:760px) { .doctor-mobile-specialty { display: block; flex-basis: 100%; font-size: .65rem; color: #536b89; } }
+
+/* Match the category badges in the therapy results table. */
+.doctor-specialty-badges { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 3px; min-width: 0; }
+.doctor-specialty-category-badge { display: inline-flex; align-items: center; justify-content: center; width: max-content; max-width: min(100%,24ch); box-sizing: border-box; min-height: 17px; padding: 1px 5px; border: 1px solid #d8e0ea; border-radius: 999px; background: #eef3f8; color: #38547a; font-size: .63rem; font-weight: 600; line-height: 1.15; text-align: left; white-space: normal; overflow-wrap: anywhere; }
+.doctor-specialty-empty { color: #62769a; }
+
+.doctor-map-results-table .doctor-table-specialty { text-align: center; }
+.doctor-specialty-category-badge { text-align: center; text-wrap: balance; }
+.doctor-distance-cell .doctor-search-online, .doctor-card .doctor-search-online { display: inline-block; margin: 0; padding: 4px 7px; border-radius: 5px; background: #e6f5ec; color: #176748; font: 500 11px/1.4 Arial,sans-serif; }
+.doctor-map-results-table th:nth-child(7) .doctor-table-sort-button { line-height: 1.2; }
+
+.doctor-table-load-more-wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 20px; padding: 16px 0; color: #62769a; font-size: .8rem; }
+
+.doctor-table-load-more-wrap .is-hidden { display: none; }
+
+/* Group related filters into horizontal rows. */
+.doctor-nav-section-specialty, .doctor-nav-section-offer { display: grid; align-content: start; align-items: start; gap: 12px 16px; }
+.doctor-nav-section-specialty { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.doctor-nav-section-offer { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.doctor-nav-section-specialty > .doctor-nav-heading, .doctor-nav-section-offer > .doctor-nav-heading { grid-column: 1 / -1; margin-bottom: 0; }
+.doctor-nav-field { min-width: 0; }
+.doctor-nav-field .doctor-nav-label { display: block; margin-top: 0; margin-bottom: 5px; }
+.doctor-nav-field :is(input,select) { width: 100%; min-width: 0; box-sizing: border-box; }
+@media(min-width:761px) {
+    .doctor-navigation-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; grid-template-areas: "sort offer offer contact" "specialty specialty specialty contact" "rating rating location location" !important; }
+    .doctor-nav-section-sort, .doctor-nav-section-specialty, .doctor-nav-section-contact, .doctor-nav-section-offer { min-height: 0 !important; }
+}
+@media(max-width:760px) {
+    .doctor-navigation-grid { grid-template-areas: "sort" "offer" "specialty" "contact" "rating" "location" !important; }
+}
+@media(max-width:600px) {
+    .doctor-nav-section-specialty, .doctor-nav-section-offer { grid-template-columns: minmax(0,1fr); }
+}

@@ -200,6 +200,15 @@ function getAllSpecialtyTerms($pdo) {
     return $items;
 }
 
+// Table and column names are supplied only by the fixed profile-field mapping.
+function getAllDoctorProfileTerms($pdo, $table, $column) {
+    return $pdo->query("SELECT MIN(f.id) AS term_id, f.$column AS term_label,
+        COUNT(DISTINCT f.lcn_id) AS doctor_count FROM $table f
+        JOIN tbl_entities_nd e ON e.lcn_id = f.lcn_id AND e.aktiv = 1
+        WHERE f.$column IS NOT NULL AND TRIM(f.$column) <> ''
+        GROUP BY f.$column ORDER BY f.$column")->fetchAll();
+}
+
 try {
     $lat = getFloatParam('lat', -90, 90);
     $lng = getFloatParam('lng', -180, 180);
@@ -220,6 +229,10 @@ try {
     $city = getOptionalStringParam('city', 80);
     $search = getOptionalStringParam('search', 120);
     $specialtyTermId = getOptionalIntParam('specialtyTermId', 0, 0, 999999);
+    $minTreatmentCount = getOptionalIntParam('minTreatmentCount', 0, 0, 100000);
+    $minCategoryCount = getOptionalIntParam('minCategoryCount', 0, 0, 100000);
+    $specializationTermId = getOptionalIntParam('specializationTermId', 0, 0, 999999);
+    $qualificationTermId = getOptionalIntParam('qualificationTermId', 0, 0, 999999);
     $searchNormalized = normalizeGermanSearchTerm($search);
 
     $radiusRaw = $_GET['radiusKm'] ?? '100';
@@ -279,6 +292,8 @@ try {
             }
         }
 
+        $whereParts[] = "treatment_count >= :minTreatmentCount";
+        $whereParts[] = "category_count >= :minCategoryCount";
         $whereParts[] = "positive_ratio >= :minPositiveRatio";
         $whereParts[] = "healing_ratio >= :minHealingRatio";
         if ($minPositiveRatio > 0 || $minHealingRatio > 0 || $maxNegativeRatio < 100) $whereParts[] = "total_votes > 0";
@@ -321,6 +336,13 @@ try {
                 WHERE cst.lcn_id = results.dr_id
                   AND cst.fachrichtung = (SELECT fachrichtung FROM tbl_fachrichtungen_nd WHERE id = :specialtyTermId)
             )";
+        }
+
+        foreach (['specializationTermId' => [$specializationTermId, 'tbl_spezialisierungen_nd', 'spezialisierung'],
+                  'qualificationTermId' => [$qualificationTermId, 'tbl_zusatzqualifikationen_nd', 'zusatzqualifikation']] as $parameter => [$termId, $table, $column]) {
+            if ($termId > 0) $whereParts[] = "EXISTS (SELECT 1 FROM $table profile_term
+                WHERE profile_term.lcn_id = results.dr_id
+                AND profile_term.$column = (SELECT $column FROM $table WHERE id = :$parameter))";
         }
 
         if ($search !== '') {
@@ -406,7 +428,8 @@ try {
                 SELECT
                     d.dr_id,
                     d.dr_display_name,
-                    (SELECT COUNT(DISTINCT pt.treat_id) FROM v_lcn_provider_treatments pt WHERE pt.dr_id = d.dr_id) AS treatment_count,
+                    (SELECT COUNT(DISTINCT pt.treat_id) FROM v_lcn_provider_treatments pt JOIN v_lcn_treatments t ON t.treat_id=pt.treat_id WHERE pt.dr_id = d.dr_id) AS treatment_count,
+                    (SELECT COUNT(DISTINCT NULLIF(TRIM(t.typ), '')) FROM v_lcn_provider_treatments pt JOIN v_lcn_treatments t ON t.treat_id=pt.treat_id WHERE pt.dr_id = d.dr_id) AS category_count,
                     d.dr_type,
                     d.dr_is_dr,
                     d.dr_title_raw,
@@ -533,6 +556,8 @@ try {
     if ($drId > 0) {
         $stmt->bindValue(':dr_id', $drId);
     } else {
+        $stmt->bindValue(':minTreatmentCount', $minTreatmentCount, PDO::PARAM_INT);
+        $stmt->bindValue(':minCategoryCount', $minCategoryCount, PDO::PARAM_INT);
         $stmt->bindValue(':minPositiveRatio', $minPositiveRatio);
         $stmt->bindValue(':minHealingRatio', $minHealingRatio);
         $stmt->bindValue(':maxNegativeRatio', $maxNegativeRatio);
@@ -548,6 +573,8 @@ try {
         if ($specialtyTermId > 0) {
             $stmt->bindValue(':specialtyTermId', $specialtyTermId, PDO::PARAM_INT);
         }
+        if ($specializationTermId > 0) $stmt->bindValue(':specializationTermId', $specializationTermId, PDO::PARAM_INT);
+        if ($qualificationTermId > 0) $stmt->bindValue(':qualificationTermId', $qualificationTermId, PDO::PARAM_INT);
 
         if ($search !== '') {
             $stmt->bindValue(':search', '%' . $search . '%');
@@ -562,9 +589,20 @@ try {
     attachSpecialtyTermsToDoctors($pdo, $items);
     $specialties = getAllSpecialtyTerms($pdo);
 
+    $editorialOnline = [];
+    foreach ($pdo->query('SELECT lcn_id, ersttermin_video, ersttermin_telefon, folgetermin_video, folgetermin_telefon FROM tbl_entities_nd WHERE aktiv=1') as $onlineRow) {
+        $yes = static fn($value) => mb_strtolower(trim((string)$value)) === 'ja';
+        $editorialOnline[(int)$onlineRow['lcn_id']] =
+            ($yes($onlineRow['ersttermin_video']) || $yes($onlineRow['ersttermin_telefon'])) &&
+            ($yes($onlineRow['folgetermin_video']) || $yes($onlineRow['folgetermin_telefon']));
+    }
     foreach ($items as &$item) {
+        $item['online_only'] = in_array((int)$item['dr_id'], LCN_VERIFIED_ONLINE_ONLY_DOCTOR_IDS, true);
+        $item['online_therapy_available'] = $item['online_only'] || ($editorialOnline[(int)$item['dr_id']] ?? false);
         $hasCoordinates = (int)$item['has_coordinates'] === 1;
 
+        $item['treatment_count'] = (int)$item['treatment_count'];
+        $item['category_count'] = (int)$item['category_count'];
         $item['dr_id'] = (int)$item['dr_id'];
         $item['dr_is_dr'] = (int)$item['dr_is_dr'];
 
@@ -618,6 +656,10 @@ try {
             'city' => $city,
             'search' => $search,
             'specialtyTermId' => $specialtyTermId,
+            'minTreatmentCount' => $minTreatmentCount,
+            'minCategoryCount' => $minCategoryCount,
+            'specializationTermId' => $specializationTermId,
+            'qualificationTermId' => $qualificationTermId,
             'includeNoCoords' => $includeNoCoords,
             'hasWebsite' => $hasWebsite,
             'hasEmail' => $hasEmail,
@@ -627,6 +669,8 @@ try {
         'distanceLabel' => 'Luftlinie',
         'count' => count($items),
         'specialties' => $specialties,
+        'specializations' => getAllDoctorProfileTerms($pdo, 'tbl_spezialisierungen_nd', 'spezialisierung'),
+        'qualifications' => getAllDoctorProfileTerms($pdo, 'tbl_zusatzqualifikationen_nd', 'zusatzqualifikation'),
         'items' => $items,
     ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 

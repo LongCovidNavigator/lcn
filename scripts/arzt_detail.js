@@ -1127,7 +1127,7 @@ function renderDoctorLocationMap(doctor) {
 
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
         maxZoom: 19,
-        attribution: "Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere"
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere'
     }).addTo(doctorDetailMap);
 
     L.marker([lat, lng])

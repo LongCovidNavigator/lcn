@@ -1,0 +1,72 @@
+/* Provider cards follow the therapy search's compact blue card design. */
+.doctor-card-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.doctor-card.doctor-card-v2 { padding: 0; border: 1px solid #bdd8f2; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 12px #17365d09; }
+.doctor-card .doctor-card-accent { height: 5px; background: #0878e3; }
+.doctor-card .doctor-card-main-header { display: flex; align-items: center; gap: 18px; padding: 14px 20px; border-bottom: 1px solid #d8e7f3; }
+.doctor-card .doctor-card-rank-large { flex: 0 0 52px; width: 52px; height: 52px; min-height: 0; padding: 0; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #e7f3ff; color: #0878e3; }
+.doctor-card .doctor-card-rank-large strong { font-size: 18px; line-height: 1.2; }
+.doctor-card .doctor-card-rank-large span { font-size: 10px; line-height: 1.3; }
+.doctor-card .doctor-card-title-area { min-width: 0; flex: 1; }
+.doctor-card .doctor-card-title { margin: 0 0 6px; font-size: 18px; line-height: 1.3; }
+.doctor-card .doctor-card-title a { color: #17365d; text-decoration: none; }
+.doctor-card .doctor-card-title a:hover { text-decoration: underline; }
+.doctor-card .doctor-card-meta { display: flex; flex-direction: row; flex-wrap: wrap; gap: 5px; margin: 0; }
+.doctor-card .doctor-card-tag, .doctor-card .doctor-card-city-badge { padding: 3px 7px; font-size: 11px; line-height: 1.3; border: 1px solid #cddff1; background: #f7fbfe; color: #315579; }
+.doctor-card .doctor-card-city-badge { flex: 0 1 auto; max-width: 24%; white-space: normal; text-align: center; }
+.doctor-card .doctor-card-content-grid { display: grid; grid-template-columns: minmax(260px,.8fr) minmax(0,1.4fr); gap: 22px; padding: 12px 20px; align-items: start; }
+.doctor-card .doctor-card-info-panel { min-width: 0; min-height: 0 !important; }
+.doctor-card .doctor-card-location-panel { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px 12px; padding: 0 22px 0 0; border-right: 1px solid #d8e7f3; border-bottom: 0; }
+.doctor-card .doctor-card-section-heading { margin: 0 0 8px; font-size: 14px; line-height: 1.4; color: #17365d; }
+.doctor-card .doctor-card-location-panel > .doctor-card-section-heading { grid-column: 1 / -1; margin: 0; }
+.doctor-card .doctor-card-location-block { min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.doctor-card .doctor-card-mini-label { margin: 0 0 5px; color: #62769a; font-size: 11px; font-weight: 400; text-transform: none; }
+.doctor-card .doctor-card-main-text { font-size: 13px; line-height: 1.4; font-weight: 500; overflow-wrap: anywhere; }
+.doctor-card .doctor-card-address { margin: 0; font-style: normal; font-weight: 400; }
+.doctor-card .doctor-card-address span { display: block; }
+.doctor-card .doctor-card-rating-panel { padding: 0; }
+.doctor-card .doctor-card-section-count { display: inline; color: #62769a; font-size: 12px; font-weight: 400; white-space: nowrap; }
+.doctor-card .doctor-card-rating-link { display: inline; font-size: 11px; font-weight: 400; }
+.doctor-card .lcn-experience { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); min-width: 0; gap: 8px; }
+.doctor-card .lcn-experience .lcn-effect { display: grid; grid-template-columns: minmax(0,1fr); grid-template-rows: 20px var(--experience-bar-height,54px) auto; gap: 3px; justify-items: center; align-items: end; min-width: 0; padding: 0; border: 0; border-radius: 0; background: transparent; text-align: center; font-size: 12px; }
+.doctor-card .lcn-experience .lcn-effect strong { grid-row: 1; font-size: 13px; line-height: 20px; }
+.doctor-card .lcn-experience .lcn-effect-track { grid-row: 2; display: flex; align-items: flex-end; justify-content: center; width: 100%; height: var(--experience-bar-height,54px); border-bottom: 1px solid #d8e7f3; }
+.doctor-card .lcn-experience .lcn-effect-bar { display: block; width: 65%; max-width: 90px; border-radius: 4px 4px 0 0; }
+.doctor-card .lcn-effect-0 .lcn-effect-bar { background: #e5a5ad; }
+.doctor-card .lcn-effect-1 .lcn-effect-bar { background: #d9e1ea; }
+.doctor-card .lcn-effect-2 .lcn-effect-bar { background: #9fd3b6; }
+.doctor-card .lcn-effect-3 .lcn-effect-bar { background: #63af94; }
+.doctor-card .lcn-experience .lcn-effect > span:first-child { grid-row: 3; min-height: 0; align-self: start; font-size: 12px; line-height: 1.35; white-space: normal; overflow-wrap: normal; hyphens: auto; }
+.doctor-card .doctor-card-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 20px; border-top: 1px solid #d8e7f3; background: #f7fbfe; }
+.doctor-card .doctor-card-footer > :last-child { margin-left: auto; }
+.doctor-card .doctor-compare-add-button { min-height: 0; padding: 5px 9px; font-size: 11px; line-height: 1.3; }
+.doctor-card .doctor-card-link { font-size: 12px; }
+@media(max-width:1000px) {
+ .doctor-card .doctor-card-content-grid { grid-template-columns: minmax(0,1fr); gap: 14px; }
+ .doctor-card .doctor-card-location-panel { padding: 0 0 14px; border-right: 0; border-bottom: 1px solid #d8e7f3; }
+}
+@media(max-width:480px) {
+ .doctor-card .doctor-card-main-header { padding: 12px 14px; gap: 10px; flex-wrap: wrap; }
+ .doctor-card .doctor-card-rank-large { flex-basis: 42px; width: 42px; height: 42px; }
+ .doctor-card .doctor-card-title { font-size: 16px; }
+ .doctor-card .doctor-card-city-badge { max-width: 100%; margin-left: 52px; }
+ .doctor-card .doctor-card-content-grid { padding: 12px 14px; }
+ .doctor-card .doctor-card-location-panel { gap: 8px; }
+ .doctor-card .doctor-card-location-block { padding: 0; }
+ .doctor-card .lcn-experience { gap: 6px; }
+ .doctor-card .lcn-experience .lcn-effect > span:first-child { font-size: 10px; }
+ .doctor-card .doctor-card-footer { padding: 10px 14px; }
+}
+
+
+.doctor-card .doctor-card-rating-link, .doctor-card .doctor-card-link { color: #0867bc; text-decoration: none; }
+.doctor-card .doctor-card-rating-link:hover, .doctor-card .doctor-card-link:hover { text-decoration: underline; }
+
+.doctor-card .doctor-card-location-summary{flex:0 1 30%;min-width:0;text-align:right;color:#315579;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.doctor-card .doctor-card-distance{margin-top:5px;color:#62769a;font-size:12px}
+.doctor-card .doctor-card-location-panel{align-items:stretch}
+.doctor-card .doctor-card-offer-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:14px 10px;min-width:0;background:#f7fbfe;border:1px solid #cddff1;border-radius:8px;text-align:center}
+.doctor-card .doctor-card-offer-stat>span{font-size:13px;color:#315579;overflow-wrap:anywhere}
+.doctor-card .doctor-card-offer-stat>strong{font-size:22px;color:#0878e3}
+@media(max-width:480px){.doctor-card .doctor-card-location-summary{flex-basis:100%;margin-left:52px;text-align:left}}
+
+.doctor-card .doctor-card-footer > .doctor-compare-add-button { margin-left: 0; }

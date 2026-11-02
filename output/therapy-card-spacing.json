@@ -1,0 +1,150 @@
+{
+  "therapien_suche.html": {
+    ".treatment-card-main-header": {
+      "padding": "14px 20px 12px",
+      "margin": "0px",
+      "minHeight": "0px",
+      "height": "52px",
+      "gap": "14px",
+      "grid": "56px 919px 155px",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-content-grid": {
+      "padding": "12px 20px",
+      "margin": "0px",
+      "minHeight": "0px",
+      "height": "89.9688px",
+      "gap": "0px",
+      "grid": "421.078px 736.922px",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-classification-panel": {
+      "padding": "0px 22px 0px 0px",
+      "margin": "0px",
+      "minHeight": "auto",
+      "height": "89.9688px",
+      "gap": "normal",
+      "grid": "none",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-rating-panel": {
+      "padding": "0px 0px 0px 22px",
+      "margin": "0px",
+      "minHeight": "auto",
+      "height": "68.7656px",
+      "gap": "normal",
+      "grid": "none",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-section-heading": {
+      "padding": "0px",
+      "margin": "0px 0px 8px",
+      "minHeight": "0px",
+      "height": "18.5781px",
+      "gap": "normal",
+      "grid": "none",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-classification-list": {
+      "padding": "0px",
+      "margin": "0px",
+      "minHeight": "0px",
+      "height": "63.3906px",
+      "gap": "14px",
+      "grid": "192.031px 192.047px",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-info-block": {
+      "padding": "10px 12px",
+      "margin": "0px",
+      "minHeight": "0px",
+      "height": "41.3906px",
+      "gap": "9px",
+      "grid": "none",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-footer": {
+      "padding": "12px 20px",
+      "margin": "0px",
+      "minHeight": "0px",
+      "height": "26.3125px",
+      "gap": "12px",
+      "grid": "none",
+      "boxSizing": "content-box"
+    }
+  },
+  "top_therapien.html": {
+    ".treatment-card-main-header": {
+      "padding": "14px 20px 12px",
+      "margin": "0px",
+      "minHeight": "0px",
+      "height": "52px",
+      "gap": "14px",
+      "grid": "56px 919px 155px",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-content-grid": {
+      "padding": "12px 20px",
+      "margin": "0px",
+      "minHeight": "0px",
+      "height": "165.562px",
+      "gap": "0px",
+      "grid": "421.078px 736.922px",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-classification-panel": {
+      "padding": "28px 20px",
+      "margin": "0px",
+      "minHeight": "auto",
+      "height": "165.562px",
+      "gap": "normal",
+      "grid": "none",
+      "boxSizing": "border-box"
+    },
+    ".treatment-card-rating-panel": {
+      "padding": "28px 20px",
+      "margin": "0px",
+      "minHeight": "auto",
+      "height": "124.766px",
+      "gap": "normal",
+      "grid": "none",
+      "boxSizing": "border-box"
+    },
+    ".treatment-card-section-heading": {
+      "padding": "0px",
+      "margin": "0px 0px 8px",
+      "minHeight": "0px",
+      "height": "18.5781px",
+      "gap": "normal",
+      "grid": "none",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-classification-list": {
+      "padding": "0px",
+      "margin": "0px",
+      "minHeight": "0px",
+      "height": "82.9844px",
+      "gap": "14px",
+      "grid": "183.031px 183.047px",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-info-block": {
+      "padding": "10px 12px",
+      "margin": "0px",
+      "minHeight": "0px",
+      "height": "60.9844px",
+      "gap": "9px",
+      "grid": "none",
+      "boxSizing": "content-box"
+    },
+    ".treatment-card-footer": {
+      "padding": "12px 20px",
+      "margin": "0px",
+      "minHeight": "0px",
+      "height": "26.3125px",
+      "gap": "12px",
+      "grid": "none",
+      "boxSizing": "content-box"
+    }
+  }
+}

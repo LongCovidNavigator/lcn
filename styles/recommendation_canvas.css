@@ -1,0 +1,7 @@
+/* Recommendation content sits directly on the same canvas as catalog searches. */
+body.lcn-public-page > main.home-page.recommendation-page { background:transparent; border:0; border-radius:0; box-shadow:none; }
+.lcn-public-page .recommendation-page :is(.featured-experts-panel,.featured-treatments-panel) { background:transparent; border:0; border-radius:0; box-shadow:none; padding:0; }
+.lcn-public-page .recommendation-page .gp-directory { background:transparent; border:0; box-shadow:none; }
+/* Match the catalog-search background on every recommendation page. */
+body.lcn-public-page { background:#f7fafc; }
+body.lcn-public-page > main.home-page.recommendation-page { background:#f7fafc; }
