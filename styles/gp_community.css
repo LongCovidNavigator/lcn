@@ -1,0 +1,30 @@
+/* Shared community invitation in the homepage and GP search. */
+body.lcn-public-page .nearby-gps-contribute.gp-community {
+ display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:32px;
+ padding:36px 40px; margin-top:28px; border:1px solid #cbdff0;
+ border-radius:18px; background:linear-gradient(115deg,#edf6ff 0%,#f6faff 65%,#e5f4f4 100%);
+ position:relative; overflow:hidden;
+}
+.gp-community-copy { min-width:0; }
+.gp-community .gp-community-eyebrow { display:block; margin-bottom:12px; color:#246884; font-size:12px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; }
+body.lcn-public-page .gp-community h3 { margin:0 0 14px; font-size:clamp(25px,2.6vw,34px); line-height:1.2; letter-spacing:-.6px; }
+body.lcn-public-page .gp-community p { max-width:620px; margin:0; color:#415f7c; font-size:16px; line-height:1.7; }
+body.lcn-public-page .gp-community p strong { color:#17365d; font-weight:700; }
+.gp-community-actions { display:flex; flex-direction:column; align-items:flex-start; gap:10px; margin-top:24px; }
+body.lcn-public-page .gp-community .home-button { min-height:48px; padding:14px 22px; font-size:16px; gap:20px; border-radius:9px; background:linear-gradient(135deg,#005ca8,#00457e); border-color:#00457e; color:#fff; }
+.gp-community-actions small { color:#526c83; font-size:12px; line-height:1.5; }
+.gp-community-art { display:block; width:100%; max-width:300px; justify-self:center; align-self:center; border-radius:20px; transition:transform .2s; }
+.gp-community-art:hover { transform:translateY(-4px); }
+.gp-community-art img { display:block; width:100%; height:auto; }
+@media(max-width:760px) {
+ body.lcn-public-page .nearby-gps-contribute.gp-community { grid-template-columns:minmax(0,1fr) 160px; gap:20px; padding:26px; }
+ .gp-community-art { max-width:160px; }
+}
+@media(max-width:540px) {
+ body.lcn-public-page .nearby-gps-contribute.gp-community { grid-template-columns:minmax(0,1fr); gap:20px; padding:24px 20px; }
+ .gp-community-art { grid-row:1; max-width:190px; }
+ body.lcn-public-page .gp-community h3 { font-size:27px; }
+ body.lcn-public-page .gp-community p { font-size:15px; }
+ .gp-community-actions,.gp-community-actions .home-button { width:100%; box-sizing:border-box; }
+}
+@media(prefers-reduced-motion:reduce) { .gp-community-art { transition:none; } }

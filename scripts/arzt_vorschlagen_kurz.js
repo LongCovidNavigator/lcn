@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   for (const [id, url] of [['header-placeholder','components/header.html?v=chapters-20261024'],['footer-placeholder','components/footer.html?v=wording-20261006']]) fetch(url).then(r=>r.text()).then(html=>document.getElementById(id).innerHTML=html);
   const form=document.getElementById('entry-form'), message=document.getElementById('entry-message');
+  if (new URLSearchParams(location.search).get('primary_care') === '1') {
+    form.elements.primary_care.checked = true;
+  }
   for (const field of [form.elements.name,form.elements.organization]) {
     const box=document.createElement('div');box.className='duplicate-check';box.setAttribute('aria-live','polite');field.closest('label').after(box);
     let timer,controller,revision=0;

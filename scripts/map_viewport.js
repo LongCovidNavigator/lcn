@@ -53,10 +53,19 @@
         function show(layers) {
             if (!layers.length) return;
             // Integer zoom levels can leave almost half the map unused. Fit the
-            // actual points in fine steps, with room above for the marker icons.
+            // actual points in fine steps, including visible radius circles.
             map.options.zoomSnap = 0.1;
-            map.fitBounds(L.latLngBounds(layers.map(m => m.getLatLng())), {
-                paddingTopLeft: [18, 48], paddingBottomRight: [18, 18],
+            const bounds = L.latLngBounds(layers.map(m => m.getLatLng()));
+            let hasRadius = false;
+            map.eachLayer(layer => {
+                if (layer instanceof L.Circle) {
+                    bounds.extend(layer.getBounds());
+                    hasRadius = true;
+                }
+            });
+            map.fitBounds(bounds, {
+                paddingTopLeft: hasRadius ? [32, 64] : [18, 48],
+                paddingBottomRight: hasRadius ? [32, 32] : [18, 18],
                 maxZoom: 10, animate: false
             });
         }
@@ -95,6 +104,10 @@
             } finally { applying = false; }
             current.textContent = countries[mode === 'all' ? 'de' : mode][0];
             all.setAttribute('aria-pressed', String(mode === 'all'));
+        }, showAll() {
+            mode = 'all';
+            savedView = null;
+            entry.apply();
         }};
         map._lcnViewport = entry; instances.add(entry);
         all.addEventListener('click', () => { closeOptions(); save('all'); });

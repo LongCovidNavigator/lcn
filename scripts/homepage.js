@@ -773,6 +773,7 @@ function initNearbyGps() {
     if (!form) return;
     form.addEventListener("submit", searchNearbyGps);
     const input = document.getElementById('nearby-gps-location');
+    initNearbyGpsSuggestions(input, form);
     const clear = document.getElementById('nearby-gps-location-clear');
     const syncClear = () => { if (clear) clear.hidden = !input.value.trim(); };
     input.addEventListener('input', syncClear);
@@ -866,10 +867,13 @@ async function searchNearbyGps(event) {
     status.classList.remove("is-error");
     status.textContent = "Standort und hausärztliche Therapien werden gesucht …";
     try {
-        const geoResponse = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}`);
-        const geoData = await geoResponse.json();
-        if (!geoResponse.ok || !geoData.ok || !geoData.result) throw new Error("Der Standort konnte nicht gefunden werden.");
-        const location = geoData.result;
+        let location = input._selectedLocation;
+        if (!location || input.value !== location.formatted) {
+            const geoResponse = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}`);
+            const geoData = await geoResponse.json();
+            if (!geoResponse.ok || !geoData.ok || !geoData.result) throw new Error("Der Standort konnte nicht gefunden werden.");
+            location = geoData.result;
+        }
         saveHomepageSharedLocation(location, query);
         await loadNearbyGpsForLocation(location, false, radiusKm);
         window.dispatchEvent(new CustomEvent("homepage:location-changed"));
@@ -884,6 +888,7 @@ async function searchNearbyGps(event) {
 
 async function resetHomepageMapLocation() {
     document.getElementById('nearby-gps-location').value = '';
+    document.getElementById('nearby-gps-location').dispatchEvent(new Event('input'));
     document.getElementById('nearby-gps-location-clear').hidden = true;
     for (const key of ['lcn_shared_location_preference','lcn_doctor_location_preference','lcn_treatment_location_preference']) localStorage.removeItem(key);
     localStorage.setItem(homepageSharedLocationClearedStorageKey, String(Date.now()));
@@ -923,6 +928,7 @@ async function loadNearbyGpsForLocation(location, restored, requestedRadiusKm) {
     status.classList.remove("is-error");
     status.textContent = restored ? "Hausärztliche Anlaufstellen am gespeicherten Standort werden geladen …" : "Hausärzt:innen in der Nähe werden geladen …";
     const discovery = usesNearbyDiscovery();
+    const discoveryRadiusKm = document.body.dataset.searchTitle === 'Hausarztsuche' ? 25 : 50;
     const response = await fetch(buildHomepagePrimaryCareUrl(location, discovery ? undefined : radiusKm));
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error("Die hausärztlichen Therapien sind gerade nicht verfügbar.");
@@ -931,10 +937,10 @@ async function loadNearbyGpsForLocation(location, restored, requestedRadiusKm) {
         const seen = new Set();
         gps = gps.filter(doctor => { if (seen.has(doctor.dr_id)) return false; seen.add(doctor.dr_id); return true; }).slice(0, 10);
     }
-    renderNearbyGps(location, gps, true, discovery ? 50 : radiusKm);
+    renderNearbyGps(location, gps, true, discovery ? discoveryRadiusKm : radiusKm);
     if (discovery) {
         status.textContent = gps.length
-            ? `Die ${gps.length} nächsten erfassten Anlaufstellen · nach Entfernung sortiert. Der 50-km-Kreis dient zur Orientierung; weiter entfernte Praxen werden ebenfalls angezeigt.`
+            ? `Die ${gps.length} nächsten erfassten Anlaufstellen · nach Entfernung sortiert. Der ${discoveryRadiusKm}-km-Kreis dient zur Orientierung; weiter entfernte Praxen werden ebenfalls angezeigt.`
             : 'Hier sind noch keine Anlaufstellen erfasst. Hilf mit und ergänze eine Hausarztpraxis.';
         return;
     }
@@ -992,7 +998,13 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     const heading = document.getElementById("nearby-gps-results-heading");
     results.hidden = false;
     heading.textContent = hasUserLocation ? "Die nächsten Anlaufstellen" : "Hausärztliche Anlaufstellen in Deutschland";
-    if (usesNearbyDiscovery()) {
+    if (!hasUserLocation && document.body.dataset.searchTitle === 'Hausarztsuche') {
+        heading.textContent = "Wenn du oben deine Adresse einträgst, können wir für dich die zehn nächstgelegenen hausärztlichen Anlaufstellen heraussuchen.";
+    }
+    if (hasUserLocation && document.body.dataset.searchTitle === 'Hausarztsuche') {
+        heading.textContent = `Wir haben für dich die nächsten ${doctors.length} hausärztlichen Praxen herausgesucht!`;
+    }
+    if (usesNearbyDiscovery() && document.body.dataset.searchTitle !== 'Hausarztsuche') {
         const count = document.createElement('span');
         count.className = 'nearby-gps-result-count';
         count.textContent = String(doctors.length);
@@ -1051,8 +1063,8 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
             fillColor: "#4387b5", fillOpacity: .05, interactive: false
         }).addTo(nearbyGpsMap);
         if (usesNearbyDiscovery()) {
-            L.marker([Number(location.lat) + 50 / 111.195, Number(location.lng)], {
-                icon: L.divIcon({className:'nearby-gps-radius-label', html:'50 km', iconSize:[52,24], iconAnchor:[26,12]}),
+            L.marker([Number(location.lat) + Number(radiusKm || 50) / 111.195, Number(location.lng)], {
+                icon: L.divIcon({className:'nearby-gps-radius-label', html:`${Number(radiusKm || 50)} km`, iconSize:[52,24], iconAnchor:[26,12]}),
                 interactive:false, keyboard:false
             }).addTo(nearbyGpsMarkers);
         }
@@ -1076,14 +1088,17 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     else if (bounds.length > 0) nearbyGpsMap.fitBounds(bounds, { padding: [28, 28], maxZoom: 7 });
     else nearbyGpsMap.setView([homepageGermanyCenter.lat, homepageGermanyCenter.lng], 6);
     setTimeout(function () { nearbyGpsMap.invalidateSize(); }, 0);
+    if (hasUserLocation && document.body.dataset.searchTitle === 'Hausarztsuche') {
+        setTimeout(() => nearbyGpsMap._lcnViewport?.showAll(), 0);
+    }
 }
 
 function buildNearbyGpCard(doctor, showDistance, position) {
     const href = `arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}`;
     const distance = showDistance && Number.isFinite(Number(doctor.distance_km))
         ? `${Number(doctor.distance_km).toLocaleString("de-DE", { maximumFractionDigits: 1 })} km`
-        : "Versorgung";
-    return `<article class="nearby-gp-card" data-location-key="${escapeHomepageHtml(getNearbyGpsLocationKey(doctor))}">${usesNearbyDiscovery() ? `<span class="nearby-gp-position" aria-label="Eintrag ${position}">${position}</span>` : ''}<span class="nearby-gp-distance">${distance}</span><div><h4><a href="${href}">${escapeHomepageHtml(doctor.dr_display_name || "Hausärztliche Praxis")}</a></h4><p>${escapeHomepageHtml(formatDoctorAddress(doctor) || "Hausärztliche Therapie")}</p></div></article>`;
+        : "";
+    return `<article class="nearby-gp-card" data-location-key="${escapeHomepageHtml(getNearbyGpsLocationKey(doctor))}">${usesNearbyDiscovery() ? `<span class="nearby-gp-position" aria-label="Eintrag ${position}">${position}</span>` : ''}${distance ? `<span class="nearby-gp-distance">${distance}</span>` : ''}<div><h4><a href="${href}">${escapeHomepageHtml(doctor.dr_display_name || "Hausärztliche Praxis")}</a></h4><p>${escapeHomepageHtml(formatDoctorAddress(doctor) || "Hausärztliche Therapie")}</p></div></article>`;
 }
 
 function getNearbyGpsLocationKey(doctor) {
@@ -1258,4 +1273,87 @@ function buildRecommendationContact(doctor) {
     if(doctor.loc_email || doctor.dr_email) labels.push('Mail');
     if(doctor.loc_phone || doctor.dr_phone) labels.push('Tel');
     return labels.length ? `<div class="doctor-table-badge-row">${labels.map(label=>`<span class="doctor-table-badge">${label}</span>`).join('')}</div>` : '';
+}
+
+// Location suggestions use the same geocoder as the catalog searches.
+function initNearbyGpsSuggestions(input, form) {
+    const box = document.createElement('div');
+    box.id = 'nearby-gps-location-suggestions';
+    box.className = 'gp-location-suggestions';
+    box.hidden = true;
+    box.setAttribute('role', 'listbox');
+    box.setAttribute('aria-label', 'Ortsvorschläge');
+    input.after(box);
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-controls', box.id);
+    input.setAttribute('aria-expanded', 'false');
+    let timer, controller, revision = 0, active = -1, items = [];
+    const cache = new Map();
+    function close() {
+        clearTimeout(timer); controller?.abort(); revision++;
+        box.hidden = true; input.setAttribute('aria-expanded', 'false');
+        input.removeAttribute('aria-activedescendant'); active = -1;
+    }
+    function message(text) {
+        box.replaceChildren();
+        const status = document.createElement('div');
+        status.className = 'gp-location-status'; status.setAttribute('role', 'status');
+        status.textContent = text; box.append(status);
+        box.hidden = false; input.setAttribute('aria-expanded', 'true');
+    }
+    function choose(index) {
+        const location = items[index]; if (!location) return;
+        input.value = location.formatted;
+        input._selectedLocation = location;
+        close(); input.focus(); form.requestSubmit();
+    }
+    function render(results) {
+        items = results.filter(hasHomepageCoordinates); active = -1;
+        input.removeAttribute('aria-activedescendant'); box.replaceChildren();
+        if (!items.length) { message('Kein Ort gefunden. Bitte genauer eingeben.'); return; }
+        items.forEach((location, index) => {
+            const button = document.createElement('button');
+            button.type = 'button'; button.id = box.id + '-' + index;
+            button.setAttribute('role', 'option'); button.setAttribute('aria-selected', 'false');
+            button.textContent = location.formatted;
+            button.addEventListener('click', () => choose(index)); box.append(button);
+        });
+        box.hidden = false; input.setAttribute('aria-expanded', 'true');
+    }
+    input.addEventListener('input', () => {
+        close(); input._selectedLocation = null; items = [];
+        const query = input.value.trim(); if (query.length < 3) return;
+        const current = revision;
+        if (cache.has(query)) { render(cache.get(query)); return; }
+        message('Orte werden gesucht …');
+        timer = setTimeout(async () => {
+            controller = new AbortController();
+            try {
+                const response = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}&suggest=1`, {signal:controller.signal});
+                const data = await response.json();
+                if (current !== revision) return;
+                if (!response.ok || !data.ok) throw new Error();
+                const results = Array.isArray(data.results) ? data.results : [];
+                cache.set(query, results); render(results);
+            } catch (error) {
+                if (error.name !== 'AbortError' && current === revision) message('Ortsvorschläge gerade nicht verfügbar. Du kannst den Ort direkt suchen.');
+            }
+        }, 300);
+    });
+    input.addEventListener('keydown', event => {
+        if (event.key === 'Escape') { close(); return; }
+        if (box.hidden || !items.length) return;
+        if (event.key === 'Enter' && active >= 0) { event.preventDefault(); choose(active); return; }
+        if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
+        event.preventDefault();
+        active = (active + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+        [...box.querySelectorAll('[role="option"]')].forEach((button, index) => {
+            button.setAttribute('aria-selected', String(index === active));
+            if (index === active) { input.setAttribute('aria-activedescendant', button.id); button.scrollIntoView({block:'nearest'}); }
+        });
+    });
+    input.parentElement.addEventListener('focusout', event => { if (!input.parentElement.contains(event.relatedTarget)) close(); });
+    document.addEventListener('click', event => { if (!input.parentElement.contains(event.target)) close(); });
+    form.addEventListener('submit', close);
 }
