@@ -1527,7 +1527,7 @@ function renderDoctorCards(doctors, append = false) {
     }
 
     if (!doctors || doctors.length === 0) {
-        cardContainer.innerHTML = `<p class="doctor-empty-state">Keine Ärztinnen oder Ärzt:innen gefunden.</p>`;
+        cardContainer.innerHTML = `<p class="doctor-empty-state">Keine Behandler:innen gefunden.</p>`;
         if (loadMoreButton) loadMoreButton.classList.add("is-hidden");
         return;
     }
@@ -1714,7 +1714,7 @@ function renderDoctorResultsTable(doctors, append = false) {
     }
 
     if (!doctors || doctors.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="8">Keine Ärztinnen oder Ärzt:innen gefunden.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="8">Keine Behandler:innen gefunden.</td></tr>`;
         return;
     }
 

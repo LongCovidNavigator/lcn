@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const form=document.getElementById('entry-form'), message=document.getElementById('entry-message');
   const nameField=form.elements.name, practiceField=form.elements.organization;
   function validateIdentity(){
-    nameField.setCustomValidity(nameField.value.trim() || practiceField.value.trim() ? '' : 'Bitte gib einen Namen oder eine Praxis an.');
+    nameField.setCustomValidity(nameField.value.trim() || practiceField.value.trim() ? '' : 'Bitte gib einen Namen oder eine Praxis / Institution an.');
   }
   for(const field of [nameField,practiceField])field.addEventListener('input',validateIdentity);
   validateIdentity();

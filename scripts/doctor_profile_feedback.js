@@ -1,12 +1,12 @@
 (() => {
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const entryTypes = {
-    doctor:'Ärzt:innen', practice:'Praxis', clinic:'Klinik', other:'Anlaufstelle',
-    coach:'Coaches', content_creator:'Content-Creator:innen', naturopath:'Naturheilkundler:innen',
-    therapist:'Therapeut:innen', physiotherapist:'Physiotherapeut:innen', psychotherapist:'Psychotherapeut:innen',
-    alternative_practitioner:'Heilpraktiker:innen', occupational_therapist:'Ergotherapeut:innen',
-    speech_therapist:'Logopäd:innen', nutrition_counsellor:'Ernährungsberater:innen',
-    osteopath:'Osteopath:innen', psychologist:'Psycholog:innen', sports_therapist:'Sporttherapeut:innen'
+    doctor:'Ärzt:in', practice:'Praxis', clinic:'Klinik', other:'Anlaufstelle',
+    coach:'Coach und Berater:in', content_creator:'Content-Creator:in', naturopath:'Naturheilkundler:in',
+    therapist:'Therapeut:in', physiotherapist:'Physiotherapeut:in', psychotherapist:'Psychotherapeut:in',
+    alternative_practitioner:'Heilpraktiker:in', occupational_therapist:'Ergotherapeut:in',
+    speech_therapist:'Logopäd:in', nutrition_counsellor:'Ernährungsberater:in',
+    osteopath:'Osteopath:in', psychologist:'Psycholog:in', sports_therapist:'Sporttherapeut:in'
   };
   function normalizeType(value) {
     const text=String(value||'').trim();

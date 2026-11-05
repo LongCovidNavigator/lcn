@@ -98,3 +98,11 @@ body.lcn-public-page.provider-entry-page #entry-form .entry-submit:hover { backg
 .provider-primary-care-status{color:#218739;font-size:19px;font-weight:700;line-height:1}
 .provider-primary-care-status::before{content:''}
 .provider-primary-care input:checked~.provider-primary-care-status::before{content:'✓'}
+
+/* Two clearly separated sections share a single scrollable selection. */
+.provider-choice-groups{max-height:360px;overflow-y:auto;overscroll-behavior-y:contain;border-top:1px solid #e1eafa;padding:14px}
+.provider-choice-heading{display:block;padding:0 8px 8px;color:#17365d;font-size:14px;font-weight:700}
+.provider-type-picker .provider-choice-group .provider-choice-grid{max-height:none;overflow:visible;border:0;padding:0}
+.provider-choice-group+.provider-choice-group{position:relative;margin-top:14px;padding-top:16px}
+.provider-choice-group+.provider-choice-group::before{content:'';position:absolute;top:0;left:8px;right:8px;border-top:1px solid #d8e3ef}
+@media(max-width:650px){.provider-choice-groups{max-height:40dvh;padding:12px}}

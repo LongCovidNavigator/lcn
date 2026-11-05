@@ -19,6 +19,7 @@ function lcnDoctorSourceSql(): string
 {
     $ids = implode(',', LCN_PRIORITY_DOCTOR_IDS);
     return "(SELECT lcn_id AS dr_id, anzeigename AS dr_display_name,
+        datensatztyp AS dr_entity_kind,
         COALESCE(behandlertyp, institutionstyp, datensatztyp) AS dr_type,
         CASE WHEN titel LIKE '%Dr.%' THEN 1 ELSE 0 END AS dr_is_dr,
         titel AS dr_title_raw, vorname AS dr_firstname, nachname AS dr_lastname,

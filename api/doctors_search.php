@@ -431,6 +431,7 @@ try {
                     (SELECT COUNT(DISTINCT pt.treat_id) FROM v_lcn_provider_treatments pt JOIN v_lcn_treatments t ON t.treat_id=pt.treat_id WHERE pt.dr_id = d.dr_id) AS treatment_count,
                     (SELECT COUNT(DISTINCT NULLIF(TRIM(t.typ), '')) FROM v_lcn_provider_treatments pt JOIN v_lcn_treatments t ON t.treat_id=pt.treat_id WHERE pt.dr_id = d.dr_id) AS category_count,
                     d.dr_type,
+                    d.dr_entity_kind,
                     d.dr_is_dr,
                     d.dr_title_raw,
                     d.dr_firstname,
