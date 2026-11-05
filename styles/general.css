@@ -200,3 +200,16 @@ body.lcn-public-page > .home-page > section { width:100% !important; max-width:n
 
 /* Keep recommendation and search pages on the same centered content canvas. */
 body.lcn-public-page > .home-page.recommendation-page > :is(.nearby-gps,.featured-experts,.featured-treatments,.top-recommendation-map-section) { padding-inline:0!important; max-width:none!important; margin-inline:0!important; }
+
+/* Shared action color for all location confirmation buttons. */
+body :is(.lcn-map-submit, .nd-location-submit, .top-map-location-submit, .treatment-detail-provider-location-set-button),
+body #location-form button[type=submit] {
+    background: #005ca8 !important;
+    border-color: #005ca8 !important;
+    color: #fff !important;
+}
+body :is(.lcn-map-submit, .nd-location-submit, .top-map-location-submit, .treatment-detail-provider-location-set-button):hover,
+body #location-form button[type=submit]:hover {
+    background: #004b8a !important;
+    border-color: #004b8a !important;
+}

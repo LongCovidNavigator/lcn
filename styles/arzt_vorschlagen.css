@@ -197,3 +197,14 @@ form.doctor-entry-form .doctor-name-fields label:last-child {
     .entry-content.entry-card-grid { grid-template-columns: 1fr; }
     .entry-form-matrix { grid-template-columns: minmax(90px, 1.3fr) repeat(3, minmax(52px, 1fr)); }
 }
+
+/* Short provider form: optional profile and contact details. */
+#entry-form .entry-optional { display:inline-block; width:fit-content; color:#607785; font-size:.75rem; font-weight:400; }
+#entry-form .doctor-offerings,
+#entry-form .doctor-optional-contact { min-width:0; margin:22px 0; padding:18px; border:1px solid #cbdde7; border-radius:10px; }
+#entry-form legend { padding:0 7px; color:#123b59; font-weight:700; }
+#entry-form .doctor-optional-contact { background:#f5f9fc; }
+#entry-form .doctor-field-hint { margin:0 0 12px; color:#607785; font-size:.88rem; }
+#entry-form .doctor-contact-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+#entry-form .doctor-contact-grid label { min-width:0; }
+@media(max-width:700px) { #entry-form .doctor-contact-grid { grid-template-columns:1fr; gap:0; } }

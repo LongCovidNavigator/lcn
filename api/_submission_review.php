@@ -67,11 +67,11 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
     $insurance = is_array($payload['insurance'] ?? null) ? $payload['insurance'] : [];
     $drId=(int)($row['existing_target_id']??0);
     if($drId>0){
-        if(!lcnDoctorExists($drId))throw new DomainException('Behandler nicht gefunden.');
+        if(!lcnDoctorExists($drId))throw new DomainException('Behandler:innen nicht gefunden.');
         $stmt=$pdo->prepare("UPDATE tbl_entities_nd SET website=COALESCE(NULLIF(website,''),:website),email=COALESCE(NULLIF(email,''),:email),sprechstunde_gkv=IF(:gkv='GKV','GKV',sprechstunde_gkv),sprechstunde_pkv=IF(:pkv='PKV','PKV',sprechstunde_pkv),legacy_notes=CONCAT_WS('\n',legacy_notes,:notes) WHERE lcn_id=:id");
         $stmt->execute([':website'=>$row['website']?:null,':email'=>$row['email']?:null,':gkv'=>in_array('gkv',$insurance,true)?'GKV':null,':pkv'=>in_array('pkv',$insurance,true)?'PKV':null,':notes'=>'Geprüfte Community-Ergänzung #'.$row['submission_id'],':id'=>$drId]);
     }else{
-        $check=$pdo->prepare('SELECT lcn_id FROM tbl_entities_nd WHERE LOWER(TRIM(anzeigename))=LOWER(TRIM(?))');$check->execute([$row['name']]);if($check->fetchColumn())throw new DomainException('Behandler bereits vorhanden.');
+        $check=$pdo->prepare('SELECT lcn_id FROM tbl_entities_nd WHERE LOWER(TRIM(anzeigename))=LOWER(TRIM(?))');$check->execute([$row['name']]);if($check->fetchColumn())throw new DomainException('Behandler:innen bereits vorhanden.');
         $stmt=$pdo->prepare("INSERT INTO tbl_entities_nd(datensatztyp,behandlertyp,institutionstyp,titel,vorname,nachname,organisationsname,anzeigename,website,email,sprechstunde_gkv,sprechstunde_pkv,review_status,legacy_notes) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'approved',?)");
         $institution=in_array($providerType,['practice','clinic','therapy_center'],true);
         $stmt->execute([$institution?'Institution':($providerType==='doctor'?'Behandler':null),$providerType==='doctor'?'Arzt':null,$institution?(['practice'=>'Praxis','clinic'=>'Klinik','therapy_center'=>'Therapiezentrum'][$providerType]):null,lcnNullable($payload,'title'),lcnNullable($payload,'firstname'),lcnNullable($payload,'lastname'),lcnNullable($payload,'organization')??($institution?$row['name']:null),$row['name'],$row['website']?:null,$row['email']?:null,in_array('gkv',$insurance,true)?'GKV':null,in_array('pkv',$insurance,true)?'PKV':null,'Geprüfter Community-Vorschlag #'.$row['submission_id']]);$drId=(int)$pdo->lastInsertId();

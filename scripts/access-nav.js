@@ -101,7 +101,7 @@
         const placeholder = document.querySelector('[data-lcn-header]');
         if (placeholder && !placeholder.dataset.loading) {
             placeholder.dataset.loading = 'true';
-            fetch('components/header.html?v=contribution-20261024').then(response => {
+            fetch('components/header.html?v=two-add-links-20261105').then(response => {
                 if (!response.ok) throw new Error('Header konnte nicht geladen werden.');
                 return response.text();
             }).then(html => { placeholder.innerHTML = html; }).catch(() => {

@@ -2,7 +2,7 @@ body[data-search-title] #search-page-title { position:absolute; left:50%; transf
 body[data-search-title] #search-page-title::after { display:none; }
 body[data-search-title="Hausarztsuche"] .recommendation-page { padding-top:36px; }
 body[data-search-title="Hausarztsuche"] .home-page > .nearby-gps { margin-top:0; padding-top:0!important; }
-@media(max-width:800px) {
+@media(max-width:1100px) {
  body[data-search-title] .lcn-header.lcn-header { flex-wrap:wrap; row-gap:8px; }
  body[data-search-title] #search-page-title { position:static; transform:none; order:4; flex-basis:100%; width:100%; max-width:none; text-align:center; font-size:20px; }
 }

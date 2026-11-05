@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function setDoctorDetailSuggestionLinks() {
     const doctorId = getDoctorIdFromUrl();
     if (!doctorId) return;
-    const href = `arzt_vorschlagen.html?existing_target_id=${encodeURIComponent(doctorId)}`;
+    const href = `behandler_vorschlagen.html?existing_target_id=${encodeURIComponent(doctorId)}`;
     document.querySelectorAll("[data-detail-suggestion-link]").forEach(function (link) { link.href = href; });
 }
 
@@ -73,7 +73,7 @@ async function loadDoctorDetail() {
     const doctorId = getDoctorIdFromUrl();
 
     if (!doctorId) {
-        showDoctorDetailError("Keine gültige Arzt-ID in der URL gefunden.");
+        showDoctorDetailError("Keine gültige Profil-ID in der URL gefunden.");
         return;
     }
 
@@ -82,7 +82,7 @@ async function loadDoctorDetail() {
         const data = await response.json();
 
         if (!response.ok || !data.ok) {
-            throw new Error(data.message || "Der Arzt-Steckbrief konnte nicht geladen werden.");
+            throw new Error(data.message || "Der Behandler:innen-Steckbrief konnte nicht geladen werden.");
         }
 
         currentDoctorDetail = data.item || {};
@@ -98,8 +98,8 @@ async function loadDoctorDetail() {
         showDoctorDetailContent();
 
     } catch (error) {
-        console.error("Fehler beim Laden des Arzt-Steckbriefs:", error);
-        showDoctorDetailError(error.message || "Der Arzt-Steckbrief konnte nicht geladen werden.");
+        console.error("Fehler beim Laden des Behandler:innen-Steckbriefs:", error);
+        showDoctorDetailError(error.message || "Der Behandler:innen-Steckbrief konnte nicht geladen werden.");
     }
 }
 
@@ -131,7 +131,7 @@ function renderTemporaryDoctorStructure(doctor = {}) {
     const billingModel = doctor.dr_accepts_gkv === "yes"
         ? "Über GKV möglich"
         : doctor.dr_accepts_pkv === "yes"
-            ? "Nur PKV / Selbstzahler"
+            ? "Nur PKV / Selbstzahlende"
             : "Unbekannt";
     const billingFacts = window.LCN_DOCTOR_STRUCTURE_DATA?.billing
         || [["Abrechnungsmodell", billingModel], ["Kassensitz", "Unbekannt"]];
@@ -485,7 +485,7 @@ async function handleDoctorDetailVote(event) {
     }
 
     if (!currentDoctorDetail || !currentDoctorDetail.dr_id) {
-        alert("Die Arzt-ID fehlt. Die Bewertung konnte nicht gespeichert werden.");
+        alert("Die Profil-ID fehlt. Die Bewertung konnte nicht gespeichert werden.");
         return;
     }
 
@@ -547,7 +547,7 @@ function getDoctorIdFromUrl() {
 
 function renderDoctorDetail(doctor, terms, treatmentsGrouped) {
     const safeTerms = normalizeTermsObject(terms);
-    const name = doctor.dr_display_name || "Unbekannte Ärztin / unbekannter Arzt";
+    const name = doctor.dr_display_name || "Unbekannte behandelnde Person";
     const label = doctor.loc_label || "";
     const city = doctor.loc_city || "";
     const plz = doctor.loc_plz || "";
@@ -710,7 +710,7 @@ function formatDoctorType(type) {
         return "Organisation";
     }
 
-    return type || "Behandler";
+    return type || "Behandler:innen";
 }
 
 function renderActionBar(doctor) {
@@ -1747,7 +1747,7 @@ function buildTreatmentItemHtml(treatment, rank) {
             <div class="doctor-detail-treatment-item-main">
                 <div class="doctor-detail-treatment-item-topline">
                     ${titleHtml}
-                    <span class="doctor-detail-treatment-rank-badge" title="Behandler gesamt">${providerCount || rank}</span>
+                    <span class="doctor-detail-treatment-rank-badge" title="Behandler:innen gesamt">${providerCount || rank}</span>
                 </div>
 
                 ${ratingHtml}
@@ -1782,7 +1782,7 @@ function buildTreatmentTableHtml(entries) {
                         <th>${buildTreatmentTableSortHeader("Kategorie", "category")}</th>
                         <th>${buildTreatmentTableSortHeader("Erfahrung", "experience")}</th>
                         <th>${buildTreatmentTableSortHeader("Bewertungen", "votes")}</th>
-                        <th>${buildTreatmentTableSortHeader("Behandler gesamt", "providers")}</th>
+                        <th>${buildTreatmentTableSortHeader("Behandler:innen gesamt", "providers")}</th>
                     </tr>
                 </thead>
 
@@ -1798,8 +1798,8 @@ function buildTreatmentTableHtml(entries) {
                         <th>Therapie</th>
                         <th>Positiv</th>
                         <th>
-                            <span class="doctor-detail-treatment-provider-heading-full">Behandler</span>
-                            <span class="doctor-detail-treatment-provider-heading-short" aria-label="Behandler">#</span>
+                            <span class="doctor-detail-treatment-provider-heading-full">Behandler:innen</span>
+                            <span class="doctor-detail-treatment-provider-heading-short" aria-label="Behandler:innen">#</span>
                         </th>
                     </tr>
                 </thead>
@@ -2288,7 +2288,7 @@ function showDoctorDetailError(message) {
     const statusElement = document.getElementById("doctor-detail-status");
     const contentElement = document.getElementById("doctor-detail-content");
 
-    setText("doctor-detail-title", "Arzt-Steckbrief nicht gefunden");
+    setText("doctor-detail-title", "Behandler:innen-Steckbrief nicht gefunden");
     setText("doctor-detail-subtitle", "");
 
     if (contentElement) {

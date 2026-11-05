@@ -1,0 +1,24 @@
+/* Invitations to add entries have their own palette, separate from experience boxes. */
+.entry-invitation.entry-invitation--providers{background:#fff5f5;border-color:#f1dfe2}
+.entry-invitation--providers .entry-invitation-eyebrow{color:#a15e71}
+.provider-entry-page .entry-invitation--providers h2{color:#50333f}
+.entry-invitation--providers p{color:#795f69}
+.entry-invitation--providers .entry-invitation-note{color:#937680}
+.home-contribution-invitations{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.home-contribution-invitations .entry-invitation{display:flex;flex-direction:column;align-items:stretch;padding:30px;border:1px solid #f1dfe2;border-radius:24px;margin:0;min-width:0;gap:24px}
+.home-contribution-invitations .entry-invitation-copy{display:flex;flex-direction:column;align-items:flex-start;flex:1}
+.home-contribution-invitations .entry-invitation-art{order:-1;width:112px;height:112px;align-self:flex-start}
+.home-contribution-invitations .entry-invitation-art svg{display:block;width:100%;height:auto}
+.home-contribution-invitations .entry-invitation-eyebrow{display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+body.lcn-public-page .home-contribution-invitations h3{font-size:28px;line-height:1.25;letter-spacing:-.5px;margin:0 0 18px;color:#50333f}
+.home-contribution-invitations p{font-size:15px;line-height:1.7;margin:0 0 18px}
+.home-contribution-invitations p strong{font-weight:400}
+.home-contribution-invitations :is(.entry-invitation-note,.therapy-entry-invitation-note){font-size:13px;line-height:1.7;margin:0 0 24px}
+.home-contribution-invitations .therapy-entry-invitation-note small{display:block;margin-top:5px;font-size:13px}
+.home-contribution-invitations .entry-invitation--therapies{background:#fff9f3;border-color:#f3e6d9;color:#786456}
+.home-contribution-invitations .entry-invitation--therapies .entry-invitation-eyebrow{color:#a96a43}
+body.lcn-public-page .home-contribution-invitations .entry-invitation--therapies h3{color:#493a32}
+.home-contribution-invitations .contribution-invitation-link{display:inline-flex;gap:18px;align-items:center;margin-top:auto;padding:13px 18px;border-radius:11px;background:#a15e71;color:#fff;text-decoration:none;font-size:14px;font-weight:700}
+.home-contribution-invitations .entry-invitation--therapies .contribution-invitation-link{background:#ad6943}
+.home-contribution-invitations .contribution-invitation-link:hover{filter:brightness(.93)}
+@media(max-width:700px){.home-contribution-invitations{grid-template-columns:1fr}.home-contribution-invitations .entry-invitation{padding:24px}body.lcn-public-page .home-contribution-invitations h3{font-size:25px}}

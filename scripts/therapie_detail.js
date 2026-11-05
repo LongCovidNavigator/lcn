@@ -347,9 +347,9 @@ function buildTreatmentSubtitle(treatment) {
     }
 
     if (Number(treatment.provider_count || 0) === 1) {
-        parts.push("1 Behandler hinterlegt");
+        parts.push("1 Behandler:in hinterlegt");
     } else {
-        parts.push(`${Number(treatment.provider_count || 0)} Behandler hinterlegt`);
+        parts.push(`${Number(treatment.provider_count || 0)} Behandler:innen hinterlegt`);
     }
 
     return parts.join(" · ");
@@ -391,9 +391,9 @@ function renderTreatmentTags(treatment) {
     }
 
     if (Number(treatment.provider_count || 0) > 0) {
-        tags.push(`${Number(treatment.provider_count || 0)} Behandler`);
+        tags.push(`${Number(treatment.provider_count || 0)} Behandler:innen`);
     } else {
-        tags.push("Keine Behandler hinterlegt");
+        tags.push("Keine Behandler:innen hinterlegt");
     }
 
     if (Number(treatment.total_votes || 0) > 0) {
@@ -548,14 +548,14 @@ function renderTreatmentProviderCard(treatment) {
     if (providerCount === 0) {
         element.innerHTML = `
             <span class="treatment-detail-provider-bubble treatment-detail-provider-bubble-empty">0</span>
-            <span class="treatment-detail-muted">Noch kein Behandler hinterlegt.</span>
+            <span class="treatment-detail-muted">Noch keine behandelnde Person hinterlegt.</span>
         `;
         return;
     }
 
     const label = providerCount === 1
-        ? "1 Behandler ist aktuell mit dieser Therapie verknüpft."
-        : `${providerCount} Behandler sind aktuell mit dieser Therapie verknüpft.`;
+        ? "1 Behandler:in ist aktuell mit dieser Therapie verknüpft."
+        : `${providerCount} Behandler:innen sind aktuell mit dieser Therapie verknüpft.`;
 
     element.innerHTML = `
         <span class="treatment-detail-provider-bubble">${providerCount}</span>
@@ -572,7 +572,7 @@ function renderTreatmentProviders(providers) {
     if (!Array.isArray(providers) || providers.length === 0) {
         element.innerHTML = `
             <div class="treatment-detail-empty-box">
-                Für diese Therapie sind aktuell keine Behandler hinterlegt.
+                Für diese Therapie sind aktuell keine Behandler:innen hinterlegt.
             </div>
         `;
         return;
@@ -600,7 +600,7 @@ function renderTreatmentProviders(providers) {
         providersHtml = `
             <section class="treatment-detail-provider-group">
                 <div class="treatment-detail-provider-group-header">
-                    <h3>Alle Behandler</h3>
+                    <h3>Alle Behandler:innen</h3>
                     <span>${rankedProviders.length}</span>
                 </div>
 
@@ -609,8 +609,8 @@ function renderTreatmentProviders(providers) {
         `;
     } else {
         providersHtml = `
-            ${buildProviderGroupHtml("Auf der Karte angezeigt", providersOnMap, "Diese Behandler haben nutzbare Koordinaten und werden auf der Karte angezeigt.", totalProvidersOnMap)}
-            ${buildProviderGroupHtml("Nicht auf der Karte angezeigt", providersWithoutMap, "Diese Behandler bleiben in der Liste sichtbar, haben aber aktuell keine nutzbaren Koordinaten.", totalProvidersWithoutMap)}
+            ${buildProviderGroupHtml("Auf der Karte angezeigt", providersOnMap, "Diese Behandler:innen haben nutzbare Koordinaten und werden auf der Karte angezeigt.", totalProvidersOnMap)}
+            ${buildProviderGroupHtml("Nicht auf der Karte angezeigt", providersWithoutMap, "Diese Behandler:innen bleiben in der Liste sichtbar, haben aber aktuell keine nutzbaren Koordinaten.", totalProvidersWithoutMap)}
             ${rankedProviders.length > visibleRankedProviders.length ? `
                 <div class="treatment-detail-provider-load-more-wrap">
                     <button type="button" class="treatment-detail-provider-load-more-button">
@@ -637,10 +637,10 @@ function buildProviderViewSwitchHtml() {
         : "Für die Entfernungssortierung bitte einen Standort eingeben.";
 
     return `
-        <div class="treatment-detail-provider-controls" aria-label="Behandleransicht und Sortierung">
+        <div class="treatment-detail-provider-controls" aria-label="Behandler:innen-Ansicht und Sortierung">
             <div class="treatment-detail-provider-controls-grid">
                 <section class="treatment-detail-provider-control-card">
-                    <h3>Behandleransicht</h3>
+                    <h3>Behandler:innen-Ansicht</h3>
 
                     <div class="treatment-detail-provider-view-switch">
                         <button
@@ -771,7 +771,7 @@ function buildProviderListHtml(providers) {
                 <thead>
                     <tr>
                         <th>Rang</th>
-                        <th>${buildProviderTableSortHeader("Behandler", "name")}</th>
+                        <th>${buildProviderTableSortHeader("Behandler:innen", "name")}</th>
                         <th>${buildProviderTableSortHeader("Standort", "location")}</th>
                         <th>${buildProviderTableSortHeader("Karte", "map")}</th>
                         <th>${buildProviderTableSortHeader("Entfernung", "distance")}</th>
@@ -790,7 +790,7 @@ function buildProviderListHtml(providers) {
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Behandler</th>
+                        <th>Behandler:innen</th>
                         <th>Positiv</th>
                         <th>Standort</th>
                     </tr>
@@ -805,7 +805,7 @@ function buildProviderListHtml(providers) {
 
 function buildProviderCompactTableRowHtml(provider) {
     const rank = Number(provider.display_rank || 0);
-    const name = provider.dr_display_name || "Unbekannter Behandler";
+    const name = provider.dr_display_name || "Unbekannte behandelnde Person";
     const compactLocation = [provider.loc_plz, provider.loc_city]
         .filter(Boolean)
         .join(" ") || provider.loc_city || "Kein Standort";
@@ -839,7 +839,7 @@ function buildProviderCompactTableRowHtml(provider) {
 }
 
 function buildProviderTableRowHtml(provider) {
-    const name = provider.dr_display_name || "Unbekannter Behandler";
+    const name = provider.dr_display_name || "Unbekannte behandelnde Person";
     const location = buildProviderLocation(provider) || "Kein Standort hinterlegt";
     const careBadges = buildProviderCareBadges(provider);
     const contactLinks = buildProviderContactLinks(provider);
@@ -857,7 +857,7 @@ function buildProviderTableRowHtml(provider) {
                 ${rankHtml}
             </td>
 
-            <td data-label="Behandler">
+            <td data-label="Behandler:innen">
                 ${detailUrl
                     ? `<a class="treatment-detail-provider-name-link" href="${detailUrl}"><strong>${escapeHtml(name)}</strong></a>`
                     : `<strong>${escapeHtml(name)}</strong>`}
@@ -1085,7 +1085,7 @@ async function handleProviderLocationSubmit() {
 
 
     } catch (error) {
-        console.error("Fehler beim Geocoding des Behandler-Standorts:", error);
+        console.error("Fehler beim Geocoding der behandelnden Personnen-Standorts:", error);
         alert(error.message || "Der Standort konnte nicht gefunden werden.");
     } finally {
         setProviderLocationControlsDisabled(false);
@@ -1130,7 +1130,7 @@ function focusProviderLocationInput() {
 }
 
 function buildProviderCardHtml(provider) {
-    const name = provider.dr_display_name || "Unbekannter Behandler";
+    const name = provider.dr_display_name || "Unbekannte behandelnde Person";
     const location = buildProviderLocation(provider);
     const careBadges = buildProviderCareBadges(provider);
     const contactLinks = buildProviderContactLinks(provider);
@@ -1352,8 +1352,8 @@ function renderTreatmentProviderMap(providers) {
 
     if (countElement) {
         const providerCountLabel = providersWithCoords.length === 1
-            ? "1 Behandlerstandort"
-            : `${providersWithCoords.length} Behandlerstandorte`;
+            ? "1 Standort von Behandler:innen"
+            : `${providersWithCoords.length} Standorte von Behandler:innen`;
 
         countElement.textContent = hasUserLocation
             ? `${providerCountLabel} + dein Standort`
@@ -1486,7 +1486,7 @@ function hasValidCoordinates(provider) {
 }
 
 function buildProviderMapPopupHtml(provider) {
-    const name = provider.dr_display_name || "Unbekannter Behandler";
+    const name = provider.dr_display_name || "Unbekannte behandelnde Person";
     const location = buildProviderLocation(provider);
     const detailUrl = provider.dr_id
         ? `arzt_detail.html?id=${encodeURIComponent(provider.dr_id)}`

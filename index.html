@@ -1,360 +1,71 @@
 <!DOCTYPE html>
 <html lang="de">
 <head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=split-country-20261101"><script src="scripts/map_viewport.js?v=stable-view-20261102"></script>
-<script src="scripts/online_access.js?v=contextual-map-legend-20261027" defer></script>
+<script src="scripts/online_access.js?v=shared-count-pins-20261105" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long Covid Navigator</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="styles/general.css">
+    <link rel="stylesheet" href="styles/general.css?v=location-dark-blue-20261105">
     <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="styles/homepage.css?v=48">
     <link rel="stylesheet" href="styles/homepage_alignment.css?v=4">
-    <script src="scripts/homepage_sections.js?v=4" defer></script>
+    <script src="scripts/homepage_sections.js?v=saved-position-carousel-20261105-3" defer></script>
+    <link rel="stylesheet" href="styles/homepage_carousel.css?v=responsive-refresh-20261105">
     <link rel="stylesheet" href="styles/footer-style.css">
-    <script src="scripts/image-registry.js?v=5"></script>
+    <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/homepage.js?v=original-esri-20261102" defer></script>
+    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/homepage.js?v=shared-count-pins-20261105" defer></script>
     <script src="scripts/access-nav.js?v=contribution-20261024" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=unified-blue-location-search-20261027"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=hero-image-20261024"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=search-experience-sort-20261031"></script><link rel="stylesheet" href="styles/gp_community.css?v=shared-community-20261102"></head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=hero-image-20261024"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=search-experience-sort-20261031"></script><link rel="stylesheet" href="styles/gp_community.css?v=shared-community-20261102"><link rel="stylesheet" href="styles/top_community.css?v=home-top-links-20261105"><script src="scripts/top_community.js?v=dropdown-20261105-2" defer></script><link rel="stylesheet" href="styles/contribution_invitations.css?v=1"></head>
 
 <body class="lcn-public-page">
     <div id="header-placeholder" data-lcn-header></div>
 
     <main class="home-page" id="start">
 
-        <section class="home-hero">
-            <div class="home-hero-inner">
-                <p class="eyebrow">Long Covid Navigator</p>
-
-                <h1>Wir helfen dir auf deinem Weg zur Genesung.</h1>
-
-                <p class="hero-lead">
-                    Verständlich. Vertrauenswürdig. Für Menschen mit Long Covid,
-                    ME/CFS, POTS und verwandten Erkrankungen.
-                </p>
-            </div>
-        </section>
-
-    <nav class="home-section-nav" aria-label="Bereiche der Startseite">
-        <span class="home-section-nav-title">Auf dieser Seite</span>
-        <a href="#empfehlung">Empfehlung</a>
-        <a href="#hausarzt">Hausärzte</a>
-        <a href="#suche">Suche</a>
-        <a href="#ergaenzung">Ergänzung</a>
-        <a href="#projekt">Über das Projekt</a>
-        <a href="#start" class="home-section-nav-top">Nach oben ↑</a>
-    </nav>
-
-        <section class="simple-flow" hidden aria-labelledby="flow-heading">
-            <div class="section-heading compact-heading">
-                <h2 id="flow-heading">So geht es</h2>
-            </div>
-
-            <div class="flow-steps">
-
-                <article class="flow-card">
-                    <div class="flow-card-head">
-                        <span class="flow-number">1</span>
-                        <h3>Auswahl</h3>
-                    </div>
-
-                    <div class="flow-photo flow-photo-choice" aria-hidden="true">
-                        <img data-lcn-image="home-selection" alt="">
-                        <span class="choice-photo-label choice-label-left">Therapien</span>
-                        <span class="choice-photo-label choice-label-right">Behandler</span>
-                    </div>
-
-                    <div class="flow-card-content">
-                        <p>
-                            Wähle den passenden Weg: Therapien suchen oder Behandler finden.
-                        </p>
-                    </div>
+        <section class="home-discover home-discover--photo" aria-labelledby="discover-heading" aria-roledescription="Karussell">
+            <div class="home-discover-heading"><h1 id="discover-heading">Wie können wir dir helfen?</h1><p>Entdecken, Erfahrungen teilen und gemeinsam Wissen ergänzen.</p></div>
+            <div class="home-carousel-shell">
+                <button class="home-carousel-arrow home-carousel-prev" type="button" aria-label="Vorherige Karte" aria-controls="home-carousel-track"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="14 6 8 12 14 18" /></svg></button>
+                <div class="home-carousel-track" id="home-carousel-track" tabindex="0" aria-label="Angebote durchblättern">
+<article class="home-discover-card home-discover-card--mint" id="empfehlung" aria-label="1 von 7: Top-Therapien">
+                    <a class="home-discover-visual" href="top_therapien.html" aria-label="Top-Therapien ansehen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Empfehlungen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-top-therapies.webp" alt="" loading="eager" width="800" height="1000"></div><span class="home-discover-visual-title">Top-Therapien</span></a>
+                    <div class="home-discover-copy"><h3>Was hat dir geholfen? Teile deine Erfahrung.</h3><a class="home-discover-link" href="top_therapien.html">Top-Therapien ansehen <span aria-hidden="true">↗</span></a></div>
                 </article>
-
-                <div class="flow-arrow" aria-hidden="true">→</div>
-
-                <article class="flow-card">
-                    <div class="flow-card-head">
-                        <span class="flow-number">2</span>
-                        <h3>Suche starten</h3>
-                    </div>
-
-                    <div class="flow-ui flow-search-ui" aria-hidden="true">
-                        <div class="search-ui-panel">
-                            <div class="search-ui-tabs">
-                                <span class="active">Therapien</span>
-                                <span>Behandler</span>
-                            </div>
-
-                            <label>
-                                Kategorie
-                                <span>Physiotherapie</span>
-                            </label>
-
-                            <label>
-                                Beschwerden
-                                <span>Fatigue</span>
-                            </label>
-
-                            <label>
-                                Standort
-                                <span>Köln, 20 km</span>
-                            </label>
-                        </div>
-
-                        <div class="search-ui-map">
-                            <span class="map-route route-one"></span>
-                            <span class="map-route route-two"></span>
-                            <span class="map-pin pin-a"></span>
-                            <span class="map-pin pin-b"></span>
-                            <span class="map-pin pin-c"></span>
-                            <span class="map-pin pin-d"></span>
-
-                            <div class="search-ui-result">
-                                <strong>Passende Treffer</strong>
-                                <small>in deiner Nähe finden</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flow-card-content">
-                        <p>
-                            Nutze Filter und Kategorien, um passende Angebote oder Fachpersonen zu finden.
-                        </p>
-                    </div>
+<article class="home-discover-card home-discover-card--mint" id="top-behandler" aria-label="2 von 7: Top-Behandler:innen">
+                    <a class="home-discover-visual" href="top_behandler.html" aria-label="Top-Behandler:innen ansehen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Empfehlungen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-top-providers.webp" alt="" loading="eager" width="800" height="1000"></div><span class="home-discover-visual-title">Top-Behandler:innen</span></a>
+                    <div class="home-discover-copy"><h3>Deine Erfahrung kann anderen den Weg zeigen.</h3><a class="home-discover-link" href="top_behandler.html">Top-Behandler:innen ansehen <span aria-hidden="true">↗</span></a></div>
                 </article>
-
-                <div class="flow-arrow" aria-hidden="true">→</div>
-
-                <article class="flow-card">
-                    <div class="flow-card-head">
-                        <span class="flow-number">3</span>
-                        <h3>Detailseite öffnen</h3>
-                    </div>
-
-                    <div class="flow-ui flow-detail-ui" aria-hidden="true">
-                        <div class="detail-ui-head">
-                            <div class="detail-ui-avatar"></div>
-
-                            <div class="detail-ui-title">
-                                <strong>Praxis Lebensqualität</strong>
-                                <span>Physiotherapie · Köln</span>
-                                <small>★ ★ ★ ★ ★ 4,9</small>
-                            </div>
-                        </div>
-
-                        <div class="detail-ui-tabs">
-                            <span>Über uns</span>
-                            <span>Angebote</span>
-                            <span>Bewertungen</span>
-                            <span>Kontakt</span>
-                        </div>
-
-                        <div class="detail-ui-body">
-                            <ul>
-                                <li>Spezialisiert auf Long Covid</li>
-                                <li>Individuelle Therapiepläne</li>
-                                <li>Ganzheitlicher Ansatz</li>
-                            </ul>
-
-                            <div class="detail-ui-box">
-                                <strong>Öffnungszeiten</strong>
-                                <span>Mo – Fr</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flow-card-content">
-                        <p>
-                            Erfahre mehr und vergleiche, was für dich relevant ist.
-                        </p>
-                    </div>
+<article class="home-discover-card home-discover-card--blue" id="hausarzt" aria-label="3 von 7: Hausärzt:innen finden">
+                    <a class="home-discover-visual" href="hausarzt_suche.html" aria-label="Hausarztpraxis finden" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Hausärzt:innen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-primary-care.webp" alt="" loading="eager" width="800" height="1000"></div><span class="home-discover-visual-title">Hausärzt:innen finden</span></a>
+                    <div class="home-discover-copy"><h3>Eine gute Anlaufstelle. Ganz in deiner Nähe.</h3><a class="home-discover-link" href="hausarzt_suche.html">Hausarztpraxis finden <span aria-hidden="true">↗</span></a></div>
                 </article>
-
-            </div>
-        </section>
-
-        <section class="lcn-philosophy" hidden aria-labelledby="lcn-philosophy-heading">
-            <span class="eyebrow">Unsere Grundidee</span>
-            <h2 id="lcn-philosophy-heading">Therapien finden, die dir helfen können.</h2>
-            <p>Das ist unser Ziel als Team des Long Covid Navigators. Was infrage kommt, hängt auch davon ab, was du im Alltag leisten kannst und welche Unterstützung für dich erreichbar ist. Deshalb betrachten wir Therapien aus drei Perspektiven – und verbinden sie mit passenden Behandlern.</p>
-            <div class="lcn-philosophy-grid">
-                <article>
-                    <span class="lcn-philosophy-number" aria-hidden="true">1</span>
-                    <h3>Welche Belastungshürden gibt es?</h3>
-                    <p>Ist die Therapie zu Hause möglich oder musst du anreisen? Wie viel Kraft kosten Termine und Durchführung? Angaben zum Crash- und PEM-Risiko helfen dir, die mögliche Belastung einzuordnen.</p>
+<article class="home-discover-card home-discover-card--blue" id="suche" aria-label="4 von 7: Therapien suchen">
+                    <a class="home-discover-visual" href="therapien_suche.html" aria-label="Therapien suchen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Suche</span><div class="home-discover-art"><img src="assets/images/homepage/collage-therapy-search-v2.webp" alt="" loading="lazy" width="800" height="1000"></div><span class="home-discover-visual-title">Therapien suchen</span></a>
+                    <div class="home-discover-copy"><h3>Entdecke, was dich unterstützen kann.</h3><a class="home-discover-link" href="therapien_suche.html">Therapien suchen <span aria-hidden="true">↗</span></a></div>
                 </article>
-                <article>
-                    <span class="lcn-philosophy-number" aria-hidden="true">2</span>
-                    <h3>Wie zugänglich ist die Therapie?</h3>
-                    <p>Brauchst du ein Rezept? Wie lange wartest du auf einen Termin? Welche Kosten können entstehen und was übernimmt die Versicherung? Diese Informationen helfen dir bei der Planung.</p>
+<article class="home-discover-card home-discover-card--blue" id="behandler-suchen" aria-label="5 von 7: Behandler:innen suchen">
+                    <a class="home-discover-visual" href="behandler_suche.html" aria-label="Behandler:innen suchen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Suche</span><div class="home-discover-art"><img src="assets/images/homepage/collage-provider-search-v2.webp" alt="" loading="lazy" width="800" height="1000"></div><span class="home-discover-visual-title">Behandler:innen suchen</span></a>
+                    <div class="home-discover-copy"><h3>Finde Menschen, die deine Erkrankung kennen.</h3><a class="home-discover-link" href="behandler_suche.html">Behandler:innen suchen <span aria-hidden="true">↗</span></a></div>
                 </article>
-                <article>
-                    <span class="lcn-philosophy-number" aria-hidden="true">3</span>
-                    <h3>Welche Erfahrungen gibt es?</h3>
-                    <p>Was berichten andere Betroffene? Bei welchen Beschwerden haben sie Veränderungen erlebt? Wir machen Verbesserung, Heilung, unveränderte Beschwerden und Verschlechterung sichtbar. Persönliche Erfahrungen geben Orientierung, sind aber kein Wirksamkeitsnachweis.</p>
+<article class="home-discover-card home-discover-card--peach" id="ergaenzung" aria-label="6 von 7: Therapie ergänzen">
+                    <a class="home-discover-visual" href="behandlung_vorschlagen.html" aria-label="Therapie ergänzen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Mitmachen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-add-therapy-v2.webp" alt="" loading="lazy" width="800" height="1000"></div><span class="home-discover-visual-title">Therapie ergänzen</span></a>
+                    <div class="home-discover-copy"><h3>Eine Therapie fehlt? Dein Hinweis hilft weiter.</h3><a class="home-discover-link" href="behandlung_vorschlagen.html">Therapie ergänzen <span aria-hidden="true">↗</span></a></div>
                 </article>
-                <article>
-                    <span class="lcn-philosophy-number" aria-hidden="true">4</span>
-                    <h3>Wer kann dir dabei helfen?</h3>
-                    <p>Wir verknüpfen Therapien mit Behandlern – etwa ärztlichen Praxen, Therapeut:innen oder Coaches. So findest du von einer Therapie zu passenden Anlaufstellen und von einem Profil zu den dort angebotenen Therapien.</p>
+<article class="home-discover-card home-discover-card--peach" id="behandler-ergaenzen" aria-label="7 von 7: Behandler:innen ergänzen">
+                    <a class="home-discover-visual" href="behandler_vorschlagen.html" aria-label="Behandler:innen ergänzen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Mitmachen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-add-provider.webp" alt="" loading="lazy" width="800" height="1000"></div><span class="home-discover-visual-title">Behandler:innen ergänzen</span></a>
+                    <div class="home-discover-copy"><h3>Dein Hinweis kann anderen die Suche erleichtern.</h3><a class="home-discover-link" href="behandler_vorschlagen.html">Behandler:innen ergänzen <span aria-hidden="true">↗</span></a></div>
                 </article>
-            </div>
-            <p><strong>Therapie und passende Unterstützung gehören zusammen.</strong> Du kannst bei einer Therapie starten oder direkt nach Behandler suchen.</p>
-            <a class="home-button primary-button" href="therapien_suche.html">Therapien suchen →</a>
-            <a class="home-button card-button" href="behandler_suche.html">Behandler finden →</a>
-        </section>
-
-        <section class="home-recommendation-teasers" id="empfehlung" aria-labelledby="editorial-heading">
-            <div class="section-heading home-editorial-heading home-area-heading">
-                <h2 id="editorial-heading">Empfehlung</h2>
-                <p>Unsere redaktionellen Top-Einträge</p>
-            </div>
-        <section class="featured-treatments" aria-labelledby="featured-treatments-heading">
-            <div class="featured-treatments-panel">
-                <div class="section-heading featured-treatments-heading">
-                    <h3 id="featured-treatments-heading"><a href="top_therapien.html">Therapien im Fokus</a></h3>
-                    <p>Redaktionell zusammengestellt zur Orientierung – kein Wirksamkeitsranking.</p>
                 </div>
-
-                <div id="featured-treatments-list" class="featured-treatments-list" data-editorial-selection="true" data-list-mode="teaser" data-initial-count="10" aria-live="polite">
-                    <p class="featured-treatments-status">Therapien werden geladen …</p>
-                </div>
-
-                <div class="featured-treatments-actions">
-                    <button id="featured-treatments-more" class="featured-treatments-more" type="button"
-                            aria-expanded="false" aria-controls="featured-treatments-list" hidden>
-                        Weitere anzeigen
-                    </button>
-                    <a class="home-button card-button featured-treatments-all" href="top_therapien.html">
-                        Top-Therapien ansehen <span aria-hidden="true">→</span>
-                    </a>
-                </div>
+                <button class="home-carousel-arrow home-carousel-next" type="button" aria-label="Nächste Karte" aria-controls="home-carousel-track"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="10 6 16 12 10 18" /></svg></button>
             </div>
-        </section>
-
-        <section class="featured-experts" aria-labelledby="featured-experts-heading">
-            <div class="featured-experts-panel">
-                <div class="section-heading featured-experts-heading">
-                    <h3 id="featured-experts-heading"><a href="top_behandler.html">Behandler im Fokus</a></h3>
-                    <p>Redaktionell zusammengestellt zur Orientierung – keine Rangfolge nach Bewertungen.</p>
-                </div>
-
-                <div id="featured-experts-list" class="featured-experts-list" data-list-mode="teaser" data-initial-count="10" aria-live="polite">
-                    <p class="featured-experts-loading">Einträge werden geladen …</p>
-                </div>
-
-                <div class="featured-experts-more-wrap">
-                    <button id="featured-experts-more" class="featured-experts-more" type="button"
-                            aria-expanded="false" hidden>
-                        <span>Weitere anzeigen</span>
-                        <span class="featured-experts-chevron" aria-hidden="true">⌄</span>
-                    </button>
-                    <a class="home-button card-button featured-experts-all" href="top_behandler.html">
-                        Top-Behandler ansehen <span aria-hidden="true">→</span>
-                    </a>
-                </div>
-            </div>
-        </section>
-        </section>
-
-        <section class="nearby-gps" id="hausarzt" aria-labelledby="nearby-gps-heading">
-            <div class="home-chapter-disclosure">
-                <a class="home-chapter-link" href="hausarzt_suche.html">
-                    <span class="home-chapter-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
-                    <span class="home-chapter-label">
-                        <strong id="nearby-gps-heading">Hausärzte</strong>
-                        <span>Finde hausärztliche Anlaufstellen oder ergänze deine Praxis.</span>
-                    </span>
-                    <span aria-hidden="true">→</span>
-                </a>
-            </div>
-                <aside class="nearby-gps-contribute gp-community" aria-labelledby="gp-community-title">
-                    <div class="gp-community-copy">
-                        <span class="gp-community-eyebrow">Von Betroffenen für Betroffene</span>
-                        <h3 id="gp-community-title">Deine Hausarztpraxis fehlt?</h3>
-                        <p><strong>Dein Hinweis kann anderen Betroffenen die Suche erleichtern.</strong> Ergänze deine Hausarztpraxis und hilf mit, hausärztliche Anlaufstellen für Menschen mit Long Covid sichtbar zu machen. Gemeinsam lassen wir diese Karte wachsen.</p>
-                        <div class="gp-community-actions"><a class="home-button card-button" href="arzt_vorschlagen.html?primary_care=1">Hausarztpraxis ergänzen <span aria-hidden="true">＋</span></a><small>Name und Web-Adresse reichen für den Anfang. Wir übernehmen die weitere Recherche.</small></div>
-                    </div>
-                    <a class="gp-community-art" href="arzt_vorschlagen.html?primary_care=1" aria-label="Deine Hausarztpraxis auf der Karte ergänzen"><img src="assets/images/homepage/gp-community-map.svg" alt="" width="360" height="300" loading="lazy"></a>
-                </aside>
-        </section>
-
-        <section class="path-section" id="suche" aria-labelledby="path-heading">
-            <div class="section-heading selection-heading home-area-heading">
-                <h2 id="path-heading">Suche</h2>
-                <p>Nutze unsere Suchfunktion</p>
-            </div>
-
-            <div class="path-grid">
-                <article class="path-card path-card-split therapy-card">
-                    <div class="path-card-media therapy-card-media" aria-hidden="true">
-                        <img data-lcn-image="home-therapies" alt="">
-                    </div>
-
-                    <div class="path-card-main">
-                        <div class="path-card-icon path-card-search-icon" aria-hidden="true"></div>
-
-                        <div class="path-card-content">
-                            <h3>Therapien suchen</h3>
-                            <p>
-                                Finde evidenzbasierte und unterstützende Therapieangebote,
-                                die zu deinen Bedürfnissen passen – von Pacing und Physiotherapie
-                                bis zu Coaching und mehr.
-                            </p>
-
-                            <a href="therapien_suche.html" class="home-button card-button">
-                                Therapien entdecken
-                                <span aria-hidden="true">→</span>
-                            </a>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="path-card path-card-split doctor-card">
-                    <div class="path-card-main">
-                        <div class="path-card-icon path-card-group-icon" aria-hidden="true"></div>
-
-                        <div class="path-card-content">
-                            <h3>Behandler finden</h3>
-                            <p>
-                                Suche nach Behandler und Fachpersonen, die Erfahrung mit Long Covid,
-                                ME/CFS, POTS und verwandten Erkrankungen haben.
-                            </p>
-
-                            <a href="behandler_suche.html" class="home-button card-button">
-                                Fachbehandler finden
-                                <span aria-hidden="true">→</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="path-card-media doctor-card-media" aria-hidden="true">
-                        <img data-lcn-image="home-doctors" alt="">
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <section class="home-contribution" id="ergaenzung" aria-labelledby="contribution-heading">
-            <div class="section-heading home-area-heading">
-                <h2 id="contribution-heading">Ergänzung</h2>
-            </div>
-            <div class="home-contribution-panel">
-                <div class="home-contribution-intro">
-                    <span class="home-contribution-symbol" aria-hidden="true">＋</span>
-                    <div><h3>Dein Hinweis hilft weiter.</h3><p>Fehlt eine Behandlung oder eine Anlaufstelle? Hilf mit, den Katalog zu erweitern.</p></div>
-                </div>
-                <div class="home-contribution-actions">
-                    <a href="behandlung_vorschlagen.html"><span><strong>Behandlung ergänzen</strong><small>Eine fehlende Behandlung vorschlagen</small></span><span aria-hidden="true">→</span></a>
-                    <a href="arzt_vorschlagen.html"><span><strong>Behandler ergänzen</strong><small>Eine Praxis oder Fachperson vorschlagen</small></span><span aria-hidden="true">→</span></a>
-                </div>
-            </div>
+            <div class="home-discover-footer"><span></span><p>Von Betroffenen. Für Betroffene.</p><span></span></div>
+            <div class="home-carousel-meta"><span class="home-carousel-status" aria-live="polite" aria-atomic="true">1 / 7</span><p class="home-carousel-hint">Mit den Pfeilen weiterblättern oder zur Seite wischen.</p></div>
         </section>
 
         <section class="project-intro" id="projekt" aria-labelledby="project-heading">
@@ -445,4 +156,5 @@
     </script>
 </body>
 </html>
+
 

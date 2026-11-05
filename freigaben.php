@@ -12,7 +12,7 @@ header('Cache-Control: no-store, private');
     <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/freigaben.css?v=merge-choice-20261022">
-    <script src="scripts/image-registry.js?v=5"></script>
+    <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
     <script src="scripts/access-nav.js?v=chapters-20261024" defer></script>
 </head>
 <body>

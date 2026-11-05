@@ -1,0 +1,15 @@
+/* Therapy-specific fields share the provider accordion and banner styles. */
+.therapy-entry-page .therapy-entry-classification{margin:0;padding:8px 24px 24px;border:0;border-radius:0;background:transparent}
+.therapy-entry-page #entry-form select:disabled{background:#f1f4f8;color:#718299}
+.therapy-entry-page #therapy-entry-drug{padding:20px;margin-top:24px;background:#f7fbfe;border:1px solid #e1eafa;border-radius:8px}
+.therapy-entry-page #therapy-entry-drug h3{font-size:17px;margin:0 0 8px}
+.therapy-entry-page #therapy-entry-drug p{font-size:14px;line-height:1.6;color:#536b89;margin:0 0 16px}
+.therapy-entry-page #entry-form .therapy-entry-roles label{display:flex;align-items:center;gap:8px;margin:0;padding:10px 12px;border:1px solid #e1eafa;border-radius:7px;font-size:14px;font-weight:400;cursor:pointer}
+.therapy-entry-page #entry-form input[type=radio]{width:16px;min-height:0;height:16px;accent-color:#0878e3;padding:0;margin:0;flex:none}
+.therapy-entry-page .therapy-entry-roles label:has(input:checked){background:#e7f3ff;border-color:#8dbfe9;color:#17365d}
+.therapy-entry-page .therapy-entry-diagram .is-current{background:#e7f3ff;border:1px solid #8dbfe9}
+.therapy-entry-page .therapy-entry-diagram small{font-size:12px;color:#536b89}
+.therapy-entry-page .therapy-entry-diagram strong{font-size:14px;color:#17365d;margin-top:6px}
+.therapy-entry-page #therapy-entry-assignment-help{display:block;font-size:13px;margin-top:8px;color:#536b89}
+.therapy-entry-page #entry-form .duplicate-check{font-size:13px;color:#536b89}
+@media(max-width:650px){.therapy-entry-page .therapy-entry-classification{padding:4px 16px 20px}.therapy-entry-page #therapy-entry-drug{padding:16px}.therapy-entry-page .therapy-entry-grid{grid-template-columns:1fr;gap:0}}

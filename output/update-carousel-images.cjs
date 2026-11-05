@@ -1,0 +1,4 @@
+const sharp=require('sharp'),fs=require('fs');
+const root='C:/Users/willi/.codex/generated_images/01a1acf3-7401-7462-aa84-95401168b769/';
+const jobs=[['exec-59eee2a0-aa00-4b95-a1d3-c78a93d0300f.png','therapy-search-v2'],['exec-d5fd123b-6dd5-43cf-a21c-d5d9a51efb2b.png','provider-search-v2'],['exec-e3690e22-4cfa-48c0-b5d2-dc601dafc2f8.png','add-therapy-v2']];
+(async()=>{for(const [src,key]of jobs){fs.copyFileSync(root+src,'assets/images/homepage/collage-'+key+'.png');await sharp(root+src).resize(800,1000).webp({quality:86}).toFile('assets/images/homepage/collage-'+key+'.webp')}let html=fs.readFileSync('index.html','utf8');for(const [,key]of jobs)html=html.replace('collage-'+key.replace('-v2','')+'.webp','collage-'+key+'.webp');fs.writeFileSync('index.html',html)})().catch(e=>{console.error(e);process.exit(1)});

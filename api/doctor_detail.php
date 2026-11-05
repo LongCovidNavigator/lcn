@@ -170,7 +170,7 @@ try {
     if($id){$merged=lcnMergedCatalogId(lcnDoctorDatabase(),'doctor',(int)$id);if($merged!==(int)$id)sendJson(['ok'=>true,'merged_target_id'=>$merged]);}
 
     if (!$id || $id <= 0) {
-        throw new InvalidArgumentException("Keine gültige Arzt-ID übergeben.");
+        throw new InvalidArgumentException("Keine gültige Profil-ID übergeben.");
     }
 
     $pdo = lcnDoctorDatabase();
@@ -296,7 +296,7 @@ try {
         sendJson([
             'ok' => false,
             'error' => true,
-            'message' => 'Für diese Arzt-ID wurde kein Datensatz gefunden.',
+            'message' => 'Für diese Profil-ID wurde kein Datensatz gefunden.',
         ], 404);
     }
 

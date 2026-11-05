@@ -25,7 +25,7 @@
   function groups() {
     const d=profile.item,r=profile.research||{};
     return {
-      identity: {title:'Name und Praxis',fields:[['name','Name',d.dr_display_name],['organization','Praxis / Organisation',d.dr_org_name],['type','Einordnung des Behandlers',typeValues(d.dr_type).join('\n')]]},
+      identity: {title:'Name und Praxis',fields:[['name','Name',d.dr_display_name],['organization','Praxis / Organisation',d.dr_org_name],['type','Einordnung der behandelnden Person',typeValues(d.dr_type).join('\n')]]},
       medical: {title:'Medizinisches Profil',fields:[['specialty','Fachrichtungen',termNames(r.specialty||profile.terms?.specialty)],['specializations','Spezialisierungen',termNames(r.specializations)],['qualifications','Zusatzqualifikationen',termNames(r.qualifications)]]},
       location: {title:'Standort',fields:[['address','Adresse',[[d.loc_street,d.loc_housenumber].filter(Boolean).join(' '),[d.loc_plz,d.loc_city].filter(Boolean).join(' ')].filter(Boolean).join(', ')],['country','Land',countryCodes.find(code=>code===String(d.loc_country||'').toUpperCase()||countryLabel(code).toLocaleLowerCase('de')===String(d.loc_country||'').toLocaleLowerCase('de'))||d.loc_country],['additional','Weitere Standorte',(r.locations||[]).filter(l=>Number(l.loc_id)!==Number(d.loc_id)).map(l=>[l.loc_label,l.loc_street,l.loc_plz,l.loc_city,l.loc_country].filter(Boolean).join(', ')).join('\n')]]},
       contact: {title:'Kontakt',fields:[['phone','Telefon',d.loc_phone||d.dr_phone],['email','E-Mail',d.loc_email||d.dr_email],['website','Website',d.loc_website||d.dr_website]]}

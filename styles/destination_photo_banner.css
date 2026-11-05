@@ -1,0 +1,112 @@
+/* One banner layout across recommendations, searches and contribution forms. */
+body.lcn-public-page .destination-photo-banner.destination-photo-banner {
+ --banner-color:#78babb; --community-accent:#00676b;
+ display:grid; grid-template-columns:minmax(0,1fr) 33%; align-items:center; gap:0;
+ position:relative; isolation:isolate; padding:0; border:0; border-radius:20px;
+ background:var(--banner-color); overflow:visible; min-height:300px;
+}
+body.lcn-public-page .destination-photo-banner.destination-photo-banner--blue { --banner-color:#c8e4f0; }
+body.lcn-public-page .destination-photo-banner.destination-photo-banner--peach { --banner-color:#ffdecc; }
+body.lcn-public-page .destination-photo-banner > :is(.top-community-copy,.gp-community-copy,.entry-invitation-copy) { grid-column:1; z-index:1; min-width:0; padding:30px 32px; }
+body.lcn-public-page .destination-photo-banner.destination-photo-banner > .destination-photo-art {
+ display:block; position:absolute; grid-area:auto; inset:0 0 0 auto;
+ width:35%; max-width:none; height:100%; min-height:0; max-height:none; margin:0; padding:0;
+ object-fit:cover; object-position:center; border-radius:0 20px 20px 0; align-self:stretch;
+ mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.3) 10%,#000 32%);
+ -webkit-mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.3) 10%,#000 32%);
+}
+body.lcn-public-page .destination-photo-banner :is(h1,h2,h3,strong,p,small,.top-community-eyebrow,.gp-community-eyebrow,.entry-invitation-eyebrow) { color:#17365d; }
+body.lcn-public-page .destination-photo-banner :is(h1,h2,h3) { font-size:clamp(24px,2.6vw,34px); line-height:1.2; margin:0 0 16px; }
+body.lcn-public-page .destination-photo-banner p { font-size:16px; line-height:1.7; }
+body.lcn-public-page .destination-photo-banner :is(.entry-invitation-note,.therapy-entry-invitation-note) { background:transparent; border:0; padding:0; margin-top:16px; }
+body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner { margin:24px 0; }
+body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > div { grid-column:1; z-index:1; padding:30px 32px 12px; align-self:end; }
+body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > div strong { display:block; font-size:28px; line-height:1.25; margin-bottom:14px; }
+body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > div span { display:block; color:#17365d; font-size:16px; line-height:1.6; max-width:680px; }
+body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > a { grid-column:1; z-index:1; justify-self:start; align-self:start; margin:8px 32px 30px; padding:13px 20px; background:#005ca8; border:1px solid #005ca8; color:#fff; border-radius:9px; white-space:normal; }
+body.lcn-public-page .destination-photo-banner .home-button { background:#005ca8; border-color:#005ca8; color:#fff; }
+body.lcn-public-page .destination-photo-banner .search-contribution-eyebrow { display:block; margin-bottom:12px; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+@media(max-width:760px) {
+ body.lcn-public-page .destination-photo-banner.destination-photo-banner { grid-template-columns:1fr; border-radius:14px; min-height:0; }
+ body.lcn-public-page .destination-photo-banner > :is(.top-community-copy,.gp-community-copy,.entry-invitation-copy) { padding:24px 20px; }
+ body.lcn-public-page .destination-photo-banner.destination-photo-banner > .destination-photo-art { position:relative; grid-column:1; grid-row:auto; inset:auto; width:100%; height:230px; object-position:center; border-radius:0 0 14px 14px; mask-image:linear-gradient(to bottom,transparent,#000 22%); -webkit-mask-image:linear-gradient(to bottom,transparent,#000 22%); }
+ body.lcn-public-page .destination-photo-banner :is(h1,h2,h3) { font-size:24px; }
+ body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > div { padding:24px 20px 12px; }
+ body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > a { margin:8px 20px 24px; }
+}
+/* Fade the noticeboard's frame rather than leaving a visible rectangular edge. */
+@media(min-width:761px) {
+ body.lcn-public-page.therapy-entry-page .destination-photo-banner.destination-photo-banner > .destination-photo-art {
+  width:38%;
+  mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.12) 13%,rgba(0,0,0,.65) 35%,#000 58%),linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.5) 10%,#000 25%);
+  mask-composite:intersect;
+  -webkit-mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.12) 13%,rgba(0,0,0,.65) 35%,#000 58%),linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.5) 10%,#000 25%);
+  -webkit-mask-composite:source-in;
+ }
+}
+/* The overview is the primary path; the inline lookup remains optional. */
+body.lcn-public-page .destination-photo-banner .top-community-actions { display:grid; grid-template-columns:auto minmax(160px,280px); align-items:center; justify-content:start; gap:12px 14px; }
+body.lcn-public-page .destination-photo-banner .community-overview-invitation { grid-column:1 / -1; font-size:16px; font-weight:800; line-height:1.5; }
+body.lcn-public-page .destination-photo-banner .community-inline-label { width:auto; font-size:12px; line-height:1.5; color:#17365d; }
+body.lcn-public-page .destination-photo-banner .community-search-field { width:100%; min-width:0; }
+body.lcn-public-page .destination-photo-banner .community-search-field .community-search-input { min-height:36px; height:36px; padding:7px 10px; border:1px solid #17365d45; border-radius:6px; font-size:13px; background:#ffffffc9; }
+@media(max-width:760px) {
+ body.lcn-public-page .destination-photo-banner .top-community-actions { grid-template-columns:minmax(0,1fr); gap:8px; }
+ body.lcn-public-page .destination-photo-banner .community-search-field { max-width:320px; }
+}
+/* Same introductory typography on every destination banner. */
+body.lcn-public-page .destination-photo-banner :is(.top-community-eyebrow,.gp-community-eyebrow,.entry-invitation-eyebrow,.search-contribution-eyebrow) { display:block; margin:0 0 12px; font-size:12px; line-height:1.4; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+/* Keep optional lookup close to its sentence, below the primary overview cue. */
+body.lcn-public-page .destination-photo-banner .top-community-actions {
+ grid-template-columns:max-content minmax(140px,210px); column-gap:6px; row-gap:6px; margin-top:20px;
+}
+body.lcn-public-page .destination-photo-banner .community-overview-invitation { margin-bottom:4px; }
+body.lcn-public-page .destination-photo-banner .community-inline-label { margin:0; font-size:12px; }
+body.lcn-public-page .destination-photo-banner .community-search-field .community-search-input {
+ min-height:28px; height:28px; padding:3px 6px; font-size:12px; border:0; border-bottom:1px solid #17365d55;
+ border-radius:3px 3px 0 0; background:#ffffff26; box-shadow:none;
+}
+body.lcn-public-page .destination-photo-banner .community-search-field .community-search-input::placeholder { color:#36566d; opacity:.8; }
+body.lcn-public-page .destination-photo-banner .community-search-field .community-search-input:focus { background:#ffffffb3; }
+@media(max-width:600px) {
+ body.lcn-public-page .destination-photo-banner .top-community-actions { grid-template-columns:minmax(0,1fr); gap:4px; }
+ body.lcn-public-page .destination-photo-banner .community-search-field { max-width:210px; }
+}
+body.lcn-public-page .destination-photo-banner .community-inline-search-row { grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; }
+body.lcn-public-page .destination-photo-banner .community-inline-search-row .community-search-field { flex:0 1 210px; width:210px; }
+body.lcn-public-page .destination-photo-banner a.community-overview-link { color:#17365d; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:4px; }
+body.lcn-public-page .destination-photo-banner a.community-overview-link:hover { color:#004b71; }
+body.lcn-public-page .destination-photo-banner a.community-overview-link:focus-visible { outline:3px solid #005ca8; outline-offset:4px; }
+#featured-treatments-heading,#featured-experts-heading { scroll-margin-top:100px; }
+html { scroll-behavior:smooth; }
+@media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+body.lcn-public-page .nearby-gps > .destination-photo-banner { margin:0 0 28px; }
+body.lcn-public-page .entry-detail-shell > .destination-photo-banner { margin-top:0; margin-bottom:24px; }
+body.top-search-page .recommendation-page > .destination-photo-banner { width:100%; max-width:1500px; margin:0 auto 28px; }
+body.lcn-public-page .destination-photo-banner .community-search-destination { grid-column:1/-1; justify-self:start; color:#17365d; font-size:12px; line-height:1.5; text-decoration:underline; text-underline-offset:3px; }
+body.lcn-public-page .destination-photo-banner .community-search-destination:hover { color:#004b71; }
+body.lcn-public-page .destination-photo-banner .community-search-destination:focus-visible { outline:3px solid #005ca8; outline-offset:4px; }
+body.lcn-public-page .destination-photo-banner p.destination-discovery-copy,
+body.lcn-public-page .destination-photo-banner p.destination-contribution-copy { margin:0 0 14px; font-size:16px; line-height:1.65; }
+body.lcn-public-page :is(.treatment-suggest-entry,.doctor-suggest-entry).destination-photo-banner > div p strong { display:inline; font:inherit; font-weight:800; margin:0; }
+body.lcn-public-page .destination-photo-banner .destination-discovery-link { display:inline-block; color:#17365d; font-size:16px; font-weight:800; line-height:1.5; text-decoration:underline; text-underline-offset:4px; margin:0 0 20px; }
+body.lcn-public-page .destination-photo-banner .destination-discovery-link:focus-visible { outline:3px solid #005ca8; outline-offset:4px; }
+#therapy-search-start,#provider-search-start,#nearby-gps-form { scroll-margin-top:110px; }
+body.lcn-public-page .destination-photo-banner a.destination-discovery-link { background:transparent; border:0; border-radius:0; padding:0; box-shadow:none; color:#17365d; }
+
+/* Let the shared banners fit narrow screens and larger text settings. */
+body.lcn-public-page .destination-photo-banner,
+body.lcn-public-page .destination-photo-banner * { box-sizing:border-box; }
+body.lcn-public-page .destination-photo-banner :is(h1,h2,h3,p,a,.community-overview-invitation) { overflow-wrap:anywhere; }
+@media(max-width:1100px) {
+ body.lcn-public-page .destination-photo-banner .top-community-actions { grid-template-columns:minmax(0,1fr); }
+ body.lcn-public-page .destination-photo-banner .community-search-field .community-search-input { font-size:16px; height:44px; min-height:44px; padding:8px 10px; }
+ body.lcn-public-page .destination-photo-banner :is(.community-search-destination,.destination-discovery-link,.community-overview-link) { min-height:44px; padding-block:10px; }
+ body.lcn-public-page .destination-photo-banner a.destination-discovery-link { padding-block:10px; }
+}
+@media(max-width:760px) {
+ body.lcn-public-page .destination-photo-banner .community-inline-search-row { align-items:stretch; }
+ body.lcn-public-page .destination-photo-banner .community-inline-search-row .community-search-field { flex:1 1 100%; width:100%; max-width:none; }
+ body.lcn-public-page .destination-photo-banner.destination-photo-banner > .destination-photo-art { height:clamp(160px,45vw,230px); }
+ body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > a { max-width:calc(100% - 40px); }
+}

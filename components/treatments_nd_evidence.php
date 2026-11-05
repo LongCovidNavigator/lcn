@@ -39,10 +39,10 @@ function ndAccessScales(array $item, ?array $only = null): string
         $html .= '<section class="nd-research-scale" data-research-scale="' . $field . '"><div class="nd-scale-heading"><h4>' . ndEscape($title) . '</h4><span>Redaktionell recherchiert</span></div><ol class="nd-option-line" style="--options:' . count($options) . '">';
         foreach ($options as $index => $option) {
             $active = $selected === $index;
-            $html .= '<li' . ($active ? ' class="is-current"' : '') . '><span class="nd-option-dot" aria-hidden="true">' . ($active ? '✓' : '') . '</span><span>' . ($field === 'zugang' && $index === 2 ? 'Nur im Rahmen einer<br>Studie möglich' : ndEscape(str_replace('Anbieter', 'Behandler', $option))) . '</span>' . ($active ? '<strong>Recherchierter Wert</strong>' : '') . '</li>';
+            $html .= '<li' . ($active ? ' class="is-current"' : '') . '><span class="nd-option-dot" aria-hidden="true">' . ($active ? '✓' : '') . '</span><span>' . ($field === 'zugang' && $index === 2 ? 'Nur im Rahmen einer<br>Studie möglich' : ndEscape(str_replace('Anbieter', 'Behandler:innen', $option))) . '</span>' . ($active ? '<strong>Recherchierter Wert</strong>' : '') . '</li>';
         }
         $display = $field === 'gkv_kostenuebernahme_status' && $selected !== null ? ($selected === 0 ? 'Grundsätzlich erstattungsfähig – Voraussetzungen beachten.' : 'Keine reguläre Erstattung im recherchierten Einsatzkontext.') : $raw;
-        $html .= '</ol><p class="nd-researched-value"><strong>' . ($notApplicable ? 'Nicht anwendbar' : ($selected === null ? 'Differenzierte Angabe' : 'Einordnung')) . ':</strong> ' . ndEscape(str_replace('Anbieter', 'Behandler', $display)) . '</p>';
+        $html .= '</ol><p class="nd-researched-value"><strong>' . ($notApplicable ? 'Nicht anwendbar' : ($selected === null ? 'Differenzierte Angabe' : 'Einordnung')) . ':</strong> ' . ndEscape(str_replace('Anbieter', 'Behandler:innen', $display)) . '</p>';
         if ($selected === null && !$notApplicable) $html .= '<p class="nd-scale-note">Der Recherchewert lässt sich nicht eindeutig einer einzelnen Option zuordnen. Deshalb ist kein Punkt markiert.</p>';
         $html .= ndFieldEvidence($item, $field) . '</section>';
     }

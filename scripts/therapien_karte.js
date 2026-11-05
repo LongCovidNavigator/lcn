@@ -3,7 +3,7 @@
 // Ergänzt:
 // - Radius frei eingeben
 // - Radius-Kreis auf Karte anzeigen
-// - Distanz in Tabellen-Behandler-Zelle anzeigen
+// - Distanz in Tabellen-Behandler:innen-Zelle anzeigen
 // - Intelligente Suche nach Name, Alias und Oberbegriff
 // =========================
 
@@ -1558,7 +1558,7 @@ function updateTreatmentMobileTablePresentation() {
 
     if (metricHeading) {
         metricHeading.textContent = metricMode === "provider-total"
-            ? "Behandler gesamt"
+            ? "Behandler:innen gesamt"
             : metricMode === "provider-area"
                 ? "Im Suchgebiet"
                 : "Entfernung / Ort";
@@ -1566,10 +1566,10 @@ function updateTreatmentMobileTablePresentation() {
 
     if (providerHeading) {
         const searchAreaActive = hasActiveTreatmentSearchArea() || filters.sortKey === "matching_provider_count";
-        providerHeading.textContent = searchAreaActive ? "Suchgebiet / Gesamt" : "Behandler gesamt";
+        providerHeading.textContent = searchAreaActive ? "Suchgebiet / Gesamt" : "Behandler:innen gesamt";
         providerHeading.title = searchAreaActive
-            ? "Behandler im aktiven Suchgebiet / Behandler insgesamt"
-            : "Behandler insgesamt";
+            ? "Behandler:innen im aktiven Suchgebiet / Behandler:innen insgesamt"
+            : "Behandler:innen insgesamt";
     }
 
     return { isMobile, metricMode, experienceMode };
@@ -1727,7 +1727,7 @@ function buildTreatmentCardHtml(treatment, index) {
     const category = escapeHtml(String(treatment.typ || "").trim() || "Keine Kategorie angegeben");
     const subcategory = escapeHtml(String(treatment.unterkategorie || "").trim() || "Keine Unterkategorie angegeben");
     const providerCount = Number(treatment.total_provider_count ?? treatment.provider_count ?? 0);
-    const providerCountLabel = providerCount === 1 ? "1 Behandler insgesamt" : `${providerCount} Behandler insgesamt`;
+    const providerCountLabel = providerCount === 1 ? "1 Behandler:in insgesamt" : `${providerCount} Behandler:innen insgesamt`;
 
     const totalVotes = Number(treatment.total_votes ?? 0);
     const positiveRatio = Number(treatment.positive_ratio ?? 0);
@@ -1764,7 +1764,7 @@ function buildTreatmentCardHtml(treatment, index) {
                 </div>
 
                 <div class="treatment-card-provider-summary">
-                    <span class="treatment-card-provider-summary-label">Behandler</span>
+                    <span class="treatment-card-provider-summary-label">Behandler:innen</span>
                     <div class="treatment-card-provider-detail">
                         ${providerHtml}
                     </div>
@@ -2096,19 +2096,19 @@ function buildTreatmentProviderHtml(treatment) {
     }
 
     if (displaysWholeResultAsSearchArea) {
-        return `<span class="treatment-provider-bubble" title="${providerCount} Behandler im Suchgebiet, ${providerCount} Behandler gesamt">${providerCount}/${providerCount}</span>`;
+        return `<span class="treatment-provider-bubble" title="${providerCount} Behandler:innen im Suchgebiet, ${providerCount} Behandler:innen gesamt">${providerCount}/${providerCount}</span>`;
     }
 
     if (hasSearchArea) {
         if (filters.includeNoCoords && unlocatedProviderCount > 0) {
-            return `<span class="treatment-provider-bubble" title="${matchingProviderCount} Behandler im Suchgebiet, ${unlocatedProviderCount} ohne Koordinaten, ${providerCount} Behandler gesamt">${matchingProviderCount}+?/${providerCount}</span>`;
+            return `<span class="treatment-provider-bubble" title="${matchingProviderCount} Behandler:innen im Suchgebiet, ${unlocatedProviderCount} ohne Koordinaten, ${providerCount} Behandler:innen gesamt">${matchingProviderCount}+?/${providerCount}</span>`;
         }
-        return `<span class="treatment-provider-bubble" title="${matchingProviderCount} Behandler im Suchgebiet, ${providerCount} Behandler gesamt">${matchingProviderCount}/${providerCount}</span>`;
+        return `<span class="treatment-provider-bubble" title="${matchingProviderCount} Behandler:innen im Suchgebiet, ${providerCount} Behandler:innen gesamt">${matchingProviderCount}/${providerCount}</span>`;
     }
 
     if (filters.mappedProvidersOnly) {
         const totalProviderCount = Number(treatment.total_provider_count ?? providerCount);
-        return `<span class="treatment-provider-bubble" title="${providerCount} kartierte von ${totalProviderCount} Behandlern">${providerCount}</span>`;
+        return `<span class="treatment-provider-bubble" title="${providerCount} kartierte von ${totalProviderCount} Behandler:innen">${providerCount}</span>`;
     }
 
     return `<span class="treatment-provider-bubble">${providerCount}</span>`;
@@ -2252,7 +2252,7 @@ function resetTreatmentLocation(shouldReload = true) {
         treatmentMap.setView([treatmentDefaultMapCenter.lat, treatmentDefaultMapCenter.lng], 6);
     }
 
-    updateTreatmentMapStatus("Bitte Kartenstandort setzen, um die nächsten Behandlerstandorte der gefundenen Therapien auf der Karte zu sehen.");
+    updateTreatmentMapStatus("Bitte Kartenstandort setzen, um die nächsten Standorte von Behandler:innen der gefundenen Therapien auf der Karte zu sehen.");
 
     if (shouldReload) {
         loadTreatmentResults();
@@ -2607,7 +2607,7 @@ function renderTreatmentMap(treatments, mapData) {
     const groupValues = Array.from(groups.values());
 
     if (groupValues.length === 0) {
-        updateTreatmentMapStatus("Für die aktuell angezeigten Therapien gibt es keine koordinierten Behandlerstandorte.");
+        updateTreatmentMapStatus("Für die aktuell angezeigten Therapien gibt es keine koordinierten Standorte von Behandler:innen.");
         return;
     }
 
@@ -2673,7 +2673,7 @@ function renderTreatmentMap(treatments, mapData) {
         const treatmentCount = countUniqueTreatmentsInProviderGroups(groupValues);
 
         updateTreatmentMapStatus(
-            `${providerCount} Behandlerstandorte für ${treatmentCount} Therapien${viewPart}${cityPart}${radiusPart} auf der Karte. Farben zeigen die Therapie-Zuordnung.`
+            `${providerCount} Standorte von Behandler:innen für ${treatmentCount} Therapien${viewPart}${cityPart}${radiusPart} auf der Karte. Farben zeigen die Therapie-Zuordnung.`
         );
         return;
     }
@@ -2683,7 +2683,7 @@ function renderTreatmentMap(treatments, mapData) {
     }, 0);
 
     updateTreatmentMapStatus(
-        `${treatmentCountOnMap} Therapien${viewPart}${cityPart}${radiusPart} mit nächstem Behandlerstandort auf der Karte. Mehrere Therapien am selben Standort werden in einem Popup gebündelt.`
+        `${treatmentCountOnMap} Therapien${viewPart}${cityPart}${radiusPart} mit nächstem Standort von Behandler:innen auf der Karte. Mehrere Therapien am selben Standort werden in einem Popup gebündelt.`
     );
 }
 
@@ -2835,7 +2835,7 @@ function createTreatmentColorMarkerIcon(colorIndex, treatmentCountAtLocation = 1
 
 function buildTreatmentMapPopupHtml(group) {
     const provider = group.provider;
-    const providerName = escapeHtml(provider.dr_display_name || "Behandler");
+    const providerName = escapeHtml(provider.dr_display_name || "Behandler:innen");
     const address = buildProviderAddressText(provider);
     const treatments = group.treatments.slice().sort(function (a, b) {
         return String(a.behandlung || "").localeCompare(String(b.behandlung || ""), "de");
@@ -2863,7 +2863,7 @@ function buildTreatmentMapPopupHtml(group) {
         : "";
 
     const doctorLink = provider.dr_id
-        ? `<a href="arzt_detail.html?id=${encodeURIComponent(provider.dr_id)}">Arzt-Steckbrief öffnen</a>`
+        ? `<a href="arzt_detail.html?id=${encodeURIComponent(provider.dr_id)}">Behandler:innen-Steckbrief öffnen</a>`
         : "";
 
     return `
@@ -2886,10 +2886,10 @@ function buildAllMatchingProvidersPopupHtml(group) {
     const hiddenProviderCount = Math.max(0, group.providers.length - visibleProviders.length);
     const providerBlocksHtml = visibleProviders.map(function (providerEntry) {
         const provider = providerEntry.provider;
-        const providerName = escapeHtml(provider.dr_display_name || "Behandler");
+        const providerName = escapeHtml(provider.dr_display_name || "Behandler:innen");
         const address = buildProviderAddressText(provider);
         const doctorLink = provider.dr_id
-            ? `<a href="arzt_detail.html?id=${encodeURIComponent(provider.dr_id)}">Arzt-Steckbrief öffnen</a>`
+            ? `<a href="arzt_detail.html?id=${encodeURIComponent(provider.dr_id)}">Behandler:innen-Steckbrief öffnen</a>`
             : "";
 
         const uniqueTreatments = dedupeProviderTreatments(providerEntry.treatments);
@@ -2924,7 +2924,7 @@ function buildAllMatchingProvidersPopupHtml(group) {
     }).join("<hr>");
 
     const moreProvidersHtml = hiddenProviderCount > 0
-        ? `<div class="treatment-map-popup-muted">+ ${hiddenProviderCount} weitere Behandler an diesem Standort</div>`
+        ? `<div class="treatment-map-popup-muted">+ ${hiddenProviderCount} weitere Behandler:innen an diesem Standort</div>`
         : "";
 
     return `

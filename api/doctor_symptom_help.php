@@ -7,7 +7,7 @@ try {
  $write=($_SERVER['REQUEST_METHOD']??'GET')==='POST';
  if($write){lcnRequireVotingRequest();$input=lcnReadJsonBody();}else $input=$_GET;
  $id=filter_var($input['dr_id']??null,FILTER_VALIDATE_INT);
- if(!$id||!lcnDoctorExists($id))throw new InvalidArgumentException('Behandler nicht gefunden.');
+ if(!$id||!lcnDoctorExists($id))throw new InvalidArgumentException('Behandler:innen nicht gefunden.');
  $p=lcnDoctorDatabase();$respondent=$write?lcnVoterKey():lcnExistingVoterKey();
  if($write){
   $symptom=$input['symptom_id']??null;$action=$input['action']??'answer';

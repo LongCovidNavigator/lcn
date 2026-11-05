@@ -1,0 +1,100 @@
+.provider-entry-page.lcn-public-page{background:#f7fafc;color:#17365d}
+.provider-entry-page .entry-detail-shell{width:min(1000px,calc(100% - 40px));margin:32px auto 64px}
+.provider-entry-page .entry-back{font-size:14px;font-weight:500;color:#0878e3;margin-bottom:28px}
+.entry-invitation{margin:0 0 32px;padding:0;background:none;border:0}
+.provider-entry-page .entry-invitation h2{margin:0 0 10px;font-size:25px;line-height:1.35;color:#17365d}
+.entry-invitation p{margin:0;font-size:16px;line-height:1.65;color:#536b89}
+.provider-entry-page #entry-form>.entry-card{padding:0;border:0;background:transparent;box-shadow:none}
+.entry-step{margin:0 0 16px;border:1px solid #e1eafa;border-radius:10px;background:#fff}
+.entry-step>summary{display:flex;align-items:center;gap:16px;padding:20px 24px;cursor:pointer;list-style:none;color:#17365d;font-size:20px;font-weight:700;border-radius:9px}
+.entry-step>summary::-webkit-details-marker{display:none}
+.entry-step>summary::after{content:'';width:9px;height:9px;border-right:2px solid;border-bottom:2px solid;transform:rotate(45deg);margin-left:auto;flex:none}
+.entry-step[open]>summary{background:#f7fbfe;border-bottom:1px solid #e1eafa;border-radius:9px 9px 0 0}
+.entry-step[open]>summary::after{transform:rotate(225deg)}
+.entry-step-number{display:grid;place-items:center;width:36px;height:36px;border:1px solid #0878e3;border-radius:50%;color:#0878e3;font-size:18px;font-weight:500;flex:none}
+.entry-step summary small{display:block;margin-top:6px;font-size:14px;font-weight:400;line-height:1.5;color:#536b89}
+.entry-step-body{padding:8px 24px 24px}
+.entry-basics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.provider-entry-page #entry-form :is(label,input,select,textarea){box-sizing:border-box;min-width:0}
+.entry-step-body,.entry-basics-grid>*,.provider-choice-grid{min-width:0}
+.provider-choice span{overflow-wrap:anywhere}
+.provider-entry-page #entry-form label{display:grid;gap:9px;margin-top:20px;font-size:15px;font-weight:600;color:#17365d}
+.provider-entry-page #entry-form :is(input:not([type=checkbox]),select,textarea){width:100%;min-width:0;min-height:46px;padding:12px 14px;border:1px solid #cbd9e9;border-radius:7px;background:#fff;color:#17365d;font:400 16px Arial,sans-serif}
+.provider-entry-page #entry-form textarea{resize:vertical}
+.provider-entry-page #entry-form :is(input,textarea)::placeholder{color:#7c8ca0}
+.provider-entry-page #entry-form :is(.provider-types,.doctor-offerings,.doctor-optional-contact){min-width:0;padding:0;margin:18px 0 0;border:0;background:transparent}
+.provider-entry-page #entry-form .doctor-offerings{border-top:1px solid #e1eafa;padding-top:20px;margin-top:24px}
+.provider-entry-page #entry-form legend{padding:0;margin-bottom:10px;font-size:16px;font-weight:600;color:#17365d}
+.entry-optional{font-size:12px;font-weight:400;color:#536b89;margin-left:8px}
+.provider-entry-page #entry-form .doctor-field-hint,.entry-required-note{font-size:13px;font-weight:400;color:#536b89;line-height:1.6;margin:10px 0 18px}
+.entry-required-note{margin:20px 0 0}
+.provider-choice-grid{display:flex;flex-wrap:wrap;gap:9px}
+.provider-entry-page #entry-form label.provider-choice{display:block;position:relative;margin:0;cursor:pointer;font-weight:400}
+.provider-choice input{position:absolute;opacity:0;width:1px;height:1px}
+.provider-choice span{display:block;padding:10px 13px;border:1px solid #e1eafa;border-radius:7px;font-size:14px;color:#536b89}
+.provider-choice input:checked+span{background:#e7f3ff;border-color:#8dbfe9;color:#17365d}
+.provider-choice input:checked+span::before{content:'✓ ';font-weight:700}
+.provider-choice input:focus-visible+span{outline:3px solid #0878e3;outline-offset:3px}
+.provider-choice:hover span{border-color:#8dbfe9}
+.provider-entry-page #entry-form input[type=checkbox]{width:18px;height:18px;accent-color:#0878e3}
+.provider-entry-page #entry-form .catalog-form-treatments{margin:0}
+.provider-entry-page #entry-form .catalog-form-treatments>strong{display:none}
+.provider-entry-page #entry-form .ux-symptom-picker{width:100%;max-width:none}
+.provider-entry-page #entry-form .ux-symptom-input-wrap{max-width:100%}
+.entry-form-footer{margin-top:28px}
+.entry-form-footer p{font-size:14px;line-height:1.65;color:#536b89;margin:0 0 16px}
+.provider-entry-page #entry-form .entry-submit{width:auto;min-height:48px;padding:14px 24px;margin-top:8px;border:0;border-radius:8px;background:#005ca8;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+.provider-entry-page #entry-form .entry-submit:hover{background:#00457e}
+.provider-entry-page #entry-form .entry-submit:disabled{opacity:.65;cursor:wait}
+@media(max-width:650px){.provider-entry-page .entry-detail-shell{width:calc(100% - 32px);margin-top:24px}.provider-entry-page .entry-invitation h2{font-size:22px}.entry-basics-grid{grid-template-columns:1fr;gap:0}.entry-step>summary{padding:16px;gap:12px;font-size:18px}.entry-step-body{padding:4px 16px 20px}.entry-step-number{width:30px;height:30px;font-size:16px}.entry-step summary small{font-size:13px}.provider-entry-page #entry-form .entry-submit{width:100%}.provider-entry-page #entry-form .doctor-contact-grid{grid-template-columns:1fr}}
+/* Shared motivational banner on both contribution forms. */
+.provider-entry-page .entry-motivation-banner{display:grid;grid-template-columns:minmax(0,1fr) 90px;align-items:center;gap:28px;padding:24px;border:1px solid #f3e6d9;border-radius:10px;background:#fff9f3;margin-bottom:24px}
+.provider-entry-page .entry-motivation-banner--providers{background:#fff5f5;border-color:#f1dfe2}
+.entry-motivation-banner .entry-invitation-eyebrow{display:block;font-size:12px;line-height:1.5;font-weight:700;letter-spacing:.5px;color:#ad6943;margin-bottom:8px}
+.entry-motivation-banner--providers .entry-invitation-eyebrow{color:#a15e71}
+body.provider-entry-page .entry-motivation-banner :is(h1,h2){font-size:25px;line-height:1.35;letter-spacing:0;margin:0 0 10px;color:#17365d}
+.provider-entry-page .entry-motivation-banner p{font-size:15px;line-height:1.65;color:#536b89;margin:0}
+.entry-motivation-banner p strong{font-weight:400}
+.entry-motivation-banner :is(.entry-invitation-note,.therapy-entry-invitation-note){font-size:13px;line-height:1.65;color:#536b89;margin-top:12px}
+.entry-motivation-banner .therapy-entry-invitation-note strong{font-weight:400}
+.entry-motivation-banner .therapy-entry-invitation-note small{display:inline;font-size:13px;color:inherit}
+.entry-motivation-banner .entry-invitation-art{width:90px;color:#bf7950}
+.entry-motivation-banner--providers .entry-invitation-art{color:#a15e71}
+.entry-motivation-banner .entry-invitation-art svg{display:block;width:100%;height:auto}
+@media(max-width:650px){.provider-entry-page .entry-motivation-banner{grid-template-columns:1fr;padding:20px;gap:0}.entry-motivation-banner .entry-invitation-art{display:none}body.provider-entry-page .entry-motivation-banner :is(h1,h2){font-size:22px}}
+.provider-entry-page #entry-form .provider-primary-care[hidden]{display:none!important}
+.provider-entry-page #entry-form .provider-primary-care{display:flex;align-items:center;gap:10px}
+.provider-type-picker{border:1px solid #cbd9e9;border-radius:7px;background:#fff}
+.provider-type-picker>summary{padding:13px 14px;cursor:pointer;color:#17365d;font-size:15px}
+.provider-type-picker .provider-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:300px;overflow:auto;padding:12px;border-top:1px solid #e1eafa;gap:4px}
+.provider-entry-page #entry-form .provider-type-picker label.provider-choice{display:flex;align-items:center;gap:9px;padding:8px;border-radius:5px}
+.provider-type-picker .provider-choice input{position:static;opacity:1;width:18px;height:18px;flex:none}
+.provider-type-picker .provider-choice span{padding:0;border:0;border-radius:0;background:transparent;font-size:14px}
+.provider-type-picker .provider-choice input:checked+span{background:transparent;border:0}
+.provider-type-picker .provider-choice input:checked+span::before{content:none}
+.provider-type-chips{display:flex;flex-wrap:wrap;gap:8px}
+.provider-type-chips:not(:empty){margin-bottom:12px}
+.provider-type-chip{padding:9px 12px;min-height:40px;border:1px solid #b6d8f8;border-radius:7px;background:#e7f3ff;color:#17365d;font:400 14px Arial;cursor:pointer}
+.provider-type-chip:hover{background:#d9ecff}
+@media(max-width:650px){.provider-type-picker .provider-choice-grid{grid-template-columns:1fr}}
+body.lcn-public-page.provider-entry-page #entry-form .entry-submit { background:#005ca8; border-color:#005ca8; color:#fff; }
+body.lcn-public-page.provider-entry-page #entry-form .entry-submit:hover { background:#00457e; }
+@media(max-width:1100px){
+ .provider-entry-page #entry-form .provider-type-picker label.provider-choice{min-height:44px}
+ .provider-type-picker .provider-choice-grid{max-height:min(300px,40dvh);overscroll-behavior-y:contain}
+ .provider-type-chip{min-height:44px;max-width:100%;overflow-wrap:anywhere;text-align:left}
+ .provider-entry-page #entry-form .provider-primary-care{min-height:44px}
+}
+
+.provider-entry-page #entry-form .provider-types>.provider-primary-care{margin:12px 0 0}
+
+/* Keep the optional profile fields in one compact, continuous flow. */
+.provider-entry-page #entry-form .provider-types>.doctor-field-hint{margin:0 0 12px}
+.provider-entry-page #entry-form .doctor-offerings{border:0;border-radius:0;padding:0;margin:0}
+.provider-entry-page #entry-form .doctor-offerings label{margin-top:0}
+.provider-entry-page #entry-form .catalog-form-treatments{gap:8px}
+ .provider-entry-page #entry-form label.provider-primary-care{width:fit-content;gap:10px;min-height:40px;margin:10px 0 0;cursor:pointer;font-size:15px;font-weight:700}
+.provider-entry-page #entry-form .provider-primary-care input{position:static;width:18px;height:18px;opacity:1;flex:none;margin:0}
+.provider-primary-care-status{color:#218739;font-size:19px;font-weight:700;line-height:1}
+.provider-primary-care-status::before{content:''}
+.provider-primary-care input:checked~.provider-primary-care-status::before{content:'✓'}

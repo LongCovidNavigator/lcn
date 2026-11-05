@@ -520,6 +520,7 @@ function setupDoctorDirtyFilterHint() {
 
 function setupDoctorAutoApplyControls() {
     const immediateElements = [
+        document.getElementById("doctor-provider-type-select"),
         document.getElementById("doctor-specialty-select"),
         document.getElementById("doctor-specialization-select"),
         document.getElementById("doctor-qualification-select"),
@@ -922,6 +923,9 @@ function resetDoctorNavigationControls() {
     if (hasEmailInput) hasEmailInput.checked = false;
     if (hasPhoneInput) hasPhoneInput.checked = false;
     if (specialtySelect) specialtySelect.value = "0";
+    const providerSelect = document.getElementById("doctor-provider-type-select");
+    if (providerSelect) providerSelect.value = "";
+    window.providerTypeGroup = "";
     document.getElementById("doctor-specialization-select").value = "0";
     document.getElementById("doctor-qualification-select").value = "0";
     currentSpecializationTermId = 0;
@@ -1208,6 +1212,12 @@ async function loadDoctorsFromSearchApi(settings) {
       } catch(error) { console.error(error); setMapStatus('Community-Einträge konnten nicht geladen werden.'); }
     }
 
+    const providerSelect = document.getElementById("doctor-provider-type-select");
+    if (providerSelect) {
+        apiDoctors = renderProviderTypePicker(apiDoctors, providerSelect);
+
+    }
+
     if (!currentLocation) {
         apiDoctors = apiDoctors.map(function (doctor) {
             return {
@@ -1273,12 +1283,12 @@ function renderDoctorSpecialtySelect(specialties) {
 function updateStatusAfterSearch(settings) {
     const filterText = buildActiveFilterStatusText();
     if (currentDoctors.length > 0 && currentDoctors.every(doctor => !doctor.has_coordinates)) {
-        setMapStatus(`${currentDoctors.length} Ärzte gefunden. Adressen vorhanden; Kartenpositionen und Entfernungen fehlen noch.${filterText}`);
+        setMapStatus(`${currentDoctors.length} Ärzt:innen gefunden. Adressen vorhanden; Kartenpositionen und Entfernungen fehlen noch.${filterText}`);
         return;
     }
 
     if (showOnlyCompareSelection) {
-        setMapStatus(`${selectedDoctorsForCompare.length} ausgewählte Behandler in der Vergleichsansicht.${filterText}`);
+        setMapStatus(`${selectedDoctorsForCompare.length} ausgewählte Behandler:innen in der Vergleichsansicht.${filterText}`);
         return;
     }
 
@@ -1287,16 +1297,16 @@ function updateStatusAfterSearch(settings) {
             ? " Einträge ohne Koordinaten werden zusätzlich angezeigt."
             : "";
 
-        setMapStatus(`${currentDoctors.length} Ärzte im Umkreis von ${settings.radiusKm} km gefunden. Entfernung: Luftlinie.${noCoordsText}${filterText}`);
+        setMapStatus(`${currentDoctors.length} Ärzt:innen im Umkreis von ${settings.radiusKm} km gefunden. Entfernung: Luftlinie.${noCoordsText}${filterText}`);
         return;
     }
 
     if (currentLocation) {
-        setMapStatus(`${currentDoctors.length} Ärzte gefunden. Entfernung: Luftlinie zum Standort.${filterText}`);
+        setMapStatus(`${currentDoctors.length} Ärzt:innen gefunden. Entfernung: Luftlinie zum Standort.${filterText}`);
         return;
     }
 
-    setMapStatus(`${currentDoctors.length} Ärzte gefunden. Kein Standort gesetzt.${filterText}`);
+    setMapStatus(`${currentDoctors.length} Ärzt:innen gefunden. Kein Standort gesetzt.${filterText}`);
 }
 
 function buildActiveFilterStatusText() {
@@ -1331,7 +1341,7 @@ function buildActiveFilterStatusText() {
 function drawRadiusIfNeeded(settings) {
     if (settings.isCityMode && settings.cityCenter) {
         if (!map._lcnViewport) map.setView([settings.cityCenter.lat, settings.cityCenter.lng], 11);
-        setMapStatus(`Suche Behandler in ${currentCityFilter}.`);
+        setMapStatus(`Suche Behandler:innen in ${currentCityFilter}.`);
         return;
     }
 
@@ -1343,18 +1353,18 @@ function drawRadiusIfNeeded(settings) {
         }).addTo(map);
 
         if (!map._lcnViewport) map.fitBounds(radiusCircle.getBounds(), { padding: [30, 30] });
-        setMapStatus(`Suche Ärzte im Umkreis von ${settings.radiusKm} km. Entfernung: Luftlinie.`);
+        setMapStatus(`Suche Ärzt:innen im Umkreis von ${settings.radiusKm} km. Entfernung: Luftlinie.`);
         return;
     }
 
     if (currentLocation) {
         if (!map._lcnViewport) map.setView([currentLocation.lat, currentLocation.lng], 6);
-        setMapStatus("Suche alle Ärzte mit Koordinaten. Entfernung wird als Luftlinie zum Standort berechnet.");
+        setMapStatus("Suche alle Ärzt:innen mit Koordinaten. Entfernung wird als Luftlinie zum Standort berechnet.");
         return;
     }
 
     if (!map._lcnViewport) map.setView([defaultMapCenter.lat, defaultMapCenter.lng], 6);
-    setMapStatus("Suche alle Ärzte. Kein Standort gesetzt.");
+    setMapStatus("Suche alle Ärzt:innen. Kein Standort gesetzt.");
 }
 
 function clearMapSearchLayers() {
@@ -1517,7 +1527,7 @@ function renderDoctorCards(doctors, append = false) {
     }
 
     if (!doctors || doctors.length === 0) {
-        cardContainer.innerHTML = `<p class="doctor-empty-state">Keine Ärztinnen oder Ärzte gefunden.</p>`;
+        cardContainer.innerHTML = `<p class="doctor-empty-state">Keine Ärztinnen oder Ärzt:innen gefunden.</p>`;
         if (loadMoreButton) loadMoreButton.classList.add("is-hidden");
         return;
     }
@@ -1545,7 +1555,7 @@ function renderDoctorCards(doctors, append = false) {
 }
 
 function buildDoctorCardHtml(doctor, index) {
-    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannter Arzt"));
+    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannte behandelnde Person"));
     const plz = escapeHtml(doctor.loc_plz || "");
     const city = escapeHtml(doctor.loc_city || "");
     const street = escapeHtml(doctor.loc_street || "");
@@ -1690,10 +1700,10 @@ function renderDoctorResultsTable(doctors, append = false) {
     const remaining = total - visibleCount;
     if (more) {
         more.classList.toggle("is-hidden", remaining === 0);
-        more.textContent = `Weitere ${Math.min(doctorTableBatchSize, remaining)} Behandler laden (${remaining} weitere)`;
+        more.textContent = `Weitere ${Math.min(doctorTableBatchSize, remaining)} Behandler:innen laden (${remaining} weitere)`;
     }
     const status = document.getElementById("doctor-table-page-status");
-    if (status) status.textContent = `${visibleCount} von ${total} Behandlern angezeigt`;
+    if (status) status.textContent = `${visibleCount} von ${total} Behandler:innen angezeigt`;
     const tableBody = document.getElementById("doctor-map-results-body");
 
     updateDoctorMobileTablePresentation();
@@ -1704,7 +1714,7 @@ function renderDoctorResultsTable(doctors, append = false) {
     }
 
     if (!doctors || doctors.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="8">Keine Ärztinnen oder Ärzte gefunden.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="8">Keine Ärztinnen oder Ärzt:innen gefunden.</td></tr>`;
         return;
     }
 
@@ -1737,7 +1747,7 @@ function buildDoctorTableSpecialtyHtml(doctor) {
 }
 
 function buildDoctorTableRowHtml(doctor, rank) {
-    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannter Arzt"));
+    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannte behandelnde Person"));
 
     return `
         <tr data-dr-id="${escapeHtml(doctor.dr_id)}">
@@ -2013,7 +2023,7 @@ function renderDoctorCompareSelection() {
 
     if (statusElement) {
         statusElement.textContent = hasSelection
-            ? `${selectedDoctorsForCompare.length} Behandler ausgewählt.`
+            ? `${selectedDoctorsForCompare.length} Behandler:innen ausgewählt.`
             : "";
     }
 
@@ -2098,7 +2108,7 @@ async function refreshSingleDoctor(drId, ownVote = null) {
     );
 
     if (!response.ok) {
-        throw new Error("Einzelner Arzt konnte nicht neu geladen werden.");
+        throw new Error("Einzelnes Profil konnte nicht neu geladen werden.");
     }
 
     const data = await response.json();
@@ -2197,7 +2207,7 @@ function getDoctorVoteStats(doctor) {
 }
 
 function buildDoctorPopupHtml(doctor) {
-    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannter Arzt"));
+    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannte behandelnde Person"));
     const plz = escapeHtml(doctor.loc_plz || "");
     const city = escapeHtml(doctor.loc_city || "");
     const stats = getDoctorVoteStats(doctor);

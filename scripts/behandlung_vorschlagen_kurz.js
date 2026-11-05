@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  for (const [id, url] of [['header-placeholder','components/header.html?v=chapters-20261024'],['footer-placeholder','components/footer.html?v=wording-20261006']]) fetch(url).then(r=>r.text()).then(html=>document.getElementById(id).innerHTML=html);
+  for (const [id, url] of [['header-placeholder','components/header.html?v=two-add-links-20261105'],['footer-placeholder','components/footer.html?v=wording-20261006']]) fetch(url).then(r=>r.text()).then(html=>document.getElementById(id).innerHTML=html);
   const form=document.getElementById('entry-form'), message=document.getElementById('entry-message');
   for (const field of [form.elements.name]) {
     const box=document.createElement('div');box.className='duplicate-check';box.setAttribute('aria-live','polite');field.closest('label').after(box);
@@ -24,17 +24,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const existingId=Number(new URLSearchParams(location.search).get('existing_target_id'));
   if(existingId>0)fetch('api/submission_existing_detail.php?type=treatment&id='+existingId).then(r=>r.json()).then(data=>{const entry=data.item||data.data;if(entry){form.elements.name.value=entry.name||'';form.elements.website.value=entry.website||'';}}).catch(()=>{});
   let saving=false;
+  const suggestedName=new URLSearchParams(location.search).get('name');
+  if(suggestedName){form.elements.name.value=suggestedName.slice(0,180);form.elements.name.dispatchEvent(new Event('input'));}
   form.addEventListener('submit',async event=>{
-    event.preventDefault(); if(saving||!form.reportValidity())return;saving=true;
+    event.preventDefault(); if(saving||!form.reportValidity())return;const classification=window.LCNTherapyEntry?window.LCNTherapyEntry.payload():{};if(window.LCNTherapyEntry&&classification===null)return;saving=true;
     const button=form.querySelector('.entry-submit');button.disabled=true;message.textContent='Wird gespeichert …';
     let website=form.elements.website.value.trim();if(website && !/^https?:\/\//i.test(website))website='https://'+website;
     try {
-      const response=await fetch('api/create_submission.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'treatment',simple_treatment:true,doctor_ids:window.LCNCatalogEntry?.doctorIds()||[],name:form.elements.name.value.trim(),website,company:form.elements.company.value,existing_target_id:Number(new URLSearchParams(location.search).get('existing_target_id'))||undefined})});
+      const response=await fetch('api/create_submission.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...classification,type:'treatment',simple_treatment:true,doctor_ids:window.LCNCatalogEntry?.doctorIds()||[],name:form.elements.name.value.trim(),website,company:form.elements.company.value,existing_target_id:Number(new URLSearchParams(location.search).get('existing_target_id'))||undefined})});
       const data=await response.json();if(!response.ok||!data.ok||!data.submission_id)throw Error(data.error||'Eintrag konnte nicht gespeichert werden.');
       if(window.LCNCatalogEntry?.saved(data))return;
-      form.reset();form.elements.name.dispatchEvent(new Event('input'));
+      form.reset();form.elements.treatment_category?.dispatchEvent(new Event('change'));form.elements.name.dispatchEvent(new Event('input'));
       message.textContent=existingId>0?'Danke! Dein Änderungsvorschlag wurde zur Prüfung gespeichert.':'Danke! Dein Vorschlag wurde gespeichert und erscheint als noch nicht geprüft im Katalog. Wir übernehmen die weitere Recherche.';button.disabled=false;
     }catch(error){message.textContent=error.message;button.disabled=false;}finally{saving=false;}
   });
 });
 function toggleMobileMenu(){document.querySelector('.main-nav ul')?.classList.toggle('show');}
+// Keep browser validation usable when a field is inside a collapsed card.
+document.getElementById('entry-form')?.addEventListener('invalid', event => {
+  const section = event.target.closest('.entry-step');
+  if (section) section.open = true;
+}, true);

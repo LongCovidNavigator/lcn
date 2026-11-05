@@ -5,7 +5,7 @@ function lcnPublishPendingTreatment(PDO $p, int $sid, string $name, array $paylo
  $rows=lcnNdRows($p,"SELECT treat_nd_id FROM tbl_treatments_nd WHERE LOWER(TRIM(treatmentname))=LOWER(TRIM(?)) AND review_status<>'rejected_group' ORDER BY treat_nd_id LIMIT 1",[$name]);
  if($rows)$id=(int)$rows[0]['treat_nd_id'];
  else {
-  $p->prepare("INSERT INTO tbl_treatments_nd(treatmentname,typ,legacy_match_status,review_status,datenstand,notes_internal) VALUES(?,?,'new','pending_group',CURRENT_DATE,?)")->execute([$name,$payload['treatment_category']??null,'Community-Vorschlag #'.$sid]);$id=(int)$p->lastInsertId();
+  $p->prepare("INSERT INTO tbl_treatments_nd(treatmentname,typ,unterkategorie,legacy_match_status,review_status,datenstand,notes_internal) VALUES(?,?,?,'new','pending_group',CURRENT_DATE,?)")->execute([$name,$payload['treatment_category']??null,$payload['treatment_subcategory']??null,'Community-Vorschlag #'.$sid]);$id=(int)$p->lastInsertId();
   $alias=lcnTreatmentProposalAlias($p,$name,'primary_name');
   $p->prepare('INSERT INTO tbl_cpl_treatments_nd2aliases(treat_nd_id,alias_id,note) VALUES(?,?,?)')->execute([$id,$alias,'Community-Vorschlag #'.$sid]);
  }

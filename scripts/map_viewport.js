@@ -12,7 +12,7 @@
         instances.forEach(entry => entry.apply(true));
     }
     function attach(map) {
-        if (map._lcnViewport || !map._containerId) return;
+        if (map._lcnViewport || !map._containerId || (typeof map.getPane==='function' && !map.getPane('mapPane'))) return;
         const toolbar = L.DomUtil.create('div', 'doctor-map-viewport-tools', map.getContainer());
         toolbar.innerHTML = '<div class="map-country-control"><div class="map-country-split"><button type="button" data-country-current>Deutschland</button><button type="button" data-country-toggle aria-label="Land auswählen" aria-expanded="false"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="map-country-options" hidden></div></div><button type="button" data-show-all>Alle Treffer</button>';
         L.DomEvent.disableClickPropagation(toolbar);
@@ -39,7 +39,7 @@
         toolbar.addEventListener('focusout', event => { if (!toolbar.contains(event.relatedTarget)) closeOptions(); });
         const outsideClick = event => { if (!toolbar.contains(event.target)) closeOptions(); };
         document.addEventListener('click', outsideClick);
-        let markers = [], timer, applying = false, mode = preference;
+        let markers = [], timer, applying = false, mode = preference, disposed = false;
         let previousPoints = null, savedView = null;
         // Data refreshes must not turn the user's country/zoom selection into a
         // new fitBounds operation. Compare locations rather than marker objects.
@@ -79,6 +79,7 @@
         const entry = { apply(force = false) {
             // Leaflet ignores a new zoom while an earlier zoom transition is
             // running. Keep the saved view intact until that transition ends.
+            if (disposed) return;
             if (map._animatingZoom) {
                 clearTimeout(timer); timer = setTimeout(() => entry.apply(force), 50);
                 return;
@@ -116,10 +117,11 @@
         map.on('moveend', () => { if (!applying && !timer) rememberView(); });
         map.on('resize', () => entry.apply());
         map.on('layeradd layerremove', event => {
+            if (disposed) return;
             if (!(event.layer instanceof L.Marker) && !(event.layer instanceof L.Circle)) return;
             clearTimeout(timer); timer = setTimeout(() => entry.apply(), 30);
         });
-        map.on('unload', () => { clearTimeout(timer); instances.delete(entry); document.removeEventListener('click', outsideClick); });
+        map.on('unload', () => { disposed = true; clearTimeout(timer); instances.delete(entry); document.removeEventListener('click', outsideClick); });
         entry.apply();
     }
     function install() {

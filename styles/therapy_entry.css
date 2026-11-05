@@ -1,0 +1,22 @@
+.therapy-entry-classification { margin:24px 0; padding:24px; border:1px solid #d7dfea; border-radius:12px; background:#f8faff; }
+.therapy-entry-classification h2 { margin:0 0 8px; font-size:22px; color:#17365d; }
+.therapy-entry-classification h2 small { font-size:14px; font-weight:400; }
+.therapy-entry-classification p,.therapy-entry-classification small { color:#526c83; line-height:1.6; }
+.therapy-entry-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.therapy-entry-grid > * { min-width:0; }
+.therapy-entry-classification select { display:block; width:100%; min-height:46px; padding:10px; border:1px solid #bed1e4; border-radius:7px; color:#17365d; background:white; font:inherit; box-sizing:border-box; }
+.therapy-entry-roles { display:flex; flex-wrap:wrap; gap:8px; }
+.therapy-entry-roles label { display:flex; align-items:center; gap:8px; padding:10px; border:1px solid #cbdde7; border-radius:8px; background:white; }
+.therapy-entry-roles input { width:auto; margin:0; }
+.therapy-entry-diagram { display:grid; grid-template-columns:1fr auto 1fr auto 1fr; align-items:center; gap:10px; margin:20px 0; }
+.therapy-entry-diagram > div { min-width:0; border:1px solid #cbdde7; border-radius:9px; padding:14px; background:white; overflow-wrap:anywhere; }
+.therapy-entry-diagram small,.therapy-entry-diagram strong { display:block; }
+.therapy-entry-diagram .is-current { border:2px solid #7057a3; background:#f3effa; }
+#therapy-entry-drug[hidden],#therapy-entry-assignment[hidden] { display:none; }
+#therapy-entry-options-status:empty { display:none; }
+@media(max-width:600px) { .therapy-entry-classification { padding:16px; } .therapy-entry-grid { grid-template-columns:1fr;gap:0; } .therapy-entry-diagram { grid-template-columns:1fr; } .therapy-entry-diagram > span { justify-self:center; transform:rotate(90deg); } }
+body.lcn-public-page .therapy-entry-invitation h1 { margin:0 0 16px; font-size:clamp(26px,2.6vw,34px); line-height:1.2; letter-spacing:-.6px; color:#17365d; }
+.therapy-entry-invitation { margin:0 0 24px; grid-template-columns:minmax(0,1fr) 220px; }
+.therapy-entry-invitation-note { margin-top:22px; color:#7057a3; font-size:15px; line-height:1.6; }
+.therapy-entry-invitation-note small { display:block; margin-top:4px; color:#526c83; font-size:13px; }
+@media(max-width:760px) { .therapy-entry-invitation { grid-template-columns:minmax(0,1fr); } .therapy-entry-invitation .top-community-art { display:none; } }

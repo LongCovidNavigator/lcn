@@ -53,11 +53,15 @@ try {
     $name = submissionString($input, 'name', 180);
     $website = submissionString($input, 'website', 500);
     submissionString($input, 'address', 500);
-    submissionString($input, 'organization', 180);
+    $organization = submissionString($input, 'organization', 180);
+    if ($type === 'doctor' && ($input['simple_doctor'] ?? false) === true && $name === '' && $organization !== '') {
+        $name = $organization;
+        $input['name'] = $name;
+    }
     foreach (['primary_care', 'specialist_care'] as $field) {
         if (array_key_exists($field, $input) && !is_bool($input[$field])) lcnSendVoteJson(['ok'=>false,'error'=>'Ungültige Angabe zur Tätigkeit.'],422);
     }
-    if (($input['simple_doctor'] ?? false) === true && ($type !== 'doctor' || $website === '')) lcnSendVoteJson(['ok'=>false,'error'=>'Bitte Name und Web-Adresse angeben.'],422);
+    if (($input['simple_doctor'] ?? false) === true && ($type !== 'doctor' || $website === '')) lcnSendVoteJson(['ok'=>false,'error'=>'Bitte einen Namen oder eine Praxis sowie die Web-Adresse angeben.'],422);
     $email = submissionString($input, 'email', 254);
     $phone = submissionString($input, 'phone', 60);
     $city = submissionString($input, 'city', 120);
@@ -81,7 +85,7 @@ try {
         lcnSendVoteJson(['ok' => false, 'error' => 'Bitte bestätige die Richtigkeit deiner Angaben.'], 422);
     }
 
-    $allowed = ['primary_care','specialist_care','address','type','existing_target_id','name','website','title','firstname','lastname','organization','provider_type','treatment_category','aliases','email','phone','street','house_number','postal_code','city','country','lat','lng','source_url','known_providers','features','insurance','specialty_ids','treatment_ids','doctor_ids','indications','mechanism','effort','cost','speed','crash_risk','offerings','experience','experience_note','relationship','review_note',
+    $allowed = ['primary_care','specialist_care','address','type','existing_target_id','name','website','title','firstname','lastname','organization','provider_type','provider_types','treatment_category','treatment_subcategory','medication_role','medication_parent_id','medication_parent_name','aliases','email','phone','street','house_number','postal_code','city','country','lat','lng','source_url','known_providers','features','insurance','specialty_ids','treatment_ids','doctor_ids','indications','mechanism','effort','cost','speed','crash_risk','offerings','experience','experience_note','relationship','review_note',
         'billing_model','statutory_seat','cost_initial','cost_followup','cost_typical_total','first_appointment_wait','first_appointment_wait_unit','waiting_list','availability_updated_at',
         'initial_onsite','initial_video','initial_phone','followup_onsite','followup_video','followup_phone','home_visits','onsite_wait',
         'considers_pem','breaks_possible','appointment_adaptable','quiet_waiting_area','waiting_lying_down','wheelchair_accessible','step_free_access','lying_down_possible','companion_possible',
@@ -92,6 +96,19 @@ try {
     if ($type === 'doctor') $input['treatment_ids'] = lcnSubmissionTreatmentIds($input);
     $payload = array_intersect_key($input, array_flip($allowed));
     $pdo = lcnDoctorDatabase();
+    if($type==='treatment'){
+        foreach(['treatment_category'=>150,'treatment_subcategory'=>150,'medication_role'=>20,'medication_parent_name'=>180] as $field=>$max)if(array_key_exists($field,$payload))$payload[$field]=submissionString($input,$field,$max);
+        if(!in_array($payload['medication_role']??'', ['','group','ingredient','brand'],true))lcnSendVoteJson(['ok'=>false,'error'=>'Ungültige Arzneimittel-Einordnung.'],422);
+        if(($payload['treatment_category']??'')!=='Arzneimittel'){
+            unset($payload['medication_role'],$payload['medication_parent_id'],$payload['medication_parent_name']);
+        }elseif(!empty($payload['medication_parent_id'])){
+            if(!in_array($payload['medication_role']??'',['ingredient','brand'],true))lcnSendVoteJson(['ok'=>false,'error'=>'Bitte zuerst die Arzneimittel-Einordnung wählen.'],422);
+            $parentId=filter_var($payload['medication_parent_id'],FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+            $q=$pdo->prepare("SELECT treatmentname FROM tbl_treatments_nd WHERE treat_nd_id=? AND typ='Arzneimittel' AND review_status<>'rejected_group'");$q->execute([$parentId?:0]);$parentName=$q->fetchColumn();
+            if(!$parentName)lcnSendVoteJson(['ok'=>false,'error'=>'Die gewählte Arzneimittel-Zuordnung wurde nicht gefunden.'],422);
+            $payload['medication_parent_id']=(int)$parentId;$payload['medication_parent_name']=$parentName;
+        }
+    }
     $voterKey = lcnVoterKey();
     if($type==='treatment'){lcnLockTreatmentProposals($pdo);$proposalLock=true;}
 

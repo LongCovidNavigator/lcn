@@ -8,7 +8,7 @@
   try { const saved = JSON.parse(localStorage.getItem(sharedKey)); if (valid(saved)) origin = {...saved, label:saved.location || saved.label || 'Gespeicherter Standort'}; } catch {}
   let relationFeedback={};window.addEventListener('lcn-relation-feedback',event=>{relationFeedback=event.detail||{};entries.forEach(renderProviders);});let ratings={},ratingsLoaded=false;const positiveNode=point=>{
     const container=document.createElement('div'),grid=document.createElement('div'),r=ratings[point.dr_id];
-    container.className='nd-provider-rating-summary';grid.className='treatment-card-ratings';grid.setAttribute('role','group');grid.setAttribute('aria-label','Behandlererfahrungen');
+    container.className='nd-provider-rating-summary';grid.className='treatment-card-ratings';grid.setAttribute('role','group');grid.setAttribute('aria-label','Erfahrungen mit Behandler:innen');
     for(const [key,label,tone] of [['healing','Heilung','healing'],['improvement','Verbesserung','improvement'],['neutral','Neutral','neutral'],['worsening','Verschlechterung','negative']]){
       const field=document.createElement('div');field.className='treatment-card-rating treatment-card-rating-'+tone;
       const value=document.createElement('strong');value.textContent=r?Math.round(r[key+'_percent']).toLocaleString('de-DE')+' %':'—';
@@ -41,7 +41,7 @@
     const km=closest?distance(closest):null,index=online||km===null?-1:travelBand(km);
     const heading=document.createElement('div');heading.className='travel-estimate-heading';
     const title=document.createElement('strong');title.textContent='Anreiseaufwand';
-    const result=document.createElement('span');result.textContent=online?online.name+' · Erst- und Folgetermin online':closest?closest.name+' · '+km.toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':origin?'Keine Behandler mit Koordinaten im gewählten Filter.':'Standort eingeben, um die Entfernung einzuordnen.';
+    const result=document.createElement('span');result.textContent=online?online.name+' · Erst- und Folgetermin online':closest?closest.name+' · '+km.toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':origin?'Keine Behandler:innen mit Koordinaten im gewählten Filter.':'Standort eingeben, um die Entfernung einzuordnen.';
     heading.append(title,result);box.replaceChildren(heading);
     const scale=document.createElement('ol');scale.className='travel-scale';scale.setAttribute('aria-label','Entfernung und Anreiseaufwand');
     const remote=document.createElement('li');remote.className='travel-online-level'+(online?' is-current':'');remote.innerHTML='<strong>Erst- und Folgetermin online</strong><span class="travel-scale-bar" aria-hidden="true"></span><span>Keine Anreise zu Erst- und Folgetermin</span>';scale.append(remote);
@@ -51,11 +51,11 @@
       const bar=document.createElement('span');bar.className='travel-scale-bar';bar.setAttribute('aria-hidden','true');
       const timing=document.createElement('span');timing.textContent=time;
       li.append(label,bar,timing);
-      if(i===index){li.setAttribute('aria-current','true');const current=document.createElement('b');current.textContent='Nächster Behandler im Filter';li.append(current);}
+      if(i===index){li.setAttribute('aria-current','true');const current=document.createElement('b');current.textContent='Nächste behandelnde Person im Filter';li.append(current);}
       scale.append(li);
     });box.append(scale);
     const details=document.createElement('details'),summary=document.createElement('summary'),note=document.createElement('p');summary.textContent='Wie wird eingeordnet?';
-    note.textContent='Die Einordnung zeigt die Luftlinienentfernung zum nächstgelegenen Behandler im aktuellen Filter. Fahrzeiten sind grobe Orientierungswerte, keine Routenberechnung. Sind Erst- und Folgetermin online möglich, entfällt die Anreise zu diesen Terminen. Ob Untersuchungen oder Behandlungen vor Ort nötig sind, muss zusätzlich mit der Praxis geklärt werden.';
+    note.textContent='Die Einordnung zeigt die Luftlinienentfernung zum nächstgelegenen behandelnden Person im aktuellen Filter. Fahrzeiten sind grobe Orientierungswerte, keine Routenberechnung. Sind Erst- und Folgetermin online möglich, entfällt die Anreise zu diesen Terminen. Ob Untersuchungen oder Behandlungen vor Ort nötig sind, muss zusätzlich mit der Praxis geklärt werden.';
     details.append(summary,note);box.append(details);
   }
   function filteredProviders(entry) {
@@ -87,13 +87,13 @@
     const feedbackScore=p=>{const v=relationFeedback[p.dr_id?'d:'+p.dr_id+':t:'+document.querySelector('.ux-detail[data-treatment-id]').dataset.treatmentId:'s:'+p.submission_id];return (v?.confirm||0)-(v?.oppose||0);};
     const value=(p,key)=>key==='number'?numbers.get(p):key==='city'?(p.city||''):key==='distance'?(origin&&valid(p)?distance(p):null):['worsening','improvement','healing'].includes(key)?(ratings[p.dr_id]?.[key+'_percent']??null):key==='feedback'?feedbackScore(p):p.name;
     const rows=filteredProviders(entry).sort((a,b)=>{const group=onlineGroup(a)-onlineGroup(b);if(group)return group;const x=value(a,sort),y=value(b,sort);if(x===null)return y===null?0:1;if(y===null)return -1;const cmp=typeof x==='string'?x.localeCompare(y,'de',{numeric:true}):x-y;return cmp*(direction==='desc'?-1:1)||a.name.localeCompare(b.name,'de');});
-    function changeSort(key){const next=sort===key?(direction==='asc'?'desc':'asc'):(['improvement','healing','feedback'].includes(key)?'desc':'asc');host.querySelector('[data-provider-sort]').value=key+':'+next;renderProviders(entry);}    host.querySelector('[data-provider-count]').textContent=rows.length+' von '+providers.length+' Behandlern'+(sort==='distance'&&!origin?' · Für die Entfernungssortierung bitte oben einen Standort eingeben.':'');
+    function changeSort(key){const next=sort===key?(direction==='asc'?'desc':'asc'):(['improvement','healing','feedback'].includes(key)?'desc':'asc');host.querySelector('[data-provider-sort]').value=key+':'+next;renderProviders(entry);}    host.querySelector('[data-provider-count]').textContent=rows.length+' von '+providers.length+' Behandler:innen'+(sort==='distance'&&!origin?' · Für die Entfernungssortierung bitte oben einen Standort eingeben.':'');
     const sidebarCount=host.querySelector('[data-location-provider-count]');if(sidebarCount)sidebarCount.textContent=rows.length+' von '+providers.length;
     host.querySelectorAll('[data-provider-view]').forEach(b=>{const active=b.dataset.providerView===entry.view;b.classList.toggle('is-active',active);b.setAttribute('aria-pressed',String(active));});
     if(!rows.length){
       list.className='nd-map-results nd-provider-empty';
-      const message=document.createElement('p');message.textContent='Kein passender Behandler gefunden.';
-      const link=document.createElement('a');link.textContent='Behandler hinzufügen →';
+      const message=document.createElement('p');message.textContent='Keine passende behandelnde Person gefunden.';
+      const link=document.createElement('a');link.textContent='Behandler:innen hinzufügen →';
       const targetId='add-provider-'+document.querySelector('.ux-detail[data-treatment-id]').dataset.treatmentId;
       link.href='#'+targetId;
       link.addEventListener('click',event=>{
@@ -108,7 +108,7 @@
     function showButton(point,compact=false){const button=document.createElement('button');button.type='button';button.className='nd-show-provider';button.textContent=valid(point)?(compact?'Karte':'Auf Karte zeigen'):(compact?'—':'Standort nicht verfügbar');if(!compact)button.title=valid(point)?'Auf Karte zeigen':'Standort nicht verfügbar';button.disabled=!valid(point);button.addEventListener('click',()=>{if(!map)return;host.querySelector('.top-map-content').classList.remove('is-collapsed');map.invalidateSize();if(origin)map.fitBounds([[origin.lat,origin.lng],[point.lat,point.lng]],{padding:[64,64],maxZoom:12});else map.setView([point.lat,point.lng],12);entry.markers.get(point)?.openPopup();host.querySelector('.nd-map-canvas').scrollIntoView({block:'center'});});return button;}
     const km=p=>origin&&valid(p)?Math.round(distance(p)).toLocaleString('de-DE')+' km':'';
     if(entry.view==='table'){
-      list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();[['Nr.','number'],['Behandler','name'],['Ort','city'],['Entfernung','distance'],['Verschlechterung','worsening'],['Verbesserung','improvement'],['Heilung','healing'],['Karte',null],['Rückmeldungen','feedback']].forEach(([label,key])=>{const th=document.createElement('th');th.scope='col';if(key==='feedback'){th.dataset.catalogReportHeading='';th.className='catalog-report-column';}if(!key){th.textContent=label;th.className='nd-provider-map-column';}else{const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=key==='distance'&&!origin;button.setAttribute('aria-label','Nach '+label+' sortieren');button.addEventListener('click',()=>changeSort(key));th.setAttribute('aria-sort',sort===key?(direction==='asc'?'ascending':'descending'):'none');th.append(button);}head.append(th);});const body=table.createTBody();rows.forEach((point,index)=>{const row=body.insertRow();const number=row.insertCell();number.className="nd-provider-row-number";number.textContent=String(numbers.get(point));const nameCell=row.insertCell();nameCell.append(nameNode(point));if(point.pending)nameCell.append(pendingNote(point));row.insertCell().textContent=point.city||'Keine Ortsangabe';const distanceCell=row.insertCell();distanceCell.className='provider-distance-cell';if(origin&&valid(point))distanceCell.append(numericValue(distance(point),'km',2));else distanceCell.textContent=km(point);row.insertCell().append(ratingCell(point,'worsening'));row.insertCell().append(ratingCell(point,'improvement'));row.insertCell().append(ratingCell(point,'healing'));row.insertCell().append(showButton(point,true));});list.append(table);
+      list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();[['Nr.','number'],['Behandler:innen','name'],['Ort','city'],['Entfernung','distance'],['Verschlechterung','worsening'],['Verbesserung','improvement'],['Heilung','healing'],['Karte',null],['Rückmeldungen','feedback']].forEach(([label,key])=>{const th=document.createElement('th');th.scope='col';if(key==='feedback'){th.dataset.catalogReportHeading='';th.className='catalog-report-column';}if(!key){th.textContent=label;th.className='nd-provider-map-column';}else{const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=key==='distance'&&!origin;button.setAttribute('aria-label','Nach '+label+' sortieren');button.addEventListener('click',()=>changeSort(key));th.setAttribute('aria-sort',sort===key?(direction==='asc'?'ascending':'descending'):'none');th.append(button);}head.append(th);});const body=table.createTBody();rows.forEach((point,index)=>{const row=body.insertRow();const number=row.insertCell();number.className="nd-provider-row-number";number.textContent=String(numbers.get(point));const nameCell=row.insertCell();nameCell.append(nameNode(point));if(point.pending)nameCell.append(pendingNote(point));row.insertCell().textContent=point.city||'Keine Ortsangabe';const distanceCell=row.insertCell();distanceCell.className='provider-distance-cell';if(origin&&valid(point))distanceCell.append(numericValue(distance(point),'km',2));else distanceCell.textContent=km(point);row.insertCell().append(ratingCell(point,'worsening'));row.insertCell().append(ratingCell(point,'improvement'));row.insertCell().append(ratingCell(point,'healing'));row.insertCell().append(showButton(point,true));});list.append(table);
     }else{
       list.className='nd-map-results doctor-card-grid';
       rows.forEach(point=>{
@@ -181,7 +181,7 @@
     host.querySelector('[data-radius-enabled]').addEventListener('change',()=>render(entry));
     host.querySelector('[data-radius]').addEventListener('input',event=>{if(event.target.validity.valid){host.querySelector('[data-radius-enabled]').checked=true;render(entry);}});
     render(entry);
-    const all=document.createElement('button');all.type='button';all.textContent='Alle Behandler anzeigen';
+    const all=document.createElement('button');all.type='button';all.textContent='Alle Behandler:innen anzeigen';
     host.querySelector('.doctor-results-search-panel').append(all);
     all.addEventListener('click',()=>{host.dataset.locationMode='radius';const includeUnknown=host.querySelector('[data-include-no-coords]');if(includeUnknown)includeUnknown.checked=false;host.querySelector('[data-provider-specialty]').value='';host.querySelectorAll('[data-rating-filter]').forEach(slider=>{slider.value=slider.dataset.ratingFilter==='worsening'?100:0;slider.nextElementSibling.value=slider.value;});host.querySelector('[data-provider-search]').value='';host.querySelector('[data-provider-city]').value='';host.querySelector('[data-radius-enabled]').checked=false;render(entry);});
     host.querySelector('[data-provider-search]').addEventListener('input',()=>render(entry));
@@ -257,7 +257,7 @@
       groups.forEach(points=>{
         const popup=document.createElement('div'),heading=document.createElement('strong');heading.textContent=points.length>1?points.length+' Einträge':points[0].name;popup.append(heading);
         const list=document.createElement('ul');list.className='top-map-popup-list';points.forEach(point=>{const li=document.createElement('li');li.textContent=point.name;const small=document.createElement('small');small.textContent=point.place+(point.pending?' · Prüfung ausstehend':'');li.append(small);list.append(li);});popup.append(list);
-        let icon=markerIcon();if(points.length>1){const wrapper=document.createElement('div'),img=document.createElement('img'),count=document.createElement('span');img.src=window.LCNImages.urls['map-marker-default'];img.alt='';count.textContent=points.length;wrapper.append(img,count);icon=L.divIcon({className:'top-map-count-marker',html:wrapper.innerHTML,iconSize:[31,41],iconAnchor:[15,41],popupAnchor:[0,-35]});}
+        let icon=markerIcon();if(points.length>1)icon=window.LCNImages.countMarkerIcon(points.length);
         const marker=L.marker([points[0].lat,points[0].lng],{icon,riseOnHover:true}).bindPopup(popup,{autoPan:false}).addTo(entry.map);window.LCNOnline?.track(marker,points.map(p=>p.dr_id));points.forEach(point=>entry.markers.set(point,marker));
       });
   }
@@ -268,12 +268,12 @@
       L.control.zoom({position:'topright'}).addTo(entry.map);
       canvas.addEventListener('click',()=>entry.map.scrollWheelZoom.enable());canvas.addEventListener('mouseleave',()=>entry.map.scrollWheelZoom.disable());
       const tiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere',maxZoom:19}).addTo(entry.map);
-      tiles.on('tileerror',()=>{entry.host.querySelector('[data-map-status]').textContent='Kartenhintergrund konnte nicht geladen werden. Behandler-Marker und Entfernungsliste bleiben verfügbar.';});
+      tiles.on('tileerror',()=>{entry.host.querySelector('[data-map-status]').textContent='Kartenhintergrund konnte nicht geladen werden. Behandler:innen-Marker und Entfernungsliste bleiben verfügbar.';});
       new ResizeObserver(()=>{if(canvas.clientWidth){entry.map.invalidateSize();if(!entry.wasVisible){render(entry);entry.wasVisible=true;}}else entry.wasVisible=false;}).observe(canvas);render(entry);
     });
   }
   window.addEventListener('lcn-online-ready',()=>entries.forEach(render));
-  init().catch(()=>entries.forEach(({host})=>{host.querySelector('.nd-map-canvas').textContent='Karte konnte nicht geladen werden. Behandler und Entfernungen stehen weiterhin in der Liste.';}));
+  init().catch(()=>entries.forEach(({host})=>{host.querySelector('.nd-map-canvas').textContent='Karte konnte nicht geladen werden. Behandler:innen und Entfernungen stehen weiterhin in der Liste.';}));
 })();
 
 

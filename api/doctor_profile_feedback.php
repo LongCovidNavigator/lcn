@@ -9,7 +9,7 @@ try {
     $write=($_SERVER['REQUEST_METHOD']??'GET')==='POST';
     if($write){lcnRequireVotingRequest();$input=lcnReadJsonBody();}else $input=$_GET;
     $id=filter_var($input['id']??null,FILTER_VALIDATE_INT);
-    if(!$id||!lcnDoctorExists($id))throw new InvalidArgumentException('Behandler nicht gefunden.');
+    if(!$id||!lcnDoctorExists($id))throw new InvalidArgumentException('Behandler:innen nicht gefunden.');
     $fields=['identity'=>['name','organization','type'],'medical'=>['specialty','specializations','qualifications'],'location'=>['address','country','additional'],'contact'=>['phone','email','website']];
     $pdo=lcnDoctorDatabase();$listItems=lcnProfileListItems($pdo,$id);
     if($write){

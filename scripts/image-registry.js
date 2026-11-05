@@ -93,5 +93,9 @@
         apply();
     }
 
-    window.LCNImages = Object.freeze({ paths, urls, apply, configureLeaflet });
+    function countMarkerIcon(count, color = '#2889c2', border = '#176398') {
+        const value = Math.max(1, Math.floor(Number(count) || 1));
+        return window.L.divIcon({className:'lcn-count-pin', html:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 44" width="32" height="44" style="display:block;filter:drop-shadow(0 2px 2px #17365d55)" aria-label="${value} Einträge"><path d="M16 1C7.7 1 1 7.7 1 16c0 10 15 26.5 15 26.5S31 26 31 16C31 7.7 24.3 1 16 1Z" fill="${color}" stroke="${border}" stroke-width="1.5"/><text x="16" y="17" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="Arial,sans-serif" font-size="${value > 99 ? 12 : 14}" font-weight="700">${value}</text></svg>`,iconSize:[32,44],iconAnchor:[16,44],popupAnchor:[0,-38]});
+    }
+    window.LCNImages = Object.freeze({ paths, urls, apply, configureLeaflet, countMarkerIcon });
 })();

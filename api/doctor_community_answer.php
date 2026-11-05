@@ -5,7 +5,7 @@ lcnRequireVotingRequest();
 try {
     $body = lcnReadJsonBody();
     $id = $body['dr_id'] ?? null;
-    if (!is_int($id) || !lcnDoctorExists($id)) lcnSendVoteJson(['ok' => false, 'error' => 'Behandler nicht gefunden.'], 404);
+    if (!is_int($id) || !lcnDoctorExists($id)) lcnSendVoteJson(['ok' => false, 'error' => 'Behandler:innen nicht gefunden.'], 404);
     $action = $body['action'] ?? 'answer';
     if (!in_array($action, ['answer', 'reset', 'clear','move_cost_context'], true)) lcnSendVoteJson(['ok' => false, 'error' => 'Ungültige Aktion.'], 400);
     $key = $body['question'] ?? null;

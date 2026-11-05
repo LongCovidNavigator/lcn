@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="de">
 <head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=split-country-20261101"><script src="scripts/map_viewport.js?v=stable-view-20261102"></script>
-<script src="scripts/online_access.js?v=experience-sort-tooltips-20261031" defer></script>
+<script src="scripts/online_access.js?v=shared-count-pins-20261105" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long Covid Navigator - Therapien-Suche</title>
 
-    <link rel="stylesheet" href="styles/general.css?v=content-aligned-20261101-3">
+    <link rel="stylesheet" href="styles/general.css?v=location-dark-blue-20261105">
     <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/lcnprotocol_table.css">
@@ -17,9 +17,9 @@
     >
 
     <link rel="stylesheet" href="styles/therapien_karte.css?v=table-subcategory-20261031">
-    <script src="scripts/image-registry.js?v=5"></script>
+    <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
     <script src="scripts/access-nav.js?v=chapters-20261024" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=compact-provider-rating-block-20261027"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=experience-sort-tooltips-20261031"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/search_tables.css?v=restored-search-design-20261102"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/more_results_bar.css?v=blue-bar-20261102"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=contact-row-20261102"></head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=experience-sort-tooltips-20261031"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/search_tables.css?v=restored-search-design-20261102"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/more_results_bar.css?v=unified-blue-20261105"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=contact-row-20261102"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=responsive-refresh-20261105"><link rel="stylesheet" href="styles/search_navigation_blue.css?v=banner-blue-20261105"></head>
 
 <script>
     function toggleMobileMenu() {
@@ -33,7 +33,12 @@
     <div id="header-placeholder"></div>
 
     <div class="container">
-        <section class="treatment-navigation-panel" aria-label="Navigation für Therapiesuche">
+<aside class="destination-photo-banner destination-photo-banner--blue treatment-suggest-entry" aria-label="Therapie ergänzen">
+            <div><small class="search-contribution-eyebrow">Von Betroffenen für Betroffene</small><h2>Entdecke, was dich unterstützen kann.</h2><p class="destination-discovery-copy"><strong>Welche Möglichkeiten passen zu dir?</strong> Entdecke erfasste Therapien und nutze die Filter, um Angebote und Erfahrungen anderer Betroffener zu vergleichen.</p><a class="destination-discovery-link" href="#treatment-results-list">Entdecke unten die Therapien im Überblick.</a><p class="destination-contribution-copy"><strong>Eine Therapie fehlt?</strong> Teile deinen Hinweis und mache unser gemeinsames Wissen vollständiger. Der Name reicht für den Anfang – wir übernehmen die weitere Recherche.</p></div>
+            <a href="behandlung_vorschlagen.html">Therapie ergänzen →</a>
+        <img class="destination-photo-art" src="assets/images/homepage/banner-therapy-search-v2.webp" alt="" width="800" height="1000"></aside>
+
+        <section id="therapy-search-start" class="treatment-navigation-panel" aria-label="Navigation für Therapiesuche">
             <button
                 id="treatment-navigation-toggle-button"
                 class="treatment-navigation-header"
@@ -68,10 +73,10 @@
                             <option value="total_votes:asc">Anzahl Bewertungen &#x2191;</option>
                             <option value="provider_count:desc">Behandleranzahl gesamt &#x2193;</option>
                             <option value="provider_count:asc">Behandleranzahl gesamt &#x2191;</option>
-                            <option value="matching_provider_count:desc">Behandler im Suchgebiet &#x2193;</option>
-                            <option value="matching_provider_count:asc">Behandler im Suchgebiet &#x2191;</option>
-                            <option value="distance:asc">Entfernung nächster Behandler &#x2191;</option>
-                            <option value="distance:desc">Entfernung nächster Behandler &#x2193;</option>
+                            <option value="matching_provider_count:desc">Behandler:innen im Suchgebiet &#x2193;</option>
+                            <option value="matching_provider_count:asc">Behandler:innen im Suchgebiet &#x2191;</option>
+                            <option value="distance:asc">Entfernung nächster Behandler:innen &#x2191;</option>
+                            <option value="distance:desc">Entfernung nächster Behandler:innen &#x2193;</option>
                         </select>
                     </section>
 
@@ -210,11 +215,11 @@
 
                     <section class="treatment-nav-section treatment-nav-section-provider">
                         <h3 class="treatment-nav-heading">
-                            Behandler
-                            <span class="treatment-nav-info" data-tooltip="Filtert danach, ob und wie viele Behandler zu einer Therapie hinterlegt sind." tabindex="0" aria-label="Info: Behandler">i</span>
+                            Behandler:innen
+                            <span class="treatment-nav-info" data-tooltip="Filtert danach, ob und wie viele Behandler:innen zu einer Therapie hinterlegt sind." tabindex="0" aria-label="Info: Behandler:innen">i</span>
                         </h3>
 
-                        <label class="treatment-nav-label" for="treatment-min-provider-input">Mindestanzahl Behandler</label>
+                        <label class="treatment-nav-label" for="treatment-min-provider-input">Mindestanzahl Behandler:innen</label>
                         <input
                             id="treatment-min-provider-input"
                             class="treatment-nav-text-input treatment-radius-input"
@@ -227,11 +232,11 @@
                         <div class="treatment-provider-options">
                             <label class="treatment-nav-checkbox-row" for="treatment-only-with-provider-input">
                                 <input id="treatment-only-with-provider-input" type="checkbox">
-                                Mit Behandler
+                                Mit Behandler:innen
                             </label>
                             <label class="treatment-nav-checkbox-row" for="treatment-mapped-providers-only-input">
                                 <input id="treatment-mapped-providers-only-input" type="checkbox">
-                                Nur kartierte Behandler zählen
+                                Nur kartierte Behandler:innen zählen
                             </label>
                         </div>
                     </section>
@@ -239,7 +244,7 @@
                     <section class="treatment-nav-section treatment-nav-section-location">
                         <h3 class="treatment-nav-heading">
                             Standortsuche
-                            <span class="treatment-nav-info" data-tooltip="Setzt deinen Kartenstandort. Optional kannst du die Suche auf Behandler in deiner Stadt oder in einem frei gewählten Radius beschränken." tabindex="0" aria-label="Info: Ort und Karte">i</span>
+                            <span class="treatment-nav-info" data-tooltip="Setzt deinen Kartenstandort. Optional kannst du die Suche auf Behandler:innen in deiner Stadt oder in einem frei gewählten Radius beschränken." tabindex="0" aria-label="Info: Ort und Karte">i</span>
                         </h3>
 
                         <label class="treatment-nav-label" for="treatment-location-input">Adresse oder Ort</label>
@@ -268,7 +273,7 @@
                         <label class="treatment-nav-checkbox-row treatment-include-no-coords" for="treatment-include-no-coords-input">
                             <input id="treatment-include-no-coords-input" type="checkbox" disabled>
                             Einträge ohne Koordinaten einbeziehen
-                            <span class="treatment-nav-info" data-tooltip="Nimmt Therapien mit passenden Behandlern ohne berechenbare Kartenposition zusätzlich auf. Für diese Behandler kann nicht geprüft werden, ob sie innerhalb des Radius liegen." tabindex="0" aria-label="Info: Einträge ohne Koordinaten einbeziehen">i</span>
+                            <span class="treatment-nav-info" data-tooltip="Nimmt Therapien mit passenden Behandler:innen ohne berechenbare Kartenposition zusätzlich auf. Für diese Behandler:innen kann nicht geprüft werden, ob sie innerhalb des Radius liegen." tabindex="0" aria-label="Info: Einträge ohne Koordinaten einbeziehen">i</span>
                         </label>
 
                         <label class="treatment-nav-label" for="treatment-radius-input">Radius in km</label>
@@ -324,12 +329,12 @@
                 </section>
 
                 <p id="treatment-map-status" class="treatment-map-status">
-                    Bitte Kartenstandort setzen, um die nächsten Behandlerstandorte der gefundenen Therapien auf der Karte zu sehen.
+                    Bitte Kartenstandort setzen, um die nächsten Standorte von Behandler:innen der gefundenen Therapien auf der Karte zu sehen.
                 </p>
             </div>
         </section>
 
-        <section class="treatment-results-panel" aria-label="Therapien und Therapien">
+        <section id="treatment-results-list" class="treatment-results-panel" aria-label="Therapien und Therapien">
             <div class="treatment-results-header">
                 <span class="treatment-results-header-left">
                     <span class="treatment-results-header-icon" aria-hidden="true">&#x25A4;</span>
@@ -391,10 +396,10 @@
                                 <option value="total_votes:asc">Anzahl Bewertungen &#x2191;</option>
                                 <option value="provider_count:desc">Behandleranzahl gesamt &#x2193;</option>
                                 <option value="provider_count:asc">Behandleranzahl gesamt &#x2191;</option>
-                                <option value="matching_provider_count:desc">Behandler im Suchgebiet &#x2193;</option>
-                                <option value="matching_provider_count:asc">Behandler im Suchgebiet &#x2191;</option>
-                                <option value="distance:asc">Entfernung nächster Behandler &#x2191;</option>
-                                <option value="distance:desc">Entfernung nächster Behandler &#x2193;</option>
+                                <option value="matching_provider_count:desc">Behandler:innen im Suchgebiet &#x2193;</option>
+                                <option value="matching_provider_count:asc">Behandler:innen im Suchgebiet &#x2191;</option>
+                                <option value="distance:asc">Entfernung nächster Behandler:innen &#x2191;</option>
+                                <option value="distance:desc">Entfernung nächster Behandler:innen &#x2193;</option>
                             </select>
                         </div>
                         <div class="treatment-results-sort-field">
@@ -438,10 +443,7 @@
             </div>
         </section>
 
-        <aside class="treatment-suggest-entry" aria-label="Therapie ergänzen">
-            <div><strong>Fehlt eine Therapie?</strong><span>Ergänze Name, Quelle und alles, was du über die Therapie weißt.</span></div>
-            <a href="behandlung_vorschlagen.html">Therapie vorschlagen →</a>
-        </aside>
+        
 
         <section id="treatment-table-results-section" class="treatment-table-results-section is-hidden">
             <button type="button" class="lcn-search-table-toggle" data-lcn-table-toggle aria-expanded="true" aria-controls="treatment-table-content"><span>▤ &nbsp; Tabelle</span><span class="lcn-search-table-chevron" aria-hidden="true">⌃</span></button>
@@ -453,7 +455,7 @@
                         <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="name">Therapie</button></th>
                         <th><button class="treatment-table-sort-button" type="button" data-table-sort-key="category">Kategorie</button></th>
                         <th class="lcn-experience-heading-cell"><button id="treatment-table-experience-button" class="treatment-table-sort-button" type="button" data-table-sort-key="experience"><span id="treatment-table-experience-heading">Erfahrung</span> <span class="treatment-table-header-note">(n = Angaben)</span></button></th>
-                        <th><button id="treatment-table-provider-button" class="treatment-table-sort-button" type="button" data-table-sort-key="provider"><span id="treatment-table-provider-heading">Behandler gesamt</span></button></th>
+                        <th><button id="treatment-table-provider-button" class="treatment-table-sort-button" type="button" data-table-sort-key="provider"><span id="treatment-table-provider-heading">Behandler:innen gesamt</span></button></th>
                         <th><button id="treatment-table-metric-button" class="treatment-table-sort-button" type="button" data-table-sort-key="location"><span id="treatment-table-metric-heading">Entfernung / Ort</span></button></th>
                     </tr>
                 </thead>
@@ -488,7 +490,7 @@
     </script>
 
     <script>
-        fetch("components/header.html?v=top-therapien-20261102")
+        fetch("components/header.html?v=two-add-links-20261105")
             .then(response => response.text())
             .then(data => {
                 document.getElementById("header-placeholder").innerHTML = data;

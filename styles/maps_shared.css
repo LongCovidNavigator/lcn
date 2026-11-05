@@ -3,7 +3,7 @@
 :is(.doctor-location-input-row,.treatment-location-input-row,.top-map-location-input-row,.own-location-control){position:relative;display:flex;gap:8px;width:100%;align-items:center}
 :is(#doctor-location-input,#treatment-location-input,#top-map-location-input,#own-location,.nd-map-location input[name=location],#nearby-gps-location){width:100%;min-width:0;min-height:44px;border:1px solid #cbdce9;border-radius:8px;padding:10px 38px 10px 12px;background:white;color:#17365d;font:inherit;box-sizing:border-box}
 :is(#doctor-radius-input,#treatment-radius-input,[data-radius],#top-map-radius,#nearby-gps-radius){min-height:44px;width:100%;max-width:180px;border:1px solid #cbdce9;border-radius:8px;padding:8px 12px;font:inherit;background:white;color:#17365d;box-sizing:border-box}
-:is(.top-map-location-submit,.lcn-map-submit,#location-form button[type=submit],.nd-map-location button[type=submit]){min-height:44px;border:1px solid #0878e3;border-radius:8px;background:#0878e3;color:white;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;margin-top:8px}
+:is(.top-map-location-submit,.lcn-map-submit,#location-form button[type=submit],.nd-map-location button[type=submit]){min-height:44px;border:1px solid #005ca8;border-radius:8px;background:#005ca8;color:white;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;margin-top:8px}
 :is(.doctor-location-mode-button,.treatment-location-mode-button){min-height:40px;border-radius:8px;font-size:14px}
 :is(.location-suggestions,.top-map-location-suggestions){z-index:1100;border:1px solid #cbdce9;border-radius:8px;background:white;box-shadow:0 4px 16px #17365d18}
 :is(.location-suggestions,.top-map-location-suggestions) button{min-height:44px;text-align:left;padding:10px 12px}
@@ -105,10 +105,10 @@
 :is(#doctor-location-clear-button,#treatment-location-clear-button,#top-map-location-clear,#doctor-detail-own-location-clear,[data-map-clear]).is-hidden { display:none!important; }
 #clear-location { top:7px; right:7px; }
 :is(.nearby-gps-search button[type="submit"],.nearby-gps-all,.top-map-location-submit,.lcn-map-submit,#location-form button[type="submit"],.treatment-detail-provider-location-set-button) {
- background:#0878e3!important; border:1px solid #0878e3!important; color:#fff!important; border-radius:8px; box-shadow:none!important;
+ background:#005ca8!important; border:1px solid #005ca8!important; color:#fff!important; border-radius:8px; box-shadow:none!important;
 }
 :is(.nearby-gps-search button[type="submit"],.nearby-gps-all,.top-map-location-submit,.lcn-map-submit,#location-form button[type="submit"],.treatment-detail-provider-location-set-button):hover {
- background:#0666c3!important; border-color:#0666c3!important; color:#fff!important;
+ background:#004b8a!important; border-color:#004b8a!important; color:#fff!important;
 }
 .nearby-gps-actions .nearby-gps-suggest { background:#f0f7ff!important; border-color:#d3e5f8!important; color:#2862a0!important; }
 .nearby-gps-actions .nearby-gps-suggest:hover { background:#e3f0ff!important; border-color:#abcff5!important; color:#20578f!important; }
@@ -123,3 +123,6 @@
 
 /* Share the detail filter's blue slider color across both search navigations. */
 :is(.doctor-nav-section,.treatment-nav-section) input[type=range]{accent-color:#0878e3}
+
+/* Keep Leaflet panes and controls below the shared navigation. */
+.leaflet-container{isolation:isolate;z-index:0}

@@ -85,3 +85,17 @@
 
 /* Shared viewport-positioned info boxes replace overflowing CSS pseudo-tooltips. */
 .doctor-map-page .doctor-nav-info::before, .doctor-map-page .doctor-nav-info::after { display: none !important; }
+
+/* Provider type, offering and contact share the first row; sorting follows contact. */
+.doctor-map-page .doctor-nav-section-provider{grid-area:provider;min-width:0}
+@media(min-width:1101px){
+ .doctor-map-page .doctor-navigation-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-areas:"provider offer offer contact" "specialty specialty specialty sort" "rating rating location location"!important;align-items:stretch}
+ .doctor-map-page .doctor-nav-section{height:auto;min-height:0!important;box-sizing:border-box}
+}
+@media(min-width:761px) and (max-width:1100px){
+ .doctor-map-page .doctor-navigation-grid{grid-template-areas:"provider contact" "offer offer" "specialty specialty" "sort sort" "rating location"!important}
+}
+@media(max-width:760px){
+ .doctor-map-page .doctor-navigation-grid{grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"provider" "offer" "contact" "specialty" "sort" "rating" "location"!important}
+}
+.doctor-map-page .doctor-navigation-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:16px;margin-top:16px}

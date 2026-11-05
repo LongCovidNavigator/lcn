@@ -1,105 +1,78 @@
 (() => {
-    const navigation = document.querySelector('.home-section-nav');
-    if (!navigation) return;
-    const teasers = {
-        empfehlung: ['Empfehlung', 'Therapien und Behandler im Fokus'],
-        suche: ['Suche', 'Entdecke Therapien und passende Behandler.'],
-        ergaenzung: ['Ergänzung', 'Teile eine Behandlung oder Anlaufstelle, die noch fehlt.']
-    };
-    for (const [id, [title, teaser]] of Object.entries(teasers)) {
-        const section = document.getElementById(id);
-        if (!section) continue;
-        const details = document.createElement('details');
-        details.className = 'home-chapter-disclosure';
-        details.open = id === 'empfehlung';
-        const summary = document.createElement('summary');
-        const heading = document.createElement('strong');
-        heading.textContent = title;
-        const description = document.createElement('span');
-        description.textContent = teaser;
-        const icons = {
-            empfehlung: '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9Z"/>',
-            hausarzt: '<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
-            suche: '<circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 6 6"/>',
-            ergaenzung: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/>'
-        };
-        const icon = document.createElement('span');
-        icon.className = 'home-chapter-icon';
-        icon.setAttribute('aria-hidden', 'true');
-        icon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons[id]}</svg>`;
-        const text = document.createElement('span');
-        text.className = 'home-chapter-label';
-        text.append(heading, description);
-        summary.append(icon, text);
-        const body = document.createElement('div');
-        body.className = 'home-chapter-body';
-        body.append(...section.childNodes);
-        details.append(summary, body);
-        section.append(details);
-        details.addEventListener('toggle', () => {
-            if (details.open) requestAnimationFrame(() => {
-                if (id === 'hausarzt') window.dispatchEvent(new Event('resize'));
-            });
-            schedule();
+    const track = document.querySelector('.home-carousel-track');
+    if (!track) return;
+    const cards = [...track.querySelectorAll('.home-discover-card')];
+    const nav = document.querySelector('.home-section-nav');
+    const status = document.querySelector('.home-carousel-status');
+    const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let current = 0;
+    const positionKey = 'lcn-home-carousel-position';
+    let savedPosition = 0;
+    try { savedPosition = Math.max(0, Number(sessionStorage.getItem(positionKey)) || 0); } catch (_) {}
+    // Old section hashes must not override the last position on arrival.
+    if (cards.some(card => '#' + card.id === location.hash)) {
+        history.replaceState(history.state, '', location.pathname + location.search);
+    }
+    function restorePosition() {
+        track.scrollTo({left: savedPosition, behavior: 'instant'});
+        update();
+    }
+    function savePosition() {
+        try { sessionStorage.setItem(positionKey, String(track.scrollLeft)); } catch (_) {}
+    }
+    const previous = document.querySelector('.home-carousel-prev');
+    const next = document.querySelector('.home-carousel-next');
+    function go(index) {
+        const target = cards[Math.max(0, Math.min(index, cards.length - 1))];
+        track.scrollTo({left: target.offsetLeft - cards[0].offsetLeft, behavior: reduced() ? 'instant' : 'smooth'});
+    }
+    function step(direction) {
+        const max = Math.max(0, track.scrollWidth - track.clientWidth);
+        if ((direction < 0 && track.scrollLeft <= 3) || (direction > 0 && track.scrollLeft >= max - 3)) return;
+        const distance = cards[1].offsetLeft - cards[0].offsetLeft;
+        track.scrollTo({left: Math.max(0, Math.min(track.scrollWidth - track.clientWidth, track.scrollLeft + direction * distance)), behavior: reduced() ? 'instant' : 'smooth'});
+    }
+    previous.addEventListener('click', () => step(-1));
+    next.addEventListener('click', () => step(1));
+    track.addEventListener('keydown', event => {
+        if (event.target !== track) return;
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); step(event.key === 'ArrowLeft' ? -1 : 1); return; }
+        const targets = {Home: 0, End: cards.length - 1};
+        if (event.key in targets) { event.preventDefault(); go(targets[event.key]); }
+    });
+    function update() {
+        const max = track.scrollWidth - track.clientWidth;
+        current = track.scrollLeft >= max - 3 ? cards.length - 1 : cards.reduce((best, card, i) => Math.abs(card.offsetLeft - cards[0].offsetLeft - track.scrollLeft) < Math.abs(cards[best].offsetLeft - cards[0].offsetLeft - track.scrollLeft) ? i : best, 0);
+        previous.disabled = track.scrollLeft <= 3;
+        next.disabled = track.scrollLeft >= max - 3;
+        status.textContent = `${current + 1} / ${cards.length}`;
+        const group = current < 2 ? 'empfehlung' : current === 2 ? 'hausarzt' : current < 5 ? 'suche' : 'ergaenzung';
+        nav?.querySelectorAll('a').forEach(link => {
+            if (link.hash === '#' + group) link.setAttribute('aria-current', 'location');
+            else link.removeAttribute('aria-current');
         });
     }
-    document.addEventListener('click', event => {
-        const button = event.target.closest('.home-ranking-toggle');
-        if (!button) return;
-        const expanded = button.getAttribute('aria-expanded') !== 'true';
-        const rows = button.closest('.home-ranking-content').querySelectorAll('.home-ranking-additional');
-        rows.forEach(row => { row.hidden = !expanded; });
-        button.setAttribute('aria-expanded', String(expanded));
-        button.textContent = expanded ? 'Weniger anzeigen ↑' : `Weitere ${rows.length} anzeigen ↓`;
-    });
-    const links = [...navigation.querySelectorAll('a[href^="#"]')].filter(link => link.hash !== '#start');
-    const sections = links.map(link => document.getElementById(link.hash.slice(1))).filter(Boolean);
-    function openTarget() {
-        const section = document.getElementById(location.hash.slice(1));
-        const details = section?.querySelector(':scope > details');
-        if (details) details.open = true;
+    function openHash() {
+        const index = cards.findIndex(card => '#' + card.id === location.hash);
+        if (index >= 0) go(index);
     }
-    navigation.addEventListener('click', event => {
+    nav?.addEventListener('click', event => {
         const link = event.target.closest('a');
-        if (!link) return;
-        const section = document.getElementById(link.hash.slice(1));
-        const details = section?.querySelector(':scope > details');
-        if (details) details.open = true;
-        if (section) {
-            event.preventDefault();
-            history.pushState(null, '', link.hash);
-            section.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
-        }
+        const index = cards.findIndex(card => '#' + card.id === link?.hash);
+        if (index < 0) return;
+        event.preventDefault();
+        history.pushState(null, '', link.hash);
+        go(index);
+        document.querySelector('.home-discover').scrollIntoView({behavior:reduced() ? 'instant' : 'smooth', block:'start'});
     });
-    let scheduled = false;
-    let previousActive = null;
-    function update() {
-        scheduled = false;
-        const height = navigation.getBoundingClientRect().height;
-        document.documentElement.style.setProperty('--home-nav-height', `${height + 16}px`);
-        const threshold = scrollY + innerHeight >= document.documentElement.scrollHeight - 4 ? innerHeight * 0.65 : height + 36;
-        let active = sections[0];
-        for (const section of sections) {
-            if (section.getBoundingClientRect().top <= threshold) active = section;
-        }
-        for (const link of links) {
-            if (active && link.hash === '#' + active.id) {
-                link.setAttribute('aria-current', 'location');
-                if (previousActive !== active && navigation.scrollWidth > navigation.clientWidth) {
-                    navigation.scrollTo({left:link.offsetLeft - navigation.clientWidth / 2 + link.offsetWidth / 2, behavior:'smooth'});
-                }
-            } else link.removeAttribute('aria-current');
-        }
-        previousActive = active;
-    }
-    function schedule() {
-        if (!scheduled) { scheduled = true; requestAnimationFrame(update); }
-    }
-    addEventListener('scroll', schedule, {passive:true});
-    addEventListener('resize', schedule);
-    addEventListener('load', schedule);
-    addEventListener('hashchange', () => { openTarget(); schedule(); });
-    if ('ResizeObserver' in window) new ResizeObserver(schedule).observe(document.querySelector('.home-page'));
-    openTarget();
-    update();
+    track.addEventListener('scroll', () => { update(); savePosition(); }, {passive:true});
+    track.addEventListener('focusin', event => {
+        const card = event.target.closest('.home-discover-card');
+        if (card) go(cards.indexOf(card));
+    });
+    addEventListener('hashchange', openHash);
+    addEventListener('resize', update);
+    restorePosition();
+    addEventListener('load', restorePosition, {once:true});
+    addEventListener('pagehide', savePosition);
 })();

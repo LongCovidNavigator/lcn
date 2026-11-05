@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="de">
 <head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=split-country-20261101"><script src="scripts/map_viewport.js?v=stable-view-20261102"></script>
-<script src="scripts/online_access.js?v=experience-sort-tooltips-20261031" defer></script>
+<script src="scripts/online_access.js?v=shared-count-pins-20261105" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Long Covid Navigator - Behandler-Suche</title>
+    <title>Long Covid Navigator - Behandler:innen-Suche</title>
 
-    <link rel="stylesheet" href="styles/general.css?v=content-aligned-20261101-3">
+    <link rel="stylesheet" href="styles/general.css?v=location-dark-blue-20261105">
     <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/lcnprotocol_table.css">
@@ -15,10 +15,11 @@
         rel="stylesheet"
         href="assets/vendor/leaflet/leaflet.css"
     >
-	<link rel="stylesheet" href="styles/aerzte_karte.css?v=contact-two-rows-20261031">
-    <script src="scripts/image-registry.js?v=5"></script>
+	<link rel="stylesheet" href="styles/aerzte_karte.css?v=provider-filter-20261105">
+    <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
     <script src="scripts/access-nav.js?v=chapters-20261024" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=compact-provider-rating-block-20261027"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=experience-sort-tooltips-20261031"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/doctor_cards.css?v=profile-website-only-20261031"><link rel="stylesheet" href="styles/search_tables.css?v=restored-search-design-20261102"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/doctor_search_responsive.css?v=mobile-tablet-20261031"><link rel="stylesheet" href="styles/more_results_bar.css?v=blue-bar-20261102"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=contact-row-20261102"></head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=experience-sort-tooltips-20261031"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/doctor_cards.css?v=profile-website-only-20261031"><link rel="stylesheet" href="styles/search_tables.css?v=restored-search-design-20261102"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/doctor_search_responsive.css?v=provider-filter-20261105"><link rel="stylesheet" href="styles/more_results_bar.css?v=unified-blue-20261105"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=contact-row-20261102"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=responsive-refresh-20261105"><link rel="stylesheet" href="styles/search_navigation_blue.css?v=banner-blue-20261105"><link rel="stylesheet" href="styles/provider_type_filter.css">
+</head>
 
 <script>
     function toggleMobileMenu() {
@@ -27,12 +28,17 @@
     }
 </script>
 
-<body data-search-title="Behandlersuche" class="lcn-public-page doctor-map-page">
+<body data-search-title="Behandler:innen-Suche" class="lcn-public-page doctor-map-page">
 
     <div id="header-placeholder" data-lcn-header></div>
 
     <div class="container">
-        <section class="doctor-navigation-panel" aria-label="Navigation für Ärztinnen- und Behandler-Suche">
+<aside class="destination-photo-banner destination-photo-banner--blue doctor-suggest-entry" aria-label="Ärztin, Behandler:in oder Praxis ergänzen">
+            <div><small class="search-contribution-eyebrow">Von Betroffenen für Betroffene</small><h2>Finde Menschen, die deine Erkrankung kennen.</h2><p class="destination-discovery-copy"><strong>Wer kann dich auf deinem Weg begleiten?</strong> Entdecke Behandler:innen und Praxen und grenze die Auswahl nach Standort, fachlichem Profil und Erfahrungen anderer Betroffener ein.</p><a class="destination-discovery-link" href="#doctor-results-list">Entdecke unten passende Behandler:innen.</a><p class="destination-contribution-copy"><strong>Du kennst eine Anlaufstelle, die hier noch fehlt?</strong> Hilf anderen Betroffenen mit deinem Hinweis. Name oder Praxis und die Web-Adresse reichen für den Anfang – wir übernehmen die weitere Recherche.</p></div>
+            <a href="behandler_vorschlagen.html">Behandler:in ergänzen →</a>
+        <img class="destination-photo-art" src="assets/images/homepage/banner-provider-search-v2.webp" alt="" width="800" height="1000"></aside>
+
+        <section id="provider-search-start" class="doctor-navigation-panel" aria-label="Navigation für Ärztinnen- und Behandler:innen-Suche">
 			<button
 				id="doctor-navigation-toggle-button"
 				class="doctor-navigation-header"
@@ -49,26 +55,12 @@
 
 			<div id="doctor-navigation-content" class="doctor-navigation-content">
 				<div class="doctor-navigation-grid">
-					<section class="doctor-nav-section doctor-nav-section-sort">
-						<h3 class="doctor-nav-heading">
-							Sortierung
-							<span class="doctor-nav-info" data-tooltip="Legt fest, in welcher Reihenfolge die Ergebnisse angezeigt werden. Die Sortierung nach Entfernung ist erst möglich, wenn ein Standort gesetzt wurde." data-lcn-tooltip="Legt fest, in welcher Reihenfolge die Ergebnisse angezeigt werden. Die Sortierung nach Entfernung ist erst möglich, wenn ein Standort gesetzt wurde." tabindex="0" aria-label="Info: Sortierung">i</span>
-						</h3>
-
-						<label class="doctor-nav-label" for="doctor-sort-select">Sortieren nach</label>
-						<select id="doctor-sort-select" class="doctor-nav-select">
-							<option value="name:asc">Name A–Z</option>
-							<option value="name:desc">Name Z–A</option>
-							<option value="distance:asc">Entfernung &#x2191;</option>
-							<option value="distance:desc">Entfernung &#x2193;</option>
-							<option value="positive_ratio:desc">Positive Erfahrungen [%] &#x2193;</option>
-							<option value="positive_ratio:asc">Positive Erfahrungen [%] &#x2191;</option>
-							<option value="negative_ratio:asc">Negative Erfahrungen [%] &#x2191;</option>
-							<option value="negative_ratio:desc">Negative Erfahrungen [%] &#x2193;</option>
-							<option value="total_votes:desc">Anzahl Bewertungen &#x2193;</option>
-							<option value="total_votes:asc">Anzahl Bewertungen &#x2191;</option>
-						</select>
-					</section>
+					<section class="doctor-nav-section doctor-nav-section-provider">
+<h3 class="doctor-nav-heading">Behandlerart</h3>
+<label class="doctor-nav-label" for="doctor-provider-type-select">Art der Behandler:in</label>
+<select id="doctor-provider-type-select" hidden aria-hidden="true" tabindex="-1"><option value="">Alle Behandlerarten</option></select>
+<details id="provider-type-picker" class="provider-filter-picker"><summary>Alle Behandlerarten</summary><div class="provider-filter-menu"><div class="provider-filter-groups" role="group" aria-label="Einzelperson oder Institution"></div><div class="provider-filter-options"></div></div></details>
+</section>
 
                     <section class="doctor-nav-section doctor-nav-section-offer">
                         <h3 class="doctor-nav-heading">Therapieangebot <span class="doctor-nav-info" tabindex="0" aria-label="Info: Therapieangebot" data-tooltip="Zählt die erfassten unterschiedlichen Therapien und ihre Hauptkategorien. Mehrfachstandorte werden nicht mehrfach gezählt. Die Anzahl beschreibt das dokumentierte Angebot, nicht dessen Qualität." data-lcn-tooltip="Zählt die erfassten unterschiedlichen Therapien und ihre Hauptkategorien. Mehrfachstandorte werden nicht mehrfach gezählt. Die Anzahl beschreibt das dokumentierte Angebot, nicht dessen Qualität.">i</span></h3>
@@ -125,11 +117,31 @@
 							Telefonnummer hinterlegt
 						</label>
 					</section>
+<section class="doctor-nav-section doctor-nav-section-sort">
+						<h3 class="doctor-nav-heading">
+							Sortierung
+							<span class="doctor-nav-info" data-tooltip="Legt fest, in welcher Reihenfolge die Ergebnisse angezeigt werden. Die Sortierung nach Entfernung ist erst möglich, wenn ein Standort gesetzt wurde." data-lcn-tooltip="Legt fest, in welcher Reihenfolge die Ergebnisse angezeigt werden. Die Sortierung nach Entfernung ist erst möglich, wenn ein Standort gesetzt wurde." tabindex="0" aria-label="Info: Sortierung">i</span>
+						</h3>
+
+						<label class="doctor-nav-label" for="doctor-sort-select">Sortieren nach</label>
+						<select id="doctor-sort-select" class="doctor-nav-select">
+							<option value="name:asc">Name A–Z</option>
+							<option value="name:desc">Name Z–A</option>
+							<option value="distance:asc">Entfernung &#x2191;</option>
+							<option value="distance:desc">Entfernung &#x2193;</option>
+							<option value="positive_ratio:desc">Positive Erfahrungen [%] &#x2193;</option>
+							<option value="positive_ratio:asc">Positive Erfahrungen [%] &#x2191;</option>
+							<option value="negative_ratio:asc">Negative Erfahrungen [%] &#x2191;</option>
+							<option value="negative_ratio:desc">Negative Erfahrungen [%] &#x2193;</option>
+							<option value="total_votes:desc">Anzahl Bewertungen &#x2193;</option>
+							<option value="total_votes:asc">Anzahl Bewertungen &#x2191;</option>
+						</select>
+					</section>
 
                     <section class="doctor-nav-section doctor-nav-section-rating">
 						<h3 class="doctor-nav-heading">
 							Bewertung
-							<span class="doctor-nav-info" data-tooltip="Filtert Ärztinnen und Ärzte nach Erfahrungswerten: Verbesserung und Heilung jeweils mindestens X %, negative Erfahrungen höchstens Y %." data-lcn-tooltip="Filtert Ärztinnen und Ärzte nach Erfahrungswerten: Verbesserung und Heilung jeweils mindestens X %, negative Erfahrungen höchstens Y %." tabindex="0" aria-label="Info: Bewertung">i</span>
+							<span class="doctor-nav-info" data-tooltip="Filtert Ärzt:innen nach Erfahrungswerten: Verbesserung und Heilung jeweils mindestens X %, negative Erfahrungen höchstens Y %." data-lcn-tooltip="Filtert Ärzt:innen nach Erfahrungswerten: Verbesserung und Heilung jeweils mindestens X %, negative Erfahrungen höchstens Y %." tabindex="0" aria-label="Info: Bewertung">i</span>
 						</h3>
 
 						<div class="doctor-rating-control">
@@ -347,11 +359,11 @@
 			</div>
 		</section>
 
-		<section class="doctor-results-panel" aria-label="Ärztinnen und Ärzte">
+		<section id="doctor-results-list" class="doctor-results-panel" aria-label="Ärzt:innen">
 			<div class="doctor-results-header">
 				<span class="doctor-results-header-left">
 					<span class="doctor-results-header-icon" aria-hidden="true">&#x25A4;</span>
-					<span>Behandler</span>
+					<span>Behandler:innen</span>
 				</span>
 
 				<div class="doctor-view-switch doctor-view-switch-in-header" aria-label="Ansicht wechseln">
@@ -375,10 +387,10 @@
 				</div>
 			</div>
 
-			<div class="doctor-results-search-panel" aria-label="Ärztinnen und Ärzte suchen und vergleichen">
+			<div class="doctor-results-search-panel" aria-label="Ärzt:innen suchen und vergleichen">
 				<div class="doctor-results-search-row">
 					<div class="doctor-results-search-field">
-						<label class="doctor-results-search-label" for="doctor-search-input">Behandler suchen</label>
+						<label class="doctor-results-search-label" for="doctor-search-input">Behandler:innen suchen</label>
 						<input
 							id="doctor-search-input"
 							class="doctor-results-search-input"
@@ -453,21 +465,18 @@
             </div>
         </section>
 
-        <aside class="doctor-suggest-entry" aria-label="Ärztin, Arzt oder Praxis ergänzen">
-            <div><strong>Fehlt eine Ärztin, ein Arzt oder eine Praxis?</strong><span>Teile die wichtigsten Informationen und auf Wunsch direkt deine Erfahrung.</span></div>
-            <a href="arzt_vorschlagen.html">Neuen Eintrag vorschlagen →</a>
-        </aside>
+        
 
         <section id="doctor-table-results-section" class="doctor-map-results-section is-hidden">
             <button type="button" class="lcn-search-table-toggle" data-lcn-table-toggle aria-expanded="true" aria-controls="doctor-table-content"><span>▤ &nbsp; Tabelle</span><span class="lcn-search-table-chevron" aria-hidden="true">⌃</span></button>
-            <div id="doctor-table-content" class="lcn-search-table-content" role="region" tabindex="0" aria-label="Behandler-Tabelle, seitlich scrollbar">
+            <div id="doctor-table-content" class="lcn-search-table-content" role="region" tabindex="0" aria-label="Behandler:innen-Tabelle, seitlich scrollbar">
                 <p class="doctor-table-scroll-hint">↔ Tabelle seitlich scrollen, um alle Spalten zu sehen.</p>
 
             <table class="doctor-map-results-table">
 				<thead>
 					<tr>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="rank"><span class="table-rank-label-full">Platz</span><span class="table-rank-label-short">#</span></button></th>
-						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="name">Behandler</button></th>
+						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="name">Behandler:innen</button></th>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="specialty">Fachrichtung</button></th>
                         <th class="lcn-experience-heading-cell"><button id="doctor-table-experience-button" class="doctor-table-sort-button" type="button" data-table-sort-key="experience"><span id="doctor-table-experience-heading">Erfahrung</span> <span class="doctor-table-header-note">(n = Angaben)</span></button></th>
 						<th><button class="doctor-table-sort-button" type="button" data-table-sort-key="location">Entfernung</button></th>
@@ -485,7 +494,7 @@
 			</table>
             <div class="doctor-table-load-more-wrap lcn-more-bar">
                 <span id="doctor-table-page-status" role="status" aria-live="polite"></span>
-                <button id="doctor-table-load-more-button" class="doctor-cards-load-more-button is-hidden" type="button" aria-controls="doctor-map-results-body">Weitere 50 Behandler laden</button>
+                <button id="doctor-table-load-more-button" class="doctor-cards-load-more-button is-hidden" type="button" aria-controls="doctor-map-results-body">Weitere 50 Behandler:innen laden</button>
             </div>
         
             </div>
@@ -495,7 +504,8 @@
     <script src="assets/vendor/leaflet/leaflet.js"></script>
 	<script>window.LCNImages.configureLeaflet(window.L);</script>
 		<script src="scripts/dummy_preferences.js?v=global-dummy-20261024"></script>
-    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/aerzte_karte.js?v=cards-km-only-20261102"></script>
+    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/provider_type_filter.js"></script>
+<script src="scripts/aerzte_karte.js?v=provider-filter-20261105"></script>
 
     <div id="footer-placeholder"></div>
 

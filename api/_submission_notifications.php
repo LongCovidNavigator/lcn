@@ -18,7 +18,7 @@ function lcnBuildSubmissionNotification(PDO $pdo): array {
     $treatmentCount=count($items)-$doctorCount;
     $subject=sprintf('LCN: %d neue Vorschläge zur Prüfung',count($items));
     $lines=[$subject,'','Seit dem letzten Bericht sind neue Community-Vorschläge eingegangen:','Ärzt:innen / Praxen: '.$doctorCount,'Therapien: '.$treatmentCount,'Insgesamt noch offen: '.$pending];
-    if($items){$lines[]='';$lines[]='Neue Vorschläge:';foreach($items as $item){$label=$item['entity_type']==='doctor'?'Behandler':'Therapie';$place=trim((string)$item['city'])!==''?' – '.$item['city']:'';$rating=$item['experience']!==null?' – Erfahrung: '.$item['experience']:'';$lines[]=sprintf('- #%d [%s] %s%s%s',(int)$item['submission_id'],$label,$item['name'],$place,$rating);}}
+    if($items){$lines[]='';$lines[]='Neue Vorschläge:';foreach($items as $item){$label=$item['entity_type']==='doctor'?'Behandler:innen':'Therapie';$place=trim((string)$item['city'])!==''?' – '.$item['city']:'';$rating=$item['experience']!==null?' – Erfahrung: '.$item['experience']:'';$lines[]=sprintf('- #%d [%s] %s%s%s',(int)$item['submission_id'],$label,$item['name'],$place,$rating);}}
     $lines[]='';$lines[]='Jetzt prüfen: '.lcnSubmissionReviewUrl();$lines[]='';$lines[]='Diese Nachricht wurde automatisch vom Long Covid Navigator erstellt.';
     return ['subject'=>$subject,'body'=>implode(PHP_EOL,$lines).PHP_EOL,'period_start'=>$periodStart,'items'=>$items,'new_count'=>count($items),'pending_count'=>$pending];
 }

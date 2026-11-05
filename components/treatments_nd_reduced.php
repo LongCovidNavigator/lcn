@@ -46,7 +46,7 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
         if ($kind==='effect') $html .= '<span class="bar-area"><strong data-percent>–</strong><span class="effect-bar effect-'.$i.'" data-bar></span></span>';
         elseif ($kind==='cost') $html .= '<span class="dot" aria-hidden="true"></span><strong class="scale-percent" data-percent>–</strong>';
         else $html .= '<strong data-percent>–</strong><span class="ux-track" aria-hidden="true"><span data-bar></span></span>';
-        $displayLabel = ndEscape($kind === 'effect' && $i === 1 ? 'Neutral' : mb_strtoupper(mb_substr($label, 0, 1)).mb_substr(str_replace('Anbieter', 'Behandler', $label), 1));
+        $displayLabel = ndEscape($kind === 'effect' && $i === 1 ? 'Neutral' : mb_strtoupper(mb_substr($label, 0, 1)).mb_substr(str_replace('Anbieter', 'Behandler:innen', $label), 1));
         if ($key === 'access') $displayLabel = str_replace(' / ', $i === 1 ? ' oder<br>' : ' /<br>', $displayLabel);
         if ($key === 'access' && $i === 2) $displayLabel = 'Nur im Rahmen einer<br>Studie möglich';
         $html .= '<span>'.$displayLabel.'</span><small class="ux-selected">Deine Auswahl</small></button>';

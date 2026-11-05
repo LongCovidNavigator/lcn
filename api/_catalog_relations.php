@@ -8,7 +8,7 @@ function lcnValidateCatalogRelation(PDO $p,int $doctor,int $treatment,string $ac
 
 function lcnApplyCatalogRelation(PDO $p,array $row,array $payload): int {
  $relation=$payload['relationship'];$doctor=(int)$relation['doctor_id'];$treatment=(int)$relation['treatment_id'];$action=$relation['action'];
- if((int)($row['existing_target_id']??0)!==$doctor)throw new DomainException('Die gemeldete Zuordnung passt nicht zum Behandler.');
+ if((int)($row['existing_target_id']??0)!==$doctor)throw new DomainException('Die gemeldete Zuordnung passt nicht zur behandelnden Person.');
  lcnValidateCatalogRelation($p,$doctor,$treatment,$action);
  if($action==='remove'){
   $payload['removed_relations']=lcnNdRows($p,'SELECT * FROM tbl_cpl_entities2treatments_nd WHERE lcn_id=? AND treat_nd_id=?',[$doctor,$treatment]);

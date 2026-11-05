@@ -1,0 +1,6 @@
+from pathlib import Path
+p=Path('scripts/aerzte_karte.js');s=p.read_text(encoding='utf-8');a=s.index('        const aliases = {doctor:');b=s.index('\n    }',a)
+s=s[:a]+'''        apiDoctors = renderProviderTypePicker(apiDoctors, providerSelect);
+'''+s[b:];s=s.replace('if (providerSelect) providerSelect.value = "";', 'if (providerSelect) providerSelect.value = "";\n    window.providerTypeGroup = "";');p.write_text(s,encoding='utf-8')
+p=Path('behandler_suche.html');s=p.read_text(encoding='utf-8');s=s.replace('<select id="doctor-provider-type-select" class="doctor-nav-select"><option value="">Alle Behandlerarten</option></select>', '''<select id="doctor-provider-type-select" hidden aria-hidden="true" tabindex="-1"><option value="">Alle Behandlerarten</option></select>
+<details id="provider-type-picker" class="provider-filter-picker"><summary>Alle Behandlerarten</summary><div class="provider-filter-menu"><div class="provider-filter-groups" role="group" aria-label="Einzelperson oder Institution"></div><div class="provider-filter-options"></div></div></details>''');s=s.replace('<script src="scripts/aerzte_karte.js', '<script src="scripts/provider_type_filter.js"></script>\n<script src="scripts/aerzte_karte.js');s=s.replace('</head>','<link rel="stylesheet" href="styles/provider_type_filter.css">\n</head>');p.write_text(s,encoding='utf-8')

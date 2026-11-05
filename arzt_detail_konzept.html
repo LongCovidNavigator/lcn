@@ -2,13 +2,13 @@
 <html lang="de">
 <head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=split-country-20261101"><script src="scripts/map_viewport.js?v=stable-view-20261102"></script>
 <script src="scripts/dummy_preferences.js?v=global-dummy-20261024" defer></script>
-<script src="scripts/online_access.js?v=relationship-feedback-tooltips-20261028-3" defer></script>
+<script src="scripts/online_access.js?v=shared-count-pins-20261105" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LCN – Behandler-Detailseite</title>
+  <title>LCN – Behandler:innen-Detailseite</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=aligned-appointment-notice-20261030">
-  <script src="scripts/image-registry.js?v=5" defer></script>
+  <script src="scripts/image-registry.js?v=shared-count-pins-20261105" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
   <script src="scripts/doctor_relative_score_view.js?v=remove-percentile-caption-20261030" defer></script>
   <link rel="stylesheet" href="styles/doctor_relative_score.css?v=comparison-colors-20261026">
@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="styles/doctor_treatment_table_beta.css?v=no-sort-arrows-20261024">
 <link rel="stylesheet" href="styles/catalog_relations.css?v=compact-feedback-spacing-20261028"><script src="scripts/catalog_relations.js?v=relationship-feedback-tooltips-20261028-3" defer></script><link rel="stylesheet" href="styles/dashboard_shared.css?v=travel-cases-20261030"></head>
 <body>
-  <div class="prototype-note"><span><strong>LCN</strong> Praxis und Therapien: Originaldaten. <span id="community-mode">Community-Daten werden geladen …</span> Deine Angaben werden gespeichert und diesem Browser zugeordnet.</span><label class="doctor-selector">Behandler ansehen<select id="demo-doctor"><option>Wird geladen …</option></select></label><button type="button" id="reset-demo" disabled>Eigene Angaben zu dieser Praxis löschen</button></div>
+  <div class="prototype-note"><span><strong>LCN</strong> Praxis und Therapien: Originaldaten. <span id="community-mode">Community-Daten werden geladen …</span> Deine Angaben werden gespeichert und diesem Browser zugeordnet.</span><label class="doctor-selector">Behandler:innen ansehen<select id="demo-doctor"><option>Wird geladen …</option></select></label><button type="button" id="reset-demo" disabled>Eigene Angaben zu dieser Praxis löschen</button></div>
   <div class="page-shell">
     <header class="profile">
       <div class="avatar" aria-hidden="true">LCN</div>
@@ -34,11 +34,11 @@
       </nav>
     </header>
     <div class="detail-layout">
-      <nav class="side-nav" aria-label="Ansichten der Behandler-Detailseite">
+      <nav class="side-nav" aria-label="Ansichten der Behandler:innen-Detailseite">
         <div class="nav-items">
         <a href="#ueberblick" data-view="ueberblick"><span class="nav-number">1</span><span><strong>Überblick</strong></span></a>
         <a href="#termin" data-view="termin"><span class="nav-number">2</span><span><strong>Welche Belastungshürden gibt es bei einem Termin?</strong></span></a>
-        <a href="#zugang" data-view="zugang"><span class="nav-number">3</span><span><strong>Wie zugänglich ist der Behandler?</strong></span></a>
+        <a href="#zugang" data-view="zugang"><span class="nav-number">3</span><span><strong>Wie zugänglich ist die behandelnde Person?</strong></span></a>
         <a href="#wirkung" data-view="wirkung"><span class="nav-number">4</span><span><strong>Welche Erfahrungen gibt es?</strong></span></a>
         <a href="#dashboard" data-view="dashboard"><span class="nav-number">5</span><span><strong>Dashboard</strong></span></a>
         </div>

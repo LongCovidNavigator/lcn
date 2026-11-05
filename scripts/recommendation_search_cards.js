@@ -14,7 +14,7 @@ window.LCNSearchCards=(()=>{
  const treatmentDetailUrl=t=>`therapie_detail.html?treat_id=${encodeURIComponent(t.treat_id)}`;
  const formatDistanceKm=value=>Number(value).toLocaleString('de-DE',{maximumFractionDigits:2})+' km';
 function buildDoctorCardHtml(doctor, index) {
-    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannter Arzt"));
+    const name = escapeHtml(LCNDoctorNames.compact(doctor.dr_display_name || "Unbekannte behandelnde Person"));
     const plz = escapeHtml(doctor.loc_plz || "");
     const city = escapeHtml(doctor.loc_city || "");
     const street = escapeHtml(doctor.loc_street || "");
@@ -53,7 +53,7 @@ function buildDoctorCardHtml(doctor, index) {
             <div class="doctor-card-content-grid">
                 <section class="doctor-card-info-panel doctor-card-location-panel">
                     <div class="doctor-card-offer-stat"><span>Therapien</span><strong>${Number(doctor.treatment_count || 0)}</strong></div>
-                    <div class="doctor-card-offer-stat"><span>Therapievielfalt</span><strong>${Number(doctor.category_count || 0)}</strong></div>
+                    <div class="doctor-card-offer-stat"><span>Therapievielfalt</span><strong>${doctor.category_count == null || (Number(doctor.treatment_count) > 0 && Number(doctor.category_count) === 0) ? "–" : Number(doctor.category_count)}</strong></div>
                 </section>
 
                 <section class="doctor-card-info-panel doctor-card-rating-panel">
@@ -152,7 +152,7 @@ function buildTreatmentCardHtml(treatment, index) {
     const category = escapeHtml(String(treatment.typ || "").trim() || "Keine Kategorie angegeben");
     const subcategory = escapeHtml(String(treatment.unterkategorie || "").trim() || "Keine Unterkategorie angegeben");
     const providerCount = Number(treatment.total_provider_count ?? treatment.provider_count ?? 0);
-    const providerCountLabel = providerCount === 1 ? "1 Behandler insgesamt" : `${providerCount} Behandler insgesamt`;
+    const providerCountLabel = providerCount === 1 ? "1 Behandler:in insgesamt" : `${providerCount} Behandler:innen insgesamt`;
 
     const totalVotes = Number(treatment.total_votes ?? 0);
     const positiveRatio = Number(treatment.positive_ratio ?? 0);
@@ -189,7 +189,7 @@ function buildTreatmentCardHtml(treatment, index) {
                 </div>
 
                 <div class="treatment-card-provider-summary">
-                    <span class="treatment-card-provider-summary-label">Behandler</span>
+                    <span class="treatment-card-provider-summary-label">Behandler:innen</span>
                     <div class="treatment-card-provider-detail">
                         ${providerHtml}
                     </div>

@@ -32,6 +32,7 @@ async function loadFeaturedTreatments() {
             const selection = await selectionResponse.json();
             if (!selectionResponse.ok || !selection.ok || !selection.catalog_available) throw new Error('Auswahl nicht verfügbar');
             const selectedIds = [...new Set(selection.topics.flatMap(topic => topic.items.map(item => Number(item.treat_id))))];
+            selectedIds.splice(30);
             if (!selectedIds.length) { list.textContent = 'Noch keine Top-Therapien hinterlegt.'; return; }
             const response = await fetch('api/treatments_search.php?treat_ids=' + selectedIds.join(',') + buildHomepageLocationQuery());
             const payload = await response.json();
@@ -109,7 +110,7 @@ async function loadFeaturedTreatments() {
         };
     } catch (error) {
         console.error("Therapien für die Startseite konnten nicht geladen werden:", error);
-        list.innerHTML = '<p class="featured-treatments-status">Die Therapien konnten gerade nicht geladen werden.</p>';
+        showRecommendationLoadError(list, moreButton, loadFeaturedTreatments);
     }
 }
 
@@ -135,6 +136,7 @@ function bindFeaturedTreatmentViewSwitch(list, treatments) {
     }
 
     buttons.forEach(function (button) {
+        button.disabled = false;
         button.onclick = function () { render(button.dataset.featuredTreatmentView); };
     });
     render(getSavedHomepageResultView());
@@ -146,7 +148,7 @@ function buildFeaturedTreatmentsTableHtml(treatments) {
             <thead><tr>
                 <th scope="col">Platz</th><th scope="col">Therapie</th><th scope="col">Kategorie</th>
                 <th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Angaben)</span></th>
-                <th scope="col">Behandler gesamt</th><th scope="col">Entfernung / Ort</th>
+                <th scope="col">Behandler:innen gesamt</th><th scope="col">Entfernung / Ort</th>
             </tr></thead>
             <tbody>${buildFeaturedTreatmentTableRowsHtml(treatments, 0, false)}</tbody>
         </table>
@@ -168,7 +170,7 @@ function buildFeaturedTreatmentsHtml(treatments) {
                     <th scope="col">Therapie</th>
                     <th scope="col">Kategorie</th>
                     <th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Angaben)</span></th>
-                    <th scope="col">Behandler gesamt</th>
+                    <th scope="col">Behandler:innen gesamt</th>
                     <th scope="col">Entfernung / Ort</th>
                 </tr></thead>
                 <tbody>${buildFeaturedTreatmentTableRowsHtml(tableEntries, 3, false)}</tbody>
@@ -235,7 +237,7 @@ function buildFeaturedTreatmentHtml(editorialTreatment, treatment, index) {
                 </div>
                 <div class="featured-treatment-card-facts">
                     <span><small>Kategorie</small><strong>${type}</strong></span>
-                    <span><small>Behandler</small><strong>${providerCount}</strong></span>
+                    <span><small>Behandler:innen</small><strong>${providerCount}</strong></span>
                     <span><small>Entfernung / Ort</small><strong>${distance !== null && distance !== undefined ? formatFeaturedTreatmentDistance(distance) : "—"}</strong>${city ? `<em>${escapeHomepageHtml(city)}</em>` : ""}</span>
                 </div>
                 <div class="featured-treatment-votes">
@@ -373,6 +375,22 @@ document.addEventListener("DOMContentLoaded", loadFeaturedExperts);
 window.addEventListener("homepage:location-changed", loadFeaturedExperts);
 document.addEventListener("DOMContentLoaded", initNearbyGps);
 
+function showRecommendationLoadError(list, moreButton, retry) {
+    if (list.previousElementSibling?.classList.contains('recommendation-card-compare-bar')) list.previousElementSibling.remove();
+    list.classList.remove('recommendation-search-cards');
+    list.innerHTML = '<div class="recommendation-load-error" role="alert"><p>Die Daten konnten nicht aus der Datenbank geladen werden. Bitte versuche es später erneut.</p><button type="button" class="home-button">Erneut versuchen</button></div>';
+    if (moreButton) moreButton.hidden = true;
+    list.closest('section')?.querySelectorAll('[data-featured-view], [data-featured-treatment-view]').forEach(button => {
+        button.disabled = true;
+        button.onclick = null;
+    });
+    list.querySelector('button').addEventListener('click', function () {
+        this.disabled = true;
+        this.textContent = 'Daten werden geladen …';
+        retry();
+    });
+}
+
 async function loadFeaturedExperts() {
     const list = document.getElementById("featured-experts-list");
     const moreButton = document.getElementById("featured-experts-more");
@@ -387,13 +405,15 @@ async function loadFeaturedExperts() {
         const response = await fetch(`api/doctors_search.php?priority=1&lat=${encodeURIComponent(origin.lat)}&lng=${encodeURIComponent(origin.lng)}&radiusKm=all&includeNoCoords=1`);
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.message || "Daten konnten nicht geladen werden.");
-        doctors = Array.isArray(data.items) ? data.items : [];
+        if (!Array.isArray(data.items)) throw new Error("Ungültige Datenbankantwort");
+        doctors = data.items;
     } catch (error) {
-        // Die feste redaktionelle Liste bleibt auch ohne Datenbank-Anreicherung vollständig sichtbar.
-        console.warn("Datenbank-Anreicherung der Expert:innen-Liste nicht verfügbar:", error);
+        console.warn("Behandler:innen konnten nicht geladen werden:", error);
+        showRecommendationLoadError(list, moreButton, loadFeaturedExperts);
+        return;
     }
 
-    const editorialList = featuredExperts.map(function (entry) {
+    let editorialList = featuredExperts.filter(entry => !entry[0].includes("Renz-Polster")).map(function (entry) {
         const matchedDoctor = doctors.find(function (doctor) {
             return normalizeExpertName(doctor.dr_display_name) === normalizeExpertName(entry[0]);
         });
@@ -404,11 +424,22 @@ async function loadFeaturedExperts() {
             editorial_location: entry[2],
             editorial_fallback: !matchedDoctor
         });
-    });
+    }).filter(doctor => !doctor.editorial_fallback && doctor.dr_id);
+
+    // Keep editorial order, removing the least documented profiles first.
+    const removals = new Set(editorialList.map((doctor, index) => ({doctor, index}))
+        .sort((a, b) => Number(a.doctor.treatment_count || 0) - Number(b.doctor.treatment_count || 0)
+            || Number(b.doctor.editorial_fallback) - Number(a.doctor.editorial_fallback)
+            || b.index - a.index)
+        .slice(0, Math.max(0, editorialList.length - 30)).map(entry => entry.index));
+    editorialList = editorialList.filter((_, index) => !removals.has(index));
 
     const initialCount = list.closest(".home-recommendation-teasers") ? 10 : editorialList.length;
     const initialEntries = editorialList.slice(0, initialCount);
     const longlist = editorialList.slice(initialCount);
+    // The recommendation map uses exactly these enriched entries, not a second full-catalog search.
+    window.LCNFeaturedDoctors = { items: initialEntries, available: doctors.length > 0 };
+    window.dispatchEvent(new CustomEvent('homepage:experts-loaded', { detail: window.LCNFeaturedDoctors }));
     list.innerHTML = list.closest(".home-recommendation-teasers")
         ? buildHomepageRankingTable(initialEntries, "doctor")
         : buildFeaturedExpertsHtml(initialEntries, 0, false);
@@ -460,6 +491,7 @@ function bindFeaturedExpertViewSwitch(list, doctors) {
     }
 
     buttons.forEach(function (button) {
+        button.disabled = false;
         button.onclick = function () { render(button.dataset.featuredView); };
     });
     render(getSavedHomepageResultView());
@@ -467,7 +499,7 @@ function bindFeaturedExpertViewSwitch(list, doctors) {
 
 function buildFeaturedExpertsTableOnlyHtml(doctors) {
     if (document.body.classList.contains('top-search-page')) {
-        return `<div class="featured-experts-table-wrap"><table class="featured-experts-table"><thead><tr><th>Platz</th><th>Behandler</th><th>Fachrichtung</th><th>Erfahrung <span class="featured-expert-table-header-note">(n = Angaben)</span></th><th>Entfernung</th><th>Therapien</th><th>Therapie-<br>vielfalt</th><th>Kontakt</th></tr></thead><tbody>${buildFeaturedExpertTableRowsHtml(doctors,0,false)}</tbody></table></div>`;
+        return `<div class="featured-experts-table-wrap"><table class="featured-experts-table"><thead><tr><th>Platz</th><th>Behandler:innen</th><th>Fachrichtung</th><th>Erfahrung <span class="featured-expert-table-header-note">(n = Angaben)</span></th><th>Entfernung</th><th>Therapien</th><th>Therapie-<br>vielfalt</th><th>Kontakt</th></tr></thead><tbody>${buildFeaturedExpertTableRowsHtml(doctors,0,false)}</tbody></table></div>`;
     }
     return `<div class="featured-experts-table-wrap">
         <table class="featured-experts-table">
@@ -581,7 +613,7 @@ function buildFeaturedExpertTableRowsHtml(doctors, rankOffset, isLonglist) {
         const supply = buildFeaturedExpertSupplyHtml(doctor);
         const contact = document.body.classList.contains('top-search-page') ? buildRecommendationContact(doctor) : buildFeaturedExpertContactHtml(doctor);
         if (document.body.classList.contains('top-search-page')) {
-            return `<tr><td>${rank}</td><td><span class="featured-expert-table-name"><a href="${profileHref}">${name}</a></span></td><td>${buildRecommendationSpecialtyBadges(doctor)}</td><td>${votes}</td><td>${buildRecommendationDistance(doctor)}</td><td>${doctor.treatment_count == null ? '–' : Number(doctor.treatment_count)}</td><td>${doctor.category_count == null ? '–' : Number(doctor.category_count)}</td><td>${contact}</td></tr>`;
+            return `<tr><td>${rank}</td><td><span class="featured-expert-table-name"><a href="${profileHref}">${name}</a></span></td><td>${buildRecommendationSpecialtyBadges(doctor)}</td><td>${votes}</td><td>${buildRecommendationDistance(doctor)}</td><td>${doctor.treatment_count == null ? '–' : Number(doctor.treatment_count)}</td><td>${doctor.category_count == null || (Number(doctor.treatment_count) > 0 && Number(doctor.category_count) === 0) ? '–' : Number(doctor.category_count)}</td><td>${contact}</td></tr>`;
         }
 
 
@@ -945,8 +977,8 @@ async function loadNearbyGpsForLocation(location, restored, requestedRadiusKm) {
         return;
     }
     status.textContent = gps.length
-        ? `${gps.length} Behandler der hausärztlichen Therapie im Umkreis von ${radiusKm} km gefunden.`
-        : `Im Umkreis von ${radiusKm} km wurden aktuell keine Behandler der hausärztlichen Therapie gefunden.`;
+        ? `${gps.length} Behandler:innen der hausärztlichen Therapie im Umkreis von ${radiusKm} km gefunden.`
+        : `Im Umkreis von ${radiusKm} km wurden aktuell keine Behandler:innen der hausärztlichen Therapie gefunden.`;
 }
 
 function buildHomepagePrimaryCareUrl(location, radiusKm) {
@@ -1012,7 +1044,7 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
         heading.append(count);
     }
     list.innerHTML = doctors.length ? doctors.map(function (doctor, index) { return buildNearbyGpCard(doctor, hasUserLocation, index + 1); }).join("")
-        : '<p class="nearby-gps-status">Versuche alternativ die vollständige Behandlersuche.</p>';
+        : '<p class="nearby-gps-status">Versuche alternativ die vollständige Behandler:innen-Suche.</p>';
     allLink.href = `therapie_detail.html?treat_id=${homepagePrimaryCareTreatmentId}`;
 
     if (typeof L === "undefined") return;
@@ -1117,11 +1149,7 @@ function groupNearbyGpsProviders(doctors) {
 }
 
 function buildNearbyGpsCountIcon(count) {
-    return L.divIcon({
-        className: "nearby-gps-count-marker",
-        html: `<img src="${escapeHomepageHtml(window.LCNImages.urls["map-marker-default"])}" alt=""><span>${count}</span>`,
-        iconSize: [31, 41], iconAnchor: [15, 41], popupAnchor: [0, -35]
-    });
+    return window.LCNImages.countMarkerIcon(count);
 }
 
 function buildNearbyGpsGroupPopup(group) {
@@ -1244,12 +1272,12 @@ function buildHomepageRankingContent(entries, type) {
         const specialty = String(entry.specialty_labels || '').trim();
         const cardInfo = !treatment && specialty ? `<span class="home-top-specialty">${escapeHomepageHtml(specialty)}</span>` : '';
         const count = treatment ? topic.provider_count : entry.treatment_count;
-        const countLabel = treatment ? 'Behandler im Katalog' : 'Therapien im Katalog';
+        const countLabel = treatment ? 'Behandler:innen im Katalog' : 'Therapien im Katalog';
         const countHtml = `<div class="home-ranking-fact"><strong>${count !== null && count !== undefined ? Number(count).toLocaleString('de-DE') : '—'}</strong><span>${countLabel}</span></div>`;
         return {name: escapeHomepageHtml(name), href, detailHtml, cardInfo, countHtml};
     });
     const rows = details.map((entry, index) => `<tr class="${index < 3 ? 'home-ranking-highlight' : 'home-ranking-additional'}"${index >= 3 ? ' hidden' : ''}><td class="home-ranking-number">${String(index + 1).padStart(2, '0')}</td><th scope="row"><a href="${entry.href}">${entry.name}</a>${treatment ? `<small>${entry.detailHtml}</small>` : ''}</th>${treatment ? '' : `<td class="home-ranking-city">${entry.detailHtml}</td>`}<td>${entry.countHtml}</td></tr>`).join('');
-    return `<div class="home-ranking-content home-ranking-${type}"><div class="home-ranking-scroll"><table class="home-ranking-table"><thead><tr><th scope="col">#</th><th scope="col">${treatment ? 'Therapie / Kategorie' : 'Behandler'}</th>${treatment ? '' : '<th scope="col">Ort</th>'}<th scope="col">${treatment ? 'Behandler' : 'Therapien'}</th></tr></thead><tbody id="home-ranking-${type}-rows">${rows}</tbody></table></div>${details.length > 3 ? `<button type="button" class="home-ranking-toggle" aria-expanded="false" aria-controls="home-ranking-${type}-rows">Weitere ${details.length - 3} anzeigen ↓</button>` : ''}</div>`;
+    return `<div class="home-ranking-content home-ranking-${type}"><div class="home-ranking-scroll"><table class="home-ranking-table"><thead><tr><th scope="col">#</th><th scope="col">${treatment ? 'Therapie / Kategorie' : 'Behandler:innen'}</th>${treatment ? '' : '<th scope="col">Ort</th>'}<th scope="col">${treatment ? 'Behandler:innen' : 'Therapien'}</th></tr></thead><tbody id="home-ranking-${type}-rows">${rows}</tbody></table></div>${details.length > 3 ? `<button type="button" class="home-ranking-toggle" aria-expanded="false" aria-controls="home-ranking-${type}-rows">Weitere ${details.length - 3} anzeigen ↓</button>` : ''}</div>`;
 }
 
 // Same specialty pills as the unchanged doctor catalog table.
@@ -1263,7 +1291,7 @@ function buildRecommendationSpecialtyBadges(doctor) {
 
 function buildRecommendationDistance(doctor) {
     const saved = getHomepageSharedLocation();
-    const distance = saved && doctor.distance_km != null ? formatFeaturedTreatmentDistance(doctor.distance_km) : saved ? 'Entfernung unbekannt' : 'Standort setzen';
+    const distance = saved && doctor.distance_km != null ? formatFeaturedTreatmentDistance(doctor.distance_km) : saved ? '–' : 'Standort setzen';
     const place = doctor.loc_city || doctor.editorial_location || doctor.loc_plz || '';
     return `<div class="doctor-distance-cell"><strong>${escapeHomepageHtml(distance)}</strong>${place ? `<span class="doctor-distance-place">${escapeHomepageHtml(place)}</span>` : ''}</div>`;
 }

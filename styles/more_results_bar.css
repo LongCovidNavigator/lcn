@@ -1,8 +1,8 @@
 /* Shared continuation bar. Only pagination/actions are styled here. */
 body.lcn-public-page .lcn-more-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px 20px; margin:16px 0 0; padding:10px 14px; box-sizing:border-box; border:1px solid #e1eafa; border-radius:8px; background:#f7fbfe; color:#536b89; font:400 13px/1.4 Arial,Helvetica,sans-serif; }
 body.lcn-public-page .lcn-more-bar:has(> button:is([hidden],.is-hidden)):not(:has(> button:not([hidden]):not(.is-hidden))) { display:none; }
-body.lcn-public-page .lcn-more-bar > :is(button,a) { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:38px; max-width:100%; width:auto; margin:0; padding:8px 18px; box-sizing:border-box; border:1px solid #0867bc; border-radius:6px; background:#0867bc; color:#fff; box-shadow:none; font:600 14px/1.4 Arial,Helvetica,sans-serif; text-decoration:none; text-align:center; cursor:pointer; }
-body.lcn-public-page .lcn-more-bar > :is(button,a):hover { background:#00549d; border-color:#00549d; color:#fff; }
+body.lcn-public-page .lcn-more-bar > :is(button,a) { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:38px; max-width:100%; width:auto; margin:0; padding:8px 18px; box-sizing:border-box; border:1px solid #005ca8; border-radius:6px; background:#005ca8; color:#fff; box-shadow:none; font:600 14px/1.4 Arial,Helvetica,sans-serif; text-decoration:none; text-align:center; cursor:pointer; }
+body.lcn-public-page .lcn-more-bar > :is(button,a):hover { background:#00457e; border-color:#00457e; color:#fff; }
 body.lcn-public-page .lcn-more-bar > :is(button,a):focus-visible { outline:3px solid #8cc4f3; outline-offset:3px; }
 body.lcn-public-page .lcn-more-bar > :is([hidden],.is-hidden) { display:none!important; }
 @media(max-width:600px) { body.lcn-public-page .lcn-more-bar { padding:10px; } body.lcn-public-page .lcn-more-bar > :is(button,a) { width:100%; font-size:14px; } }

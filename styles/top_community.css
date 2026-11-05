@@ -1,0 +1,48 @@
+.top-community { --community-accent:#007f79; --community-soft:#edf9f6; display:grid; grid-template-columns:minmax(0,1fr) 280px; align-items:center; gap:36px; padding:36px 40px; margin:10px 0 32px; border:1px solid #c6e4df; border-left:5px solid var(--community-accent); border-radius:18px; background:linear-gradient(115deg,var(--community-soft),#fafdff); box-sizing:border-box; }
+.top-community--therapies { --community-accent:#7057a3; --community-soft:#f3effa; border-color:#dfd5ef; border-left-color:var(--community-accent); }
+.top-community-copy { min-width:0; }
+.top-community-eyebrow { display:block; margin-bottom:12px; color:var(--community-accent); font-size:12px; font-weight:800; letter-spacing:1.3px; text-transform:uppercase; }
+body.lcn-public-page .top-community :is(h2,h3) { margin:0 0 16px; max-width:760px; font-size:clamp(25px,2.6vw,34px); line-height:1.2; letter-spacing:-.6px; color:#17365d; }
+body.lcn-public-page .top-community p { max-width:760px; margin:0; color:#415f7c; font-size:16px; line-height:1.7; }
+.top-community p strong { color:#17365d; }
+.top-community-actions { display:flex; flex-direction:column; align-items:flex-start; gap:11px; margin-top:24px; }
+body.lcn-public-page .top-community .home-button { display:inline-flex; align-items:center; justify-content:center; gap:22px; min-height:48px; padding:14px 22px; border:1px solid var(--community-accent); border-radius:9px; background:var(--community-accent); color:white; font-size:16px; text-decoration:none; box-sizing:border-box; }
+.top-community .home-button:hover { filter:brightness(.92); }
+.top-community .home-button:focus-visible { outline:3px solid #17365d; outline-offset:4px; }
+.top-community-actions small { max-width:650px; color:#526c83; font-size:12px; line-height:1.6; }
+.top-community-art { display:block; width:100%; max-width:280px; height:auto; justify-self:center; }
+:is(#featured-experts-heading,#featured-treatments-heading) { scroll-margin-top:110px; }
+@media(max-width:900px) { .top-community { grid-template-columns:minmax(0,1fr) 180px; gap:20px; padding:28px; } }
+@media(max-width:600px) { .top-community { grid-template-columns:minmax(0,1fr); padding:24px 20px; gap:18px; margin-bottom:24px; } .top-community-art { display:none; } body.lcn-public-page .top-community p { font-size:15px; } .top-community-actions,.top-community .home-button { width:100%; } }
+/* The landing page places the two recommendations in adjacent columns. */
+.home-recommendation-teasers .top-community { grid-template-columns:minmax(0,1fr); gap:12px; padding:26px; margin:0 0 20px; }
+.home-recommendation-teasers .top-community-art { grid-row:1; max-width:150px; }
+body.lcn-public-page .home-recommendation-teasers .top-community :is(h2,h3) { font-size:28px; }
+.home-recommendation-teasers .home-chapter-body :is(.featured-treatments-panel,.featured-experts-panel) { height:auto; }
+@media(max-width:600px) { .home-recommendation-teasers .top-community { padding:24px 20px; } }
+.top-community-actions > :is(.community-search-label,.community-search-input,.community-search-results) { width:100%; box-sizing:border-box; }
+.community-search-label { color:#17365d; font-size:16px; font-weight:800; }
+.community-search-input { min-height:50px; padding:12px 15px; background:white; color:#17365d; border:1px solid var(--community-accent); border-radius:9px; font:inherit; min-width:0; }
+.community-search-input:focus-visible { outline:3px solid var(--community-accent); outline-offset:2px; }
+.community-search-results { color:#415f7c; font-size:14px; line-height:1.5; }
+.community-search-results:empty { display:none; }
+.community-search-results ul { list-style:none; margin:8px 0 0; padding:0; display:grid; gap:6px; }
+.community-search-results li a { display:block; padding:10px 13px; border:1px solid #d9e4ed; border-radius:8px; background:white; color:#17365d; text-decoration:none; overflow-wrap:anywhere; }
+.community-search-results li a:hover { border-color:var(--community-accent); }
+.community-search-results li small { display:block; }
+.community-search-add { color:var(--community-accent); font-size:15px; font-weight:800; text-underline-offset:3px; }
+.community-search-field { position:relative; width:100%; min-width:0; }
+.community-search-field .community-search-input { width:100%; box-sizing:border-box; }
+.community-search-field .community-search-input { font-size:16px; }
+.community-search-field .community-search-results { position:absolute; top:calc(100% + 7px); left:0; right:0; z-index:1000; max-height:300px; overflow-y:auto; padding:12px; border:1px solid var(--community-accent); border-radius:9px; background:#fff; box-shadow:0 10px 28px #17365d25; box-sizing:border-box; }
+.community-search-results[hidden] { display:none; }
+.community-search-results .community-search-add { display:block; padding:12px 0 2px; }
+.top-community:has(.community-search-results:not([hidden])) { position:relative; z-index:1010; }
+
+.home-recommendation-teasers .home-top-destination{display:flex;justify-content:space-between;gap:18px;margin:0 0 22px;padding:0 0 16px;border-bottom:1px solid #17365d18;color:var(--community-accent);font-size:18px;font-weight:700;text-decoration:none}.home-recommendation-teasers .home-top-destination:hover{text-decoration:underline}
+@media(max-width:900px) {
+ .top-community { grid-template-columns:minmax(0,1fr); }
+ .top-community-art { display:none; }
+ .top-community .home-button,.community-search-add { max-width:100%; overflow-wrap:anywhere; }
+ .home-recommendation-teasers .top-community { padding:22px 18px; }
+}

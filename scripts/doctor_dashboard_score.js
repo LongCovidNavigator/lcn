@@ -34,7 +34,7 @@
         percentile=(values.filter(v=>v<rawValue).length+values.filter(v=>v===rawValue).length/2)/values.length;
         value=Math.max(0,Math.min(1,(percentile-.1)/.8));
       }
-      add(label,weight,value,'Vergleich mit anderen Behandlern mit eingetragenen Therapien: obere 10 % volle Punkte, untere 10 % keine Punkte; dazwischen linear nach Platzierung. Gleiche Anzahlen erhalten gleich viele Punkte.');
+      add(label,weight,value,'Vergleich mit anderen Behandler:innen mit eingetragenen Therapien: obere 10 % volle Punkte, untere 10 % keine Punkte; dazwischen linear nach Platzierung. Gleiche Anzahlen erhalten gleich viele Punkte.');
       Object.assign(rows[rows.length-1],{rawValue,percentile,comparisonCount:values.length,relativeOffer:true});
     };
     addOfferRank('Anzahl Therapien',7,'treatmentCount');

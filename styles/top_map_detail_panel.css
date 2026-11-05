@@ -1,0 +1,47 @@
+/* Same dimensions, control order and spacing as the appointment map on provider details. */
+.top-search-page .top-recommendation-map-section{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;align-items:stretch}
+.top-search-page .top-recommendation-map-section .top-map-location-controls{display:flex;flex-direction:column;align-items:stretch;align-self:start;gap:14px;box-sizing:border-box;min-width:0;height:460px;min-height:460px;margin:0;padding:14px;border:1px solid #dbe5f1;border-radius:9px;background:#fbfdff;color:#173d74;font:400 13px/1.55 Arial,sans-serif}
+.top-search-page .top-recommendation-map-section .nd-location-title{margin:0 0 8px;text-align:center;color:#17365d;font-size:16px;line-height:1.4;font-weight:700}
+.top-search-page .top-recommendation-map-section #top-map-location-form{display:flex;flex-direction:column;gap:6px;margin:0;min-width:0}
+.top-search-page .top-recommendation-map-section .nd-location-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:24px}
+.top-search-page .top-recommendation-map-section label{margin:0;color:#173d74;text-align:left;font:600 13px/1.4 Arial,sans-serif}
+.top-search-page .top-recommendation-map-section #top-map-location-clear{position:static;transform:none;width:24px!important;min-width:24px!important;height:24px!important;min-height:24px!important;flex:0 0 24px;border:0!important;font-size:18px}
+.top-search-page .top-recommendation-map-section #top-map-location-input{box-sizing:border-box;width:100%;min-width:0;height:32px;min-height:32px;padding:5px 8px;border:1px solid #cbdce9;border-radius:5px;background:white;color:#17365d;font:400 13px/1.4 Arial,sans-serif}
+.top-search-page .top-recommendation-map-section #top-map-location-form .top-map-location-submit{box-sizing:border-box;width:100%;height:42px;min-height:42px;margin:8px 0 0;padding:6px 8px;border-radius:5px;font:600 13px/20px Arial,sans-serif}
+.top-search-page .top-recommendation-map-section .doctor-location-filters{display:block;min-width:0;margin:10px 0 0;padding-top:14px;border-top:1px solid #dbe5f1}
+.top-search-page .top-recommendation-map-section .nd-radius-inline{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+.top-search-page .top-recommendation-map-section .nd-radius-value{display:grid;grid-template-columns:minmax(0,1fr) 58px;align-items:center;gap:8px;width:100%}
+.top-search-page .top-recommendation-map-section .nd-radius-value>span{white-space:nowrap}
+.top-search-page .top-recommendation-map-section #top-map-radius{box-sizing:border-box;width:58px;min-width:58px;max-width:58px;height:30px;min-height:30px;padding:4px;border:1px solid #cbdce9;border-radius:5px;background:white;color:#17365d;text-align:center;font:400 13px/1.4 Arial,sans-serif;appearance:textfield;-moz-appearance:textfield}
+.top-search-page #top-map-radius::-webkit-inner-spin-button,.top-search-page #top-map-radius::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.top-search-page .top-recommendation-map-section .nd-radius-toggle{position:relative;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;text-align:left;padding-left:0;box-sizing:border-box;width:100%;min-height:24px;padding-right:38px;cursor:pointer}
+.top-search-page .top-recommendation-map-section #top-map-radius-enabled{position:absolute;top:50%;right:0;transform:translateY(-50%);box-sizing:border-box;width:30px;min-width:30px;height:18px;min-height:18px;margin:0;padding:0;appearance:none;border:1px solid #a8bbd1;border-radius:12px;background:#dce6f0;cursor:pointer}
+.top-search-page #top-map-radius-enabled::after{content:'';position:absolute;top:2px;left:2px;display:block;width:12px;height:12px;margin:0;background:white;border-radius:50%;box-shadow:0 1px 3px #17365d30;transition:transform .12s ease}
+.top-search-page #top-map-radius-enabled:checked{background:#0878e3;border-color:#0878e3}
+.top-search-page #top-map-radius-enabled:checked::after{transform:translateX(12px)}
+.top-search-page .top-recommendation-map-section .nd-location-summary{display:flex;flex-direction:column;gap:3px;margin-top:auto;padding-top:16px;border-top:1px solid #dbe5f1;color:#62769a;font:400 12px/1.55 Arial,sans-serif}
+.top-search-page .top-recommendation-map-section .nd-location-summary strong{color:#17365d;font:600 20px/1.4 Arial,sans-serif}
+.top-search-page .top-recommendation-map-section .top-map-status{margin:0;color:#62769a;font:400 12px/1.55 Arial,sans-serif}
+.top-search-page .top-recommendation-map-section .top-map-status.is-error{color:#a32d39}
+.top-search-page .top-recommendation-map-section .top-map-panel{min-width:0}
+.top-search-page .top-recommendation-map-section .top-map-content{padding:0}
+.top-search-page .top-recommendation-map-section #top-recommendation-map{box-sizing:border-box;width:100%;height:460px;min-height:460px;max-height:460px;border:1px solid #dbe5f1;border-radius:9px;background:#edf3f8}
+.top-search-page .top-map-content>.lcn-online-legend{display:flex;justify-content:flex-end;gap:16px;margin:6px 0 0;text-align:right;font-size:12px}
+.top-search-page .top-recommendation-map-section [hidden]{display:none!important}
+.top-search-page .top-recommendation-map-section :is(input,button):focus-visible{outline:2px solid #0878e3;outline-offset:3px}
+@media(max-width:800px){.top-search-page .top-recommendation-map-section{grid-template-columns:minmax(0,1fr)}.top-search-page .top-recommendation-map-section .top-map-location-controls{height:auto;min-height:0}.top-search-page .top-recommendation-map-section .nd-location-summary{margin-top:0}}
+@media(max-width:650px){.top-search-page .top-recommendation-map-section #top-recommendation-map{height:380px;min-height:380px;max-height:380px}}
+
+.top-search-page .top-recommendation-map-section .nd-radius-toggle>span{margin:0;text-align:left}
+/* Keep location controls readable and touchable without triggering mobile input zoom. */
+@media(max-width:1100px){
+ .top-search-page .top-recommendation-map-section #top-map-location-input,
+ .top-search-page .top-recommendation-map-section #top-map-radius{font-size:16px;height:44px;min-height:44px}
+ .top-search-page .top-recommendation-map-section #top-map-location-clear{width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;flex-basis:44px}
+ .top-search-page .top-recommendation-map-section .nd-radius-toggle{min-height:44px}
+ .top-search-page .top-recommendation-map-section .top-map-location-controls{height:auto;min-height:460px}
+ .top-search-page .top-map-content>.lcn-online-legend{flex-wrap:wrap;gap:8px 16px}
+}
+@media(max-width:800px){
+ .top-search-page .top-recommendation-map-section .top-map-location-controls{min-height:0}
+}

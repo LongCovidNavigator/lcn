@@ -44,7 +44,7 @@
   body.compact-doctor-header .overview-group dd {overflow-wrap:anywhere}
   body.compact-doctor-header .ux-overview-summary {grid-template-columns:minmax(0,1fr);gap:14px}
   body.compact-doctor-header .assessment-header {gap:10px;margin-bottom:16px}
-  body.compact-doctor-header #view-content .travel-scale {grid-template-columns:repeat(3,minmax(0,1fr))}
+  body.compact-doctor-header #view-content .travel-scale {grid-template-columns:repeat(3,minmax(0,1fr))!important}
   body.compact-doctor-header .cost-preferences {justify-content:flex-start}
   body.compact-doctor-header .cost-preference {max-width:100%;flex-wrap:wrap}
   body.compact-doctor-header #view-content :is(input[type=search],input[type=text],input[type=email],textarea,select) {font-size:16px}
