@@ -43,3 +43,17 @@ body.fb-community-page{background:#f8f9fa}
 .fb-community-page #fb-list .fb-card-footer time{margin-left:auto;white-space:nowrap;font-size:10px}
 @media(max-width:1000px){.fb-community-page #fb-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}}
 @media(max-width:600px){.fb-community-page #fb-list{grid-template-columns:minmax(0,1fr);gap:20px}.fb-community-page #fb-list .fb-card-content{padding:17px 13px 13px}.fb-community-page #fb-list h2{font-size:20px}.fb-community-page #fb-list .fb-card-content>p{font-size:14px}.fb-community-page #fb-list .fb-vote{font-size:13px}.fb-community-page #fb-list .fb-card-footer{font-size:12px}}
+/* Leave enough room for card actions on portrait tablets and small phones. */
+@media(min-width:601px) and (max-width:1100px){
+  .fb-community-page #fb-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:1000px){
+  .fb-community-page .fb-toolbar input,.fb-community-page .fb-toolbar select{font-size:16px;min-height:44px;height:auto}
+  .fb-community-page .fb-toolbar button,.fb-community-page #fb-pages button{min-height:44px}
+}
+@media(max-width:600px){
+  .fb-community-page #fb-list .fb-vote{flex-wrap:wrap;gap:8px;min-width:0}
+  .fb-community-page #fb-list .fb-vote>span:last-child{max-width:100%;white-space:normal}
+  .fb-community-page .fb-list-heading{flex-wrap:wrap}
+  .fb-community-page .fb-community-heading>.fb-button{min-height:44px}
+}

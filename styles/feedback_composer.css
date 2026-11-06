@@ -11,3 +11,22 @@
 #fb-idea-dialog [hidden]{display:none!important}
 #fb-idea-dialog [data-form-result]{overflow-wrap:anywhere;margin:0}
 @media(max-width:600px){#fb-idea-dialog.fb-shell{--compose-gutter:20px;max-height:calc(100dvh - 24px)}#fb-idea-dialog .fb-compose-heading{padding-top:24px}#fb-idea-dialog .fb-compose-options{gap:8px}#fb-idea-dialog .fb-compose-options button{padding:11px}#fb-idea-dialog .fb-compose-options [aria-pressed=true]{padding:10px}#fb-idea-dialog .fb-panel{padding-top:22px}}
+/* Touch layouts also apply when the composer is opened outside the community page. */
+@media(max-width:1000px){
+  #fb-idea-dialog .fb-form input,#fb-idea-dialog .fb-form select,#fb-idea-dialog .fb-form textarea{font-size:16px}
+  #fb-idea-dialog .fb-reference input[type=search],#fb-idea-dialog .fb-reference select{font-size:16px}
+  #fb-idea-dialog .fb-reference-decisions label{min-height:44px;align-items:flex-start;padding:10px 0}
+  #fb-idea-dialog .fb-reference-decisions input{margin-top:2px}
+  #fb-idea-dialog .fb-dialog-close{width:44px;height:44px;top:10px;right:10px}
+  #fb-idea-dialog button{min-height:44px;overflow-wrap:anywhere}
+}
+@media(max-width:480px){
+  #fb-idea-dialog.fb-shell{--compose-gutter:16px;width:calc(100% - 16px)}
+  #fb-idea-dialog .fb-compose-options{grid-template-columns:minmax(0,1fr)}
+  #fb-idea-dialog .fb-form>button[type=submit]{width:100%;white-space:normal}
+  #fb-idea-dialog .fb-reference{padding:12px}
+}
+@media(max-height:500px){
+  #fb-idea-dialog.fb-shell{max-height:calc(100dvh - 16px)}
+  #fb-idea-dialog .fb-compose-heading{padding-top:16px}
+}
