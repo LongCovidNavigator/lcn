@@ -110,3 +110,22 @@ body.lcn-public-page .destination-photo-banner :is(h1,h2,h3,p,a,.community-overv
  body.lcn-public-page .destination-photo-banner.destination-photo-banner > .destination-photo-art { height:clamp(160px,45vw,230px); }
  body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > a { max-width:calc(100% - 40px); }
 }
+
+/* Match each image's top-edge colours, so the mobile join has no colour step. */
+@media(max-width:760px) {
+ body.top-search-page .destination-photo-banner.top-community--doctors {
+  --banner-color:linear-gradient(90deg,#73b3b5 0%,#73b3b5 12.5%,#71b3b5 25%,#71b3b6 37.5%,#71b3b5 50%,#71b3b6 62.5%,#71b3b5 75%,#71b3b5 87.5%,#71b3b6 100%);
+ }
+ body.top-search-page .destination-photo-banner.top-community--therapies {
+  --banner-color:linear-gradient(90deg,#71b4b2 0%,#71b4b3 12.5%,#71b5b3 25%,#72b5b3 37.5%,#72b5b3 50%,#72b5b3 62.5%,#73b5b4 75%,#72b5b5 87.5%,#71b5b5 100%);
+ }
+ body.top-search-page .destination-photo-banner.top-community > .destination-photo-art {
+  width:100%;
+  height:auto;
+  margin:0;
+  border-radius:0 0 14px 14px;
+  mask-image:linear-gradient(to bottom,transparent 0%,#000 6%);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 6%);
+  box-shadow:none;
+ }
+}

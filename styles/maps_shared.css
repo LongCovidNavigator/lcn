@@ -126,3 +126,53 @@
 
 /* Keep Leaflet panes and controls below the shared navigation. */
 .leaflet-container{isolation:isolate;z-index:0}
+
+/* A single compact radius row on catalog, recommendation and detail maps. */
+.lcn-location-heading { justify-content:flex-start!important; text-align:left!important; }
+.lcn-location-heading>label { width:100%!important; text-align:left!important; margin:0!important; }
+.lcn-location-field { position:relative; }
+.lcn-location-field>input { padding-right:44px!important; }
+.lcn-location-field>button:is(#top-map-location-clear,#clear-location,[data-map-clear]) {
+ position:absolute!important; top:50%!important; right:2px!important; transform:translateY(-50%)!important;
+ width:40px!important; min-width:40px!important; height:40px!important; min-height:0!important;
+ padding:0!important; margin:0!important; border:0!important; background:transparent!important; color:#62769a!important; z-index:2;
+}
+.lcn-location-field input[type=search]::-webkit-search-cancel-button { -webkit-appearance:none; }
+.lcn-radius-row.lcn-radius-row {
+ display:grid!important; grid-template-columns:minmax(0,1fr) 36px 58px!important;
+ align-items:center!important; gap:8px!important; width:100%!important;
+}
+.lcn-radius-row.lcn-radius-row>.nd-radius-value { display:contents!important; }
+.lcn-radius-row>.nd-radius-value>span { grid-column:1; grid-row:1; white-space:normal!important; text-align:left; }
+.lcn-radius-row.lcn-radius-row>.nd-radius-toggle,
+.lcn-catalog-radius-row>label:has(input) {
+ grid-column:2!important; grid-row:1!important; position:relative!important;
+ display:flex!important; align-items:center!important; justify-content:center!important;
+ width:36px!important; min-width:0!important; height:40px!important; min-height:0!important;
+ padding:0!important; margin:0!important; font-size:0!important;
+}
+.lcn-radius-row>.nd-radius-toggle>span { display:none!important; }
+.lcn-radius-row.lcn-radius-row>.nd-radius-toggle>input,
+.lcn-catalog-radius-row>label>input {
+ position:relative!important; top:auto!important; right:auto!important; transform:none!important;
+ width:30px!important; min-width:30px!important; max-width:30px!important; height:18px!important; min-height:18px!important;
+ padding:0!important; margin:0!important; appearance:none; border:1px solid #a8bbd1!important; border-radius:12px!important; background:#dce6f0; cursor:pointer;
+}
+.lcn-catalog-radius-row>label>input::after { content:''; position:absolute; top:2px; left:2px; width:12px; height:12px; background:white; border-radius:50%; }
+.lcn-catalog-radius-row>label>input:checked { background:#0878e3; border-color:#0878e3!important; }
+.lcn-catalog-radius-row>label>input:checked::after { transform:translateX(12px); }
+.lcn-radius-row.lcn-radius-row>.nd-radius-value>input,
+.lcn-catalog-radius-row>input {
+ grid-column:3!important; grid-row:1!important; box-sizing:border-box!important;
+ width:58px!important; min-width:58px!important; max-width:58px!important; height:32px!important; min-height:32px!important;
+ margin:0!important; padding:4px!important; text-align:center!important; font-size:16px!important; line-height:22px!important;
+}
+.lcn-radius-row>.nd-include-unlocated { grid-column:1 / -1!important; grid-row:2; }
+.lcn-catalog-radius-row { display:grid; grid-template-columns:minmax(0,1fr) 36px 58px; align-items:center; gap:8px; grid-column:1 / -1; grid-row:4; }
+.lcn-catalog-radius-row>label:first-child { margin:0!important; text-align:left; }
+@media(max-width:760px) { .lcn-catalog-radius-row { grid-row:6; } }
+.lcn-location-heading.lcn-location-heading { width:100%!important; align-self:stretch!important; box-sizing:border-box; }
+.lcn-catalog-radius-row.lcn-catalog-radius-row { align-self:center!important; min-height:40px!important; height:40px!important; }
+.lcn-catalog-radius-row>label:has(input) { align-self:center!important; line-height:0!important; gap:0!important; }
+.lcn-catalog-radius-row>input { align-self:center!important; }
+.lcn-catalog-radius-row>input { position:static!important; transform:none!important; inset:auto!important; }

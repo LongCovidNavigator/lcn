@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const more = document.getElementById('gp-directory-more');
     const escape = value => escapeHomepageHtml(value);
     const normalize = value => String(value || '').toLocaleLowerCase('de').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss');
-    let rows = [], visible = 50, sort = 'name', direction = 1;
+    let rows = [], visible = 50, sort = 'distance', direction = 1;
     let hasOrigin = false;
     let view = 'table';
     const cards = document.getElementById('gp-directory-cards');

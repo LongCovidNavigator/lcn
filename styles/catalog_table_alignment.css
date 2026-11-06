@@ -27,3 +27,29 @@ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured
 body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) { white-space:nowrap; }
 body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) .doctor-table-badge-row { display:flex;flex-wrap:nowrap;align-items:center;gap:3px;white-space:nowrap; }
 body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) .doctor-table-badge { flex:0 0 auto; }
+
+/* Mobile result tables: keep the essential columns within even a 320px viewport. */
+@media (max-width:760px) {
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) {
+  width:100%!important; min-width:0!important; max-width:100%; table-layout:fixed;
+ }
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) :is(th,td) {
+  padding:8px 5px!important; white-space:normal!important; overflow-wrap:anywhere; min-width:0!important;
+ }
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(5)),
+ body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(n+3):not(:nth-child(6)) { display:none!important; }
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(2) { display:table-cell!important; width:auto!important; text-align:left; }
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(5),
+ body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(6) { display:table-cell!important; width:86px!important; text-align:center; }
+ body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(1) { display:table-cell!important; width:39px!important; text-align:center; }
+ body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(2) { display:table-cell!important; width:auto!important; text-align:left; }
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) :is(a,button,strong) { white-space:normal; overflow-wrap:anywhere; min-width:0; }
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) :is(.doctor-compare-add-button,.treatment-compare-add-button,.doctor-mobile-specialty,.doctor-mobile-offer-counts,.doctor-distance-place,.featured-treatment-table-location>small,.treatment-table-stacked-cell>.treatment-table-muted) { display:none!important; }
+ body.lcn-public-page :is(.doctor-table-name-stack,.treatment-table-name-stack,.treatment-table-name-line) { min-width:0; max-width:100%; }
+}
+
+@media (max-width:760px) {
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) :is(th,td):nth-child(1) { display:table-cell!important; width:39px!important; text-align:center; }
+ body.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table) .table-rank-label-full { display:inline!important; }
+ body.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table) .table-rank-label-short { display:none!important; }
+}

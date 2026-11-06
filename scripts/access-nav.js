@@ -119,3 +119,6 @@
     new MutationObserver(initialize).observe(document.documentElement, {childList:true, subtree:true});
 })();
 
+
+// Shared, independent product-feedback entry point on all pages with navigation.
+(()=>{if(document.querySelector('script[data-lcn-feedback-loader]'))return;const script=document.createElement('script');script.dataset.lcnFeedbackLoader='';script.src='scripts/feedback_context.js?v=shared-composer-20261106-6';script.defer=true;document.head.append(script);})();

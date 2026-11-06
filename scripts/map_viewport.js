@@ -12,7 +12,7 @@
         instances.forEach(entry => entry.apply(true));
     }
     function attach(map) {
-        if (map._lcnViewport || !map._containerId || (typeof map.getPane==='function' && !map.getPane('mapPane'))) return;
+        if (map.options.lcnViewport === false || map._lcnViewport || !map._containerId || (typeof map.getPane==='function' && !map.getPane('mapPane'))) return;
         const toolbar = L.DomUtil.create('div', 'doctor-map-viewport-tools', map.getContainer());
         toolbar.innerHTML = '<div class="map-country-control"><div class="map-country-split"><button type="button" data-country-current>Deutschland</button><button type="button" data-country-toggle aria-label="Land auswählen" aria-expanded="false"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="map-country-options" hidden></div></div><button type="button" data-show-all>Alle Treffer</button>';
         L.DomEvent.disableClickPropagation(toolbar);

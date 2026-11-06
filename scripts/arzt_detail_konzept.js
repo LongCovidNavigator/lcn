@@ -281,19 +281,12 @@
     if (typeof L === 'undefined') { element.textContent = 'Karte konnte nicht geladen werden.'; return null; }
     element.replaceChildren();
     window.LCNImages?.configureLeaflet(L);
-    const country=String(doctor.loc_country||'DE').trim().toUpperCase();
-    const countryBounds={DE:[[47.2,5.8],[55.1,15.1]],AT:[[46.3,9.5],[49.1,17.2]],CH:[[45.8,5.9],[47.9,10.5]]};
-    const countryCode=({DEUTSCHLAND:'DE',GERMANY:'DE',AUT:'AT','ÖSTERREICH':'AT',AUSTRIA:'AT',CHE:'CH',SCHWEIZ:'CH',SWITZERLAND:'CH'})[country]||country;
-    const map = L.map(element, {zoomControl: false, scrollWheelZoom: false, dragging: !compact, doubleClickZoom: !compact, touchZoom: !compact, keyboard: !compact});
+    // Detail maps focus on this practice, independently of search-map country preferences.
+    const map = L.map(element, {lcnViewport: false, zoomControl: false, scrollWheelZoom: false, dragging: !compact, doubleClickZoom: !compact, touchZoom: !compact, keyboard: !compact});
     const own = savedLocation();
     const visible=locations.filter(p=>hasCoordinates(p)&&(!locationRadiusEnabled||compact||!own||locationDistance(p)<=locationRadius));
-    const overview=(countryBounds[countryCode]||countryBounds.DE).map(point=>[...point]);
-    locations.filter(hasCoordinates).forEach(point=>{const lat=Number(point.loc_lat),lng=Number(point.loc_lng);overview[0][0]=Math.min(overview[0][0],lat);overview[0][1]=Math.min(overview[0][1],lng);overview[1][0]=Math.max(overview[1][0],lat);overview[1][1]=Math.max(overview[1][1],lng);});
-    if(!compact&&own){
-      const points=visible.map(point=>[Number(point.loc_lat),Number(point.loc_lng)]);
-      points.push([own.lat,own.lng]);
-      map.fitBounds(points,{padding:[48,48],maxZoom:14});
-    }else map.fitBounds(overview,{padding:[20,20]});
+    const focusLocations=visible.length?visible:locations.filter(hasCoordinates);
+    map.fitBounds(focusLocations.map(point=>[Number(point.loc_lat),Number(point.loc_lng)]),{padding:[32,32],maxZoom:14,animate:false});
     if (!compact) {
       L.control.zoom({position:'topright'}).addTo(map);
       element.onclick = () => map.scrollWheelZoom.enable();

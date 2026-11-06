@@ -39,6 +39,7 @@ async function loadFeaturedTreatments() {
             if (!response.ok || !payload.ok) throw new Error('Therapien nicht verfügbar');
             const byId = new Map(payload.items.map(item => [Number(item.treat_id), item]));
             const entries = selectedIds.filter(id => byId.has(id)).map(id => ({editorial: {id, name: byId.get(id).behandlung}, data: byId.get(id)}));
+            entries.sort((a,b) => compareRecommendationDistance(a.data,b.data,"nearest_provider_distance_km"));
             bindFeaturedTreatmentViewSwitch(list, entries);
             return;
         }
@@ -433,6 +434,7 @@ async function loadFeaturedExperts() {
             || b.index - a.index)
         .slice(0, Math.max(0, editorialList.length - 30)).map(entry => entry.index));
     editorialList = editorialList.filter((_, index) => !removals.has(index));
+    editorialList.sort((a,b) => compareRecommendationDistance(a,b,"distance_km"));
 
     const initialCount = list.closest(".home-recommendation-teasers") ? 10 : editorialList.length;
     const initialEntries = editorialList.slice(0, initialCount);
@@ -1384,4 +1386,11 @@ function initNearbyGpsSuggestions(input, form) {
     input.parentElement.addEventListener('focusout', event => { if (!input.parentElement.contains(event.relatedTarget)) close(); });
     document.addEventListener('click', event => { if (!input.parentElement.contains(event.target)) close(); });
     form.addEventListener('submit', close);
+}
+
+// Keep entries without a measurable distance after all nearby results.
+function compareRecommendationDistance(a, b, key) {
+    const distance = item => item[key] != null && Number.isFinite(Number(item[key])) ? Number(item[key]) : Infinity;
+    const x = distance(a), y = distance(b);
+    return x === y ? 0 : x < y ? -1 : 1;
 }

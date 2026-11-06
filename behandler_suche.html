@@ -17,9 +17,9 @@
     >
 	<link rel="stylesheet" href="styles/aerzte_karte.css?v=provider-filter-20261105">
     <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
-    <script src="scripts/access-nav.js?v=chapters-20261024" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=experience-sort-tooltips-20261031"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/doctor_cards.css?v=profile-website-only-20261031"><link rel="stylesheet" href="styles/search_tables.css?v=restored-search-design-20261102"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/doctor_search_responsive.css?v=provider-filter-20261105"><link rel="stylesheet" href="styles/more_results_bar.css?v=unified-blue-20261105"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=contact-row-20261102"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=responsive-refresh-20261105"><link rel="stylesheet" href="styles/search_navigation_blue.css?v=banner-blue-20261105"><link rel="stylesheet" href="styles/provider_type_filter.css">
-</head>
+    <script src="scripts/access-nav.js?v=all-pages-20261106-3" defer></script>
+<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=2"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=experience-sort-tooltips-20261031"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/doctor_cards.css?v=profile-website-only-20261031"><link rel="stylesheet" href="styles/search_tables.css?v=restored-search-design-20261102"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/doctor_search_responsive.css?v=provider-filter-20261105"><link rel="stylesheet" href="styles/more_results_bar.css?v=unified-blue-20261105"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=mobile-rank-distance-20261106"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=responsive-refresh-20261105"><link rel="stylesheet" href="styles/search_navigation_blue.css?v=banner-blue-20261105"><link rel="stylesheet" href="styles/provider_type_filter.css">
+<script src="scripts/feedback_context.js?v=shared-composer-20261106-6" defer data-lcn-feedback-loader></script></head>
 
 <script>
     function toggleMobileMenu() {
@@ -127,7 +127,7 @@
 						<select id="doctor-sort-select" class="doctor-nav-select">
 							<option value="name:asc">Name A–Z</option>
 							<option value="name:desc">Name Z–A</option>
-							<option value="distance:asc">Entfernung &#x2191;</option>
+							<option value="distance:asc" selected>Entfernung &#x2191;</option>
 							<option value="distance:desc">Entfernung &#x2193;</option>
 							<option value="positive_ratio:desc">Positive Erfahrungen [%] &#x2193;</option>
 							<option value="positive_ratio:asc">Positive Erfahrungen [%] &#x2191;</option>
@@ -404,7 +404,7 @@
 						<select id="doctor-results-sort-select" class="doctor-results-search-input doctor-results-sort-select">
 							<option value="name:asc">Name A–Z</option>
 							<option value="name:desc">Name Z–A</option>
-							<option value="distance:asc">Entfernung &#x2191;</option>
+							<option value="distance:asc" selected>Entfernung &#x2191;</option>
 							<option value="distance:desc">Entfernung &#x2193;</option>
 							<option value="positive_ratio:desc">Positive Erfahrungen [%] &#x2193;</option>
 							<option value="positive_ratio:asc">Positive Erfahrungen [%] &#x2191;</option>
@@ -505,7 +505,7 @@
 	<script>window.LCNImages.configureLeaflet(window.L);</script>
 		<script src="scripts/dummy_preferences.js?v=global-dummy-20261024"></script>
     <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/provider_type_filter.js?v=colon-20261105"></script>
-<script src="scripts/aerzte_karte.js?v=provider-taxonomy-20261105"></script>
+<script src="scripts/aerzte_karte.js?v=distance-default-20261106"></script>
 
     <div id="footer-placeholder"></div>
 

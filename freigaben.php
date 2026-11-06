@@ -13,13 +13,14 @@ header('Cache-Control: no-store, private');
     <link rel="stylesheet" href="styles/footer-style.css">
     <link rel="stylesheet" href="styles/freigaben.css?v=merge-choice-20261022">
     <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
-    <script src="scripts/access-nav.js?v=chapters-20261024" defer></script>
-</head>
+    <script src="scripts/access-nav.js?v=all-pages-20261106-3" defer></script>
+<script src="scripts/feedback_context.js?v=shared-composer-20261106-6" defer data-lcn-feedback-loader></script></head>
 <body>
     <div id="header-placeholder"></div>
     <main class="review-shell">
         <a class="review-back" href="index.html">← Zurück zur Beta-Startseite</a>
         <header><span>LCN Administration</span><h1>Prüf- und Freigabeübersicht</h1><p>Automatisch vorsortierte neue Einträge, Ergänzungen, mögliche Dubletten und Auffälligkeiten.</p></header>
+        <p><a href="feedback_admin.php">Ideen, Kommentare und privates Feedback verwalten →</a></p>
         <section id="review-dashboard" class="review-dashboard" aria-label="Übersicht"></section>
         <div class="review-type-filters" id="review-type-filters">
             <button class="is-active" data-type="all">Alle</button><button data-type="doctor">Ärzt:innen & Praxen</button><button data-type="treatment">Therapien</button>

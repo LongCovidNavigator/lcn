@@ -1,0 +1,53 @@
+<?php
+require_once __DIR__.'/api/_symptom_catalog.php';
+header('Cache-Control: private, no-store');
+if(lcnCurrentSiteRole()==='guest'){http_response_code(403);exit('Bitte zuerst bei der Beta anmelden.');}
+lcnVotingToken();
+function symEscape($v): string{return htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');}
+function symParam(string $key,int $max=100): string{return is_string($_GET[$key]??null)?mb_substr(trim($_GET[$key]),0,$max):'';}
+$search=symParam('q');$category=symParam('category',100);$sort=symParam('sort');$page=max(1,min(10000,(int)($_GET['page']??1)));
+$error=false;$items=[];$categories=[];$total=0;$pending=[];$reviewAvailable=true;
+try{
+ $p=lcnDatabase();$categories=symCategories($p);$where=[];$args=[];
+ $symId=filter_var($_GET['id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+ if($symId){$where[]='s.sym_id=?';$args[]=$symId;}
+ if($search!==''){$where[]="s.sym_name LIKE ? ESCAPE '!'";$args[]='%'.strtr($search,['!'=>'!!','%'=>'!%','_'=>'!_']).'%';}
+ if($category==='__none')$where[]="TRIM(COALESCE(s.sym_category,''))=''";
+ elseif($category!==''){$where[]='TRIM(s.sym_category)=?';$args[]=$category;}
+ $where=$where?implode(' AND ',$where):'1=1';
+ $q=$p->prepare("SELECT COUNT(*) FROM tbl_symptoms s WHERE $where");$q->execute($args);$total=(int)$q->fetchColumn();
+ $page=min($page,max(1,(int)ceil($total/40)));$offset=($page-1)*40;
+ $order=['desc'=>'s.sym_name DESC,s.sym_id','category'=>"COALESCE(s.sym_category,''),s.sym_name,s.sym_id"][$sort]??'s.sym_name,s.sym_id';
+ $q=$p->prepare("SELECT s.sym_id,s.sym_name,COALESCE(s.sym_category,'') sym_category FROM tbl_symptoms s WHERE $where ORDER BY $order LIMIT 40 OFFSET $offset");$q->execute($args);$items=$q->fetchAll();
+ try{
+  $votes=$p->prepare('SELECT sym_id,category_snapshot,vote FROM tbl_symptom_category_votes WHERE voter_key=?');$votes->execute([lcnExistingVoterKey()??'']);$own=[];foreach($votes as $v)$own[$v['sym_id']]=$v;
+  foreach($items as &$item){$v=$own[$item['sym_id']]??null;$item['counts']=symVoteCounts($p,(int)$item['sym_id'],$item['sym_category']);$item['own_vote']=$v&&$v['category_snapshot']===$item['sym_category']?$v['vote']:null;}unset($item);
+  if(lcnCurrentSiteRole()==='admin')$pending=$p->query("SELECT * FROM tbl_symptom_requests WHERE status='pending' ORDER BY id LIMIT 100")->fetchAll();
+ }catch(Throwable $e){$reviewAvailable=false;lcnLogApiError('symptom_review_read',$e);}
+}catch(Throwable $e){lcnLogApiError('symptoms',$e);$error=true;http_response_code(503);}
+function symActions(array $r): void {global $reviewAvailable;
+ $id=(int)$r['sym_id'];$vote=$r['own_vote']??null; ?>
+ <div class="sym-actions" data-symptom="<?=$id?>" data-name="<?=symEscape($r['sym_name'])?>" data-category="<?=symEscape($r['sym_category'])?>">
+ <?php if(trim($r['sym_category'])!==''): foreach(['confirm'=>'Bestätigen','disagree'=>'Widersprechen'] as $value=>$label): $count=(int)($r['counts'][$value]??0); ?>
+ <button type="button" class="sym-vote" data-vote="<?=$value?>" aria-label="<?=$label?>: Kategorie <?=symEscape($r['sym_category'])?> · <?=$count?> Stimmen" title="<?=$label?><?=$value==='disagree'?' und passendere Kategorie vorschlagen':''?>" aria-pressed="<?=$vote===$value?'true':'false'?>" <?=$reviewAvailable?'':'disabled'?>><span aria-hidden="true"><?=$value==='confirm'?'✓':'×'?></span> <span data-count><?=$count?></span></button>
+ <?php endforeach; else: ?><button type="button" class="sym-category-button" data-propose <?=$reviewAvailable?'':'disabled'?>>Kategorie vorschlagen</button><?php endif; ?></div>
+
+<?php }
+?><!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Symptome im Überblick – LCN</title><link rel="stylesheet" href="styles/general.css"><link rel="stylesheet" href="styles/navigation.css"><link rel="stylesheet" href="styles/feedback.css"><link rel="stylesheet" href="styles/public_detail_theme.css"><link rel="stylesheet" href="styles/footer-style.css"><link rel="stylesheet" href="styles/symptoms.css?v=compact-three-columns-3"><script src="scripts/access-nav.js?v=all-pages-20261106-3" defer></script><script src="scripts/symptoms.js?v=lcn-category-votes-2" defer></script><script src="scripts/feedback_context.js?v=shared-composer-20261106-6" defer data-lcn-feedback-loader></script></head>
+<body class="lcn-public-page sym-page"><div id="header-placeholder"><?php readfile(__DIR__.'/components/header.html'); ?></div>
+<main class="fb-shell"><header class="fb-hero"><span class="fb-eyebrow">Navigator · Übersicht</span><h1>Symptome im Überblick</h1><p>Finde Symptome und ihre Kategorien. Hilf mit, die Zuordnung zu verbessern oder fehlende Symptome zu ergänzen.</p><p class="fb-muted">Diese Übersicht ersetzt keine medizinische Einordnung. Bestätigen und Widersprechen beziehen sich auf die Kategorie, nicht auf die Beschwerden.</p></header>
+<section class="sym-navigation doctor-navigation-panel" aria-labelledby="sym-navigation-title"><h2 class="sym-panel-heading doctor-navigation-header" id="sym-navigation-title"><span aria-hidden="true">☷</span> Navigation</h2><form class="fb-toolbar" id="sym-search-form" role="search"><div class="sym-search-field"><label for="sym-search">Symptom suchen</label><input id="sym-search" type="search" name="q" maxlength="100" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sym-suggestions" value="<?=symEscape($search)?>"><div id="sym-suggestions" role="listbox" aria-label="Suchvorschläge" hidden></div></div>
+<label>Kategorie<select name="category"><option value="">Alle Kategorien</option><option value="__none" <?=$category==='__none'?'selected':''?>>Ohne Kategorie</option><?php foreach($categories as $c): ?><option value="<?=symEscape($c)?>" <?=$category===$c?'selected':''?>><?=symEscape($c)?></option><?php endforeach; ?></select></label>
+<label>Sortierung<select name="sort"><option value="">Name A–Z</option><option value="desc" <?=$sort==='desc'?'selected':''?>>Name Z–A</option><option value="category" <?=$sort==='category'?'selected':''?>>Kategorie</option></select></label><button class="fb-button">Suchen</button><a href="symptome.php">Zurücksetzen</a></form></section>
+<section class="sym-results doctor-results-panel" aria-label="Symptome"><div class="sym-results-bar doctor-results-header"><p role="status"><?=$total?> Symptome<?=($search!==''||$category!=='')?' gefunden':''?></p><div class="doctor-view-switch" role="group" aria-label="Ansicht wechseln"><button type="button" class="doctor-view-switch-button is-active" data-view="cards" aria-pressed="true">Kacheln</button><button type="button" class="doctor-view-switch-button" data-view="table" aria-pressed="false">Tabelle</button></div><button type="button" class="fb-secondary" id="sym-add" <?=$reviewAvailable?'':'disabled'?>>Fehlendes Symptom ergänzen</button></div>
+<div id="sym-message" role="status" aria-live="polite" tabindex="-1" hidden></div>
+<?php if(!$reviewAvailable): ?><p class="fb-note">Die Mitwirkung ist vorübergehend nicht verfügbar. Du kannst weiterhin alle Symptome durchsuchen.</p><?php endif; ?>
+<?php if($error): ?><p class="fb-error">Die Symptome können gerade nicht geladen werden.</p><?php elseif(!$items): ?><p class="fb-note">Keine passenden Symptome gefunden. Ändere deine Filter oder schlage ein fehlendes Symptom vor.</p><?php else: ?>
+<div id="sym-cards"><?php foreach($items as $r): ?><article class="fb-card" id="symptom-<?=(int)$r['sym_id']?>"><div class="fb-card-content"><h2><?=symEscape($r['sym_name'])?></h2><p><span class="fb-tag"><?=symEscape(trim($r['sym_category'])?:'Noch ohne Kategorie')?></span></p><?php symActions($r); ?></div></article><?php endforeach; ?></div>
+<div id="sym-table" hidden><table><caption class="sym-sr-only">Symptome und ihre Kategorisierung</caption><thead><tr><th scope="col">Symptom</th><th scope="col">Kategorie</th><th scope="col">Kategorisierung prüfen</th></tr></thead><tbody><?php foreach($items as $r): ?><tr><th scope="row"><?=symEscape($r['sym_name'])?></th><td><?=symEscape(trim($r['sym_category'])?:'Noch ohne Kategorie')?></td><td><?php symActions($r); ?></td></tr><?php endforeach; ?></tbody></table></div>
+<nav class="fb-actions" aria-label="Symptomseiten"><?php $params=['q'=>$search,'category'=>$category,'sort'=>$sort];if($symId)$params['id']=$symId; if($page>1): ?><a href="?<?=symEscape(http_build_query($params+['page'=>$page-1]))?>">← Zurück</a><?php endif; ?><span>Seite <?=$page?> von <?=max(1,ceil($total/40))?></span><?php if($page*40<$total): ?><a href="?<?=symEscape(http_build_query($params+['page'=>$page+1]))?>">Weiter →</a><?php endif; ?></nav>
+<?php endif; ?>
+</section><?php if(lcnCurrentSiteRole()==='admin'&&$reviewAvailable): ?><details class="fb-panel" id="sym-review"><summary>Symptomvorschläge prüfen (<?=count($pending)?><?=count($pending)===100?'+':''?>)</summary><p class="fb-muted">Neue Symptome und Kategorieänderungen werden erst nach Freigabe übernommen. Angezeigt werden bis zu 100 offene Vorschläge.</p><?php foreach($pending as $r): ?><article class="fb-card" data-request="<?=(int)$r['id']?>"><div><h3><?=symEscape($r['name'])?></h3><p><?=$r['sym_id']?'Kategorie ändern: '.symEscape($r['category_snapshot']?:'Ohne Kategorie').' →':'Neues Symptom · Kategorie:'?> <?=symEscape($r['category']?:'Ohne Kategorie')?></p><p><?=symEscape($r['reason'])?></p><div class="fb-actions"><button type="button" class="fb-button" data-review="approve">Freigeben</button><button type="button" class="fb-secondary" data-review="reject">Ablehnen</button></div></div></article><?php endforeach; ?></details><?php endif; ?>
+<dialog id="sym-dialog" aria-labelledby="sym-dialog-title"><form id="sym-proposal" class="fb-form"><h2 id="sym-dialog-title">Symptom ergänzen</h2><p id="sym-dialog-note">Dein Vorschlag wird vor der Übernahme geprüft.</p><label id="sym-name-label">Symptomname<input name="name" minlength="2" maxlength="100" required></label><label>Kategorie<input name="category" list="sym-categories" maxlength="100"><datalist id="sym-categories"><?php foreach($categories as $c): ?><option value="<?=symEscape($c)?>"><?php endforeach; ?></datalist></label><p class="fb-muted">Wähle eine vorhandene Kategorie oder schlage eine neue vor.</p><label>Begründung (optional)<textarea name="reason" maxlength="2000" rows="3"></textarea></label><p id="sym-dialog-error" class="fb-error" role="alert" hidden></p><div class="fb-actions"><button class="fb-button" type="submit">Vorschlag senden</button><button class="fb-secondary" type="button" id="sym-dialog-close">Abbrechen</button></div></form></dialog>
+</main><div id="footer-placeholder"><?php readfile(__DIR__.'/components/footer.html'); ?></div></body></html>

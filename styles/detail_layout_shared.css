@@ -1,4 +1,8 @@
 /* Shared geometry for doctor and therapy details. Load after page-specific styles. */
+/* Keep links and expandable entries aligned despite generic mobile nav rules. */
+.detail-main-menu,
+.detail-main-menu a,
+.detail-main-menu summary {text-align:left}
 body.compact-doctor-header>.page-shell,body.compact-doctor-header>.nd-shell{box-sizing:border-box;width:100%;max-width:1440px;margin:0 auto;padding:14px 24px 40px}
 body.compact-doctor-header .detail-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:0;align-items:stretch;background:#fff;border:1px solid #e1eafa;border-radius:10px}
 body.compact-doctor-header .detail-layout>.side-nav{display:block;position:static;align-self:stretch;background:#f7fbfe;border:0;border-right:1px solid #e1eafa;border-radius:10px 0 0 10px;padding:8px 4px 24px 0;margin:0}

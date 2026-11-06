@@ -575,7 +575,7 @@ function bindTreatmentNavigationEvents() {
 
 function updateTreatmentSortSelects() {
     const source = document.getElementById("treatment-sort-select");
-    const value = source ? source.value : "name:asc";
+    const value = source ? source.value : "distance:asc";
 
     [
         document.getElementById("treatment-sort-select"),
@@ -1301,7 +1301,7 @@ function getTreatmentFilters() {
     const radiusInput = document.getElementById("treatment-radius-input");
     const includeNoCoordsInput = document.getElementById("treatment-include-no-coords-input");
 
-    const sortValue = sortSelect ? sortSelect.value : "name:asc";
+    const sortValue = sortSelect ? sortSelect.value : "distance:asc";
     const sortParts = sortValue.split(":");
 
     const onlyWithProvider = onlyWithProviderInput ? onlyWithProviderInput.checked : false;
@@ -1315,7 +1315,7 @@ function getTreatmentFilters() {
     }
 
     return {
-        sortKey: sortParts[0] || "name",
+        sortKey: sortParts[0] || "distance",
         sortDirection: sortParts[1] || "asc",
 		searchTerm: "",
         category: categorySelect ? String(categorySelect.value || "").trim() : "",
@@ -1376,7 +1376,7 @@ function resetTreatmentFilters() {
     hideTreatmentAliasSmartSuggestions();
     setInputValue("treatment-alias-smart-input", "");
     setTreatmentAliasSmartStatus("Suche nach direktem Therapienamen, Alias/Synonym oder Oberbegriff/Kombibegriff.");
-    setInputValue("treatment-sort-select", "name:asc");
+    setInputValue("treatment-sort-select", "distance:asc");
     setInputValue("treatment-community-status-select", "all");
     setInputValue("treatment-category-select", "");
     setInputValue("treatment-subcategory-select", "");

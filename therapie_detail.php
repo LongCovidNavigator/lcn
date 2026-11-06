@@ -112,5 +112,5 @@ echo ndRenderRelationshipStages($graph,(int)$id);
 echo ndRenderTreatmentCombinations($graph,(int)$id);
 ?>
 <p data-treatment-relation-status role="status"></p>
-</section><section id="dashboard" class="nd-panel" aria-label="Dashboard" hidden><div data-treatment-score="full"></div><div class="ux-dashboard-grid" data-treatment-dashboard></div></section></div></div><?php ndEnd(); ?>
+</section><section id="dashboard" class="nd-panel" aria-label="Dashboard" hidden><div data-treatment-score="full"></div><div class="ux-dashboard-grid" data-treatment-dashboard></div></section></div></div><link rel="stylesheet" href="styles/feedback.css"><?php ndEnd(); ?>
 

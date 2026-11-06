@@ -12,7 +12,7 @@ let visibleDoctorCardCount = doctorCardBatchSize;
 let selectedDoctorsForCompare = [];
 let showOnlyCompareSelection = false;
 
-let currentDoctorSortKey = "name";
+let currentDoctorSortKey = "distance";
 let currentDoctorSortDirection = "asc";
 let currentDoctorTableSortKey = null;
 let currentDoctorTableSortDirection = "asc";
@@ -894,7 +894,7 @@ function resetDoctorNavigationControls() {
     const includeNoCoordsInput = document.getElementById("doctor-include-no-coords-input");
     const radiusInput = document.getElementById("doctor-radius-input");
 
-    currentDoctorSortKey = "name";
+    currentDoctorSortKey = "distance";
     currentDoctorSortDirection = "asc";
     currentMinPositiveRatio = 0;
     currentMinHealingRatio = 0;
@@ -910,7 +910,7 @@ function resetDoctorNavigationControls() {
     currentIncludeNoCoords = false;
     showOnlyCompareSelection = false;
 
-    if (sortSelect) sortSelect.value = "name:asc";
+    if (sortSelect) sortSelect.value = "distance:asc";
     if (minPositiveInput) minPositiveInput.value = "0";
     if (minHealingInput) minHealingInput.value = "0";
     if (maxNegativeInput) maxNegativeInput.value = "100";
@@ -948,7 +948,7 @@ function resetDoctorNavigationControls() {
 
 
 function parseSortSelectValue(value) {
-    const [key, direction] = String(value || "name:asc").split(":");
+    const [key, direction] = String(value || "distance:asc").split(":");
 
     return {
         key: key || "name",
@@ -1228,11 +1228,6 @@ async function loadDoctorsFromSearchApi(settings) {
         });
     }
 
-    if (!currentLocation && currentDoctorSortKey === "distance") {
-        currentDoctorSortKey = "name";
-        currentDoctorSortDirection = "asc";
-        updateSortSelectValue();
-    }
 
     currentDoctors = sortDoctors(apiDoctors, currentDoctorSortKey, currentDoctorSortDirection);
     visibleDoctorCardCount = doctorCardBatchSize;
@@ -1869,8 +1864,6 @@ function doctorOnlineLabel(doctor) {
 }
 
 function compareDoctorDistance(a, b, direction = "asc") {
-    const online = Number(Boolean(b.online_therapy_available)) - Number(Boolean(a.online_therapy_available));
-    if (online) return online;
     const distanceA = !a.online_only && a.distance_km != null && Number.isFinite(Number(a.distance_km)) ? Number(a.distance_km) : null;
     const distanceB = !b.online_only && b.distance_km != null && Number.isFinite(Number(b.distance_km)) ? Number(b.distance_km) : null;
     if (distanceA === null && distanceB !== null) return 1;
