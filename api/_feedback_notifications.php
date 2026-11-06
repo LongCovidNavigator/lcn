@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__.'/_lcn_db.php';
+require_once __DIR__.'/_feedback_smtp.php';
 
 /** The transport can be replaced in tests; a true result only confirms handoff. */
 function fbNotifyPrivateReport(int $id, string $message, ?string $replyTo, string $page, ?callable $transport=null): bool {
@@ -12,7 +13,7 @@ function fbNotifyPrivateReport(int $id, string $message, ?string $replyTo, strin
  if($replyTo!==null&&filter_var($replyTo,FILTER_VALIDATE_EMAIL)&&!preg_match('/[\r\n]/',$replyTo))$headers[]='Reply-To: '.$replyTo;
  $subject='LCN: Vertrauliches Feedback #'.$id;
  $body="Neues vertrauliches Feedback #".$id."\n\n".$message."\n\nSeitenbezug: ".($page!==''?$page:'Ohne Seitenbezug')."\nKontakt für Rückfragen: ".($replyTo?:'Nicht angegeben')."\n";
- try{$sent=$transport? $transport($to,$subject,$body,implode("\r\n",$headers)) : @mail($to,$subject,$body,implode("\r\n",$headers));}
+ try{$sent=$transport? $transport($to,$subject,$body,implode("\r\n",$headers)) : fbSmtpSend($to,$subject,$body,implode("\r\n",$headers));}
  catch(Throwable $error){$sent=false;}
  if(!$sent)error_log('LCN feedback notification: mail handoff failed for report #'.$id.'; message remains in feedback administration.');
  return (bool)$sent;
