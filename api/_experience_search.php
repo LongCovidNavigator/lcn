@@ -1,6 +1,9 @@
 <?php
 // Same four-category answers as experience_summary.php, grouped for search filters.
+require_once __DIR__ . '/_lcn_db.php';
+
 function lcnExperienceSearchSql(string $type, bool $includeDummy): string {
+    $includeDummy = $includeDummy && lcnDummyDataAllowed();
     if ($type === 'doctor') {
         $answers = "SELECT dr_id AS id, option_value - 1 AS effect, 1 AS n FROM doctor_community_answers WHERE question_key='effect' AND context_key='' AND option_value BETWEEN 1 AND 4";
         if ($includeDummy) $answers .= " UNION ALL SELECT dr_id, option_value - 1, 1 FROM doctor_community_dummy_answers WHERE question_key='effect' AND context_key='' AND option_value BETWEEN 1 AND 4";

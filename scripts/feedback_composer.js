@@ -9,7 +9,7 @@ export async function openComposer(mode='#privat',context){
  composer.openMode(mode,trigger);
 }
 async function mount(context){
- await Promise.all(['styles/feedback.css?v=image-scene-20261107','styles/feedback_community.css?v=ai-images-20261106-1','styles/feedback_composer.css?v=image-refinement-20261107'].map(href=>new Promise((resolve,reject)=>{const link=document.createElement('link');link.rel='stylesheet';link.href=href;link.onload=resolve;link.onerror=reject;document.head.append(link);})));
+ await Promise.all(['styles/feedback.css?v=image-scene-20261107','styles/feedback_community.css?v=ai-images-20261106-1','styles/feedback_composer.css?v=responsive-20261107'].map(href=>new Promise((resolve,reject)=>{const link=document.createElement('link');link.rel='stylesheet';link.href=href;link.onload=resolve;link.onerror=reject;document.head.append(link);})));
  const response=await fetch('components/feedback_composer.html?v=privacy-label-20261107');if(!response.ok)throw Error('Das Formular konnte nicht geladen werden.');
  const template=document.createElement('template');template.innerHTML=await response.text();
  const composer=template.content.querySelector('dialog');document.body.append(composer);

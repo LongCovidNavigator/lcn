@@ -18,7 +18,7 @@
   ];
   // Archived alternative: appointmentVariant(4) / mergedAppointmentCell.
   // Active display is appointmentVariant(3), formerly labelled Variante 2.
-  const emptyAppointmentDemo = new URLSearchParams(location.search).get('demo') === 'termine-null';
+  const emptyAppointmentDemo = window.LCNDummy.available && new URLSearchParams(location.search).get('demo') === 'termine-null';
   const demoAppointmentAnswers = {};
   let includeDummy = window.LCNDummy.get();
   let communityLoading = false;
@@ -27,7 +27,8 @@
     if(!dummyToggle)return;
     dummyToggle.textContent = communityLoading ? 'Dummydaten werden geladen …' : 'Dummy-Daten sind '+(includeDummy?'an':'aus');
     dummyToggle.setAttribute('aria-pressed',String(includeDummy));
-    dummyToggle.disabled = communityLoading || state.saving || !validId || isSubmission || emptyAppointmentDemo;
+    dummyToggle.hidden = !window.LCNDummy.available;
+    dummyToggle.disabled = dummyToggle.hidden || communityLoading || state.saving || !validId || isSubmission || emptyAppointmentDemo;
     if(isSubmission || emptyAppointmentDemo)dummyToggle.title='Für diese Test- oder Vorschlagsansicht nicht verfügbar.';
   }
   dummyToggle?.addEventListener('click',()=>{if(!communityLoading&&!state.saving) { window.LCNDummy.set(!includeDummy); }});
@@ -94,7 +95,7 @@
       applyCommunityResponse(data);
       includeDummy = Boolean(state.community.include_dummy);
       const url = new URL(location.href);
-      if(!emptyAppointmentDemo) {url.searchParams.set('demo',includeDummy?'1':'0');history.replaceState(history.state,'',url);}
+      if(window.LCNDummy.available && !emptyAppointmentDemo) {url.searchParams.set('demo',includeDummy?'1':'0');history.replaceState(history.state,'',url);}
       state.communityError = false;
     } catch (_) { state.communityError = true; notify('Community-Daten konnten nicht geladen werden.'); }
     communityLoading = false;

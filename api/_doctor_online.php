@@ -11,7 +11,7 @@ function lcnDoctorOnlineAccess(PDO $pdo,bool $dummy=false): array {
         $result[(int)$row['lcn_id']]=['first'=>$first,'follow'=>$follow,'researchedFirst'=>$first,'researchedFollow'=>$follow,'researchedComplete'=>$first&&$follow];
     }
     $counts=[];
-    foreach($dummy?['doctor_community_answers','doctor_community_dummy_answers']:['doctor_community_answers'] as $table){
+    foreach(($dummy && lcnDummyDataAllowed())?['doctor_community_answers','doctor_community_dummy_answers']:['doctor_community_answers'] as $table){
         foreach($pdo->query("SELECT dr_id,question_key,option_value,COUNT(*) n FROM $table WHERE question_key IN ('appointment_first_video','appointment_followup_video') GROUP BY dr_id,question_key,option_value") as $row){
             $kind=$row['question_key']==='appointment_first_video'?'first':'follow';
             $counts[(int)$row['dr_id']][$kind][(int)$row['option_value']]=($counts[(int)$row['dr_id']][$kind][(int)$row['option_value']]??0)+(int)$row['n'];

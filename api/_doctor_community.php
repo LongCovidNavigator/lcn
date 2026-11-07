@@ -36,7 +36,7 @@ function lcnDoctorCommunityIncludesDummy(): bool
 function lcnDoctorCommunity(PDO $pdo, int $doctorId, ?bool $includeDummy = null): array
 {
     if (!lcnDoctorExists($doctorId)) throw new InvalidArgumentException('Unknown doctor');
-    $includeDummy ??= lcnDoctorCommunityIncludesDummy();
+    $includeDummy = lcnDummyDataAllowed() && ($includeDummy ?? lcnDoctorCommunityIncludesDummy());
     $counts = [];
     $tables = ['doctor_community_answers' => 'real'];
     if ($includeDummy) $tables['doctor_community_dummy_answers'] = 'dummy';

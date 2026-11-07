@@ -151,6 +151,19 @@ function lcnDatabaseProfile(): ?string
     return $profile;
 }
 
+function lcnDummyDataAllowed(): bool
+{
+    if (PHP_SAPI !== 'cli') {
+        $host = (string)($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '');
+        if (!preg_match('/^(localhost\.?|127\.0\.0\.1|\[::1\])(?::[0-9]+)?$/iD', $host)
+            || !in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)) {
+            return false;
+        }
+    }
+
+    return str_starts_with(lcnDatabaseProfile() ?? '', 'LOCAL_');
+}
+
 function lcnDatabaseConfig(): array
 {
     $profile = lcnDatabaseProfile();

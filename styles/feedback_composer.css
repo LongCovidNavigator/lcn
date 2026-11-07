@@ -2,7 +2,7 @@
 #fb-idea-dialog.fb-shell{--compose-gutter:30px;box-sizing:border-box;margin:auto;font:15px/1.6 Arial,sans-serif;width:min(700px,calc(100% - 28px));max-width:700px;max-height:calc(100dvh - 40px);padding:0;color:#17304b;border:1px solid #d0dfec;border-radius:16px;overflow:auto;background:#fff}
 #fb-idea-dialog .fb-compose-heading{padding:28px var(--compose-gutter) 0}
 #fb-idea-dialog .fb-compose-heading h2{margin:8px 36px 22px 0;line-height:1.3}
-#fb-idea-dialog .fb-compose-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:auto;min-height:0;margin:0;padding:0 var(--compose-gutter)!important;border:0!important;border-radius:0;background:transparent;box-shadow:none;color:#17304b;position:static}
+#fb-idea-dialog .fb-compose-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:auto;min-height:0;margin:0;padding:0 var(--compose-gutter)!important;border:0!important;border-radius:0;background:transparent;box-shadow:none;color:#17304b;position:static}
 #fb-idea-dialog .fb-compose-options button{min-width:0;width:100%;margin:0;text-align:left;white-space:normal;line-height:1.4}
 #fb-idea-dialog .fb-panel{margin:0;padding:26px var(--compose-gutter) 30px;border:0;border-radius:0}
 #fb-idea-dialog .fb-panel>h2{margin:5px 0 12px;line-height:1.35}
@@ -45,6 +45,8 @@
   #fb-idea-dialog .fb-compose-options{grid-template-columns:minmax(0,1fr)}
   #fb-idea-dialog .fb-form>button[type=submit]{width:100%;white-space:normal}
   #fb-idea-dialog .fb-reference{padding:12px}
+  #fb-idea-dialog .fb-image-options{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #fb-idea-dialog .fb-image-none{font-size:12px}
 }
 @media(max-height:500px){
   #fb-idea-dialog.fb-shell{max-height:calc(100dvh - 16px)}

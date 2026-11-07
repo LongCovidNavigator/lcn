@@ -3,7 +3,7 @@
     function syncDummyToggle() {
         document.querySelectorAll('[data-lcn-dummy-toggle]').forEach(button => {
             const enabled = window.LCNDummy?.get() || false;
-            button.disabled = !window.LCNDummy;
+            button.hidden = button.disabled = !window.LCNDummy?.available;
             button.setAttribute('aria-pressed', String(enabled));
             const label = 'Dummy-Daten: ' + (enabled ? 'an' : 'aus');
             if (button.textContent !== label) button.textContent = label;
@@ -13,10 +13,13 @@
         let script = document.querySelector('script[src*="scripts/dummy_preferences.js"]');
         if (!script) {
             script = document.createElement('script');
-            script.src = new URL('dummy_preferences.js?v=2', document.currentScript.src).href;
+            script.src = new URL('dummy_preferences.js?v=local-only', document.currentScript.src).href;
             document.head.append(script);
         }
-        script.addEventListener('load', syncDummyToggle, {once:true});
+        script.addEventListener('load', () => {
+            syncDummyToggle();
+            if (window.LCNDummy?.get()) window.dispatchEvent(new Event('lcn-dummy-change'));
+        }, {once:true});
     }
     document.addEventListener('click', event => {
         if (event.target.closest('[data-lcn-dummy-toggle]') && window.LCNDummy) window.LCNDummy.set(!window.LCNDummy.get());

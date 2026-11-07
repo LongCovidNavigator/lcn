@@ -36,7 +36,7 @@
  function sync(){const hidden=!!document.querySelector('dialog[open],[aria-modal="true"]:not([hidden])');if(button.hidden!==hidden)button.hidden=hidden;}
  new MutationObserver(sync).observe(document.body,{subtree:true,attributes:true,attributeFilter:['open','hidden','aria-modal']});document.addEventListener('focusin',sync);document.addEventListener('focusout',()=>setTimeout(sync,0));
  document.addEventListener('click',e=>{const link=e.target.closest('a[href]');if(!link)return;try{const target=new URL(link.href,location.href);if(target.origin===location.origin&&target.pathname.endsWith('/mitgestalten.html')&&!location.pathname.endsWith('/mitgestalten.html'))sessionStorage.setItem('lcn-feedback-source',JSON.stringify({...capture(),time:Date.now()}));}catch{}});
- async function open(mode){try{const {openComposer}=await import('./feedback_composer.js?v=privacy-label-20261107');await openComposer(mode,capture());}catch(error){console.error(error);button.title=error.message;}}
+ async function open(mode){try{const {openComposer}=await import('./feedback_composer.js?v=responsive-20261107');await openComposer(mode,capture());}catch(error){console.error(error);button.title=error.message;}}
  button.onclick=()=>open(location.pathname.endsWith('/mitgestalten.html')?'#idee':'#privat');
  document.addEventListener('click',e=>{const link=e.target.closest('a[href]');if(!link||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)return;const target=new URL(link.href,location.href);if(target.origin!==location.origin||!['#idee','#privat'].includes(target.hash))return;if(target.pathname!==location.pathname&&!target.pathname.endsWith('/mitgestalten.html'))return;e.preventDefault();open(target.hash);});
 })();

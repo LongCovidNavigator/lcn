@@ -2,6 +2,7 @@
 // CLI-only, additive and repeatable. Never writes to existing doctor/research/vote tables.
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require_once __DIR__ . '/../api/_doctor_community.php';
+if (!lcnDummyDataAllowed()) throw new RuntimeException('Dummy data requires a local database profile.');
 $pdo = lcnDoctorDatabase();
 $database = $pdo->query('SELECT DATABASE()')->fetchColumn();
 if ($database !== 'lcn_hybrid_database') throw new RuntimeException('Expected local lcn_hybrid_database.');

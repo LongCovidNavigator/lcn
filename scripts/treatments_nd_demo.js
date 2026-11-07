@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const toolbar = document.querySelector('.nd-demo-toolbar');
-  if (!toolbar) return;
+  if (!toolbar || !window.LCNDummy.available) return;
   // Deliberately synthetic, fixed n=100 per question. Never submitted or copied into answers.
   const profiles = {
     ldn: {name:'LDN', application:[12,76,18,3,0,0,0,0,0,0,0,4], titration:[84,16], taper:[28,72], dose_adjustment:[68,32], rating:[68,18,14], effect:[14,18,62,6], gamechanger:[32,68], onset:[4,12,51,23,10], pem:[48,34,13,5], setting:[82,14,28,6], gkv:[18,82], pharmacy:[86,14], duration_band:[90,6,3,1], frequency_band:[2,4,86,8], count_band:[1,5,14,80], total_duration_band:[2,10,28,60]},

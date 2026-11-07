@@ -5,7 +5,7 @@ header('Cache-Control: no-store');
 try {
     $pdo = lcnDoctorDatabase();
     require_once __DIR__ . '/_experience_summary.php';
-    $includeDummy = ($_GET['include_dummy'] ?? '0') === '1';
+    $includeDummy = lcnDummyDataAllowed() && ($_GET['include_dummy'] ?? '0') === '1';
     $result = lcnExperienceSummary($pdo, $includeDummy);
     echo json_encode(['ok'=>true,'counts'=>$result,'include_dummy'=>$includeDummy], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {

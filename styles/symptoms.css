@@ -32,3 +32,16 @@
 .sym-page #sym-message,.sym-results>.fb-note,.sym-results>.fb-error{margin:16px 20px}
 @media(min-width:651px) and (max-width:1000px){#sym-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.sym-page .fb-shell{padding:0 16px;margin-top:20px}.sym-navigation .fb-toolbar{padding:16px;gap:14px}.sym-navigation .sym-search-field{min-width:0}.sym-navigation .fb-toolbar>label{min-width:0}.sym-panel-heading{padding:14px 16px}.sym-results-bar{padding:16px;gap:12px}#sym-cards{grid-template-columns:1fr;padding:0 16px;gap:12px}.sym-page #sym-table{margin:0 16px}.sym-page #sym-cards .fb-card{padding:16px}.sym-results-bar .doctor-view-switch{flex:1}.sym-results-bar .doctor-view-switch-button{flex:1}.sym-results-bar>#sym-add{width:auto}.sym-page .sym-results>nav{margin-inline:16px}}
+.sym-page #sym-dialog {
+  box-sizing: border-box;
+  max-height: calc(100dvh - 24px);
+}
+@media (max-width: 900px) {
+  .sym-page :is(.fb-toolbar, #sym-dialog) :is(input, select, textarea) {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+@media (max-width: 480px) {
+  .sym-page #sym-dialog { padding: 16px; }
+}

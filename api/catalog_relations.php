@@ -43,7 +43,9 @@ try {
   foreach($pending as &$proposal){if(!$proposal['id'])continue;
    $rows=lcnNdRows($p,'SELECT t.treat_id,t.behandlung,t.typ,t.unterkategorie,(SELECT COUNT(DISTINCT c.dr_id) FROM v_lcn_provider_treatments c WHERE c.treat_id=t.treat_id) AS provider_total FROM v_lcn_treatments t WHERE t.treat_id=?',[$proposal['id']]);
    if(!$rows)continue;$proposal['details']=lcnApplyDoctorTreatmentRatings($p,$rows)[0];
-   $examples=lcnNdRows($p,'SELECT * FROM treatment_experience_dummy_counts WHERE treat_id=?',[$proposal['id']]);$proposal['dummy_example']=$examples?array_map('intval',$examples[0]):null;
+   if (lcnDummyDataAllowed()) {
+    $examples=lcnNdRows($p,'SELECT * FROM treatment_experience_dummy_counts WHERE treat_id=?',[$proposal['id']]);$proposal['dummy_example']=$examples?array_map('intval',$examples[0]):null;
+   }
   }unset($proposal);
  } lcnSendVoteJson(['ok'=>true,'items'=>$items,'linked'=>array_map('intval',$linked),'pending'=>array_values($pending)]);
 }catch(InvalidArgumentException $e){lcnSendVoteJson(['ok'=>false,'error'=>$e->getMessage()],400);}

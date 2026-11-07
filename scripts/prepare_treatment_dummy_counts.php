@@ -1,6 +1,7 @@
 <?php
 if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
 require_once __DIR__.'/../api/_treatment_answers.php';
+if (!lcnDummyDataAllowed()) throw new RuntimeException('Dummy data requires a local database profile.');
 $p=lcnTreatmentsNdDatabase();
 $p->exec(file_get_contents(__DIR__.'/../migrations/018_treatment_dummy_counts.sql'));
 $insert=$p->prepare('INSERT IGNORE INTO tbl_treatment_dummy_counts_nd VALUES (?,?,?,?)');

@@ -23,6 +23,8 @@ function lcnMergePlan(PDO $p,string $type,int $source,int $target,array $overlay
  $conflicts=[];$updates=[];$ignore=[$d['id'],$d['name'],'legacy_treat_id','legacy_match_status','created_at','updated_at','review_status','datenstand','slug','notes_internal','legacy_notes'];
  foreach($byId[$source] as $key=>$value){if(in_array($key,$ignore,true)||$value===null||$value==='')continue;$other=$byId[$target][$key];if($other===null||$other==='')$updates[$key]=$value;elseif((string)$value!==(string)$other)$conflicts[]=['key'=>'field:'.$key,'label'=>$key,'source'=>$value,'target'=>$other];}
  $operations=[];
+ $localOnlyTables = ['doctor_community_dummy_answers', 'tbl_treatment_dummy_counts_nd', 'treatment_experience_dummy_counts'];
+ if (!lcnDummyDataAllowed()) $d['refs'] = array_diff_key($d['refs'], array_flip($localOnlyTables));
  foreach($d['refs'] as $table=>$refs){
   $columns=lcnNdRows($p,"SHOW COLUMNS FROM `$table`");$auto=[];foreach($columns as $column)if(str_contains($column['Extra'],'auto_increment'))$auto[]=$column['Field'];
   $indexes=[];foreach(lcnNdRows($p,"SHOW INDEX FROM `$table`") as $index)if(!$index['Non_unique'])$indexes[$index['Key_name']][]=$index['Column_name'];

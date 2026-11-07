@@ -3,9 +3,7 @@ window.LCNExperience = (() => {
   const labels=['Verschlechterung','Neutral','Verbesserung','Heilung'];
   let counts=null,failed=false,includeDummy=false,requestVersion=0;
   function dummyEnabled(){
-    if(window.LCNDummy)return window.LCNDummy.get();
-    try{const saved=localStorage.getItem('lcn_dummy_data_enabled');if(saved!==null)return saved==='1';}catch(_){}
-    return new URLSearchParams(location.search).get('demo')==='1';
+    return window.LCNDummy?.get() ?? false;
   }
   function load(){
     const version=++requestVersion;includeDummy=dummyEnabled();counts=null;failed=false;

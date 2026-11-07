@@ -7,14 +7,19 @@
  const date=v=>new Date(String(v).replace(' ','T')).toLocaleDateString('de-DE');
  const options=(values,selected)=>Object.entries(values).map(([k,v])=>`<option value="${esc(k)}" ${k===selected?'selected':''}>${esc(v)}</option>`).join('');
  const field=(label,name,value,max=180,area=false)=>`<label>${label}${area?`<textarea rows="4" name="${name}" maxlength="${max}">${esc(value)}</textarea>`:`<input name="${name}" maxlength="${max}" value="${esc(value)}">`}</label>`;
- let config, listSeq=0;
+ let config, listSeq=0, listItems;
+ const pendingVotes=new Set();
  const params=new URLSearchParams(location.search),context={};
  if(params.get('entity_type')&&params.get('entity_id')){context.entity_type=params.get('entity_type');context.entity_id=params.get('entity_id');}
  const names={doctor:'Behandler:in',treatment:'Therapie',symptom:'Symptom'};
  const contextLink=r=>{const id=Number(r.entity_id);if(!id||!names[r.entity_type])return '';const href=r.entity_type==='doctor'?`arzt_detail.html?id=${id}`:r.entity_type==='treatment'?`therapie_detail.php?treatment_id=${id}`:`symptome.php?id=${id}#symptom-${id}`;return `<a href="${href}">${names[r.entity_type]} #${id}</a>`;};
  const referenceMarkup=r=>r.page_reference?`<p class="fb-note">Seitenbezug: <a href="${esc(r.page_reference.page_path)}">${esc(r.page_reference.label||'Zugehörige Seite')}</a>${r.page_reference.section_label?` · Reiter: ${esc(r.page_reference.section_label)}`:''}${r.page_reference.element_label?` · Bereich: ${esc(r.page_reference.element_label)}`:''}</p>`:'';
  const tags=r=>`<div class="fb-tags"><span class="fb-tag fb-status-${esc(r.status)}">${esc(config.statuses[r.status])}</span>${contextLink(r)}</div>`;
- const vote=r=>`<button class="fb-vote" type="button" data-vote="${Number(r.id)}" aria-pressed="${!!Number(r.supported)}" aria-label="${Number(r.supported)?'Unterstützung entfernen':'Vorschlag unterstützen'}: ${esc(r.title)}"><span aria-hidden="true">▲</span><strong>${Number(r.votes)}</strong><span>${Number(r.supported)?'Unterstützt':'Unterstützen'}</span></button>`;
+ const voteLabel=(supported,title,count)=>`${supported?'Unterstützung entfernen':'Vorschlag unterstützen'}: ${title} (${count} Unterstützungen)`;
+ const vote=r=>`<button class="fb-vote" type="button" data-vote="${Number(r.id)}" aria-pressed="${!!Number(r.supported)}" aria-label="${esc(voteLabel(Number(r.supported),r.title,Number(r.votes)))}" data-vote-title="${esc(r.title)}"${pendingVotes.has(Number(r.id))?' disabled':''}>
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M12 3 3.5 12H8v8h8v-8h4.5L12 3Z"/></svg>
+  <strong>${Number(r.votes)}</strong>
+ </button>`;
  // Stable round-robin covers: sorting and filtering keep the same image per idea.
  const cover=r=>/^[a-f0-9]{32}$/.test(r.image_id||'')?`api/feedback_image.php?id=${r.image_id}`:r.seed_key?`assets/images/feedback/motif-${String(((Math.max(1,Number(r.id)||1)-1)%9)+1).padStart(2,'0')}.webp`:'';
  const ideaInvitation=`
@@ -45,7 +50,31 @@
   }));
   config=await api({action:'config'});
   if(config.admin)document.querySelectorAll('[data-admin-only]').forEach(n=>n.hidden=false);
-  document.addEventListener('click',async e=>{const b=e.target.closest('[data-vote]');if(!b)return;b.disabled=true;try{const d=await api({action:'vote',id:Number(b.dataset.vote),supported:b.getAttribute('aria-pressed')!=='true'},true);b.setAttribute('aria-pressed',String(d.supported));b.querySelector('strong').textContent=d.votes;b.querySelector('span:last-child').textContent=d.supported?'Unterstützt':'Unterstützen';b.setAttribute('aria-label',d.supported?'Unterstützung entfernen':'Vorschlag unterstützen');}catch(err){message(err.message,true);}finally{b.disabled=false;}});
+  document.addEventListener('click',async e=>{
+   const button=e.target.closest('[data-vote]');
+   if(!button)return;
+   const id=Number(button.dataset.vote);
+   if(pendingVotes.has(id))return;
+   const currentButton=()=>button.isConnected?button:$(`[data-vote="${id}"]`);
+   pendingVotes.add(id);
+   button.disabled=true;
+   try{
+    const d=await api({action:'vote',id,supported:button.getAttribute('aria-pressed')!=='true'},true);
+    const item=listItems?.find(r=>Number(r.id)===id);
+    if(item)Object.assign(item,{supported:d.supported,votes:d.votes});
+    const current=currentButton();
+    if(current){
+     current.setAttribute('aria-pressed',String(d.supported));
+     current.querySelector('strong').textContent=d.votes;
+     current.setAttribute('aria-label',voteLabel(d.supported,current.dataset.voteTitle,d.votes));
+    }
+   }catch(err){message(err.message,true);}
+   finally{
+    pendingVotes.delete(id);
+    const current=currentButton();
+    if(current)current.disabled=false;
+   }
+  });
   function bindSubmit(form,action,extra={},done){form.addEventListener('submit',async e=>{e.preventDefault();const b=form.querySelector('button[type=submit]')||form.querySelector('button');b.disabled=true;try{const data=Object.fromEntries(new FormData(form));const d=await api({...data,...extra,action},true);if(done)await done(d);form.closest('dialog')?.close();message(d.message||'Gespeichert.');}catch(err){const modal=form.closest('dialog');if(modal){let result=form.querySelector('[data-form-result]');if(!result){result=document.createElement('p');result.dataset.formResult='';result.className='fb-form-result';result.setAttribute('role','alert');form.append(result);}result.textContent=err.message;result.scrollIntoView({block:'nearest'});}else message(err.message,true);}finally{b.disabled=false;}});}
   if($('#fb-admin-list')){
    const filter=$('#fb-admin-filters');
@@ -260,7 +289,86 @@
    states();filter.elements.kind.addEventListener('change',()=>{states();load();});filter.onsubmit=e=>{e.preventDefault();load();};await load();return;
   }
   $('#fb-status-filter').insertAdjacentHTML('beforeend',options(config.statuses));
-  async function loadList(page=1){const seq=++listSeq;try{const values=Object.fromEntries(new FormData($('#fb-filters')));const d=await api({action:'list',...values,page});if(seq!==listSeq)return;$('#fb-count').textContent=`${d.total} ${d.total===1?'Vorschlag':'Vorschläge'}`;$('#fb-list').setAttribute('aria-busy','false');$('#fb-list').innerHTML=(d.items.map(r=>{const image=cover(r);return `<article class="fb-card fb-idea-card">${image?`<a class="fb-card-cover" href="mitgestalten.html?id=${Number(r.id)}" tabindex="-1" aria-hidden="true"><img src="${image}" alt="" width="600" height="400" loading="lazy" decoding="async"></a>`:''}<div class="fb-card-content">${tags(r)}<h2><a href="mitgestalten.html?id=${r.id}">${esc(r.title)}</a></h2><p>${esc(r.description.slice(0,240))}${r.description.length>240?' …':''}</p><div class="fb-card-support">${vote(r)}</div><div class="fb-card-footer"><a href="mitgestalten.html?id=${r.id}">${Number(r.comments)} ${Number(r.comments)===1?'Kommentar':'Kommentare'} · Mitdiskutieren →</a><time datetime="${esc(String(r.created_at).slice(0,10))}">${date(r.created_at)}</time></div>${r.seed_key?'<small class="fb-test-marker">LCN-Testidee · keine echten Nutzerbeiträge</small>':''}</div></article>`;}).join('')||'<p class="fb-note">Noch keine passenden Vorschläge.</p>')+ideaInvitation;pages(page,d.pages,loadList);}catch(err){message(err.message,true);}}
+  const list=$('#fb-list');
+  let listOffset=0;
+  function renderList(){
+   if(!listItems)return;
+   const view=list.dataset.view;
+   const items=listItems.map((r,index)=>{
+    const href=`mitgestalten.html?id=${Number(r.id)}`;
+    const title=`<a href="${href}">${esc(r.title)}</a>`;
+    const image=cover(r);
+    const thumbnail=image?`<img src="${image}" alt="" width="600" height="400" loading="lazy" decoding="async">`:'';
+    const comments=Number(r.comments);
+    if(view==='table'){
+     return `<tr>
+      <td>${listOffset+index+1}</td>
+      <td>${vote(r)}</td>
+      <td>${thumbnail}</td>
+      <th scope="row">${title}</th>
+      <td>${comments}</td>
+     </tr>`;
+    }
+    return `<article class="fb-card fb-idea-card">
+     ${image?`<a class="fb-card-cover" href="${href}" tabindex="-1" aria-hidden="true">${thumbnail}</a>`:''}
+     <div class="fb-card-content">
+      ${tags(r)}<h2>${title}</h2>
+      <p>${esc(r.description.slice(0,240))}${r.description.length>240?' …':''}</p>
+      <div class="fb-card-footer">
+       ${vote(r)}
+       <a href="${href}">${comments} ${comments===1?'Kommentar':'Kommentare'} · Mitdiskutieren →</a>
+       <time datetime="${esc(String(r.created_at).slice(0,10))}">${date(r.created_at)}</time>
+      </div>
+     </div>
+    </article>`;
+   }).join('');
+   const proposals=view==='table'&&items
+    ?`<div class="fb-proposal-table-scroll" role="region" aria-label="Vorschlagstabelle" tabindex="0">
+     <table class="fb-proposal-table">
+      <thead><tr>
+       <th scope="col">Rang</th>
+       <th scope="col">Unterstützung</th>
+       <th scope="col">Bild</th>
+       <th scope="col">Name</th>
+       <th scope="col">Kommentare</th>
+      </tr></thead>
+      <tbody>${items}</tbody>
+     </table>
+    </div>`
+    :items;
+   list.innerHTML=(proposals||'<p class="fb-note">Noch keine passenden Vorschläge.</p>')+(view==='cards'?ideaInvitation:'');
+  }
+  const viewButtons=document.querySelectorAll('[data-proposal-view]');
+  const viewPreferenceKey='lcn.mitgestalten.view';
+  function selectView(view){
+   list.dataset.view=view;
+   viewButtons.forEach(option=>option.setAttribute('aria-pressed',String(option.dataset.proposalView===view)));
+   renderList();
+  }
+  try{
+   const savedView=localStorage.getItem(viewPreferenceKey);
+   if(savedView==='cards'||savedView==='table')selectView(savedView);
+  }catch{}
+  viewButtons.forEach(button=>button.addEventListener('click',()=>{
+   const view=button.dataset.proposalView;
+   if(list.dataset.view===view)return;
+   selectView(view);
+   try{localStorage.setItem(viewPreferenceKey,view);}catch{}
+  }));
+  async function loadList(page=1){
+   const seq=++listSeq;
+   try{
+    const values=Object.fromEntries(new FormData($('#fb-filters')));
+    const d=await api({action:'list',...values,page});
+    if(seq!==listSeq)return;
+    listItems=d.items;
+    listOffset=Number(d.offset)||0;
+    $('#fb-count').textContent=`${d.total} ${d.total===1?'Vorschlag':'Vorschläge'}`;
+    list.setAttribute('aria-busy','false');
+    renderList();
+    pages(page,d.pages,loadList);
+   }catch(err){message(err.message,true);}
+  }
   let searchTimer;$('#fb-filters').elements.q.addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>loadList(),300);});
   $('#fb-filters').onsubmit=e=>{e.preventDefault();clearTimeout(searchTimer);loadList();};$('#fb-filters').querySelectorAll('select').forEach(select=>select.addEventListener('change',()=>loadList()));
   if(params.get('id')){
@@ -288,14 +396,13 @@
         <h1>${esc(r.title)}</h1>
         ${referenceMarkup(r)}
         <div class="fb-prose">${esc(r.description)}</div>
-        <div class="fb-card-support">${vote(r)}</div>
-        <div class="fb-card-footer"><span>${Number(d.comment_total)} ${Number(d.comment_total)===1?'Kommentar':'Kommentare'}</span><time datetime="${esc(String(r.created_at).slice(0,10))}">${date(r.created_at)}</time></div>
+        <div class="fb-card-footer">${vote(r)}<span>${Number(d.comment_total)} ${Number(d.comment_total)===1?'Kommentar':'Kommentare'}</span><time datetime="${esc(String(r.created_at).slice(0,10))}">${date(r.created_at)}</time></div>
         ${r.team_reply?`<aside class="fb-note"><strong>Antwort des LCN-Teams</strong><p class="fb-prose">${esc(r.team_reply)}</p></aside>`:''}
       </div>
     </article>
     ${d.history.length?`<section class="fb-panel"><h2>Entwicklungsverlauf</h2><div class="fb-history">${d.history.map(h=>`<p><strong>${esc(config.statuses[h.new_value]||h.new_value)}</strong> · ${date(h.created_at)}<br><span class="fb-prose">${esc(h.reason)}</span></p>`).join('')}</div></section>`:''}<section class="fb-panel fb-discussion"><h2>Kommentare (${d.comment_total})</h2>${d.comments.map(c=>`<article class="fb-comment"><strong>Community-Beitrag</strong> <span class="fb-muted">${date(c.created_at)}</span><p class="fb-prose">${esc(c.body)}</p></article>`).join('')||'<p>Noch keine Kommentare.</p>'}<nav id="fb-comment-pages" class="fb-actions"></nav><form id="fb-comment-form" class="fb-form"><label>Deine Ergänzung<textarea id="fb-comment-body" name="body" required minlength="5" maxlength="4000" rows="4"></textarea></label><p class="fb-muted">Nach der Freigabe ist dein Kommentar öffentlich sichtbar.</p><button type="submit" class="fb-button">Kommentar senden</button></form></section>`;
    const cp=$('#fb-comment-pages');for(const [label,p] of [['← Frühere Kommentare',page-1],['Weitere Kommentare →',page+1]]){if(p<1||p>Math.ceil(d.comment_total/30))continue;const b=document.createElement('button');b.className='fb-secondary';b.textContent=label;b.onclick=()=>detail(p).catch(e=>message(e.message,true));cp.append(b);}bindSubmit($('#fb-comment-form'),'comment',{id:Number(r.id)},()=>$('#fb-comment-form').reset());}
    await detail();
-  }else{await loadList();}if(['#idee','#privat'].includes(location.hash)){const {openComposer}=await import('./feedback_composer.js?v=privacy-label-20261107');await openComposer(location.hash);}
+  }else{await loadList();}if(['#idee','#privat'].includes(location.hash)){const {openComposer}=await import('./feedback_composer.js?v=responsive-20261107');await openComposer(location.hash);}
  }catch(err){message(err.message,true);}
 })();

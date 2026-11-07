@@ -139,14 +139,19 @@ try {
   }
   $where=implode(' AND ',$where);$page=max(1,min(10000,(int)($in['page']??1)));$size=15;$offset=($page-1)*$size;
   $q=$p->prepare("SELECT COUNT(*) FROM tbl_feedback_ideas i WHERE $where");$q->execute($args);$total=(int)$q->fetchColumn();
-  $sort=['votes'=>'votes DESC,i.id DESC','new'=>'i.created_at DESC,i.id DESC','updated'=>'i.updated_at DESC,i.id DESC'][$in['sort']??'votes']??'votes DESC,i.id DESC';
+  $sort=[
+   'votes'=>'votes DESC,i.id DESC',
+   'comments'=>'comments DESC,votes DESC,i.id DESC',
+   'new'=>'i.created_at DESC,i.id DESC',
+   'updated'=>'i.updated_at DESC,i.id DESC',
+  ][$in['sort']??'votes']??'votes DESC,i.id DESC';
   $q=$p->prepare("SELECT i.id,i.title,i.description,i.category,i.status,i.created_at,i.updated_at,i.entity_type,i.entity_id,i.seed_key,
    (SELECT COUNT(*) FROM tbl_feedback_votes v WHERE v.idea_id=i.id) votes,
    (SELECT COUNT(*) FROM tbl_feedback_comments c WHERE c.idea_id=i.id AND c.moderation='approved') comments,
    EXISTS(SELECT 1 FROM tbl_feedback_votes v WHERE v.idea_id=i.id AND v.voter_key=?) supported
    FROM tbl_feedback_ideas i WHERE $where ORDER BY $sort LIMIT $size OFFSET $offset");$q->execute(array_merge([lcnExistingVoterKey()??''],$args));
   $items=$q->fetchAll();$images=fbImageIds($p,array_column($items,'id'));foreach($items as &$item)$item['image_id']=$images[$item['id']]??null;unset($item);
-  lcnSendVoteJson(['ok'=>true,'items'=>$items,'total'=>$total,'page'=>$page,'pages'=>(int)ceil($total/$size)]);
+  lcnSendVoteJson(['ok'=>true,'items'=>$items,'total'=>$total,'page'=>$page,'offset'=>$offset,'pages'=>(int)ceil($total/$size)]);
  }
  if($action==='detail'){
   $id=fbId($in['id']??null);$r=fbIdea($p,$id);$seen=[];

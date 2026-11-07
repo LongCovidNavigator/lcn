@@ -416,7 +416,10 @@
   root.addEventListener('click',event=>{const button=event.target.closest('[data-symptom-id]');if(!button||busy||!loaded)return;const symptom=symptomHelp.symptoms.find(s=>s.id===Number(button.dataset.symptomId));if(!symptom)return;sync({action:symptom.selected?'clear':'answer',question:'symptom-help-'+symptom.id,value:'Ja'});});
   function renderAll() {
     renderCostControls();
-    toggle.textContent='Dummy-Daten sind '+(demo?'an':'aus');toggle.setAttribute('aria-pressed',String(demo));
+    if (toggle) {
+      toggle.textContent='Dummy-Daten sind '+(demo?'an':'aus');
+      toggle.setAttribute('aria-pressed',String(demo));
+    }
 
 
 
@@ -424,7 +427,7 @@
     questions.forEach(render);renderSummaries();renderSymptomHelp();
 
   }
-  toggle.addEventListener('click',()=>{if(busy)return;demo=!demo;window.LCNDummy.set(demo);const url=new URL(location.href);url.searchParams.set('demo',demo?'1':'0');history.replaceState(null,'',url);renderAll();});
+  toggle?.addEventListener('click',()=>{if(busy||!window.LCNDummy.available)return;demo=!demo;window.LCNDummy.set(demo);const url=new URL(location.href);url.searchParams.set('demo',demo?'1':'0');history.replaceState(null,'',url);renderAll();});
   window.addEventListener('storage',event=>{if(event.key===window.LCNDummy.key){demo=window.LCNDummy.get();renderAll();}if(['lcn_shared_location_preference','lcn_shared_location_cleared'].includes(event.key))renderSummaries();});
   window.addEventListener('lcn-dummy-change',()=>{const next=window.LCNDummy.get();if(next!==demo){demo=next;renderAll();}});
   window.addEventListener('homepage:location-changed',()=>renderSummaries());

@@ -1,8 +1,8 @@
-/* Both result tables follow the therapy search's understated table design. */
-.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table) :is(th,td) { font-family: Arial,Helvetica,sans-serif; padding: 6px 7px; vertical-align: middle; line-height: 1.15; border: 1px solid #e1eafa; }
-.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table) th { background: #f7fbfe; color: #17365d; font-size: .72rem; font-weight: 700; box-shadow: none; }
-.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table) td { font-size: .74rem; font-weight: 400; }
-.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table) :is(th,td):first-child { padding-left: 4px; padding-right: 4px; }
+/* Catalog and proposal tables follow the therapy search's understated table design. */
+.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table,.fb-proposal-table) :is(th,td) { font-family: Arial,Helvetica,sans-serif; padding: 6px 7px; vertical-align: middle; line-height: 1.15; border: 1px solid #e1eafa; }
+.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table,.fb-proposal-table) th { background: #f7fbfe; color: #17365d; font-size: .72rem; font-weight: 700; box-shadow: none; }
+.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table,.fb-proposal-table) td { font-size: .74rem; font-weight: 400; }
+.lcn-public-page :is(.doctor-map-results-table,.treatment-results-table,.fb-proposal-table) :is(th,td):first-child { padding-left: 4px; padding-right: 4px; }
 :is(.doctor-map-results-table,.treatment-results-table) td .lcn-experience { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 5px; width: 100%; min-width: 0; box-sizing: border-box; }
 :is(.doctor-map-results-table,.treatment-results-table) td .lcn-experience :is(.lcn-effect,.lcn-effect strong,.lcn-experience-count,small) { text-align: center; }
 @media(max-width:760px) {
