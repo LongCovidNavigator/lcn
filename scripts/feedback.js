@@ -343,7 +343,7 @@
   const mobileResults=matchMedia('(max-width: 760px)');
   let preferredView='cards';
   function selectView(){
-   const view=mobileResults.matches?'table':preferredView;
+   const view=mobileResults.matches?'cards':preferredView;
    list.dataset.view=view;
    viewButtons.forEach(option=>option.setAttribute('aria-pressed',String(option.dataset.proposalView===view)));
    renderList();

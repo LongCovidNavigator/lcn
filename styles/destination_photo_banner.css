@@ -119,11 +119,18 @@ body.lcn-public-page .destination-photo-banner :is(h1,h2,h3,p,a,.community-overv
 }
 
 @media(max-width:760px) {
+ body.lcn-public-page.fb-community-page .fb-motivation > .entry-invitation-copy {
+  padding-bottom:8px;
+ }
  /* Crop the empty tabletop above the motif and fade into the banner color. */
  body.lcn-public-page .fb-motivation.destination-photo-banner .destination-photo-frame > .destination-photo-art {
   aspect-ratio:5/3;
   object-position:center bottom;
   --photo-fade:linear-gradient(to bottom,transparent,#000 25%);
+ }
+ body.lcn-public-page.fb-community-page .fb-motivation.destination-photo-banner .destination-photo-frame > .destination-photo-art {
+  aspect-ratio:2/1;
+  --photo-fade:linear-gradient(to bottom,transparent,#000 10%);
  }
  /* Keep faces upright and move the crop towards the top of the original. */
  body.lcn-public-page .destination-photo-banner:is(.gp-community,.doctor-suggest-entry,.top-community) > .destination-photo-art {
