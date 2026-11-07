@@ -213,3 +213,13 @@ body #location-form button[type=submit]:hover {
     background: #004b8a !important;
     border-color: #004b8a !important;
 }
+
+/* Views with a table alternative use the table on narrow screens. */
+@media (max-width: 760px) {
+    .doctor-results-header .doctor-view-switch:has(> [data-view="table"], > [data-provider-view="table"]),
+    .treatment-view-switch:has(> [data-view="table"]),
+    body.lcn-public-page .gp-view-switch:has(> [data-gp-view="table"]),
+    .fb-community-page .fb-proposal-views {
+        display: none;
+    }
+}

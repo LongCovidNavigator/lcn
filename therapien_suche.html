@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="de">
-<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=split-country-20261101"><script src="scripts/map_viewport.js?v=stable-view-20261102"></script>
-<script src="scripts/online_access.js?v=shared-count-pins-20261105" defer></script>
+<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=touch-pan-20261107"><script src="scripts/map_viewport.js?v=touch-pan-reset-20261107"></script>
+<script src="scripts/online_access.js?v=compact-badge-20261107" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long Covid Navigator - Therapien-Suche</title>
 
-    <link rel="stylesheet" href="styles/general.css?v=location-dark-blue-20261105">
+    <link rel="stylesheet" href="styles/general.css?v=mobile-table-20261107">
     <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="styles/footer-style.css?v=b4b1163611">
     <link rel="stylesheet" href="styles/lcnprotocol_table.css">
@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="styles/therapien_karte.css?v=table-subcategory-20261031">
     <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
     <script src="scripts/access-nav.js?v=local-only-20261107" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=8f1296b5fe"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=local-only-20261107"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/search_tables.css?v=restored-search-design-20261102"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/more_results_bar.css?v=unified-blue-20261105"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=mobile-rank-distance-20261106"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=responsive-refresh-20261105"><link rel="stylesheet" href="styles/search_navigation_blue.css?v=banner-blue-20261105"><script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script></head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=8f1296b5fe"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=local-only-20261107"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/search_tables.css?v=fit-result-tables-20261107"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/more_results_bar.css?v=unified-blue-20261105"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=fit-result-tables-20261107"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=tablet-therapy-sentence-break-20261107"><link rel="stylesheet" href="styles/search_navigation_blue.css?v=banner-blue-20261105"><script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script></head>
 
 <script>
     function toggleMobileMenu() {
@@ -34,26 +34,26 @@
 
     <div class="container">
 <aside class="destination-photo-banner destination-photo-banner--blue treatment-suggest-entry" aria-label="Therapie ergänzen">
-            <div><small class="search-contribution-eyebrow">Von Betroffenen für Betroffene</small><h2>Entdecke, was dich unterstützen kann.</h2><p class="destination-discovery-copy"><strong>Welche Möglichkeiten passen zu dir?</strong> Entdecke erfasste Therapien und nutze die Filter, um Angebote und Erfahrungen anderer Betroffener zu vergleichen.</p><a class="destination-discovery-link" href="#treatment-results-list">Entdecke unten die Therapien im Überblick.</a><p class="destination-contribution-copy"><strong>Eine Therapie fehlt?</strong> Teile deinen Hinweis und mache unser gemeinsames Wissen vollständiger. Der Name reicht für den Anfang – wir übernehmen die weitere Recherche.</p></div>
+            <div><small class="search-contribution-eyebrow">Von Betroffenen für Betroffene</small><h2>Entdecke, was dich unterstützen kann.</h2><p class="destination-discovery-copy"><strong>Welche Möglichkeiten passen zu dir?</strong> Entdecke erfasste Therapien und nutze die Filter, um Angebote und Erfahrungen&nbsp;anderer Betroffener zu vergleichen.</p><a class="destination-discovery-link" href="#treatment-results-list">Entdecke unten die Therapien im Überblick.</a><p class="destination-contribution-copy"><strong>Eine Therapie fehlt?</strong> Teile deinen Hinweis und mache unser gemeinsames Wissen vollständiger.<br class="therapy-contribution-break"> Der Name reicht für den Anfang und wir übernehmen die weitere Recherche.</p></div>
             <a href="behandlung_vorschlagen.html">Therapie ergänzen →</a>
-        <img class="destination-photo-art" src="assets/images/homepage/banner-therapy-search-v2.webp" alt="" width="800" height="1000"></aside>
+        <img class="destination-photo-art" src="assets/images/homepage/banner-therapy-search-v5.webp" alt="" width="1050" height="1050"></aside>
 
-        <section id="therapy-search-start" class="treatment-navigation-panel" aria-label="Navigation für Therapiesuche">
+        <section id="therapy-search-start" class="treatment-navigation-panel" aria-label="Filter für Therapiesuche">
             <button
                 id="treatment-navigation-toggle-button"
-                class="treatment-navigation-header"
+                class="treatment-navigation-header is-collapsed"
                 type="button"
-                aria-expanded="true"
+                aria-expanded="false"
                 aria-controls="treatment-navigation-content"
             >
                 <span class="treatment-navigation-header-left">
                     <span class="treatment-navigation-header-icon" aria-hidden="true">&#x2637;</span>
-                    <span>Navigation</span>
+                    <span>Filter</span>
                 </span>
                 <span class="treatment-navigation-chevron" aria-hidden="true">&#x2303;</span>
             </button>
 
-            <div id="treatment-navigation-content" class="treatment-navigation-content">
+            <div id="treatment-navigation-content" class="treatment-navigation-content is-collapsed">
                 <div class="treatment-navigation-grid">
                     <section class="treatment-nav-section treatment-nav-section-sort">
                         <h3 class="treatment-nav-heading">
@@ -477,7 +477,8 @@
     <script src="assets/vendor/leaflet/leaflet.js"></script>
     <script>window.LCNImages.configureLeaflet(window.L);</script>
     <script src="scripts/dummy_preferences.js?v=local-only-20261107"></script>
-    <script src="scripts/therapien_karte.js?v=distance-default-20261106"></script>
+    <script src="scripts/search_online_groups.js?v=20261107"></script>
+    <script src="scripts/therapien_karte.js?v=desktop-online-groups-20261107"></script>
 
     <div id="footer-placeholder"></div>
 

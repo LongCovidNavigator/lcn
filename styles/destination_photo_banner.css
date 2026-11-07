@@ -8,7 +8,8 @@ body.lcn-public-page .destination-photo-banner.destination-photo-banner {
 body.lcn-public-page .destination-photo-banner.destination-photo-banner--blue { --banner-color:#c8e4f0; }
 body.lcn-public-page .destination-photo-banner.destination-photo-banner--peach { --banner-color:#ffdecc; }
 body.lcn-public-page .destination-photo-banner > :is(.top-community-copy,.gp-community-copy,.entry-invitation-copy) { grid-column:1; z-index:1; min-width:0; padding:30px 32px; }
-body.lcn-public-page .destination-photo-banner.destination-photo-banner > .destination-photo-art {
+body.lcn-public-page .destination-photo-banner .destination-photo-frame { display:contents; }
+body.lcn-public-page .destination-photo-banner.destination-photo-banner .destination-photo-art {
  display:block; position:absolute; grid-area:auto; inset:0 0 0 auto;
  width:35%; max-width:none; height:100%; min-height:0; max-height:none; margin:0; padding:0;
  object-fit:cover; object-position:center; border-radius:0 20px 20px 0; align-self:stretch;
@@ -29,7 +30,14 @@ body.lcn-public-page .destination-photo-banner .search-contribution-eyebrow { di
 @media(max-width:760px) {
  body.lcn-public-page .destination-photo-banner.destination-photo-banner { grid-template-columns:1fr; border-radius:14px; min-height:0; }
  body.lcn-public-page .destination-photo-banner > :is(.top-community-copy,.gp-community-copy,.entry-invitation-copy) { padding:24px 20px; }
- body.lcn-public-page .destination-photo-banner.destination-photo-banner > .destination-photo-art { position:relative; grid-column:1; grid-row:auto; inset:auto; width:100%; height:230px; object-position:center; border-radius:0 0 14px 14px; mask-image:linear-gradient(to bottom,transparent,#000 22%); -webkit-mask-image:linear-gradient(to bottom,transparent,#000 22%); }
+ body.lcn-public-page .destination-photo-banner.destination-photo-banner .destination-photo-art {
+  position:relative; grid-column:1; grid-row:auto; inset:auto;
+  width:100%; height:auto; aspect-ratio:5/4; max-height:320px;
+  object-position:center; border-radius:0 0 14px 14px;
+  --photo-fade:linear-gradient(to bottom,transparent,rgba(0,0,0,.45) 9%,rgba(0,0,0,.85) 20%,#000 32%);
+  -webkit-mask-image:var(--photo-fade);
+  mask-image:var(--photo-fade);
+ }
  body.lcn-public-page .destination-photo-banner :is(h1,h2,h3) { font-size:24px; }
  body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > div { padding:24px 20px 12px; }
  body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > a { margin:8px 20px 24px; }
@@ -92,7 +100,7 @@ body.lcn-public-page :is(.treatment-suggest-entry,.doctor-suggest-entry).destina
 body.lcn-public-page .destination-photo-banner .destination-discovery-link { display:inline-block; color:#17365d; font-size:16px; font-weight:800; line-height:1.5; text-decoration:underline; text-underline-offset:4px; margin:0 0 20px; }
 body.lcn-public-page .destination-photo-banner .destination-discovery-link:focus-visible { outline:3px solid #005ca8; outline-offset:4px; }
 #therapy-search-start,#provider-search-start,#nearby-gps-form { scroll-margin-top:110px; }
-body.lcn-public-page .destination-photo-banner a.destination-discovery-link { background:transparent; border:0; border-radius:0; padding:0; box-shadow:none; color:#17365d; }
+body.lcn-public-page .destination-photo-banner a.destination-discovery-link { background:transparent; border:0; border-radius:0; padding:0; box-shadow:none; color:#17365d; text-align:start; }
 
 /* Let the shared banners fit narrow screens and larger text settings. */
 body.lcn-public-page .destination-photo-banner,
@@ -107,25 +115,117 @@ body.lcn-public-page .destination-photo-banner :is(h1,h2,h3,p,a,.community-overv
 @media(max-width:760px) {
  body.lcn-public-page .destination-photo-banner .community-inline-search-row { align-items:stretch; }
  body.lcn-public-page .destination-photo-banner .community-inline-search-row .community-search-field { flex:1 1 100%; width:100%; max-width:none; }
- body.lcn-public-page .destination-photo-banner.destination-photo-banner > .destination-photo-art { height:clamp(160px,45vw,230px); }
  body.lcn-public-page :is(.doctor-suggest-entry,.treatment-suggest-entry).destination-photo-banner > a { max-width:calc(100% - 40px); }
 }
 
-/* Match each image's top-edge colours, so the mobile join has no colour step. */
 @media(max-width:760px) {
+ /* Crop the empty tabletop above the motif and fade into the banner color. */
+ body.lcn-public-page .fb-motivation.destination-photo-banner .destination-photo-frame > .destination-photo-art {
+  aspect-ratio:5/3;
+  object-position:center bottom;
+  --photo-fade:linear-gradient(to bottom,transparent,#000 25%);
+ }
+ /* Keep faces upright and move the crop towards the top of the original. */
+ body.lcn-public-page .destination-photo-banner:is(.gp-community,.doctor-suggest-entry,.top-community) > .destination-photo-art {
+  object-position:center top;
+ }
+ /* Match the turquoise of the original recommendation photos. */
  body.top-search-page .destination-photo-banner.top-community--doctors {
   --banner-color:linear-gradient(90deg,#73b3b5 0%,#73b3b5 12.5%,#71b3b5 25%,#71b3b6 37.5%,#71b3b5 50%,#71b3b6 62.5%,#71b3b5 75%,#71b3b5 87.5%,#71b3b6 100%);
  }
  body.top-search-page .destination-photo-banner.top-community--therapies {
   --banner-color:linear-gradient(90deg,#71b4b2 0%,#71b4b3 12.5%,#71b5b3 25%,#72b5b3 37.5%,#72b5b3 50%,#72b5b3 62.5%,#73b5b4 75%,#72b5b5 87.5%,#71b5b5 100%);
  }
- body.top-search-page .destination-photo-banner.top-community > .destination-photo-art {
-  width:100%;
+}
+
+/* Give search introductions the full width on compact tablets in either orientation. */
+@media (orientation: portrait) and (min-width: 761px) and (max-width: 834px) and (max-height: 1200px),
+       (orientation: landscape) and (min-height: 761px) and (max-height: 834px) and (max-width: 1200px) {
+ body.lcn-public-page .destination-photo-banner.destination-photo-banner:is(.gp-community,.doctor-suggest-entry,.treatment-suggest-entry) {
+  grid-template-columns:minmax(0,1fr) 248px;
+  align-items:start;
+  min-height:0;
+ }
+ body.lcn-public-page .destination-photo-banner:is(.gp-community,.doctor-suggest-entry,.treatment-suggest-entry) > div {
+  display:grid;
+  grid-column:1 / -1;
+  grid-template-columns:subgrid;
+ }
+ body.lcn-public-page .destination-photo-banner:is(.gp-community,.doctor-suggest-entry,.treatment-suggest-entry) > div > :is(.gp-community-eyebrow,.search-contribution-eyebrow,h2,h3,.destination-discovery-copy) {
+  grid-column:1 / -1;
+  max-width:none;
+ }
+ body.lcn-public-page .destination-photo-banner:is(.gp-community,.doctor-suggest-entry,.treatment-suggest-entry) > div > :is(.destination-discovery-link,.destination-contribution-copy,.gp-community-actions) {
+  grid-column:1;
+  margin-inline-end:12px;
+ }
+ body.lcn-public-page .destination-photo-banner:is(.gp-community,.doctor-suggest-entry,.treatment-suggest-entry) .destination-discovery-link {
+  justify-self:start;
+ }
+ body.lcn-public-page .destination-photo-banner.doctor-suggest-entry > div > .destination-contribution-copy {
+  margin-inline-end:40px;
+ }
+ body.lcn-public-page .destination-photo-banner.destination-photo-banner:is(.gp-community,.doctor-suggest-entry,.treatment-suggest-entry) > .destination-photo-art {
+  inset:auto 0 0 auto;
+  width:285px;
+  height:65.5%;
+  object-position:center bottom;
+  border-radius:0 0 20px 0;
+  mask-image:linear-gradient(to right,transparent,#000 25%),linear-gradient(to bottom,transparent,#000 16%);
+  mask-composite:intersect;
+ }
+ body.lcn-public-page .destination-photo-banner.destination-photo-banner:is(.doctor-suggest-entry,.treatment-suggest-entry) > .destination-photo-art {
+  mask-image:linear-gradient(to right,transparent,rgba(0,0,0,.12) 12%,#000 38%),linear-gradient(to bottom,transparent,#000 9%);
+ }
+ body.lcn-public-page .destination-photo-banner.destination-photo-banner.treatment-suggest-entry > .destination-photo-art {
+  height:272px;
+ }
+}
+
+.therapy-contribution-break { display:none; }
+
+@media (orientation: landscape) and (min-height: 761px) and (max-height: 834px) and (max-width: 1200px) {
+ .therapy-contribution-break { display:inline; }
+ body.lcn-public-page .destination-photo-banner.doctor-suggest-entry > div > .destination-contribution-copy {
+  margin-inline-end:-16px;
+ }
+ body.lcn-public-page .destination-photo-banner.treatment-suggest-entry > div > .destination-contribution-copy {
+  margin-inline-end:-44px;
+ }
+}
+
+/* Keep recommendation motifs beside the text on compact tablets. */
+@media (orientation: portrait) and (min-width: 761px) and (max-width: 834px) and (max-height: 1200px),
+       (orientation: landscape) and (min-height: 761px) and (max-height: 834px) and (max-width: 1200px) {
+ body.lcn-public-page .destination-photo-banner:is(.top-community--doctors,.top-community--therapies) {
+  grid-template-columns:minmax(0,1fr) 38%;
+ }
+ body.lcn-public-page .destination-photo-banner:is(.top-community--doctors,.top-community--therapies) > .top-community-copy {
+  display:grid;
+  grid-column:1 / -1;
+  grid-template-columns:subgrid;
+  padding:28px;
+ }
+ body.lcn-public-page .destination-photo-banner:is(.top-community--doctors,.top-community--therapies) .top-community-copy > h2 {
+  grid-column:1 / -1;
+ }
+ body.lcn-public-page .destination-photo-banner:is(.top-community--doctors,.top-community--therapies) .top-community-copy > :is(.top-community-eyebrow,p,.top-community-actions) {
+  grid-column:1;
+  margin-inline-end:16px;
+ }
+ body.lcn-public-page .destination-photo-banner:is(.top-community--doctors,.top-community--therapies) .community-overview-link {
+  font-size:15px;
+  text-wrap:balance;
+ }
+ body.lcn-public-page .destination-photo-banner:is(.top-community--doctors,.top-community--therapies) > .destination-photo-art {
+  inset:auto 0 0 auto;
+  width:min(40%, 320px);
   height:auto;
-  margin:0;
-  border-radius:0 0 14px 14px;
-  mask-image:linear-gradient(to bottom,transparent 0%,#000 6%);
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 6%);
-  box-shadow:none;
+  aspect-ratio:800 / 720;
+  object-fit:contain;
+  --tablet-photo-fade:linear-gradient(to right,transparent,#000 22%),linear-gradient(to bottom,transparent,#000 11%);
+  -webkit-mask-image:var(--tablet-photo-fade);
+  mask-image:var(--tablet-photo-fade);
+  mask-composite:intersect;
  }
 }

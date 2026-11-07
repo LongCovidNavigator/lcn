@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="de">
-<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=split-country-20261101"><script src="scripts/map_viewport.js?v=stable-view-20261102"></script>
-<script src="scripts/online_access.js?v=shared-count-pins-20261105" defer></script>
+<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=touch-pan-20261107"><script src="scripts/map_viewport.js?v=touch-pan-reset-20261107"></script>
+<script src="scripts/online_access.js?v=doctor-appointments-20261107" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long Covid Navigator - Behandler:innen-Suche</title>
 
-    <link rel="stylesheet" href="styles/general.css?v=location-dark-blue-20261105">
+    <link rel="stylesheet" href="styles/general.css?v=mobile-table-20261107">
     <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="styles/footer-style.css?v=b4b1163611">
     <link rel="stylesheet" href="styles/lcnprotocol_table.css">
@@ -18,7 +18,7 @@
 	<link rel="stylesheet" href="styles/aerzte_karte.css?v=provider-filter-20261105">
     <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
     <script src="scripts/access-nav.js?v=local-only-20261107" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=8f1296b5fe"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=local-only-20261107"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/doctor_cards.css?v=profile-website-only-20261031"><link rel="stylesheet" href="styles/search_tables.css?v=restored-search-design-20261102"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/doctor_search_responsive.css?v=responsive-20261107"><link rel="stylesheet" href="styles/more_results_bar.css?v=unified-blue-20261105"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=mobile-rank-distance-20261106"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=responsive-refresh-20261105"><link rel="stylesheet" href="styles/search_navigation_blue.css?v=banner-blue-20261105"><link rel="stylesheet" href="styles/provider_type_filter.css">
+<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=8f1296b5fe"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=local-only-20261107"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/doctor_cards.css?v=profile-website-only-20261031"><link rel="stylesheet" href="styles/search_tables.css?v=fit-result-tables-20261107"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/doctor_search_responsive.css?v=fit-result-tables-20261107"><link rel="stylesheet" href="styles/more_results_bar.css?v=unified-blue-20261105"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=fit-result-tables-20261107"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=wide-tablet-banner-copy-20261107"><link rel="stylesheet" href="styles/search_navigation_blue.css?v=banner-blue-20261105"><link rel="stylesheet" href="styles/provider_type_filter.css">
 <script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script></head>
 
 <script>
@@ -36,24 +36,24 @@
 <aside class="destination-photo-banner destination-photo-banner--blue doctor-suggest-entry" aria-label="Ärztin, Behandler:in oder Praxis ergänzen">
             <div><small class="search-contribution-eyebrow">Von Betroffenen für Betroffene</small><h2>Finde Menschen, die deine Erkrankung kennen.</h2><p class="destination-discovery-copy"><strong>Wer kann dich auf deinem Weg begleiten?</strong> Entdecke Behandler:innen und Praxen und grenze die Auswahl nach Standort, fachlichem Profil und Erfahrungen anderer Betroffener ein.</p><a class="destination-discovery-link" href="#doctor-results-list">Entdecke unten passende Behandler:innen.</a><p class="destination-contribution-copy"><strong>Du kennst eine Anlaufstelle, die hier noch fehlt?</strong> Hilf anderen Betroffenen mit deinem Hinweis. Name oder Praxis und die Web-Adresse reichen für den Anfang – wir übernehmen die weitere Recherche.</p></div>
             <a href="behandler_vorschlagen.html">Behandler:in ergänzen →</a>
-        <img class="destination-photo-art" src="assets/images/homepage/banner-provider-search-v2.webp" alt="" width="800" height="1000"></aside>
+        <img class="destination-photo-art" src="assets/images/homepage/banner-provider-search-v4.webp" alt="" width="1050" height="1050"></aside>
 
-        <section id="provider-search-start" class="doctor-navigation-panel" aria-label="Navigation für die Behandler:innen-Suche">
+        <section id="provider-search-start" class="doctor-navigation-panel" aria-label="Filter für die Behandler:innen-Suche">
 			<button
 				id="doctor-navigation-toggle-button"
-				class="doctor-navigation-header"
+				class="doctor-navigation-header is-collapsed"
 				type="button"
-				aria-expanded="true"
+				aria-expanded="false"
 				aria-controls="doctor-navigation-content"
 			>
 				<span class="doctor-navigation-header-left">
 					<span class="doctor-navigation-header-icon" aria-hidden="true">&#x2637;</span>
-					<span>Navigation</span>
+					<span>Filter</span>
 				</span>
 				<span class="doctor-navigation-chevron" aria-hidden="true">&#x2303;</span>
 			</button>
 
-			<div id="doctor-navigation-content" class="doctor-navigation-content">
+			<div id="doctor-navigation-content" class="doctor-navigation-content is-collapsed">
 				<div class="doctor-navigation-grid">
 					<section class="doctor-nav-section doctor-nav-section-provider">
 <h3 class="doctor-nav-heading">Behandlerart</h3>
@@ -469,8 +469,7 @@
 
         <section id="doctor-table-results-section" class="doctor-map-results-section is-hidden">
             <button type="button" class="lcn-search-table-toggle" data-lcn-table-toggle aria-expanded="true" aria-controls="doctor-table-content"><span>▤ &nbsp; Tabelle</span><span class="lcn-search-table-chevron" aria-hidden="true">⌃</span></button>
-            <div id="doctor-table-content" class="lcn-search-table-content" role="region" tabindex="0" aria-label="Behandler:innen-Tabelle, seitlich scrollbar">
-                <p class="doctor-table-scroll-hint">↔ Tabelle seitlich scrollen, um alle Spalten zu sehen.</p>
+            <div id="doctor-table-content" class="lcn-search-table-content" role="region" tabindex="0" aria-label="Behandler:innen-Tabelle">
 
             <table class="doctor-map-results-table">
 				<thead>
@@ -505,7 +504,8 @@
 	<script>window.LCNImages.configureLeaflet(window.L);</script>
 		<script src="scripts/dummy_preferences.js?v=local-only-20261107"></script>
     <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/provider_type_filter.js?v=colon-20261105"></script>
-<script src="scripts/aerzte_karte.js?v=distance-default-20261106"></script>
+<script src="scripts/search_online_groups.js?v=20261107"></script>
+<script src="scripts/aerzte_karte.js?v=desktop-online-groups-20261107"></script>
 
     <div id="footer-placeholder"></div>
 

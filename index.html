@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
-<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=split-country-20261101"><script src="scripts/map_viewport.js?v=stable-view-20261102"></script>
-<script src="scripts/online_access.js?v=shared-count-pins-20261105" defer></script>
+<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=touch-pan-20261107"><script src="scripts/map_viewport.js?v=touch-pan-reset-20261107"></script>
+<script src="scripts/online_access.js?v=compact-badge-20261107" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long Covid Navigator</title>
@@ -12,16 +12,16 @@
     <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="styles/homepage.css?v=48">
-    <link rel="stylesheet" href="styles/homepage_alignment.css?v=4">
-    <script src="scripts/homepage_sections.js?v=saved-position-carousel-20261105-3" defer></script>
-    <link rel="stylesheet" href="styles/homepage_carousel.css?v=responsive-refresh-20261105">
+    <link rel="stylesheet" href="styles/homepage_alignment.css?v=5">
+    <script src="scripts/homepage_sections.js?v=navigation-order-20261107" defer></script>
+    <link rel="stylesheet" href="styles/homepage_carousel.css?v=search-card-crop-20261107">
     <link rel="stylesheet" href="styles/footer-style.css?v=b4b1163611">
     <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/homepage.js?v=distance-default-20261106" defer></script>
+    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/homepage.js?v=online-treatment-label-20261107" defer></script>
     <script src="scripts/access-nav.js?v=local-only-20261107" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=8f1296b5fe"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=local-only-20261107"></script><link rel="stylesheet" href="styles/gp_community.css?v=shared-community-20261102"><link rel="stylesheet" href="styles/top_community.css?v=home-top-links-20261105"><script src="scripts/top_community.js?v=dropdown-20261105-2" defer></script><link rel="stylesheet" href="styles/contribution_invitations.css?v=1"><link rel="stylesheet" href="styles/feedback.css"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=feedback-home-20261106"><script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script></head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=8f1296b5fe"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=local-only-20261107"></script><link rel="stylesheet" href="styles/gp_community.css?v=shared-community-20261102"><link rel="stylesheet" href="styles/top_community.css?v=home-top-links-20261105"><script src="scripts/top_community.js?v=dropdown-20261105-2" defer></script><link rel="stylesheet" href="styles/contribution_invitations.css?v=1"><link rel="stylesheet" href="styles/feedback.css"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=mobile-photo-composition-20261107"><script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script></head>
 
 <body class="lcn-public-page">
     <div id="header-placeholder" data-lcn-header></div>
@@ -33,33 +33,33 @@
             <div class="home-carousel-shell">
                 <button class="home-carousel-arrow home-carousel-prev" type="button" aria-label="Vorherige Karte" aria-controls="home-carousel-track"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="14 6 8 12 14 18" /></svg></button>
                 <div class="home-carousel-track" id="home-carousel-track" tabindex="0" aria-label="Angebote durchblättern">
-<article class="home-discover-card home-discover-card--mint" id="empfehlung" aria-label="1 von 7: Top-Therapien">
-                    <a class="home-discover-visual" href="top_therapien.html" aria-label="Top-Therapien ansehen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Empfehlungen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-top-therapies.webp" alt="" loading="eager" width="800" height="1000"></div><span class="home-discover-visual-title">Top-Therapien</span></a>
-                    <div class="home-discover-copy"><h3>Was hat dir geholfen? Teile deine Erfahrung.</h3><a class="home-discover-link" href="top_therapien.html">Top-Therapien ansehen <span aria-hidden="true">↗</span></a></div>
+<article class="home-discover-card home-discover-card--mint" id="top-behandler" aria-label="1 von 7: Empfehlung zu Behandler:innen">
+                    <a class="home-discover-visual" href="community_empfehlung_behandlerinnen.html" aria-label="Empfehlung zu Behandler:innen"><span class="home-discover-category">Community-Empfehlung</span><div class="home-discover-art"><img src="assets/images/homepage/collage-top-providers.webp" alt="" loading="eager" width="800" height="1000"></div><span class="home-discover-visual-title">Empfehlung zu Behandler:innen</span></a>
+                    <div class="home-discover-copy"><h3>Entdecke Behandler:innen, die in der Community und online häufig genannt werden.</h3></div>
                 </article>
-<article class="home-discover-card home-discover-card--mint" id="top-behandler" aria-label="2 von 7: Top-Behandler:innen">
-                    <a class="home-discover-visual" href="top_behandler.html" aria-label="Top-Behandler:innen ansehen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Empfehlungen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-top-providers.webp" alt="" loading="eager" width="800" height="1000"></div><span class="home-discover-visual-title">Top-Behandler:innen</span></a>
-                    <div class="home-discover-copy"><h3>Deine Erfahrung kann anderen den Weg zeigen.</h3><a class="home-discover-link" href="top_behandler.html">Top-Behandler:innen ansehen <span aria-hidden="true">↗</span></a></div>
+<article class="home-discover-card home-discover-card--mint" id="empfehlung" aria-label="2 von 7: Empfehlung zu Therapie">
+                    <a class="home-discover-visual" href="community_empfehlung_therapien.html" aria-label="Empfehlung zu Therapie"><span class="home-discover-category">Community-Empfehlung</span><div class="home-discover-art"><img src="assets/images/homepage/collage-top-therapies.webp" alt="" loading="eager" width="800" height="1000"></div><span class="home-discover-visual-title">Empfehlung zu Therapie</span></a>
+                    <div class="home-discover-copy"><h3>Entdecke Therapien, die in der Community und online häufig genannt werden.</h3></div>
                 </article>
 <article class="home-discover-card home-discover-card--blue" id="hausarzt" aria-label="3 von 7: Hausärzt:innen finden">
-                    <a class="home-discover-visual" href="hausarzt_suche.html" aria-label="Hausarztpraxis finden" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Hausärzt:innen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-primary-care.webp" alt="" loading="eager" width="800" height="1000"></div><span class="home-discover-visual-title">Hausärzt:innen finden</span></a>
-                    <div class="home-discover-copy"><h3>Eine gute Anlaufstelle. Ganz in deiner Nähe.</h3><a class="home-discover-link" href="hausarzt_suche.html">Hausarztpraxis finden <span aria-hidden="true">↗</span></a></div>
+                    <a class="home-discover-visual" href="hausarzt_suche.html" aria-label="Hausarztpraxis finden"><span class="home-discover-category">Hausärzt:innen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-primary-care.webp" alt="" loading="eager" width="800" height="1000"></div><span class="home-discover-visual-title">Hausärzt:innen finden</span></a>
+                    <div class="home-discover-copy"><h3>Eine gute Anlaufstelle. Ganz in deiner Nähe.</h3></div>
                 </article>
-<article class="home-discover-card home-discover-card--blue" id="suche" aria-label="4 von 7: Therapien suchen">
-                    <a class="home-discover-visual" href="therapien_suche.html" aria-label="Therapien suchen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Suche</span><div class="home-discover-art"><img src="assets/images/homepage/collage-therapy-search-v2.webp" alt="" loading="lazy" width="800" height="1000"></div><span class="home-discover-visual-title">Therapien suchen</span></a>
-                    <div class="home-discover-copy"><h3>Entdecke, was dich unterstützen kann.</h3><a class="home-discover-link" href="therapien_suche.html">Therapien suchen <span aria-hidden="true">↗</span></a></div>
+<article class="home-discover-card home-discover-card--peach" id="behandler-ergaenzen" aria-label="4 von 7: Behandler:innen ergänzen">
+                    <a class="home-discover-visual" href="behandler_vorschlagen.html" aria-label="Behandler:innen ergänzen"><span class="home-discover-category">Mitmachen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-add-provider.webp" alt="" loading="lazy" width="800" height="1000"></div><span class="home-discover-visual-title">Behandler:innen ergänzen</span></a>
+                    <div class="home-discover-copy"><h3>Dein Hinweis kann anderen die Suche erleichtern.</h3></div>
                 </article>
-<article class="home-discover-card home-discover-card--blue" id="behandler-suchen" aria-label="5 von 7: Behandler:innen suchen">
-                    <a class="home-discover-visual" href="behandler_suche.html" aria-label="Behandler:innen suchen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Suche</span><div class="home-discover-art"><img src="assets/images/homepage/collage-provider-search-v2.webp" alt="" loading="lazy" width="800" height="1000"></div><span class="home-discover-visual-title">Behandler:innen suchen</span></a>
-                    <div class="home-discover-copy"><h3>Finde Menschen, die deine Erkrankung kennen.</h3><a class="home-discover-link" href="behandler_suche.html">Behandler:innen suchen <span aria-hidden="true">↗</span></a></div>
+<article class="home-discover-card home-discover-card--peach" id="ergaenzung" aria-label="5 von 7: Therapie ergänzen">
+                    <a class="home-discover-visual" href="behandlung_vorschlagen.html" aria-label="Therapie ergänzen"><span class="home-discover-category">Mitmachen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-add-therapy-v2.webp" alt="" loading="lazy" width="800" height="1000"></div><span class="home-discover-visual-title">Therapie ergänzen</span></a>
+                    <div class="home-discover-copy"><h3>Eine Therapie fehlt? Dein Hinweis hilft weiter.</h3></div>
                 </article>
-<article class="home-discover-card home-discover-card--peach" id="ergaenzung" aria-label="6 von 7: Therapie ergänzen">
-                    <a class="home-discover-visual" href="behandlung_vorschlagen.html" aria-label="Therapie ergänzen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Mitmachen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-add-therapy-v2.webp" alt="" loading="lazy" width="800" height="1000"></div><span class="home-discover-visual-title">Therapie ergänzen</span></a>
-                    <div class="home-discover-copy"><h3>Eine Therapie fehlt? Dein Hinweis hilft weiter.</h3><a class="home-discover-link" href="behandlung_vorschlagen.html">Therapie ergänzen <span aria-hidden="true">↗</span></a></div>
+<article class="home-discover-card home-discover-card--blue" id="behandler-suchen" aria-label="6 von 7: Behandler:innen suchen">
+                    <a class="home-discover-visual" href="behandler_suche.html" aria-label="Behandler:innen suchen"><span class="home-discover-category">Suche</span><div class="home-discover-art"><img src="assets/images/homepage/banner-provider-search-v3.webp" alt="" loading="lazy" width="1050" height="1050"></div><span class="home-discover-visual-title">Behandler:innen suchen</span></a>
+                    <div class="home-discover-copy"><h3>Finde Menschen, die deine Erkrankung kennen.</h3></div>
                 </article>
-<article class="home-discover-card home-discover-card--peach" id="behandler-ergaenzen" aria-label="7 von 7: Behandler:innen ergänzen">
-                    <a class="home-discover-visual" href="behandler_vorschlagen.html" aria-label="Behandler:innen ergänzen" tabindex="-1" aria-hidden="true"><span class="home-discover-category">Mitmachen</span><div class="home-discover-art"><img src="assets/images/homepage/collage-add-provider.webp" alt="" loading="lazy" width="800" height="1000"></div><span class="home-discover-visual-title">Behandler:innen ergänzen</span></a>
-                    <div class="home-discover-copy"><h3>Dein Hinweis kann anderen die Suche erleichtern.</h3><a class="home-discover-link" href="behandler_vorschlagen.html">Behandler:innen ergänzen <span aria-hidden="true">↗</span></a></div>
+<article class="home-discover-card home-discover-card--blue" id="suche" aria-label="7 von 7: Therapien suchen">
+                    <a class="home-discover-visual" href="therapien_suche.html" aria-label="Therapien suchen"><span class="home-discover-category">Suche</span><div class="home-discover-art"><img src="assets/images/homepage/banner-therapy-search-v3.webp" alt="" loading="lazy" width="1050" height="1050"></div><span class="home-discover-visual-title">Therapien suchen</span></a>
+                    <div class="home-discover-copy"><h3>Entdecke, was dich unterstützen kann.</h3></div>
                 </article>
                 </div>
                 <button class="home-carousel-arrow home-carousel-next" type="button" aria-label="Nächste Karte" aria-controls="home-carousel-track"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="10 6 16 12 10 18" /></svg></button>
@@ -68,7 +68,7 @@
             <div class="home-carousel-meta"><span class="home-carousel-status" aria-live="polite" aria-atomic="true">1 / 7</span><p class="home-carousel-hint">Mit den Pfeilen weiterblättern oder zur Seite wischen.</p></div>
         </section>
 
-        <aside class="destination-photo-banner destination-photo-banner--lavender fb-motivation fb-home-motivation" aria-labelledby="fb-home-motivation-title"><div class="entry-invitation-copy"><span class="entry-invitation-eyebrow">Von Betroffenen für Betroffene</span><h2 id="fb-home-motivation-title">Gemeinsam gestalten wir den Long-Covid-Navigator</h2><p>Du weißt am besten, was dir auf deinem Weg zur Genesung helfen kann. Teile deine Ideen und unterstütze Vorschläge, die du hilfreich findest. So entscheidet die Community mit, wie sich der Navigator weiterentwickelt.</p><div class="fb-actions"><a class="fb-button" href="mitgestalten.html#idee">Deine Idee einbringen</a><a class="fb-motivation-link" href="mitgestalten.html">Vorschläge entdecken →</a></div></div><img class="destination-photo-art" src="assets/images/homepage/banner_feedback_community_01.png" alt="" width="1254" height="1254"></aside>
+        <aside class="destination-photo-banner destination-photo-banner--lavender fb-motivation fb-home-motivation" aria-labelledby="fb-home-motivation-title"><div class="entry-invitation-copy"><span class="entry-invitation-eyebrow">Von Betroffenen für Betroffene</span><h2 id="fb-home-motivation-title">Gemeinsam gestalten wir den Long-Covid-Navigator</h2><p>Du weißt am besten, was dir auf deinem Weg zur Genesung helfen kann. Teile deine Ideen und unterstütze Vorschläge, die du hilfreich findest. So entscheidet die Community mit, wie sich der Long-Covid-Navigator weiterentwickelt.</p><div class="fb-actions"><a class="fb-button" href="mitgestalten.html#idee">Deine Idee einbringen</a><a class="fb-motivation-link" href="mitgestalten.html">Vorschläge entdecken →</a></div></div><div class="destination-photo-frame"><img class="destination-photo-art" src="assets/images/homepage/banner_feedback_community_01.png" alt="" width="1254" height="1254"></div></aside>
 
         <section class="project-intro" id="projekt" aria-labelledby="project-heading">
             <div class="section-heading project-heading">

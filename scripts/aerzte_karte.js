@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
     restoreDoctorLocationPreference();
     updateRadiusInputState();
     setResultsView(getSavedDoctorResultsView());
+    doctorMobileResults.addEventListener("change", () => setResultsView(getSavedDoctorResultsView()));
     renderDoctorCards([]);
     renderDoctorResultsTable([]);
     applySearchFromControls(false, false);
@@ -156,13 +157,13 @@ function setupDoctorViewSwitch() {
 
     if (cardViewButton) {
         cardViewButton.addEventListener("click", function () {
-            setResultsView("cards");
+            setResultsView("cards", true);
         });
     }
 
     if (tableViewButton) {
         tableViewButton.addEventListener("click", function () {
-            setResultsView("table");
+            setResultsView("table", true);
         });
     }
 }
@@ -222,10 +223,10 @@ function setupDoctorTableSortControls() {
         return;
     }
 
-    table.addEventListener("click", function (event) {
+    table.parentElement.addEventListener("click", function (event) {
         const sortButton = event.target.closest("[data-table-sort-key]");
 
-        if (!sortButton || !table.contains(sortButton)) {
+        if (!sortButton) {
             return;
         }
 
@@ -469,14 +470,15 @@ function setupDoctorResultEventDelegation() {
     }
 
     if (tableResultsBody) {
-        tableResultsBody.addEventListener("click", handleDoctorCompareClick);
-        tableResultsBody.addEventListener("click", handleDoctorCardVote);
+        const tableContent = tableResultsBody.closest(".lcn-search-table-content");
+        tableContent.addEventListener("click", handleDoctorCompareClick);
+        tableContent.addEventListener("click", handleDoctorCardVote);
     }
 
     if (loadMoreButton) {
         loadMoreButton.addEventListener("click", function () {
             visibleDoctorCardCount += doctorCardBatchSize;
-            renderDoctorCards(getDisplayedDoctors(), true);
+            renderDoctorCards(getDisplayedDoctors());
         });
     }
 }
@@ -1398,9 +1400,14 @@ function updateUserLocationMarker() {
         .openPopup();
 }
 
-function setResultsView(viewName) {
-    viewName = viewName === "table" ? "table" : "cards";
-    try { localStorage.setItem("lcn_result_view_preference", viewName); } catch (_) {}
+const doctorMobileResults = window.matchMedia("(max-width: 760px)");
+const doctorOnlineGroupLabels = ["Behandler:innen mit Online-Angebot", "Weitere Behandler:innen"];
+
+function setResultsView(viewName, remember = false) {
+    if (remember) {
+        try { localStorage.setItem("lcn_result_view_preference", viewName); } catch (_) {}
+    }
+    viewName = doctorMobileResults.matches || viewName === "table" ? "table" : "cards";
     const cardSection = document.getElementById("doctor-card-results-section");
     const tableSection = document.getElementById("doctor-table-results-section");
     const cardButton = document.getElementById("doctor-card-view-button");
@@ -1445,7 +1452,10 @@ function renderCurrentDoctorResultsView() {
     const tableBody = document.getElementById("doctor-map-results-body");
 
     if (currentView === "cards") {
-        if (tableBody) tableBody.innerHTML = "";
+        if (tableBody) {
+            LCNSearchOnlineGroups.resetTable(tableBody);
+            tableBody.innerHTML = "";
+        }
         renderDoctorCards(displayedDoctors);
         return;
     }
@@ -1513,7 +1523,7 @@ function renderDoctorMarkers(doctors) {
     }
 }
 
-function renderDoctorCards(doctors, append = false) {
+function renderDoctorCards(doctors) {
     const cardContainer = document.getElementById("doctor-card-results");
     const loadMoreButton = document.getElementById("doctor-cards-load-more-button");
 
@@ -1531,15 +1541,8 @@ function renderDoctorCards(doctors, append = false) {
         ? doctors
         : doctors.slice(0, visibleDoctorCardCount);
 
-    const existingCount = append ? cardContainer.querySelectorAll(":scope > .doctor-card").length : 0;
-    const html = visibleDoctors.slice(existingCount).map(function (doctor, index) {
-        return buildDoctorCardHtml(doctor, existingCount + index);
-    }).join("");
-    if (append) {
-        cardContainer.insertAdjacentHTML("beforeend", html);
-    } else {
-        cardContainer.innerHTML = html;
-    }
+    cardContainer.innerHTML = LCNSearchOnlineGroups.renderCards(doctors, visibleDoctors.length,
+        doctorOnlineLabel, buildDoctorCardHtml, doctorOnlineGroupLabels);
 
     if (loadMoreButton) {
         const remainingCount = Math.max(0, doctors.length - visibleDoctors.length);
@@ -1573,7 +1576,7 @@ function buildDoctorCardHtml(doctor, index) {
                 </div>
 
                 <div class="doctor-card-title-area">
-                    <h3 class="doctor-card-title">${doctorTitle}</h3>${communityBadge}
+                    <h3 class="doctor-card-title">${doctorTitle}</h3>${doctorOnlineLabel(doctor) ? `<span class="doctor-search-online lcn-online-badge">${doctorOnlineLabel(doctor)}</span>` : ""}${communityBadge}
 
                     <div class="doctor-card-meta">
 						${specialtyChipsHtml || '<span class="doctor-card-tag">Fachrichtungen: —</span>'}
@@ -1582,7 +1585,7 @@ function buildDoctorCardHtml(doctor, index) {
 
                 <div class="doctor-card-location-summary">
                     <address class="doctor-card-address">${street || houseNumber ? `<span>${street} ${houseNumber}</span>` : ""}${plz || city ? `<span>${plz} ${city}</span>` : ""}</address>
-                    <div class="doctor-card-distance">${doctorOnlineLabel(doctor) ? `<span class="doctor-search-online lcn-online-badge">${doctorOnlineLabel(doctor)}</span>` : ""}${!doctor.online_only ? distance : ""}</div>
+                    <div class="doctor-card-distance">${!doctor.online_only ? distance : ""}</div>
                 </div>
             </div>
 
@@ -1708,6 +1711,7 @@ function renderDoctorResultsTable(doctors, append = false) {
         return;
     }
 
+    if (doctorMobileResults.matches || !total) LCNSearchOnlineGroups.resetTable(tableBody);
     if (!doctors || doctors.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="8">Keine Behandler:innen gefunden.</td></tr>`;
         return;
@@ -1725,6 +1729,11 @@ function renderDoctorResultsTable(doctors, append = false) {
     });
 
     sortDoctorTableRows(tableRows);
+    if (!doctorMobileResults.matches) {
+        LCNSearchOnlineGroups.renderTables(tableBody, tableRows, visibleCount,
+            row => doctorOnlineLabel(row.doctor), row => buildDoctorTableRowHtml(row.doctor, row.rank), doctorOnlineGroupLabels);
+        return;
+    }
 
     // Sort the full result set first; mount only the requested batch.
     const start = append ? tableBody.querySelectorAll("tr[data-dr-id]").length : 0;
@@ -1751,6 +1760,7 @@ function buildDoctorTableRowHtml(doctor, rank) {
                 <div class="doctor-table-name-stack">
 					${doctor.is_community_preview?`<a href="arzt_detail.html?submission_id=${Number(doctor.community_submission_id)}">${name}</a><span class="community-preview-badge">Noch nicht geprüft</span>`:`<a href="arzt_detail.html?id=${encodeURIComponent(doctor.dr_id)}">${name}</a>`}
 
+                    ${doctorOnlineLabel(doctor) ? `<span class="doctor-search-online lcn-online-badge">${doctorOnlineLabel(doctor)}</span>` : ""}
                     <span class="doctor-mobile-specialty">${buildDoctorTableSpecialtyHtml(doctor)}</span>
                     <span class="doctor-mobile-offer-counts">${Number(doctor.treatment_count || 0)} Therapien · Therapievielfalt: ${Number(doctor.category_count || 0)}</span>
 					<button type="button" class="doctor-compare-add-button doctor-compare-add-button-table ${isDoctorSelectedForCompare(doctor.dr_id) ? "is-selected" : ""}" data-dr-id="${escapeHtml(doctor.dr_id)}">
@@ -1860,7 +1870,7 @@ function getDoctorTableContactCount(doctor) {
 }
 
 function doctorOnlineLabel(doctor) {
-    return doctor.online_only ? "Nur Online-Therapie" : doctor.online_therapy_available ? "Online-Therapie" : "";
+    return doctor.online_therapy_available ? LCNOnline.appointmentLabel : "";
 }
 
 function compareDoctorDistance(a, b, direction = "asc") {
@@ -1875,10 +1885,9 @@ function compareDoctorDistance(a, b, direction = "asc") {
 function buildDoctorTableLocationHtml(doctor) {
     const place = String(doctor.loc_city || doctor.loc_plz || "").trim();
     const distance = getDoctorDistanceText(doctor, true);
-    const online = doctorOnlineLabel(doctor);
     const label = distance !== "-" ? distance : currentLocation ? "Entfernung unbekannt" : "Standort setzen";
-    return `<div class="doctor-distance-cell">${online ? `<span class="doctor-search-online lcn-online-badge">${online}</span>` : ""}
-        ${!doctor.online_only ? `<strong>${escapeHtml(label)}</strong>${place && !online ? `<span class="doctor-distance-place">${escapeHtml(place)}</span>` : ""}` : ""}</div>`;
+    if (doctor.online_only) return "–";
+    return `<div class="doctor-distance-cell"><strong>${escapeHtml(label)}</strong>${place ? `<span class="doctor-distance-place">${escapeHtml(place)}</span>` : ""}</div>`;
 }
 
 function normalizeDoctorOfferMinimum(id) {

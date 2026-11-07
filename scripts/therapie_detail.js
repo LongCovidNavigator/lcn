@@ -2,6 +2,7 @@ const priorityTreatmentContext = true;
 let currentTreatmentDetail = null;
 let treatmentProviderMap = null;
 let treatmentProviderMarkerLayer = null;
+const mobileProviderResults = window.matchMedia("(max-width: 760px)");
 let currentProviderViewMode = getSavedProviderViewMode();
 const providerCardBatchSize = 30;
 let visibleProviderCardCount = providerCardBatchSize;
@@ -562,6 +563,10 @@ function renderTreatmentProviderCard(treatment) {
     `;
 }
 
+mobileProviderResults.addEventListener("change", () => {
+    if (currentTreatmentDetail) renderTreatmentProviders(currentTreatmentDetail.providers);
+});
+
 function renderTreatmentProviders(providers) {
     const element = document.getElementById("treatment-detail-providers");
 
@@ -578,6 +583,7 @@ function renderTreatmentProviders(providers) {
         return;
     }
 
+    const providerViewMode = mobileProviderResults.matches ? "list" : currentProviderViewMode;
     const sortedProviders = sortProvidersForDisplay(providers);
     const rankedProviders = sortedProviders.map(function (provider, index) {
         return {
@@ -586,7 +592,7 @@ function renderTreatmentProviders(providers) {
         };
     });
 
-    const visibleRankedProviders = currentProviderViewMode === "cards"
+    const visibleRankedProviders = providerViewMode === "cards"
         ? rankedProviders.slice(0, visibleProviderCardCount)
         : rankedProviders;
     const providersOnMap = visibleRankedProviders.filter(provider => hasValidCoordinates(provider));
@@ -596,7 +602,7 @@ function renderTreatmentProviders(providers) {
 
     let providersHtml = "";
 
-    if (currentProviderViewMode === "list") {
+    if (providerViewMode === "list") {
         providersHtml = `
             <section class="treatment-detail-provider-group">
                 <div class="treatment-detail-provider-group-header">
@@ -624,7 +630,7 @@ function renderTreatmentProviders(providers) {
     element.innerHTML = `
         ${buildProviderViewSwitchHtml()}
 
-        <div class="treatment-detail-provider-list-inner treatment-detail-provider-view-${currentProviderViewMode}">
+        <div class="treatment-detail-provider-list-inner treatment-detail-provider-view-${providerViewMode}">
             ${providersHtml}
         </div>
     `;
@@ -639,13 +645,13 @@ function buildProviderViewSwitchHtml() {
     return `
         <div class="treatment-detail-provider-controls" aria-label="Behandler:innen-Ansicht und Sortierung">
             <div class="treatment-detail-provider-controls-grid">
-                <section class="treatment-detail-provider-control-card">
+                ${mobileProviderResults.matches ? "" : `<section class="treatment-detail-provider-control-card">
                     <h3>Behandler:innen-Ansicht</h3>
 
                     <div class="treatment-detail-provider-view-switch">
                         <button
                             type="button"
-                            class="treatment-detail-provider-view-button ${currentProviderViewMode === "cards" ? "is-active" : ""}"
+                            class="treatment-detail-provider-view-button ${providerViewMode === "cards" ? "is-active" : ""}"
                             data-provider-view="cards"
                         >
                             Kacheln
@@ -653,13 +659,13 @@ function buildProviderViewSwitchHtml() {
 
                         <button
                             type="button"
-                            class="treatment-detail-provider-view-button ${currentProviderViewMode === "list" ? "is-active" : ""}"
+                            class="treatment-detail-provider-view-button ${providerViewMode === "list" ? "is-active" : ""}"
                             data-provider-view="list"
                         >
                             Tabelle
                         </button>
                     </div>
-                </section>
+                </section>`}
 
                 <section class="treatment-detail-provider-control-card">
                     <h3>Sortierung</h3>
@@ -1390,6 +1396,7 @@ function renderTreatmentProviderMap(providers) {
         const marker = L.marker([Number(provider.loc_lat), Number(provider.loc_lng)]);
         marker.bindPopup(buildProviderMapPopupHtml(provider));
         marker.addTo(treatmentProviderMarkerLayer);
+        window.LCNOnline?.track(marker, provider.dr_id);
     });
 
     if (hasUserLocation) {

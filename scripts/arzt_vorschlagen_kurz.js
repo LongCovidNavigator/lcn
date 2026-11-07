@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if(new URLSearchParams(location.search).get('primary_care')==='1'){doctor.checked=true;primary.checked=true;}
   form.querySelectorAll('[name="provider_types"]').forEach(input=>input.addEventListener('change',updateTypes));
   updateTypes();
-  document.addEventListener('click',event=>{const picker=form.querySelector('.provider-type-picker');if(!picker.contains(event.target))picker.open=false;});
   form.querySelector('.provider-type-picker').addEventListener('keydown',event=>{if(event.key==='Escape'){event.currentTarget.open=false;event.currentTarget.querySelector('summary').focus();}});
   for (const field of [form.elements.name,form.elements.organization]) {
     const box=document.createElement('div');box.className='duplicate-check';box.setAttribute('aria-live','polite');field.closest('label').after(box);

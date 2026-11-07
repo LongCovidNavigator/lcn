@@ -197,7 +197,7 @@ body.fb-community-page{background:#f8f9fa}
 .fb-proposal-table-scroll {
   overflow-x: auto;
 }
-.fb-proposal-table :is(thead th, td) {
+.fb-proposal-table thead th {
   white-space: nowrap;
 }
 .lcn-public-page .fb-proposal-table td {

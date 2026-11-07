@@ -1,16 +1,21 @@
 <?php
 require_once __DIR__.'/_feedback.php';
 const FB_REFERENCE_PAGES=[
- 'index.html'=>'Startseite','top_behandler.html'=>'Top-Behandler:innen','top_therapien.html'=>'Top-Therapien',
+ 'index.html'=>'Startseite','community_empfehlung_behandlerinnen.html'=>'Empfehlung zu Behandler:innen','community_empfehlung_therapien.html'=>'Empfehlung zu Therapie',
  'hausarzt_suche.html'=>'Hausärzt:innen','behandler_suche.html'=>'Behandler:innen-Suche','therapien_suche.html'=>'Therapie-Suche',
  'behandler_vorschlagen.html'=>'Behandler:in vorschlagen','behandlung_vorschlagen.html'=>'Therapie vorschlagen',
  'mitgestalten.html'=>'Mitgestalten','symptome.php'=>'Symptomübersicht','impressum.html'=>'Impressum','datenschutz.html'=>'Datenschutz',
  'arzt_detail.html'=>'Behandler-Detailseite','therapie_detail.php'=>'Therapie-Detailseite','therapie_detail.html'=>'Therapie-Detailseite'
 ];
+const FB_REFERENCE_ALIASES=[
+ 'top_behandler.html'=>'community_empfehlung_behandlerinnen.html',
+ 'top_therapien.html'=>'community_empfehlung_therapien.html',
+ 'top_behandlungen.html'=>'community_empfehlung_therapien.html'
+];
 function fbReferencePath(array $in): string {
  $path=fbText($in,'page_path',500);if(isset($in['reference_mode'])){$mode=fbChoice($in,'reference_mode',['confirm'=>1,'none'=>1,'other'=>1]);if($mode==='none'){if($path!==''||!empty($in['entity_type'])||!empty($in['entity_id']))throw new InvalidArgumentException('Bitte den Seitenbezug vollständig entfernen.');return '';}if($path==='')throw new InvalidArgumentException('Bitte den Seitenbezug bestätigen oder entfernen.');}if($path==='')return '';
  $parts=parse_url($path);if(!$parts||isset($parts['scheme'])||isset($parts['host'])||preg_match('/[\x00-\x20\\\\]/',$path))throw new InvalidArgumentException('Bitte eine Seite aus der Auswahl verwenden.');
- $file=$parts['path']??'';if(!isset(FB_REFERENCE_PAGES[$file]))throw new InvalidArgumentException('Unbekannte Seite im Seitenbezug.');
+ $file=$parts['path']??'';$file=FB_REFERENCE_ALIASES[$file]??$file;if(!isset(FB_REFERENCE_PAGES[$file]))throw new InvalidArgumentException('Unbekannte Seite im Seitenbezug.');
  parse_str($parts['query']??'',$query);$allowed=[];
  $type=$file==='arzt_detail.html'?'doctor':(in_array($file,['therapie_detail.php','therapie_detail.html'],true)?'treatment':null);
  if($type){$key=$type==='doctor'?'id':($file==='therapie_detail.php'?'treatment_id':(isset($query['nd_id'])?'nd_id':'treat_id'));$id=fbId($query[$key]??null);if(($in['entity_type']??null)!==$type||fbId($in['entity_id']??null)!==$id)throw new InvalidArgumentException('Seite und ausgewählter Eintrag passen nicht zusammen.');$allowed[$key]=$id;}
@@ -30,5 +35,5 @@ function fbReadPageReference(PDO $p,int $id,bool $includeDetails=false): ?array 
   unset($row['section_label'],$row['element_label']);
   $row['page_path']=explode('#',$row['page_path'],2)[0];
  }
- $file=parse_url($row['page_path'],PHP_URL_PATH);$row['label']=FB_REFERENCE_PAGES[$file]??'Zugehörige Seite';return $row;
+ $file=parse_url($row['page_path'],PHP_URL_PATH);$canonical=FB_REFERENCE_ALIASES[$file]??$file;if($canonical!==$file)$row['page_path']=$canonical.substr($row['page_path'],strlen($file));$row['label']=FB_REFERENCE_PAGES[$canonical]??'Zugehörige Seite';return $row;
 }

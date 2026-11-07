@@ -37,7 +37,7 @@ function buildDoctorCardHtml(doctor, index) {
                 </div>
 
                 <div class="doctor-card-title-area">
-                    <h3 class="doctor-card-title">${doctorTitle}</h3>${communityBadge}
+                    <h3 class="doctor-card-title">${doctorTitle}</h3>${doctorOnlineLabel(doctor) ? `<span class="doctor-search-online lcn-online-badge">${doctorOnlineLabel(doctor)}</span>` : ""}${communityBadge}
 
                     <div class="doctor-card-meta">
 						${specialtyChipsHtml || '<span class="doctor-card-tag">Fachrichtungen: —</span>'}
@@ -46,7 +46,7 @@ function buildDoctorCardHtml(doctor, index) {
 
                 <div class="doctor-card-location-summary">
                     <address class="doctor-card-address">${street || houseNumber ? `<span>${street} ${houseNumber}</span>` : ""}${plz || city ? `<span>${plz} ${city}</span>` : ""}</address>
-                    <div class="doctor-card-distance">${doctorOnlineLabel(doctor) ? `<span class="doctor-search-online lcn-online-badge">${doctorOnlineLabel(doctor)}</span>` : ""}${!doctor.online_only ? distance : ""}</div>
+                    <div class="doctor-card-distance">${!doctor.online_only ? distance : ""}</div>
                 </div>
             </div>
 
@@ -141,7 +141,7 @@ function buildDoctorSpecialtyChipsHtml(doctor, chipClassName = "doctor-card-tag"
 
 
 function doctorOnlineLabel(doctor) {
-    return doctor.online_only ? "Nur Online-Therapie" : doctor.online_therapy_available ? "Online-Therapie" : "";
+    return doctor.online_therapy_available ? LCNOnline.appointmentLabel : "";
 }
 
 function buildTreatmentCardHtml(treatment, index) {
@@ -184,6 +184,7 @@ function buildTreatmentCardHtml(treatment, index) {
                     <h3 class="treatment-card-title">${treatmentTitle}</h3>${communityBadge}
 
                     <div class="treatment-card-meta">
+                        ${treatment.online_at_home ? `<span class="lcn-online-badge">${LCNOnline.appointmentLabel}</span>` : ""}
                         ${distanceHtml}
                     </div>
                 </div>

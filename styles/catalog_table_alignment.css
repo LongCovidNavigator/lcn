@@ -1,6 +1,6 @@
 /* Explicitly requested shared typography, column sizing and distance presentation. */
-body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table){table-layout:fixed;width:100%;border-collapse:collapse}
-body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) :is(th,td){box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;font-size:.74rem;line-height:1.15}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table){table-layout:fixed;width:100%;min-width:0;border-collapse:collapse}
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) :is(th,td){box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;font-size:.74rem;line-height:1.15;overflow-wrap:anywhere}
 body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) th{font-size:.72rem;font-weight:700}
 body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) td:nth-child(2) :is(.doctor-table-name-stack>a,.featured-expert-table-name>a,.treatment-table-detail-link,.featured-treatment-table-name>a){font:600 .74rem/1.15 Arial,Helvetica,sans-serif}
 body.lcn-public-page :is(.gp-directory-table,.featured-treatments-table) td:nth-child(2)>a{font:600 .74rem/1.15 Arial,Helvetica,sans-serif}
@@ -23,10 +23,18 @@ body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :i
 body.lcn-public-page :is(.treatment-results-table,.featured-treatments-table) :is(th,td):nth-child(6){width:12%!important}
 body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) td:nth-child(2) a:not(.doctor-compare-add-button):not(.treatment-compare-add-button){font-size:.74rem!important;font-weight:600!important;line-height:1.15!important}
 
-/* Keep all three contact badges on one line in every provider table. */
-body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) { white-space:nowrap; }
-body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) .doctor-table-badge-row { display:flex;flex-wrap:nowrap;align-items:center;gap:3px;white-space:nowrap; }
-body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) .doctor-table-badge { flex:0 0 auto; }
+/* Keep the contact badges within their column at narrower widths. */
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) { white-space:normal; }
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) .doctor-table-badge-row { display:flex;flex-wrap:wrap;align-items:center;gap:3px; }
+body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table) td:nth-child(8) .doctor-table-badge { max-width:100%;box-sizing:border-box;white-space:normal; }
+
+@media (min-width:761px) and (max-width:1100px) {
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) :is(th,td,th button) { white-space:normal; }
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) td .lcn-experience {
+  grid-template-columns:repeat(4,minmax(0,1fr)); gap:3px; min-width:0;
+ }
+ body.lcn-public-page :is(.doctor-map-results-table,.gp-directory-table,.featured-experts-table,.treatment-results-table,.featured-treatments-table) td .lcn-experience .lcn-experience-count { grid-column:1/-1; min-width:0; text-align:center; }
+}
 
 /* Mobile result tables: keep the essential columns within even a 320px viewport. */
 @media (max-width:760px) {

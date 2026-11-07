@@ -2,6 +2,7 @@
 require_once __DIR__ . '/_voting.php';
 require_once __DIR__ . '/_experience_search.php';
 require_once __DIR__ . '/_treatment_routes.php';
+require_once __DIR__ . '/_doctor_online.php';
 require_once __DIR__ . '/_search_normalization.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -880,6 +881,7 @@ try {
         ) AS results
     ";
 
+    $onlineIds = lcnTreatmentOnlineIds($pdo, $acceptsGkv);
     $whereParts = [];
     $params = [
         ':mapped_providers_only_for_select' => $mappedProvidersOnly ? 1 : 0,
@@ -959,12 +961,15 @@ try {
 		}
 
         if ($providerCity !== '' || $hasProviderRadius || $acceptsGkv) {
-            if ($includeNoCoords) {
-                $whereParts[] = "(results.matching_provider_count > 0 OR results.unlocated_provider_count > 0)";
-            } else {
-			    $whereParts[] = "results.matching_provider_count > 0";
+            $providerMatches = ['results.matching_provider_count > 0'];
+            if ($hasProviderRadius && $providerCity === '' && !$mappedProvidersOnly && $onlineIds) {
+                $providerMatches[] = 'results.treat_id IN (' . implode(',', array_keys($onlineIds)) . ')';
             }
-		}
+            if ($includeNoCoords) {
+                $providerMatches[] = 'results.unlocated_provider_count > 0';
+            }
+            $whereParts[] = '(' . implode(' OR ', $providerMatches) . ')';
+        }
 
 		$whereParts[] = "results.positive_ratio >= :min_positive";
         $whereParts[] = "results.healing_ratio >= :min_healing";
@@ -1064,6 +1069,7 @@ try {
 
     foreach ($items as &$item) {
         $item['treat_id'] = (int)$item['treat_id'];
+        $item['online_at_home'] = isset($onlineIds[$item['treat_id']]);
 
         $item['pro'] = (int)$item['pro'];
         $item['neutral'] = (int)$item['neutral'];

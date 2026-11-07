@@ -1,4 +1,4 @@
-.lcn-online-badge{display:inline-block;vertical-align:middle;margin:4px 6px;padding:4px 7px;border-radius:5px;background:#e6f5ec;color:#176748;font:500 11px/1.4 Arial,sans-serif;white-space:normal}
+.lcn-online-badge{display:table;width:fit-content;max-width:100%;box-sizing:border-box;margin:4px 0;padding:4px 7px;border-radius:5px;background:#e6f5ec;color:#176748;font:500 11px/1.4 Arial,sans-serif;white-space:normal}
 .lcn-online-legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:10px 0;color:#526b80;font:400 12px/1.5 Arial,sans-serif}
 .lcn-online-legend>span{display:inline-flex;align-items:center;gap:6px}.lcn-online-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}.online-green{background:#248965}.online-blue{background:#2385d6}.online-red{background:#d93b40}
 .lcn-online-marker img{width:25px;height:41px}.lcn-online-marker span{position:absolute;left:14px;top:-4px;border-radius:50%;padding:2px 5px;background:#fff;color:#176748;border:1px solid #248965;font:bold 11px Arial}
@@ -11,5 +11,16 @@
 
 .lcn-shared-tooltip{position:fixed;z-index:10000;width:max-content;max-width:min(420px,calc(100vw - 24px));box-sizing:border-box;padding:10px 14px;background:#fff;border:1px solid #dbe5f1;box-shadow:0 6px 22px #17365d20;border-radius:8px;font:400 14px/1.6 Arial,sans-serif;color:#62769a;pointer-events:none}
 .lcn-shared-tooltip[hidden]{display:none}
-#view-content .nd-provider-heading>.lcn-online-badge{flex:0 1 auto;max-width:155px;margin:0 0 0 auto;text-align:center;font-size:11px}
+/* Touch uses the shared box instead of the browser's emulated hover. */
+[data-lcn-touch-input] .ux-heading-info > p {
+  visibility:hidden !important;
+  opacity:0 !important;
+  transition:none !important;
+}
+[data-lcn-touch-input] .heading-help-info,
+[data-lcn-touch-input] :is(.doctor-nav-info,.treatment-nav-info)::before,
+[data-lcn-touch-input] :is(.doctor-nav-info,.treatment-nav-info)::after {
+  display:none !important;
+}
+#view-content .nd-provider-heading .lcn-online-badge{font-weight:500}
 #view-content .nd-provider-heading>h4{min-width:0}

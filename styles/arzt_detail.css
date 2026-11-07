@@ -4294,10 +4294,10 @@
 .doctor-hybrid-page .doctor-detail-fact-list dd { white-space: pre-line; overflow-wrap: anywhere; }
 .doctor-hybrid-page #doctor-detail-access-costs > div { display: block; }
 .doctor-hybrid-page #doctor-detail-access-costs dt { margin-bottom: 8px; }
-.doctor-hybrid-billing { display: block !important; overflow-x: auto; }
-.doctor-hybrid-billing table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+.doctor-hybrid-billing { display: block !important; }
+.doctor-hybrid-billing table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
 .doctor-hybrid-billing caption { text-align: left; font-size: 0.8rem; color: #526779; margin-bottom: 12px; }
-.doctor-hybrid-billing th, .doctor-hybrid-billing td { padding: 10px 6px; border-bottom: 1px solid #dce5eb; vertical-align: top; overflow-wrap: normal; }
+.doctor-hybrid-billing th, .doctor-hybrid-billing td { padding: 10px 6px; border-bottom: 1px solid #dce5eb; vertical-align: top; overflow-wrap: anywhere; }
 .doctor-hybrid-billing thead th { font-size: 0.75rem; color: #526779; }
 .doctor-hybrid-page .doctor-detail-appointment-matrix td { font-size: 0.85rem; }
 

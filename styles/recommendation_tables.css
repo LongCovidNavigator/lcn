@@ -80,8 +80,7 @@ body.lcn-public-page .recommendation-page .featured-treatments-table tbody tr, b
 body.lcn-public-page .recommendation-page .featured-treatments-table tbody tr td:nth-child(2) a {font-size:11.84px;font-weight:400;font-family:Arial, Helvetica, sans-serif;line-height:13.616px;padding:0px;color:rgb(8, 103, 188);background-color:rgba(0, 0, 0, 0);border-collapse:collapse;border-spacing:2px;border:0px none rgb(8, 103, 188);text-align:left;border-radius:0px;}
 body.lcn-public-page .recommendation-page .featured-treatments-table th button {display:inline-flex;justify-content:center;width:100%;font:inherit;color:inherit;padding:0;background:transparent;border:0;}
 body.lcn-public-page .recommendation-page .featured-treatments-table td .lcn-experience {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;width:100%;}
-@media(max-width:1100px){ body.lcn-public-page .recommendation-page :is(.gp-directory-table,.featured-experts-table,.featured-treatments-table){min-width:1000px} }
-body.lcn-public-page .recommendation-page :is(.featured-experts-table-wrap,.featured-treatments-table-wrap,.gp-directory-scroll){overflow:auto;border:1px solid #e1eafa;border-radius:8px;background:#fff}
+body.lcn-public-page .recommendation-page :is(.featured-experts-table-wrap,.featured-treatments-table-wrap,.gp-directory-scroll){overflow:visible;border:1px solid #e1eafa;border-radius:8px;background:#fff}
 /* Match the search table's entire frame, including the transparent outer surface. */
 body.lcn-public-page .recommendation-page :is(.featured-experts-table-wrap,.featured-treatments-table-wrap,.gp-directory-scroll) { background:transparent; border:0; border-radius:0; }
 body.lcn-public-page .recommendation-page .lcn-recommendation-table-frame { border:0; border-radius:0; background:transparent; }
@@ -98,7 +97,6 @@ body.lcn-public-page .recommendation-page :is(.lcn-recommendation-table-frame,.l
 body.lcn-public-page .recommendation-page :is(.gp-directory-table,.featured-experts-table,.featured-treatments-table) th { position:sticky; top:-1px; z-index:4; background:#f7fbfe; }
 body.lcn-public-page .recommendation-page .doctor-specialty-badges { display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:3px;min-width:0; }
 body.lcn-public-page .recommendation-page :is(.doctor-specialty-category-badge,.featured-treatment-table-badge) { display:inline-flex;align-items:center;justify-content:center;width:max-content;max-width:min(100%,24ch);box-sizing:border-box;min-height:17px;padding:1px 5px;border:1px solid #d8e0ea;border-radius:999px;background:#eef3f8;color:#38547a;font-size:.63rem;font-weight:600;line-height:1.15;text-align:center;text-wrap:balance;white-space:normal;overflow-wrap:anywhere; }
-@media(max-width:1100px){body.lcn-public-page .recommendation-page .lcn-recommendation-table-content { overflow-x:auto; overflow-y:visible; } }
 /* Use the unchanged search's distance stack and neutral contact badges. */
 body.lcn-public-page .recommendation-page .doctor-distance-cell{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;font-size:.74rem;line-height:1.15}
 body.lcn-public-page .recommendation-page .doctor-distance-cell strong{font-size:inherit;font-weight:700;color:#07152f}

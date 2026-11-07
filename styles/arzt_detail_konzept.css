@@ -592,10 +592,10 @@ body:not(.compact-doctor-header) .profile .contact{min-width:0;max-width:100%;fl
 body:not(.compact-doctor-header) .profile .profile-copy{min-width:0;overflow-wrap:anywhere}
 
 /* Consistent score tables and calculation help across detail dashboards. */
-.doctor-score-scroll,.doctor-distribution-scroll{max-width:100%;overflow-x:auto}
+.doctor-score-scroll,.doctor-distribution-scroll{max-width:100%}
 .doctor-score-table,.doctor-distribution-table{width:100%;border-collapse:collapse;font-size:13px;line-height:1.5}
-.doctor-score-table{min-width:600px}
-.doctor-distribution-table{min-width:390px}
+.doctor-score-table{table-layout:fixed}
+.doctor-distribution-table{table-layout:fixed}
 .doctor-score-table th,.doctor-score-table td,.doctor-distribution-table th,.doctor-distribution-table td{padding:12px 8px;text-align:left;border-bottom:1px solid #e1eafa;vertical-align:middle;overflow-wrap:anywhere}
 .doctor-score-table thead th,.doctor-distribution-table thead th{font-size:11px;font-weight:400;color:#62769a;background:#f5f9fd}
 .doctor-score-table tr>:nth-child(n+3),.doctor-distribution-table tr>:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums}
@@ -604,7 +604,7 @@ body:not(.compact-doctor-header) .profile .profile-copy{min-width:0;overflow-wra
 .doctor-score-table .is-excluded{color:#8491a1}
 .doctor-score-table small{display:block;font-size:11px;margin-top:4px}
 .doctor-score-table tfoot{font-weight:700;background:#edf6ff;color:#17365d}
-.doctor-distribution-table .dashboard-bar-value{min-width:90px}
+.doctor-distribution-table .dashboard-bar-value{min-width:0}
 .doctor-calculation-help{margin:16px 0;font-size:13px;line-height:1.6}
 .doctor-calculation-help summary{cursor:pointer;color:#1768b2}
 .doctor-score-scroll:focus-visible{outline:2px solid #0878e3;outline-offset:3px}

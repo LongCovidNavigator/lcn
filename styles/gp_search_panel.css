@@ -9,7 +9,8 @@ body.lcn-public-page .gp-directory-tools>div{max-width:none;width:100%}
 body.lcn-public-page .gp-results-search-row{display:grid;grid-template-columns:minmax(240px,1fr) minmax(220px,320px);gap:14px;align-items:end}
 body.lcn-public-page .gp-directory-tools label{display:block;margin:0 0 5px;color:#344766;font:800 .74rem/normal Arial,Helvetica,sans-serif}
 body.lcn-public-page .gp-directory-tools :is(input,select){box-sizing:border-box;width:100%;border:1px solid #c6d0df;border-radius:7px;background:#fff;color:#07152f;padding:8px 10px;font:400 .82rem/normal Arial,Helvetica,sans-serif;min-height:0}
-body.lcn-public-page .gp-directory[data-view="cards"]>.lcn-recommendation-table-frame{display:none}
+body.lcn-public-page .gp-directory[data-view="cards"] > .lcn-recommendation-table-frame,
+body.lcn-public-page .gp-directory[data-view="cards"] #gp-directory-online > .lcn-recommendation-table-frame{display:none}
 body.lcn-public-page #gp-directory-cards[hidden]{display:none!important}
 @media(max-width:760px){body.lcn-public-page .gp-results-search-row{grid-template-columns:minmax(0,1fr)}body.lcn-public-page .gp-directory-tools :is(input,select){min-height:44px;font-size:16px}}
 
@@ -86,4 +87,33 @@ html.gp-search-page #nearby-gps-form .gp-location-suggestions button:focus-visib
 html.gp-search-page #nearby-gps-form .gp-location-suggestions button[aria-selected="true"] {
  background:#e7f3ff!important;
  color:#06457f!important;
+}
+
+@media (max-width:760px), (max-width:800px) and (orientation:portrait) {
+ html.gp-search-page .home-page .nearby-gps-results { grid-template-columns:minmax(0,1fr); }
+ html.gp-search-page :is(.nearby-gps-sidebar,#gp-directory-title,.gp-directory-intro,.gp-results-header) { display:none!important; }
+ body.lcn-public-page .gp-directory .gp-directory-tools { border:1px solid #d8e0ea; border-radius:10px; }
+ html.gp-search-page .home-page > .nearby-gps-discovery { padding-bottom:0!important; }
+ html.gp-search-page .gp-directory { margin-top:20px; }
+ html.gp-search-page :is(#gp-directory-nearest,#gp-directory-online) { position:relative; padding-top:0; }
+ html.gp-search-page :is(#gp-directory-nearest-title,#gp-directory-online-title) { margin-top:0; }
+ html.gp-search-page :is(#gp-directory-nearest-title,#gp-directory-online-title,#gp-directory-remaining-title) { text-align:center; }
+ html.gp-search-page :is(#gp-directory-nearest:not([hidden]) + #gp-directory-online,#gp-directory-remaining-title) { margin-top:1.5rem; }
+
+ html.gp-search-page #gp-directory-nearest::before,
+ html.gp-search-page #gp-directory-nearest[hidden] + #gp-directory-online::before,
+ html.gp-search-page :is(#gp-directory-nearest,#gp-directory-online)::after {
+  content:"";
+  position:absolute;
+  inset-inline:0;
+  border-top:1px solid #b7cbdf;
+  pointer-events:none;
+ }
+ html.gp-search-page #gp-directory-nearest::before,
+ html.gp-search-page #gp-directory-nearest[hidden] + #gp-directory-online::before { top:-10px; }
+ html.gp-search-page :is(#gp-directory-nearest,#gp-directory-online)::after { bottom:0; }
+}
+
+@media (width > 800px), (width > 760px) and (orientation:landscape) {
+ html.gp-search-page #gp-directory-online { padding:0; max-width:none; }
 }

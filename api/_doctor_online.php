@@ -1,13 +1,14 @@
 <?php
-require_once __DIR__.'/_doctor_hybrid.php';
+require_once __DIR__.'/_treatments_nd.php';
 
 function lcnDoctorOnlineAccess(PDO $pdo,bool $dummy=false): array {
     $result=[];
     foreach($pdo->query('SELECT lcn_id,ersttermin_video,ersttermin_telefon,folgetermin_video,folgetermin_telefon FROM tbl_entities_nd WHERE aktiv=1') as $row){
         $yes=static fn($value)=>mb_strtolower(trim((string)$value))==='ja';
         $verified=in_array((int)$row['lcn_id'],LCN_VERIFIED_ONLINE_ONLY_DOCTOR_IDS,true);
-        $first=$verified&&($yes($row['ersttermin_video'])||$yes($row['ersttermin_telefon']));
-        $follow=$verified&&($yes($row['folgetermin_video'])||$yes($row['folgetermin_telefon']));
+        $editorial=in_array((int)$row['lcn_id'],LCN_VERIFIED_ONLINE_APPOINTMENT_DOCTOR_IDS,true);
+        $first=$editorial||$verified&&($yes($row['ersttermin_video'])||$yes($row['ersttermin_telefon']));
+        $follow=$editorial||$verified&&($yes($row['folgetermin_video'])||$yes($row['folgetermin_telefon']));
         $result[(int)$row['lcn_id']]=['first'=>$first,'follow'=>$follow,'researchedFirst'=>$first,'researchedFollow'=>$follow,'researchedComplete'=>$first&&$follow];
     }
     $counts=[];
@@ -23,4 +24,22 @@ function lcnDoctorOnlineAccess(PDO $pdo,bool $dummy=false): array {
     }
     foreach($result as &$row)$row['complete']=$row['first']&&$row['follow'];unset($row);
     return $result;
+}
+
+/** Therapies deliverable at home with a listed provider offering both remote appointments. */
+function lcnTreatmentOnlineIds(PDO $pdo, bool $acceptsGkv = false): array
+{
+    $remote = lcnDoctorOnlineAccess($pdo);
+    $rows = $pdo->query("SELECT t.treat_nd_id, t.typ, t.durchfuehrungssetting, c.lcn_id
+        FROM tbl_treatments_nd t
+        JOIN tbl_cpl_entities2treatments_nd c ON c.treat_nd_id = t.treat_nd_id
+        WHERE c.relation_status IN ('bestand','belegt') AND c.lcn_id IS NOT NULL"
+        . ($acceptsGkv ? " AND EXISTS (SELECT 1 FROM v_lcn_doctors d WHERE d.dr_id = c.lcn_id AND d.dr_accepts_gkv = 'yes')" : ''));
+    $ids = [];
+    foreach ($rows as $row) {
+        if (($remote[(int)$row['lcn_id']]['complete'] ?? false) && lcnNdCanTreatAtHome($row)) {
+            $ids[(int)$row['treat_nd_id']] = true;
+        }
+    }
+    return $ids;
 }

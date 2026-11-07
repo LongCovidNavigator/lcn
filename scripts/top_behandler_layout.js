@@ -37,7 +37,7 @@
 
     const style = document.createElement('link');
     style.rel = 'stylesheet';
-    style.href = 'styles/top_behandler_layout.css?v=8';
+    style.href = 'styles/top_behandler_layout.css?v=9';
     document.head.append(style);
 
     installTableRenderer();

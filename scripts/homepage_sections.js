@@ -46,7 +46,7 @@
         previous.disabled = track.scrollLeft <= 3;
         next.disabled = track.scrollLeft >= max - 3;
         status.textContent = `${current + 1} / ${cards.length}`;
-        const group = current < 2 ? 'empfehlung' : current === 2 ? 'hausarzt' : current < 5 ? 'suche' : 'ergaenzung';
+        const group = current < 2 ? 'empfehlung' : current === 2 ? 'hausarzt' : current < 5 ? 'ergaenzung' : 'suche';
         nav?.querySelectorAll('a').forEach(link => {
             if (link.hash === '#' + group) link.setAttribute('aria-current', 'location');
             else link.removeAttribute('aria-current');

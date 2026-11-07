@@ -1,13 +1,13 @@
 if(!document.querySelector('[data-feedback-reference-style]')){const css=document.createElement('link');css.rel='stylesheet';css.href='styles/feedback_reference.css?v=reference-combobox-20261107';css.dataset.feedbackReferenceStyle='';document.head.append(css);}
 // Shared page reference editor. Never copies search text or arbitrary URL parameters.
 const pages={
- 'index.html':'Startseite','top_behandler.html':'Top-Behandler:innen','top_therapien.html':'Top-Therapien',
+ 'index.html':'Startseite','community_empfehlung_behandlerinnen.html':'Empfehlung zu Behandler:innen','community_empfehlung_therapien.html':'Empfehlung zu Therapie',
  'hausarzt_suche.html':'Hausärzt:innen','behandler_suche.html':'Behandler:innen-Suche','therapien_suche.html':'Therapie-Suche',
  'behandler_vorschlagen.html':'Behandler:in vorschlagen','behandlung_vorschlagen.html':'Therapie vorschlagen',
  'mitgestalten.html':'Mitgestalten','symptome.php':'Symptomübersicht','impressum.html':'Impressum','datenschutz.html':'Datenschutz',
  'arzt_detail.html':'Behandler-Detailseite','therapie_detail.php':'Therapie-Detailseite'
 };
-const aliases={'aerzte_karte.html':'behandler_suche.html','therapien_karte.html':'therapien_suche.html','top_behandlungen.html':'top_therapien.html','arzt_vorschlagen.html':'behandler_vorschlagen.html','eintrag_vorschlagen.html':'behandler_vorschlagen.html'};
+const aliases={'aerzte_karte.html':'behandler_suche.html','therapien_karte.html':'therapien_suche.html','top_behandlungen.html':'community_empfehlung_therapien.html','top_therapien.html':'community_empfehlung_therapien.html','top_behandler.html':'community_empfehlung_behandlerinnen.html','arzt_vorschlagen.html':'behandler_vorschlagen.html','eintrag_vorschlagen.html':'behandler_vorschlagen.html'};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const request=async params=>{const r=await fetch('api/feedback.php?'+new URLSearchParams(params),{credentials:'same-origin',cache:'no-store'});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Die Einträge können gerade nicht geladen werden.');return d;};
 export function fromUrl(value){

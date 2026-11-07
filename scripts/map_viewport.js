@@ -40,7 +40,7 @@
         const outsideClick = event => { if (!toolbar.contains(event.target)) closeOptions(); };
         document.addEventListener('click', outsideClick);
         let markers = [], timer, applying = false, mode = preference, disposed = false;
-        let previousPoints = null, savedView = null;
+        let previousPoints = null, savedView = null, previousRadius = null;
         // Data refreshes must not turn the user's country/zoom selection into a
         // new fitBounds operation. Compare locations rather than marker objects.
         const pointKey = marker => {
@@ -86,21 +86,36 @@
             }
             clearTimeout(timer); timer = null;
             collect();
+            let radiusCircle = null;
+            if (map.options.lcnFitRadius) {
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Circle) radiusCircle = layer;
+                });
+            }
+            const radius = radiusCircle ? pointKey(radiusCircle) + ':' + radiusCircle.getRadius() : null;
+            const radiusChanged = radius !== previousRadius;
             const points = new Set(markers.map(pointKey));
-            const addedOutside = previousPoints !== null && savedView && markers.some(marker =>
+            const addedOutside = !radius && previousPoints !== null && savedView && markers.some(marker =>
                 !previousPoints.has(pointKey(marker)) && !savedView.bounds.contains(marker.getLatLng()));
-            const firstResults = previousPoints === null && points.size > 0;
+            const firstResults = !radius && previousPoints === null && points.size > 0;
             if (force) mode = preference;
             else if (addedOutside) mode = 'all';
             applying = true;
             try {
-                if (force || !savedView || firstResults || addedOutside) {
+                if (!force && radiusCircle && radiusChanged) {
+                    map.options.zoomSnap = 0.1;
+                    map.fitBounds(radiusCircle.getBounds(), {
+                        paddingTopLeft: [24, 56], paddingBottomRight: [24, 28],
+                        maxZoom: 16, animate: false
+                    });
+                } else if (force || !savedView || firstResults || addedOutside || radiusChanged) {
                     if (mode === 'all' && markers.length) show(markers);
                     else map.fitBounds(countries[mode === 'all' ? 'de' : mode][1], {padding:[24,24],animate:false});
                 } else {
                     map.setView(savedView.center, savedView.zoom, {animate:false});
                 }
                 rememberView();
+                previousRadius = radius;
                 if (points.size || previousPoints !== null) previousPoints = points;
             } finally { applying = false; }
             current.textContent = countries[mode === 'all' ? 'de' : mode][0];
@@ -124,10 +139,73 @@
         map.on('unload', () => { disposed = true; clearTimeout(timer); instances.delete(entry); document.removeEventListener('click', outsideClick); });
         entry.apply();
     }
+    function configureTouchGestures(map) {
+        if (!map.touchZoom.enabled() || !map.dragging.enabled()) return;
+        const container = map.getContainer();
+        const previousTouchAction = container.style.touchAction;
+        let touchDragActive = false;
+        let lastPointerType;
+        const control = L.control({position: 'bottomleft'});
+        const scrollButton = document.createElement('button');
+        scrollButton.type = 'button';
+        scrollButton.className = 'map-resume-page-scroll';
+        scrollButton.textContent = 'Seite scrollen';
+        scrollButton.hidden = true;
+        L.DomEvent.disableClickPropagation(scrollButton);
+        control.onAdd = () => scrollButton;
+        control.addTo(map);
+
+        function setTouchDrag(active) {
+            touchDragActive = active;
+            // The browser reads touch-action at the start of the next gesture.
+            container.style.touchAction = active ? 'none' : 'pan-x pan-y';
+            scrollButton.hidden = !active;
+        }
+        setTouchDrag(false);
+
+        function resumePageScroll() {
+            setTouchDrag(false);
+            map.dragging.disable();
+            map.scrollWheelZoom.disable();
+            container.classList.remove('is-scroll-zoom-active');
+        }
+        scrollButton.addEventListener('click', event => {
+            // The map's native click listener would otherwise re-enable wheel zoom.
+            event.stopPropagation();
+            resumePageScroll();
+        });
+
+        const setDragMode = event => {
+            lastPointerType = event.pointerType;
+            if (lastPointerType === 'touch' && !touchDragActive) map.dragging.disable();
+            else map.dragging.enable();
+            if (lastPointerType === 'mouse' && map.options.scrollWheelZoom) map.scrollWheelZoom.enable();
+        };
+        const activateTouchDrag = event => {
+            if ((event.pointerType || lastPointerType) !== 'touch' || !event.detail) return;
+            if (event.target.closest('.leaflet-control, .leaflet-marker-icon, .leaflet-popup, .doctor-map-viewport-tools, button, a')) return;
+            setTouchDrag(true);
+        };
+        const releaseOutside = event => {
+            if (touchDragActive && !container.contains(event.target)) resumePageScroll();
+        };
+        container.addEventListener('pointerdown', setDragMode, true);
+        container.addEventListener('click', activateTouchDrag);
+        document.addEventListener('pointerdown', releaseOutside, true);
+        map.once('unload', () => {
+            container.removeEventListener('pointerdown', setDragMode, true);
+            container.removeEventListener('click', activateTouchDrag);
+            document.removeEventListener('pointerdown', releaseOutside, true);
+            container.style.touchAction = previousTouchAction;
+        });
+    }
     function install() {
         if (!window.L || L.Map.prototype._lcnViewportInstalled) return;
         L.Map.prototype._lcnViewportInstalled = true;
-        L.Map.addInitHook(function () { this.whenReady(() => setTimeout(() => attach(this), 0)); });
+        L.Map.addInitHook(function () {
+            configureTouchGestures(this);
+            this.whenReady(() => setTimeout(() => attach(this), 0));
+        });
     }
     window.LCNMapViewport = { install };
     document.addEventListener('load', install, true);

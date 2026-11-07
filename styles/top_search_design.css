@@ -14,8 +14,44 @@
 .top-search-page :is(.featured-experts-table,.featured-treatments-table) td { font-size: .74rem; font-weight: 400; }
 .top-search-page :is(.featured-experts-table-wrap,.featured-treatments-table-wrap) { border-radius: 10px; }
 .top-search-page .top-map-location-controls { border-color: #e1eafa; border-radius: 10px; }
+.top-search-page :is(.featured-radius-heading,.featured-radius-empty) { grid-column: 1 / -1; margin: 0; }
+.top-search-page .featured-radius-heading { padding-top: 14px; color: #17365d; font-size: 1rem; }
+.top-search-page .featured-radius-heading:not(:first-child) { margin-top: 12px; border-top: 1px solid #dce8ee; }
+.top-search-page .featured-radius-empty { color: #536b89; }
+.top-search-page .is-comparing :is(.featured-radius-heading,.featured-radius-empty) { display: none; }
+.top-search-page .featured-treatment-table-name { text-align: left; }
+.top-search-page .featured-treatment-table-name > .lcn-online-badge {
+ display: block;
+ width: fit-content;
+ margin: 3px 0 0;
+ padding: 2px 6px;
+}
+.top-search-page #featured-treatments-list .treatment-card-meta {
+ flex-direction: column;
+ align-items: flex-start;
+ gap: 3px;
+}
+.top-search-page #featured-treatments-list .treatment-card-meta > .lcn-online-badge {
+ margin: 0;
+ padding: 2px 6px;
+}
+@media (min-width:761px) and (max-width:1100px) {
+ .top-search-page #featured-treatments-list .featured-treatments-table :is(th,td) {
+  padding-inline: 4px;
+ }
+ .top-search-page #featured-treatments-list .featured-treatments-table :is(th,td):nth-child(1) { width: 5% !important; }
+ .top-search-page #featured-treatments-list .featured-treatments-table :is(th,td):nth-child(2) { width: 22% !important; }
+ .top-search-page #featured-treatments-list .featured-treatments-table :is(th,td):nth-child(3) { width: 18% !important; }
+ .top-search-page #featured-treatments-list .featured-treatments-table :is(th,td):nth-child(4) { width: 27% !important; }
+ .top-search-page #featured-treatments-list .featured-treatments-table :is(th,td):nth-child(5) { width: 12% !important; }
+ .top-search-page #featured-treatments-list .featured-treatments-table :is(th,td):nth-child(6) { width: 16% !important; }
+ .top-search-page #featured-treatments-list .featured-treatments-table td .lcn-experience {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+ }
+}
 @media(max-width:760px) {
- .top-search-page :is(.featured-experts-table,.featured-treatments-table) { min-width: 900px; }
+ .top-search-page .featured-page-view-switch:has([data-featured-view], [data-featured-treatment-view]) { display: none; }
  .top-search-page :is(.featured-experts-panel,.featured-treatments-panel) { padding: 12px; }
  .top-search-page :is(.featured-experts-list,.featured-treatments-list,.featured-ranking-group) { min-width: 0; }
 }

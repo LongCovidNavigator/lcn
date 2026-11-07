@@ -4,9 +4,15 @@
  let context=null, timer, controller, active=-1;
  function message(text){const box=$('#sym-message');box.textContent=text;box.className='fb-success';box.hidden=false;}
  async function send(body){const response=await fetch('api/symptom_catalog.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await response.json();if(!response.ok||!data.ok)throw Error(data.error||'Bitte versuche es erneut.');return data;}
- function view(value){value=value==='table'?'table':'cards';$('#sym-cards')?.toggleAttribute('hidden',value!=='cards');$('#sym-table')?.toggleAttribute('hidden',value!=='table');document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('is-active',b.dataset.view===value);b.setAttribute('aria-pressed',String(b.dataset.view===value));});try{localStorage.setItem('lcn-symptom-view',value);}catch{}}
+ const mobileResults=matchMedia('(max-width: 760px)');
+ function view(preferred){const value=mobileResults.matches||preferred==='table'?'table':'cards';$('#sym-cards')?.toggleAttribute('hidden',value!=='cards');$('#sym-table')?.toggleAttribute('hidden',value!=='table');document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('is-active',b.dataset.view===value);b.setAttribute('aria-pressed',String(b.dataset.view===value));});}
  let saved;try{saved=localStorage.getItem('lcn-symptom-view');}catch{}view(saved);
- document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>view(b.dataset.view)));
+ mobileResults.addEventListener('change',()=>view(saved));
+ document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{
+  saved=b.dataset.view;
+  try{localStorage.setItem('lcn-symptom-view',saved);}catch{}
+  view(saved);
+ }));
  function hide(){list.hidden=true;input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');active=-1;}
  function openProposal(sym=null,name=''){
   hide();context=sym;form.reset();$('#sym-dialog-error').hidden=true;

@@ -1,5 +1,4 @@
 /* Responsive refinements apply only to the provider search. */
-.doctor-table-scroll-hint { display: none; }
 @media(max-width:1100px) {
  body.doctor-map-page > .container { padding: 16px; }
  .doctor-map-page .doctor-navigation-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; grid-template-areas: "sort offer" "specialty specialty" "contact contact" "rating location" !important; gap: 12px !important; }
@@ -23,9 +22,6 @@
  .doctor-map-page :is(.doctor-navigation-header,.doctor-map-header,.lcn-search-table-toggle,.doctor-view-switch-button,.doctor-cards-load-more-button,.doctor-navigation-reset-button,.doctor-compare-action-button,.doctor-results-mode-button) { min-height: 44px; }
  .doctor-map-page #doctor-map { height: 360px; min-height: 260px; max-height: 50dvh; }
  .doctor-map-page :is(.doctor-map-panel,.doctor-results-panel) { margin-top: 24px; }
- .doctor-map-page #doctor-table-content { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
- .doctor-map-page .doctor-table-scroll-hint { display: block; margin: 0; padding: 10px 12px; color: #62769a; font-size: 12px; }
- .doctor-map-page .doctor-map-results-table { min-width: 1000px; }
  .doctor-map-page .doctor-map-results-table :is(th,td):nth-child(n) { display: table-cell; }
  .doctor-map-page .doctor-map-results-table :is(th,td) { padding: 8px; font-size: 12px; }
  .doctor-map-page .doctor-map-results-table :is(th,td):nth-child(1) { width: 4%; }
@@ -58,7 +54,6 @@
  .doctor-map-page .doctor-results-search-panel { padding: 12px; }
  .doctor-map-page .doctor-results-search-row { grid-template-columns: minmax(0,1fr); }
  .doctor-map-page .doctor-navigation-footer { flex-wrap: wrap; gap: 12px; }
- .doctor-map-page .doctor-table-scroll-hint { display: none; }
  .doctor-map-page .doctor-navigation-reset-button { width: 100%; }
  .doctor-map-page #doctor-map { height: 300px; }
  .doctor-map-page .doctor-suggest-entry { margin-block: 16px; padding: 16px; gap: 12px; }

@@ -10,6 +10,8 @@
 let currentTreatments = [];
 let currentCategories = [];
 let currentSubcategoriesByCategory = {};
+const treatmentMobileResults = window.matchMedia("(max-width: 760px)");
+const treatmentOnlineGroupLabels = ["Therapien mit Online-Angebot", "Weitere Therapien"];
 let currentViewMode = getSavedTreatmentResultsView();
 const treatmentCardBatchSize = 30;
 let visibleTreatmentCardCount = treatmentCardBatchSize;
@@ -90,6 +92,7 @@ async function initTreatmentPage() {
    
     bindTreatmentViewSwitchEvents();
     setTreatmentViewMode(currentViewMode);
+    treatmentMobileResults.addEventListener("change", () => setTreatmentViewMode(getSavedTreatmentResultsView()));
     bindTreatmentCompareControls();
     bindTreatmentCardContainerEvents();
     bindTreatmentTableContainerEvents();
@@ -196,6 +199,7 @@ async function loadTreatmentResults() {
         console.error("Fehler beim Laden der Therapien:", error);
 
         if (tableBody) {
+            LCNSearchOnlineGroups.resetTable(tableBody);
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6">Fehler beim Laden der Therapiedaten.</td>
@@ -378,6 +382,7 @@ function normalizeTreatment(treatment) {
         matching_provider_count: Number(treatment.matching_provider_count ?? 0),
         unlocated_provider_count: Number(treatment.unlocated_provider_count ?? 0),
         nearest_provider: normalizeNearestProvider(treatment.nearest_provider),
+        online_at_home: treatment.online_at_home === true,
         nearest_provider_distance_km: treatment.nearest_provider_distance_km === null || treatment.nearest_provider_distance_km === undefined
             ? null
             : Number(treatment.nearest_provider_distance_km)
@@ -1029,13 +1034,13 @@ function bindTreatmentViewSwitchEvents() {
 
     if (cardButton) {
         cardButton.addEventListener("click", function () {
-            setTreatmentViewMode("cards");
+            setTreatmentViewMode("cards", true);
         });
     }
 
     if (tableButton) {
         tableButton.addEventListener("click", function () {
-            setTreatmentViewMode("table");
+            setTreatmentViewMode("table", true);
         });
     }
 }
@@ -1133,7 +1138,7 @@ function bindTreatmentTableContainerEvents() {
         return;
     }
 
-    tableBody.addEventListener("click", function (event) {
+    tableBody.closest(".lcn-search-table-content").addEventListener("click", function (event) {
         const compareButton = event.target.closest(".treatment-compare-add-button");
 
         if (compareButton) {
@@ -1153,9 +1158,11 @@ function bindTreatmentTableContainerEvents() {
     });
 }
 
-function setTreatmentViewMode(viewMode) {
-    currentViewMode = viewMode === "table" ? "table" : "cards";
-    try { localStorage.setItem("lcn_result_view_preference", currentViewMode); } catch (_) {}
+function setTreatmentViewMode(viewMode, remember = false) {
+    if (remember) {
+        try { localStorage.setItem("lcn_result_view_preference", viewMode); } catch (_) {}
+    }
+    currentViewMode = treatmentMobileResults.matches || viewMode === "table" ? "table" : "cards";
 
     const cardSection = document.getElementById("treatment-card-results-section");
     const tableSection = document.getElementById("treatment-table-results-section");
@@ -1206,6 +1213,7 @@ function renderCurrentTreatmentView() {
 
     if (currentViewMode === "cards") {
         if (tableBody) {
+            LCNSearchOnlineGroups.resetTable(tableBody);
             tableBody.innerHTML = "";
         }
 
@@ -1349,6 +1357,8 @@ function applyClientSideTreatmentSort() {
         else if(filters.sortKey==="provider_count")result=Number(a.provider_count||0)-Number(b.provider_count||0);
         else if(filters.sortKey==="matching_provider_count")result=Number(a.matching_provider_count||0)-Number(b.matching_provider_count||0);
         else if(filters.sortKey==="distance"){
+            const onlineOrder = Number(b.online_at_home) - Number(a.online_at_home);
+            if (onlineOrder) return onlineOrder;
             const distanceA=a.nearest_provider_distance_km===null?Infinity:Number(a.nearest_provider_distance_km);
             const distanceB=b.nearest_provider_distance_km===null?Infinity:Number(b.nearest_provider_distance_km);
             result=Number.isFinite(distanceA)||Number.isFinite(distanceB)?distanceA-distanceB:0;
@@ -1421,9 +1431,9 @@ function bindTreatmentTableSortControls() {
     const table = document.querySelector(".treatment-results-table");
     if (!table) return;
 
-    table.addEventListener("click", function (event) {
+    table.parentElement.addEventListener("click", function (event) {
         const button = event.target.closest("[data-table-sort-key]");
-        if (!button || !table.contains(button)) return;
+        if (!button) return;
 
         const key = button.dataset.tableSortKey;
         if (key === "experience" || key === "experience-negative") {
@@ -1485,6 +1495,7 @@ function buildTreatmentTableRowHtml(treatment, rank, presentation) {
                         ${treatment.is_community_preview?`<strong>${treatmentName}</strong>`:`<a class="treatment-table-detail-link" href="${treatmentDetailUrl(treatment)}">${treatmentName}</a>`}
                         ${treatment.is_community_preview || treatment.review_pending?`<span class="community-preview-badge">${treatment.is_community_preview?'Noch nicht geprüft':'Prüfung ausstehend'}</span>`:''}
                     </div>
+                    ${treatment.online_at_home ? `<span class="lcn-online-badge">${LCNOnline.appointmentLabel}</span>` : ""}
                     <button
                         type="button"
                         class="treatment-compare-add-button treatment-compare-add-button-table ${isSelected ? "is-selected" : ""}"
@@ -1522,7 +1533,7 @@ function buildTreatmentMobileMetricHtml(treatment, mode) {
 }
 
 function updateTreatmentMobileTablePresentation() {
-    const table = document.querySelector(".treatment-results-table");
+    const table = document.getElementById("treatment-results-body")?.parentElement;
     const filters = getTreatmentFilters();
     const experienceButton = document.getElementById("treatment-table-experience-button");
     const experienceHeading = document.getElementById("treatment-table-experience-heading");
@@ -1612,6 +1623,7 @@ function renderTreatmentResultsTable(treatments, append = false) {
 
     const presentation = updateTreatmentMobileTablePresentation();
 
+    if (treatmentMobileResults.matches || !treatments?.length) LCNSearchOnlineGroups.resetTable(tableBody);
     if (!treatments || treatments.length === 0) {
         tableBody.innerHTML = `
             <tr>
@@ -1631,6 +1643,12 @@ function renderTreatmentResultsTable(treatments, append = false) {
     updateTreatmentTableSortHeaders();
 
     const visibleRows = showOnlyTreatmentCompareSelection ? rows : rows.slice(0, visibleTreatmentTableCount);
+    if (!treatmentMobileResults.matches) {
+        LCNSearchOnlineGroups.renderTables(tableBody, rows, visibleRows.length,
+            row => row.treatment.online_at_home,
+            row => buildTreatmentTableRowHtml(row.treatment, row.rank, presentation), treatmentOnlineGroupLabels);
+        return;
+    }
     const startIndex = append ? tableBody.querySelectorAll("tr[data-treat-id]").length : 0;
     const html = visibleRows.slice(startIndex).map(function (row) {
         return buildTreatmentTableRowHtml(row.treatment, row.rank, presentation);
@@ -1663,6 +1681,8 @@ function sortTreatmentTableRows(rows) {
             result = countA - countB;
         }
         else if (currentTreatmentTableSortKey === "location") {
+            const onlineOrder = Number(b.online_at_home) - Number(a.online_at_home);
+            if (onlineOrder) return onlineOrder;
             const distanceA = a.nearest_provider_distance_km === null ? Infinity : Number(a.nearest_provider_distance_km);
             const distanceB = b.nearest_provider_distance_km === null ? Infinity : Number(b.nearest_provider_distance_km);
             result = distanceA - distanceB;
@@ -1707,9 +1727,8 @@ function renderTreatmentCards(treatments) {
         ? treatments
         : treatments.slice(0, visibleTreatmentCardCount);
 
-    cardResults.innerHTML = visibleTreatments.map(function (treatment, index) {
-        return buildTreatmentCardHtml(treatment, index);
-    }).join("");
+    cardResults.innerHTML = LCNSearchOnlineGroups.renderCards(treatments, visibleTreatments.length,
+        treatment => treatment.online_at_home, buildTreatmentCardHtml, treatmentOnlineGroupLabels);
 
     if (loadMoreButton) {
         const remainingCount = Math.max(0, treatments.length - visibleTreatments.length);
@@ -1756,7 +1775,9 @@ function buildTreatmentCardHtml(treatment, index) {
                 </div>
 
                 <div class="treatment-card-title-area">
-                    <h3 class="treatment-card-title">${treatmentTitle}</h3>${communityBadge}
+                    <h3 class="treatment-card-title">${treatmentTitle}</h3>
+                    ${treatment.online_at_home ? `<span class="lcn-online-badge">${LCNOnline.appointmentLabel}</span>` : ""}
+                    ${communityBadge}
 
                     <div class="treatment-card-meta">
                         ${distanceHtml}

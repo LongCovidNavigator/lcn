@@ -39,7 +39,7 @@
 .ux-relationship-table :is(th,td):first-child{width:48%}.ux-relationship-table :is(th,td):nth-child(2){width:28%}.ux-relationship-table :is(th,td):last-child{width:24%;text-align:right}
 .ux-relationship-table td small{display:block;margin-top:5px;font-size:11px;color:#718096}
 .ux-relationship-table td[colspan]{width:auto!important;text-align:left!important;color:#718096}
-.ux-relationship-table .catalog-feedback{justify-content:flex-end}
+.ux-relationship-table .catalog-feedback{justify-content:flex-end;flex-wrap:wrap}
 .treatment-relation-dialog select,.treatment-relation-dialog input[type=url]{width:100%;box-sizing:border-box;border:1px solid #cddfec;border-radius:6px;padding:10px;font:inherit;background:white;color:#17365d}
 .treatment-relation-dialog [hidden]{display:none!important}
 .treatment-relation-dialog{box-sizing:border-box;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto}

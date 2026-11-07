@@ -7,11 +7,16 @@
 @media(max-width:640px){.featured-ranking-heading-row{align-items:stretch;flex-direction:column}.featured-ranking-heading-row .featured-page-view-switch{align-self:flex-start}}
 
 /* Center the heading across the full results area. */
-body:is([data-search-title="Top-Behandler:innen"],[data-search-title="Top-Therapien"]) .featured-page-heading-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:end;gap:16px}
-body:is([data-search-title="Top-Behandler:innen"],[data-search-title="Top-Therapien"]) .featured-page-heading-row .section-heading{grid-column:2;text-align:center;margin:0;max-width:800px}
-body:is([data-search-title="Top-Behandler:innen"],[data-search-title="Top-Therapien"]) .featured-page-heading-row .featured-page-view-switch{grid-column:3;justify-self:end}
+body[data-recommendation] .featured-page-heading-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:end;gap:16px}
+body[data-recommendation] .featured-page-heading-row .section-heading{grid-column:2;text-align:center;margin:0;max-width:800px}
+body[data-recommendation] .featured-page-heading-row .featured-page-view-switch{grid-column:3;justify-self:end}
 @media(max-width:1100px){
-body:is([data-search-title="Top-Behandler:innen"],[data-search-title="Top-Therapien"]) .featured-page-heading-row{grid-template-columns:minmax(0,1fr)}
-body:is([data-search-title="Top-Behandler:innen"],[data-search-title="Top-Therapien"]) .featured-page-heading-row .section-heading{grid-column:1;justify-self:center}
-body:is([data-search-title="Top-Behandler:innen"],[data-search-title="Top-Therapien"]) .featured-page-heading-row .featured-page-view-switch{grid-column:1}
+body[data-recommendation] .featured-page-heading-row{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+body[data-recommendation] .featured-page-heading-row .section-heading{grid-column:1;text-align:left}
+body[data-recommendation] .featured-page-heading-row .featured-page-view-switch{grid-column:2}
+}
+@media(max-width:760px){
+body[data-recommendation] .featured-page-heading-row{grid-template-columns:minmax(0,1fr)}
+body[data-recommendation] .featured-page-heading-row .section-heading{text-align:center;justify-self:center}
+body[data-recommendation] .featured-page-heading-row .featured-page-view-switch{grid-column:1}
 }

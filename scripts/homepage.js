@@ -15,6 +15,47 @@ const featuredTreatments = [
 const featuredTreatmentInitialCount = 11;
 const featuredTreatmentAdditionalCount = 40;
 const featuredTreatmentDataById = new Map();
+let topRecommendationRadius = null;
+let renderTopRecommendationView;
+const topRecommendationMobileView = window.matchMedia("(max-width: 760px)");
+
+topRecommendationMobileView.addEventListener("change", () => {
+    renderTopRecommendationView?.(getSavedHomepageResultView());
+});
+
+window.addEventListener("top-recommendations:radius-changed", event => {
+    topRecommendationRadius = event.detail;
+    renderTopRecommendationView?.(getSavedHomepageResultView());
+});
+
+function renderFeaturedRadiusGroups(entries, getLocation, renderGroup, isOnline = () => false, distanceHeading = "", onlineHeading = LCNOnline.appointmentLabel) {
+    if (!topRecommendationRadius && !distanceHeading) return renderGroup(entries, 0);
+
+    const { km, contains } = topRecommendationRadius || {};
+    const online = [], inside = [], outside = [];
+    let hasUnknownDistance = false;
+    for (const entry of entries) {
+        if (isOnline(entry)) {
+            online.push(entry);
+            continue;
+        }
+        const location = getLocation(entry);
+        const inRadius = !contains || (location && contains(location));
+        if (inRadius == null) hasUnknownDistance = true;
+        (inRadius ? inside : outside).push(entry);
+    }
+
+    const heading = label => `<h3 class="featured-radius-heading">${label}</h3>`;
+    const empty = '<p class="featured-radius-empty">Keine Einträge in diesem Abschnitt.</p>';
+    const onlineGroup = online.length ? heading(onlineHeading) + renderGroup(online, 0) : "";
+    const nearbyGroup = heading(contains ? `Innerhalb von ${km} km` : distanceHeading)
+        + (inside.length ? renderGroup(inside, online.length) : empty);
+    const outsideGroup = contains
+        ? heading(`Außerhalb von ${km} km${hasUnknownDistance ? " oder ohne Entfernungsangabe" : ""}`)
+            + (outside.length ? renderGroup(outside, online.length + inside.length) : empty)
+        : "";
+    return onlineGroup + nearbyGroup + outsideGroup;
+}
 
 document.addEventListener("DOMContentLoaded", loadFeaturedTreatments);
 window.addEventListener("homepage:location-changed", loadFeaturedTreatments);
@@ -33,13 +74,14 @@ async function loadFeaturedTreatments() {
             if (!selectionResponse.ok || !selection.ok || !selection.catalog_available) throw new Error('Auswahl nicht verfügbar');
             const selectedIds = [...new Set(selection.topics.flatMap(topic => topic.items.map(item => Number(item.treat_id))))];
             selectedIds.splice(30);
-            if (!selectedIds.length) { list.textContent = 'Noch keine Top-Therapien hinterlegt.'; return; }
+            if (!selectedIds.length) { list.textContent = 'Für die Community-Empfehlung sind noch keine Therapien hinterlegt.'; return; }
             const response = await fetch('api/treatments_search.php?treat_ids=' + selectedIds.join(',') + buildHomepageLocationQuery());
             const payload = await response.json();
             if (!response.ok || !payload.ok) throw new Error('Therapien nicht verfügbar');
             const byId = new Map(payload.items.map(item => [Number(item.treat_id), item]));
             const entries = selectedIds.filter(id => byId.has(id)).map(id => ({editorial: {id, name: byId.get(id).behandlung}, data: byId.get(id)}));
-            entries.sort((a,b) => compareRecommendationDistance(a.data,b.data,"nearest_provider_distance_km"));
+            entries.sort((a,b) => Number(Boolean(b.data.online_at_home)) - Number(Boolean(a.data.online_at_home))
+                || compareRecommendationDistance(a.data,b.data,"nearest_provider_distance_km"));
             bindFeaturedTreatmentViewSwitch(list, entries);
             return;
         }
@@ -120,17 +162,17 @@ function bindFeaturedTreatmentViewSwitch(list, treatments) {
     if (!buttons.length) return;
 
     function render(view) {
-        const isTable = view === "table";
-        saveHomepageResultView(view);
+        const isTable = topRecommendationMobileView.matches || view === "table";
         if(list.previousElementSibling?.classList.contains('recommendation-card-compare-bar')) list.previousElementSibling.remove();
         list.classList.toggle('recommendation-search-cards', !isTable);
-        list.innerHTML = isTable
-            ? buildFeaturedTreatmentsTableHtml(treatments)
-            : treatments.map(function (entry, index) {
-                return document.body.classList.contains('top-search-page') && window.LCNSearchCards ? LCNSearchCards.treatment({...entry.data,treat_id:entry.editorial.id,behandlung:entry.editorial.name},index) : buildFeaturedTreatmentHtml(entry.editorial, entry.data, index);
-            }).join("");
+        list.classList.remove('is-comparing');
+        list.innerHTML = renderFeaturedRadiusGroups(treatments, entry => entry.data.nearest_provider, (entries, offset) => isTable
+            ? buildFeaturedTreatmentsTableHtml(entries, offset)
+            : entries.map(function (entry, index) {
+                return document.body.classList.contains('top-search-page') && window.LCNSearchCards ? LCNSearchCards.treatment({...entry.data,treat_id:entry.editorial.id,behandlung:entry.editorial.name},offset + index) : buildFeaturedTreatmentHtml(entry.editorial, entry.data, offset + index);
+            }).join(""), entry => entry.data.online_at_home, "Vor Ort");
         buttons.forEach(function (button) {
-            const active = button.dataset.featuredTreatmentView === view;
+            const active = button.dataset.featuredTreatmentView === (isTable ? "table" : "cards");
             button.classList.toggle("is-active", active);
             button.setAttribute("aria-pressed", String(active));
         });
@@ -138,12 +180,16 @@ function bindFeaturedTreatmentViewSwitch(list, treatments) {
 
     buttons.forEach(function (button) {
         button.disabled = false;
-        button.onclick = function () { render(button.dataset.featuredTreatmentView); };
+        button.onclick = function () {
+            saveHomepageResultView(button.dataset.featuredTreatmentView);
+            render(button.dataset.featuredTreatmentView);
+        };
     });
+    renderTopRecommendationView = render;
     render(getSavedHomepageResultView());
 }
 
-function buildFeaturedTreatmentsTableHtml(treatments) {
+function buildFeaturedTreatmentsTableHtml(treatments, offset) {
     return `<div class="featured-treatments-table-wrap">
         <table class="featured-treatments-table">
             <thead><tr>
@@ -151,7 +197,7 @@ function buildFeaturedTreatmentsTableHtml(treatments) {
                 <th scope="col">Erfahrung <span class="featured-treatment-table-header-note">(n = Angaben)</span></th>
                 <th scope="col">Behandler:innen gesamt</th><th scope="col">Entfernung / Ort</th>
             </tr></thead>
-            <tbody>${buildFeaturedTreatmentTableRowsHtml(treatments, 0, false)}</tbody>
+            <tbody>${buildFeaturedTreatmentTableRowsHtml(treatments, offset, false)}</tbody>
         </table>
     </div>`;
 }
@@ -193,10 +239,11 @@ function buildFeaturedTreatmentTableRowsHtml(treatments, rankOffset, isExtra) {
         const locationHtml = distance !== null && distance !== undefined && distance !== ""
             ? `<strong>${formatFeaturedTreatmentDistance(distance)}</strong>${city ? `<small>${city}</small>` : ""}`
             : city ? `<small>${city}</small>` : '<span class="featured-treatment-table-muted">—</span>';
+        const onlineBadge = treatment.online_at_home ? `<span class="lcn-online-badge">${LCNOnline.appointmentLabel}</span>` : "";
 
         return `<tr class="featured-treatment-table-row${isExtra ? " is-treatment-extra" : ""}">
             <td class="featured-treatment-table-rank">${rankOffset + index + 1}</td>
-            <td class="featured-treatment-table-name"><a href="${href}">${name}</a></td>
+            <td class="featured-treatment-table-name"><a href="${href}">${name}</a>${onlineBadge}</td>
             <td>${category ? `<span class="featured-treatment-table-badge">${escapeHomepageHtml(category)}</span>` : '<span class="featured-treatment-table-muted">—</span>'}</td>
             <td>${buildFeaturedTreatmentTableExperienceHtml(treatment)}</td>
             <td><span class="featured-treatment-provider-bubble${providerCount ? "" : " is-empty"}">${providerCount}</span></td>
@@ -399,9 +446,9 @@ async function loadFeaturedExperts() {
     const isFullExpertsPage = list.dataset.fullViewSwitch === "true";
 
     let doctors = [];
+    const storedLocation = getHomepageSharedLocation();
 
     try {
-        const storedLocation = getHomepageSharedLocation();
         const origin = storedLocation || homepageGermanyCenter;
         const response = await fetch(`api/doctors_search.php?priority=1&lat=${encodeURIComponent(origin.lat)}&lng=${encodeURIComponent(origin.lng)}&radiusKm=all&includeNoCoords=1`);
         const data = await response.json();
@@ -446,7 +493,7 @@ async function loadFeaturedExperts() {
         ? buildHomepageRankingTable(initialEntries, "doctor")
         : buildFeaturedExpertsHtml(initialEntries, 0, false);
     if (isFullExpertsPage) {
-        bindFeaturedExpertViewSwitch(list, initialEntries);
+        bindFeaturedExpertViewSwitch(list, initialEntries, Boolean(storedLocation));
     }
     if (!list.dataset.voteBound) {
         list.addEventListener("click", handleFeaturedExpertVote);
@@ -473,20 +520,25 @@ async function loadFeaturedExperts() {
     };
 }
 
-function bindFeaturedExpertViewSwitch(list, doctors) {
+function bindFeaturedExpertViewSwitch(list, doctors, hasLocation) {
     const buttons = document.querySelectorAll("[data-featured-view]");
     if (!buttons.length) return;
 
+    const orderedDoctors = [...doctors].sort((a, b) =>
+        (hasLocation ? compareRecommendationDistance(a, b, "distance_km") : 0)
+        || a.dr_display_name.localeCompare(b.dr_display_name, "de"));
+
     function render(view) {
-        const isTable = view === "table";
-        saveHomepageResultView(view);
+        const isTable = topRecommendationMobileView.matches || view === "table";
         if(list.previousElementSibling?.classList.contains('recommendation-card-compare-bar')) list.previousElementSibling.remove();
         list.classList.toggle('recommendation-search-cards', !isTable);
-        list.innerHTML = isTable
-            ? buildFeaturedExpertsTableOnlyHtml(doctors)
-            : window.LCNSearchCards ? doctors.map((doctor,index)=>LCNSearchCards.doctor(doctor,index)).join('') : buildFeaturedExpertsHtml(doctors, 0, false, true);
+        list.classList.remove('is-comparing');
+        list.innerHTML = renderFeaturedRadiusGroups(orderedDoctors, doctor => doctor, (entries, offset) => isTable
+            ? buildFeaturedExpertsTableOnlyHtml(entries, offset)
+            : window.LCNSearchCards ? entries.map((doctor, index) => LCNSearchCards.doctor(doctor, offset + index)).join('') : buildFeaturedExpertsHtml(entries, offset, false, true),
+            doctor => doctor.online_therapy_available, hasLocation ? "Behandler:innen nach Entfernung" : "Behandler:innen nach Name", LCNOnline.appointmentLabel);
         buttons.forEach(function (button) {
-            const active = button.dataset.featuredView === view;
+            const active = button.dataset.featuredView === (isTable ? "table" : "cards");
             button.classList.toggle("is-active", active);
             button.setAttribute("aria-pressed", String(active));
         });
@@ -494,14 +546,18 @@ function bindFeaturedExpertViewSwitch(list, doctors) {
 
     buttons.forEach(function (button) {
         button.disabled = false;
-        button.onclick = function () { render(button.dataset.featuredView); };
+        button.onclick = function () {
+            saveHomepageResultView(button.dataset.featuredView);
+            render(button.dataset.featuredView);
+        };
     });
+    renderTopRecommendationView = render;
     render(getSavedHomepageResultView());
 }
 
-function buildFeaturedExpertsTableOnlyHtml(doctors) {
+function buildFeaturedExpertsTableOnlyHtml(doctors, offset) {
     if (document.body.classList.contains('top-search-page')) {
-        return `<div class="featured-experts-table-wrap"><table class="featured-experts-table"><thead><tr><th>Platz</th><th>Behandler:innen</th><th>Fachrichtung</th><th>Erfahrung <span class="featured-expert-table-header-note">(n = Angaben)</span></th><th>Entfernung</th><th>Therapien</th><th>Therapie-<br>vielfalt</th><th>Kontakt</th></tr></thead><tbody>${buildFeaturedExpertTableRowsHtml(doctors,0,false)}</tbody></table></div>`;
+        return `<div class="featured-experts-table-wrap"><table class="featured-experts-table"><thead><tr><th>Platz</th><th>Behandler:innen</th><th>Fachrichtung</th><th>Erfahrung <span class="featured-expert-table-header-note">(n = Angaben)</span></th><th>Entfernung</th><th>Therapien</th><th>Therapie-<br>vielfalt</th><th>Kontakt</th></tr></thead><tbody>${buildFeaturedExpertTableRowsHtml(doctors,offset,false)}</tbody></table></div>`;
     }
     return `<div class="featured-experts-table-wrap">
         <table class="featured-experts-table">
@@ -512,7 +568,7 @@ function buildFeaturedExpertsTableOnlyHtml(doctors) {
                 <th scope="col">Versorgung <span class="featured-expert-table-header-note">(GKV, PKV)</span></th>
                 <th scope="col">Kontakt</th>
             </tr></thead>
-            <tbody>${buildFeaturedExpertTableRowsHtml(doctors, 0, false)}</tbody>
+            <tbody>${buildFeaturedExpertTableRowsHtml(doctors, offset, false)}</tbody>
         </table>
     </div>`;
 }
@@ -615,7 +671,10 @@ function buildFeaturedExpertTableRowsHtml(doctors, rankOffset, isLonglist) {
         const supply = buildFeaturedExpertSupplyHtml(doctor);
         const contact = document.body.classList.contains('top-search-page') ? buildRecommendationContact(doctor) : buildFeaturedExpertContactHtml(doctor);
         if (document.body.classList.contains('top-search-page')) {
-            return `<tr><td>${rank}</td><td><span class="featured-expert-table-name"><a href="${profileHref}">${name}</a></span></td><td>${buildRecommendationSpecialtyBadges(doctor)}</td><td>${votes}</td><td>${buildRecommendationDistance(doctor)}</td><td>${doctor.treatment_count == null ? '–' : Number(doctor.treatment_count)}</td><td>${doctor.category_count == null || (Number(doctor.treatment_count) > 0 && Number(doctor.category_count) === 0) ? '–' : Number(doctor.category_count)}</td><td>${contact}</td></tr>`;
+            const onlineBadge = doctor.online_therapy_available
+                ? `<span class="lcn-online-badge">${LCNOnline.appointmentLabel}</span>`
+                : '';
+            return `<tr data-doctor-online-managed><td>${rank}</td><td><span class="featured-expert-table-name"><a href="${profileHref}">${name}</a>${onlineBadge}</span></td><td>${buildRecommendationSpecialtyBadges(doctor)}</td><td>${votes}</td><td>${buildRecommendationDistance(doctor)}</td><td>${doctor.treatment_count == null ? '–' : Number(doctor.treatment_count)}</td><td>${doctor.category_count == null || (Number(doctor.treatment_count) > 0 && Number(doctor.category_count) === 0) ? '–' : Number(doctor.category_count)}</td><td>${contact}</td></tr>`;
         }
 
 
@@ -968,8 +1027,7 @@ async function loadNearbyGpsForLocation(location, restored, requestedRadiusKm) {
     if (!response.ok || !data.ok) throw new Error("Die hausärztlichen Therapien sind gerade nicht verfügbar.");
     let gps = getHomepagePrimaryCareProviders(data, true);
     if (discovery) {
-        const seen = new Set();
-        gps = gps.filter(doctor => { if (seen.has(doctor.dr_id)) return false; seen.add(doctor.dr_id); return true; }).slice(0, 10);
+        gps = getNearestHomepagePrimaryCareProviders(gps);
     }
     renderNearbyGps(location, gps, true, discovery ? discoveryRadiusKm : radiusKm);
     if (discovery) {
@@ -1007,6 +1065,15 @@ function getHomepagePrimaryCareProviders(data, sortByDistance) {
         return String(a.dr_display_name || "").localeCompare(String(b.dr_display_name || ""), "de", { sensitivity: "base" });
     });
     return providers;
+}
+
+function getNearestHomepagePrimaryCareProviders(providers) {
+    const seen = new Set();
+    return providers.filter(doctor => {
+        if (seen.has(doctor.dr_id)) return false;
+        seen.add(doctor.dr_id);
+        return true;
+    }).slice(0, 10);
 }
 
 function saveHomepageSharedLocation(location, fallbackText) {
@@ -1110,6 +1177,7 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
             icon: group.doctors.length > 1 ? buildNearbyGpsCountIcon(group.doctors.length) : nearbyGpsProviderIcon,
             riseOnHover: true
         }).bindPopup(buildNearbyGpsGroupPopup(group)).addTo(nearbyGpsMarkers);
+        window.LCNOnline?.track(marker, group.doctors.map(doctor => doctor.dr_id), group.doctors.length);
         nearbyGpsMarkersByLocation.set(group.key, marker);
     });
     bindNearbyGpCardHighlights(list);
@@ -1217,7 +1285,7 @@ async function loadHomepageEditorialSelection(list, moreButton) {
         render(true);
         alignHomepageRecommendations();
     }catch(error){
-        console.error('Top-Therapien für die Startseite konnten nicht geladen werden:', error);
+        console.error('Community-Empfehlung für Therapien konnte nicht geladen werden:', error);
         list.innerHTML='<p class="featured-treatments-status"></p>';
         list.firstElementChild.textContent=error.message || 'Die Therapien konnten gerade nicht geladen werden.';
         if(moreButton)moreButton.hidden=true;

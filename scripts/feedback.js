@@ -340,20 +340,24 @@
   }
   const viewButtons=document.querySelectorAll('[data-proposal-view]');
   const viewPreferenceKey='lcn.mitgestalten.view';
-  function selectView(view){
+  const mobileResults=matchMedia('(max-width: 760px)');
+  let preferredView='cards';
+  function selectView(){
+   const view=mobileResults.matches?'table':preferredView;
    list.dataset.view=view;
    viewButtons.forEach(option=>option.setAttribute('aria-pressed',String(option.dataset.proposalView===view)));
    renderList();
   }
   try{
    const savedView=localStorage.getItem(viewPreferenceKey);
-   if(savedView==='cards'||savedView==='table')selectView(savedView);
+   if(savedView==='cards'||savedView==='table')preferredView=savedView;
   }catch{}
+  selectView();
+  mobileResults.addEventListener('change',selectView);
   viewButtons.forEach(button=>button.addEventListener('click',()=>{
-   const view=button.dataset.proposalView;
-   if(list.dataset.view===view)return;
-   selectView(view);
-   try{localStorage.setItem(viewPreferenceKey,view);}catch{}
+   preferredView=button.dataset.proposalView;
+   selectView();
+   try{localStorage.setItem(viewPreferenceKey,preferredView);}catch{}
   }));
   async function loadList(page=1){
    const seq=++listSeq;

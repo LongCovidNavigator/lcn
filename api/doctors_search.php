@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/_voting.php';
 require_once __DIR__ . '/_experience_search.php';
-require_once __DIR__ . '/_doctor_hybrid.php';
+require_once __DIR__ . '/_doctor_online.php';
 require_once __DIR__ . '/_search_normalization.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -280,6 +280,10 @@ try {
     $fuzzyDoctorSql=$fuzzyDoctorIds ? ' OR dr_id IN ('.implode(',',array_unique($fuzzyDoctorIds)).')' : '';
     $whereParts = [];
     if (($_GET['priority'] ?? '') === '1') $whereParts[] = 'dr_id IN (SELECT lcn_id FROM tbl_entities_nd WHERE is_priority_doctor=1)';
+    $treatmentId = (int)($_GET['treat_id'] ?? 0);
+    if ($treatmentId > 0) {
+        $whereParts[] = 'dr_id IN (SELECT dr_id FROM v_lcn_provider_treatments WHERE treat_id = :treatmentId)';
+    }
 
     if ($drId > 0) {
         $whereParts[] = "dr_id = :dr_id";
@@ -553,6 +557,7 @@ try {
     $stmt->bindValue(':lat1', $lat);
     $stmt->bindValue(':lat2', $lat);
     $stmt->bindValue(':lng1', $lng);
+    if ($treatmentId > 0) $stmt->bindValue(':treatmentId', $treatmentId, PDO::PARAM_INT);
 
     if ($drId > 0) {
         $stmt->bindValue(':dr_id', $drId);
@@ -590,16 +595,10 @@ try {
     attachSpecialtyTermsToDoctors($pdo, $items);
     $specialties = getAllSpecialtyTerms($pdo);
 
-    $editorialOnline = [];
-    foreach ($pdo->query('SELECT lcn_id, ersttermin_video, ersttermin_telefon, folgetermin_video, folgetermin_telefon FROM tbl_entities_nd WHERE aktiv=1') as $onlineRow) {
-        $yes = static fn($value) => mb_strtolower(trim((string)$value)) === 'ja';
-        $editorialOnline[(int)$onlineRow['lcn_id']] =
-            ($yes($onlineRow['ersttermin_video']) || $yes($onlineRow['ersttermin_telefon'])) &&
-            ($yes($onlineRow['folgetermin_video']) || $yes($onlineRow['folgetermin_telefon']));
-    }
+    $onlineAccess = lcnDoctorOnlineAccess($pdo);
     foreach ($items as &$item) {
         $item['online_only'] = in_array((int)$item['dr_id'], LCN_VERIFIED_ONLINE_ONLY_DOCTOR_IDS, true);
-        $item['online_therapy_available'] = $item['online_only'] || ($editorialOnline[(int)$item['dr_id']] ?? false);
+        $item['online_therapy_available'] = $onlineAccess[(int)$item['dr_id']]['complete'] ?? false;
         $hasCoordinates = (int)$item['has_coordinates'] === 1;
 
         $item['treatment_count'] = (int)$item['treatment_count'];

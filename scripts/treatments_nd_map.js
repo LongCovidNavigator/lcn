@@ -21,8 +21,9 @@
 
   function numericValue(value,unit,width=3){const node=document.createElement('span'),number=document.createElement('span'),suffix=document.createElement('span');node.className='provider-numeric-value';node.style.setProperty('--number-width',width+'ch');number.className='provider-value-number';number.textContent=Math.round(value).toLocaleString('de-DE');suffix.className='provider-value-unit';suffix.textContent=unit;node.setAttribute('aria-label',number.textContent+' '+unit);node.append(number,suffix);return node;}
   function ratingCell(point,key){const r=ratings[point.dr_id],value=r?.[key+'_percent'];const node=value!=null?numericValue(value,'%'):document.createElement('span');node.classList.add('catalog-rating-number');if(key==='worsening')node.classList.add('catalog-rating-negative');if(value==null)node.textContent='—';return node;}
+  const mobileResults=matchMedia('(max-width: 760px)');
   let view='cards';try{view=localStorage.getItem('lcn_result_view_preference')==='table'?'table':'cards';}catch{}
-  const entries = hosts.map(host => {const providers=JSON.parse(host.querySelector('.nd-map-data').textContent);return {host,providers,points:providers.filter(valid),map:null,view};});
+  const entries = hosts.map(host => {const providers=JSON.parse(host.querySelector('.nd-map-data').textContent);return {host,providers,points:providers.filter(valid),map:null};});
   window.addEventListener('lcn-pending-providers',event=>{entries.forEach(entry=>{entry.providers=entry.providers.filter(p=>!p.pending);const ids=new Set(entry.providers.map(p=>Number(p.dr_id)));entry.providers.push(...(event.detail||[]).filter(p=>!p.dr_id||!ids.has(Number(p.dr_id))));entry.points=entry.providers.filter(valid);const citySelect=entry.host.querySelector('[data-provider-city]');[...new Set(entry.providers.map(p=>p.city).filter(Boolean))].forEach(city=>{if(![...citySelect.options].some(o=>o.value===city)){const option=document.createElement('option');option.value=option.textContent=city;citySelect.append(option);}});render(entry);});});
   let ratingRequest=0;async function loadRatings(){const request=++ratingRequest;try{const demo=document.getElementById('nd-demo-header-toggle')?.getAttribute('aria-pressed')==='true';const response=await fetch('api/provider_positive_ratings.php?include_dummy='+(demo?'1':'0'));const data=await response.json();if(request!==ratingRequest||!data.ok)return;ratings=data.ratings;ratingsLoaded=true;entries.forEach(render);}catch{}}
   const demoButton=document.getElementById('nd-demo-header-toggle');if(demoButton)new MutationObserver(loadRatings).observe(demoButton,{attributes:true,attributeFilter:['aria-pressed']});loadRatings();
@@ -33,18 +34,20 @@
   }
   const travelBands=[[20,'Bis 20 km','Unter 30 Min.',5.6],[50,'Über 20–50 km','30–60 Min.',4.2],[100,'Über 50–100 km','Etwa 1–2 Std.',2.8],[300,'Über 100–300 km','Mehrere Stunden',1.4],[800,'Über 300–800 km','Tagesreise',0.7],[Infinity,'Über 800 km','Tagesreise oder länger / ggf. Flug',0]];
   const travelBand=km=>travelBands.findIndex(([limit])=>km<=limit);
+  const isOnlineAtHome = (entry, provider) => entry.host.dataset.canTreatAtHome === "1"
+    && !provider.pending && Boolean(window.LCNOnline?.get(provider.dr_id).complete);
   function renderTravel(entry,closest){
     if(entry.host.dataset.independentAtHome==='1'){entry.host.querySelector('[data-travel-estimate]')?.remove();return;}
     let box=entry.host.querySelector('[data-travel-estimate]');
     if(!box){box=document.createElement('section');box.className='travel-estimate';box.dataset.travelEstimate='';entry.host.querySelector('.top-map-location-layout').before(box);}
-    const online=filteredProviders(entry).find(p=>window.LCNOnline?.get(p.dr_id).complete);
+    const online=filteredProviders(entry).find(p=>isOnlineAtHome(entry,p));
     const km=closest?distance(closest):null,index=online||km===null?-1:travelBand(km);
     const heading=document.createElement('div');heading.className='travel-estimate-heading';
     const title=document.createElement('strong');title.textContent='Anreiseaufwand';
-    const result=document.createElement('span');result.textContent=online?online.name+' · Erst- und Folgetermin online':closest?closest.name+' · '+km.toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':origin?'Keine Behandler:innen mit Koordinaten im gewählten Filter.':'Standort eingeben, um die Entfernung einzuordnen.';
+    const result=document.createElement('span');result.textContent=online?online.name+' · Online-Behandlung':closest?closest.name+' · '+km.toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':origin?'Keine Behandler:innen mit Koordinaten im gewählten Filter.':'Standort eingeben, um die Entfernung einzuordnen.';
     heading.append(title,result);box.replaceChildren(heading);
     const scale=document.createElement('ol');scale.className='travel-scale';scale.setAttribute('aria-label','Entfernung und Anreiseaufwand');
-    const remote=document.createElement('li');remote.className='travel-online-level'+(online?' is-current':'');remote.innerHTML='<strong>Erst- und Folgetermin online</strong><span class="travel-scale-bar" aria-hidden="true"></span><span>Keine Anreise zu Erst- und Folgetermin</span>';scale.append(remote);
+    const remote=document.createElement('li');remote.className='travel-online-level'+(online?' is-current':'');remote.innerHTML='<strong>Online-Behandlung</strong><span class="travel-scale-bar" aria-hidden="true"></span><span>Keine Anreise zu Erst- und Folgetermin</span>';scale.append(remote);
     travelBands.forEach(([,range,time,points],i)=>{
       const li=document.createElement('li');li.className='travel-level-'+(i+1)+(i===index?' is-current':'');
       const label=document.createElement('strong');label.textContent=range;
@@ -76,9 +79,12 @@
     const specialty=host.querySelector('[data-provider-specialty]')?.value||'';
     const limits=[...host.querySelectorAll('[data-rating-filter]')];
     const matchesRatings=p=>limits.every(input=>{const threshold=Number(input.value),maximum=input.dataset.ratingFilter==='worsening';if(threshold===(maximum?100:0))return true;const value=ratings[p.dr_id]?.[input.dataset.ratingFilter+'_percent'];return value!=null&&(maximum?value<=threshold:value>=threshold);});
-    return providers.filter(p=>(!specialty||(p.specialties||[]).includes(specialty)) && matchesRatings(p) && (p.name+' '+p.place).toLocaleLowerCase('de').includes(query) && (!city || p.city?.toLocaleLowerCase('de')===city.toLocaleLowerCase('de')) && (!enabled || !usable || (valid(p)?distance(p)<=Number(radius.value):Boolean(includeUnknown?.checked))));
+    return providers.filter(p=>(!specialty||(p.specialties||[]).includes(specialty)) && matchesRatings(p) && (p.name+' '+p.place).toLocaleLowerCase('de').includes(query) && (!city || p.city?.toLocaleLowerCase('de')===city.toLocaleLowerCase('de')) && (!enabled || !usable || isOnlineAtHome(entry,p) || (valid(p)?distance(p)<=Number(radius.value):Boolean(includeUnknown?.checked))));
   }
+  mobileResults.addEventListener('change',()=>entries.forEach(renderProviders));
+
   function renderProviders(entry){
+    const activeView=mobileResults.matches?'table':view;
     const {host,providers,map}=entry,list=host.querySelector('.nd-map-results');list.replaceChildren();
     const [sort,direction]=host.querySelector('[data-provider-sort]').value.split(':');
     const onlineGroup=p=>{const access=window.LCNOnline?.get(p.dr_id);return access?.first&&access.follow?0:2;};
@@ -89,7 +95,7 @@
     const rows=filteredProviders(entry).sort((a,b)=>{const group=onlineGroup(a)-onlineGroup(b);if(group)return group;const x=value(a,sort),y=value(b,sort);if(x===null)return y===null?0:1;if(y===null)return -1;const cmp=typeof x==='string'?x.localeCompare(y,'de',{numeric:true}):x-y;return cmp*(direction==='desc'?-1:1)||a.name.localeCompare(b.name,'de');});
     function changeSort(key){const next=sort===key?(direction==='asc'?'desc':'asc'):(['improvement','healing','feedback'].includes(key)?'desc':'asc');host.querySelector('[data-provider-sort]').value=key+':'+next;renderProviders(entry);}    host.querySelector('[data-provider-count]').textContent=rows.length+' von '+providers.length+' Behandler:innen'+(sort==='distance'&&!origin?' · Für die Entfernungssortierung bitte oben einen Standort eingeben.':'');
     const sidebarCount=host.querySelector('[data-location-provider-count]');if(sidebarCount)sidebarCount.textContent=rows.length+' von '+providers.length;
-    host.querySelectorAll('[data-provider-view]').forEach(b=>{const active=b.dataset.providerView===entry.view;b.classList.toggle('is-active',active);b.setAttribute('aria-pressed',String(active));});
+    host.querySelectorAll('[data-provider-view]').forEach(b=>{const active=b.dataset.providerView===activeView;b.classList.toggle('is-active',active);b.setAttribute('aria-pressed',String(active));});
     if(!rows.length){
       list.className='nd-map-results nd-provider-empty';
       const message=document.createElement('p');message.textContent='Keine passende behandelnde Person gefunden.';
@@ -107,7 +113,7 @@
     function pendingNote(point){const note=document.createElement('small');note.className='catalog-pending-note';note.textContent='Prüfung ausstehend';if(point.own)note.title='Dein Vorschlag · Prüfung ausstehend';return note;}
     function showButton(point,compact=false){const button=document.createElement('button');button.type='button';button.className='nd-show-provider';button.textContent=valid(point)?(compact?'Karte':'Auf Karte zeigen'):(compact?'—':'Standort nicht verfügbar');if(!compact)button.title=valid(point)?'Auf Karte zeigen':'Standort nicht verfügbar';button.disabled=!valid(point);button.addEventListener('click',()=>{if(!map)return;host.querySelector('.top-map-content').classList.remove('is-collapsed');map.invalidateSize();if(origin)map.fitBounds([[origin.lat,origin.lng],[point.lat,point.lng]],{padding:[64,64],maxZoom:12});else map.setView([point.lat,point.lng],12);entry.markers.get(point)?.openPopup();host.querySelector('.nd-map-canvas').scrollIntoView({block:'center'});});return button;}
     const km=p=>origin&&valid(p)?Math.round(distance(p)).toLocaleString('de-DE')+' km':'';
-    if(entry.view==='table'){
+    if(activeView==='table'){
       list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();[['Nr.','number'],['Behandler:innen','name'],['Ort','city'],['Entfernung','distance'],['Verschlechterung','worsening'],['Verbesserung','improvement'],['Heilung','healing'],['Karte',null],['Rückmeldungen','feedback']].forEach(([label,key])=>{const th=document.createElement('th');th.scope='col';if(key==='feedback'){th.dataset.catalogReportHeading='';th.className='catalog-report-column';}if(!key){th.textContent=label;th.className='nd-provider-map-column';}else{const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=key==='distance'&&!origin;button.setAttribute('aria-label','Nach '+label+' sortieren');button.addEventListener('click',()=>changeSort(key));th.setAttribute('aria-sort',sort===key?(direction==='asc'?'ascending':'descending'):'none');th.append(button);}head.append(th);});const body=table.createTBody();rows.forEach((point,index)=>{const row=body.insertRow();const number=row.insertCell();number.className="nd-provider-row-number";number.textContent=String(numbers.get(point));const nameCell=row.insertCell();nameCell.append(nameNode(point));if(point.pending)nameCell.append(pendingNote(point));row.insertCell().textContent=point.city||'Keine Ortsangabe';const distanceCell=row.insertCell();distanceCell.className='provider-distance-cell';if(origin&&valid(point))distanceCell.append(numericValue(distance(point),'km',2));else distanceCell.textContent=km(point);row.insertCell().append(ratingCell(point,'worsening'));row.insertCell().append(ratingCell(point,'improvement'));row.insertCell().append(ratingCell(point,'healing'));row.insertCell().append(showButton(point,true));});list.append(table);
     }else{
       list.className='nd-map-results doctor-card-grid';
@@ -186,7 +192,7 @@
     all.addEventListener('click',()=>{host.dataset.locationMode='radius';const includeUnknown=host.querySelector('[data-include-no-coords]');if(includeUnknown)includeUnknown.checked=false;host.querySelector('[data-provider-specialty]').value='';host.querySelectorAll('[data-rating-filter]').forEach(slider=>{slider.value=slider.dataset.ratingFilter==='worsening'?100:0;slider.nextElementSibling.value=slider.value;});host.querySelector('[data-provider-search]').value='';host.querySelector('[data-provider-city]').value='';host.querySelector('[data-radius-enabled]').checked=false;render(entry);});
     host.querySelector('[data-provider-search]').addEventListener('input',()=>render(entry));
     host.querySelector('[data-provider-sort]').addEventListener('change',()=>renderProviders(entry));
-    host.querySelectorAll('[data-provider-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.providerView;try{localStorage.setItem('lcn_result_view_preference',view);}catch{}entries.forEach(item=>{item.view=view;renderProviders(item);});}));
+    host.querySelectorAll('[data-provider-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.providerView;try{localStorage.setItem('lcn_result_view_preference',view);}catch{}entries.forEach(renderProviders);}));
     const input=host.querySelector('input'),suggestions=host.querySelector('.top-map-location-suggestions');
     let timer,controller,suggestionVersion=0,activeSuggestion=-1;
     const suggestionCache=new Map();

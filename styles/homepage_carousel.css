@@ -20,9 +20,6 @@
 .home-discover-copy { padding:20px 0 0; flex:1; display:flex; flex-direction:column; }
 .home-discover-copy h3 { margin:0 0 10px; font-size:20px; line-height:1.35; }
 .home-discover-copy p { margin:0 0 20px; color:#536b89; font-size:15px; line-height:1.65; }
-.home-discover-link { margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-top:1px solid #dce6ec; font-size:15px; font-weight:800; text-decoration:none; color:#006e73; }
-.home-discover-link span { font-size:23px; }
-.home-discover-link:hover { text-decoration:underline; }
 .home-carousel-arrow { position:absolute; top:150px; z-index:2; display:grid; place-items:center; width:52px; height:52px; border:1px solid #e6eaf0; border-radius:50%; background:#fff; box-shadow:0 4px 14px #17365d22; color:#17365d; cursor:pointer; font:38px/1 Arial,sans-serif; }
 .home-carousel-prev { left:-26px; }.home-carousel-next { right:-26px; }
 .home-carousel-arrow:hover { background:#edf7f5; }
@@ -50,20 +47,28 @@
 .home-discover--photo .home-discover-heading { display:block; text-align:center; margin:0 0 32px; }
 .home-discover--photo .home-discover-heading :is(h1,h2) { font-size:clamp(28px,3.1vw,42px); font-weight:800; letter-spacing:-.8px; line-height:1.2; margin:0 0 12px; }
 .home-discover--photo .home-discover-heading p { font-size:clamp(15px,1.4vw,19px); line-height:1.5; color:#17365d; }
-.home-discover--photo .home-carousel-track { gap:20px; padding:5px 2px 18px; }
-.home-discover--photo .home-discover-card { flex-basis:calc((100% - 62px)/3.12); border-radius:22px; overflow:hidden; background:#fff; box-shadow:0 5px 12px #17365d12; --card-bg:#78babb; --card-accent:#007e83; }
+.home-discover--photo .home-carousel-shell { container-type:inline-size; }
+.home-discover--photo .home-carousel-track {
+ --card-gap:16px;
+ --visible-cards:1;
+ gap:var(--card-gap);
+ padding:5px 2px 18px;
+ scroll-padding-inline:2px;
+}
+.home-discover--photo .home-discover-card { flex-basis:calc((100% - (var(--visible-cards) - 1) * var(--card-gap)) / var(--visible-cards)); border-radius:22px; overflow:hidden; background:#fff; box-shadow:0 5px 12px #17365d12; --card-bg:#78babb; --card-accent:#007e83; }
 .home-discover--photo .home-discover-card--blue { --card-bg:#d3e7f7; }
 .home-discover--photo .home-discover-card--peach { --card-bg:#ffdecc; }
+.home-discover--photo :is(#behandler-suchen,#suche) { --card-bg:#b8dceb; }
 
 .home-discover--photo .home-discover-visual { display:block; border:0; border-radius:0; aspect-ratio:4/5; }
 .home-discover--photo .home-discover-art { position:absolute; inset:0; padding:0; height:100%; overflow:hidden; }
 .home-discover--photo .home-discover-art img { width:100%; height:100%; max-height:none; object-fit:cover; }
+.home-discover--photo :is(#behandler-suchen,#suche) .home-discover-art { top:auto; height:auto; aspect-ratio:1; }
+.home-discover--photo #suche .home-discover-art { left:auto; right:-6%; bottom:-7%; width:132%; }
 .home-discover--photo .home-discover-category { top:18px; left:20px; padding:5px 13px; border-radius:20px; background:#fffffff5; color:#00747a; font-size:13px; line-height:1.4; font-weight:800; }
 .home-discover--photo .home-discover-visual-title { display:block; position:absolute; z-index:1; top:59px; left:20px; right:16px; padding:0; font-size:clamp(22px,2.05vw,29px); font-weight:800; line-height:1.12; letter-spacing:-.6px; overflow-wrap:normal; }
 .home-discover--photo .home-discover-copy { padding:17px 20px 18px; gap:12px; }
 .home-discover--photo .home-discover-copy h3 { margin:0; font-size:16px; font-weight:400; line-height:1.45; }
-.home-discover--photo .home-discover-link { padding:0; border:0; font-size:16px; line-height:1.35; color:#007e83; gap:8px; }
-.home-discover--photo .home-discover-link span { font-size:23px; }
 .home-discover--photo .home-carousel-arrow { top:calc((100% - 23px)/2); transform:translateY(-50%); width:48px; height:48px; border:3px solid white; color:white; background:#007f85; box-shadow:0 4px 10px #17365d20; }
 .home-discover--photo .home-carousel-arrow:hover { background:#00666c; }
 .home-discover--photo .home-carousel-prev { left:-22px; }.home-discover--photo .home-carousel-next { right:-22px; }
@@ -71,13 +76,16 @@
 .home-discover-footer span { flex:1; height:1px; background:#4cabb0; }.home-discover-footer p { margin:0; color:#17365d; font-size:22px; font-weight:800; }
 .home-carousel-meta { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:16px; }
 .home-discover--photo .home-carousel-hint { margin:0; }
-@media(max-width:1000px) and (min-width:761px) {
- .home-discover--photo .home-discover-card { flex-basis:43%; }
+@container (min-width:560px) {
+ .home-discover--photo .home-carousel-track { --visible-cards:2; }
+}
+@container (min-width:900px) {
+ .home-discover--photo .home-carousel-track { --visible-cards:3; --card-gap:20px; }
 }
 @media(max-width:760px) {
  .home-discover--photo { width:calc(100% - 40px); margin-top:30px; }.home-discover--photo .home-discover-heading { margin-bottom:24px; }
  .home-discover--photo .home-discover-heading :is(h1,h2) { font-size:28px; }.home-discover--photo .home-discover-heading p { font-size:15px; }
- .home-discover--photo .home-carousel-track { gap:16px; }.home-discover--photo .home-discover-card { flex-basis:90%; border-radius:18px; }
+ .home-discover--photo .home-discover-card { border-radius:18px; }
  
  .home-discover--photo .home-discover-visual-title { top:57px; font-size:26px; left:18px; }.home-discover--photo .home-discover-category { top:16px; left:18px; font-size:12px; }
  .home-discover--photo .home-discover-copy { padding:16px 18px 18px; }.home-discover--photo .home-discover-copy h3 { font-size:16px; }
@@ -92,12 +100,9 @@
 .home-carousel-arrow { padding:0; box-sizing:border-box; }
 .home-carousel-arrow svg { display:block; width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
 
-/* Long labels must stay inside the photo cards, including small phones. */
-.home-discover--photo :is(.home-discover-visual-title,.home-discover-link,.home-discover-copy h3) { overflow-wrap:anywhere; hyphens:auto; }
+.home-discover--photo :is(.home-discover-visual-title,.home-discover-copy h3) { overflow-wrap:normal; hyphens:none; }
+.home-discover--photo .home-discover-visual:focus-visible { outline-offset:-4px; }
 .home-discover--photo .home-discover-category { max-width:calc(100% - 40px); box-sizing:border-box; }
-@media(max-width:1100px) {
- .home-discover--photo .home-discover-link { min-height:44px; }
-}
 @media(max-width:760px) {
  .home-discover--photo .home-carousel-arrow { width:44px; height:44px; }
  .home-discover--photo .home-discover-visual-title { font-size:clamp(22px,6vw,26px); }

@@ -30,11 +30,11 @@
 .experience-0{background:#e5a5ad;}.experience-1{background:#d9e1ea;}.experience-2{background:#9fd3b6;}.experience-3{background:#63af94;}
 .treatment-experience-legend{display:flex;flex-wrap:wrap;gap:12px 20px;margin:12px 0;font-size:12px;color:var(--muted);}.treatment-experience-legend>span{display:flex;align-items:center;gap:6px;}.treatment-experience-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;}
 .doctor-detail-treatment-rank-badge,.doctor-detail-treatment-provider-badge,.doctor-detail-treatment-vote-total{color:#526b90;font-weight:600;}.treatment-rating-note{font-size:12px!important;color:var(--muted);}
-.doctor-detail-treatment-compact-table{display:none;min-width:760px;}
+.doctor-detail-treatment-compact-table{display:none;}
 @media(max-width:1100px){
  .doctor-detail-treatment-table-detailed{display:none;}
  .doctor-detail-treatment-compact-table{display:table;}
- .doctor-detail-treatment-compact-table th,.doctor-detail-treatment-compact-table td{padding:12px 8px;font-size:12px;}
+ .doctor-detail-treatment-compact-table th,.doctor-detail-treatment-compact-table td{padding:12px 8px;font-size:12px;overflow-wrap:anywhere;}
  .doctor-detail-treatment-compact-table th:nth-child(1){width:5%;}
  .doctor-detail-treatment-compact-table th:nth-child(2){width:30%;}
  .doctor-detail-treatment-compact-table th:nth-child(3){width:15%;}

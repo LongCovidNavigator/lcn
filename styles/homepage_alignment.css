@@ -100,6 +100,9 @@
  .home-recommendation-teasers .home-ranking-table tbody :is(td,th) { padding:8px 4px; }
  .home-recommendation-teasers .home-ranking-doctor .home-ranking-table th a { font-size:12px; }
  .home-page > #projekt { margin-top:28px; }
+ .home-page > .fb-home-motivation + #projekt { margin-top:48px; }
+ .home-page > #projekt .project-heading { margin-bottom:6px; }
+ .home-page > #projekt .project-block:first-child { padding-top:6px; }
 }
 
 /* Remove the old full-section spacing inside the compact chapter stack. */
