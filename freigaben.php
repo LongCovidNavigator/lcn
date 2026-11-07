@@ -10,11 +10,11 @@ header('Cache-Control: no-store, private');
     <title>Freigaben – LCN</title>
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
-    <link rel="stylesheet" href="styles/footer-style.css">
+    <link rel="stylesheet" href="styles/footer-style.css?v=b4b1163611">
     <link rel="stylesheet" href="styles/freigaben.css?v=merge-choice-20261022">
     <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
-    <script src="scripts/access-nav.js?v=all-pages-20261106-3" defer></script>
-<script src="scripts/feedback_context.js?v=shared-composer-20261106-6" defer data-lcn-feedback-loader></script></head>
+    <script src="scripts/access-nav.js?v=5804013934" defer></script>
+<script src="scripts/feedback_context.js?v=f582b5a910" defer data-lcn-feedback-loader></script></head>
 <body>
     <div id="header-placeholder"></div>
     <main class="review-shell">
@@ -36,7 +36,7 @@ header('Cache-Control: no-store, private');
         <section id="review-list"></section>
     </main>
     <div id="footer-placeholder"></div>
-    <script src="scripts/freigaben.js?v=no-sort-arrows-20261024"></script>
+    <script src="scripts/freigaben.js?v=febe805868"></script>
     <script>function toggleMobileMenu(){document.querySelector('.main-nav ul')?.classList.toggle('show');}</script>
 </body>
 </html>

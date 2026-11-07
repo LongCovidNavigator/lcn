@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  for (const [id, url] of [['header-placeholder','components/header.html?v=two-add-links-20261105'],['footer-placeholder','components/footer.html?v=wording-20261006']]) fetch(url).then(r=>r.text()).then(html=>document.getElementById(id).innerHTML=html);
+  for (const [id, url] of [['header-placeholder','components/header.html?v=two-add-links-20261105'],['footer-placeholder','components/footer.html?v=f320b7bc85']]) fetch(url).then(r=>r.text()).then(html=>document.getElementById(id).innerHTML=html);
   const form=document.getElementById('entry-form'), message=document.getElementById('entry-message');
   const nameField=form.elements.name, practiceField=form.elements.organization;
   function validateIdentity(){

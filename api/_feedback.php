@@ -2,7 +2,7 @@
 require_once __DIR__.'/_site_auth.php';
 require_once __DIR__.'/_voting.php';
 const LCN_FEEDBACK_CATEGORIES = ['providers'=>'Behandler:innen','treatments'=>'Behandlungen','symptoms'=>'Symptome','navigation'=>'Suche und Navigation','reviews'=>'Bewertungen und Erfahrungen','general'=>'Allgemeine Verbesserungen'];
-const LCN_FEEDBACK_STATUSES = ['open'=>'Offen','review'=>'In Prüfung','planned'=>'Geplant','progress'=>'In Arbeit','done'=>'Umgesetzt','deferred'=>'Zurückgestellt','declined'=>'Nicht vorgesehen'];
+const LCN_FEEDBACK_STATUSES = ['open'=>'Offen','planned'=>'Geplant','progress'=>'In Arbeit','done'=>'Umgesetzt','deferred'=>'Zurückgestellt','declined'=>'Nicht vorgesehen'];
 const LCN_FEEDBACK_REPORTS = ['error'=>'Fehler entdeckt','missing'=>'Fehlende Information','technical'=>'Technisches Problem','general'=>'Allgemeine Rückmeldung','other'=>'Sonstiges'];
 function fbText(array $in,string $key,int $max,int $min=0): string {
  $v=$in[$key]??'';if(!is_string($v)||mb_strlen(trim($v))<$min||mb_strlen($v)>$max)throw new InvalidArgumentException('Bitte das Feld „'.$key.'“ prüfen ('.$min.'–'.$max.' Zeichen).');return trim($v);

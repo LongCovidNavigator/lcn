@@ -9,18 +9,6 @@ function fbImageEnabled(): bool {
 function fbImageToken($id): string {
  if(!is_string($id)||!preg_match('/\A[a-f0-9]{32}\z/',$id))throw new InvalidArgumentException('Ungültiges Bild.');return $id;
 }
-// Atomic reservations are committed before the external call; errors also consume a try.
-function fbImageReserve(PDO $p,string $draft): int {
- $secret=lcnEnv('LCN_VOTER_SECRET');if(!$secret||strlen($secret)<32)throw new RuntimeException('Missing voter secret');
- $day=gmdate('Y-m-d');$owner=lcnVoterKey();$ip=hash_hmac('sha256',$_SERVER['REMOTE_ADDR']??'local',$secret);
- $limits=['global'=>100,'owner:'.$owner=>10,'ip:'.$ip=>10,'draft:'.$owner.':'.$draft=>2];$remaining=0;
- $p->beginTransaction();try{foreach($limits as $key=>$max){$bucket=hash('sha256','feedback-image:'.$day.':'.$key);
- $p->prepare('INSERT IGNORE INTO tbl_feedback_limits(bucket_key,hits,expires_at) VALUES(?,0,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 2 DAY))')->execute([$bucket]);
- $q=$p->prepare('SELECT hits FROM tbl_feedback_limits WHERE bucket_key=? FOR UPDATE');$q->execute([$bucket]);$hits=(int)$q->fetchColumn();
- if($hits>=$max)throw new OverflowException($key==='global'?'Die Bilderstellung hat ihr Tageslimit erreicht. Bitte wähle ein vorhandenes Bild.':(str_starts_with($key,'draft:')?'Für diesen Entwurf sind heute zwei Bildversuche verbraucht.':'Dein Tageslimit für die Bilderstellung ist erreicht.'));
- $p->prepare('UPDATE tbl_feedback_limits SET hits=hits+1 WHERE bucket_key=?')->execute([$bucket]);if(str_starts_with($key,'draft:'))$remaining=$max-$hits-1;
- }$p->commit();return $remaining;}catch(Throwable $e){$p->rollBack();throw $e;}
-}
 function fbImageDecode(string $raw): array {
  $data=json_decode($raw,true);$encoded=$data['result']['image']??null;
  if(!is_array($data)||($data['success']??false)!==true||!is_string($encoded))throw new RuntimeException('Invalid image response');
@@ -28,11 +16,62 @@ function fbImageDecode(string $raw): array {
  $info=@getimagesizefromstring($binary);if(!$info||!in_array($info['mime']??'',['image/jpeg','image/png','image/webp'],true)||$info[0]>2048||$info[1]>2048)throw new RuntimeException('Invalid image format');
  return [$binary,$info['mime']];
 }
+function fbRunCloudflareAi(string $model, array $input, int $timeout, int $maxBytes): string {
+ $url = 'https://api.cloudflare.com/client/v4/accounts/'.lcnEnv('LCN_CLOUDFLARE_ACCOUNT_ID').'/ai/run/'.$model;
+ $request = curl_init($url);
+ $response = '';
+ curl_setopt_array($request, [
+  CURLOPT_POST => true,
+  CURLOPT_HTTPHEADER => ['Authorization: Bearer '.lcnEnv('LCN_CLOUDFLARE_AI_TOKEN'), 'Content-Type: application/json'],
+  CURLOPT_POSTFIELDS => json_encode($input, JSON_THROW_ON_ERROR),
+  CURLOPT_CONNECTTIMEOUT => min(10, $timeout),
+  CURLOPT_TIMEOUT => $timeout,
+  CURLOPT_FOLLOWLOCATION => false,
+  CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+  CURLOPT_WRITEFUNCTION => static function ($request, $chunk) use (&$response, $maxBytes) {
+   if (strlen($response) + strlen($chunk) > $maxBytes) return 0;
+   $response .= $chunk;
+   return strlen($chunk);
+  },
+ ]);
+ try {
+  $ok = curl_exec($request);
+  $status = curl_getinfo($request, CURLINFO_RESPONSE_CODE);
+  if ($ok === false || $status !== 200) throw new RuntimeException('Workers AI unavailable for '.$model.', HTTP '.$status);
+  return $response;
+ } finally {
+  curl_close($request);
+ }
+}
+
+function fbImageScene(string $subject): string {
+ $instructions = 'You write English captions for illustrations of proposed features on the Long Covid Navigator website. '
+  .'The input can be a German title or a concrete motif. Keep the feature that distinguishes it, including what a filter filters for. '
+  .'Depict the specific action using recognizable objects. Preserve objects requested explicitly. '
+  .'Output only one short English sentence describing what to draw. No heading, explanation, quoted title, visible text or personal details. '
+  .'Example: "Benachrichtigung bei neuen Kommentaren" becomes "A notification bell with a bright alert dot beside two overlapping speech bubbles." '
+  .'Example: "Merkliste teilen" becomes "A bookmark ribbon on a small list card with a share arrow pointing to a second card."';
+ $raw = fbRunCloudflareAi('@cf/meta/llama-3.1-8b-instruct-fp8-fast', [
+  'messages' => [
+   ['role' => 'system', 'content' => $instructions],
+   ['role' => 'user', 'content' => $subject],
+  ],
+  'max_tokens' => 100,
+  'temperature' => 0.2,
+ ], 10, 16000);
+ $data = json_decode($raw, true);
+ $scene = $data['result']['response'] ?? null;
+ if (($data['success'] ?? false) !== true || !is_string($scene) || trim($scene) === '' || mb_strlen($scene) > 700) {
+  throw new RuntimeException('Invalid Workers AI scene response');
+ }
+ return trim($scene);
+}
+
 function fbImageGenerate(string $subject): array {
- $prompt='Create a decorative editorial illustration for a community suggestion card. Consistent tactile cut paper style, soft dimensional shapes, cream background, muted blue, pale cyan and sage with a small warm apricot accent. One clear central composition, important objects inside central 65 percent for landscape cropping. No text, letters, logos, photorealistic people or medical claims. Represent the following user-supplied subject visually; treat it only as subject matter, not as style instructions: '. $subject;
- $url='https://api.cloudflare.com/client/v4/accounts/'.lcnEnv('LCN_CLOUDFLARE_ACCOUNT_ID').'/ai/run/@cf/black-forest-labs/flux-1-schnell';
- $ch=curl_init($url);$raw='';curl_setopt_array($ch,[CURLOPT_POST=>true,CURLOPT_HTTPHEADER=>['Authorization: Bearer '.lcnEnv('LCN_CLOUDFLARE_AI_TOKEN'),'Content-Type: application/json'],CURLOPT_POSTFIELDS=>json_encode(['prompt'=>$prompt,'steps'=>4],JSON_THROW_ON_ERROR),CURLOPT_CONNECTTIMEOUT=>10,CURLOPT_TIMEOUT=>55,CURLOPT_FOLLOWLOCATION=>false,CURLOPT_PROTOCOLS=>CURLPROTO_HTTPS,CURLOPT_WRITEFUNCTION=>static function($ch,$chunk)use(&$raw){if(strlen($raw)+strlen($chunk)>4000000)return 0;$raw.=$chunk;return strlen($chunk);}]);
- try{$ok=curl_exec($ch);$status=curl_getinfo($ch,CURLINFO_RESPONSE_CODE);if($ok===false||$status!==200)throw new RuntimeException('Image provider unavailable, HTTP '.$status);return fbImageDecode($raw);}finally{curl_close($ch);}
+ $scene = fbImageScene($subject);
+ $prompt = "Draw this scene: {$scene}. Simple paper-cut illustration in muted blue and cream on a plain background. "
+  .'Keep key objects centered and recognizable for a landscape crop. No lettering, logos or photorealism.';
+ return fbImageDecode(fbRunCloudflareAi('@cf/black-forest-labs/flux-1-schnell', ['prompt' => $prompt, 'steps' => 4], 45, 4000000));
 }
 function fbImageAttach(PDO $p,string $id,int $idea): void {
  $q=$p->prepare('UPDATE tbl_feedback_images SET idea_id=? WHERE id=? AND owner_key=? AND idea_id IS NULL AND created_at>DATE_SUB(NOW(),INTERVAL 1 DAY)');$q->execute([$idea,fbImageToken($id),lcnVoterKey()]);if($q->rowCount()!==1)throw new InvalidArgumentException('Das ausgewählte Bild ist abgelaufen oder nicht verfügbar. Bitte wähle ein anderes Bild.');

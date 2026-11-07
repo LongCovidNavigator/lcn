@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const accessScript=document.createElement('script');accessScript.src='scripts/access-nav.js?v=2';document.head.append(accessScript);
+    const accessScript=document.createElement('script');accessScript.src='scripts/access-nav.js?v=5804013934';document.head.append(accessScript);
     const duplicateStyles=document.createElement('link');duplicateStyles.rel='stylesheet';duplicateStyles.href='styles/duplicate_check.css?v=2';document.head.append(duplicateStyles);
     const refinementStyles=document.createElement('link');refinementStyles.rel='stylesheet';refinementStyles.href='styles/entry_refinements.css?v=1';document.head.append(refinementStyles);
     const doctorNameStyles=document.createElement('link');doctorNameStyles.rel='stylesheet';doctorNameStyles.href='styles/doctor_name_fields.css?v=1';document.head.append(doctorNameStyles);
     fragment('header-placeholder', 'components/header.html?v=two-add-links-20261105');
-    fragment('footer-placeholder', 'components/footer.html');
+    fragment('footer-placeholder', 'components/footer.html?v=f320b7bc85');
     const form = document.getElementById('entry-form');
     const message = document.getElementById('entry-message');
     buildDoctorStructuredFields(form);

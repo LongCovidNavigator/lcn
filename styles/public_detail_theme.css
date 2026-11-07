@@ -40,8 +40,8 @@
 .lcn-public-page :is(.entry-profile,.nearby-gps-panel){background:#fff}
 .lcn-public-page .entry-avatar{background:#e7f3ff;color:#0878e3;border:1px solid #d9ebfc}
 .lcn-public-page .entry-submit{background:#0878e3;border-radius:8px;min-height:44px}
-.lcn-public-page footer{background:#f7fbfe;color:#536b89;border-top:1px solid #e1eafa}
-.lcn-public-page footer :is(a,nav){background:transparent;color:#315e8c;border:0}
+.lcn-public-page footer:where(:not(.lcn-site-footer)){background:#f7fbfe;color:#536b89;border-top:1px solid #e1eafa}
+.lcn-public-page footer:where(:not(.lcn-site-footer)) :is(a,nav){background:transparent;color:#315e8c;border:0}
 .lcn-public-page :is(.doctor-map-header,.treatment-map-header){background:#f7fbfe;color:#17365d;border:1px solid #e1eafa;border-radius:9px 9px 0 0}
 .lcn-public-page :is(.doctor-map-header,.treatment-map-header):hover{background:#e7f3ff}
 .lcn-public-page :is(.doctor-location-mode-button,.treatment-location-mode-button).is-active{background:#e7f3ff;color:#0878e3;border-color:#b6d8f8}

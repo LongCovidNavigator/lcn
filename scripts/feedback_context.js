@@ -1,7 +1,20 @@
 (()=>{
  if(window.lcnFloatingFeedback)return;window.lcnFloatingFeedback=true;
- const css=document.createElement('link');css.rel='stylesheet';css.href='styles/feedback_floating.css?v=unified-20261106-1';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='styles/feedback_floating.css?v=responsive-footer-20261107';document.head.append(css);
  const button=document.createElement('button');button.type='button';button.className='lcn-feedback-float';button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls','fb-idea-dialog');button.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-8l-6 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>Feedback</span>';document.body.append(button);
+ function positionAboveFooter(){
+  const footer=document.querySelector('.lcn-site-footer');
+  const bounds=footer?.getBoundingClientRect();
+  const clearance=bounds?.height ? Math.max(0, innerHeight - bounds.top + 12) : 0;
+  button.style.setProperty('--lcn-footer-clearance', `${clearance}px`);
+ }
+ window.addEventListener('scroll', positionAboveFooter, {passive:true});
+ window.addEventListener('resize', positionAboveFooter);
+ const footerLayout=new ResizeObserver(positionAboveFooter);
+ footerLayout.observe(document.body);
+ const footerPlaceholder=document.getElementById('footer-placeholder');
+ if(footerPlaceholder)footerLayout.observe(footerPlaceholder);
+
  let lastArea=null;
  const areaFor=node=>node?.closest?.('main .card,main article,main section,.nd-panel .card,.nd-panel section');
  document.addEventListener('pointerdown',e=>{if(e.target.closest('.lcn-feedback-float,#fb-idea-dialog'))return;lastArea=areaFor(e.target);},true);
@@ -23,7 +36,7 @@
  function sync(){const hidden=!!document.querySelector('dialog[open],[aria-modal="true"]:not([hidden])');if(button.hidden!==hidden)button.hidden=hidden;}
  new MutationObserver(sync).observe(document.body,{subtree:true,attributes:true,attributeFilter:['open','hidden','aria-modal']});document.addEventListener('focusin',sync);document.addEventListener('focusout',()=>setTimeout(sync,0));
  document.addEventListener('click',e=>{const link=e.target.closest('a[href]');if(!link)return;try{const target=new URL(link.href,location.href);if(target.origin===location.origin&&target.pathname.endsWith('/mitgestalten.html')&&!location.pathname.endsWith('/mitgestalten.html'))sessionStorage.setItem('lcn-feedback-source',JSON.stringify({...capture(),time:Date.now()}));}catch{}});
- async function open(mode){try{const {openComposer}=await import('./feedback_composer.js?v=private-5');await openComposer(mode,capture());}catch(error){console.error(error);button.title=error.message;}}
- button.onclick=()=>open('#privat');
+ async function open(mode){try{const {openComposer}=await import('./feedback_composer.js?v=privacy-label-20261107');await openComposer(mode,capture());}catch(error){console.error(error);button.title=error.message;}}
+ button.onclick=()=>open(location.pathname.endsWith('/mitgestalten.html')?'#idee':'#privat');
  document.addEventListener('click',e=>{const link=e.target.closest('a[href]');if(!link||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)return;const target=new URL(link.href,location.href);if(target.origin!==location.origin||!['#idee','#privat'].includes(target.hash))return;if(target.pathname!==location.pathname&&!target.pathname.endsWith('/mitgestalten.html'))return;e.preventDefault();open(target.hash);});
 })();

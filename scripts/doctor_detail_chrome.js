@@ -67,7 +67,7 @@
     const list=parsed.querySelector('.main-nav > ul');
     if(list){list.querySelectorAll('[class]').forEach(el=>el.removeAttribute('class'));menu.replaceChildren(list);}
   }).catch(()=>{});
-  fetch('components/footer.html').then(r=>r.ok?r.text():'').then(html=>{
+  fetch('components/footer.html?v=f320b7bc85').then(r=>r.ok?r.text():'').then(html=>{
     document.getElementById('footer-placeholder').innerHTML=html;
     window.LCNImages?.apply(document.getElementById('footer-placeholder'));
   }).catch(()=>{});

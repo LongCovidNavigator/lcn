@@ -334,7 +334,7 @@ const featuredExperts = [
     ["Dr. Michael Stingl", "AT", "Wien"],
     ["Prof. Dr. Carmen Scheibenbogen", "DE", "Berlin"],
     ["Dr. Michael Kacik", "DE", "Münster"],
-    ["Dr. Beate Jaeger", "DE", "Deutschland"],
+    ["Dr. Beate Jäger", "DE", "Deutschland"],
     ["Dr. Maja Strasser", "CH", "Solothurn"],
     ["PD Dr. Dr. Bettina Hohberger", "DE", "Erlangen"],
     ["Priv.-Doz. Dr. Dr. Valentina O. Puntmann", "DE", "Frankfurt am Main"],

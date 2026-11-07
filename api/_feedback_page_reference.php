@@ -24,7 +24,11 @@ function fbReferenceLabel(PDO $p,string $type,int $id): string {
  $q=$p->prepare("SELECT `$name` FROM `$table` WHERE `$key`=?");$q->execute([$id]);return (string)$q->fetchColumn();
 }
 
-function fbReadPageReference(PDO $p,int $id): ?array {
+function fbReadPageReference(PDO $p,int $id,bool $includeDetails=false): ?array {
  $q=$p->prepare('SELECT page_path,section_label,element_label FROM tbl_feedback_page_references WHERE idea_id=?');$q->execute([$id]);$row=$q->fetch();if(!$row)return null;
+ if(!$includeDetails){
+  unset($row['section_label'],$row['element_label']);
+  $row['page_path']=explode('#',$row['page_path'],2)[0];
+ }
  $file=parse_url($row['page_path'],PHP_URL_PATH);$row['label']=FB_REFERENCE_PAGES[$file]??'Zugehörige Seite';return $row;
 }

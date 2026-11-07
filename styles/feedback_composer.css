@@ -9,6 +9,26 @@
 #fb-idea-dialog .fb-dialog-close{display:grid;place-items:center;position:absolute;top:16px;right:16px;width:36px;height:36px;padding:0;border-radius:8px}
 #fb-idea-dialog .fb-dialog-close:hover{background:#edf6fb}
 #fb-idea-dialog [hidden]{display:none!important}
+
+#fb-ai-options {
+ display: grid;
+ justify-items: start;
+ gap: 12px;
+ margin-bottom: 16px;
+}
+
+#fb-image-refinement {
+ width: 100%;
+}
+
+#fb-image-prompt {
+ display: block;
+ min-height: 76px;
+}
+
+#fb-ai-options > .fb-muted {
+ margin: 0;
+}
 #fb-idea-dialog [data-form-result]{overflow-wrap:anywhere;margin:0}
 @media(max-width:600px){#fb-idea-dialog.fb-shell{--compose-gutter:20px;max-height:calc(100dvh - 24px)}#fb-idea-dialog .fb-compose-heading{padding-top:24px}#fb-idea-dialog .fb-compose-options{gap:8px}#fb-idea-dialog .fb-compose-options button{padding:11px}#fb-idea-dialog .fb-compose-options [aria-pressed=true]{padding:10px}#fb-idea-dialog .fb-panel{padding-top:22px}}
 /* Touch layouts also apply when the composer is opened outside the community page. */

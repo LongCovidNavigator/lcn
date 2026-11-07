@@ -1,13 +1,44 @@
 <?php
-if(PHP_SAPI!=='cli'){http_response_code(404);exit;}
+if (PHP_SAPI !== 'cli') {
+    http_response_code(404);
+    exit;
+}
 require_once __DIR__.'/prepare_feedback.php';
-$p=fbLocalDatabase();
-$ideas=[
- ['Ärzte nach Krankenkassen filtern','providers','Ich möchte gezielt Ärzte finden, bei denen Long-Covid-Patienten als gesetzlich Versicherte behandelt werden. Dabei wäre wichtig, zwischen Kosten der Sprechstunde, der Behandlung und einzelner Therapien zu unterscheiden.'],
- ['Ausführlichere Erfahrungsberichte zu Behandlungen','treatments','Neben einer einfachen Bewertung möchte ich ausführlichere Erfahrungsberichte lesen können, beispielsweise zur Behandlungsdauer, individuellen Verträglichkeit und zum subjektiven Verlauf.'],
- ['Ärzte und Behandlungen als Favoriten speichern','general','Ich möchte interessante Ärzte und Behandlungen auf einer persönlichen Merkliste speichern und später wiederfinden können.'],
- ['Behandlungen nach PEM-Verträglichkeit filtern','treatments','Ich möchte besser erkennen können, welche Behandlungen andere Betroffene mit Post-Exertional Malaise als gut oder schlecht verträglich erlebt haben.'],
- ['Verbesserte Symptomsuche','symptoms','Ich wünsche mir eine einfachere Möglichkeit, Symptome zu suchen, miteinander zu vergleichen und passende Informationen zu finden.'],
- ['Arztprofile mit detaillierten Kosteninformationen','providers','Es sollte klar erkennbar sein, ob die Sprechstunde, die eigentliche Behandlung sowie angebotene Medikamente und Therapien von GKV oder PKV übernommen werden oder selbst bezahlt werden müssen.']
+
+$ideas = [
+    'feedback-v2-1' => ['Schneller sehen, wer welche Therapien anbietet', 'navigation',
+        'Die angebotenen Therapien sollen auf der Detailseite von Behandler:innen in einem eigenen Reiter „Therapien“ angezeigt werden.'],
+    'feedback-v2-3' => ['Einfachere Detailseiten für Behandler:innen und Therapien', 'general',
+        'Auf den Detailseiten von Behandler:innen und Therapien muss ich mich durch mehrere Bereiche klicken, um die verschiedenen Abstimmungen zu finden. Dabei verliere ich schnell den Überblick. Mir würde eine einzige Abstimmung pro Detailseite reichen, bei der ich angeben kann, wie sich mein Gesundheitszustand im Verlauf der Behandlung oder Therapie entwickelt hat.'],
+    'feedback-v2-6' => ['Kommentarbereich: Erfahrungsberichte zu Behandler:innen', 'reviews',
+        'Auf der Detailseite von Behandler:innen soll es einen Kommentarbereich geben. Dort möchte ich Erfahrungen mit der Betreuung, der Kommunikation und dem Ablauf in der Praxis lesen und teilen können.'],
+    'feedback-v1-2' => ['Kommentarbereich: Erfahrungsberichte zu Therapien', 'reviews',
+        'Auf der Detailseite einer Therapie soll es einen Kommentarbereich geben. Dort möchte ich Erfahrungen zur Anwendung, Dauer, Verträglichkeit und persönlich wahrgenommenen Wirkung lesen und teilen können.'],
+    'feedback-v2-8' => ['Persönlicher Bereich mit Login', 'general',
+        'Ich möchte mich anmelden und interessante Behandler:innen und Therapien, eigene Präferenzen und Symptome speichern. In meinem Profil möchte ich auch festhalten können, welche Therapien ich ausprobiert habe und wie mein bisheriger Weg aussieht.'],
 ];
-$p->beginTransaction();try{$q=$p->prepare("INSERT INTO tbl_feedback_ideas(title,description,category,moderation,display_name,seed_key) VALUES(?,?,?,'approved','LCN-Testdaten',?) ON DUPLICATE KEY UPDATE seed_key=VALUES(seed_key)");foreach($ideas as $i=>[$title,$cat,$body])$q->execute([$title,$body,$cat,'feedback-v1-'.($i+1)]);$p->commit();echo "PASS: six labeled local test ideas, no fabricated votes.\n";}catch(Throwable $e){$p->rollBack();throw $e;}
+
+$db = fbLocalDatabase();
+$db->beginTransaction();
+try {
+    $db->exec("UPDATE tbl_feedback_ideas SET moderation='archived'
+        WHERE seed_key IN ('feedback-v1-1','feedback-v1-3','feedback-v1-4','feedback-v1-5','feedback-v1-6',
+            'feedback-v2-2','feedback-v2-4','feedback-v2-5','feedback-v2-7')
+        AND moderation='approved'");
+
+    $update = $db->prepare("UPDATE tbl_feedback_ideas SET title=?, category=?, description=? WHERE seed_key=?");
+    foreach (['feedback-v2-1', 'feedback-v2-3', 'feedback-v2-6', 'feedback-v1-2'] as $key) {
+        $update->execute([...$ideas[$key], $key]);
+    }
+
+    $insert = $db->prepare("INSERT INTO tbl_feedback_ideas(title,description,category,moderation,display_name,seed_key)
+        VALUES(?,?,?,'approved','LCN-Testdaten',?) ON DUPLICATE KEY UPDATE seed_key=VALUES(seed_key)");
+    foreach ($ideas as $key => [$title, $category, $description]) {
+        $insert->execute([$title, $description, $category, $key]);
+    }
+    $db->commit();
+    echo "PASS: five local feedback proposals seeded. Superseded proposals archived.\n";
+} catch (Throwable $error) {
+    $db->rollBack();
+    throw $error;
+}

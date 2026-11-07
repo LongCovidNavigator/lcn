@@ -40,7 +40,7 @@ php scripts/prepare_feedback.php
 php scripts/seed_feedback.php
 ```
 
-Beide Werkzeuge sind nur per CLI verfügbar und prüfen vor dem Datenbankzugriff das Profil `LOCAL_HYBRID`, einen Loopback-DB-Host und den Datenbanknamen `lcn_hybrid_database`. Die Migration ist additiv und wiederholbar. Die Seed-Datei ist separat und überschreibt vorhandene Ideen nicht. Keine automatische Seed-Ausführung online. Für eine spätere Freigabe ist die SQL-Migration über den bestehenden Deploymentprozess auszuführen; die lokalen Hilfsskripte bleiben absichtlich auf die lokale Datenbank begrenzt.
+Beide Werkzeuge sind nur per CLI verfügbar und prüfen vor dem Datenbankzugriff das Profil `LOCAL_HYBRID`, einen Loopback-DB-Host und den Datenbanknamen `lcn_hybrid_database`. Die Migration ist additiv und wiederholbar. Die Seed-Datei ergänzt lokale Beispielvorschläge, archiviert überholte Beispiele und aktualisiert die Texte ausgewählter Beispiele. Die Seed-Datei läuft ausschließlich lokal. Für eine spätere Freigabe wird die SQL-Migration über den bestehenden Deploymentprozess ausgeführt.
 
 ## API
 
@@ -55,17 +55,19 @@ Alle Aktionen liegen unter `api/feedback.php`. Antworten enthalten `ok`, Fehler 
 | POST | vote | `id`, `supported` als Boolean; idempotent setzen/entfernen, frischer Stimmenstand |
 | POST | comment | `id`, `body`, optional `display_name`; immer zunächst pending |
 | POST | report | `category`, `body`; optional `email`, `page_path`, `entity_type`, `entity_id`; ausschließlich privat |
-| GET | admin_queue | `kind` (ideas/comments/reports), optional `state`, `page`; 30 Einträge pro Seite plus Dashboardzahlen |
-| POST | admin_idea | `id`, `title`, `description`, `category`, `status`, `moderation`, optional `team_reply`, `reason` |
+| GET | admin_queue | `kind` (ideas/comments/reports), optional `state`, `status` (nur Ideen), `page`; 30 Einträge pro Seite plus Dashboardzahlen |
+| POST | admin_idea | `id`, `title`, `description`, `category`, optional `status`, `moderation`, `team_reply`, `reason` |
+| POST | admin_idea_reject | `id` einer Idee, die zur Prüfung steht |
+| POST | admin_idea_classify | `id` und entweder `moderation` oder bei freigegebenen Ideen `status` mit optionaler `reason` |
 | POST | admin_comment | `id`, `moderation` (approved/hidden/deleted) |
-| POST | admin_report | `id`, `status` (open/done/archived/deleted) |
+| POST | admin_report | `id`, `status` (open/done/rejected/archived/deleted) |
 | POST | admin_merge | `id` als Quelle, `target_id` als Ziel |
 
 Kein öffentlicher Abruf privater Meldungen, Kontaktadressen oder ungeprüfter Kommentare. Kategorien und sieben Entwicklungsstände sind zentral in `api/_feedback.php` konfiguriert. Öffentliche Inhalte verwenden ausschließlich Textausgabe mit HTML-Escaping. HTTP: 201 bei Einreichung, 400 bei ungültigen Daten, 403 bei fehlender Berechtigung/falschem Ursprung, 404 bei nicht veröffentlichten Ideen, 405/415 bei falscher Methode/Medientyp, 413 bei zu großem Body, 429 bei Spamlimit und generische 500 bei internen Fehlern.
 
 ## Identität, Transaktionen und Sicherheit
 
-Die vorhandene `lcn_voter`-Identität wird wiederverwendet: zufälliges HttpOnly-/SameSite-Lax-Cookie, Secure bei HTTPS, mit bestehendem Secret serverseitig per HMAC abgeleitet. IP-Adressen sind keine Abstimmungsidentität. Die separate Feedback-Ratenbegrenzung verwendet Browser-HMAC und Quell-IP-HMAC in Zehn-Minuten-Fenstern: 8 Einreichungen je Aktion, 60 Vote-Anfragen und 100 Adminänderungen. Abgelaufene Ratenzähler werden beim Schreiben entfernt. Gelöschte Cookies und mehrere Browser ermöglichen weitere Identitäten; Stimmen sind ausdrücklich keine repräsentative Umfrage.
+Die vorhandene `lcn_voter`-Identität wird wiederverwendet: zufälliges HttpOnly-/SameSite-Lax-Cookie, Secure bei HTTPS, mit bestehendem Secret serverseitig per HMAC abgeleitet. IP-Adressen sind keine Abstimmungsidentität. Die separate Feedback-Ratenbegrenzung verwendet Browser-HMAC und Quell-IP-HMAC in Zehn-Minuten-Fenstern: 8 Einreichungen je Aktion, 60 Vote-Anfragen und 100 Adminänderungen. Abgelaufene Ratenzähler werden beim Schreiben entfernt. Gelöschte Cookies und mehrere Browser ermöglichen weitere Identitäten.
 
 Votes und Kommentare sperren den zugehörigen Ideendatensatz. Zusammenführungen sperren beide Ideen in sortierter ID-Reihenfolge und übernehmen Kommentare samt Moderationsstand sowie deduplizierte Stimmen in einer Transaktion. Quellideen und ihre Historie bleiben als Weiterverweise erhalten. Fremdschlüssel und eindeutige Constraints verhindern verwaiste interne Beziehungen und doppelte Stimmen.
 
