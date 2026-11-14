@@ -35,17 +35,28 @@
   window.addEventListener('lcn-dummy-change', () => { const next = window.LCNDummy.get(); if (next !== includeDummy && !isSubmission && !emptyAppointmentDemo) loadCommunityData(next); });
   window.addEventListener('storage', event => { if(event.key === window.LCNDummy.key && !isSubmission && !emptyAppointmentDemo) loadCommunityData(window.LCNDummy.get()); });
   let appointmentEditor = null;
-  const mobileTreatmentResults=matchMedia('(max-width: 760px)');
-  function savedTreatmentView(){try{const value=localStorage.getItem('lcn_doctor_treatment_view_preference');return ['categories','list','cards'].includes(value)?value:'categories';}catch{return 'categories';}}
-  function saveTreatmentView(value){try{localStorage.setItem('lcn_doctor_treatment_view_preference',value);}catch{}}
-  const state = { view: 'ueberblick', insurance: (window.LCNCost?.get().insurance||'GKV').toLowerCase(), selections: {}, treatmentCategory: null, treatmentView: savedTreatmentView(), treatmentSort: null, treatmentSortDirection: 'desc', treatmentQuery: '', treatmentFilterCategories: null, treatmentOnlyRated: false, treatmentPositiveMin: 0, treatmentHealingMin: 0, treatmentNegativeMax: 100, data: null, loading: true, error: false, community: null, communityError: false, saving: false };
   const content = document.getElementById('view-content');
+  const dashboardLink = document.querySelector('.side-nav [data-view="dashboard"]');
+  let isAdmin = false;
   const livePage = document.body.dataset.doctorPage === 'live';
   const submissionParam = new URLSearchParams(location.search).get('submission_id');
   const isSubmission = submissionParam !== null;
   const idParam = submissionParam ?? new URLSearchParams(location.search).get('id');
   const doctorId = Number(idParam || (livePage ? 0 : 627));
   const validId = /^\d+$/.test(idParam || (livePage ? '' : '627')) && Number.isSafeInteger(doctorId) && doctorId > 0;
+  const treatmentViewKey = 'lcn_doctor_treatment_view:' + (isSubmission ? 'submission:' : '') + doctorId;
+  function savedTreatmentView() {
+    try {
+      const view = sessionStorage.getItem(treatmentViewKey);
+      return ['categories', 'list', 'cards'].includes(view) ? view : null;
+    } catch {
+      return null;
+    }
+  }
+  function saveTreatmentView(view) {
+    try { sessionStorage.setItem(treatmentViewKey, view); } catch {}
+  }
+  const state = { view: 'ueberblick', insurance: (window.LCNCost?.get().insurance||'GKV').toLowerCase(), selections: {}, treatmentCategory: null, treatmentView: savedTreatmentView(), treatmentSort: null, treatmentSortDirection: 'desc', treatmentQuery: '', treatmentFilterCategories: null, treatmentOnlyRated: false, treatmentPositiveMin: 0, treatmentHealingMin: 0, treatmentNegativeMax: 100, data: null, loading: true, error: false, community: null, communityError: false, saving: false };
   if (isSubmission) {
     const banner=document.querySelector('.prototype-note > span');
     if(banner) for(const node of banner.childNodes) if(node.nodeType===Node.TEXT_NODE) node.textContent=node.textContent.replace('Praxis und Therapien: Originaldaten.', 'Praxisangaben aus dem Community-Eintrag.');
@@ -160,6 +171,9 @@
       applyCommunityResponse(data);
       appointmentEditor = null;
       render();
+      if (payload.question && !payload.action) {
+        window.dispatchEvent(new CustomEvent('lcn-experience-answer-saved', {detail: payload.question}));
+      }
       notify(payload.action === 'move_cost_context' ? 'Deine Angabe wurde gespeichert.' : payload.action === 'reset' ? 'Deine Angaben zu dieser Praxis wurden gelöscht.' : payload.action === 'clear' ? 'Deine Stimme wurde zurückgenommen.' : 'Deine Angabe wurde gespeichert.');return true;
     } catch (error) {
       notify('Speichern konnte nicht bestätigt werden. Bitte erneut versuchen.');return false;
@@ -240,12 +254,14 @@
       document.querySelector('.avatar').textContent = [doctor.dr_firstname?.[0], doctor.dr_lastname?.[0]].filter(Boolean).join('') || 'LCN';
       document.getElementById('profile-specialty').textContent = [labels(data.research?.specialty || data.terms?.specialty), labels(data.research?.specializations)].filter(Boolean).join(' | ');
       document.getElementById('profile-address').textContent = livePage ? ([doctor.loc_plz, doctor.loc_city].filter(Boolean).join(' ') || address()) : address();
-      document.querySelector('.contact').innerHTML = [['Website', doctor.loc_website || doctor.dr_website], ['Telefon', doctor.loc_phone || doctor.dr_phone], ['E-Mail', doctor.loc_email || doctor.dr_email]].filter(([type, value]) => type==='E-Mail'||value).map(([type, value]) => {
+      const contact = document.querySelector('.contact');
+      const restoreDummyToggle = contact.contains(dummyToggle);
+      contact.innerHTML = [['Website', doctor.loc_website || doctor.dr_website], ['Telefon', doctor.loc_phone || doctor.dr_phone], ['E-Mail', doctor.loc_email || doctor.dr_email]].filter(([type, value]) => type==='E-Mail'||value).map(([type, value]) => {
         if(type==='E-Mail'&&!String(value||'').trim())return '<button type="button" class="contact-unavailable" disabled title="Keine E-Mail-Adresse hinterlegt" aria-label="E-Mail nicht hinterlegt"><span class="contact-symbol" aria-hidden="true">✉</span><span class="contact-label">E-Mail</span></button>';
         const link = contactLink(type, value);
         return link.replace('<a ', `<a aria-label="${type}" title="${type}" `).replace(`>${escape(value)}</a>`, livePage ? `><span class="contact-symbol" aria-hidden="true">${({Website:'↗',Telefon:'☎','E-Mail':'✉'})[type]}</span><span class="contact-label">${type}</span></a>` : `>${type}</a>`);
       }).join('');
-      if(dummyToggle)document.querySelector('.contact').prepend(dummyToggle);
+      if (restoreDummyToggle) contact.prepend(dummyToggle);
       profileMap?.remove();
       profileMap = createMap(document.getElementById('profile-map'), true);
     } catch (error) {
@@ -284,20 +300,17 @@
     if (typeof L === 'undefined') { element.textContent = 'Karte konnte nicht geladen werden.'; return null; }
     element.replaceChildren();
     window.LCNImages?.configureLeaflet(L);
-    // Detail maps focus on this practice, independently of search-map country preferences.
-    const map = L.map(element, {lcnViewport: false, zoomControl: false, scrollWheelZoom: false, dragging: !compact, doubleClickZoom: !compact, touchZoom: !compact, keyboard: !compact});
     const own = savedLocation();
     const visible=locations.filter(p=>hasCoordinates(p)&&(!locationRadiusEnabled||compact||!own||locationDistance(p)<=locationRadius));
-    const focusLocations=visible.length?visible:locations.filter(hasCoordinates);
-    map.fitBounds(focusLocations.map(point=>[Number(point.loc_lat),Number(point.loc_lng)]),{padding:[32,32],maxZoom:14,animate:false});
-    if (!compact) {
-      L.control.zoom({position:'topright'}).addTo(map);
-      element.onclick = () => map.scrollWheelZoom.enable();
-      element.onmouseleave = () => map.scrollWheelZoom.disable();
-    }
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom:19, attribution:'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere'
-    }).addTo(map);
+    const resultLocations = visible.map(point => [Number(point.loc_lat), Number(point.loc_lng)]);
+    const focusLocations = !compact && own ? [...resultLocations, [own.lat, own.lng]] : resultLocations;
+    const map = window.LCNMapViewport.createMap(element, {
+      viewKey: compact ? undefined : 'doctor:' + (isSubmission ? 'submission:' : '') + doctorId,
+      center: null, zoomPosition: compact ? null : 'topright', wheelZoom: !compact,
+      lcnViewport: !compact, lcnResultLocations: compact ? undefined : resultLocations,
+      dragging: !compact, doubleClickZoom: !compact, touchZoom: !compact, keyboard: !compact
+    });
+    map.fitBounds(focusLocations,{padding:[32,32],maxZoom:14,animate:false});
     let practiceMarkers=[];
     function renderPracticeMarkers(){
       practiceMarkers.forEach(marker=>map.removeLayer(marker));
@@ -325,8 +338,8 @@
     if(!compact){const status=document.querySelector('[data-doctor-map-status]');if(status)status.textContent=locationRadiusEnabled&&!savedLocation()?'Bitte zuerst einen Ausgangsort übernehmen.':visible.length+' Praxisstandorte im Filter · Entfernung als Luftlinie.';}
     if(!compact&&locationRadiusEnabled&&savedLocation())L.circle([savedLocation().lat,savedLocation().lng],{radius:locationRadius*1000,color:'#0875ee',weight:2,fillOpacity:.06}).addTo(map);
     if (!compact && own) {
-      const icon = L.icon({iconUrl: window.LCNImages.urls['map-marker-red'], shadowUrl: window.LCNImages.urls['map-marker-shadow'], iconSize:[25,41], iconAnchor:[12,41], popupAnchor:[1,-34], shadowSize:[41,41]});
-      L.marker([own.lat, own.lng], {icon, title: own.label}).addTo(map).bindPopup(`<strong>Dein Standort</strong><br>${escape(own.label)}`);
+      const icon = window.LCNMapViewport.originIcon();
+      L.marker([own.lat, own.lng], {icon, title: own.label, lcnOwnLocation: true, zIndexOffset: 1000}).addTo(map).bindPopup(`<strong>Dein Standort</strong><br>${escape(own.label)}`);
     }
     return map;
   }
@@ -372,43 +385,11 @@
     if(!host)return;
     const valid=p=>p?.lat!=null&&p?.lng!=null&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng));
     const setOrigin=(point,label)=>{host.elements.doctor_location_query.value=label;saveLocation(host,point);};
-    const input=host.querySelector('input'),suggestions=host.querySelector('.top-map-location-suggestions');
-    let timer,controller,suggestionVersion=0,activeSuggestion=-1;
-    const suggestionCache=new Map();
-    suggestions.setAttribute('role','listbox');
-    input.setAttribute('role','combobox');input.setAttribute('aria-autocomplete','list');input.setAttribute('aria-expanded','false');
-    suggestions.id=input.id+'-suggestions';input.setAttribute('aria-controls',suggestions.id);
-    function showMessage(text){suggestions.replaceChildren();const note=document.createElement('p');note.className='location-suggestion-status';note.setAttribute('role','status');note.textContent=text;suggestions.append(note);suggestions.classList.remove('is-hidden');input.setAttribute('aria-expanded','true');activeSuggestion=-1;}
-    function dismiss(){clearTimeout(timer);controller?.abort();suggestionVersion++;suggestions.classList.add('is-hidden');input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');activeSuggestion=-1;}
-    function paintSuggestions(results,query){
-      suggestions.replaceChildren();activeSuggestion=-1;
-      results.filter(valid).forEach((result,index)=>{const choice=document.createElement('button');choice.type='button';choice.id=suggestions.id+'-'+index;choice.setAttribute('role','option');choice.textContent=result.formatted||result.label||query;choice.addEventListener('click',()=>{dismiss();setOrigin(result,choice.textContent);});suggestions.append(choice);});
-      if(!suggestions.childElementCount)showMessage('Kein Ort gefunden. Bitte Ort oder PLZ genauer angeben.');
-      else {suggestions.classList.remove('is-hidden');input.setAttribute('aria-expanded','true');}
-    }
-    function suggest(){
-      dismiss();const query=input.value.trim();
-      if(query.length<2){showMessage('Mindestens zwei Zeichen für Ort oder PLZ eingeben.');return;}
-      const cacheKey=query.toLocaleLowerCase('de');
-      if(suggestionCache.has(cacheKey)){paintSuggestions(suggestionCache.get(cacheKey),query);return;}
-      showMessage('Orte werden gesucht …');const version=suggestionVersion;
-      timer=setTimeout(async()=>{const requestController=new AbortController();controller=requestController;
-        try{const response=await fetch('api/geocode_location.php?suggest=1&q='+encodeURIComponent(query),{signal:requestController.signal});const data=await response.json();if(version!==suggestionVersion)return;if(!response.ok||!data.ok)throw new Error();const results=data.results||[];suggestionCache.set(cacheKey,results);paintSuggestions(results,query);}
-        catch(error){if(error.name!=='AbortError'&&version===suggestionVersion)showMessage('Ortssuche derzeit nicht verfügbar. Bitte erneut versuchen.');}
-      },150);
-    }
-    host.addEventListener('submit',dismiss);
-    host.addEventListener('focusout',event=>{if(!host.contains(event.relatedTarget))dismiss();});
-    input.addEventListener('input',suggest);
-    input.addEventListener('focus',suggest);
-    input.addEventListener('keydown',event=>{
-      if(event.key==='Escape'){dismiss();return;}
-      const choices=[...suggestions.querySelectorAll('button')];
-      if(!suggestions.classList.contains('is-hidden')&&choices.length&&['ArrowDown','ArrowUp'].includes(event.key)){
-        event.preventDefault();activeSuggestion=(activeSuggestion+(event.key==='ArrowDown'?1:-1)+choices.length)%choices.length;
-        choices.forEach((choice,i)=>choice.setAttribute('aria-selected',String(i===activeSuggestion)));input.setAttribute('aria-activedescendant',choices[activeSuggestion].id);
-      }else if(event.key==='Enter'&&!suggestions.classList.contains('is-hidden')&&activeSuggestion>=0){event.preventDefault();choices[activeSuggestion]?.click();}
-    });
+    const dismiss = window.LCNMapViewport.bindLocationSuggestions(
+      host.querySelector('input'), host.querySelector('.top-map-location-suggestions'), { valid, onSelect: setOrigin }
+    );
+    host.addEventListener('submit', dismiss);
+    host.addEventListener('focusout', event => { if (!host.contains(event.relatedTarget)) dismiss(); });
   }
   let locationRequest = null;
   function refreshLocation() {
@@ -435,8 +416,7 @@
       if ((response && !response.ok) || !data.ok) throw new Error(data.message || 'Standort nicht gefunden.');
       const value = data.result;
       if (value?.lat == null || value?.lng == null || !Number.isFinite(Number(value.lat)) || !Number.isFinite(Number(value.lng))) throw new Error('Keine gültigen Koordinaten gefunden.');
-      localStorage.setItem('lcn_shared_location_preference', JSON.stringify({location:value.formatted || query, label:value.formatted || query, city:value.city || '', lat:Number(value.lat), lng:Number(value.lng)}));
-      localStorage.removeItem('lcn_shared_location_cleared');
+      window.LCNMapViewport.saveLocation({location:value.formatted || query, label:value.formatted || query, city:value.city || '', lat:Number(value.lat), lng:Number(value.lng)});
       refreshLocation();
       notify('Standort übernommen – auch für die anderen LCN-Seiten.');
     } catch (error) {
@@ -446,8 +426,7 @@
   function clearLocation() {
     locationRequest?.abort();
     try {
-      ['lcn_shared_location_preference','lcn_doctor_location_preference','lcn_treatment_location_preference'].forEach(key => localStorage.removeItem(key));
-      localStorage.setItem('lcn_shared_location_cleared','1');
+      window.LCNMapViewport.clearLocation();
       refreshLocation();
     } catch (_) { notify('Standort konnte nicht entfernt werden.'); }
   }
@@ -505,7 +484,7 @@
   function locationCard() {
     if (!state.data) return `<section class="card"><h3>Standort</h3>${dataStatus()}</section>`;
     const own = savedLocation();
-    return `<section class="card location-section" aria-label="Standort"><h3>Standort</h3>${travelEstimate()}${researchedRemoteNotice()}<div class="doctor-detail-location-grid"><div class="doctor-detail-location-address top-map-location-controls"><h4 class="nd-location-title">Standortsuche</h4><form id="location-form" role="search" autocomplete="off" aria-label="Standortsuche"><div class="nd-location-heading"><label for="own-location">Adresse, PLZ oder Ort</label><button type="button" id="clear-location" aria-label="Standort entfernen"${own ? '' : ' hidden'}>×</button></div><div class="own-location-control top-map-location-input-row"><input id="own-location" name="doctor_location_query" type="search" placeholder="z. B. Musterstadt" autocomplete="off" data-lpignore="true" data-1p-ignore="true" spellcheck="false" enterkeyhint="search" maxlength="200" value="${escape(own?.label || '')}"><div class="top-map-location-suggestions is-hidden"></div></div><button type="submit" class="nd-location-submit">Standort übernehmen</button><span data-location-status role="status" aria-live="polite"></span></form>${practiceFilters()}<div class="nd-location-summary"><span>Entfernung zu deinem Standort</span><strong id="own-distance">${distanceText()}</strong><span data-doctor-map-status role="status"></span></div></div><div id="doctor-detail-map" class="doctor-detail-map" aria-label="Karte des Praxisstandorts"></div></div></section>`;
+    return `<section class="card location-section" aria-label="Standort"><h3>Standort</h3>${travelEstimate()}${researchedRemoteNotice()}<div class="doctor-detail-location-grid"><div class="doctor-detail-location-address top-map-location-controls"><h4 class="nd-location-title">Standortsuche</h4><form id="location-form" role="search" autocomplete="off" aria-label="Standortsuche"><div class="nd-location-heading"><label for="own-location">Adresse, PLZ oder Ort</label><button type="button" id="clear-location" aria-label="Standort entfernen"${own ? '' : ' hidden'}>×</button></div><div class="own-location-control top-map-location-input-row"><input id="own-location" name="doctor_location_query" type="search" placeholder="z. B. Musterstadt" autocomplete="off" data-lpignore="true" data-1p-ignore="true" spellcheck="false" enterkeyhint="search" maxlength="200" value="${escape(own?.label || '')}"></div><button type="submit" class="nd-location-submit">Standort übernehmen</button><div class="top-map-location-suggestions is-hidden"></div><span data-location-status role="status" aria-live="polite"></span></form>${practiceFilters()}<div class="nd-location-summary"><span>Entfernung zu deinem Standort</span><strong id="own-distance">${distanceText()}</strong><span data-doctor-map-status role="status"></span></div></div><div id="doctor-detail-map" class="doctor-detail-map" aria-label="Karte des Praxisstandorts"></div></div></section>`;
   }
   function profileFacts() {
     if (!state.data) return `<section class="card overview-facts"><h3>Überblick</h3>${dataStatus()}</section>`;
@@ -538,7 +517,7 @@
   }
 
   function overview() {
-    return profileFacts() + dashboardScore(true);
+    return profileFacts() + communityRating() + (isAdmin ? dashboardScore(true) : '') + treatmentSection();
   }
 
   function adaptationHelp() {
@@ -595,8 +574,11 @@
       `<section class="card">${blockTitle('Wartezeit auf Folgetermine', 'Wie lange musstest du bei dieser behandelnden Person auf einen Folgetermin warten? Wähle die Stufe, die auf deine Erfahrung zutrifft. Erneutes Anklicken deiner Auswahl nimmt sie zurück.')}${dotScale('wait-followup', scales.wait)}</section>`;
   }
 
+  function communityRating() {
+    return `<section class="card"><div class="chart-heading"><div><h3>Community-Bewertung</h3><p>Subjektive Erfahrungen nach der Therapie.</p></div><span>${communityNote('effect')}</span></div><div class="effect-chart" role="group" aria-label="Zustandsveränderung: Community und deine Auswahl">${[0,1,2,3].map(i => { const label=i===1?'Neutral':scales.effect[i]; const value = percent('effect',i); return `<button type="button" class="effect-column" data-choice="effect" data-value="${i}" aria-pressed="${state.selections.effect === i}" aria-label="${label}: ${percentText(value)}. Als eigene Erfahrung auswählen"><span class="bar-area"><strong>${percentText(value)}</strong><span class="effect-bar effect-${i}" style="height:${(value || 0) * 1.5}px"></span></span><span class="effect-label">${label}</span></button>`; }).join('')}</div>${effectComparison()}</section>`;
+  }
   function effect() {
-    return `<section class="card"><div class="chart-heading"><div><h3>Community-Bewertung</h3><p>Subjektive Erfahrungen nach der Therapie.</p></div><span>${communityNote('effect')}</span></div><div class="effect-chart" role="group" aria-label="Zustandsveränderung: Community und deine Auswahl">${[0,1,2,3].map(i => { const label=i===1?'Neutral':scales.effect[i]; const value = percent('effect',i); return `<button type="button" class="effect-column" data-choice="effect" data-value="${i}" aria-pressed="${state.selections.effect === i}" aria-label="${label}: ${percentText(value)}. Als eigene Erfahrung auswählen"><span class="bar-area"><strong>${percentText(value)}</strong><span class="effect-bar effect-${i}" style="height:${(value || 0) * 1.5}px"></span></span><span class="effect-label">${label}</span></button>`; }).join('')}</div>${effectComparison()}</section>` + '<section class="card ux-symptom-help" data-doctor-symptom-help><h3>Bei welchen Symptomen hat dir die behandelnde Person geholfen?</h3><p>Klicke die Symptome an, bei denen dir die Behandlung geholfen hat. Erneutes Anklicken nimmt deine Stimme zurück.</p><ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol><div class="ux-symptom-picker" data-symptom-combobox><label for="doctor-symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="doctor-symptom-search" type="text" role="combobox" data-symptom-search placeholder="Symptom auswählen oder eintippen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="doctor-symptom-picker"><button type="button" data-symptom-toggle aria-label="Symptomliste öffnen" aria-controls="doctor-symptom-picker" aria-expanded="false">⌄</button></div><div id="doctor-symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div></section>' + treatmentSection();
+    return communityRating() + '<section class="card ux-symptom-help" data-doctor-symptom-help><h3>Bei welchen Symptomen hat dir die behandelnde Person geholfen?</h3><p>Klicke die Symptome an, bei denen dir die Behandlung geholfen hat. Erneutes Anklicken nimmt deine Stimme zurück.</p><ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol><div class="ux-symptom-picker" data-symptom-combobox><label for="doctor-symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="doctor-symptom-search" type="text" role="combobox" data-symptom-search placeholder="Symptom auswählen oder eintippen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="doctor-symptom-picker"><button type="button" data-symptom-toggle aria-label="Symptomliste öffnen" aria-controls="doctor-symptom-picker" aria-expanded="false">⌄</button></div><div id="doctor-symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div></section>' + treatmentSection();
   }
   let pendingCatalogTreatments=[],treatmentFeedback={};window.addEventListener('lcn-relation-feedback',event=>{treatmentFeedback=event.detail||{};if(state.treatmentSort==='feedback'&&document.getElementById('treatment-section'))refreshTreatmentControls();});
   window.addEventListener('lcn-pending-treatments',event=>{pendingCatalogTreatments=event.detail||[];if(document.getElementById('treatment-section'))refreshTreatmentControls();});
@@ -634,13 +616,16 @@
     const meta=e=>e.pending&&e.provider_total==null?'':Number(e.provider_total??e.provider_count??0)+' Behandler:innen';
     const card=(key,label,count)=>'<button type="button" class="treatment-category-card" data-treatment-category="'+escape(key)+'"><span>'+escape(label)+'</span><strong>'+count+'</strong><span>Therapien →</span></button>';
     const filterControls='<div class="treatment-controls"><div class="treatment-search-controls"><label>Therapie suchen<input type="search" id="treatment-query" value="'+escape(state.treatmentQuery)+'" placeholder="Name, Kategorie oder Unterkategorie"></label><details id="treatment-category-filter"><summary>Kategorien'+(state.treatmentFilterCategories===null?' · alle':' · '+state.treatmentFilterCategories.length)+'</summary><div class="treatment-category-options"><button type="button" data-treatment-filter-all="1">Alle</button><button type="button" data-treatment-filter-none="1">Keine</button>'+groups.map(([name])=>'<label><input type="checkbox" data-treatment-filter-category="'+escape(name)+'" '+(state.treatmentFilterCategories===null||state.treatmentFilterCategories.includes(name)?'checked':'')+'> '+escape(categoryLabel(name))+'</label>').join('')+'</div></details><label class="treatment-rated-toggle"><input type="checkbox" id="treatment-only-rated" '+(state.treatmentOnlyRated?'checked':'')+'> Nur mit Bewertung</label><button type="button" id="treatment-reset-filters">Zurücksetzen</button></div><div class="treatment-rating-controls">'+[['positive','Verbesserung mindestens',state.treatmentPositiveMin],['healing','Heilung mindestens',state.treatmentHealingMin],['negative','Negative Erfahrungen höchstens',state.treatmentNegativeMax]].map(([key,label,value])=>'<div><label for="treatment-'+key+'-range">'+label+'</label><div class="treatment-range-row"><input id="treatment-'+key+'-range" data-treatment-rating="'+key+'" type="range" min="0" max="100" value="'+value+'"><input aria-label="'+label+' in Prozent" id="treatment-'+key+'-number" data-treatment-rating="'+key+'" type="number" min="0" max="100" value="'+value+'"><span>%</span></div></div>').join('')+'<label>Sortieren<select id="treatment-sort-select">'+[['name:asc','Name A–Z'],['name:desc','Name Z–A'],['experience:desc','Verbesserung ↓'],['healing:desc','Heilung ↓'],['feedback:desc','Rückmeldungen ↓'],['negative:desc','Negative Erfahrungen ↓'],['votes:desc','Bewertungen ↓'],['providers:desc','Behandler:innen ↓']].map(([key,label])=>'<option value="'+key+'" '+((state.treatmentSort||'providers')+':'+state.treatmentSortDirection===key?'selected':'')+'>'+label+'</option>').join('')+'</select></label></div></div><p class="treatment-result-count" role="status">'+rows.length+' von '+all.length+' Therapien'+(category&&category!=='*'?' in der gewählten Auswahl':'')+'</p>';
-    const treatmentView=mobileTreatmentResults.matches&&state.treatmentView==='cards'?'list':state.treatmentView;
+    const categories = groups.filter(([name]) => name.trim() && !['Ohne Kategorie', 'Kategorie unbekannt'].includes(name));
+    const defaultView = all.length < 6 ? 'cards' : all.length > 12 && categories.length ? 'categories' : 'list';
+    const preferredView = state.treatmentView ?? defaultView;
+    const treatmentView = preferredView === 'categories' && !categories.length ? 'list' : preferredView;
     let body='';
     if(treatmentView==='categories'&&!category){
       body='<div class="treatment-categories">'+groups.map(([name])=>[name,rows.filter(e=>e.category===name)]).filter(([,entries])=>entries.length).map(([name,entries])=>card(name,categoryLabel(name),entries.length)).join('')+'</div>';
     }else{
       const label=category==='@editorial'?'Community-Empfehlung für Therapien':category&&category!=='*'?categoryLabel(category):'Alle Therapien';
-      body='<div class="treatment-drilldown"><strong>'+escape(label)+' · '+(category==='@editorial'?editorialData.matched_count+' Therapien aus der Community-Empfehlung, '+rows.length+' Einträge':rows.length+' Therapien')+'</strong><button type="button" id="treatment-back">Alle Kategorien</button></div>';
+      body='<div class="treatment-drilldown"><strong>'+escape(label)+' · '+(category==='@editorial'?editorialData.matched_count+' Therapien aus der Community-Empfehlung, '+rows.length+' Einträge':rows.length+' Therapien')+'</strong>'+(categories.length?'<button type="button" id="treatment-back">Alle Kategorien</button>':category?'<button type="button" id="treatment-back">Alle Therapien</button>':'')+'</div>';
       if(!rows.length)body+='<p>Noch keine passenden Therapien zugeordnet.</p>';
       else if(treatmentView==='cards')body+='<div class="treatment-categories treatment-rating-cards">'+rows.map(e=>'<article class="treatment-result-card"><h4>'+link(e)+'</h4><p>'+escape(categoryLabel(e.category))+'</p><small>'+meta(e)+'</small>'+cardRatings(e)+'</article>').join('')+'</div>';
       else {
@@ -657,10 +642,9 @@
     const specializations=labels(state.data.research?.specializations);
     const percentile=all.length<=5?'Wenige dokumentierte Einträge':catalog?.top_percent!=null?'Top '+catalog.top_percent+' %':'Noch kein Vergleich verfügbar';
     const preview=(editorialData?.matches||[]).slice(0,3).map(topic=>'<li><button type="button" data-treatment-category="@editorial">'+escape(topic.label)+'</button></li>').join('');
-    const categories=groups.filter(([name])=>name!=='Ohne Kategorie');
-    const summary='<div class="treatment-profile-summary"><div><span>Umfang im Vergleich</span><strong class="'+(all.length>5&&catalog?.top_percent!=null?'score-percentile score-percentile-level-'+(catalog.top_percent<=20?4:catalog.top_percent<=40?3:catalog.top_percent<=60?2:catalog.top_percent<=80?1:0):'')+'">'+percentile+'</strong><dl class="profile-average"><div><dt>Diese Praxis</dt><dd>'+all.length+' Einträge</dd></div><div><dt>Vergleichsgruppe</dt><dd>'+(catalog?catalog.doctor_count:'–')+' Behandler:innen</dd></div></dl><small>'+(all.length<=5?'Bis einschließlich fünf Einträge: keine Prozent-Einstufung.':catalog?.top_percent!=null?catalog.at_least_count+' von '+catalog.doctor_count+' Profilen haben mindestens '+all.length+' Einträge.':'')+' Verglichen werden alle Katalogprofile mit mehr als fünf Einträgen. </small></div><div><span>Häufigste Kategorien</span><strong>'+categories.length+' Kategorien</strong><ul class="profile-summary-list">'+categories.slice(0,3).map(([name,entries])=>'<li><button type="button" data-treatment-category="'+escape(name)+'">'+escape(categoryLabel(name))+' <b>'+entries.length+'</b></button></li>').join('')+'</ul><button type="button" class="profile-summary-more" data-treatment-view="categories">Alle Kategorien anzeigen →</button></div><div><div class="top-therapy-heading"><span>Abdeckung der Community-Empfehlung für Therapien</span><span class="top-therapy-help adaptation-heading-help"><button type="button" class="heading-help-trigger" aria-label="Was zeigt die Abdeckung der Community-Empfehlung?" aria-describedby="top-therapy-info"><span aria-hidden="true">ⓘ</span></button><span id="top-therapy-info" class="heading-help-info" role="tooltip">Die Abdeckung zeigt, wie viele Therapien aus der Community-Empfehlung dieser Praxis zugeordnet sind. Die Auswahl beruht auf häufigen Nennungen in der Community und in unserer Online-Recherche.</span></span></div><strong>'+(editorialData?editorialData.matched_count+' von '+editorialData.total+' Therapien aus der Community-Empfehlung':'Noch nicht abgeglichen')+'</strong><ul class="profile-summary-list editorial-preview">'+preview+'</ul>'+(editorialData?'<button type="button" class="profile-summary-more" data-treatment-category="@editorial">Alle '+editorialData.matched_count+' Therapien aus der Community-Empfehlung anzeigen →</button>':'')+'</div></div>';
+    const summary='<div class="treatment-profile-summary">'+(isAdmin?'<div><span>Umfang im Vergleich</span><strong class="'+(all.length>5&&catalog?.top_percent!=null?'score-percentile score-percentile-level-'+(catalog.top_percent<=20?4:catalog.top_percent<=40?3:catalog.top_percent<=60?2:catalog.top_percent<=80?1:0):'')+'">'+percentile+'</strong><dl class="profile-average"><div><dt>Diese Praxis</dt><dd>'+all.length+' Einträge</dd></div><div><dt>Vergleichsgruppe</dt><dd>'+(catalog?catalog.doctor_count:'–')+' Behandler:innen</dd></div></dl><small>'+(all.length<=5?'Bis einschließlich fünf Einträge: keine Prozent-Einstufung.':catalog?.top_percent!=null?catalog.at_least_count+' von '+catalog.doctor_count+' Profilen haben mindestens '+all.length+' Einträge.':'')+' Verglichen werden alle Katalogprofile mit mehr als fünf Einträgen. </small></div>':'')+'<div><span>Häufigste Kategorien</span><strong>'+categories.length+' Kategorien</strong><ul class="profile-summary-list">'+categories.slice(0,3).map(([name,entries])=>'<li><button type="button" data-treatment-category="'+escape(name)+'">'+escape(categoryLabel(name))+' <b>'+entries.length+'</b></button></li>').join('')+'</ul>'+(categories.length?'<button type="button" class="profile-summary-more" data-treatment-view="categories">Alle Kategorien anzeigen →</button>':'')+'</div><div><div class="top-therapy-heading"><span>Abdeckung der Community-Empfehlung für Therapien</span><span class="top-therapy-help adaptation-heading-help"><button type="button" class="heading-help-trigger" aria-label="Was zeigt die Abdeckung der Community-Empfehlung?" aria-describedby="top-therapy-info"><span aria-hidden="true">ⓘ</span></button><span id="top-therapy-info" class="heading-help-info" role="tooltip">Die Abdeckung zeigt, wie viele Therapien aus der Community-Empfehlung dieser Praxis zugeordnet sind. Die Auswahl beruht auf häufigen Nennungen in der Community und in unserer Online-Recherche.</span></span></div><strong>'+(editorialData?editorialData.matched_count+' von '+editorialData.total+' Therapien aus der Community-Empfehlung':'Noch nicht abgeglichen')+'</strong><ul class="profile-summary-list editorial-preview">'+preview+'</ul>'+(editorialData?'<button type="button" class="profile-summary-more" data-treatment-category="@editorial">Alle '+editorialData.matched_count+' Therapien aus der Community-Empfehlung anzeigen →</button>':'')+'</div></div>';
     const editorialNotes=editorialData?.partial?.length?'<details class="treatment-match-notes"><summary>'+editorialData.partial.length+' nur teilweise passende Zuordnungen</summary><p>Diese zählen nicht als bestätigter Treffer der redaktionellen Auswahl:</p><ul>'+editorialData.partial.map(e=>'<li>'+escape(e.label)+'</li>').join('')+'</ul><p>Zum Beispiel belegt allgemeine Physiotherapie keine PEM-Anpassung; einzelne Komponenten belegen keine vollständige Kombination.</p></details>':'';
-    return '<section class="card" id="treatment-section"><h3 tabindex="-1">Therapien <span class="total-count">'+all.length+'</span></h3><p>Das recherchierte Therapieprofil von '+escape(state.data.item.dr_display_name)+'.</p>'+summary+'<p class="treatment-specializations"><strong>Erfasste Spezialisierungen:</strong> '+(escape(specializations)||'<span class="overview-missing">Noch keine Angabe</span>')+'</p><p class="field-note">Der Vergleich beschreibt dokumentierte Einträge, nicht Qualität oder Wirksamkeit. Die Vergleichsgruppe wächst mit weiteren Katalogprofilen mit mehr als fünf Einträgen. Die Community-Empfehlung für Therapien dient zur Orientierung.</p>'+editorialNotes+'<div class="treatment-view-switch" role="group" aria-label="Therapieansicht">'+[['categories','Kategorien'],['list','Liste'],['cards','Kacheln']].filter(([key])=>key!=='cards'||!mobileTreatmentResults.matches).map(([key,label])=>'<button type="button" data-treatment-view="'+key+'" aria-pressed="'+(treatmentView===key)+'">'+label+'</button>').join('')+'</div>'+filterControls+'<div id="treatment-results" tabindex="-1" aria-label="Therapien und Kategorien">'+body+'</div></section>';
+    return '<section class="card" id="treatment-section"><h3 tabindex="-1">Therapien <span class="total-count">'+all.length+'</span></h3><p>Das recherchierte Therapieprofil von '+escape(state.data.item.dr_display_name)+'.</p>'+summary+'<p class="treatment-specializations"><strong>Erfasste Spezialisierungen:</strong> '+(escape(specializations)||'<span class="overview-missing">Noch keine Angabe</span>')+'</p><p class="field-note">Der Vergleich beschreibt dokumentierte Einträge, nicht Qualität oder Wirksamkeit. Die Vergleichsgruppe wächst mit weiteren Katalogprofilen mit mehr als fünf Einträgen. Die Community-Empfehlung für Therapien dient zur Orientierung.</p>'+editorialNotes+'<div class="treatment-view-switch" role="group" aria-label="Therapieansicht">'+[['categories','Kategorien'],['list','Tabelle'],['cards','Kacheln']].filter(([key])=>key!=='categories'||categories.length).map(([key,label])=>'<button type="button" data-treatment-view="'+key+'" aria-pressed="'+(treatmentView===key)+'">'+label+'</button>').join('')+'</div>'+filterControls+'<div id="treatment-results" tabindex="-1" aria-label="Therapien und Kategorien">'+body+'</div></section>';
 
   }
   function appointmentCountNote() {
@@ -682,6 +666,7 @@
     });
   }
   function ratingComparison(key,minimum,unit,reference) {
+    if (!isAdmin) return '';
     const summarize=options=>{
       const total=options.reduce((sum,o)=>sum+Number(o.count||0),0);
       return {total,mean:total?options.reduce((sum,o,i)=>sum+Number(o.count||0)*(i+1),0)/total:null};
@@ -793,7 +778,7 @@
       const others=row.comparisonCount-1;
       return 'Für '+label+(others===1?' wird aktuell ein anderer Behandler:innen':' werden aktuell '+number(others)+' andere Behandler:innen')+' mit Therapieeinträgen zum Vergleich herangezogen.';
     }).join(' ');
-    const treatments='<section class="card dashboard-shared-card dashboard-card doctor-dashboard-offer"><div class="assessment-header"><h3><a class="doctor-dashboard-title-link" href="#wirkung">Therapien</a></h3><span class="assessment-count">'+count+' Einträge</span></div><div class="dashboard-points"><strong>'+(treatmentAvailable?number(treatmentEarned)+' <small>/ 10 Punkte</small>':'Noch nicht auswertbar')+'</strong></div>'+offerGraphic+calculationHelp('Für die Bewertung vergleichen wir die Therapieanzahl und die Kategorienvielfalt der Therapien mit anderen Behandler:innen. Für die Therapieanzahl sind bis zu 7 Punkte möglich, für die Kategorienvielfalt bis zu 3 Punkte. Die oberen 10 % erhalten jeweils die volle Punktzahl, die unteren 10 % erhalten 0 Punkte. Dazwischen werden die Punkte linear nach der Platzierung vergeben. Gleiche Anzahlen erhalten gleich viele Punkte. Fehlen Therapieeinträge oder ausreichende Vergleichsdaten, werden die Teilwerte nicht bewertet und nicht in die Gesamtwertung einbezogen.'+offerComparisonText)+'</section>';
+    const treatments='<section class="card dashboard-shared-card dashboard-card doctor-dashboard-offer"><div class="assessment-header"><h3><a class="doctor-dashboard-title-link" href="#ueberblick">Therapien</a></h3><span class="assessment-count">'+count+' Einträge</span></div><div class="dashboard-points"><strong>'+(treatmentAvailable?number(treatmentEarned)+' <small>/ 10 Punkte</small>':'Noch nicht auswertbar')+'</strong></div>'+offerGraphic+calculationHelp('Für die Bewertung vergleichen wir die Therapieanzahl und die Kategorienvielfalt der Therapien mit anderen Behandler:innen. Für die Therapieanzahl sind bis zu 7 Punkte möglich, für die Kategorienvielfalt bis zu 3 Punkte. Die oberen 10 % erhalten jeweils die volle Punktzahl, die unteren 10 % erhalten 0 Punkte. Dazwischen werden die Punkte linear nach der Platzierung vergeben. Gleiche Anzahlen erhalten gleich viele Punkte. Fehlen Therapieeinträge oder ausreichende Vergleichsdaten, werden die Teilwerte nicht bewertet und nicht in die Gesamtwertung einbezogen.'+offerComparisonText)+'</section>';
 
     const km=distanceKm(),travelRow=scoreRow('Persönliche Anreise');
     const travelLevels=[
@@ -819,7 +804,7 @@
     return dashboardScore()+group(2,'Welche Belastungshürden gibt es bei einem Termin?',30,card('Long-Covid-gerechter Termin','adaptation',scales.adaptation,'termin')+appointments+travel)+group(3,'Wie zugänglich ist die behandelnde Person?',30,card('Behandlungskosten',costKey,scales.costs.map(label=>window.LCNCost?.amount(label,costSystem().code==='CH'?'CHF':'EUR')||label),'zugang',costChoices)+card('Wartezeit auf den Ersttermin','wait',scales.wait,'zugang')+card('Wartezeit auf Folgetermine','wait-followup',scales.wait,'zugang'))+group(4,'Welche Erfahrungen gibt es?',40,card('Zustandsveränderung','effect',scales.effect,'wirkung')+treatments);
 
   }
-  const views = { ueberblick: overview, termin: appointment, zugang: access, wirkung: effect, dashboard: dashboard };
+  const views = { ueberblick: overview, termin: appointment, zugang: access, wirkung: effect };
   function alignDashboardStatus(){
     const cards=[...content.querySelectorAll('.doctor-aligned-status-card')];
     const slots=cards.map(card=>({card,header:card.querySelector('.doctor-card-header-slot'),notice:card.querySelector('.doctor-card-notice-slot')}));
@@ -900,9 +885,6 @@
     results.focus({preventScroll:true});
     results.scrollIntoView({block:'start',behavior:'instant'});
   }
-  mobileTreatmentResults.addEventListener('change',()=>{
-    refreshTreatmentControls(document.activeElement?.id);
-  });
   function refreshTreatmentControls(focusId) {
     const section=document.getElementById('treatment-section');
     const open=document.getElementById('treatment-category-filter')?.open;
@@ -1008,18 +990,21 @@
       render();
       [...content.querySelectorAll('[data-treatment-sort="'+key+'"]')].find(el=>el.getClientRects().length)?.focus({preventScroll:true});
     } else if (button.hasAttribute('data-treatment-view')) {
-      state.treatmentView=button.dataset.treatmentView;saveTreatmentView(state.treatmentView);
+      state.treatmentView = button.dataset.treatmentView;
+      if (button.closest('.treatment-view-switch')) saveTreatmentView(state.treatmentView);
       if(state.treatmentView==='categories')state.treatmentCategory=null;
       render();
       if(button.classList.contains('profile-summary-more')) revealTreatmentResults();
-      else content.querySelector('[data-treatment-view="'+state.treatmentView+'"]').focus({preventScroll:true});
+      else content.querySelector('.treatment-view-switch [data-treatment-view="'+state.treatmentView+'"]').focus({preventScroll:true});
     } else if (button.hasAttribute('data-treatment-category')) {
       state.treatmentCategory = button.dataset.treatmentCategory;
       render();
       revealTreatmentResults();
     } else if (button.id === 'treatment-back') {
       const previous = state.treatmentCategory;
-      state.treatmentView = 'categories';saveTreatmentView('categories');
+      if (content.querySelector('.treatment-view-switch [data-treatment-view="categories"]')) {
+        state.treatmentView = 'categories';
+      }
       state.treatmentCategory = null;
       render();
       [...content.querySelectorAll('[data-treatment-category]')].find(option => option.dataset.treatmentCategory === previous)?.focus({preventScroll:true});
@@ -1064,6 +1049,16 @@
     return;
   }
   navigate(false);
+  fetch('api/current_user.php', {credentials:'same-origin', cache:'no-store'})
+    .then(response => response.ok ? response.json() : null)
+    .then(user => {
+      if (user?.role !== 'admin') return;
+      isAdmin = true;
+      views.dashboard = dashboard;
+      dashboardLink.hidden = false;
+      navigate(false);
+    })
+    .catch(() => {});
   loadOriginalData();
   loadCommunityData();
   loadDoctorSelector();

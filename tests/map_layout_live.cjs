@@ -56,15 +56,14 @@ const assert=require('node:assert/strict');
  await p.waitForSelector('.nd-provider-table .catalog-rating-negative .provider-value-unit');
  const numeric=await p.locator('.nd-provider-table').evaluate(table=>{
   const rows=[...table.tBodies[0].rows].filter(r=>!r.classList.contains('nd-provider-group-row'));
-  return {color:getComputedStyle(table.querySelector('.catalog-rating-negative')).color,columns:[3,4,5,6].map(index=>rows.flatMap(row=>{const cell=row.cells[index],value=cell.querySelector('.provider-numeric-value');if(!value)return [];const unit=value.querySelector('.provider-value-unit').getBoundingClientRect(),num=value.querySelector('.provider-value-number');return [{unitLeft:unit.left,numberRight:num.getBoundingClientRect().right,text:num.textContent,centerDelta:Math.abs(value.getBoundingClientRect().left+value.getBoundingClientRect().width/2-cell.getBoundingClientRect().left-cell.getBoundingClientRect().width/2)}];}))};
+  return {color:getComputedStyle(table.querySelector('.catalog-rating-negative')).color,columns:[3,4,5,6].map(index=>rows.flatMap(row=>{const cell=row.cells[index],value=cell.querySelector('.provider-numeric-value');if(!value)return [];const unit=value.querySelector('.provider-value-unit').getBoundingClientRect(),num=value.querySelector('.provider-value-number');const digits=document.createRange();digits.selectNodeContents(num);return [{unitLeft:unit.left,digitsRight:digits.getBoundingClientRect().right,numberRight:num.getBoundingClientRect().right,text:num.textContent,centerDelta:Math.abs(value.getBoundingClientRect().left+value.getBoundingClientRect().width/2-cell.getBoundingClientRect().left-cell.getBoundingClientRect().width/2)}];}))};
  });
  assert.equal(numeric.color,'rgb(164, 62, 87)');
- for(const column of numeric.columns){assert(column.length>1);for(const value of column){assert(!value.text.includes(','));assert(Math.abs(value.unitLeft-column[0].unitLeft)<1);assert(Math.abs(value.numberRight-column[0].numberRight)<1);assert(value.centerDelta<1);}}
+ for(const column of numeric.columns){assert(column.length>1);for(const value of column){assert(!value.text.includes(','));assert(value.digitsRight<value.unitLeft,'Rendered digits must end before the unit');assert(Math.abs(value.unitLeft-column[0].unitLeft)<1);assert(Math.abs(value.numberRight-column[0].numberRight)<1);assert(value.centerDelta<1);}}
  console.log('PASS: red worsening percentages; centered integer values with aligned digits and units in all four numeric columns.');
  const feedbackHeader=await p.locator('.nd-provider-table thead th').last().evaluate(cell=>{const range=document.createRange();range.selectNodeContents(cell.querySelector('button'));const text=range.getBoundingClientRect(),box=cell.getBoundingClientRect();return {left:text.left-box.left,right:box.right-text.right};});
  assert(feedbackHeader.left>=0&&feedbackHeader.right>=0,'Feedback heading must fit inside its column');
- assert.equal(await p.locator('.provider-distance-cell .provider-numeric-value').first().evaluate(e=>e.style.getPropertyValue('--number-width')),'2ch');
- console.log('PASS: feedback heading fully visible; distance groups centered on a two-digit number slot.');
+ console.log('PASS: feedback heading fully visible.');
  await p.waitForSelector('.nd-map-notes .lcn-online-legend');
  const legendPosition=await p.evaluate(()=>{const legend=document.querySelector('.nd-map-notes .lcn-online-legend').getBoundingClientRect(),map=document.querySelector('.nd-map-canvas').getBoundingClientRect();return {left:legend.left-map.left,gap:legend.top-map.bottom};});
  assert(Math.abs(legendPosition.left)<1);assert(legendPosition.gap>=0&&legendPosition.gap<=8);

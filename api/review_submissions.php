@@ -3,6 +3,9 @@ require_once __DIR__.'/_pending_treatments.php';
 require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_submission_review.php';
 require_once __DIR__ . '/_catalog_merge.php';
+require_once __DIR__ . '/_doctor_profile_review.php';
+require_once __DIR__ . '/_medication_classification_review.php';
+require_once __DIR__ . '/_review_reopen.php';
 lcnRequireReviewAccess();
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST'
@@ -12,6 +15,35 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST'
 
 try {
     $pdo=lcnDoctorDatabase();
+    if (($_GET['queue']??'')==='medication') {
+        if(($_SERVER['REQUEST_METHOD']??'GET')==='GET'){
+            lcnSendVoteJson(['ok'=>true,'items'=>lcnMedicationReviewList($pdo)]);
+        }
+        lcnRequireVotingRequest();
+        $status=lcnDecideMedicationReview($pdo,lcnReadJsonBody());
+        lcnSendVoteJson(['ok'=>true,'status'=>$status]);
+    }
+    if (($_GET['queue']??'')==='profile') {
+        if(($_SERVER['REQUEST_METHOD']??'GET')==='GET'){
+            lcnSendVoteJson(['ok'=>true,'items'=>lcnProfileReviewList($pdo)]);
+        }
+        lcnRequireVotingRequest();
+        $status=lcnDecideProfileReview($pdo,lcnReadJsonBody());
+        lcnSendVoteJson(['ok'=>true,'status'=>$status]);
+    }
+    if (($_SERVER['REQUEST_METHOD']??'GET')==='GET'&&($_GET['queue']??'')==='symptoms') {
+        $offset=max(0,(int)($_GET['offset']??0));
+        $items=$pdo->query("SELECT id AS submission_id, 'symptom' AS entity_type, 'symptom_catalog' AS source,
+            sym_id AS existing_target_id, IF(sym_id IS NULL,'new','change') AS submission_kind,
+            name, category, category_snapshot, reason, status AS review_status, created_at, reviewed_at
+            FROM tbl_symptom_requests ORDER BY created_at DESC,id DESC LIMIT 201 OFFSET ".$offset)->fetchAll();
+        $hasMore=count($items)>200;
+        if($hasMore)array_pop($items);
+        $undoKeys=lcnReviewSnapshotKeys($pdo,'symptom');
+        foreach($items as &$item)$item['can_reopen']=isset($undoKeys[$item['submission_id']]);
+        unset($item);
+        lcnSendVoteJson(['ok'=>true,'items'=>$items,'has_more'=>$hasMore]);
+    }
     if(($_SERVER['REQUEST_METHOD']??'GET')==='GET'&&isset($_GET['merge_preview'])){
         $pdo->beginTransaction();$rows=lcnNdRows($pdo,'SELECT * FROM community_submissions WHERE submission_id=? FOR UPDATE',[(int)$_GET['merge_preview']]);if(!$rows)throw new DomainException('Vorschlag nicht gefunden.');$row=$rows[0];if(!in_array($row['review_status'],['pending','reviewing'],true))throw new DomainException('Vorschlag bereits abgeschlossen.');
         [$a,$b]=lcnMergePair($pdo,$row);$keep=(int)($_GET['keep_id']??$b);$plan=lcnMergePreview($pdo,$row,$keep);$version=hash('sha256',json_encode($plan));$pdo->rollBack();
@@ -26,6 +58,9 @@ try {
         $sql.=' ORDER BY created_at DESC, submission_id DESC LIMIT 201 OFFSET '.$offset; $stmt=$pdo->prepare($sql); $stmt->execute($params);
         $items=$stmt->fetchAll();$hasMore=count($items)>200;if($hasMore)array_pop($items); foreach($items as &$item){$item['payload']=lcnSubmissionPayload($item);$item['triage_reasons']=json_decode((string)($item['triage_reasons']??'[]'),true)?:[];$item['submission_id']=(int)$item['submission_id'];$item['triage_score']=(int)$item['triage_score'];$item['existing_target_id']=$item['existing_target_id']!==null?(int)$item['existing_target_id']:null;$item['duplicate_target_id']=$item['duplicate_target_id']!==null?(int)$item['duplicate_target_id']:null;}
         unset($item);
+        $undoKeys=lcnReviewSnapshotKeys($pdo,'submission');
+        foreach($items as &$item)$item['can_reopen']=isset($undoKeys[$item['submission_id']]);
+        unset($item);
         $duplicateNames=[];foreach(lcnNdRows($pdo,'SELECT treat_nd_id,treatmentname FROM tbl_treatments_nd') as $target)$duplicateNames[(int)$target['treat_nd_id']]=$target['treatmentname'];
         foreach($items as &$item)if($item['entity_type']==='treatment')$item['duplicate_target_name']=$duplicateNames[$item['duplicate_target_id']]??null;
         unset($item);
@@ -37,10 +72,15 @@ try {
     if (($_SERVER['REQUEST_METHOD']??'')!=='POST') lcnSendVoteJson(['ok'=>false,'error'=>'Method not allowed.'],405);
     $input=json_decode((string)file_get_contents('php://input'),true,16,JSON_THROW_ON_ERROR);
     $id=filter_var($input['submission_id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]); $action=(string)($input['action']??''); $note=trim((string)($input['note']??''));
-    if($id===false||!in_array($action,['approve','merge','reject','duplicate'],true)||mb_strlen($note)>3000) lcnSendVoteJson(['ok'=>false,'error'=>'Ungültige Aktion.'],422);
+    if($id===false||!in_array($action,['approve','merge','reject','duplicate','reopen'],true)||mb_strlen($note)>3000) lcnSendVoteJson(['ok'=>false,'error'=>'Ungültige Aktion.'],422);
     $pdo->beginTransaction();
     $stmt=$pdo->prepare('SELECT * FROM community_submissions WHERE submission_id=:id FOR UPDATE');$stmt->execute([':id'=>$id]);$row=$stmt->fetch();
     if(!$row) throw new DomainException('Vorschlag nicht gefunden.');
+    if($action==='reopen'){
+        lcnReopenSubmission($pdo,$row);
+        $pdo->commit();
+        lcnSendVoteJson(['ok'=>true,'status'=>'pending']);
+    }
     if(!in_array($row['review_status'],['pending','reviewing'],true))throw new DomainException('Dieser Antrag wurde bereits abgeschlossen. Bitte die Übersicht neu laden.');
     $targetId=null;$status=['reject'=>'rejected','duplicate'=>'duplicate','approve'=>'approved','merge'=>'approved'][$action];
     if($action==='merge'){
@@ -50,7 +90,13 @@ try {
         if($row['entity_type']==='doctor'){$row['existing_target_id']=$targetId;lcnApproveDoctorSubmission($pdo,$row,lcnSubmissionPayload($row));}
         $payload=lcnSubmissionPayload($row);$r=$payload['treatment_relationship']??[];
         if(($r['kind']??'')==='group'){$r['group_name']=$plan['target_name'];$r['group_alias_id']=lcnTreatmentProposalAlias($pdo,$r['group_name'],'umbrella_term');foreach(['source_id','left_id','right_id','context_id'] as $key)if((int)($r[$key]??0)===$plan['source_id'])$r[$key]=$targetId;$payload['treatment_relationship']=$r;$row['existing_target_id']=$r['source_id'];lcnApproveTreatmentRelationship($pdo,$row,$payload);}
-    }elseif($action==='approve'){$payload=lcnSubmissionPayload($row);$targetId=$row['entity_type']==='doctor'?lcnApproveDoctorSubmission($pdo,$row,$payload):lcnApproveTreatmentSubmission($pdo,$row,$payload);}
+    }elseif($action==='approve'){
+        $payload=lcnSubmissionPayload($row);
+        $scopes=lcnSubmissionReviewScopes($pdo,$row,$payload);
+        $before=lcnReviewSnapshot($pdo,$scopes);
+        $targetId=$row['entity_type']==='doctor'?lcnApproveDoctorSubmission($pdo,$row,$payload):lcnApproveTreatmentSubmission($pdo,$row,$payload);
+        lcnSaveReviewSnapshot($pdo,'submission',(string)$id,$scopes,$before);
+    }
     $update=$pdo->prepare("UPDATE community_submissions SET existing_target_id=COALESCE(existing_target_id,:existing),submission_kind=IF(:existing IS NULL,submission_kind,'change'),review_status=:status,reviewer_note=:note,reviewed_at=NOW(),approved_target_id=:target WHERE submission_id=:id");
     $update->execute([':existing'=>$action==='merge'?$targetId:null,':status'=>$status,':note'=>$note?:null,':target'=>$targetId,':id'=>$id]);
     if(in_array($action,['reject','duplicate'],true)){

@@ -48,6 +48,7 @@ nav ul li a:hover {
 }
 .lcn-header *, .lcn-header *::before, .lcn-header *::after {box-sizing:border-box}
 .lcn-header [hidden] {display:none!important}
+:root:not([data-lcn-site-role="admin"]) :is([data-lcn-dummy-toggle], #doctor-demo-toggle, #nd-demo-header-toggle) { display:none!important; }
 .lcn-header .lcn-brand {display:flex;align-items:center;gap:12px;color:#17365d;text-decoration:none;font-size:19px;font-weight:600;letter-spacing:-.4px;white-space:nowrap}
 .lcn-brand strong {font-weight:800}
 .lcn-header .lcn-brand-logo {display:block;width:40px;height:40px;object-fit:contain;flex-shrink:0}
@@ -103,3 +104,20 @@ nav ul li a:hover {
 .lcn-header .lcn-dummy-toggle[aria-pressed="true"] { background:#fff5df; border-color:#e9c875; color:#805b13; }
 .lcn-header .lcn-dummy-toggle:disabled { opacity:.6; cursor:wait; }
 @media(max-width:450px) { .lcn-header.lcn-header { gap:10px; padding-inline:14px; } .lcn-header .lcn-dummy-toggle { padding:8px; font-size:11px; } }
+
+.lcn-role-toggle { display:inline-grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:2px; padding:2px; max-width:100%; box-sizing:border-box; border:1px solid #d7e3ee; border-radius:9px; background:#edf3f9; }
+:is(.lcn-header,#header-placeholder) .lcn-role-toggle button { width:auto; min-width:0; min-height:32px; padding:5px 7px; border:0; border-radius:6px; background:transparent; color:#315e8c; font:700 11px/1.25 Arial,sans-serif; cursor:pointer; }
+:is(.lcn-header,#header-placeholder) .lcn-role-toggle button[aria-pressed="true"] { background:#174d83; color:#fff; cursor:default; }
+.lcn-role-toggle button:focus-visible { outline:2px solid #0878e3; outline-offset:2px; }
+.lcn-local-view-controls { display:flex; align-items:center; justify-content:space-between; gap:8px; box-sizing:border-box; }
+.lcn-header > .lcn-local-view-controls { flex:1 1 0; min-width:0; }
+.lcn-local-view-controls > :is(.lcn-dummy-toggle,#doctor-demo-toggle,#nd-demo-header-toggle) { max-width:48%; margin:0; white-space:normal; }
+body.compact-doctor-header #header-placeholder .lcn-local-view-controls > :is(#doctor-demo-toggle,#nd-demo-header-toggle) { white-space:normal; }
+.lcn-local-view-controls .lcn-role-toggle { min-width:0; }
+.nd-local-controls:empty { display:none; }
+@media(max-width:450px) {
+    .lcn-header.lcn-header:has(> .lcn-local-view-controls) { gap:6px; padding-inline:8px; }
+    .lcn-header > .lcn-local-view-controls { gap:4px; }
+    .lcn-header > .lcn-local-view-controls button { padding-inline:4px; overflow-wrap:anywhere; }
+    .lcn-header:has(> .lcn-local-view-controls) .lcn-brand span { display:none; }
+}

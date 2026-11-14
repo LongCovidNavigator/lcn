@@ -1,6 +1,38 @@
 <?php
 require_once __DIR__.'/_treatments_nd.php';
 
+function lcnSymptomTreatmentCoverage(PDO $pdo, array $symptomIds): array
+{
+    if (!$symptomIds) return [];
+
+    $placeholders = implode(',', array_fill(0, count($symptomIds), '?'));
+    $links = lcnNdRows($pdo, "SELECT links.sym_id, links.treat_nd_id FROM (
+        SELECT sym_id, treat_nd_id FROM tbl_cpl_treatments_nd2symptoms
+        WHERE aktiv=1 AND sym_id IN ($placeholders)
+        UNION
+        SELECT sym_id, treat_nd_id FROM tbl_treatment_symptom_help_links
+        WHERE sym_id IN ($placeholders)
+    ) links JOIN tbl_treatments_nd t ON t.treat_nd_id=links.treat_nd_id
+    WHERE t.review_status<>'rejected_group'", [...$symptomIds, ...$symptomIds]);
+
+    $coverage = array_fill_keys($symptomIds, []);
+    foreach ($links as $link) {
+        $coverage[(int)$link['sym_id']][] = (int)$link['treat_nd_id'];
+    }
+    return $coverage;
+}
+
+function lcnTreatmentsForSymptom(PDO $pdo, int $symptom): array
+{
+    return lcnNdRows($pdo, "SELECT t.treat_nd_id, t.treatmentname, t.typ,
+        (EXISTS (SELECT 1 FROM tbl_cpl_treatments_nd2symptoms c
+            WHERE c.treat_nd_id=t.treat_nd_id AND c.sym_id=? AND c.aktiv=1)
+        OR EXISTS (SELECT 1 FROM tbl_treatment_symptom_help_links h
+            WHERE h.treat_nd_id=t.treat_nd_id AND h.sym_id=?)) AS linked
+        FROM tbl_treatments_nd t WHERE t.review_status<>'rejected_group'
+        ORDER BY t.treatmentname,t.treat_nd_id", [$symptom, $symptom]);
+}
+
 function lcnTreatmentSymptomHelp(PDO $pdo,int $treatment,?string $respondent): array {
     $catalog=lcnNdRows($pdo,'SELECT sym_id AS id,sym_name AS name FROM tbl_symptoms ORDER BY sym_name,sym_id');
     $editorial=array_map('intval',array_column(lcnNdRows($pdo,'SELECT DISTINCT sym_id FROM tbl_cpl_treatments_nd2symptoms WHERE treat_nd_id=? AND aktiv=1 AND sym_id IS NOT NULL',[$treatment]),'sym_id'));

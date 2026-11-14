@@ -2,6 +2,7 @@
   'use strict';
   const root = document.querySelector('.ux-detail');
   if (!root) return;
+  const grid = root.querySelector('[data-treatment-dashboard]');
   let draft = {}, serverCounts = {}, comparisonProfiles = [], symptomHelp = {symptoms:[],catalog:[]}, busy = false, loaded = false;
   const endpoint = 'api/treatment_answer.php';
   const statusNode = document.createElement('p');statusNode.setAttribute('role','status');statusNode.className='ux-test-notice ux-answer-status';root.querySelector('#view-content').prepend(statusNode);
@@ -14,7 +15,9 @@
     try {
       const response=await fetch(payload?endpoint:endpoint+'?treatment_id='+encodeURIComponent(root.dataset.treatmentId),payload?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({treatment_id:Number(root.dataset.treatmentId),...payload})}:{cache:'no-store'});
       const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Bewertungen konnten nicht geladen werden.');
-      draft=data.own_answers||{};serverCounts=data.counts||{};comparisonProfiles=data.comparison_profiles||[];symptomHelp=data.symptom_help||{symptoms:[],catalog:[]};loaded=true;renderAll();notify(payload?(payload.action==='clear'?'Deine Stimme wurde zurückgenommen.':'Deine Angabe wurde gespeichert.'):'',Boolean(payload));return true;
+      draft=data.own_answers||{};serverCounts=data.counts||{};comparisonProfiles=data.comparison_profiles||[];symptomHelp=data.symptom_help||{symptoms:[],catalog:[]};loaded=true;renderAll();notify(payload?(payload.action==='clear'?'Deine Stimme wurde zurückgenommen.':'Deine Angabe wurde gespeichert.'):'',Boolean(payload));
+      if (payload?.action === 'answer') window.dispatchEvent(new CustomEvent('lcn-experience-answer-saved', {detail: payload.question}));
+      return true;
     }catch(error){notify(error.message+' Deine letzte bestätigte Auswahl bleibt unverändert.');return false;}
     finally{busy=false;root.querySelectorAll('[data-option],[data-clear],[data-segment],[data-symptom-id],[data-symptom-search],[data-symptom-toggle]').forEach(b=>{b.disabled=!loaded;b.setAttribute('aria-disabled',String(!loaded));});filterSymptomPicker();if(!payload&&loaded&&Object.keys(draft).some(k=>(k.startsWith('unit_cost:')||k.startsWith('total_cost:'))&&k.split(':')[1]!==window.LCNCost.context()))sync({action:'move_cost_context',context:window.LCNCost.context()});}
   }
@@ -38,11 +41,14 @@
   function render(card) {
     const id = card.dataset.question, options = [...card.querySelectorAll('[data-option]')];
     const {counts, local} = countsFor(card);
+    card.dataset.realAnswerCount = (serverCounts[key(card)] || (card.dataset.kind === 'cost' ? [] : JSON.parse(card.dataset.counts))).reduce((sum, count) => sum + Number(count), 0);
     const total = counts.reduce((a,b)=>a+b,0), own = draft[key(card)];
+    card.dataset.displayAnswerCount = total;
     card.querySelector('[data-community-note]').textContent = total ? total + (total === 1 ? ' Angabe' : ' Angaben') : 'Noch keine Community-Angaben';
     options.forEach((button,i)=>{
       const percent = total ? counts[Number(button.dataset.option)]*100/total : null;
-      button.querySelector('[data-percent]').textContent = percent === null ? '–' : number(percent)+' %';
+      const option = card.dataset.kind === 'donut' ? button.parentElement : button;
+      option.querySelector('[data-percent]').textContent = percent === null ? '–' : number(percent)+' %';
       button.setAttribute('aria-pressed',String(own?.value === button.dataset.value));
       const bar=button.querySelector('[data-bar]');
       if(bar) bar.style[card.dataset.kind==='effect'||id==='access'?'height':'width']=(percent || 0)+'%';
@@ -83,7 +89,7 @@
 
   const escape = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const help = {
-    pem:'Wie hoch ist das Crash-/PEM-Risiko bei dieser Therapie? Wähle die Stufe, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Angaben der Community zu einer Verschlechterung nach Belastung.',
+    pem:'Wie hoch ist das Crash-PEM-Risiko bei dieser Therapie? Wähle die Stufe, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Angaben der Community zu einer Verschlechterung nach Belastung.',
     effect:'Wie hat sich dein Zustand durch die Therapie verändert? Wähle die Bewertung, die auf deine Erfahrung zutrifft. Die Verteilung zeigt subjektive Erfahrungen der Community und ist kein Wirksamkeitsnachweis.',
     gamechanger:'War die Therapie für dich ein Gamechanger, hat sie also deinen Alltag entscheidend verbessert? Wähle die Antwort, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Antworten der Community.',
     unit_cost:'Wie hoch ist dein eigener Kostenanteil pro Anwendung, Packung oder Therapieeinheit? Wähle eine grob passende Stufe.',
@@ -107,8 +113,23 @@
     const meta=document.createElement('div');meta.className='ux-question-meta';meta.append(card.querySelector('[data-community-note]'));
     if(card.dataset.kind==='cost')meta.append(card.querySelector('.insurance-toggle'));
     cardHeading.append(heading,meta);card.prepend(cardHeading);
-    if(key==='effect'){const node=document.createElement('div');node.dataset.ratingComparison='';card.append(node);}
-    if(key==='pem'){const node=document.createElement('div');node.dataset.pemComparison='';card.append(node);}
+    if(grid && key==='effect'){const node=document.createElement('div');node.dataset.ratingComparison='';card.append(node);}
+    if(grid && key==='pem'){const node=document.createElement('div');node.dataset.pemComparison='';card.append(node);}
+    if (key === 'gamechanger') {
+      const answer = document.createElement('div');
+      answer.className = 'ux-gamechanger-answer';
+      const chart = card.querySelector('.ux-chart');
+      chart.before(answer);
+      answer.append(chart, card.querySelector('.ux-own'));
+      if (grid) {
+        const layout = document.createElement('div');
+        layout.className = 'ux-gamechanger-layout';
+        const comparison = document.createElement('div');
+        comparison.dataset.gamechangerComparison = '';
+        answer.before(layout);
+        layout.append(comparison, answer);
+      }
+    }
   });
   appendHelp(root.querySelector('.card:has(>.nd-provider-map)>h3'), 'Wo findest du Behandler:innen für diese Therapie? Gib deinen Ausgangsort ein und übernimm ihn mit Enter oder einem Suchvorschlag. Du kannst die Behandler:innen nach Ort und Radius filtern. Die Karte zeigt gespeicherte Hauptstandorte; Entfernungen sind Luftlinien. Vorläufige Zuordnungen sind gekennzeichnet.');
   appendHelp(root.querySelector('#symptom-help-heading'), 'Bei welchen Symptomen hat dir die Therapie geholfen? Wähle die passenden Symptome aus oder ergänze eines über die Suche. Erneutes Anklicken deiner Auswahl nimmt sie zurück.');
@@ -156,7 +177,7 @@
     const noTravel=Boolean(profile?.home_visit_setting)||remote||(atHome&&(independent||profile?.freely_available)&&!prescriptionRequired);
     const result=window.lcnTreatmentScore(counts,context,null,independent,{distance:distances.length?Math.min(...distances):null,noTravel,prescriptionRequired,oneOffPrescription},gamechangerReference.filter(p=>p.id!==profile?.id).map(p=>p.value));
     const travel=result.rows.find(row=>row.key==='distance');
-    if(travel.value==null)travel.reason=!valid(origin)?'Bitte deinen Ausgangsort unter Standorte eingeben. Danach werden Entfernung und Punkte automatisch berechnet.':'Für diese Therapie ist noch kein bestätigter Anbieter mit gültigen Koordinaten hinterlegt.';
+    if(travel.value==null)travel.reason=!valid(origin)?'Bitte deinen Ausgangsort unter Anreise eingeben. Danach werden Entfernung und Punkte automatisch berechnet.':'Für diese Therapie ist noch kein bestätigter Anbieter mit gültigen Koordinaten hinterlegt.';
     return result;
   }
   function comparisonRange(own,values){
@@ -193,8 +214,8 @@
   }
 
   function renderSummaries(){
-    if(!root.querySelector('[data-treatment-dashboard]'))return;
-    const context=window.LCNCost.context();const contextLabel=window.LCNCost.label();
+    if (!grid) return;
+    const context=window.LCNCost.context();
     const counts=currentCounts();
     // Both cost rows use the same context in the overall score.
     ['unit_cost','total_cost'].forEach(k=>{const card=questions.find(c=>c.dataset.question===k);counts[k+':'+context]=displayedCounts(card,k+':'+context);});
@@ -206,7 +227,22 @@
     }).filter(profile=>profile.value!=null);
     const result=scoreProfile(ownProfile||{id:Number(root.dataset.treatmentId),independent_at_home:root.dataset.independentAtHome==='1'},counts,context);
     const others=comparisonProfiles.filter(p=>p.id!==Number(root.dataset.treatmentId)).map(p=>referenceProfile(p,context));
-    const eligible=others.map(p=>scoreProfile(p,p.counts,context)).filter(r=>r.dataCoverage>70);
+    const peerResults=others.map(p=>scoreProfile(p,p.counts,context));
+    const rating=result.rows.find(r=>r.key==='effect');
+    const values=peerResults.map(peer=>peer.rows.find(r=>r.key==='effect')).filter(r=>r.value!=null).map(r=>1+3*r.value);
+    const ratingComparison=comparison(rating.value==null?null:1+3*rating.value,values,'Community-Bewertung im Vergleich',(demo||loaded)&&rating.total>=10,4);
+    root.querySelectorAll('[data-rating-comparison]').forEach(node=>{node.innerHTML=ratingComparison;});
+    const gamechanger=result.rows.find(r=>r.key==='gamechanger');
+    const gameValues=peerResults.map(peer=>peer.rows.find(r=>r.key==='gamechanger')).filter(r=>r.value!=null).map(r=>100*r.rawValue);
+    const gameCard=questions.find(card=>card.dataset.question==='gamechanger');
+    if(gameCard){
+      const target=gameCard.querySelector('[data-gamechanger-comparison]');
+      target.innerHTML=comparison(gamechanger.rawValue==null?null:100*gamechanger.rawValue,gameValues,'Gamechanger im Vergleich',(demo||loaded)&&gamechanger.total>=10,100,false,' zur Gamechanger-Frage').replaceAll('Punkte ','Prozentpunkte ').replaceAll(' / 100',' %');
+    }
+    const pem=result.rows.find(r=>r.key==='pem');
+    const pemValues=peerResults.map(peer=>peer.rows.find(r=>r.key==='pem')).filter(r=>r.value!=null).map(r=>4-3*r.value);
+    root.querySelector('[data-pem-comparison]').innerHTML=comparison(pem.value==null?null:4-3*pem.value,pemValues,'Crash-PEM-Risiko im Vergleich',(demo||loaded)&&pem.total>=10,4,true);
+    const eligible=peerResults.filter(r=>r.dataCoverage>70);
     const comparisonValues=eligible.map(r=>r.score);
     const comparisonReady=(demo||loaded)&&result.dataCoverage>70;
 
@@ -238,7 +274,6 @@
       const comparisonHtml=scoreClassification(result,comparisonValues,comparisonReady);
       node.innerHTML='<section class="card dashboard-score therapy-final-summary">'+comparisonHtml+'<details class="therapy-more-info"><summary>Weitere Infos</summary>'+comparisonExplanation(result,comparisonValues,comparisonReady)+comparisonOrientation+'</details>'+(node.dataset.treatmentScore==='overview'?'':'<details><summary>Gewichtung und Teilwerte</summary>'+explanation+'<div class="therapy-score-scroll" role="region" aria-label="Gewichtung und Teilwerte" tabindex="0"><table class="score-parts therapy-score-table"><thead><tr><th scope="col">Teilwert</th><th scope="col">Berücksichtigung</th><th scope="col">Gewicht</th><th scope="col">Beitrag</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><th scope="row">Gesamtwert</th><td>'+result.available+' von '+result.fieldCount+' Teilwerten</td><td>'+number(result.coverage)+'</td><td>'+(result.coverage?number(result.earned):'—')+'</td></tr></tfoot></table></div></details>')+'</section>';
     });
-    const grid=root.querySelector('[data-treatment-dashboard]');
     grid.innerHTML=questions.filter(c=>!c.dataset.question.startsWith('symptom-')).sort((a,b)=>{const order=['setting','access','pem','unit_cost','total_cost','effect','gamechanger'];return order.indexOf(a.dataset.question)-order.indexOf(b.dataset.question);}).map(card=>{
       const chartCounts=card.dataset.kind==='cost'?counts[card.dataset.question+':'+context]:countsFor(card).counts;
       const total=chartCounts.reduce((n,v)=>n+v,0);
@@ -293,7 +328,7 @@
     const travelLevel=travel.noTravel?0:travel.distance==null?-1:travelLevels.findIndex((level,i)=>i>0&&travel.distance<=level[0]);
     const travelGraphic='<ol class="dashboard-travel-scale" aria-label="Anreisestufen und Punkte">'+travelLevels.map((level,i)=>'<li'+(i===travelLevel?' class="is-current" aria-current="true"':'')+'><span class="dashboard-travel-color" style="background:'+level[4]+'" aria-hidden="true"></span><span><strong>'+level[1]+'</strong><small>'+level[2]+'</small></span><b>'+number(travel.oneOffPrescription&&i>0?15-(15-level[3])/2:level[3])+' P.</b></li>').join('')+'</ol>';
 
-    grid.insertAdjacentHTML('beforeend','<section class="card ux-dashboard-card dashboard-shared-card" data-dashboard-question="distance"><h3>Persönliche Anreise '+helpMarkup('Persönliche Anreise','Wie weit ist die nächste behandelnde Person von deinem Standort entfernt? Die Entfernung wird als Luftlinie zum nächstgelegenen bestätigten Anbieter berechnet. Deinen Ausgangsort kannst du unter Standorte ergänzen. Bei eigenständig zu Hause durchführbaren Therapien ohne Verordnung entfällt die Anreise. Für eine nötige Verordnung zu Hause nehmen wir ohne bestätigte Online-Möglichkeit einen einmaligen Termin mit halbiertem Entfernungsabzug an.')+'</h3><div class="dashboard-points"><strong>'+(travel.value==null?'Noch nicht auswertbar':number(travel.value*15)+' <small>/ 15 Punkte</small>')+'</strong></div><p>'+(travel.noTravel?'Keine Anreise erforderlich':travel.distance==null?escape(travel.reason):number(travel.distance)+' km Luftlinie zum nächstgelegenen bestätigten Anbieter')+'</p>'+(travel.oneOffPrescription?'<p class="ux-dashboard-score-note">Verordnung: einmaliger Vor-Ort-Termin angenommen · halber Entfernungsabzug.</p>':'')+travelGraphic+'<p class="ux-dashboard-score-note">'+escape(travel.reason)+'</p></section>');
+    grid.insertAdjacentHTML('beforeend','<section class="card ux-dashboard-card dashboard-shared-card" data-dashboard-question="distance"><h3>Persönliche Anreise '+helpMarkup('Persönliche Anreise','Wie weit ist die nächste behandelnde Person von deinem Standort entfernt? Die Entfernung wird als Luftlinie zum nächstgelegenen bestätigten Anbieter berechnet. Deinen Ausgangsort kannst du unter Anreise ergänzen. Bei eigenständig zu Hause durchführbaren Therapien ohne Verordnung entfällt die Anreise. Für eine nötige Verordnung zu Hause nehmen wir ohne bestätigte Online-Möglichkeit einen einmaligen Termin mit halbiertem Entfernungsabzug an.')+'</h3><div class="dashboard-points"><strong>'+(travel.value==null?'Noch nicht auswertbar':number(travel.value*15)+' <small>/ 15 Punkte</small>')+'</strong></div><p>'+(travel.noTravel?'Keine Anreise erforderlich':travel.distance==null?escape(travel.reason):number(travel.distance)+' km Luftlinie zum nächstgelegenen bestätigten Anbieter')+'</p>'+(travel.oneOffPrescription?'<p class="ux-dashboard-score-note">Verordnung: einmaliger Vor-Ort-Termin angenommen · halber Entfernungsabzug.</p>':'')+travelGraphic+'<p class="ux-dashboard-score-note">'+escape(travel.reason)+'</p></section>');
     for(const [sectionNumber,title,maximum,keys] of [[2,'Welche Belastungshürden gibt es bei der Therapie?',30,['setting','pem','distance']],[3,'Wie zugänglich ist die Therapie?',30,['access','total_cost','unit_cost']],[4,'Welche Erfahrungen gibt es?',40,['effect','gamechanger']]]){
       const rows=result.rows.filter(row=>keys.includes(row.key));
       const available=rows.filter(row=>row.value!=null);
@@ -327,7 +362,7 @@
     grid.querySelectorAll('[data-dashboard-question]').forEach(card=>{
       const heading=card.querySelector('.assessment-header')||card.querySelector('h3');
       const oldLink=card.querySelector('.dashboard-detail');
-      const target=oldLink?.getAttribute('href')||'#termin';
+      const target=oldLink?.getAttribute('href')||'#anreise';
       const title=card.querySelector('h3');
       const link=document.createElement('a');link.className='therapy-dashboard-title-link';link.href=target;
       link.textContent=title.firstChild.textContent.trim();title.firstChild.replaceWith(link);
@@ -342,20 +377,7 @@
       const help=group.querySelector(':scope>.therapy-cost-selection-info');
       if(help)group.append(help);
     });
-    const rating=result.rows.find(r=>r.key==='effect');
-    const values=others.map(p=>scoreProfile(p,p.counts,context).rows[0]).filter(r=>r.value!=null).map(r=>1+3*r.value);
-    root.querySelector('[data-rating-comparison]').innerHTML=comparison(rating.value==null?null:1+3*rating.value,values,'Community-Bewertung im Vergleich',(demo||loaded)&&rating.total>=10,4);
-    const gamechanger=result.rows.find(r=>r.key==='gamechanger');
-    const gameValues=others.map(p=>scoreProfile(p,p.counts,context).rows.find(r=>r.key==='gamechanger')).filter(r=>r.value!=null).map(r=>100*r.rawValue);
-    const gameCard=questions.find(card=>card.dataset.question==='gamechanger');
-    if(gameCard){
-      let target=gameCard.querySelector('[data-gamechanger-comparison]');
-      if(!target){const layout=document.createElement('div');layout.className='ux-gamechanger-layout';const left=document.createElement('div');left.className='ux-gamechanger-answer';target=document.createElement('div');target.dataset.gamechangerComparison='';const chart=gameCard.querySelector('.ux-chart');chart.before(layout);left.append(chart,gameCard.querySelector('.ux-own'));layout.append(target,left);}
-      target.innerHTML=comparison(gamechanger.rawValue==null?null:100*gamechanger.rawValue,gameValues,'Gamechanger im Vergleich',(demo||loaded)&&gamechanger.total>=10,100,false,' zur Gamechanger-Frage').replaceAll('Punkte ','Prozentpunkte ').replaceAll(' / 100',' %');
-    }
-    const pem=result.rows.find(r=>r.key==='pem');
-    const pemValues=others.map(p=>scoreProfile(p,p.counts,context).rows.find(r=>r.key==='pem')).filter(r=>r.value!=null).map(r=>4-3*r.value);
-    root.querySelector('[data-pem-comparison]').innerHTML=comparison(pem.value==null?null:4-3*pem.value,pemValues,'Crash-/PEM-Risiko im Vergleich',(demo||loaded)&&pem.total>=10,4,true);
+
   }
   async function changeCostPreferences(patch){if(busy)return;const previous=window.LCNCost.get(),before=window.LCNCost.context();window.LCNCost.set(patch);const context=window.LCNCost.context();if(before!==context&&Object.keys(draft).some(k=>k.startsWith('unit_cost:')||k.startsWith('total_cost:'))){if(!await sync({action:'move_cost_context',context}))window.LCNCost.set(previous);}renderAll();}
 
@@ -395,7 +417,11 @@
     const list=root.querySelector('[data-symptom-ranking]'),picker=root.querySelector('[data-symptom-picker]');
     if(!list||!picker)return;
     const focused=document.activeElement?.dataset.symptomId;
+    root.querySelector('.ux-symptom-help').dataset.realAnswerCount = Math.max(0, ...symptomHelp.symptoms.map(symptom => symptom.count));
     const rows=symptomHelp.symptoms.map(symptom=>({...symptom,count:symptom.count+(demo&&symptom.editorial?(symptom.id*7)%31:0)})).sort((a,b)=>b.count-a.count||Number(b.editorial)-Number(a.editorial)||a.name.localeCompare(b.name,'de'));
+    list.closest('.ux-symptom-help').dataset.guideSymptoms = JSON.stringify(
+      rows.filter(symptom => symptom.count > 0).slice(0, 2).map(({name, count}) => ({name, count}))
+    );
     const visibleRows=rows.filter(symptom=>symptom.editorial||symptom.count>0||symptom.selected);
     if(loaded&&!busy){const visibleIds=new Set(visibleRows.map(symptom=>symptom.id));for(let i=symptomOrder.length-1;i>=0;i--)if(!visibleIds.has(symptomOrder[i]))symptomOrder.splice(i,1);}
     visibleRows.forEach(symptom=>{if(!symptomOrder.includes(symptom.id))symptomOrder.push(symptom.id);});
@@ -425,6 +451,7 @@
 
 
     questions.forEach(render);renderSummaries();renderSymptomHelp();
+    root.dispatchEvent(new Event('lcn-treatment-answers-rendered', {bubbles: true}));
 
   }
   toggle?.addEventListener('click',()=>{if(busy||!window.LCNDummy.available)return;demo=!demo;window.LCNDummy.set(demo);const url=new URL(location.href);url.searchParams.set('demo',demo?'1':'0');history.replaceState(null,'',url);renderAll();});

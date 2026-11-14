@@ -10,6 +10,7 @@
  async function sync(payload){if(busy)return;busy=true;renderSymptomHelp();if(payload)notify('Wird gespeichert …');try{
  const response=await fetch('api/doctor_symptom_help.php'+(payload?'':'?dr_id='+doctorId),payload?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dr_id:doctorId,symptom_id:Number(payload.question.replace('symptom-help-','')),action:payload.action||'answer'})}:{cache:'no-store'});
  const data=await response.json();if(!response.ok||!data.ok)throw Error(data.error||'Symptome konnten nicht geladen werden.');cached=symptomHelp=data.symptom_help;loaded=true;if(payload)notify(payload.action==='clear'?'Deine Stimme wurde zurückgenommen.':'Deine Angabe wurde gespeichert.');
+ if(payload && payload.action !== 'clear') window.dispatchEvent(new CustomEvent('lcn-experience-answer-saved', {detail: payload.question}));
  }catch(error){notify(error.message);}finally{busy=false;renderSymptomHelp();}}
   let symptomSearch='',symptomOpen=false,symptomActive=-1;
   function closeSymptomPicker(){symptomOpen=false;symptomActive=-1;filterSymptomPicker();}

@@ -50,7 +50,7 @@ try {
   lcnSendVoteJson(['ok'=>true,'items'=>$items]);
  }
  if($write){
-  $allowed=['create','comment','vote','report','admin_idea','admin_idea_reject','admin_idea_classify','admin_comment','admin_report','admin_merge'];
+  $allowed=['create','comment','vote','report','admin_idea','admin_idea_reject','admin_idea_classify','admin_idea_delete','admin_comment','admin_report','admin_merge'];
   if(!in_array($action,$allowed,true))throw new InvalidArgumentException('Unbekannte Schreibaktion.');
   fbRate($p,$admin?'admin':$action,$admin?100:($action==='vote'?60:8));
   if($action==='create'){
@@ -68,7 +68,7 @@ try {
     $p->prepare('INSERT INTO tbl_feedback_images(id,owner_key,idea_id,mime_type,image_data) VALUES(?,?,?,?,?)')->execute([bin2hex(random_bytes(16)),lcnVoterKey(),$id,'image/webp',$binary]);
    }
    $p->commit();
-   lcnSendVoteJson(['ok'=>true,'id'=>$id,'message'=>'Danke! Deine Idee wird geprüft und nach Freigabe veröffentlicht.'],201);
+   lcnSendVoteJson(['ok'=>true,'id'=>$id,'message'=>'Danke! Deine Idee ist bereits sichtbar und wird noch geprüft.'],201);
   }
   if($action==='report'){
    [$type,$entity]=fbContext($p,$in);$page=isset($in['reference_mode'])?fbReferencePath($in):fbText($in,'page_path',500);if($page!==''&&(str_contains($page,'://')||str_starts_with($page,'//')||preg_match('/[\x00-\x1f]/',$page)))throw new InvalidArgumentException('Bitte einen lokalen Seitenbezug angeben.');
@@ -79,12 +79,13 @@ try {
   }
   $p->beginTransaction();
   if($action==='admin_merge'){fbMerge($p,fbId($in['id']??null),fbId($in['target_id']??null));}
+  elseif($action==='admin_idea_delete'){fbDeleteArchived($p,'ideas',fbId($in['id']??null));}
   elseif($action==='admin_comment'){
    $id=fbId($in['id']??null);$state=fbChoice($in,'moderation',['pending'=>1,'approved'=>1,'rejected'=>1,'archived'=>1,'hidden'=>1,'deleted'=>1]);
-   if($state==='deleted')$p->prepare('DELETE FROM tbl_feedback_comments WHERE id=?')->execute([$id]);else $p->prepare('UPDATE tbl_feedback_comments SET moderation=? WHERE id=?')->execute([$state,$id]);
+   if($state==='deleted')fbDeleteArchived($p,'comments',$id);else $p->prepare('UPDATE tbl_feedback_comments SET moderation=? WHERE id=?')->execute([$state,$id]);
   }elseif($action==='admin_report'){
    $id=fbId($in['id']??null);$state=fbChoice($in,'status',['open'=>1,'done'=>1,'rejected'=>1,'archived'=>1,'deleted'=>1]);
-   if($state==='deleted')$p->prepare('DELETE FROM tbl_feedback_reports WHERE id=?')->execute([$id]);
+   if($state==='deleted')fbDeleteArchived($p,'reports',$id);
    elseif($state==='archived')$p->prepare("UPDATE tbl_feedback_reports SET status='archived', email=NULL WHERE id=?")->execute([$id]);
    else $p->prepare('UPDATE tbl_feedback_reports SET status=? WHERE id=?')->execute([$state,$id]);
   }else{
@@ -128,7 +129,7 @@ try {
   $p->commit();lcnSendVoteJson(['ok'=>true,'message'=>$action==='comment'?'Danke für deinen Kommentar!':'Gespeichert.']);
  }
  if($action==='list'){
-  $where=["i.moderation='approved'","i.merged_into IS NULL"];$args=[];
+  $where=["i.moderation IN ('approved','pending')","i.merged_into IS NULL"];$args=[];
   if(!empty($in['category'])){$where[]='i.category=?';$args[]=fbChoice($in+['category'=>'general'],'category',LCN_FEEDBACK_CATEGORIES);}
   if(!empty($in['status'])){$where[]='i.status=?';$args[]=fbChoice($in,'status',LCN_FEEDBACK_STATUSES);}
   $search=fbText($in,'q',180);if($search!==''){
@@ -145,9 +146,9 @@ try {
    'new'=>'i.created_at DESC,i.id DESC',
    'updated'=>'i.updated_at DESC,i.id DESC',
   ][$in['sort']??'votes']??'votes DESC,i.id DESC';
-  $q=$p->prepare("SELECT i.id,i.title,i.description,i.category,i.status,i.created_at,i.updated_at,i.entity_type,i.entity_id,i.seed_key,
+  $q=$p->prepare("SELECT i.id,i.title,i.description,i.category,i.status,i.moderation,i.created_at,i.updated_at,i.entity_type,i.entity_id,i.seed_key,
    (SELECT COUNT(*) FROM tbl_feedback_votes v WHERE v.idea_id=i.id) votes,
-   (SELECT COUNT(*) FROM tbl_feedback_comments c WHERE c.idea_id=i.id AND c.moderation='approved') comments,
+   (SELECT COUNT(*) FROM tbl_feedback_comments c WHERE c.idea_id=i.id AND c.moderation IN ('approved','pending')) comments,
    EXISTS(SELECT 1 FROM tbl_feedback_votes v WHERE v.idea_id=i.id AND v.voter_key=?) supported
    FROM tbl_feedback_ideas i WHERE $where ORDER BY $sort LIMIT $size OFFSET $offset");$q->execute(array_merge([lcnExistingVoterKey()??''],$args));
   $items=$q->fetchAll();$images=fbImageIds($p,array_column($items,'id'));foreach($items as &$item)$item['image_id']=$images[$item['id']]??null;unset($item);
@@ -156,12 +157,15 @@ try {
  if($action==='detail'){
   $id=fbId($in['id']??null);$r=fbIdea($p,$id);$seen=[];
   while($r['merged_into']){if(isset($seen[$r['id']]))throw new RuntimeException('Merge cycle');$seen[$r['id']]=true;$r=fbIdea($p,(int)$r['merged_into']);}
-  fbPublic($r);$id=(int)$r['id'];$r['image_id']=fbImageIds($p,[$id])[$id]??null;unset($r['email'],$r['moderation']);$r['page_reference']=fbReadPageReference($p,$id);
+  fbPublic($r);
+  $id=(int)$r['id'];$r['image_id']=fbImageIds($p,[$id])[$id]??null;unset($r['email'],$r['archived_at'],$r['archive_reminded_at']);$r['page_reference']=fbReadPageReference($p,$id);
   $q=$p->prepare('SELECT COUNT(*) FROM tbl_feedback_votes WHERE idea_id=?');$q->execute([$id]);$r['votes']=(int)$q->fetchColumn();
   $q=$p->prepare('SELECT 1 FROM tbl_feedback_votes WHERE idea_id=? AND voter_key=?');$q->execute([$id,lcnExistingVoterKey()??'']);$r['supported']=(bool)$q->fetchColumn();
-  $page=max(1,min(10000,(int)($in['page']??1)));$offset=($page-1)*30;
-  $q=$p->prepare("SELECT id,body,display_name,created_at FROM tbl_feedback_comments WHERE idea_id=? AND moderation='approved' ORDER BY created_at,id LIMIT 30 OFFSET $offset");$q->execute([$id]);$comments=$q->fetchAll();
-  $q=$p->prepare("SELECT COUNT(*) FROM tbl_feedback_comments WHERE idea_id=? AND moderation='approved'");$q->execute([$id]);$total=(int)$q->fetchColumn();
+  $visibleComments="FROM tbl_feedback_comments WHERE idea_id=? AND moderation IN ('approved','pending')";
+  $q=$p->prepare("SELECT COUNT(*) $visibleComments");$q->execute([$id]);$total=(int)$q->fetchColumn();
+  $requestedPage=$in['page']??1;
+  $page=$requestedPage==='last'?max(1,(int)ceil($total/30)):max(1,min(10000,(int)$requestedPage));$offset=($page-1)*30;
+  $q=$p->prepare("SELECT id,body,display_name,created_at,moderation $visibleComments ORDER BY created_at,id LIMIT 30 OFFSET $offset");$q->execute([$id]);$comments=$q->fetchAll();
   $q=$p->prepare("SELECT old_value,new_value,reason,created_at FROM tbl_feedback_history WHERE idea_id=? AND event_type='status' ORDER BY id DESC LIMIT 100");$q->execute([$id]);
   lcnSendVoteJson(['ok'=>true,'idea'=>$r,'comments'=>$comments,'comment_total'=>$total,'page'=>$page,'history'=>$q->fetchAll(),'merged'=>count($seen)>0]);
  }
@@ -170,18 +174,35 @@ try {
   $page=max(1,min(10000,(int)($in['page']??1)));$table=$tables[$kind];
   $filter='1=1';$args=[];if(!empty($in['state'])){$state=fbText($in,'state',16);$filter=($kind==='reports'?'status':'moderation').'=?';$args[]=$state;}
   if($kind==='ideas'&&!empty($in['status'])){$filter.=' AND status=?';$args[]=fbChoice($in,'status',LCN_FEEDBACK_STATUSES);}
+  $archiveDays=LCN_FEEDBACK_ARCHIVE_DAYS;
+  $overdue="COALESCE(DATE_ADD(archived_at,INTERVAL $archiveDays DAY)<=NOW(),0)";
   if(isset($in['focus_id'])){
    $focusId=fbId($in['focus_id']);
-   $q=$p->prepare("SELECT COUNT(*) FROM $table WHERE $filter AND id>?");
-   $q->execute([...$args,$focusId]);
+   $q=$p->prepare("SELECT $overdue FROM $table WHERE id=?");
+   $q->execute([$focusId]);
+   $focusOverdue=(int)$q->fetchColumn();
+   $q=$p->prepare("SELECT COUNT(*) FROM $table WHERE $filter AND ($overdue>? OR ($overdue=? AND id>?))");
+   $q->execute([...$args,$focusOverdue,$focusOverdue,$focusId]);
    $page=intdiv((int)$q->fetchColumn(),30)+1;
   }
   $offset=($page-1)*30;
-  $q=$p->prepare("SELECT * FROM $table WHERE $filter ORDER BY id DESC LIMIT 30 OFFSET $offset");$q->execute($args);$items=$q->fetchAll();if($kind==='ideas'){$images=fbImageIds($p,array_column($items,'id'));foreach($items as &$item)$item['image_id']=$images[$item['id']]??null;unset($item);}
+  $q=$p->prepare("SELECT *, DATE(DATE_ADD(archived_at,INTERVAL $archiveDays DAY)) archive_due,
+   DATEDIFF(DATE_ADD(archived_at,INTERVAL $archiveDays DAY),CURRENT_DATE) archive_days_left,
+   $overdue archive_overdue FROM $table WHERE $filter ORDER BY archive_overdue DESC,id DESC LIMIT 30 OFFSET $offset");
+  $q->execute($args);$items=$q->fetchAll();if($kind==='ideas'){$images=fbImageIds($p,array_column($items,'id'));foreach($items as &$item)$item['image_id']=$images[$item['id']]??null;unset($item);}
   if($kind==='ideas'){foreach($items as &$item)$item['page_reference']=fbReadPageReference($p,(int)$item['id'],true);unset($item);}
   $q=$p->prepare("SELECT COUNT(*) FROM $table WHERE $filter");$q->execute($args);$total=(int)$q->fetchColumn();
-  $stats=[];foreach(['pending_ideas'=>"SELECT COUNT(*) FROM tbl_feedback_ideas WHERE moderation='pending' AND merged_into IS NULL",'pending_comments'=>"SELECT COUNT(*) FROM tbl_feedback_comments WHERE moderation='pending'",'open_reports'=>"SELECT COUNT(*) FROM tbl_feedback_reports WHERE status='open'",'published'=>"SELECT COUNT(*) FROM tbl_feedback_ideas WHERE moderation='approved' AND merged_into IS NULL",'rejected_ideas'=>"SELECT COUNT(*) FROM tbl_feedback_ideas WHERE moderation='rejected'",'all_reports'=>"SELECT COUNT(*) FROM tbl_feedback_reports",'done_reports'=>"SELECT COUNT(*) FROM tbl_feedback_reports WHERE status='done'",'archived_reports'=>"SELECT COUNT(*) FROM tbl_feedback_reports WHERE status='archived'",'rejected_reports'=>"SELECT COUNT(*) FROM tbl_feedback_reports WHERE status='rejected'",'all_ideas'=>"SELECT COUNT(*) FROM tbl_feedback_ideas",'archived_ideas'=>"SELECT COUNT(*) FROM tbl_feedback_ideas WHERE moderation='archived'"] as $k=>$sql)$stats[$k]=(int)$p->query($sql)->fetchColumn();
-  lcnSendVoteJson(['ok'=>true,'items'=>$items,'stats'=>$stats,'page'=>$page,'pages'=>(int)ceil($total/30),'total'=>$total]);
+  $stats=[];foreach(['pending_ideas'=>"SELECT COUNT(*) FROM tbl_feedback_ideas WHERE moderation='pending' AND merged_into IS NULL",'open_reports'=>"SELECT COUNT(*) FROM tbl_feedback_reports WHERE status='open'",'published'=>"SELECT COUNT(*) FROM tbl_feedback_ideas WHERE moderation='approved' AND merged_into IS NULL",'rejected_ideas'=>"SELECT COUNT(*) FROM tbl_feedback_ideas WHERE moderation='rejected'",'all_reports'=>"SELECT COUNT(*) FROM tbl_feedback_reports",'done_reports'=>"SELECT COUNT(*) FROM tbl_feedback_reports WHERE status='done'",'archived_reports'=>"SELECT COUNT(*) FROM tbl_feedback_reports WHERE status='archived'",'rejected_reports'=>"SELECT COUNT(*) FROM tbl_feedback_reports WHERE status='rejected'",'all_ideas'=>"SELECT COUNT(*) FROM tbl_feedback_ideas",'archived_ideas'=>"SELECT COUNT(*) FROM tbl_feedback_ideas WHERE moderation='archived'"] as $k=>$sql)$stats[$k]=(int)$p->query($sql)->fetchColumn();
+  $stats['all_comments']=0;
+  foreach(['pending','approved','rejected','archived','hidden'] as $state)$stats[$state.'_comments']=0;
+  foreach($p->query('SELECT moderation, COUNT(*) total FROM tbl_feedback_comments GROUP BY moderation') as $row){
+   $count=(int)$row['total'];
+   $stats[$row['moderation'].'_comments']=$count;
+   $stats['all_comments']+=$count;
+  }
+  $archivePreviewImages=$kind==='ideas'&&lcnLocalRolePreviewAvailable()&&$stats['archived_ideas']>0
+   &&(!fbImagesReady($p)||!(int)$p->query("SELECT EXISTS(SELECT 1 FROM tbl_feedback_images img JOIN tbl_feedback_ideas idea ON idea.id=img.idea_id WHERE idea.moderation='archived')")->fetchColumn());
+  lcnSendVoteJson(['ok'=>true,'items'=>$items,'stats'=>$stats,'page'=>$page,'pages'=>(int)ceil($total/30),'total'=>$total,'archive_preview_images'=>$archivePreviewImages,'archive_days'=>$archiveDays]);
  }
  lcnSendVoteJson(['ok'=>false,'error'=>'Unbekannte Aktion.'],400);
 }catch(InvalidArgumentException $e){if(isset($p)&&$p->inTransaction())$p->rollBack();lcnSendVoteJson(['ok'=>false,'error'=>$e->getMessage()],http_response_code()===404?404:400);}

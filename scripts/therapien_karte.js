@@ -2148,41 +2148,8 @@ function initTreatmentMap() {
         return;
     }
 
-    treatmentMap = L.map("treatment-map", {
-        zoomControl: false,
-        scrollWheelZoom: false
-    }).setView(
-        [treatmentDefaultMapCenter.lat, treatmentDefaultMapCenter.lng],
-        6
-    );
-
-    mapElement.addEventListener("click", function () {
-        treatmentMap.scrollWheelZoom.enable();
-        mapElement.classList.add("is-scroll-zoom-active");
-    });
-
-    mapElement.addEventListener("mouseleave", function () {
-        treatmentMap.scrollWheelZoom.disable();
-        mapElement.classList.remove("is-scroll-zoom-active");
-    });
-
-    L.control.zoom({
-        position: "topright"
-    }).addTo(treatmentMap);
-
-    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
-        maxZoom: 19,
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere'
-    }).addTo(treatmentMap);
-
-    treatmentUserLocationIcon = L.icon({
-        iconUrl: window.LCNImages.urls["map-marker-red"],
-        shadowUrl: window.LCNImages.urls["map-marker-shadow"],
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
+    treatmentMap = window.LCNMapViewport.createMap(mapElement, { viewKey: 'treatment-search' });
+    treatmentUserLocationIcon = window.LCNMapViewport.originIcon();
 }
 
 function bindTreatmentMapEvents() {
@@ -2235,7 +2202,7 @@ async function applyTreatmentLocationFromInput() {
         updateTreatmentUserLocationMarker();
         updateTreatmentRadiusCircle();
 
-        if (treatmentMap) {
+        if (treatmentMap && !treatmentMap._lcnViewport) {
             treatmentMap.setView([geocodedLocation.lat, geocodedLocation.lng], currentTreatmentLocationMode === "city" ? 11 : 10);
         }
 
@@ -2253,10 +2220,7 @@ function resetTreatmentLocation(shouldReload = true) {
     hideTreatmentLocationSuggestions();
     treatmentLocationSuggestionController?.abort();
     currentTreatmentUserLocation = null;
-    localStorage.removeItem(treatmentLocationStorageKey);
-    localStorage.removeItem("lcn_doctor_location_preference");
-    localStorage.removeItem(sharedLocationStorageKey);
-    localStorage.setItem(sharedLocationClearedStorageKey, "1");
+    window.LCNMapViewport.clearLocation();
     setInputValue("treatment-location-input", "");
     setInputValue("treatment-radius-input", "100");
     updateTreatmentLocationStatus("Kein Kartenstandort gesetzt.");
@@ -2269,7 +2233,7 @@ function resetTreatmentLocation(shouldReload = true) {
     setTreatmentLocationMode("radius");
     updateTreatmentLocationClearButton();
 
-    if (treatmentMap) {
+    if (treatmentMap && !treatmentMap._lcnViewport) {
         treatmentMap.setView([treatmentDefaultMapCenter.lat, treatmentDefaultMapCenter.lng], 6);
     }
 
@@ -2330,14 +2294,13 @@ function updateTreatmentRadiusInputState() {
 function saveTreatmentLocationPreference() {
     if (!currentTreatmentUserLocation) return;
     localStorage.setItem(treatmentLocationStorageKey, JSON.stringify({ ...currentTreatmentUserLocation, mode: currentTreatmentLocationMode }));
-    localStorage.setItem(sharedLocationStorageKey, JSON.stringify({
+    window.LCNMapViewport.saveLocation({
         location: currentTreatmentUserLocation.label,
         label: currentTreatmentUserLocation.label,
         city: currentTreatmentUserLocation.city || "",
         lat: currentTreatmentUserLocation.lat,
         lng: currentTreatmentUserLocation.lng
-    }));
-    localStorage.removeItem(sharedLocationClearedStorageKey);
+    });
 }
 
 async function restoreTreatmentLocationPreference() {
@@ -2668,10 +2631,8 @@ function renderTreatmentMap(treatments, mapData) {
         bounds.extend(treatmentRadiusCircle.getBounds());
     }
 
-    treatmentMap.fitBounds(bounds, {
-        padding: [34, 34],
-        maxZoom: 10
-    });
+    if (treatmentMap._lcnViewport) treatmentMap._lcnViewport.apply();
+    else if (bounds.isValid()) treatmentMap.fitBounds(bounds, { padding: [34, 34], maxZoom: 10 });
 
     const filters = getTreatmentFilters();
     const cityPart = filters.onlyCurrentCity && getCurrentTreatmentCity()
@@ -3084,6 +3045,7 @@ function updateTreatmentUserLocationMarker() {
 
     treatmentUserLocationMarker = L.marker([currentTreatmentUserLocation.lat, currentTreatmentUserLocation.lng], {
         icon: treatmentUserLocationIcon,
+        lcnOwnLocation: true,
         zIndexOffset: 1000
     })
         .addTo(treatmentMap)

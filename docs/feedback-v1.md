@@ -75,7 +75,9 @@ Alle Adminaktionen werden serverseitig autorisiert. Es gibt keine neue schwache 
 
 ## Datenschutz und Aufbewahrung
 
-Entsprechend der Produktentscheidung gibt es **keine automatische Löschung von Ideen, Kommentaren, Meldungen oder Kontaktadressen**. Nur technische kurzlebige Ratenzähler laufen automatisch ab. Öffentliche Beiträge bleiben nach Freigabe erhalten. Private Meldungen können im Adminbereich bearbeitet, archiviert und ausdrücklich gelöscht werden; Kommentare können freigegeben, ausgeblendet oder gelöscht werden. Ideen lassen sich ablehnen und archivieren. Archivieren ist keine Löschung.
+Ideen, Kommentare und vertrauliches Feedback lassen sich erst nach der Archivierung endgültig löschen. Die Verwaltung zeigt das Erstellungsdatum und den internen Löschprüftermin 180 Tage nach der Archivierung. Bei bestehenden Archiveinträgen ohne Archivdatum beginnt die Frist beim Einspielen der Migration. Eine erneute Archivierung startet eine neue Frist.
+
+Der Erinnerungsjob sendet nach Ablauf eine Sammelmail mit Anzahlen an `admin@lcnavi.de`. Die Administration bestätigt die Löschung manuell. Beim Löschen einer Idee werden ihre archivierten Kommentare und zugehörigen Daten mit gelöscht. Noch nicht archivierte Kommentare und zusammengeführte Quellideen müssen zuerst separat bearbeitet werden.
 
 E-Mail-Adressen sind optional, bleiben ausschließlich administrativ sichtbar und dienen nur Rückfragen; es gibt keine automatische Benachrichtigung und keinen E-Mail-Versand durch dieses Modul. Formulare weisen auf Öffentlichkeit, Moderation, sensible Gesundheitsdaten und die private Verwendung von Kontaktangaben hin. Keine zusätzlichen Tracker, Analysedienste oder externen Schnittstellen. Die Hinweise sind technische Produkttexte, keine rechtlich geprüften Rechtstexte.
 
@@ -168,3 +170,14 @@ Erfolgreiche Tests: `php tests/feedback_page_reference.php` mit Rollback, `node 
 ### Feedback per authentifiziertem SMTP
 
 Der Feedback-Versand verwendet jetzt SMTP mit TLS und Zertifikatsprüfung statt PHP mail(). Server: `w021c680.kasserver.com`, Port `465`, Benutzer: `feedback@lcnavi.de`. Das Postfachpasswort wird ausschließlich als `LCN_FEEDBACK_SMTP_PASSWORD` in der geschützten Server-Konfiguration hinterlegt. Standardpfad lokal: `C:\xampp\htdocs\private\lcn.env` (bzw. vorhandenes `LCN_ENV_FILE`). Keine Zugangsdaten im Website-Verzeichnis speichern. Optional überschreiben `LCN_FEEDBACK_SMTP_HOST`, `LCN_FEEDBACK_SMTP_PORT`, `LCN_FEEDBACK_SMTP_USER` die Serverdaten. Absender und Empfänger werden über `LCN_FEEDBACK_NOTIFY_FROM` und `LCN_FEEDBACK_NOTIFY_TO` festgelegt.
+
+
+## Archiv-Erinnerungen betreiben
+
+Lokal übernimmt `php scripts/prepare_feedback.php` die Migration `20261108_feedback_archive.sql`. Beim Deployment die MariaDB-Migration vor der neuen Admin-API einspielen.
+
+- Vorschau ohne Versand mit `php cron/send_feedback_archive_reminders.php --dry-run`.
+- SMTP-Testnachricht an die Adminadresse mit `php cron/send_feedback_archive_reminders.php --test-mail`.
+- Täglichen Aufruf nach Deployment im KAS unter **Tools → Cronjobs** einrichten. Ziel ist die HTTPS-URL des vorgesehenen Online-Hosts mit dem Pfad `/cron/feedback_archive_reminders_http.php`. Pro Datenbank einen Job anlegen, zum Beispiel täglich um 09:00 Uhr.
+- Einen eigenen Cron-Benutzer und ein zufälliges Passwort ausschließlich für diesen Job verwenden. Den Benutzer und den PHP-`password_hash()` des Passworts außerhalb des Webroots als `LCN_FEEDBACK_ARCHIVE_CRON_USERNAME` und `LCN_FEEDBACK_ARCHIVE_CRON_PASSWORD_HASH` hinterlegen. In den zusätzlichen KAS-Einstellungen kommen sie in die Felder **HTTP Benutzer** und **HTTP Passwort**. Das Passwort gehört weder in die URL noch in Git.
+- Erfolg liefert HTTP 204 ohne Antwortinhalt. Fehlende oder falsche Zugangsdaten liefern HTTP 401. HTTP, Parameter und lokale Datenbankprofile werden abgewiesen. Bei SMTP-Fehlern liefert der Job HTTP 500 und versucht die Erinnerung beim nächsten Lauf erneut.

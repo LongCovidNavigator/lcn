@@ -57,42 +57,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    map = L.map("doctor-map", {
-		zoomControl: false,
-		scrollWheelZoom: false
-	}).setView([defaultMapCenter.lat, defaultMapCenter.lng], 6);
-
-    // Ordinary wheel gestures always scroll the page, even after clicking a marker.
-    // Capture runs before Leaflet's wheel listener, including the first gesture.
-    mapElement.addEventListener("wheel", function (event) {
-        if (event.ctrlKey || event.metaKey) {
-            map.scrollWheelZoom.enable();
-        } else {
-            map.scrollWheelZoom.disable();
-        }
-    }, { capture: true, passive: true });
-
-    mapElement.addEventListener("mouseleave", function () {
-        map.scrollWheelZoom.disable();
-    });
-
-    L.control.zoom({
-        position: "topright"
-    }).addTo(map);
-
-    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
-        maxZoom: 19,
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere'
-    }).addTo(map);
-
-    userLocationIcon = L.icon({
-        iconUrl: window.LCNImages.urls["map-marker-red"],
-        shadowUrl: window.LCNImages.urls["map-marker-shadow"],
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
+    map = window.LCNMapViewport.createMap(mapElement, { viewKey: 'doctor-search' });
+    userLocationIcon = window.LCNMapViewport.originIcon();
 
     setupDoctorNavigationPanel();
     setupDoctorMapPanel();
@@ -745,10 +711,7 @@ function saveDoctorLocationPreference() {
 
     if (locationValue === "") {
         try {
-            localStorage.removeItem(doctorLocationStorageKey);
-            localStorage.removeItem("lcn_treatment_location_preference");
-            localStorage.removeItem(sharedLocationStorageKey);
-            localStorage.setItem(sharedLocationClearedStorageKey, "1");
+            window.LCNMapViewport.clearLocation();
         } catch (error) {
             console.warn("Der gespeicherte Standort konnte nicht entfernt werden.", error);
         }
@@ -767,14 +730,13 @@ function saveDoctorLocationPreference() {
 
     try {
         localStorage.setItem(doctorLocationStorageKey, JSON.stringify(preference));
-        localStorage.setItem(sharedLocationStorageKey, JSON.stringify({
+        window.LCNMapViewport.saveLocation({
             location: locationValue,
             label: currentLocation?.label || locationValue,
             city: currentLocation?.city || currentCityFilter || "",
             lat: Number.isFinite(currentLocation?.lat) ? currentLocation.lat : null,
             lng: Number.isFinite(currentLocation?.lng) ? currentLocation.lng : null
-        }));
-        localStorage.removeItem(sharedLocationClearedStorageKey);
+        });
     } catch (error) {
         console.warn("Der Standort konnte nicht lokal gespeichert werden.", error);
     }
@@ -839,10 +801,7 @@ function restoreDoctorLocationPreference() {
 
 function removeDoctorLocationPreference(clearCurrentLocation) {
     try {
-        localStorage.removeItem(doctorLocationStorageKey);
-        localStorage.removeItem("lcn_treatment_location_preference");
-        localStorage.removeItem(sharedLocationStorageKey);
-        localStorage.setItem(sharedLocationClearedStorageKey, "1");
+        window.LCNMapViewport.clearLocation();
     } catch (error) {
         console.warn("Der gespeicherte Standort konnte nicht entfernt werden.", error);
     }
@@ -1393,11 +1352,11 @@ function updateUserLocationMarker() {
 
     userLocationMarker = L.marker([currentLocation.lat, currentLocation.lng], {
         icon: userLocationIcon,
+        lcnOwnLocation: true,
         zIndexOffset: 1000
     })
         .addTo(map)
-        .bindPopup(`<strong>Standort</strong><br>${escapeHtml(currentLocation.label)}`)
-        .openPopup();
+        .bindPopup(`<strong>Dein Standort</strong><br>${escapeHtml(currentLocation.label)}`);
 }
 
 const doctorMobileResults = window.matchMedia("(max-width: 760px)");

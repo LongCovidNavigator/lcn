@@ -1,0 +1,170 @@
+.experience-guide {
+  --experience-surface: #dcd1ec;
+  --experience-ink: #362649;
+  --experience-accent: #614584;
+  --experience-button: #f4eefb;
+  box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34%;
+  align-items: center;
+  margin-block-end: 1rem;
+  border: 0;
+  border-radius: 20px;
+  background: var(--experience-surface);
+  color: var(--experience-ink);
+}
+.experience-guide[hidden], dialog.experience-guide:not([open]) { display: none; }
+.experience-guide-copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: clamp(1.125rem, 3vw, 2rem);
+  overflow-wrap: anywhere;
+}
+.experience-guide-art {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: block;
+  width: 36%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center 38%;
+  mask-image: linear-gradient(to right, transparent, #000 40%);
+  pointer-events: none;
+}
+.experience-guide-banner { min-height: 280px; }
+.experience-guide h2 {
+  margin: 0 0 .6rem;
+  color: inherit;
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  line-height: 1.2;
+}
+.experience-guide p { margin: 0 0 .6rem; color: inherit; line-height: 1.55; }
+.experience-guide-status { font-weight: 700; }
+.experience-guide-status:empty { margin: 0; }
+.experience-guide-eyebrow {
+  display: block;
+  margin-bottom: .6rem;
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.experience-guide-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.experience-guide button {
+  box-sizing: border-box;
+  min-height: 44px;
+  max-width: 100%;
+  border: 1px solid var(--experience-accent);
+  border-radius: 9px;
+  padding: .55rem .9rem;
+  font: inherit;
+  font-weight: 700;
+  color: var(--experience-ink);
+  background: var(--experience-button);
+  cursor: pointer;
+}
+.experience-guide button.experience-guide-primary {
+  background: var(--experience-accent);
+  color: #fff;
+}
+.experience-guide button:hover { filter: brightness(.94); }
+.experience-guide button:focus-visible { outline: 2px solid var(--experience-ink); outline-offset: 3px; }
+dialog.experience-guide {
+  position: fixed;
+  inset: 0;
+  height: fit-content;
+  width: min(45rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  margin: auto;
+  overflow: auto;
+  box-shadow: 0 12px 36px #15365b33;
+}
+dialog.experience-guide::backdrop { background: #132a4659; }
+
+@media (max-width: 700px) {
+  .experience-guide { grid-template-columns: minmax(0, 1fr); border-radius: 14px; }
+  .experience-guide-banner { min-height: 0; }
+  .experience-guide-art {
+    position: static;
+    width: 100%;
+    height: clamp(96px, 25vw, 150px);
+    object-position: center 35%;
+    mask-image: linear-gradient(to bottom, transparent, #000 42%);
+  }
+  .experience-guide-banner .experience-guide-art { height: clamp(130px, 40vw, 220px); }
+}
+
+dialog.experience-guide[open] {
+  animation: experience-guide-enter 320ms ease-out both;
+}
+@keyframes experience-guide-enter {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog.experience-guide[open] { animation: none; }
+}
+
+.therapy-guide-choices {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 1fr;
+}
+.therapy-guide-sharing {
+  margin-block: .75rem;
+  padding: .75rem;
+  border: 1px solid var(--experience-accent);
+  border-radius: 8px;
+  background: var(--experience-button);
+}
+.therapy-guide-sharing .experience-guide-actions { margin-top: .5rem; }
+.therapy-guide-sharing a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: .5rem;
+  color: inherit;
+  text-decoration: underline;
+}
+.therapy-guide-sharing input { box-sizing: border-box; width: 100%; margin-top: .5rem; }
+.therapy-guide-sharing [role="status"]:empty { display: none; }
+.therapy-guide-thanks {
+  margin-block: 1rem .5rem;
+  padding: .85rem 1rem;
+  border: 1px solid #65977e;
+  border-inline-start-width: 4px;
+  border-radius: 8px;
+  background: #f0f8f3;
+  color: #234b37;
+}
+.therapy-guide-thanks strong { display: block; }
+.therapy-guide-note details {
+  margin-block: .5rem;
+  border-radius: 8px;
+  background: var(--experience-button);
+}
+.therapy-guide-note summary {
+  padding: .7rem .9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.therapy-guide-note details p { margin: 0 .9rem .5rem; }
+.therapy-guide-note details button { margin: 0 .9rem .9rem; }
+.therapy-guide-reopen {
+  min-height: 44px;
+  margin-block-end: .75rem;
+  padding: .5rem .85rem;
+  border: 1px solid #614584;
+  border-radius: 9px;
+  background: #f4eefb;
+  color: #362649;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}

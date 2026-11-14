@@ -7,7 +7,7 @@ try{
  if($method==='GET'){
   if(!fbImagesReady($p))lcnSendVoteJson(['ok'=>false,'error'=>'Bild nicht gefunden.'],404);
   $id=fbImageToken($_GET['id']??null);$q=$p->prepare('SELECT x.*,i.moderation,i.merged_into FROM tbl_feedback_images x LEFT JOIN tbl_feedback_ideas i ON i.id=x.idea_id WHERE x.id=?');$q->execute([$id]);$r=$q->fetch();
-  $public=$r&&$r['idea_id']&&$r['moderation']==='approved'&&!$r['merged_into'];
+  $public=$r&&$r['idea_id']&&in_array($r['moderation'],['approved','pending'],true)&&!$r['merged_into'];
   $draft=$r&&!$r['idea_id']&&strtotime($r['created_at'])>time()-86400&&hash_equals($r['owner_key'],lcnExistingVoterKey()??'');
   if(!$r||(!$public&&!$draft&&lcnCurrentSiteRole()!=='admin'))lcnSendVoteJson(['ok'=>false,'error'=>'Bild nicht gefunden.'],404);
   header('Content-Type: '.$r['mime_type']);header('X-Content-Type-Options: nosniff');echo $r['image_data'];exit;

@@ -15,13 +15,15 @@
  const contextLink=r=>{const id=Number(r.entity_id);if(!id||!names[r.entity_type])return '';const href=r.entity_type==='doctor'?`arzt_detail.html?id=${id}`:r.entity_type==='treatment'?`therapie_detail.php?treatment_id=${id}`:`symptome.php?id=${id}#symptom-${id}`;return `<a href="${href}">${names[r.entity_type]} #${id}</a>`;};
  const referenceMarkup=r=>r.page_reference?`<p class="fb-note">Seitenbezug: <a href="${esc(r.page_reference.page_path)}">${esc(r.page_reference.label||'Zugehörige Seite')}</a>${r.page_reference.section_label?` · Reiter: ${esc(r.page_reference.section_label)}`:''}${r.page_reference.element_label?` · Bereich: ${esc(r.page_reference.element_label)}`:''}</p>`:'';
  const tags=r=>`<div class="fb-tags"><span class="fb-tag fb-status-${esc(r.status)}">${esc(config.statuses[r.status])}</span>${contextLink(r)}</div>`;
+ const reviewBadge=r=>r.moderation==='pending'?'<small class="catalog-inline-pending">Prüfung ausstehend</small>':'';
  const voteLabel=(supported,title,count)=>`${supported?'Unterstützung entfernen':'Vorschlag unterstützen'}: ${title} (${count} Unterstützungen)`;
  const vote=r=>`<button class="fb-vote" type="button" data-vote="${Number(r.id)}" aria-pressed="${!!Number(r.supported)}" aria-label="${esc(voteLabel(Number(r.supported),r.title,Number(r.votes)))}" data-vote-title="${esc(r.title)}"${pendingVotes.has(Number(r.id))?' disabled':''}>
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M12 3 3.5 12H8v8h8v-8h4.5L12 3Z"/></svg>
   <strong>${Number(r.votes)}</strong>
  </button>`;
  // Stable round-robin covers: sorting and filtering keep the same image per idea.
- const cover=r=>/^[a-f0-9]{32}$/.test(r.image_id||'')?`api/feedback_image.php?id=${r.image_id}`:r.seed_key?`assets/images/feedback/motif-${String(((Math.max(1,Number(r.id)||1)-1)%9)+1).padStart(2,'0')}.webp`:'';
+ const motif=id=>`assets/images/feedback/motif-${String(((Math.max(1,Number(id)||1)-1)%9)+1).padStart(2,'0')}.webp`;
+ const cover=r=>/^[a-f0-9]{32}$/.test(r.image_id||'')?`api/feedback_image.php?id=${r.image_id}`:r.seed_key?motif(r.id):'';
  const ideaInvitation=`
   <article class="fb-card fb-idea-card fb-idea-invitation">
     <div class="fb-card-cover fb-invitation-art" aria-hidden="true">
@@ -75,9 +77,10 @@
     if(current)current.disabled=false;
    }
   });
-  function bindSubmit(form,action,extra={},done){form.addEventListener('submit',async e=>{e.preventDefault();const b=form.querySelector('button[type=submit]')||form.querySelector('button');b.disabled=true;try{const data=Object.fromEntries(new FormData(form));const d=await api({...data,...extra,action},true);if(done)await done(d);form.closest('dialog')?.close();message(d.message||'Gespeichert.');}catch(err){const modal=form.closest('dialog');if(modal){let result=form.querySelector('[data-form-result]');if(!result){result=document.createElement('p');result.dataset.formResult='';result.className='fb-form-result';result.setAttribute('role','alert');form.append(result);}result.textContent=err.message;result.scrollIntoView({block:'nearest'});}else message(err.message,true);}finally{b.disabled=false;}});}
+  function bindSubmit(form,action,extra={},done,save=data=>api(data,true)){form.addEventListener('submit',async e=>{e.preventDefault();const b=form.querySelector('button[type=submit]')||form.querySelector('button');b.disabled=true;try{const data=Object.fromEntries(new FormData(form));const d=await save({...data,...extra,action});if(done)await done(d);form.closest('dialog')?.close();message(d.message||'Gespeichert.');}catch(err){const modal=form.closest('dialog');if(modal){let result=form.querySelector('[data-form-result]');if(!result){result=document.createElement('p');result.dataset.formResult='';result.className='fb-form-result';result.setAttribute('role','alert');form.append(result);}result.textContent=err.message;result.scrollIntoView({block:'nearest'});}else message(err.message,true);}finally{b.disabled=false;}});}
   if($('#fb-admin-list')){
    const filter=$('#fb-admin-filters');
+   const queue=$('#fb-admin-list');
    const adminStates={
     ideas:{pending:'Zur Prüfung',approved:'Freigegeben',rejected:'Abgelehnt',archived:'Archiviert'},
     comments:{pending:'Zur Prüfung',approved:'Freigegeben',rejected:'Abgelehnt',archived:'Archiviert',hidden:'Ausgeblendet'},
@@ -85,7 +88,6 @@
    };
    const development=filter.elements.status;
    const moderation=filter.elements.state;
-   const stateButtons=$('#fb-admin-state');
    const developmentButtons=$('#fb-admin-development-buttons');
    const filterButtons=values=>Object.entries(values).map(([key,label])=>
     `<button type="button" data-filter-value="${esc(key)}" aria-pressed="false">${esc(label)}</button>`
@@ -93,47 +95,48 @@
    developmentButtons.innerHTML=filterButtons({'':'Alle',...config.statuses});
    function syncFilters(){
     const showDevelopment=filter.elements.kind.value==='ideas'&&moderation.value==='approved';
-    $('#fb-admin-development').hidden=!showDevelopment;
+    filter.hidden=!showDevelopment;
     if(!showDevelopment)development.value='';
-    for(const [group,value] of [[stateButtons,moderation.value],[developmentButtons,development.value]]){
-     group.querySelectorAll('button').forEach(button=>
-      button.setAttribute('aria-pressed',String(button.dataset.filterValue===value))
-     );
-    }
+    developmentButtons.querySelectorAll('button').forEach(button=>
+     button.setAttribute('aria-pressed',String(button.dataset.filterValue===development.value))
+    );
    }
-   for(const [group,input] of [[stateButtons,moderation],[developmentButtons,development]]){
-    group.onclick=event=>{
-     const button=event.target.closest('[data-filter-value]');
-     if(!button)return;
-     input.value=button.dataset.filterValue;
-     syncFilters();
-     load();
-    };
-   }
+   developmentButtons.onclick=event=>{
+    const button=event.target.closest('[data-filter-value]');
+    if(!button)return;
+    development.value=button.dataset.filterValue;
+    syncFilters();
+    load();
+   };
    const sections=document.querySelectorAll('[data-admin-section]');
-   function states(){
-    const kind=filter.elements.kind.value;
-    const isPrivate=kind==='reports';
-    sections.forEach(button=>button.setAttribute('aria-pressed',String((button.dataset.adminSection==='reports')===isPrivate)));
-    filter.hidden=isPrivate;
-    filter.elements.kind.querySelector('option[value=reports]').hidden=!isPrivate;
+   const defaultState=kind=>kind==='reports'?'open':'pending';
+   function selectSection(kind){
+    filter.elements.kind.value=kind;
+    queue.replaceChildren();
+    $('#fb-count').textContent='';
+    $('#fb-pages').replaceChildren();
+    sections.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.adminSection===kind)));
     stats.querySelectorAll('[data-queue-shortcut]').forEach(button=>{
      const [,area]=shortcuts[button.dataset.queueShortcut];
-     button.hidden=(area==='reports')!==isPrivate;
+     button.hidden=area!==kind;
+     button.setAttribute('aria-pressed','false');
     });
-    stateButtons.closest('fieldset').hidden=kind==='ideas';
     development.value='';
-    moderation.value=isPrivate?'open':'pending';
-    stateButtons.innerHTML=filterButtons({'':'Alle',...adminStates[kind]});
+    moderation.value=defaultState(kind);
     syncFilters();
    }
    const shortcuts={
     all_ideas:['Alle Ideen','ideas',''],
     pending_ideas:['Ideen zur Prüfung','ideas','pending'],
-    pending_comments:['Kommentare zur Prüfung','comments','pending'],
     published:['Freigegebene Ideen','ideas','approved'],
     rejected_ideas:['Abgelehnte Ideen','ideas','rejected'],
     archived_ideas:['Archivierte Ideen','ideas','archived'],
+    all_comments:['Alle Kommentare','comments',''],
+    pending_comments:['Kommentare zur Prüfung','comments','pending'],
+    approved_comments:['Freigegebene Kommentare','comments','approved'],
+    rejected_comments:['Abgelehnte Kommentare','comments','rejected'],
+    archived_comments:['Archivierte Kommentare','comments','archived'],
+    hidden_comments:['Ausgeblendete Kommentare','comments','hidden'],
     all_reports:['Alle','reports',''],
     open_reports:['Offen','reports','open'],
     done_reports:['Bearbeitet','reports','done'],
@@ -145,29 +148,107 @@
     `<button type="button" class="fb-stat" data-queue-shortcut="${key}" aria-pressed="false"><strong>–</strong>${label}</button>`
    ).join('');
    stats.querySelectorAll('button').forEach(button=>button.onclick=()=>{
-    const [,kind,state]=shortcuts[button.dataset.queueShortcut];
-    filter.elements.kind.value=kind;
-    states();
+    const [,,state]=shortcuts[button.dataset.queueShortcut];
+    development.value='';
     moderation.value=state;
     syncFilters();
     load();
    });
    sections.forEach(button=>button.onclick=()=>{
-    const section=button.dataset.adminSection;
-    const url=new URL(location.href);
-    if(section==='reports')url.searchParams.set('section','reports');
-    else url.searchParams.delete('section');
-    history.replaceState(history.state,'',url);
-    filter.elements.kind.value=section;
-    states();
+    selectSection(button.dataset.adminSection);
     load();
    });
+   function saveQueueUrl({kind,state,status},page){
+    const url=new URL(location.href);
+    for(const [key,value,fallback] of [
+     ['section',kind,'ideas'],['state',state,defaultState(kind)],['status',status,''],['page',String(page),'1']
+    ]){
+     if(value===fallback)url.searchParams.delete(key);
+     else url.searchParams.set(key,value);
+    }
+    if(url.href!==location.href)history.replaceState({...history.state,feedbackOpenEntries:[]},'',url);
+   }
+   queue.addEventListener('click',event=>{
+    const card=event.target.closest('.fb-admin-entry-row');
+    const details=card?.querySelector('details');
+    if(!details||details.open||event.defaultPrevented||event.target.closest('summary, a, button, .fb-entry-actions'))return;
+
+    const actionPadding=5;
+    const nearActions=[...card.querySelectorAll('.fb-entry-actions, .fb-entry-controls > button')].some(group=>{
+     const {left,right,top,bottom}=group.getBoundingClientRect();
+     return event.clientX>=left-actionPadding&&event.clientX<=right+actionPadding&&
+      event.clientY>=top-actionPadding&&event.clientY<=bottom+actionPadding;
+    });
+    if(!nearActions)details.open=true;
+   });
+   queue.addEventListener('toggle',event=>{
+    if(!event.target.matches('details[data-feedback-entry]'))return;
+    const feedbackOpenEntries=[...queue.querySelectorAll('details[open][data-feedback-entry]')].map(details=>details.dataset.feedbackEntry);
+    history.replaceState({...history.state,feedbackOpenEntries},'');
+   },true);
    const moderationActions={pending:'Zur Prüfung',approved:'Freigeben',rejected:'Ablehnen',archived:'Archivieren'};
    function entryActions(entry,field,choices,current,extra=''){
     const label=field==='status'?'Entwicklungsstand':'Moderation';
     return `<fieldset class="fb-admin-filter-group fb-entry-actions fb-entry-actions-${field}"><legend>${label}</legend><div>${Object.entries(choices).map(([value,text])=>
      `<button type="button" data-entry-action="${field}" data-entry-id="${Number(entry.id)}" data-filter-value="${esc(value)}" aria-pressed="${value===current}">${esc(text)}</button>`
     ).join('')}${extra}</div></fieldset>`;
+   }
+   const deleteButton=r=>`<button type="button" class="fb-delete" data-moderate="${Number(r.id)}" data-state="deleted">Löschen</button>`;
+   function archiveDates(entry,inHeader=false){
+    const days=Number(entry.archive_days_left);
+    const deadline=Number(entry.archive_overdue)
+     ? '<strong class="fb-overdue">Löschen</strong>'
+     : `<strong>${days===0?'Heute löschen':days===1?'Noch 1 Tag bis zur Löschung':`Noch ${days} Tage bis zur Löschung`}</strong>`;
+    const created=`Erstellt am ${date(entry.created_at)}`;
+    const archived=entry.archived_at?`Archiviert am ${date(entry.archived_at)}`:'Archivierungsdatum unbekannt';
+    if(inHeader)return `<p class="fb-muted fb-entry-dates"><span>${created}</span><span>${archived}</span><span>${entry.archived_at?deadline:'Löschfrist unbekannt'}</span></p>`;
+    return `<p class="fb-muted fb-entry-dates">${created}${entry.archived_at?` · ${archived} · ${deadline}`:''}</p>`;
+   }
+   function archiveDemo(id,daysLeft,retentionDays){
+    const archived = new Date();
+    archived.setDate(archived.getDate() - retentionDays + daysLeft);
+    const created = new Date(archived);
+    created.setDate(created.getDate() - 1);
+    return {
+     id,demo:true,moderation:'archived',status:'open',category:'general',
+     title:daysLeft<0?'Testeintrag · Löschung fällig':'Testeintrag · Archivfrist läuft',
+     description:'Mit dieser Beispielidee lassen sich Moderation, Bearbeitung und Löschung im Archiv ausprobieren.',
+     team_reply:'Beispiel für eine offizielle Antwort.',
+     created_at:created.toISOString(),archived_at:archived.toISOString(),
+     archive_days_left:daysLeft,archive_overdue:daysLeft<0
+    };
+   }
+   let demoEntries;
+   let retentionDays;
+   function moderateDemo(entry,moderation){
+    if(entry.moderation===moderation)return;
+    entry.moderation=moderation;
+    entry.archived_at=moderation==='archived'?new Date().toISOString():null;
+    entry.archive_days_left=retentionDays;
+    entry.archive_overdue=false;
+   }
+   async function saveAdmin(data){
+    if(data.id>=0)return api(data,true);
+    const entry=demoEntries?.find(item=>item.id===data.id);
+    if(!entry||!window.LCNDummy?.get())throw Error('Der Testeintrag ist nicht verfügbar.');
+    if(data.action==='admin_idea_delete'){
+     if(demoEntries.some(item=>item.merged_into===entry.id))throw Error('Bitte lösche zuerst die zusammengeführte Quellidee im Archiv.');
+     demoEntries=demoEntries.filter(item=>item!==entry);
+    }else if(data.action==='admin_merge'){
+     const target=demoEntries.find(item=>item.id===data.target_id&&!item.merged_into);
+     if(!target||target===entry)throw Error('Bitte die ID des anderen Testeintrags eingeben.');
+     entry.merged_into=target.id;
+     moderateDemo(entry,'archived');
+    }else if(data.action==='admin_idea'){
+     const {title,description,category,team_reply}=data;
+     if(title.trim().length<5||description.trim().length<15)throw Error('Bitte Titel und Beschreibung vervollständigen.');
+     Object.assign(entry,{title,description,category,team_reply});
+    }else if(data.status){
+     entry.status=data.status;
+    }else{
+     moderateDemo(entry,data.moderation);
+    }
+    return {message:'Testeintrag gespeichert.'};
    }
    function reportCard(report){
     const reference=report.page_path&&report.body.match(/\r?\n\r?\n— Seitenbezug —\r?\n((?:Reiter|Bereich): [^\r\n]+(?:\r?\nBereich: [^\r\n]+)?)$/);
@@ -179,12 +260,12 @@
     const actions=[
      ['done','Als bearbeitet markieren'],
      report.status==='rejected'?['open','Wieder öffnen']:['rejected','Ablehnen'],
-     ['archived','Archivieren'],
-     ['deleted','Löschen']
+     ['archived','Archivieren']
     ];
     return `<article class="fb-card fb-admin-card fb-report-card">
      <div class="fb-admin-entry-content">
-      <div class="fb-report-meta"><span class="fb-tag">#${Number(report.id)}</span><span class="fb-tag">${esc(adminStates.reports[report.status]||report.status)}</span><time class="fb-muted">${date(report.created_at)}</time></div>
+      <div class="fb-report-meta"><span class="fb-tag">#${Number(report.id)}</span><span class="fb-tag">${esc(adminStates.reports[report.status]||report.status)}</span></div>
+      ${archiveDates(report)}
       <h2>${esc(config.report_categories[report.category]||report.category)}</h2>
       <p class="fb-prose">${esc(body)}</p>
      </div>
@@ -194,37 +275,50 @@
       ${location}
      </dl>
      <div class="fb-actions fb-report-actions">${actions.map(([state,label])=>
-      `<button type="button" class="fb-secondary${state==='deleted'?' fb-delete':''}" data-moderate="${Number(report.id)}" data-state="${state}">${label}</button>`
-     ).join('')}</div>
+      `<button type="button" class="fb-secondary" data-moderate="${Number(report.id)}" data-state="${state}">${label}</button>`
+     ).join('')}${report.status==='archived'?deleteButton(report):''}</div>
     </article>`;
    }
    let queueSeq=0;
    async function load(page=1,follow=null){const seq=++queueSeq;try{
     const f=Object.fromEntries(new FormData(filter));
-    const d=await api({action:'admin_queue',...f,page,...(follow?{focus_id:follow.id}:{})});
+    saveQueueUrl(f,page);
+    const d=await api({action:'admin_queue',...f,page,...(follow?.id>0?{focus_id:follow.id}:{})});
     if(seq!==queueSeq)return;
     page=d.page;
-    $('#fb-count').textContent=`${d.total} ${d.total===1?'Eintrag':'Einträge'}`;
+    saveQueueUrl(f,page);
+    const openEntries=new Set(history.state?.feedbackOpenEntries||[]);
+    retentionDays=d.archive_days;
+    const showArchiveDemo=f.kind==='ideas'&&page===1&&window.LCNDummy?.get();
+    if(showArchiveDemo)demoEntries??=[archiveDemo(-1,-1,retentionDays),archiveDemo(-2,14,retentionDays)];
+    const visibleDemos=showArchiveDemo?demoEntries.filter(entry=>
+     (!f.state||entry.moderation===f.state)&&(!f.status||entry.status===f.status)):[];
+    $('#fb-count').textContent=`${d.total} ${d.total===1?'Eintrag':'Einträge'}${visibleDemos.length?` + ${visibleDemos.length} ${visibleDemos.length===1?'Testeintrag':'Testeinträge'}`:''}`;
     stats.querySelectorAll('button').forEach(button=>{
      const key=button.dataset.queueShortcut;
      const [,kind,state]=shortcuts[key];
      button.querySelector('strong').textContent=d.stats[key];
      button.setAttribute('aria-pressed',String(f.kind===kind&&f.state===state&&!f.status));
     });
-   $('#fb-admin-list').innerHTML=d.items.map(r=>{
+   function renderEntry(r){
+    const detailsAttributes=`data-feedback-entry="${Number(r.id)}"${openEntries.has(String(r.id))?' open':''}`;
     if(f.kind==='ideas'){
-     const editorId=`fb-idea-editor-${Number(r.id)}`;
-     return `<article class="fb-card fb-admin-entry-row fb-idea-admin-card">
-      ${r.moderation==='approved'&&!r.merged_into?`<div class="fb-idea-development">${entryActions(r,'status',config.statuses,r.status)}</div>`:''}
-      <details class="fb-admin-card">
-       <summary>#${r.id} · ${esc(r.title)} · ${esc(adminStates.ideas[r.moderation]||r.moderation)}${r.moderation==='approved'?` <span class="fb-tag fb-status-${esc(r.status)}">${esc(config.statuses[r.status]||r.status)}</span>`:''}${r.merged_into?' → #'+r.merged_into:''}</summary>
-       <p class="fb-muted">${date(r.created_at)} · Community-Beitrag · ${esc(r.email||'Keine E-Mail')} ${contextLink(r)}</p>
+     const hasDevelopment=r.moderation==='approved'&&!r.merged_into;
+     const archived=r.moderation==='archived';
+     const hasHeader=hasDevelopment||archived;
+     const image=r.image_id?cover(r):r.demo||archived&&d.archive_preview_images?motif(Math.abs(r.id)):'';
+     const thumbnail=image?`<img class="fb-admin-thumbnail" src="${image}" alt="${r.image_id?'Eingereichtes Kartenbild':'Testmotiv'}" width="72" height="72" loading="lazy">`:'';
+     return `<article class="fb-card fb-admin-entry-row fb-idea-admin-card"${r.demo?' data-archive-demo':''}>
+      ${hasHeader?`<div class="fb-idea-development${archived?' fb-idea-archive':''}">${archived?archiveDates(r,true):entryActions(r,'status',config.statuses,r.status)}<div class="fb-idea-development-image">${thumbnail}</div></div>`:''}
+      <div class="fb-admin-card"><details ${detailsAttributes}>
+       <summary>#${r.id} · ${esc(r.title)} · ${esc(adminStates.ideas[r.moderation]||r.moderation)}${r.demo?' <span class="fb-tag">Dummy</span>':''}${r.moderation==='approved'?` <span class="fb-tag fb-status-${esc(r.status)}">${esc(config.statuses[r.status]||r.status)}</span>`:''}${r.merged_into?' → #'+r.merged_into:''}</summary>
+       <p class="fb-muted">Community-Beitrag · ${esc(r.email||'Keine E-Mail')} ${contextLink(r)}</p>
        ${referenceMarkup(r)}
-       ${r.merged_into?`<a href="mitgestalten.html?id=${Number(r.merged_into)}">Zum Zielvorschlag</a>`:''}
-      </details>
-      ${!r.merged_into||r.image_id?`<div class="fb-entry-controls${r.image_id?' fb-entry-controls-with-image':''}">
-       ${r.merged_into?'':entryActions(r,'moderation',moderationActions,r.moderation)}
-       ${r.image_id?`<img class="fb-admin-thumbnail" src="${cover(r)}" alt="Eingereichtes Kartenbild" width="72" height="72" loading="lazy">`:''}
+       ${r.merged_into&&!r.demo?`<a href="mitgestalten.html?id=${Number(r.merged_into)}">Zum Zielvorschlag</a>`:''}
+      </details>${archived?'':archiveDates(r)}</div>
+      ${!r.merged_into||r.image_id||archived?`<div class="fb-entry-controls${thumbnail&&!hasHeader?' fb-entry-controls-with-image':''}">
+       ${r.merged_into?(r.moderation==='archived'?deleteButton(r):''):entryActions(r,'moderation',moderationActions,r.moderation,r.moderation==='archived'?deleteButton(r):'')}
+       ${hasHeader?'':thumbnail}
       </div>`:''}
       ${r.merged_into?'':`
        <form data-edit="${r.id}" class="fb-form fb-idea-editor">
@@ -236,21 +330,31 @@
         <button type="submit" class="fb-button">Änderungen speichern</button>
        </form>
        <form data-merge="${r.id}" class="fb-toolbar fb-idea-merge">
-        <label>Mit Zielvorschlag zusammenführen (ID)<input name="target_id" type="number" min="1" required></label>
+        <label>${r.demo?'Mit anderem Testeintrag zusammenführen (ID)':'Mit Zielvorschlag zusammenführen (ID)'}<input name="target_id" type="number" ${r.demo?'max="-1"':'min="1"'} required></label>
         <button type="submit" class="fb-secondary">Zusammenführen …</button>
        </form>`}
      </article>`;
     }
     if(f.kind==='reports')return reportCard(r);
-    const removeComment=`<button type="button" class="fb-delete" data-moderate="${Number(r.id)}" data-state="deleted">Löschen</button>`;
     return `<article class="fb-card fb-admin-entry-row fb-comment-admin-card">
-     <details class="fb-admin-card">
+     <div class="fb-admin-card"><details ${detailsAttributes}>
       <summary>#${Number(r.id)} · Kommentar zu Idee #${Number(r.idea_id)} · ${esc(adminStates.comments[r.moderation]||r.moderation)}</summary>
       <p class="fb-prose">${esc(r.body)}</p>
-      <p class="fb-muted">${date(r.created_at)} · ${esc(r.display_name||'Anonym')}</p>
-     </details>
-     <div class="fb-entry-controls">${entryActions(r,'moderation',{...moderationActions,hidden:'Ausblenden'},r.moderation,removeComment)}</div>
+      <p class="fb-muted">${esc(r.display_name||'Anonym')}</p>
+     </details>${archiveDates(r)}</div>
+     <div class="fb-entry-controls">${entryActions(r,'moderation',{...moderationActions,hidden:'Ausblenden'},r.moderation,r.moderation==='archived'?deleteButton(r):'')}</div>
     </article>`;
+   }
+   const entries=[...visibleDemos,...d.items].sort((a,b)=>Number(b.archive_overdue)-Number(a.archive_overdue));
+   queue.innerHTML=entries.map((entry,index)=>{
+    const overdue=Number(entry.archive_overdue);
+    const previousOverdue=Number(entries[index-1]?.archive_overdue);
+    const separator=index===0&&overdue
+     ? '<h2 class="fb-archive-heading">Zur Löschung fällig</h2>'
+     : previousOverdue&&!overdue
+      ? '<div class="fb-archive-divider"><span>Löschlinie</span><hr></div>'
+      : '';
+    return separator+renderEntry(entry);
    }).join('')||'<p class="fb-note">Keine Einträge in dieser Auswahl.</p>';
    document.querySelectorAll('[data-entry-action]').forEach(button=>button.onclick=async()=>{
     if(button.getAttribute('aria-pressed')==='true')return;
@@ -262,7 +366,7 @@
     controls.forEach(control=>control.disabled=true);
     try{
      const reason=card.querySelector('[name=reason]')?.value||'';
-     await api({action:f.kind==='ideas'?'admin_idea_classify':'admin_comment',id:Number(entryId),[entryAction]:filterValue,reason},true);
+     await saveAdmin({action:f.kind==='ideas'?'admin_idea_classify':'admin_comment',id:Number(entryId),[entryAction]:filterValue,reason});
      if(currentQueue!==queueSeq)return;
      if(entryAction==='moderation'){
       moderation.value=filterValue;
@@ -272,9 +376,24 @@
     }catch(err){message(err.message,true);}
     finally{controls.forEach(control=>control.disabled=false);}
    });
-   document.querySelectorAll('[data-edit]').forEach(form=>bindSubmit(form,'admin_idea',{id:Number(form.dataset.edit)},()=>load(page)));
-   document.querySelectorAll('[data-merge]').forEach(form=>form.addEventListener('submit',async e=>{e.preventDefault();const target=Number(form.elements.target_id.value);if(!confirm(`Idee #${form.dataset.merge} in Idee #${target} zusammenführen? Stimmen werden dedupliziert, Kommentare übernommen. Diese Aktion ist nicht automatisch rückgängig zu machen.`))return;const b=form.querySelector('button');b.disabled=true;try{await api({action:'admin_merge',id:Number(form.dataset.merge),target_id:target},true);message('Vorschläge zusammengeführt.');await load(page);}catch(err){message(err.message,true);}finally{b.disabled=false;}}));
-   document.querySelectorAll('[data-moderate]').forEach(b=>b.onclick=async()=>{if(b.dataset.state==='deleted'&&!confirm('Diesen Eintrag endgültig löschen?'))return;b.disabled=true;try{await api({action:f.kind==='comments'?'admin_comment':'admin_report',id:Number(b.dataset.moderate),[f.kind==='comments'?'moderation':'status']:b.dataset.state},true);await load(page);}catch(err){message(err.message,true);b.disabled=false;}});pages(page,d.pages,load);
+   document.querySelectorAll('[data-edit]').forEach(form=>bindSubmit(form,'admin_idea',{id:Number(form.dataset.edit)},()=>load(page),saveAdmin));
+   document.querySelectorAll('[data-merge]').forEach(form=>form.addEventListener('submit',async e=>{e.preventDefault();const target=Number(form.elements.target_id.value);if(!confirm(`Idee #${form.dataset.merge} in Idee #${target} zusammenführen? Stimmen werden dedupliziert, Kommentare übernommen. Diese Aktion ist nicht automatisch rückgängig zu machen.`))return;const b=form.querySelector('button');b.disabled=true;try{await saveAdmin({action:'admin_merge',id:Number(form.dataset.merge),target_id:target});message('Vorschläge zusammengeführt.');await load(page);}catch(err){message(err.message,true);}finally{b.disabled=false;}}));
+   document.querySelectorAll('[data-moderate]').forEach(button=>button.onclick=async()=>{
+    const state=button.dataset.state;
+    if(state==='deleted'){
+     const prompt=f.kind==='ideas'?'Diese Idee samt archivierten Kommentaren und zugehörigen Daten endgültig löschen?':'Diesen Eintrag endgültig löschen?';
+     if(!confirm(prompt))return;
+    }
+    const actions={ideas:'admin_idea_delete',comments:'admin_comment',reports:'admin_report'};
+    const currentQueue=queueSeq;
+    button.disabled=true;
+    try{
+     await saveAdmin({action:actions[f.kind],id:Number(button.dataset.moderate),[f.kind==='reports'?'status':'moderation']:state});
+     if(currentQueue===queueSeq)await load(page);
+    }catch(err){message(err.message,true);}
+    finally{button.disabled=false;}
+   });
+   pages(page,d.pages,load);
    if(follow){
     const target=$(`[data-entry-action="moderation"][data-entry-id="${follow.id}"][aria-pressed="true"]`);
     if(target){
@@ -285,8 +404,27 @@
     }
    }
    }catch(err){message(err.message,true);}}
-   filter.elements.kind.value=params.get('section')==='reports'?'reports':'ideas';
-   states();filter.elements.kind.addEventListener('change',()=>{states();load();});filter.onsubmit=e=>{e.preventDefault();load();};await load();return;
+   const section=params.get('section');
+   const kind=Object.hasOwn(adminStates,section)?section:'ideas';
+   selectSection(kind);
+   const state=params.get('state');
+   const status=params.get('status');
+   if(state===''||Object.hasOwn(adminStates[kind],state))moderation.value=state;
+   if(Object.hasOwn(config.statuses,status))development.value=status;
+   syncFilters();
+   const page=Number(params.get('page'));
+   filter.onsubmit=e=>e.preventDefault();
+   function refreshArchiveDemo(){
+    if(filter.elements.kind.value==='ideas')load(1);
+   }
+   window.addEventListener('lcn-dummy-change',refreshArchiveDemo);
+   window.addEventListener('storage',event=>{
+    if(event.key===window.LCNDummy?.key||event.key===null)refreshArchiveDemo();
+   });
+   await load(Number.isInteger(page)&&page>=1&&page<=10000?page:1);
+   queue.removeAttribute('data-scroll-restore-pending');
+   window.dispatchEvent(new Event('lcn:scroll-ready'));
+   return;
   }
   $('#fb-status-filter').insertAdjacentHTML('beforeend',options(config.statuses));
   const list=$('#fb-list');
@@ -305,15 +443,16 @@
       <td>${listOffset+index+1}</td>
       <td>${vote(r)}</td>
       <td>${thumbnail}</td>
-      <th scope="row">${title}</th>
+      <th scope="row">${title}${reviewBadge(r)}</th>
       <td>${comments}</td>
      </tr>`;
     }
     return `<article class="fb-card fb-idea-card">
      ${image?`<a class="fb-card-cover" href="${href}" tabindex="-1" aria-hidden="true">${thumbnail}</a>`:''}
      <div class="fb-card-content">
-      ${tags(r)}<h2>${title}</h2>
+      ${tags(r)}<h2 class="fb-idea-title">${title}</h2>
       <p>${esc(r.description.slice(0,240))}${r.description.length>240?' …':''}</p>
+      ${reviewBadge(r)}
       <div class="fb-card-footer">
        ${vote(r)}
        <a href="${href}">${comments} ${comments===1?'Kommentar':'Kommentare'} · Mitdiskutieren →</a>
@@ -400,13 +539,21 @@
         <h1>${esc(r.title)}</h1>
         ${referenceMarkup(r)}
         <div class="fb-prose">${esc(r.description)}</div>
+        ${reviewBadge(r)}
         <div class="fb-card-footer">${vote(r)}<span>${Number(d.comment_total)} ${Number(d.comment_total)===1?'Kommentar':'Kommentare'}</span><time datetime="${esc(String(r.created_at).slice(0,10))}">${date(r.created_at)}</time></div>
         ${r.team_reply?`<aside class="fb-note"><strong>Antwort des LCN-Teams</strong><p class="fb-prose">${esc(r.team_reply)}</p></aside>`:''}
       </div>
     </article>
-    ${d.history.length?`<section class="fb-panel"><h2>Entwicklungsverlauf</h2><div class="fb-history">${d.history.map(h=>`<p><strong>${esc(config.statuses[h.new_value]||h.new_value)}</strong> · ${date(h.created_at)}<br><span class="fb-prose">${esc(h.reason)}</span></p>`).join('')}</div></section>`:''}<section class="fb-panel fb-discussion"><h2>Kommentare (${d.comment_total})</h2>${d.comments.map(c=>`<article class="fb-comment"><strong>Community-Beitrag</strong> <span class="fb-muted">${date(c.created_at)}</span><p class="fb-prose">${esc(c.body)}</p></article>`).join('')||'<p>Noch keine Kommentare.</p>'}<nav id="fb-comment-pages" class="fb-actions"></nav><form id="fb-comment-form" class="fb-form"><label>Deine Ergänzung<textarea id="fb-comment-body" name="body" required minlength="5" maxlength="4000" rows="4"></textarea></label><p class="fb-muted">Nach der Freigabe ist dein Kommentar öffentlich sichtbar.</p><button type="submit" class="fb-button">Kommentar senden</button></form></section>`;
-   const cp=$('#fb-comment-pages');for(const [label,p] of [['← Frühere Kommentare',page-1],['Weitere Kommentare →',page+1]]){if(p<1||p>Math.ceil(d.comment_total/30))continue;const b=document.createElement('button');b.className='fb-secondary';b.textContent=label;b.onclick=()=>detail(p).catch(e=>message(e.message,true));cp.append(b);}bindSubmit($('#fb-comment-form'),'comment',{id:Number(r.id)},()=>$('#fb-comment-form').reset());}
+    ${d.history.length?`<section class="fb-panel"><h2>Entwicklungsverlauf</h2><div class="fb-history">${d.history.map(h=>`<p><strong>${esc(config.statuses[h.new_value]||h.new_value)}</strong> · ${date(h.created_at)}<br><span class="fb-prose">${esc(h.reason)}</span></p>`).join('')}</div></section>`:''}<section class="fb-panel fb-discussion"><h2>Kommentare (${d.comment_total})</h2>${d.comments.map(c=>`<article class="fb-comment"><strong>Community-Beitrag</strong> <span class="fb-muted">${date(c.created_at)}</span><p class="fb-prose">${esc(c.body)}</p>${reviewBadge(c)}</article>`).join('')||'<p>Noch keine Kommentare.</p>'}<nav id="fb-comment-pages" class="fb-actions"></nav><form id="fb-comment-form" class="fb-form"><label>Deine Ergänzung<textarea id="fb-comment-body" name="body" required minlength="5" maxlength="4000" rows="4"></textarea></label><p class="fb-muted">Dein Kommentar ist sofort öffentlich sichtbar und trägt bis zur Freigabe den Hinweis „Prüfung ausstehend“. Bitte teile keine persönlichen Gesundheitsdaten oder Kontaktdaten.</p><button type="submit" class="fb-button">Kommentar senden</button></form></section>`;
+   const cp=$('#fb-comment-pages');for(const [label,p] of [['← Frühere Kommentare',d.page-1],['Weitere Kommentare →',d.page+1]]){if(p<1||p>Math.ceil(d.comment_total/30))continue;const b=document.createElement('button');b.className='fb-secondary';b.textContent=label;b.onclick=()=>detail(p).catch(e=>message(e.message,true));cp.append(b);}bindSubmit($('#fb-comment-form'),'comment',{id:Number(r.id)},async()=>{
+    $('#fb-comment-form').reset();
+    await detail('last');
+   });}
    await detail();
-  }else{await loadList();}if(['#idee','#privat'].includes(location.hash)){const {openComposer}=await import('./feedback_composer.js?v=responsive-20261107');await openComposer(location.hash);}
+  }else{
+   document.addEventListener('lcn-idea-created',()=>loadList());
+   await loadList();
+  }
+  if(['#idee','#privat'].includes(location.hash)){const {openComposer}=await import('./feedback_composer.js?v=pending-ideas-20261108');await openComposer(location.hash);}
  }catch(err){message(err.message,true);}
 })();

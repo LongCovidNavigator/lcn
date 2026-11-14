@@ -5,5 +5,6 @@ header('Cache-Control: no-store, private');
 echo json_encode([
     'ok' => true,
     'role' => lcnCurrentSiteRole(),
+    'local_role_preview' => lcnLocalRolePreviewAvailable(),
     'username' => lcnAuthenticatedWebUser(),
 ], JSON_UNESCAPED_UNICODE);

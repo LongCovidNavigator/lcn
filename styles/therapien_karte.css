@@ -2472,23 +2472,6 @@ body.treatment-map-page {
     overflow-x: clip;
 }
 
-@media (hover: hover) {
-    #treatment-map:not(.is-scroll-zoom-active)::after {
-        content: "Klicken, um mit dem Mausrad zu zoomen";
-        position: absolute;
-        left: 16px;
-        bottom: 16px;
-        z-index: 1000;
-        padding: 7px 11px;
-        border-radius: 6px;
-        background: rgba(0, 56, 120, 0.9);
-        color: #ffffff;
-        font-size: 13px;
-        white-space: nowrap;
-        pointer-events: none;
-    }
-}
-
 @media (max-width: 760px) {
     .treatment-nav-section-location {
         display: grid;

@@ -2058,23 +2058,6 @@ button.doctor-table-experience-value.is-saving { cursor: wait; opacity: .55; }
     font-weight: 700;
 }
 
-@media (hover: hover) {
-    #doctor-map:not(.is-scroll-zoom-active)::after {
-        content: "Strg + Mausrad zum Zoomen";
-        position: absolute;
-        left: 16px;
-        bottom: 16px;
-        z-index: 1000;
-        padding: 7px 11px;
-        border-radius: 6px;
-        background: rgba(0, 56, 120, 0.9);
-        color: #fff;
-        font-size: 13px;
-        white-space: nowrap;
-        pointer-events: none;
-    }
-}
-
 /* =========================================================
    2. DESKTOP
    Ab 1101 px

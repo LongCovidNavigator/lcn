@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="de">
-<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=touch-pan-20261107"><script src="scripts/map_viewport.js?v=touch-pan-reset-20261107"></script>
+<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=touch-pan-20261107"><script src="scripts/map_viewport.js?v=wheel-zoom-20261108"></script>
 <script src="scripts/dummy_preferences.js?v=local-only-20261107" defer></script>
 <script src="scripts/online_access.js?v=compact-badge-20261107" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LCN – Behandler:innen-Steckbrief</title>
   <link rel="stylesheet" href="styles/general.css?v=mobile-table-20261107">
-  <link rel="stylesheet" href="styles/navigation.css?v=header-dummy-20261024">
+  <link rel="stylesheet" href="styles/navigation.css?v=local-controls-row-20261108">
   <link rel="stylesheet" href="styles/footer-style.css?v=b4b1163611">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=tablet-tables-20261107">
+  <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=admin-comparisons-20261109">
   <script src="scripts/image-registry.js?v=shared-count-pins-20261105" defer></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
   <script src="scripts/doctor_relative_score_view.js?v=remove-percentile-caption-20261030" defer></script>
   <link rel="stylesheet" href="styles/doctor_relative_score.css?v=comparison-colors-20261026">
   <script src="scripts/doctor_dashboard_score.js?v=relative-therapy-offer-20261030" defer></script>
   <script src="scripts/cost_preferences.js?v=standard-country-selection-20261028" defer></script>
-  <script src="scripts/symptom_search.js?v=1" defer></script><script src="scripts/doctor_symptom_help.js?v=1" defer></script><script src="scripts/arzt_detail_konzept.js?v=online-treatment-label-20261107" defer></script>
+  <script src="scripts/symptom_search.js?v=1" defer></script><script src="scripts/doctor_symptom_help.js?v=experience-guide-20261108" defer></script><script src="scripts/arzt_detail_konzept.js?v=admin-comparisons-20261109" defer></script>
   <link rel="stylesheet" href="styles/doctor_treatment_table_beta.css?v=tablet-tables-20261107">
-<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/detail_layout_shared.css?v=responsive-20261029"><link rel="stylesheet" href="styles/catalog_relations.css?v=tablet-tables-20261107"><script src="scripts/catalog_relations.js?v=relationship-feedback-tooltips-20261028-3" defer></script><link rel="stylesheet" href="styles/doctor_profile_feedback.css?v=20261029-entry-confirmations"><script src="scripts/doctor_profile_feedback.js?v=20261029-entry-confirmations" defer></script><link rel="stylesheet" href="styles/detail_responsive.css?v=dashboard-touch-20261030"><script src="scripts/detail_responsive.js?v=bounded-tooltips-20261030" defer></script><link rel="stylesheet" href="styles/dashboard_shared.css?v=travel-cases-20261030"><link rel="stylesheet" href="styles/feedback.css"><script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script></head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/detail_layout_shared.css?v=local-role-switch-20261108"><link rel="stylesheet" href="styles/catalog_relations.css?v=tablet-tables-20261107"><script src="scripts/catalog_relations.js?v=relationship-feedback-tooltips-20261028-3" defer></script><link rel="stylesheet" href="styles/doctor_profile_feedback.css?v=20261029-entry-confirmations"><script src="scripts/doctor_profile_feedback.js?v=20261029-entry-confirmations" defer></script><link rel="stylesheet" href="styles/detail_responsive.css?v=detail-inline-controls-20261108"><script src="scripts/detail_responsive.js?v=bounded-tooltips-20261030" defer></script><link rel="stylesheet" href="styles/dashboard_shared.css?v=travel-cases-20261030"><link rel="stylesheet" href="styles/feedback.css"><script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script><script src="scripts/scroll_restore.js" defer></script><link rel="stylesheet" href="styles/experience_guide.css?v=detail-vote-20261108"><script src="scripts/experience_guide.js?v=resume-20261108" defer></script></head>
 <body class="doctor-detail-live" data-doctor-page="live">
   <div id="header-placeholder"></div>
   <div class="page-shell"><section id="submission-note" class="card" hidden><strong>Community-Eintrag · noch nicht geprüft</strong><p>Danke fürs Ergänzen! Bitte teile, was du über diese Praxis weißt. In den drei Bereichen kannst du einzelne Fragen beantworten; deine Angaben werden gespeichert.</p><a href="#termin">Angaben zum Termin ergänzen →</a></section>
@@ -41,10 +41,10 @@
       <nav class="side-nav" aria-label="Ansichten der Behandler:innen-Detailseite">
         <div class="nav-items">
         <a href="#ueberblick" data-view="ueberblick"><span class="nav-number">1</span><span><strong>Überblick</strong></span></a>
-        <a href="#termin" data-view="termin"><span class="nav-number">2</span><span><strong>Welche Belastungshürden gibt es bei einem Termin?</strong></span></a>
-        <a href="#zugang" data-view="zugang"><span class="nav-number">3</span><span><strong>Wie zugänglich ist die behandelnde Person?</strong></span></a>
-        <a href="#wirkung" data-view="wirkung"><span class="nav-number">4</span><span><strong>Welche Erfahrungen gibt es?</strong></span></a>
-        <a href="#dashboard" data-view="dashboard"><span class="nav-number">5</span><span><strong>Dashboard</strong></span></a>
+        <a href="#termin" data-view="termin"><span class="nav-number">2</span><span><strong>Belastung und Anreise</strong></span></a>
+        <a href="#zugang" data-view="zugang"><span class="nav-number">3</span><span><strong>Kosten und Verfügbarkeit</strong></span></a>
+        <a href="#wirkung" data-view="wirkung"><span class="nav-number">4</span><span><strong>Erfahrungen aus der Community</strong></span></a>
+        <a href="#dashboard" data-view="dashboard" hidden><span class="nav-number">5</span><span><strong>Dashboard</strong></span></a>
         </div>
       </nav>
       <main id="view-content" tabindex="-1"></main>
@@ -52,8 +52,8 @@
   </div>
   <div id="feedback" role="status" aria-live="polite"></div>
   <div id="footer-placeholder"></div>
-  <script src="scripts/access-nav.js?v=local-only-20261107" defer></script>
+  <script src="scripts/access-nav.js?v=detail-inline-controls-20261108" defer></script>
   <script src="scripts/doctor_detail_chrome.js?v=8645f16162" defer></script>
-  <noscript>Bitte JavaScript aktivieren, um die fünf Ansichten zu öffnen.</noscript>
+  <noscript>Bitte JavaScript aktivieren, um zwischen den Ansichten zu wechseln.</noscript>
 </body>
 </html>

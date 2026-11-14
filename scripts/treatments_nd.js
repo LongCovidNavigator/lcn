@@ -27,15 +27,17 @@
   const links = [...document.querySelectorAll('.nd-detail .side-nav [data-view]')];
   if (!links.length) return;
   const panels = links.map(link => document.getElementById(link.dataset.view));
+  const aliases = { '#ablauf': 'termin', '#fuer-wen': 'ueberblick' };
   function show(hash, scroll = false) {
-    const aliases = { '#ablauf': 'termin', '#fuer-wen': 'ueberblick' };
     const target = document.getElementById(aliases[hash] || hash.slice(1));
     const panel = target?.closest('.nd-panel') || panels[0];
     panels.forEach(p => { p.hidden = p !== panel; });
     links.forEach(link => { if (link.dataset.view === panel.id) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current'); });
+    document.dispatchEvent(new Event('lcn-treatment-view-changed'));
     if (scroll) {
       const context = document.querySelector('.ux-detail #view-content');
-      (context || target || document.getElementById('view-content')).scrollIntoView({ block: 'start' });
+      const destination = target?.matches('#anbieter, #community-bewertung') ? target : context || target || document.getElementById('view-content');
+      destination.scrollIntoView({ block: 'start' });
     }
   }
   document.addEventListener('click', event => {

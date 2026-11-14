@@ -983,8 +983,7 @@ async function resetHomepageMapLocation() {
     document.getElementById('nearby-gps-location').value = '';
     document.getElementById('nearby-gps-location').dispatchEvent(new Event('input'));
     document.getElementById('nearby-gps-location-clear').hidden = true;
-    for (const key of ['lcn_shared_location_preference','lcn_doctor_location_preference','lcn_treatment_location_preference']) localStorage.removeItem(key);
-    localStorage.setItem(homepageSharedLocationClearedStorageKey, String(Date.now()));
+    window.LCNMapViewport.clearLocation(String(Date.now()));
     window.dispatchEvent(new CustomEvent('homepage:location-changed'));
     await loadGpsAcrossGermany();
 }
@@ -1079,14 +1078,13 @@ function getNearestHomepagePrimaryCareProviders(providers) {
 function saveHomepageSharedLocation(location, fallbackText) {
     const label = String(location.formatted || location.label || fallbackText || "").trim();
     try {
-        localStorage.setItem(homepageSharedLocationStorageKey, JSON.stringify({
+        window.LCNMapViewport.saveLocation({
             location: label,
             label,
             city: String(location.city || ""),
             lat: Number(location.lat),
             lng: Number(location.lng)
-        }));
-        localStorage.removeItem(homepageSharedLocationClearedStorageKey);
+        });
     } catch (error) {
         console.warn("Der gemeinsame Standort konnte nicht gespeichert werden:", error);
     }
@@ -1119,26 +1117,10 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     if (typeof L === "undefined") return;
     if (!nearbyGpsMap) {
         window.LCNImages?.configureLeaflet(L);
-        nearbyGpsMap = L.map("nearby-gps-map", { zoomControl: false, scrollWheelZoom: false })
-            .setView([homepageGermanyCenter.lat, homepageGermanyCenter.lng], 6);
-        document.getElementById("nearby-gps-map")?.addEventListener("click", function () {
-            nearbyGpsMap.scrollWheelZoom.enable();
-            this.classList.add("is-scroll-zoom-active");
+        nearbyGpsMap = window.LCNMapViewport.createMap('nearby-gps-map', {
+            viewKey: document.body.dataset.searchTitle === 'Hausarztsuche' ? 'gp-search' : 'homepage-gps'
         });
-        document.getElementById("nearby-gps-map")?.addEventListener("mouseleave", function () {
-            nearbyGpsMap.scrollWheelZoom.disable();
-            this.classList.remove("is-scroll-zoom-active");
-        });
-        L.control.zoom({ position: "topright" }).addTo(nearbyGpsMap);
-        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
-            maxZoom: 19,
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere'
-        }).addTo(nearbyGpsMap);
-        nearbyGpsUserIcon = L.icon({
-            iconUrl: window.LCNImages.urls["map-marker-red"],
-            shadowUrl: window.LCNImages.urls["map-marker-shadow"],
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-        });
+        nearbyGpsUserIcon = window.LCNMapViewport.originIcon();
         nearbyGpsProviderIcon = L.icon({
             iconUrl: window.LCNImages.urls["map-marker-default"],
             iconRetinaUrl: window.LCNImages.urls["map-marker-default-retina"],
@@ -1156,7 +1138,7 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     const bounds = [];
     if (hasUserLocation) {
         bounds.push([Number(location.lat), Number(location.lng)]);
-        L.marker([location.lat, location.lng], { icon: nearbyGpsUserIcon })
+        L.marker([location.lat, location.lng], { icon: nearbyGpsUserIcon, lcnOwnLocation: true, zIndexOffset: 1000 })
             .bindPopup(`<strong>Dein Standort</strong><br>${escapeHomepageHtml(location.formatted || location.label || "")}`).addTo(nearbyGpsMarkers);
         nearbyGpsRadiusCircle = L.circle([location.lat, location.lng], {
             radius: Number(radiusKm || 50) * 1000,
@@ -1166,7 +1148,7 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
         if (usesNearbyDiscovery()) {
             L.marker([Number(location.lat) + Number(radiusKm || 50) / 111.195, Number(location.lng)], {
                 icon: L.divIcon({className:'nearby-gps-radius-label', html:`${Number(radiusKm || 50)} km`, iconSize:[52,24], iconAnchor:[26,12]}),
-                interactive:false, keyboard:false
+                interactive:false, keyboard:false, lcnMapDecoration:true
             }).addTo(nearbyGpsMarkers);
         }
     }
@@ -1181,6 +1163,10 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
         nearbyGpsMarkersByLocation.set(group.key, marker);
     });
     bindNearbyGpCardHighlights(list);
+    if (nearbyGpsMap._lcnViewport) {
+        nearbyGpsMap._lcnViewport.apply();
+        return;
+    }
     if (hasUserLocation && nearbyGpsRadiusCircle && usesNearbyDiscovery()) {
         const area = L.latLngBounds(bounds);
         area.extend(nearbyGpsRadiusCircle.getBounds());
@@ -1190,9 +1176,6 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     else if (bounds.length > 0) nearbyGpsMap.fitBounds(bounds, { padding: [28, 28], maxZoom: 7 });
     else nearbyGpsMap.setView([homepageGermanyCenter.lat, homepageGermanyCenter.lng], 6);
     setTimeout(function () { nearbyGpsMap.invalidateSize(); }, 0);
-    if (hasUserLocation && document.body.dataset.searchTitle === 'Hausarztsuche') {
-        setTimeout(() => nearbyGpsMap._lcnViewport?.showAll(), 0);
-    }
 }
 
 function buildNearbyGpCard(doctor, showDistance, position) {

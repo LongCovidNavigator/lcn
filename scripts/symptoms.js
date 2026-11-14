@@ -8,6 +8,87 @@
  function view(preferred){const value=mobileResults.matches||preferred==='table'?'table':'cards';$('#sym-cards')?.toggleAttribute('hidden',value!=='cards');$('#sym-table')?.toggleAttribute('hidden',value!=='table');document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('is-active',b.dataset.view===value);b.setAttribute('aria-pressed',String(b.dataset.view===value));});}
  let saved;try{saved=localStorage.getItem('lcn-symptom-view');}catch{}view(saved);
  mobileResults.addEventListener('change',()=>view(saved));
+ const more=$('#sym-show-more');
+ const cards=[...document.querySelectorAll('#sym-cards [data-symptom-result]')];
+ const tableBody=$('#sym-table tbody');
+ let visibleLimit=50;
+ function showResults(){
+  if(!more)return;
+  cards.forEach((card,index)=>card.hidden=index>=visibleLimit);
+  [...tableBody.rows].forEach((row,index)=>row.hidden=index>=visibleLimit);
+  const remaining=Math.max(0,cards.length-visibleLimit);
+  const count=$('#sym-visible-count');
+  count.textContent=Math.min(visibleLimit,cards.length)+' von '+cards.length+' Symptomen angezeigt';
+  count.hidden=false;
+  more.hidden=remaining===0;
+  more.textContent='Weitere '+Math.min(remaining,50)+' anzeigen';
+ }
+ more?.addEventListener('click',()=>{
+  const next=($('#sym-table').hidden?cards:tableBody.rows)[visibleLimit];
+  visibleLimit+=50;
+  showResults();
+  next?.querySelector('a')?.focus();
+ });
+ showResults();
+ const sortField=$('#sym-table-sort-field');
+ if(sortField){
+  const directionButton=$('#sym-table-sort-direction');
+  const headers=[...document.querySelectorAll('[data-sym-sort]')];
+  const body=$('#sym-table tbody');
+  const collator=new Intl.Collator('de',{numeric:true,sensitivity:'base'});
+  let key='rank', direction=1;
+  const rank=row=>Number(row.cells[0].textContent);
+  const count=text=>/^\d+$/.test(text.trim())?Number(text):null;
+  const value={
+   rank,
+   name:row=>row.cells[1].querySelector('a').textContent,
+   category:row=>row.querySelector('.sym-actions').dataset.category.trim()||null,
+   votes:row=>[...row.cells[3].querySelectorAll('[data-count]')].reduce((total,node)=>total+Number(node.textContent),0),
+   treatments:row=>count(row.cells[4].textContent),
+   providers:row=>count(row.cells[5].textContent),
+   distance:row=>row.cells[6].dataset.distance!==undefined?Number(row.cells[6].dataset.distance):value.city(row),
+   city:row=>row.cells[6].dataset.city||null
+  };
+  function sortRows(){
+   const rows=[...body.rows].map(row=>({row,value:value[key](row)}));
+   rows.sort((a,b)=>{
+    if(a.value===b.value)return rank(a.row)-rank(b.row);
+    if(a.value===null)return 1;
+    if(b.value===null)return -1;
+    if(typeof a.value!==typeof b.value)return typeof a.value==='number'?-1:1;
+    const order=typeof a.value==='number'?a.value-b.value:collator.compare(a.value,b.value);
+    return order*direction||rank(a.row)-rank(b.row);
+   });
+   rows.forEach(({row},index)=>{
+    if(body.rows[index]!==row)body.insertBefore(row,body.rows[index]);
+   });
+   showResults();
+   headers.forEach(button=>{
+    const heading=button.parentElement;
+    if(button.dataset.symSort===(key==='city'?'distance':key)){
+     heading.setAttribute('aria-sort',direction===1?'ascending':'descending');
+    }else heading.removeAttribute('aria-sort');
+   });
+   directionButton.textContent=direction===1?'Aufsteigend ↑':'Absteigend ↓';
+   sortField.value=key;
+  }
+  function changeSort(next){
+   direction=next===key?-direction:1;
+   key=next;
+   sortRows();
+  }
+  headers.forEach(button=>{
+   button.disabled=false;
+   button.addEventListener('click',()=>changeSort(button.dataset.symSort));
+  });
+  sortField.closest('.sym-table-order').hidden=false;
+  sortField.addEventListener('change',()=>changeSort(sortField.value));
+  directionButton.addEventListener('click',()=>changeSort(key));
+  document.addEventListener('lcn-symptom-locations-updated',()=>{
+   if(key==='distance'||key==='city')sortRows();
+  });
+  sortRows();
+ }
  document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{
   saved=b.dataset.view;
   try{localStorage.setItem('lcn-symptom-view',saved);}catch{}
@@ -35,7 +116,7 @@
   clearTimeout(timer);controller?.abort();hide();const query=input.value.trim();if(query.length<2)return;
   timer=setTimeout(async()=>{controller=new AbortController();try{const response=await fetch('api/symptom_catalog.php?q='+encodeURIComponent(query),{signal:controller.signal});const data=await response.json();if(!response.ok||!data.ok||input.value.trim()!==query)return;list.replaceChildren();
    const option=(title,sub,callback)=>{const item=document.createElement('div');item.id='sym-option-'+list.children.length;item.setAttribute('role','option');item.setAttribute('aria-selected','false');item.textContent=title;if(sub){const small=document.createElement('small');small.textContent=sub;item.append(small);}item.addEventListener('mousedown',e=>e.preventDefault());item.addEventListener('click',callback);list.append(item);};
-   data.items.forEach(r=>option(r.sym_name,r.sym_category||'Noch ohne Kategorie',()=>{location.href='symptome.php?id='+Number(r.sym_id);}));
+   data.items.forEach(r=>option(r.sym_name,r.sym_category||'Noch ohne Kategorie',()=>{location.href='symptom_detail.php?id='+Number(r.sym_id);}));
    if(!data.exists&&!$('#sym-add').disabled)option('„'+query+'“ als fehlendes Symptom ergänzen','Vorschlag zur Prüfung einreichen',()=>openProposal(null,query));
    if(list.children.length){list.hidden=false;input.setAttribute('aria-expanded','true');}
   }catch(err){if(err.name!=='AbortError'){/* Die normale Formularsuche bleibt verfügbar. */}}},200);

@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__.'/_site_auth.php';
 require_once __DIR__.'/_voting.php';
+const LCN_FEEDBACK_ARCHIVE_DAYS = 180;
+const LCN_FEEDBACK_ARCHIVE_TABLES = [
+ 'ideas'=>['tbl_feedback_ideas','moderation'],
+ 'comments'=>['tbl_feedback_comments','moderation'],
+ 'reports'=>['tbl_feedback_reports','status']
+];
 const LCN_FEEDBACK_CATEGORIES = ['providers'=>'Behandler:innen','treatments'=>'Behandlungen','symptoms'=>'Symptome','navigation'=>'Suche und Navigation','reviews'=>'Bewertungen und Erfahrungen','general'=>'Allgemeine Verbesserungen'];
 const LCN_FEEDBACK_STATUSES = ['open'=>'Offen','planned'=>'Geplant','progress'=>'In Arbeit','done'=>'Umgesetzt','deferred'=>'Zurückgestellt','declined'=>'Nicht vorgesehen'];
 const LCN_FEEDBACK_REPORTS = ['error'=>'Fehler entdeckt','missing'=>'Fehlende Information','technical'=>'Technisches Problem','general'=>'Allgemeine Rückmeldung','other'=>'Sonstiges'];
@@ -21,7 +27,24 @@ function fbContext(PDO $p,array $in): array {
 function fbIdea(PDO $p,int $id,bool $lock=false): array {
  $q=$p->prepare('SELECT * FROM tbl_feedback_ideas WHERE id=?'.($lock?' FOR UPDATE':''));$q->execute([$id]);$r=$q->fetch();if(!$r)throw new InvalidArgumentException('Vorschlag nicht gefunden.');return $r;
 }
-function fbPublic(array $r): void {if($r['moderation']!=='approved'||$r['merged_into']){http_response_code(404);throw new InvalidArgumentException('Vorschlag nicht veröffentlicht.');}}
+function fbDeleteArchived(PDO $p,string $kind,int $id): void {
+ [$table,$state]=LCN_FEEDBACK_ARCHIVE_TABLES[$kind];
+ if($kind==='ideas'){
+  $idea=fbIdea($p,$id,true);
+  if($idea['moderation']==='archived'){
+   $q=$p->prepare("SELECT id FROM tbl_feedback_comments WHERE idea_id=? AND moderation<>'archived' LIMIT 1 FOR UPDATE");
+   $q->execute([$id]);
+   if($q->fetchColumn())throw new InvalidArgumentException('Bitte archiviere zuerst alle Kommentare zu dieser Idee.');
+   $q=$p->prepare('SELECT id FROM tbl_feedback_ideas WHERE merged_into=? LIMIT 1 FOR UPDATE');
+   $q->execute([$id]);
+   if($q->fetchColumn())throw new InvalidArgumentException('Bitte lösche zuerst die zusammengeführten Quellideen im Archiv.');
+  }
+ }
+ $q=$p->prepare("DELETE FROM $table WHERE id=? AND $state='archived'");
+ $q->execute([$id]);
+ if(!$q->rowCount())throw new InvalidArgumentException('Nur archivierte Einträge können gelöscht werden.');
+}
+function fbPublic(array $r): void {if(!in_array($r['moderation'],['approved','pending'],true)||$r['merged_into']){http_response_code(404);throw new InvalidArgumentException('Vorschlag nicht veröffentlicht.');}}
 function fbHistory(PDO $p,int $id,string $type,?string $old,?string $new,string $reason=''): void {
  $p->prepare('INSERT INTO tbl_feedback_history(idea_id,event_type,old_value,new_value,reason,admin_name) VALUES(?,?,?,?,?,?)')->execute([$id,$type,$old,$new,$reason,lcnAuthenticatedWebUser()??'local-admin']);
 }
@@ -41,6 +64,6 @@ function fbMerge(PDO $p,int $source,int $target): void {
  $p->prepare('INSERT IGNORE INTO tbl_feedback_votes(idea_id,voter_key,created_at) SELECT ?,voter_key,created_at FROM tbl_feedback_votes WHERE idea_id=?')->execute([$target,$source]);
  $p->prepare('DELETE FROM tbl_feedback_votes WHERE idea_id=?')->execute([$source]);
  $p->prepare('UPDATE tbl_feedback_comments SET idea_id=? WHERE idea_id=?')->execute([$target,$source]);
- $p->prepare('UPDATE tbl_feedback_ideas SET merged_into=? WHERE id=?')->execute([$target,$source]);
+ $p->prepare("UPDATE tbl_feedback_ideas SET merged_into=?, moderation='archived' WHERE id=?")->execute([$target,$source]);
  fbHistory($p,$source,'merge',null,(string)$target);fbHistory($p,$target,'merge',(string)$source,null,'Kommentare und Unterstützungen übernommen.');
 }

@@ -29,9 +29,10 @@
   body.compact-doctor-header #header-placeholder .contact [data-contact] {min-width:40px;min-height:44px;padding:8px}
   body.compact-doctor-header #header-placeholder .contact [data-contact] > span {margin:0}
   body.compact-doctor-header #header-placeholder .contact .contact-label {display:none}
-  body.compact-doctor-header #header-placeholder #doctor-demo-toggle {flex-basis:100%;white-space:normal;padding:4px 8px;min-height:32px;font-size:11px}
+  body.compact-doctor-header #header-placeholder .contact #doctor-demo-toggle {flex-basis:100%;white-space:normal;padding:4px 8px;min-height:32px;font-size:11px}
   body.compact-doctor-header #header-placeholder .profile > .detail-menu-toggle {right:10px;bottom:10px}
-  body.compact-doctor-header #header-placeholder .profile > #nd-demo-header-toggle {margin-right:44px;font-size:11px;padding:6px 8px;white-space:normal}
+  body.compact-doctor-header #header-placeholder .profile > .nd-local-controls {margin-right:44px}
+  body.compact-doctor-header #header-placeholder .nd-local-controls > #nd-demo-header-toggle {font-size:11px;padding:6px 8px;white-space:normal}
   body.compact-doctor-header .side-nav a {min-height:48px;padding:8px 10px;gap:6px}
   body.compact-doctor-header .side-nav strong {font-size:13px}
   body.compact-doctor-header .side-nav .nav-number {width:24px;height:24px;flex-basis:24px;font-size:12px}
@@ -83,4 +84,28 @@ body.compact-doctor-header .ux-heading-info>p{left:auto;right:0;top:100%;margin:
  body.compact-doctor-header .ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-gamechanger{grid-template-columns:100px minmax(0,125px);gap:12px;min-height:140px}
  body.compact-doctor-header .ux-detail [data-treatment-dashboard] [data-dashboard-question="gamechanger"] .ux-dashboard-ring{width:100px;height:100px}
  body.compact-doctor-header #view-content :is(.doctor-effect-columns,.therapy-effect-columns){font-size:10px;grid-template-rows:100px minmax(54px,auto) 24px 28px}
+}
+/* Give every local control its own column so loading text cannot cover the title. */
+body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) {
+  grid-template-columns:auto auto minmax(0,1fr) auto auto auto;
+  gap:clamp(4px,1vw,16px);
+}
+body.compact-doctor-header #header-placeholder .profile > .lcn-local-view-controls { display:contents; }
+body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) :is(.detail-brand-group,.lcn-role-toggle,.profile-copy,.contact,.detail-menu-toggle,#doctor-demo-toggle,#nd-demo-header-toggle) { grid-row:1; }
+body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .lcn-local-view-controls > .lcn-role-toggle { grid-column:2; }
+body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .profile-copy { grid-column:3; padding:0; text-align:center; overflow-wrap:anywhere; }
+body.compact-doctor-header #header-placeholder .profile > .lcn-local-view-controls > :is(#doctor-demo-toggle,#nd-demo-header-toggle) { grid-column:4; width:100%; max-width:12rem; }
+body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .contact { grid-column:5; max-width:none; margin:0; }
+body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .detail-menu-toggle { grid-column:6; position:static; transform:none; }
+@media(max-width:600px) {
+  body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) { grid-template-columns:auto minmax(0,1.3fr) minmax(0,1fr) minmax(0,.8fr) auto auto; padding-inline:6px; }
+  body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) .detail-brand-group { gap:2px; }
+  body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) .detail-back-link { min-width:16px; }
+  body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) .detail-brand img { width:22px; height:22px; }
+  body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) .lcn-role-toggle button,
+  body.compact-doctor-header #header-placeholder .profile > .lcn-local-view-controls > :is(#doctor-demo-toggle,#nd-demo-header-toggle) { font-size:10px; line-height:1.2; padding-inline:2px; overflow-wrap:anywhere; }
+  body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) h1 { font-size:14px; }
+  body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .contact { width:28px; flex-direction:column; }
+  body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .contact > :is(a,button) { width:28px; min-width:0; min-height:26px; padding:2px; justify-content:center; }
+  body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .detail-menu-toggle { width:32px; min-width:32px; padding:3px; }
 }

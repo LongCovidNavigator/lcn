@@ -42,6 +42,10 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
     if ($kind === 'donut') $html .= '<svg viewBox="0 0 160 160" class="ux-donut" aria-label="Gamechanger-Verteilung"><circle cx="80" cy="80" r="60" class="ux-donut-track"/><g transform="rotate(-90 80 80)"><circle cx="80" cy="80" r="60" pathLength="100" data-segment="0" role="button" tabindex="0" aria-label="Ja auswählen"/><circle cx="80" cy="80" r="60" pathLength="100" data-segment="1" role="button" tabindex="0" aria-label="Nein auswählen"/></g><text x="80" y="78" text-anchor="middle" data-donut-value>–</text><text x="80" y="98" text-anchor="middle" class="ux-donut-caption">Ja</text></svg>';
     $displayOptions = $cost ? [8 => $options[8], 9 => $options[9]] + $options : ($key === 'access' ? [3 => $options[3]] + $options : $options);
     foreach ($displayOptions as $i => $label) {
+        if ($kind === 'donut') {
+            $html .= '<div class="ux-gamechanger-option"><button type="button" data-option="'.$i.'" data-value="'.ndEscape($label).'" aria-pressed="false">'.ndEscape($label).'</button><strong data-percent>–</strong></div>';
+            continue;
+        }
         $html .= '<button type="button" data-option="'.$i.'" data-value="'.ndEscape($label).'" aria-pressed="false" class="'.($kind==='effect'?'effect-column':'ux-choice').'">';
         if ($kind==='effect') $html .= '<span class="bar-area"><strong data-percent>–</strong><span class="effect-bar effect-'.$i.'" data-bar></span></span>';
         elseif ($kind==='cost') $html .= '<span class="dot" aria-hidden="true"></span><strong class="scale-percent" data-percent>–</strong>';

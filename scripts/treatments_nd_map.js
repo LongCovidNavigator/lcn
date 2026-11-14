@@ -19,7 +19,7 @@
     container.append(grid,total);return container;
   };
 
-  function numericValue(value,unit,width=3){const node=document.createElement('span'),number=document.createElement('span'),suffix=document.createElement('span');node.className='provider-numeric-value';node.style.setProperty('--number-width',width+'ch');number.className='provider-value-number';number.textContent=Math.round(value).toLocaleString('de-DE');suffix.className='provider-value-unit';suffix.textContent=unit;node.setAttribute('aria-label',number.textContent+' '+unit);node.append(number,suffix);return node;}
+  function numericValue(value,unit){const node=document.createElement('span'),number=document.createElement('span'),suffix=document.createElement('span');node.className='provider-numeric-value';number.className='provider-value-number';number.textContent=Math.round(value).toLocaleString('de-DE');suffix.className='provider-value-unit';suffix.textContent=unit;node.setAttribute('aria-label',number.textContent+' '+unit);node.append(number,suffix);return node;}
   function ratingCell(point,key){const r=ratings[point.dr_id],value=r?.[key+'_percent'];const node=value!=null?numericValue(value,'%'):document.createElement('span');node.classList.add('catalog-rating-number');if(key==='worsening')node.classList.add('catalog-rating-negative');if(value==null)node.textContent='—';return node;}
   const mobileResults=matchMedia('(max-width: 760px)');
   let view='cards';try{view=localStorage.getItem('lcn_result_view_preference')==='table'?'table':'cards';}catch{}
@@ -37,15 +37,19 @@
   const isOnlineAtHome = (entry, provider) => entry.host.dataset.canTreatAtHome === "1"
     && !provider.pending && Boolean(window.LCNOnline?.get(provider.dr_id).complete);
   function renderTravel(entry,closest){
-    if(entry.host.dataset.independentAtHome==='1'){entry.host.querySelector('[data-travel-estimate]')?.remove();return;}
     let box=entry.host.querySelector('[data-travel-estimate]');
     if(!box){box=document.createElement('section');box.className='travel-estimate';box.dataset.travelEstimate='';entry.host.querySelector('.top-map-location-layout').before(box);}
-    const online=filteredProviders(entry).find(p=>isOnlineAtHome(entry,p));
-    const km=closest?distance(closest):null,index=online||km===null?-1:travelBand(km);
     const heading=document.createElement('div');heading.className='travel-estimate-heading';
     const title=document.createElement('strong');title.textContent='Anreiseaufwand';
-    const result=document.createElement('span');result.textContent=online?online.name+' · Online-Behandlung':closest?closest.name+' · '+km.toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':origin?'Keine Behandler:innen mit Koordinaten im gewählten Filter.':'Standort eingeben, um die Entfernung einzuordnen.';
+    const result=document.createElement('span');
     heading.append(title,result);box.replaceChildren(heading);
+    if(entry.host.dataset.independentAtHome==='1'){
+      result.textContent='Für die eigenständige Durchführung zu Hause ist keine Anreise erforderlich.';
+      return;
+    }
+    const online=filteredProviders(entry).find(p=>isOnlineAtHome(entry,p));
+    const km=closest?distance(closest):null,index=online||km===null?-1:travelBand(km);
+    result.textContent=online?online.name+' · Online-Behandlung':closest?closest.name+' · '+km.toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':origin?'Keine Behandler:innen mit Koordinaten im gewählten Filter.':'Standort eingeben, um die Entfernung einzuordnen.';
     const scale=document.createElement('ol');scale.className='travel-scale';scale.setAttribute('aria-label','Entfernung und Anreiseaufwand');
     const remote=document.createElement('li');remote.className='travel-online-level'+(online?' is-current':'');remote.innerHTML='<strong>Online-Behandlung</strong><span class="travel-scale-bar" aria-hidden="true"></span><span>Keine Anreise zu Erst- und Folgetermin</span>';scale.append(remote);
     travelBands.forEach(([,range,time,points],i)=>{
@@ -114,7 +118,31 @@
     function showButton(point,compact=false){const button=document.createElement('button');button.type='button';button.className='nd-show-provider';button.textContent=valid(point)?(compact?'Karte':'Auf Karte zeigen'):(compact?'—':'Standort nicht verfügbar');if(!compact)button.title=valid(point)?'Auf Karte zeigen':'Standort nicht verfügbar';button.disabled=!valid(point);button.addEventListener('click',()=>{if(!map)return;host.querySelector('.top-map-content').classList.remove('is-collapsed');map.invalidateSize();if(origin)map.fitBounds([[origin.lat,origin.lng],[point.lat,point.lng]],{padding:[64,64],maxZoom:12});else map.setView([point.lat,point.lng],12);entry.markers.get(point)?.openPopup();host.querySelector('.nd-map-canvas').scrollIntoView({block:'center'});});return button;}
     const km=p=>origin&&valid(p)?Math.round(distance(p)).toLocaleString('de-DE')+' km':'';
     if(activeView==='table'){
-      list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();[['Nr.','number'],['Behandler:innen','name'],['Ort','city'],['Entfernung','distance'],['Verschlechterung','worsening'],['Verbesserung','improvement'],['Heilung','healing'],['Karte',null],['Rückmeldungen','feedback']].forEach(([label,key])=>{const th=document.createElement('th');th.scope='col';if(key==='feedback'){th.dataset.catalogReportHeading='';th.className='catalog-report-column';}if(!key){th.textContent=label;th.className='nd-provider-map-column';}else{const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=key==='distance'&&!origin;button.setAttribute('aria-label','Nach '+label+' sortieren');button.addEventListener('click',()=>changeSort(key));th.setAttribute('aria-sort',sort===key?(direction==='asc'?'ascending':'descending'):'none');th.append(button);}head.append(th);});const body=table.createTBody();rows.forEach((point,index)=>{const row=body.insertRow();const number=row.insertCell();number.className="nd-provider-row-number";number.textContent=String(numbers.get(point));const nameCell=row.insertCell();nameCell.append(nameNode(point));if(point.pending)nameCell.append(pendingNote(point));row.insertCell().textContent=point.city||'Keine Ortsangabe';const distanceCell=row.insertCell();distanceCell.className='provider-distance-cell';if(origin&&valid(point))distanceCell.append(numericValue(distance(point),'km',2));else distanceCell.textContent=km(point);row.insertCell().append(ratingCell(point,'worsening'));row.insertCell().append(ratingCell(point,'improvement'));row.insertCell().append(ratingCell(point,'healing'));row.insertCell().append(showButton(point,true));});list.append(table);
+      list.className='nd-map-results nd-provider-table-wrap';const table=document.createElement('table');table.className='nd-provider-table';const head=table.createTHead().insertRow();[['Nr.','number'],['Behandler:innen','name'],['Ort','city'],['Entfernung','distance'],['Verschlechterung','worsening'],['Verbesserung','improvement'],['Heilung','healing'],['Karte',null],['Rückmeldungen','feedback']].forEach(([label,key])=>{const th=document.createElement('th');th.scope='col';if(key==='feedback'){th.dataset.catalogReportHeading='';th.className='catalog-report-column';}if(!key){th.textContent=label;th.className='nd-provider-map-column';}else{const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=key==='distance'&&!origin;button.setAttribute('aria-label','Nach '+label+' sortieren');button.addEventListener('click',()=>changeSort(key));th.setAttribute('aria-sort',sort===key?(direction==='asc'?'ascending':'descending'):'none');th.append(button);}head.append(th);});const body=table.createTBody();
+      let distanceWidth=2;
+      rows.forEach(point=>{
+        const row=body.insertRow();
+        const number=row.insertCell();
+        number.className='nd-provider-row-number';
+        number.textContent=String(numbers.get(point));
+        const nameCell=row.insertCell();
+        nameCell.append(nameNode(point));
+        if(point.pending)nameCell.append(pendingNote(point));
+        row.insertCell().textContent=point.city||'Keine Ortsangabe';
+        const distanceCell=row.insertCell();
+        distanceCell.className='provider-distance-cell';
+        if(origin&&valid(point)){
+          const distanceValue=numericValue(distance(point),'km');
+          distanceWidth=Math.max(distanceWidth,distanceValue.firstElementChild.textContent.length);
+          distanceCell.append(distanceValue);
+        }
+        row.insertCell().append(ratingCell(point,'worsening'));
+        row.insertCell().append(ratingCell(point,'improvement'));
+        row.insertCell().append(ratingCell(point,'healing'));
+        row.insertCell().append(showButton(point,true));
+      });
+      table.style.setProperty('--distance-number-width',distanceWidth+'ch');
+      list.append(table);
     }else{
       list.className='nd-map-results doctor-card-grid';
       rows.forEach(point=>{
@@ -141,15 +169,17 @@
     host.querySelector('[data-map-status]').textContent='';
     if (!map) return;
     syncMarkers(entry,points);
-    if(entry.radiusCircle) map.removeLayer(entry.radiusCircle);
+    if(entry.radiusCircle) {
+      map.removeLayer(entry.radiusCircle);
+      entry.radiusCircle = null;
+    }
     if(entry.originMarker) map.removeLayer(entry.originMarker);
-    const bounds=points.map(p=>[p.lat,p.lng]);
-    if(origin){entry.originMarker=L.marker([origin.lat,origin.lng],{icon:markerIcon(true)}).bindPopup(document.createTextNode('Dein Ausgangsort: '+origin.label)).addTo(map);bounds.push([origin.lat,origin.lng]);}
+    if(origin){entry.originMarker=L.marker([origin.lat,origin.lng],{icon:window.LCNMapViewport.originIcon(),lcnOwnLocation:true}).bindPopup(document.createTextNode('Dein Ausgangsort: '+origin.label)).addTo(map);}
     const radius=host.querySelector('[data-radius]');
     if(origin && (host.dataset.locationMode||'radius')==='radius' && host.querySelector('[data-radius-enabled]').checked && radius.value && radius.validity.valid){
       entry.radiusCircle=L.circle([origin.lat,origin.lng],{radius:Number(radius.value)*1000,color:'#0875ee',weight:2,fillOpacity:0.06}).addTo(map);
-      map.fitBounds(entry.radiusCircle.getBounds(),{padding:[24,24],animate:false});
-    } else if(bounds.length)map.fitBounds(bounds,{padding:[28,28],maxZoom:8,animate:false});else map.setView([51.16,10.45],5);
+    }
+    map._lcnViewport?.apply();
   }
   entries.forEach(entry=>{
     const filterPanel=document.createElement('div');filterPanel.className='nd-provider-filter-panel';
@@ -193,43 +223,12 @@
     host.querySelector('[data-provider-search]').addEventListener('input',()=>render(entry));
     host.querySelector('[data-provider-sort]').addEventListener('change',()=>renderProviders(entry));
     host.querySelectorAll('[data-provider-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.providerView;try{localStorage.setItem('lcn_result_view_preference',view);}catch{}entries.forEach(renderProviders);}));
-    const input=host.querySelector('input'),suggestions=host.querySelector('.top-map-location-suggestions');
-    let timer,controller,suggestionVersion=0,activeSuggestion=-1;
-    const suggestionCache=new Map();
-    suggestions.setAttribute('role','listbox');
-    input.setAttribute('role','combobox');input.setAttribute('aria-autocomplete','list');input.setAttribute('aria-expanded','false');
-    suggestions.id=input.id+'-suggestions';input.setAttribute('aria-controls',suggestions.id);
-    function showMessage(text){suggestions.replaceChildren();const note=document.createElement('p');note.className='location-suggestion-status';note.setAttribute('role','status');note.textContent=text;suggestions.append(note);suggestions.classList.remove('is-hidden');input.setAttribute('aria-expanded','true');activeSuggestion=-1;}
-    function dismiss(){clearTimeout(timer);controller?.abort();suggestionVersion++;suggestions.classList.add('is-hidden');input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');activeSuggestion=-1;}
-    function paintSuggestions(results,query){
-      suggestions.replaceChildren();activeSuggestion=-1;
-      results.filter(valid).forEach((result,index)=>{const choice=document.createElement('button');choice.type='button';choice.id=suggestions.id+'-'+index;choice.setAttribute('role','option');choice.textContent=result.formatted||result.label||query;choice.addEventListener('click',()=>{dismiss();setOrigin(result,choice.textContent);});suggestions.append(choice);});
-      if(!suggestions.childElementCount)showMessage('Kein Ort gefunden. Bitte Ort oder PLZ genauer angeben.');
-      else {suggestions.classList.remove('is-hidden');input.setAttribute('aria-expanded','true');}
-    }
-    function suggest(){
-      dismiss();const query=input.value.trim();
-      if(query.length<2){showMessage('Mindestens zwei Zeichen für Ort oder PLZ eingeben.');return;}
-      const cacheKey=query.toLocaleLowerCase('de');
-      if(suggestionCache.has(cacheKey)){paintSuggestions(suggestionCache.get(cacheKey),query);return;}
-      showMessage('Orte werden gesucht …');const version=suggestionVersion;
-      timer=setTimeout(async()=>{const requestController=new AbortController();controller=requestController;
-        try{const response=await fetch('api/geocode_location.php?suggest=1&q='+encodeURIComponent(query),{signal:requestController.signal});const data=await response.json();if(version!==suggestionVersion)return;if(!response.ok||!data.ok)throw new Error();const results=data.results||[];suggestionCache.set(cacheKey,results);paintSuggestions(results,query);}
-        catch(error){if(error.name!=='AbortError'&&version===suggestionVersion)showMessage('Ortssuche derzeit nicht verfügbar. Bitte erneut versuchen.');}
-      },150);
-    }
-    entry.dismiss=dismiss;
-    input.addEventListener('input',suggest);
-    input.addEventListener('focus',suggest);
-    document.addEventListener('click',event=>{if(!event.target.closest('.top-map-location-input-row'))dismiss();});
-    input.addEventListener('keydown',event=>{
-      if(event.key==='Escape'){dismiss();return;}
-      const choices=[...suggestions.querySelectorAll('button')];
-      if(!suggestions.classList.contains('is-hidden')&&choices.length&&['ArrowDown','ArrowUp'].includes(event.key)){
-        event.preventDefault();activeSuggestion=(activeSuggestion+(event.key==='ArrowDown'?1:-1)+choices.length)%choices.length;
-        choices.forEach((choice,i)=>choice.setAttribute('aria-selected',String(i===activeSuggestion)));input.setAttribute('aria-activedescendant',choices[activeSuggestion].id);
-      }else if(event.key==='Enter'&&!suggestions.classList.contains('is-hidden')&&activeSuggestion>=0){event.preventDefault();choices[activeSuggestion]?.click();}
-    });
+    const input = host.querySelector('input');
+    const dismiss = window.LCNMapViewport.bindLocationSuggestions(
+      input, host.querySelector('.top-map-location-suggestions'), { valid, onSelect: setOrigin }
+    );
+    entry.dismiss = dismiss;
+    document.addEventListener('click', event => { if (!event.target.closest('.top-map-location-input-row')) dismiss(); });
     host.querySelector('form').addEventListener('submit',async event=>{
       event.preventDefault();dismiss();if(!input.value.trim()){clearOrigin();return;}
       const query=host.querySelector('input').value.trim();host.querySelector('[data-map-status]').textContent='Ausgangsort wird gesucht …';
@@ -242,19 +241,19 @@
   });
   function clearOrigin(){
     origin=null;
-    try{for(const key of [sharedKey,'lcn_doctor_location_preference','lcn_treatment_location_preference'])localStorage.removeItem(key);localStorage.setItem('lcn_shared_location_cleared',String(Date.now()));}catch{}
+    try{window.LCNMapViewport.clearLocation(String(Date.now()));}catch{}
     entries.forEach(entry=>{entry.dismiss();entry.host.querySelector('[data-provider-city]').value='';entry.host.querySelector('[data-radius-enabled]').checked=false;render(entry);});
     window.dispatchEvent(new CustomEvent('homepage:location-changed'));
   }
   function setOrigin(result,label){
     origin={lat:Number(result.lat),lng:Number(result.lng),label:result.formatted||result.label||label,city:result.city||''};
-    try{localStorage.setItem(sharedKey,JSON.stringify({...origin,location:origin.label}));localStorage.removeItem('lcn_shared_location_cleared');}catch{}
+    try{window.LCNMapViewport.saveLocation({...origin,location:origin.label});}catch{}
     entries.forEach(render);window.dispatchEvent(new CustomEvent('homepage:location-changed'));
   }
   window.addEventListener('storage',event=>{if(![sharedKey,'lcn_shared_location_cleared'].includes(event.key))return;origin=null;try{const saved=JSON.parse(localStorage.getItem(sharedKey));if(valid(saved))origin={...saved,label:saved.location||saved.label||'Gespeicherter Standort'};}catch{}entries.forEach(render);});
-  function markerIcon(red=false){
+  function markerIcon(){
     const urls=window.LCNImages.urls;
-    return L.icon({iconUrl:urls[red?'map-marker-red':'map-marker-default'],iconRetinaUrl:urls[red?'map-marker-red':'map-marker-default-retina'],shadowUrl:urls['map-marker-shadow'],iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]});
+    return L.icon({iconUrl:urls['map-marker-default'],iconRetinaUrl:urls['map-marker-default-retina'],shadowUrl:urls['map-marker-shadow'],iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]});
   }
   function syncMarkers(entry,visiblePoints){
       if(entry.markers) new Set(entry.markers.values()).forEach(marker=>entry.map.removeLayer(marker));
@@ -270,12 +269,14 @@
   async function init(){
     if(!window.L){const css=document.createElement('link');css.rel='stylesheet';css.href='assets/vendor/leaflet/leaflet.css';document.head.append(css);await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='assets/vendor/leaflet/leaflet.js';script.onload=resolve;script.onerror=reject;document.head.append(script);});}
     entries.forEach(entry=>{
-      const canvas=entry.host.querySelector('.nd-map-canvas');entry.map=L.map(canvas,{zoomControl:false,scrollWheelZoom:false}).setView([51.1657,10.4515],6);
-      L.control.zoom({position:'topright'}).addTo(entry.map);
-      canvas.addEventListener('click',()=>entry.map.scrollWheelZoom.enable());canvas.addEventListener('mouseleave',()=>entry.map.scrollWheelZoom.disable());
-      const tiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere',maxZoom:19}).addTo(entry.map);
-      tiles.on('tileerror',()=>{entry.host.querySelector('[data-map-status]').textContent='Kartenhintergrund konnte nicht geladen werden. Behandler:innen-Marker und Entfernungsliste bleiben verfügbar.';});
-      new ResizeObserver(()=>{if(canvas.clientWidth){entry.map.invalidateSize();if(!entry.wasVisible){render(entry);entry.wasVisible=true;}}else entry.wasVisible=false;}).observe(canvas);render(entry);
+      const canvas = entry.host.querySelector('.nd-map-canvas');
+      const treatmentId = new URLSearchParams(location.search).get('treatment_id');
+      entry.map = window.LCNMapViewport.createMap(canvas, {
+        viewKey: 'treatment:' + treatmentId + ':' + canvas.parentElement.id,
+        lcnFitRadius: true,
+        onTileError: () => { entry.host.querySelector('[data-map-status]').textContent = 'Kartenhintergrund konnte nicht geladen werden. Behandler:innen-Marker und Entfernungsliste bleiben verfügbar.'; }
+      });
+      render(entry);
     });
   }
   window.addEventListener('lcn-online-ready',()=>entries.forEach(render));

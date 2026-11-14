@@ -339,13 +339,13 @@ body #feedback,body.ux-page .ux-answer-status,.catalog-feedback-notice,.catalog-
 
 /* Center numeric groups while keeping digits and units vertically aligned. */
 .ux-detail .nd-provider-table .provider-numeric-value{display:inline-flex;align-items:baseline;justify-content:flex-end;gap:.5ch;white-space:nowrap;font-variant-numeric:tabular-nums}
-.ux-detail .nd-provider-table .provider-value-number{display:inline-block;flex:0 0 var(--number-width,3ch);width:var(--number-width,3ch);text-align:right}
+.ux-detail .nd-provider-table .provider-value-number{display:inline-block;min-width:var(--number-width,3ch);flex-shrink:0;text-align:right}
 .ux-detail .nd-provider-table .provider-value-unit{display:inline-block;text-align:left}
 .ux-detail .nd-provider-table .catalog-rating-number.catalog-rating-negative{color:#a43e57}
 .ux-detail .nd-provider-table :is(th,td):nth-child(4){text-align:center!important}
 .ux-detail .nd-provider-table thead th:nth-child(4)>button{justify-content:center;text-align:center;width:100%}
 
-.ux-detail .nd-provider-table .provider-value-number{min-width:0}
+.ux-detail .nd-provider-table .provider-distance-cell{--number-width:var(--distance-number-width,2ch)}
 
 /* Center the feedback heading and both choices on the same column axis. */
 #view-content .nd-provider-table .catalog-report-column{box-sizing:border-box;width:120px!important;min-width:120px!important;max-width:140px!important;padding:10px 12px!important;text-align:center!important}

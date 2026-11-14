@@ -1,10 +1,10 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const source=fs.readFileSync('scripts/treatments_nd_map.js','utf8');
-const code=source.slice(source.indexOf('  function filteredProviders('),source.indexOf('  function renderProviders('));
+const code=source.slice(source.indexOf('  function filteredProviders('),source.indexOf('  mobileResults.addEventListener('));
 const nodes={'[data-provider-search]':{value:''},'[data-provider-city]':{value:''},'[data-radius]':{value:'100',validity:{valid:true}},'[data-radius-enabled]':{checked:false},'[data-include-no-coords]':{checked:false},'[data-location-filter-note]':{},'[data-location-radius-controls]':{},'[data-location-city-controls]':{}};
 const host={dataset:{},querySelector:s=>nodes[s]||null,querySelectorAll:()=>[]};
 const entry={host,providers:[{name:'A',place:'Köln',city:'Köln',lat:50,lng:7,km:20},{name:'B',place:'Berlin',city:'Berlin',lat:52,lng:13,km:500},{name:'C',place:'Köln',city:'Köln',lat:null,lng:null}]};
-const context={origin:{lat:51,lng:7,city:'Köln'},valid:p=>p.lat!=null&&p.lng!=null,distance:p=>p.km};vm.createContext(context);vm.runInContext(code,context);
+const context={origin:{lat:51,lng:7,city:'Köln'},valid:p=>p.lat!=null&&p.lng!=null,distance:p=>p.km,isOnlineAtHome:()=>false};vm.createContext(context);vm.runInContext(code,context);
 const names=()=>Array.from(context.filteredProviders(entry),p=>p.name);
 assert.deepEqual(names(),['A','B','C']);
 nodes['[data-radius-enabled]'].checked=true;

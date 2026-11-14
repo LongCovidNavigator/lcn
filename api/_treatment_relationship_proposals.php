@@ -77,7 +77,10 @@ function lcnTreatmentProposalAlias(PDO $p,string $name,string $type): int {
  $p->prepare('INSERT INTO tbl_aliases_03(alias,alias_type) VALUES(?,?)')->execute([$name,$type]);return (int)$p->lastInsertId();
 }
 function lcnTreatmentProposalLink(PDO $p,int $id,int $alias,int $submission,?string $relation=null): void {
- if(!lcnNdRows($p,'SELECT 1 FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$id,$alias]))$p->prepare('INSERT INTO tbl_cpl_treatments_nd2aliases(treat_nd_id,alias_id,note) VALUES(?,?,?)')->execute([$id,$alias,'Geprüfter Verknüpfungsvorschlag #'.$submission]);
+ if(!lcnNdRows($p,'SELECT 1 FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$id,$alias])){
+  $note=$submission>0?'Geprüfter Verknüpfungsvorschlag #'.$submission:'Geprüfte Medikamenten-Einordnung';
+  $p->prepare('INSERT INTO tbl_cpl_treatments_nd2aliases(treat_nd_id,alias_id,note) VALUES(?,?,?)')->execute([$id,$alias,$note]);
+ }
  if($relation!==null){
   $existing=lcnNdRows($p,'SELECT relation_type FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$id,$alias])[0]['relation_type'];
   if($existing!==null&&$existing!==$relation)throw new DomainException('Die Kopplung hat bereits eine andere Verbindungsart.');

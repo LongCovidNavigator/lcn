@@ -10,7 +10,7 @@ $ideas = [
         'Die angebotenen Therapien sollen auf der Detailseite von Behandler:innen in einem eigenen Reiter „Therapien“ angezeigt werden.'],
     'feedback-v2-3' => ['Einfachere Detailseiten für Behandler:innen und Therapien', 'general',
         'Auf den Detailseiten von Behandler:innen und Therapien muss ich mich durch mehrere Bereiche klicken, um die verschiedenen Abstimmungen zu finden. Dabei verliere ich schnell den Überblick. Mir würde eine einzige Abstimmung pro Detailseite reichen, bei der ich angeben kann, wie sich mein Gesundheitszustand im Verlauf der Behandlung oder Therapie entwickelt hat.'],
-    'feedback-v2-6' => ['Kommentarbereich: Erfahrungsberichte zu Behandler:innen', 'reviews',
+    'feedback-v2-6' => ['Kommentarbereich zu Behandler:innen', 'reviews',
         'Auf der Detailseite von Behandler:innen soll es einen Kommentarbereich geben. Dort möchte ich Erfahrungen mit der Betreuung, der Kommunikation und dem Ablauf in der Praxis lesen und teilen können.'],
     'feedback-v1-2' => ['Kommentarbereich: Erfahrungsberichte zu Therapien', 'reviews',
         'Auf der Detailseite einer Therapie soll es einen Kommentarbereich geben. Dort möchte ich Erfahrungen zur Anwendung, Dauer, Verträglichkeit und persönlich wahrgenommenen Wirkung lesen und teilen können.'],
@@ -36,6 +36,7 @@ try {
     foreach ($ideas as $key => [$title, $category, $description]) {
         $insert->execute([$title, $description, $category, $key]);
     }
+
     $db->commit();
     echo "PASS: five local feedback proposals seeded. Superseded proposals archived.\n";
 } catch (Throwable $error) {

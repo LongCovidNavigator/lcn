@@ -10,7 +10,7 @@ export async function openComposer(mode='#privat',context){
 }
 async function mount(context){
  await Promise.all(['styles/feedback.css?v=image-scene-20261107','styles/feedback_community.css?v=ai-images-20261106-1','styles/feedback_composer.css?v=responsive-20261107'].map(href=>new Promise((resolve,reject)=>{const link=document.createElement('link');link.rel='stylesheet';link.href=href;link.onload=resolve;link.onerror=reject;document.head.append(link);})));
- const response=await fetch('components/feedback_composer.html?v=privacy-label-20261107');if(!response.ok)throw Error('Das Formular konnte nicht geladen werden.');
+ const response=await fetch('components/feedback_composer.html?v=pending-ideas-20261108');if(!response.ok)throw Error('Das Formular konnte nicht geladen werden.');
  const template=document.createElement('template');template.innerHTML=await response.text();
  const composer=template.content.querySelector('dialog');document.body.append(composer);
  const config=await api({action:'config'});
@@ -67,6 +67,13 @@ async function mount(context){
      done?.();
     }
     result.textContent=d.message||'Danke! Dein Beitrag ist eingegangen.';
+    if(action==='create'&&Number(d.id)>0){
+     const link=document.createElement('a');
+     link.href='mitgestalten.html?id='+Number(d.id);
+     link.textContent='Deine Idee ansehen';
+     result.append(' ',link);
+     document.dispatchEvent(new Event('lcn-idea-created'));
+    }
    }catch(err){result.textContent=err.message;}
    finally{
     submitting=false;

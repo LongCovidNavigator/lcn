@@ -14,16 +14,20 @@ try{
  const forbidden=await context.request.post('http://127.0.0.1/lcn/api/feedback.php',{data:{action:'report',body:'must reject cross origin',category:'error'},headers:{Origin:'https://example.invalid'}});assert.equal(forbidden.status(),403);
  const writeIdea=title=>api({action:'create',title:prefix+' '+title,description:'An automated isolated feedback test description.',page_path:'index.html',reference_mode:'confirm',page_section:'',page_element:''},true);
  const a=await writeIdea('Source'),b=await writeIdea('Target');assert.equal(a.status,201);assert.equal(b.status,201);
- assert.equal((await api({action:'detail',id:a.id})).status,404);
- const list=await api({action:'list',q:prefix});assert.equal(list.total,0);
+ const pending=await api({action:'detail',id:a.id});assert.equal(pending.status,200);assert.equal(pending.idea.moderation,'pending');assert.ok(!('email' in pending.idea));
+ const list=await api({action:'list',q:prefix});assert.equal(list.total,2);assert.ok(list.items.every(idea=>idea.moderation==='pending'));
+ assert.equal((await api({action:'vote',id:b.id,supported:true},true)).votes,1);
+ assert.equal((await api({action:'comment',id:a.id,body:'<script>window.feedbackXSS=1</script> Test comment',display_name:'Test'},true)).ok,true);
+ const discussion=await api({action:'detail',id:a.id,page:'last'});assert.equal(discussion.comment_total,1);assert.equal(discussion.comments[0].moderation,'pending');
+ assert.equal((await api({action:'list',q:prefix})).items.find(i=>i.id==a.id).comments,1);
+ await context.addCookies([{name:'lcn_local_view',value:'admin',url:'http://127.0.0.1'}]);
  const queue=await api({action:'admin_queue',kind:'ideas'});const source=queue.items.find(i=>i.id==a.id),target=queue.items.find(i=>i.id==b.id);assert.ok(source&&target);assert.equal(source.page_reference.page_path,'index.html');
  const approve=async(r,status='open')=>api({...r,action:'admin_idea',id:Number(r.id),moderation:'approved',status,reason:'Public status explanation',team_reply:'Official team reply'},true);
  assert.equal((await approve(source)).ok,true);assert.equal((await api({action:'detail',id:a.id})).idea.page_reference.page_path,'index.html');assert.equal((await approve(target)).ok,true);
  const voted=await Promise.all(Array.from({length:8},()=>api({action:'vote',id:a.id,supported:true},true)));assert.ok(voted.every(r=>r.ok));let detail=await api({action:'detail',id:a.id});assert.equal(detail.idea.votes,1);
  await api({action:'vote',id:a.id,supported:false},true);assert.equal((await api({action:'detail',id:a.id})).idea.votes,0);
  await api({action:'vote',id:a.id,supported:true},true);await api({action:'vote',id:b.id,supported:true},true);
- assert.equal((await api({action:'comment',id:a.id,body:'<script>window.feedbackXSS=1</script> Test comment',display_name:'Test'},true)).ok,true);
- assert.equal((await api({action:'detail',id:a.id})).comments.length,0);
+ assert.equal((await api({action:'detail',id:a.id})).comments[0].moderation,'pending');
  const comments=await api({action:'admin_queue',kind:'comments'});const comment=comments.items.find(c=>c.idea_id==a.id);assert.ok(comment);await api({action:'admin_comment',id:Number(comment.id),moderation:'approved'},true);
  assert.equal((await approve(target,'progress')).ok,true);
  assert.equal((await api({action:'admin_merge',id:a.id,target_id:b.id},true)).ok,true);
@@ -37,7 +41,7 @@ try{
  assert.equal((await api({action:'report',category:'missing',body:'Invalid relation test',entity_type:'doctor',entity_id:2147483647},true)).status,400);
  await page.goto('http://127.0.0.1/lcn/mitgestalten.html?id='+a.id);await page.locator('#fb-comment-form').waitFor();await page.locator('#fb-detail a[href="index.html"]').waitFor();assert.equal(await page.evaluate(()=>window.feedbackXSS),undefined);assert.equal(await page.locator('#fb-detail script').count(),0);
  for(const width of [1440,768,390]){await page.setViewportSize({width,height:1100});await page.goto('http://127.0.0.1/lcn/mitgestalten.html');await page.locator('.fb-card').first().waitFor();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'No horizontal overflow '+width);await page.screenshot({path:'output/feedback-'+width+'.png',fullPage:true});}
- await page.goto('http://127.0.0.1/lcn/feedback_admin.php');await page.locator('#fb-admin-state option').first().waitFor({state:'attached'});await page.locator('#fb-admin-state').selectOption('');await page.locator('#fb-admin-filters button').click();await page.locator('[data-edit]').first().waitFor({state:'attached'});await page.locator('.fb-admin-card summary').first().click();await page.screenshot({path:'output/feedback-admin-390.png',fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,JSON.stringify(await page.locator('*').evaluateAll(nodes=>nodes.filter(n=>n.getBoundingClientRect().right>innerWidth+1).map(n=>[n.tagName,n.className,n.getBoundingClientRect().width]).slice(0,12))));
+ await page.goto('http://127.0.0.1/lcn/feedback_admin.php');await page.locator('[data-queue-shortcut="all_ideas"]').click();await page.locator('[data-edit]').first().waitFor({state:'attached'});await page.locator('.fb-admin-card summary').first().click();await page.screenshot({path:'output/feedback-admin-390.png',fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,JSON.stringify(await page.locator('*').evaluateAll(nodes=>nodes.filter(n=>n.getBoundingClientRect().right>innerWidth+1).map(n=>[n.tagName,n.className,n.getBoundingClientRect().width]).slice(0,12))));
  await page.goto('http://127.0.0.1/lcn/arzt_detail.html?id=542');await page.locator('.lcn-feedback-float').waitFor();await page.goto('http://127.0.0.1/lcn/therapie_detail.php?treatment_id=1');await page.locator('.lcn-feedback-float').waitFor();
  await page.goto('http://127.0.0.1/lcn/symptome.php');await page.locator('main').waitFor();assert.equal(await page.locator('main h1').count()>0,true);
  assert.deepEqual(errors,[]);console.log('PASS: HTTP lifecycle, validation, CSRF, moderation, concurrent votes, withdrawal, comments, XSS, search/filter, merge, status history, private reports, admin authorization, contexts, symptoms and 3 responsive widths.');

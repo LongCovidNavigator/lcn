@@ -3,7 +3,7 @@
  if(window.LCNOnline)return;
  let doctors={},scheduled=false;const markers=new Set();
  const get=id=>doctors[Number(id)]||{first:false,follow:false,complete:false};
- const appointmentLabel=document.documentElement.classList.contains('gp-search-page') || document.body.matches('.doctor-map-page,[data-recommendation="doctors"]')
+ const appointmentLabel=document.documentElement.classList.contains('gp-search-page') || document.body.matches('.doctor-map-page,.nd-detail,.symptom-detail,.symptom-overview,[data-recommendation="doctors"]')
    ? 'Erst- und Folgetermin online'
    : 'Online-Behandlung';
  const appointmentHint='Online-Behandlung ohne Präsenz möglich, da die behandelnde Person sowohl den Erst- als auch den Folgetermin per Video oder Telefon anbietet.';

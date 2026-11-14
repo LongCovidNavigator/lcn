@@ -25,7 +25,23 @@ body.fb-community-page{background:#f8f9fa}
 .fb-card-cover img{display:block;width:100%;height:100%;object-fit:cover}
 .fb-community-page #fb-list .fb-card-content{display:flex;flex-direction:column;padding:18px 14px 14px;flex:1;width:100%}
 .fb-community-page #fb-list h2{font-size:20px;line-height:1.35;margin:12px 0;letter-spacing:-.25px}
+.fb-community-page #fb-list .fb-idea-title {
+  min-height: 2.7em;
+}
+.fb-idea-title > a {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
 .fb-community-page #fb-list .fb-card-content>p{font-size:14px;line-height:1.65;-webkit-line-clamp:4;margin:0 0 22px;color:#536477}
+.fb-community-page #fb-list .fb-card-content > p:has(+ .catalog-inline-pending) {
+  margin-bottom: 4px;
+}
+.fb-community-page #fb-list .fb-card-content > .catalog-inline-pending {
+  margin-bottom: 14px;
+}
 .fb-community-page #fb-list .fb-tags{font-size:12px}
 .fb-community-page #fb-list .fb-tag{font-size:11px;padding:4px 10px;background:#edf3f8}
 .fb-community-page #fb-list .fb-status-progress{background:#fff0d7;color:#7b4e12}

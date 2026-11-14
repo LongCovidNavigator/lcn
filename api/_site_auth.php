@@ -13,13 +13,18 @@ function lcnAdminUsername(): string {
     return trim((string)(lcnEnv('LCN_ADMIN_USERNAME', 'admin') ?? 'admin'));
 }
 
-function lcnCurrentSiteRole(): string {
+function lcnLocalRolePreviewAvailable(): bool {
     $remoteAddress = (string)($_SERVER['REMOTE_ADDR'] ?? '');
     $host = strtolower((string)($_SERVER['HTTP_HOST'] ?? ''));
-    $host = preg_replace('/:\d+$/', '', $host);
-    if (in_array($remoteAddress, ['127.0.0.1', '::1'], true)
-        && in_array($host, ['localhost', '127.0.0.1', '::1'], true)) {
-        return 'admin';
+    $host = parse_url('http://' . $host, PHP_URL_HOST);
+    return in_array($remoteAddress, ['127.0.0.1', '::1'], true)
+        && in_array($host, ['localhost', '127.0.0.1', '[::1]'], true);
+}
+
+function lcnCurrentSiteRole(): string {
+    if (lcnLocalRolePreviewAvailable()) {
+        // Keep the beta's public features usable while previewing without admin access.
+        return ($_COOKIE['lcn_local_view'] ?? '') === 'admin' ? 'admin' : 'tester';
     }
     $user = lcnAuthenticatedWebUser();
     if ($user !== null && hash_equals(lcnAdminUsername(), $user)) return 'admin';

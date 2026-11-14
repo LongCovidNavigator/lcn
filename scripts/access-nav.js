@@ -3,7 +3,8 @@
     function syncDummyToggle() {
         document.querySelectorAll('[data-lcn-dummy-toggle]').forEach(button => {
             const enabled = window.LCNDummy?.get() || false;
-            button.hidden = button.disabled = !window.LCNDummy?.available;
+            button.hidden = button.disabled = !window.LCNDummy?.available
+                || document.documentElement.dataset.lcnSiteRole !== 'admin';
             button.setAttribute('aria-pressed', String(enabled));
             const label = 'Dummy-Daten: ' + (enabled ? 'an' : 'aus');
             if (button.textContent !== label) button.textContent = label;
@@ -31,21 +32,63 @@
 })();
 
 (function () {
-    let requested = false;
-    async function revealAdminNavigation() {
-        if (requested) return;
-        const targets = document.querySelectorAll('[data-admin-only]');
-        if (!targets.length) return;
-        requested = true;
-        try {
-            const response = await fetch('api/current_user.php', {credentials:'same-origin', cache:'no-store'});
-            const data = await response.json();
-            if (data.role === 'admin') targets.forEach(element => { element.hidden = false; });
-        } catch (_) { /* Server-side access control remains authoritative. */ }
+    const dummySelector = '[data-lcn-dummy-toggle], #doctor-demo-toggle, #nd-demo-header-toggle';
+    const cookieName = 'lcn_local_view';
+    let userRequest;
+    let user;
+
+    function updateRoleControls() {
+        const dummy = document.querySelector(dummySelector);
+        if (!dummy && !document.querySelector('[data-admin-only]')) return;
+        if (!userRequest) {
+            userRequest = fetch('api/current_user.php', {credentials:'same-origin', cache:'no-store'})
+                .then(response => response.ok ? response.json() : null)
+                .then(data => { user = data; updateRoleControls(); })
+                .catch(() => {});
+        }
+        if (!user) return;
+        const admin = user.role === 'admin';
+        document.documentElement.dataset.lcnSiteRole = user.role;
+        document.querySelectorAll('[data-lcn-dummy-toggle]').forEach(button => {
+            button.hidden = button.disabled = !admin || !window.LCNDummy?.available;
+        });
+        document.querySelectorAll('[data-admin-only]').forEach(element => { element.hidden = !admin; });
+        if (!user.local_role_preview || !dummy || dummy.closest('.lcn-local-view-controls')) return;
+        const header = dummy.closest('.lcn-header');
+        const profile = dummy.closest('#header-placeholder .profile');
+        if (!header && !profile) return;
+
+        const group = document.createElement('div');
+        group.className = 'lcn-role-toggle';
+        group.setAttribute('role', 'group');
+        group.setAttribute('aria-label', 'Lokale Ansicht');
+        [['standard', 'Standardansicht'], ['admin', 'Admin-Ansicht']].forEach(([mode, label]) => {
+            const selected = (mode === 'admin') === admin;
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = label;
+            button.setAttribute('aria-pressed', String(selected));
+            button.addEventListener('click', () => {
+                if (selected) return;
+                document.cookie = cookieName + '=' + mode + '; Path=/; Max-Age=31536000; SameSite=Lax';
+                if (mode === 'standard' && /\/(freigaben|feedback_admin|symptome|symptom_detail)\.php$/.test(location.pathname)) location.assign('index.html');
+                else location.reload();
+            });
+            group.append(button);
+        });
+        const controls = document.createElement('div');
+        controls.className = 'lcn-local-view-controls';
+        controls.append(group, dummy);
+        if (header) header.insertBefore(controls, header.querySelector('.lcn-menu-toggle'));
+        else profile.insertBefore(controls, profile.querySelector('.profile-copy'));
     }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', revealAdminNavigation);
-    else revealAdminNavigation();
-    new MutationObserver(revealAdminNavigation).observe(document.documentElement, {childList:true, subtree:true});
+    window.addEventListener('pageshow', event => {
+        if (!event.persisted || !user?.local_role_preview) return;
+        const adminCookie = document.cookie.split(';').some(cookie => cookie.trim() === cookieName + '=admin');
+        if (adminCookie !== (user.role === 'admin')) location.reload();
+    });
+    updateRoleControls();
+    new MutationObserver(updateRoleControls).observe(document.documentElement, {childList:true, subtree:true});
 })();
 
 // Event delegation also covers headers inserted after page load.

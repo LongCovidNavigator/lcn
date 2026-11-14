@@ -10,8 +10,8 @@ try {
  check(true,'invalid types and nonexistent catalog references rejected');
  foreach(['doctor'=>['tbl_entities_nd','lcn_id'],'treatment'=>['tbl_treatments_nd','treat_nd_id'],'symptom'=>['tbl_symptoms','sym_id']] as $type=>[$table,$col]){$id=$p->query("SELECT `$col` FROM `$table` LIMIT 1")->fetchColumn();if($id)check(fbContext($p,['entity_type'=>$type,'entity_id'=>$id])===[$type,(int)$id],'existing '.$type.' ID preserved');}
  $q=$p->prepare("INSERT INTO tbl_feedback_ideas(title,description,category,moderation) VALUES('Transaction test','A transactional test idea','general',?)");$q->execute(['pending']);$a=(int)$p->lastInsertId();
- try{fbPublic(fbIdea($p,$a));throw new RuntimeException('Pending idea exposed');}catch(InvalidArgumentException $e){}
- check(true,'unmoderated idea blocked');
+ fbPublic(fbIdea($p,$a));
+ check(true,'pending idea accepts public access');
  $p->prepare("UPDATE tbl_feedback_ideas SET moderation='approved' WHERE id=?")->execute([$a]);fbPublic(fbIdea($p,$a));
  $q->execute(['approved']);$b=(int)$p->lastInsertId();
  $vote=$p->prepare('INSERT IGNORE INTO tbl_feedback_votes(idea_id,voter_key) VALUES(?,?)');$v=str_repeat('a',64);$v2=str_repeat('b',64);$vote->execute([$a,$v]);$vote->execute([$a,$v]);$vote->execute([$b,$v]);$vote->execute([$a,$v2]);

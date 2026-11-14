@@ -1,6 +1,49 @@
 <?php
 require_once __DIR__.'/_treatments_nd.php';
 
+function lcnDirectSymptomProviders(PDO $pdo, array $symptomIds): array
+{
+    if (!$symptomIds) return [];
+    $placeholders = implode(',', array_fill(0, count($symptomIds), '?'));
+    $providers = [];
+    try {
+        $rows = lcnNdRows($pdo, "SELECT l.sym_id, d.dr_id, d.dr_display_name, COUNT(v.dr_id) AS experience_count
+            FROM tbl_doctor_symptom_help_links l
+            JOIN v_lcn_doctors d ON d.dr_id=l.dr_id
+            LEFT JOIN tbl_doctor_symptom_help_votes v
+                ON v.dr_id=l.dr_id AND v.sym_id=l.sym_id AND v.review_status IN ('active','approved')
+            WHERE l.sym_id IN ($placeholders)
+            GROUP BY l.sym_id, d.dr_id, d.dr_display_name
+            ORDER BY experience_count DESC, d.dr_display_name, d.dr_id", $symptomIds);
+        foreach ($rows as $row) {
+            $providers[$row['sym_id']][$row['dr_id']] = [
+                'dr_id' => (int)$row['dr_id'], 'dr_display_name' => $row['dr_display_name'],
+                'experience_count' => (int)$row['experience_count'],
+            ];
+        }
+    } catch (PDOException $e) {
+        if ($e->getCode() !== '42S02') throw $e;
+    }
+    return $providers;
+}
+
+function lcnSymptomProviderLocations(PDO $pdo, array $providersBySymptom): array
+{
+    $providers = [];
+    foreach ($providersBySymptom as $matches) $providers += $matches;
+    if (!$providers) return [];
+    $placeholders = implode(',', array_fill(0, count($providers), '?'));
+    $rows = lcnNdRows($pdo, "SELECT dr_id, loc_plz, loc_city, loc_street, loc_housenumber, loc_lat, loc_lng
+        FROM tbl_drs_locations_03 WHERE dr_id IN ($placeholders)
+        ORDER BY loc_is_primary DESC, loc_id", array_keys($providers));
+    $locations = [];
+    foreach ($rows as $row) {
+        $id = (int)$row['dr_id'];
+        $locations[$id][] = $row + ['dr_display_name' => $providers[$id]['dr_display_name']];
+    }
+    return $locations;
+}
+
 function lcnDoctorSymptomHelp(PDO $pdo,int $treatment,?string $respondent): array {
     $catalog=lcnNdRows($pdo,'SELECT sym_id AS id,sym_name AS name FROM tbl_symptoms ORDER BY sym_name,sym_id');
     $defaults=['Fatigue','Brain Fog','Schlafstörungen','Belastungsintoleranz'];$editorial=[];foreach($defaults as $name)foreach($catalog as $symptom)if($symptom['name']===$name)$editorial[]=(int)$symptom['id'];

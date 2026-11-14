@@ -628,7 +628,7 @@ function renderTreatmentProviders(providers) {
     }
 
     element.innerHTML = `
-        ${buildProviderViewSwitchHtml()}
+        ${buildProviderViewSwitchHtml(providerViewMode)}
 
         <div class="treatment-detail-provider-list-inner treatment-detail-provider-view-${providerViewMode}">
             ${providersHtml}
@@ -636,7 +636,7 @@ function renderTreatmentProviders(providers) {
     `;
 }
 
-function buildProviderViewSwitchHtml() {
+function buildProviderViewSwitchHtml(providerViewMode) {
     const locationValue = currentProviderLocation ? currentProviderLocation.label : "";
     const locationStatus = currentProviderLocation
         ? `Aktiver Standort: ${currentProviderLocation.label}`
@@ -1367,23 +1367,9 @@ function renderTreatmentProviderMap(providers) {
     }
 
     if (!treatmentProviderMap) {
-        treatmentProviderMap = L.map(mapElement, {
-            scrollWheelZoom: false
+        treatmentProviderMap = window.LCNMapViewport.createMap(mapElement, {
+            viewKey: 'legacy-treatment:' + getTreatIdFromUrl(), center: null, tileMaxZoom: 18
         });
-
-        mapElement.addEventListener("click", function () {
-            treatmentProviderMap?.scrollWheelZoom.enable();
-            mapElement.classList.add("is-scroll-zoom-active");
-        });
-
-        mapElement.addEventListener("mouseleave", function () {
-            treatmentProviderMap?.scrollWheelZoom.disable();
-            mapElement.classList.remove("is-scroll-zoom-active");
-        });
-
-        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, OpenStreetMap-Mitwirkende und weitere'
-        }).addTo(treatmentProviderMap);
     }
 
     if (treatmentProviderMarkerLayer) {
@@ -1403,7 +1389,8 @@ function renderTreatmentProviderMap(providers) {
 		const userMarker = L.marker(
 			[Number(currentProviderLocation.lat), Number(currentProviderLocation.lng)],
 			{
-				icon: buildUserLocationMapIcon(),
+				icon: window.LCNMapViewport.originIcon(),
+                lcnOwnLocation: true,
 				zIndexOffset: 1000
 			}
 		);
@@ -1415,11 +1402,14 @@ function renderTreatmentProviderMap(providers) {
 					<span>${escapeHtml(currentProviderLocation.label || "Gesetzter Standort")}</span>
 				</div>
 			`)
-			.addTo(treatmentProviderMarkerLayer)
-			.openPopup();
+			.addTo(treatmentProviderMarkerLayer);
 	}
 
     setTimeout(function () {
+        if (treatmentProviderMap._lcnViewport) {
+            treatmentProviderMap._lcnViewport.apply();
+            return;
+        }
         treatmentProviderMap.invalidateSize();
 
         const bounds = treatmentProviderMarkerLayer.getBounds();
@@ -1432,19 +1422,6 @@ function renderTreatmentProviderMap(providers) {
         }
     }, 0);
 }
-
-function buildUserLocationMapIcon() {
-    return L.icon({
-        iconUrl: window.LCNImages.urls["map-marker-red"],
-        shadowUrl: window.LCNImages.urls["map-marker-shadow"],
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
-}
-
-
 
 function hasValidCoordinates(provider) {
     if (!provider || provider.has_coordinates !== true) {
@@ -1719,14 +1696,13 @@ function setProviderTableSort(sortMode) {
 
 function saveSharedTreatmentLocation(location) {
     try {
-        localStorage.setItem("lcn_shared_location_preference", JSON.stringify({
+        window.LCNMapViewport.saveLocation({
             location: location.label,
             label: location.label,
             lat: Number(location.lat),
             lng: Number(location.lng)
-        }));
+        });
         localStorage.setItem("lcn_treatment_location_preference", JSON.stringify(location));
-        localStorage.removeItem("lcn_shared_location_cleared");
     } catch (error) {
         console.warn("Der Standort konnte nicht dauerhaft gespeichert werden:", error);
     }
@@ -1734,10 +1710,7 @@ function saveSharedTreatmentLocation(location) {
 
 function clearSavedSharedTreatmentLocation() {
     try {
-        localStorage.removeItem("lcn_shared_location_preference");
-        localStorage.removeItem("lcn_doctor_location_preference");
-        localStorage.removeItem("lcn_treatment_location_preference");
-        localStorage.setItem("lcn_shared_location_cleared", "1");
+        window.LCNMapViewport.clearLocation();
     } catch (error) {
         console.warn("Der gespeicherte Standort konnte nicht entfernt werden:", error);
     }

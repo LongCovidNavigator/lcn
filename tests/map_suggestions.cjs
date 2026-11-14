@@ -7,7 +7,8 @@ const fs=require('node:fs');
   const page=await browser.newPage();
   await page.setContent('<div id="host"><form><div class="top-map-location-input-row"><input id="place"><button type="button" data-map-clear>×</button><div class="top-map-location-suggestions is-hidden"></div></div></form><p data-map-status></p></div>');
   const source=fs.readFileSync('scripts/treatments_nd_map.js','utf8').replace(/\r\n/g,'\n');
-  const start=source.indexOf("    const input=host.querySelector('input'),suggestions=");
+  const start=source.indexOf("    const input = host.querySelector('input');");
+  await page.addScriptTag({path:'scripts/map_viewport.js'});
   const end=source.indexOf('\n  });\n  function clearOrigin()',start);
   assert(start>0&&end>start);
   await page.addScriptTag({content:`(()=>{

@@ -1,8 +1,9 @@
 <?php
 require_once __DIR__.'/_symptom_catalog.php';
+require_once __DIR__.'/_review_reopen.php';
 header('Cache-Control: private, no-store');
 try {
-    if(lcnCurrentSiteRole()==='guest')lcnSendVoteJson(['ok'=>false,'error'=>'Bitte zuerst bei der Beta anmelden.'],403);
+    lcnRequireAdminJson();
     $method=$_SERVER['REQUEST_METHOD']??'GET';
     if(!in_array($method,['GET','POST'],true)){header('Allow: GET, POST');lcnSendVoteJson(['ok'=>false,'error'=>'Methode nicht erlaubt.'],405);}
     $p=lcnDatabase();
@@ -13,10 +14,32 @@ try {
         lcnSendVoteJson(['ok'=>true,'items'=>$q->fetchAll(),'exists'=>(bool)$exact->fetchColumn()]);
     }
     lcnRequireVotingRequest();$in=lcnReadJsonBody();$action=symText($in,'action',20,1);
+    if($action==='reopen'){
+        lcnRequireAdminJson();
+        $id=filter_var($in['id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+        if(!$id)throw new InvalidArgumentException('Ungültiger Vorschlag.');
+        $p->beginTransaction();
+        $q=$p->prepare('SELECT status,reviewed_at,reviewed_by FROM tbl_symptom_requests WHERE id=? FOR UPDATE');
+        $q->execute([$id]);$decision=$q->fetch();
+        if(!$decision||$decision['status']==='pending')throw new InvalidArgumentException('Der Vorschlag ist bereits offen oder existiert nicht.');
+        if($decision['status']==='approved')$decision['catalog_changes']=lcnUndoReviewApproval($p,'symptom',(string)$id);
+        lcnRecordReviewReopen($p,'symptom',(string)$id,$decision);
+        $p->prepare("UPDATE tbl_symptom_requests SET status='pending',reviewed_at=NULL,reviewed_by=NULL WHERE id=?")->execute([$id]);
+        $p->commit();
+        lcnSendVoteJson(['ok'=>true,'status'=>'pending']);
+    }
     if($action==='review'){
         lcnRequireAdminJson();$id=filter_var($in['id']??null,FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
         if(!$id||!isset($in['approve'])||!is_bool($in['approve']))throw new InvalidArgumentException('Ungültige Entscheidung.');
-        $p->beginTransaction();symReview($p,$id,$in['approve']);$p->commit();lcnSendVoteJson(['ok'=>true,'message'=>'Prüfung gespeichert.']);
+        $p->beginTransaction();
+        $q=$p->prepare('SELECT sym_id FROM tbl_symptom_requests WHERE id=? FOR UPDATE');
+        $q->execute([$id]);$symptomId=(int)$q->fetchColumn();
+        $scopes=$in['approve']&&$symptomId?[['tbl_symptoms',['sym_id'],['sym_id'=>$symptomId]]]:[];
+        $before=lcnReviewSnapshot($p,$scopes);
+        symReview($p,$id,$in['approve']);
+        lcnSaveReviewSnapshot($p,'symptom',(string)$id,$scopes,$before);
+        $p->commit();
+        lcnSendVoteJson(['ok'=>true,'message'=>'Prüfung gespeichert.']);
     }
     if(!in_array($action,['vote','category','add'],true))throw new InvalidArgumentException('Unbekannte Aktion.');
     $key=lcnVoterKey();
@@ -44,5 +67,5 @@ try {
     if($q->fetchColumn())throw new InvalidArgumentException('Dein gleicher Vorschlag wartet bereits auf Prüfung.');
     $p->prepare('INSERT INTO tbl_symptom_requests(sym_id,name,category,category_snapshot,reason,voter_key) VALUES(?,?,?,?,?,?)')->execute([$sym?$sym['sym_id']:null,$name,$category,$sym?$sym['sym_category']:'',$reason,$key]);
     $p->commit();lcnSendVoteJson(['ok'=>true,'message'=>'Danke! Dein Vorschlag wurde gespeichert und wird vor der Übernahme geprüft.'],201);
-}catch(InvalidArgumentException $e){if(isset($p)&&$p->inTransaction())$p->rollBack();lcnSendVoteJson(['ok'=>false,'error'=>$e->getMessage()],400);}
+}catch(InvalidArgumentException|DomainException $e){if(isset($p)&&$p->inTransaction())$p->rollBack();lcnSendVoteJson(['ok'=>false,'error'=>$e->getMessage()],400);}
 catch(Throwable $e){if(isset($p)&&$p->inTransaction())$p->rollBack();lcnLogApiError('symptom_catalog',$e);lcnSendVoteJson(['ok'=>false,'error'=>'Die Anfrage konnte gerade nicht gespeichert werden. Bitte versuche es später erneut.'],503);}
