@@ -375,7 +375,7 @@
   function travelEstimate() {
     if(state.view!=='termin')return '';
     const km=distanceKm();
-    if(km===null&&!onlineAppointments().complete)return '<div class="travel-estimate"><strong>Anreiseaufwand</strong><p>'+ (savedLocation()?'Für diese Praxis fehlen Koordinaten zur Schätzung.':'Gib deinen Standort ein, um den Anreiseaufwand grob einzuordnen.')+'</p></div>';
+    if(km===null&&!onlineAppointments().complete)return '<div class="travel-estimate"><strong>Anreiseaufwand</strong><p>'+ (savedLocation()?'Für diese Praxis fehlen Koordinaten zur Schätzung.':'Wähle einen Ausgangsort aus, um den Anreiseaufwand grob einzuordnen.')+'</p></div>';
     const index=onlineAppointments().complete?-1:travelBands.findIndex(([limit])=>km<=limit);
     return '<div class="travel-estimate"><div class="travel-estimate-heading"><strong>'+(onlineAppointments().complete?'Online-Behandlung · keine Anreise zu Erst- und Folgetermin':distanceText())+'</strong><span>'+(index<0?'Keine Anreise':travelBands[index][2]+' · grobe Orientierung')+'</span></div><ol class="travel-scale"><li class="travel-online-level'+(index<0?' is-current':'')+'"><strong>Online-Behandlung</strong><span class="travel-scale-bar" aria-hidden="true"></span><span>Keine Anreise zu Erst- und Folgetermin</span></li>'+travelBands.map(([,range,time],i)=>'<li class="travel-level-'+(i+1)+(i===index?' is-current':'')+'"><strong>'+range+'</strong><span class="travel-scale-bar" aria-hidden="true"></span><span>'+time+'</span>'+(i===index?'<b>Deine Entfernung</b>':'')+'</li>').join('')+'</ol><details><summary>Wie wird eingeordnet?</summary><p>Die Einordnung zeigt die Luftlinienentfernung zu dieser Praxis. Fahrzeiten sind grobe Orientierungswerte, keine Routenberechnung. Sind Erst- und Folgetermin online möglich, entfällt die Anreise zu diesen Terminen. Ob Untersuchungen oder Behandlungen vor Ort nötig sind, muss zusätzlich mit der Praxis geklärt werden.</p></details></div>';
   }
@@ -448,7 +448,7 @@
     const explanations={
       'Überblick':'Welche Angaben sind zu dieser behandelnden Person bekannt? Hier findest du die recherchierten Informationen zu Behandler:innen, medizinischem Profil und Kontakt. Fehlende Angaben sind gekennzeichnet.',
       'Medizinisches Profil':'Welches medizinische Profil hat die behandelnde Person? Hier findest du die recherchierten Fachrichtungen, Spezialisierungen und Zusatzqualifikationen.',
-      'Standort':'Wo befindet sich die Praxis? Hier findest du die Adresse und die Karte. Gib deinen Standort ein, um die Luftlinienentfernung zu sehen. Im Termin-Reiter wird zusätzlich der Anreiseaufwand grob geschätzt.',
+      'Standort':'Wo befindet sich die Praxis? Hier findest du die Adresse und die Karte. Wähle einen Ausgangsort aus, um die Luftlinienentfernung zu sehen. Im Termin-Reiter wird zusätzlich der Anreiseaufwand grob geschätzt.',
       'Kontakt':'Wie kannst du den Behandler:innen kontaktieren? Über diese Links kannst du die Website öffnen, anrufen oder eine E-Mail schreiben.',
       'Community-Bewertung':'Wie hat sich dein Zustand durch die Behandlung verändert? Wähle die Bewertung, die auf deine Erfahrung zutrifft. Die Verteilung zeigt subjektive Erfahrungen der Community und ist kein Wirksamkeitsnachweis. Erneutes Anklicken deiner Auswahl nimmt sie zurück.',
       'Therapien':'Welche Therapien bietet diese Praxis an? Hier findest du die recherchierten Therapien. Suche und Filter helfen beim Eingrenzen.'

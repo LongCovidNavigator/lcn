@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/_submission_treatments.php';
+require_once __DIR__ . '/_provider_location.php';
 require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_search_normalization.php';
 require_once __DIR__ . '/_voting.php';
@@ -64,6 +65,7 @@ try {
     if (($input['simple_doctor'] ?? false) === true && ($type !== 'doctor' || $website === '')) lcnSendVoteJson(['ok'=>false,'error'=>'Bitte einen Namen oder eine Praxis sowie die Web-Adresse angeben.'],422);
     $email = submissionString($input, 'email', 254);
     $phone = submissionString($input, 'phone', 60);
+    if ($type === 'doctor') $input = lcnProviderLocationPayload($input);
     $city = submissionString($input, 'city', 120);
     $experience = (string)($input['experience'] ?? '');
     $existingTargetId = filter_var($input['existing_target_id'] ?? null, FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]);

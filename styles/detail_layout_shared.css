@@ -126,8 +126,14 @@ body.ux-page #ueberblick-anbieter{margin-top:20px}
 /* Community totals use the same top-right placement as doctor cards. */
 body.ux-page .ux-question-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px 20px;margin:0 0 14px}
 body.ux-page .ux-question-heading h3{flex:1;min-width:0;margin:0}
+body.ux-page .ux-question[data-question="gamechanger"] .ux-question-heading{flex-wrap:nowrap;gap:8px;min-height:3.25rem}
+body.ux-page .ux-question[data-question="gamechanger"] .ux-question-heading h3{flex:0 0 auto;white-space:nowrap}
+body.ux-page .ux-question[data-question="gamechanger"] .ux-heading-info p{white-space:normal}
+body.ux-page .ux-question[data-question="gamechanger"] .ux-question-meta{margin-left:auto;flex:1 1 0;width:auto;max-width:none;min-width:0}
+body.ux-page .ux-question[data-question="gamechanger"] [data-community-note]{white-space:pre-line;overflow-wrap:anywhere}
 body.ux-page .ux-question-meta{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:0 1 auto;min-width:0}
 body.ux-page .ux-question .ux-question-meta [data-community-note],body.ux-page .ux-question[data-kind="cost"] .ux-question-meta [data-community-note]{margin:0!important;text-align:right;font:400 13px/1.5 Arial,sans-serif;color:#6a7f9e!important}
+body.ux-page .ux-question[data-question="gamechanger"] [data-community-note]{min-height:3em}
 body.ux-page .ux-question-heading .insurance-toggle{margin:0;flex-shrink:0}
 body.ux-page .ux-question-heading.cost-question-heading{align-items:flex-start;flex-wrap:nowrap;margin-bottom:8px}
 @media(max-width:650px){body.ux-page .ux-question-heading{gap:8px}body.ux-page .ux-question-heading.cost-question-heading{flex-wrap:wrap}body.ux-page .cost-question-heading .ux-question-meta{margin-left:auto}body.ux-page .ux-question .ux-question-meta [data-community-note]{font-size:12px}}

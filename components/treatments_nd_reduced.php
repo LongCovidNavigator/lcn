@@ -29,7 +29,7 @@ function ndReducedChart(array $item, string $key, string $title, string $kind, s
     }
     $cost = in_array($key, ['unit_cost','total_cost'], true);
     $html = '<section class="card ux-question" data-question="'.$key.'" data-kind="'.$kind.'" data-counts="'.ndEscape(json_encode($counts)).'"><h3>'.ndEscape($title).'</h3>';
-    if ($key === 'gamechanger') $html .= '<p>Hat die Therapie deinen Alltag entscheidend verbessert?</p>';
+    if ($key === 'gamechanger') $html .= '<p>Hat die Therapie deinen Genesungsprozess entscheidend vorangetrieben?</p>';
     if ($key === 'unit_cost') $html .= '<p class="ux-basis-caption">(Therapie / Anwendung / Packung / Flasche / Ampulle / Spritze / Rezeptur)</p>';
 
     if ($cost) {

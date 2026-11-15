@@ -106,3 +106,18 @@ body.lcn-public-page.provider-entry-page #entry-form .entry-submit:hover { backg
 .provider-choice-group+.provider-choice-group{position:relative;margin-top:14px;padding-top:16px}
 .provider-choice-group+.provider-choice-group::before{content:'';position:absolute;top:0;left:8px;right:8px;border-top:1px solid #d8e3ef}
 @media(max-width:650px){.provider-choice-groups{max-height:40dvh;padding:12px}}
+.entry-step > summary [data-selected-treatments] { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.entry-step > summary [data-selected-treatments][hidden],
+.entry-step[open] > summary [data-selected-treatments] { display: none; }
+.catalog-summary-treatment {
+  display: inline-flex; align-items: center; gap: 7px; max-width: 100%;
+  padding: 4px 5px 4px 10px; border: 1px solid #c9b5dc; border-radius: 7px;
+  background: #eee7f5; color: #614584; font-size: 13px; font-weight: 500; line-height: 1.4;
+}
+.catalog-summary-treatment > span { overflow-wrap: anywhere; }
+.provider-entry-page #entry-form .catalog-summary-treatment button {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: 0 0 28px; width: 28px; min-height: 28px; padding: 0; margin: 0;
+  border: 0; border-radius: 5px; background: transparent; color: #614584; font-size: 19px; cursor: pointer;
+}
+.provider-entry-page #entry-form .catalog-summary-treatment button:hover { background: #dfd1eb; }

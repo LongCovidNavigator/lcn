@@ -224,3 +224,15 @@ body #location-form button[type=submit]:hover {
         display: none;
     }
 }
+/* Text must remain within its own table cell, including long place names and URLs. */
+table :is(th, td) {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal;
+}
+table :is(th, td) > :is(a, button, p, div, small, strong, span) {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+}

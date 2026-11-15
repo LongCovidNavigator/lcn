@@ -1098,7 +1098,7 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     results.hidden = false;
     heading.textContent = hasUserLocation ? "Die nächsten Anlaufstellen" : "Hausärztliche Anlaufstellen in Deutschland";
     if (!hasUserLocation && document.body.dataset.searchTitle === 'Hausarztsuche') {
-        heading.textContent = "Wenn du oben deine Adresse einträgst, können wir für dich die zehn nächstgelegenen hausärztlichen Anlaufstellen heraussuchen.";
+        heading.textContent = "Wähle oben eine Adresse oder einen Ort aus, um die zehn nächstgelegenen hausärztlichen Anlaufstellen zu finden.";
     }
     if (hasUserLocation && document.body.dataset.searchTitle === 'Hausarztsuche') {
         heading.textContent = `Wir haben für dich die nächsten ${doctors.length} hausärztlichen Praxen herausgesucht!`;

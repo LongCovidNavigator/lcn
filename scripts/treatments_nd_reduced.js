@@ -44,7 +44,7 @@
     card.dataset.realAnswerCount = (serverCounts[key(card)] || (card.dataset.kind === 'cost' ? [] : JSON.parse(card.dataset.counts))).reduce((sum, count) => sum + Number(count), 0);
     const total = counts.reduce((a,b)=>a+b,0), own = draft[key(card)];
     card.dataset.displayAnswerCount = total;
-    card.querySelector('[data-community-note]').textContent = total ? total + (total === 1 ? ' Angabe' : ' Angaben') : 'Noch keine Community-Angaben';
+    card.querySelector('[data-community-note]').textContent = total ? total + (total === 1 ? ' Angabe' : ' Angaben') : card.dataset.question === 'gamechanger' ? 'Noch keine\nCommunity-Angaben' : 'Noch keine Community-Angaben';
     options.forEach((button,i)=>{
       const percent = total ? counts[Number(button.dataset.option)]*100/total : null;
       const option = card.dataset.kind === 'donut' ? button.parentElement : button;
@@ -89,9 +89,9 @@
 
   const escape = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const help = {
-    pem:'Wie hoch ist das Crash-PEM-Risiko bei dieser Therapie? Wähle die Stufe, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Angaben der Community zu einer Verschlechterung nach Belastung.',
+    pem:'Wie hoch ist das Crash-/PEM-Risiko bei dieser Therapie? Wähle die Stufe, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Angaben der Community zu einer Verschlechterung nach Belastung.',
     effect:'Wie hat sich dein Zustand durch die Therapie verändert? Wähle die Bewertung, die auf deine Erfahrung zutrifft. Die Verteilung zeigt subjektive Erfahrungen der Community und ist kein Wirksamkeitsnachweis.',
-    gamechanger:'War die Therapie für dich ein Gamechanger, hat sie also deinen Alltag entscheidend verbessert? Wähle die Antwort, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Antworten der Community.',
+    gamechanger:'War die Therapie für dich ein Gamechanger, hat sie also deinen Genesungsprozess entscheidend vorangetrieben? Wähle die Antwort, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Antworten der Community.',
     unit_cost:'Wie hoch ist dein eigener Kostenanteil pro Anwendung, Packung oder Therapieeinheit? Wähle eine grob passende Stufe.',
     total_cost:'Wie hoch sind deine eigenen Gesamtkosten für diese Therapie bis zum jetzigen Zeitpunkt? Berücksichtige die bisherigen Anwendungen und Ausgaben zusammen. Je nach Dauer, Häufigkeit und Verlauf können sich die Kosten unterscheiden; eine grobe Schätzung genügt.',
     setting:'Wo findet die Therapie statt? Wähle das Setting, das auf deine Erfahrung zutrifft.',
@@ -103,7 +103,7 @@
     return '<span class="ux-heading-info"><button type="button" aria-label="'+escape('Information zu '+title)+'" aria-describedby="'+id+'">ⓘ</button><p id="'+id+'" role="tooltip">'+escape(text)+'</p></span>';
   }
   function appendHelp(heading, text) {
-    if (heading && !heading.querySelector('.ux-heading-info')) heading.insertAdjacentHTML('beforeend', ' '+helpMarkup(heading.textContent.trim(), text));
+    if (heading && !heading.querySelector('.ux-heading-info')) heading.insertAdjacentHTML('beforeend', '&nbsp;'+helpMarkup(heading.textContent.trim(), text));
   }
   questions.forEach((card,index)=>{
     const heading=card.querySelector('h3'), key=card.dataset.question;
@@ -131,7 +131,7 @@
       }
     }
   });
-  appendHelp(root.querySelector('.card:has(>.nd-provider-map)>h3'), 'Wo findest du Behandler:innen für diese Therapie? Gib deinen Ausgangsort ein und übernimm ihn mit Enter oder einem Suchvorschlag. Du kannst die Behandler:innen nach Ort und Radius filtern. Die Karte zeigt gespeicherte Hauptstandorte; Entfernungen sind Luftlinien. Vorläufige Zuordnungen sind gekennzeichnet.');
+  appendHelp(root.querySelector('.card:has(>.nd-provider-map)>h3'), 'Wo findest du Behandler:innen für diese Therapie? Wähle einen Ausgangsort aus und übernimm ihn mit Enter oder einem Suchvorschlag. Du kannst die Behandler:innen nach Ort und Radius filtern. Die Karte zeigt gespeicherte Hauptstandorte; Entfernungen sind Luftlinien. Vorläufige Zuordnungen sind gekennzeichnet.');
   appendHelp(root.querySelector('#symptom-help-heading'), 'Bei welchen Symptomen hat dir die Therapie geholfen? Wähle die passenden Symptome aus oder ergänze eines über die Suche. Erneutes Anklicken deiner Auswahl nimmt sie zurück.');
   function currentCounts(){return Object.fromEntries(questions.map(card=>[key(card),countsFor(card).counts]));}
   function topPercentLabel(percent){
@@ -241,7 +241,7 @@
     }
     const pem=result.rows.find(r=>r.key==='pem');
     const pemValues=peerResults.map(peer=>peer.rows.find(r=>r.key==='pem')).filter(r=>r.value!=null).map(r=>4-3*r.value);
-    root.querySelector('[data-pem-comparison]').innerHTML=comparison(pem.value==null?null:4-3*pem.value,pemValues,'Crash-PEM-Risiko im Vergleich',(demo||loaded)&&pem.total>=10,4,true);
+    root.querySelector('[data-pem-comparison]').innerHTML=comparison(pem.value==null?null:4-3*pem.value,pemValues,'Crash-/PEM-Risiko im Vergleich',(demo||loaded)&&pem.total>=10,4,true);
     const eligible=peerResults.filter(r=>r.dataCoverage>70);
     const comparisonValues=eligible.map(r=>r.score);
     const comparisonReady=(demo||loaded)&&result.dataCoverage>70;
@@ -328,7 +328,7 @@
     const travelLevel=travel.noTravel?0:travel.distance==null?-1:travelLevels.findIndex((level,i)=>i>0&&travel.distance<=level[0]);
     const travelGraphic='<ol class="dashboard-travel-scale" aria-label="Anreisestufen und Punkte">'+travelLevels.map((level,i)=>'<li'+(i===travelLevel?' class="is-current" aria-current="true"':'')+'><span class="dashboard-travel-color" style="background:'+level[4]+'" aria-hidden="true"></span><span><strong>'+level[1]+'</strong><small>'+level[2]+'</small></span><b>'+number(travel.oneOffPrescription&&i>0?15-(15-level[3])/2:level[3])+' P.</b></li>').join('')+'</ol>';
 
-    grid.insertAdjacentHTML('beforeend','<section class="card ux-dashboard-card dashboard-shared-card" data-dashboard-question="distance"><h3>Persönliche Anreise '+helpMarkup('Persönliche Anreise','Wie weit ist die nächste behandelnde Person von deinem Standort entfernt? Die Entfernung wird als Luftlinie zum nächstgelegenen bestätigten Anbieter berechnet. Deinen Ausgangsort kannst du unter Anreise ergänzen. Bei eigenständig zu Hause durchführbaren Therapien ohne Verordnung entfällt die Anreise. Für eine nötige Verordnung zu Hause nehmen wir ohne bestätigte Online-Möglichkeit einen einmaligen Termin mit halbiertem Entfernungsabzug an.')+'</h3><div class="dashboard-points"><strong>'+(travel.value==null?'Noch nicht auswertbar':number(travel.value*15)+' <small>/ 15 Punkte</small>')+'</strong></div><p>'+(travel.noTravel?'Keine Anreise erforderlich':travel.distance==null?escape(travel.reason):number(travel.distance)+' km Luftlinie zum nächstgelegenen bestätigten Anbieter')+'</p>'+(travel.oneOffPrescription?'<p class="ux-dashboard-score-note">Verordnung: einmaliger Vor-Ort-Termin angenommen · halber Entfernungsabzug.</p>':'')+travelGraphic+'<p class="ux-dashboard-score-note">'+escape(travel.reason)+'</p></section>');
+    grid.insertAdjacentHTML('beforeend','<section class="card ux-dashboard-card dashboard-shared-card" data-dashboard-question="distance"><h3>Persönliche Anreise '+helpMarkup('Persönliche Anreise','Wie weit ist die nächste behandelnde Person von deinem Standort entfernt? Die Entfernung wird als Luftlinie zum nächstgelegenen bestätigten Anbieter berechnet. Einen Ausgangsort kannst du unter Anreise auswählen. Bei eigenständig zu Hause durchführbaren Therapien ohne Verordnung entfällt die Anreise. Für eine nötige Verordnung zu Hause nehmen wir ohne bestätigte Online-Möglichkeit einen einmaligen Termin mit halbiertem Entfernungsabzug an.')+'</h3><div class="dashboard-points"><strong>'+(travel.value==null?'Noch nicht auswertbar':number(travel.value*15)+' <small>/ 15 Punkte</small>')+'</strong></div><p>'+(travel.noTravel?'Keine Anreise erforderlich':travel.distance==null?escape(travel.reason):number(travel.distance)+' km Luftlinie zum nächstgelegenen bestätigten Anbieter')+'</p>'+(travel.oneOffPrescription?'<p class="ux-dashboard-score-note">Verordnung: einmaliger Vor-Ort-Termin angenommen · halber Entfernungsabzug.</p>':'')+travelGraphic+'<p class="ux-dashboard-score-note">'+escape(travel.reason)+'</p></section>');
     for(const [sectionNumber,title,maximum,keys] of [[2,'Welche Belastungshürden gibt es bei der Therapie?',30,['setting','pem','distance']],[3,'Wie zugänglich ist die Therapie?',30,['access','total_cost','unit_cost']],[4,'Welche Erfahrungen gibt es?',40,['effect','gamechanger']]]){
       const rows=result.rows.filter(row=>keys.includes(row.key));
       const available=rows.filter(row=>row.value!=null);

@@ -3,6 +3,15 @@
  const page=document.querySelector('.ux-detail[data-treatment-id]');if(!page)return;
  const pageId=Number(page.dataset.treatmentId),api=window.LCNCatalogRelations,status=document.querySelector('[data-treatment-relation-status]');if(!api)return;
  const make=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};let catalog;
+ // Pending classifications use the same header and feedback position as saved nodes.
+ function alignPendingStage(node){
+  if(!node.classList.contains('ux-stage-node'))return;
+  const host=node.querySelector('[data-treatment-relation-feedback]');if(!host)return;
+  const header=make('div'),assertion=make('div');
+  header.className='ux-stage-node-header';assertion.className='ux-stage-assertion';
+  assertion.append(host);header.append(assertion);node.prepend(header);
+  node.querySelector(':scope > p')?.remove();
+ }
  function renderPendingCombination(item){
   const tree=make('div'),drawing=make('div'),svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),parent=make('article'),parts=make('div');
   tree.className='ux-combination-tree';tree.dataset.combinationTree='proposal-'+item.submission_id;tree.dataset.pendingCombination=item.submission_id;
@@ -32,15 +41,15 @@
   for(const name of names){
    const own=memberships.find(n=>(Number(n.left_id)===pageId||Number(n.group_root_id)===pageId)&&n.group_name===name),key='group-'+own.submission_id,rootPage=Number(own.group_root_id)===pageId;
    const tile=make('article'),host=make('span');tile.className='ux-stage-node ux-relation-entry is-linked';tile.dataset.pendingRelationship=own.submission_id;tile.dataset.pendingGroup=key;
-   const title=make(own.group_root_id&&!rootPage?'a':'strong',name);if(title.tagName==='A')title.href='therapie_detail.php?treatment_id='+own.group_root_id+'#alternativen';title.className='ux-stage-name';tile.append(title,make('small','Prüfung ausstehend'));host.dataset.treatmentRelationFeedback='s:'+own.submission_id;host.dataset.feedbackStatement=own.description;host.dataset.feedbackStandard='1';tile.append(host);const rootNode=rootPage?left.querySelector('[data-stage-node="'+pageId+'"]'):null;if(rootNode){rootNode.dataset.pendingGroup=key;}else left.insertBefore(tile,left.querySelector('[data-treatment-relation-add]'));
+   const title=make(own.group_root_id&&!rootPage?'a':'strong',name);if(title.tagName==='A')title.href='therapie_detail.php?treatment_id='+own.group_root_id+'#alternativen';title.className='ux-stage-name';tile.append(title,make('small','Prüfung ausstehend'));host.dataset.treatmentRelationFeedback='s:'+own.submission_id;host.dataset.feedbackStatement=own.description;host.dataset.feedbackStandard='1';tile.append(host);alignPendingStage(tile);const rootNode=rootPage?left.querySelector('[data-stage-node="'+pageId+'"]'):null;if(rootNode){rootNode.dataset.pendingGroup=key;}else left.insertBefore(tile,left.querySelector('[data-treatment-relation-add]'));
    const current=rootPage?null:middle.querySelector('[data-stage-node="'+pageId+'"]');if(current)current.dataset.pendingGroupMember=[current.dataset.pendingGroupMember,key].filter(Boolean).join(' ');
    for(const item of memberships.filter(n=>n.group_name===name&&Number(n.left_id)!==pageId)){
     const entry=catalog.items.find(n=>n.id===Number(item.left_id));if(!entry)continue;
-    const node=make('article'),link=make('a',entry.name),feedback=make('span');node.className='ux-stage-node ux-relation-entry is-linked';node.dataset.pendingRelationship=item.submission_id;node.dataset.pendingGroupMember=key;link.className='ux-stage-name';link.href='therapie_detail.php?treatment_id='+entry.id+'#alternativen';feedback.dataset.treatmentRelationFeedback='s:'+item.submission_id;feedback.dataset.feedbackStatement=item.description;feedback.dataset.feedbackStandard='1';node.append(link,make('small','Prüfung ausstehend'),feedback);middle.append(node);
+    const node=make('article'),link=make('a',entry.name),feedback=make('span');node.className='ux-stage-node ux-relation-entry is-linked';node.dataset.pendingRelationship=item.submission_id;node.dataset.pendingGroupMember=key;link.className='ux-stage-name';link.href='therapie_detail.php?treatment_id='+entry.id+'#alternativen';feedback.dataset.treatmentRelationFeedback='s:'+item.submission_id;feedback.dataset.feedbackStatement=item.description;feedback.dataset.feedbackStandard='1';node.append(link,make('small','Prüfung ausstehend'),feedback);alignPendingStage(node);middle.append(node);
    }
    if(rootPage)middle.querySelectorAll('[data-kind="group_contains"]').forEach(n=>n.remove());
    if(!rootPage)continue;
-   const add=make('button','＋ Weiteren Eintrag zu „'+name+'“ hinzufügen');add.type='button';add.className='ux-stage-add';add.dataset.pendingRelationship='add-'+own.submission_id;add.dataset.treatmentRelationAdd='';add.dataset.kind='group_contains';add.dataset.sourceId=pageId;add.dataset.groupId=own.group_alias_id||0;add.dataset.groupName=name;middle.append(add);
+   const add=make('button','＋ Weiteren Eintrag zu „'+name+'“ hinzufügen');add.type='button';add.className='ux-stage-add';const icon=make('span','＋'),label=make('span','Weiteren Eintrag zu „'+name+'“ hinzufügen');icon.className='ux-stage-add-icon';icon.setAttribute('aria-hidden','true');add.replaceChildren(icon,label);add.dataset.pendingRelationship='add-'+own.submission_id;add.dataset.treatmentRelationAdd='';add.dataset.kind='group_contains';add.dataset.sourceId=pageId;add.dataset.groupId=own.group_alias_id||0;add.dataset.groupName=name;middle.append(add);
   }
  }
  async function load(){
@@ -77,7 +86,7 @@
     const description=tile.querySelector('p');if(description)description.remove();
     const feedback=make('div');feedback.className='ux-combination-assertion';feedback.append(host);tile.append(feedback);
    }
-   container.insertBefore(tile,button||null);container.querySelectorAll('.ux-stage-empty').forEach(n=>n.hidden=true);const block=container.closest('.ux-stage-block');if(block)block.hidden=false;
+   alignPendingStage(tile);container.insertBefore(tile,button||null);container.querySelectorAll('.ux-stage-empty').forEach(n=>n.hidden=true);const block=container.closest('.ux-stage-block');if(block)block.hidden=false;
   }
   const alternativeEmpty=document.querySelector('.ux-alternative-empty');if(alternativeEmpty)alternativeEmpty.hidden=!!alternatives?.querySelector('.ux-feedback-relation');
   const empty=combinations?.querySelector('.ux-combination-empty');if(empty)empty.hidden=!!combinations.querySelector('[data-pending-combination]');
@@ -126,7 +135,7 @@
     event.preventDefault();if(send.disabled)return;message.textContent='';saving=true;form.inert=true;preview();
     const entries=[...(kind.value==='belongs_to_group'?groups:targets)];let completed=0;
     try{
-     for(const entry of entries){await api.request('api/treatment_relationship_proposals.php',{source_id:source,context_id:pageId,kind:kind.value,target_id:kind.value==='belongs_to_group'?0:entry.id,group_alias_id:kind.value==='belongs_to_group'?entry.id:(group?.id||0),group_name:kind.value==='belongs_to_group'?entry.name:(group?.name||''),note:note.value,source_url:url.value});completed++;if(kind.value==='belongs_to_group')groups=groups.filter(n=>n!==entry);else{targets=targets.filter(n=>n!==entry);existing.add(entry.id);}}
+     for(const entry of entries){await api.request('api/treatment_relationship_proposals.php',{source_id:source,context_id:pageId,kind:kind.value,target_id:kind.value==='belongs_to_group'?0:entry.id,group_alias_id:kind.value==='belongs_to_group'?entry.id:(group?.id||0),group_name:kind.value==='belongs_to_group'?entry.name:(group?.name||''),note:note.value,source_url:url.value});completed++;document.dispatchEvent(new CustomEvent('lcn-guide-contributed',{detail:{topic:kind.value==='alternative'?'alternative':kind.value==='component'?'combination':'classification'}}));if(kind.value==='belongs_to_group')groups=groups.filter(n=>n!==entry);else{targets=targets.filter(n=>n!==entry);existing.add(entry.id);}}
      await load();message.textContent=completed===1?'Dein Vorschlag ist gespeichert und erscheint mit „Prüfung ausstehend“.':'Alle '+completed+' Vorschläge sind gespeichert und erscheinen mit „Prüfung ausstehend“. Du kannst weitere Einträge auswählen.';cancel.textContent='Schließen';
     }catch(e){message.textContent=(completed?completed+' Vorschläge gespeichert. ':'')+e.message;await load().catch(()=>{});}
     finally{saving=false;form.inert=false;preview();targetCombo?.refresh();groupCombo?.refresh();}

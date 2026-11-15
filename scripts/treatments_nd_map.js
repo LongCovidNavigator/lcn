@@ -25,6 +25,30 @@
   let view='cards';try{view=localStorage.getItem('lcn_result_view_preference')==='table'?'table':'cards';}catch{}
   const entries = hosts.map(host => {const providers=JSON.parse(host.querySelector('.nd-map-data').textContent);return {host,providers,points:providers.filter(valid),map:null};});
   window.addEventListener('lcn-pending-providers',event=>{entries.forEach(entry=>{entry.providers=entry.providers.filter(p=>!p.pending);const ids=new Set(entry.providers.map(p=>Number(p.dr_id)));entry.providers.push(...(event.detail||[]).filter(p=>!p.dr_id||!ids.has(Number(p.dr_id))));entry.points=entry.providers.filter(valid);const citySelect=entry.host.querySelector('[data-provider-city]');[...new Set(entry.providers.map(p=>p.city).filter(Boolean))].forEach(city=>{if(![...citySelect.options].some(o=>o.value===city)){const option=document.createElement('option');option.value=option.textContent=city;citySelect.append(option);}});render(entry);});});
+  const cityLocations=new Map();
+  async function approximateCities(entry){
+    for(const provider of entry.providers){
+      if(valid(provider)||!provider.city)continue;
+      const country=({'Deutschland':'de','Österreich':'at','Schweiz':'ch'}[provider.country]||provider.country||'de').toLowerCase();
+      const key=country+':'+provider.city;
+      if(!cityLocations.has(key))cityLocations.set(key,fetch('api/geocode_location.php?q='+encodeURIComponent(provider.city)+'&country='+encodeURIComponent(country)+'&city_only=1').then(r=>r.json()).then(data=>data.ok&&valid(data.result)?data.result:null).catch(()=>null));
+      const point=await cityLocations.get(key);
+      if(point&&entry.providers.includes(provider)){
+        provider.lat=Number(point.lat);provider.lng=Number(point.lng);provider.approximate=true;
+        entry.points=entry.providers.filter(valid);render(entry);
+      }
+    }
+  }
+  window.addEventListener('lcn-provider-catalog',event=>{
+    entries.forEach(entry=>{
+      const existing=new Map(entry.providers.filter(p=>p.dr_id).map(p=>[Number(p.dr_id),p]));
+      entry.providers=(event.detail?.providers||[]).map(p=>({...existing.get(Number(p.dr_id)),...p}));
+      entry.points=entry.providers.filter(valid);
+      const select=entry.host.querySelector('[data-provider-city]');
+      for(const city of new Set(entry.providers.map(p=>p.city).filter(Boolean))){if(![...select.options].some(o=>o.value===city)){const option=document.createElement('option');option.value=option.textContent=city;select.append(option);}}
+      render(entry);approximateCities(entry);
+    });
+  });
   let ratingRequest=0;async function loadRatings(){const request=++ratingRequest;try{const demo=document.getElementById('nd-demo-header-toggle')?.getAttribute('aria-pressed')==='true';const response=await fetch('api/provider_positive_ratings.php?include_dummy='+(demo?'1':'0'));const data=await response.json();if(request!==ratingRequest||!data.ok)return;ratings=data.ratings;ratingsLoaded=true;entries.forEach(render);}catch{}}
   const demoButton=document.getElementById('nd-demo-header-toggle');if(demoButton)new MutationObserver(loadRatings).observe(demoButton,{attributes:true,attributeFilter:['aria-pressed']});loadRatings();
   function distance(point) {
@@ -113,7 +137,7 @@
       });
       list.append(message,link);return;
     }
-    function nameNode(point){const node=document.createElement(point.href?'a':'strong');node.textContent=point.name;if(point.href)node.href=point.href;if(!point.href&&point.pending)node.dataset.catalogFeedbackKey='s:'+point.submission_id;return node;}
+    function nameNode(point){const node=document.createElement(point.href?'a':'strong');node.textContent=point.name;if(point.href)node.href=point.href;if(point.pending&&!point.dr_id&&point.submission_id)node.dataset.catalogFeedbackKey='s:'+point.submission_id;return node;}
     function pendingNote(point){const note=document.createElement('small');note.className='catalog-pending-note';note.textContent='Prüfung ausstehend';if(point.own)note.title='Dein Vorschlag · Prüfung ausstehend';return note;}
     function showButton(point,compact=false){const button=document.createElement('button');button.type='button';button.className='nd-show-provider';button.textContent=valid(point)?(compact?'Karte':'Auf Karte zeigen'):(compact?'—':'Standort nicht verfügbar');if(!compact)button.title=valid(point)?'Auf Karte zeigen':'Standort nicht verfügbar';button.disabled=!valid(point);button.addEventListener('click',()=>{if(!map)return;host.querySelector('.top-map-content').classList.remove('is-collapsed');map.invalidateSize();if(origin)map.fitBounds([[origin.lat,origin.lng],[point.lat,point.lng]],{padding:[64,64],maxZoom:12});else map.setView([point.lat,point.lng],12);entry.markers.get(point)?.openPopup();host.querySelector('.nd-map-canvas').scrollIntoView({block:'center'});});return button;}
     const km=p=>origin&&valid(p)?Math.round(distance(p)).toLocaleString('de-DE')+' km':'';
@@ -219,7 +243,7 @@
     render(entry);
     const all=document.createElement('button');all.type='button';all.textContent='Alle Behandler:innen anzeigen';
     host.querySelector('.doctor-results-search-panel').append(all);
-    all.addEventListener('click',()=>{host.dataset.locationMode='radius';const includeUnknown=host.querySelector('[data-include-no-coords]');if(includeUnknown)includeUnknown.checked=false;host.querySelector('[data-provider-specialty]').value='';host.querySelectorAll('[data-rating-filter]').forEach(slider=>{slider.value=slider.dataset.ratingFilter==='worsening'?100:0;slider.nextElementSibling.value=slider.value;});host.querySelector('[data-provider-search]').value='';host.querySelector('[data-provider-city]').value='';host.querySelector('[data-radius-enabled]').checked=false;render(entry);});
+    all.addEventListener('click',()=>{host.dataset.locationMode='radius';const includeUnknown=host.querySelector('[data-include-no-coords]');if(includeUnknown)includeUnknown.checked=true;host.querySelector('[data-provider-specialty]').value='';host.querySelectorAll('[data-rating-filter]').forEach(slider=>{slider.value=slider.dataset.ratingFilter==='worsening'?100:0;slider.nextElementSibling.value=slider.value;});host.querySelector('[data-provider-search]').value='';host.querySelector('[data-provider-city]').value='';host.querySelector('[data-radius-enabled]').checked=false;render(entry);});
     host.querySelector('[data-provider-search]').addEventListener('input',()=>render(entry));
     host.querySelector('[data-provider-sort]').addEventListener('change',()=>renderProviders(entry));
     host.querySelectorAll('[data-provider-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.providerView;try{localStorage.setItem('lcn_result_view_preference',view);}catch{}entries.forEach(renderProviders);}));
@@ -261,7 +285,7 @@
       const groups=new Map();visiblePoints.forEach(point=>{const key=point.lat.toFixed(6)+','+point.lng.toFixed(6);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(point);});
       groups.forEach(points=>{
         const popup=document.createElement('div'),heading=document.createElement('strong');heading.textContent=points.length>1?points.length+' Einträge':points[0].name;popup.append(heading);
-        const list=document.createElement('ul');list.className='top-map-popup-list';points.forEach(point=>{const li=document.createElement('li');li.textContent=point.name;const small=document.createElement('small');small.textContent=point.place+(point.pending?' · Prüfung ausstehend':'');li.append(small);list.append(li);});popup.append(list);
+        const list=document.createElement('ul');list.className='top-map-popup-list';points.forEach(point=>{const li=document.createElement('li');li.textContent=point.name;const small=document.createElement('small');small.textContent=point.place+(point.approximate?' · Ungefährer Standort (Ort)':'')+(point.pending?' · Prüfung ausstehend':'');li.append(small);list.append(li);});popup.append(list);
         let icon=markerIcon();if(points.length>1)icon=window.LCNImages.countMarkerIcon(points.length);
         const marker=L.marker([points[0].lat,points[0].lng],{icon,riseOnHover:true}).bindPopup(popup,{autoPan:false}).addTo(entry.map);window.LCNOnline?.track(marker,points.map(p=>p.dr_id));points.forEach(point=>entry.markers.set(point,marker));
       });

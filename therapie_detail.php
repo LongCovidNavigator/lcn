@@ -42,7 +42,7 @@ $isAdmin = lcnCurrentSiteRole() === 'admin';
 header('Cache-Control: no-store, private');
 ndStart($item['treatmentname'] ?? 'Therapie', true, true);
 if ($error) { echo '<section class="card" role="alert"><h1>Therapie nicht verfügbar</h1><p>'.ndEscape($error).'</p><a href="therapien_suche.html">Zur Therapiesuche</a></section>'; ndEnd(); return; }
-$views = ['ueberblick'=>'Überblick','wirkung'=>'Erfahrungen aus der Community','termin'=>'Belastungseinschätzung','zugang'=>'Kosten und Verfügbarkeit','anreise'=>'Anreise','alternativen'=>'Therapiealternativen'];
+$views = ['ueberblick'=>'Überblick','wirkung'=>'Erfahrungen aus der Community','termin'=>'Belastungseinschätzung','zugang'=>'Kosten und Verfügbarkeit','symptome'=>'Symptome','anreise'=>'Behandler:innen finden (Karte)','alternativen'=>'Therapiealternativen'];
 if ($isAdmin) $views['dashboard'] = 'Dashboard';
 ?>
 <div class="detail-layout ux-detail" data-home-delivery="<?= lcnNdCanTreatAtHome($item) ? '1' : '0' ?>" data-independent-at-home="<?= lcnNdIndependentAtHome($item) ? '1' : '0' ?>" data-treatment-id="<?= (int)$id ?>" data-previous-treatment-id="<?= (int)array_search((int)$id, LCN_PREVIOUS_ND_IDS, true) ?>">
@@ -76,23 +76,25 @@ if ($isAdmin) $views['dashboard'] = 'Dashboard';
 </div>
 <?= ndReducedChart($item,'gamechanger','Gamechanger','donut') ?>
 </div>
-<section class="card ux-symptom-help" aria-labelledby="symptom-help-heading">
-<h3 id="symptom-help-heading">Symptome</h3>
-<div class="ux-symptom-grid"><ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol>
-<div class="ux-symptom-picker" data-symptom-combobox><label for="symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="symptom-search" type="text" role="combobox" data-symptom-search placeholder="＋ Weiteres Symptom hinzufügen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="symptom-picker"></div><div id="symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div></div>
-</section></section>
+</section>
 <section id="termin" class="nd-panel" aria-label="<?= ndEscape($views['termin']) ?>" hidden>
 <?= ndReducedChart($item,'setting','Durchführungssetting','rows') ?>
-<?= ndReducedChart($item,'pem','Crash-PEM-Risiko','segments') ?>
+<?= ndReducedChart($item,'pem','Crash-/PEM-Risiko','segments') ?>
 </section>
 <section id="zugang" class="nd-panel" aria-label="<?= ndEscape($views['zugang']) ?>" hidden>
 <?= ndReducedChart($item,'access','Zugang','rows') ?>
 <?= ndReducedChart($item,'unit_cost','Kosten pro Therapie / Einheit','cost') ?>
 <?= ndReducedChart($item,'total_cost','Gesamtkosten der Therapie','cost') ?>
 </section>
-<section id="anreise" class="nd-panel" aria-label="Anreise" hidden>
+<section id="anreise" class="nd-panel" aria-label="Behandler:innen finden (Karte)" hidden>
 <?= ndProviderMap($item, 'anbieter') ?>
 </section>
+<section id="symptome" class="nd-panel" aria-label="Symptome" hidden>
+<section class="card ux-symptom-help" aria-labelledby="symptom-help-heading">
+<h3 id="symptom-help-heading">Symptome</h3>
+<div class="ux-symptom-grid"><ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol>
+<div class="ux-symptom-picker" data-symptom-combobox><label for="symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="symptom-search" type="text" role="combobox" data-symptom-search placeholder="＋ Weiteres Symptom hinzufügen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="symptom-picker"></div><div id="symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div></div>
+</section></section>
 <section id="alternativen" class="nd-panel" aria-label="Therapiealternativen" hidden>
 <section class="card ux-discovery ux-alternative-section"><h3>Alternative Therapien <span class="ux-heading-info"><button type="button" aria-label="Information zu alternativen Therapien" aria-describedby="therapy-alternatives-help">ⓘ</button><p id="therapy-alternatives-help" role="tooltip">Welche anderen Behandlungen kommen für einen ähnlichen Einsatz infrage? Hier sammelt die Community mögliche Alternativen zu dieser Therapie. Du kannst weitere Optionen ergänzen. Ein Eintrag bedeutet nicht, dass die Behandlungen gleich wirksam oder für jede Person austauschbar sind. Noch ungeprüfte Vorschläge sind gekennzeichnet.</p></span></h3>
 <div class="ux-alternative-strip" role="group" aria-label="Aktuelle Therapie und Alternativen">

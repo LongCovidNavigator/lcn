@@ -109,3 +109,32 @@ body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-co
   body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .contact > :is(a,button) { width:28px; min-width:0; min-height:26px; padding:2px; justify-content:center; }
   body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .detail-menu-toggle { width:32px; min-width:32px; padding:3px; }
 }
+/* Therapy titles align with the whole header, independently of local controls. */
+@media(min-width:1100px) {
+  body.ux-page.compact-doctor-header #header-placeholder .profile > .profile-copy {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: min(32rem, calc(100% - 880px)); margin: 0; padding: 0; text-align: center;
+  }
+}
+@media(max-width:1099px) {
+  body.ux-page.compact-doctor-header #header-placeholder .profile,
+  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) {
+    grid-template-columns: auto minmax(0,1fr) auto auto auto; gap: 8px; padding: 10px 12px;
+  }
+  body.ux-page.compact-doctor-header #header-placeholder .profile > .profile-copy,
+  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .profile-copy {
+    position: static; grid-column: 1/-1; grid-row: 1; width: 100%; transform: none; padding: 0; text-align: center;
+  }
+  body.ux-page.compact-doctor-header #header-placeholder .profile > .detail-brand-group { grid-column: 1; grid-row: 2; }
+  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .lcn-local-view-controls > .lcn-role-toggle { grid-column: 2; grid-row: 2; }
+  body.ux-page.compact-doctor-header #header-placeholder .profile > .nd-local-controls,
+  body.ux-page.compact-doctor-header #header-placeholder .profile > .lcn-local-view-controls > #nd-demo-header-toggle { grid-column: 3; grid-row: 2; margin: 0; }
+  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .contact { grid-column: 4; grid-row: 2; }
+  body.ux-page.compact-doctor-header #header-placeholder .profile > .detail-menu-toggle,
+  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .detail-menu-toggle { grid-column: 5; grid-row: 2; position: static; transform: none; }
+}
+@media(min-width:1100px) {
+  body.ux-page.compact-doctor-header #header-placeholder .profile > .profile-copy {
+    grid-column: 1/-1; grid-row: 1/-1;
+  }
+}

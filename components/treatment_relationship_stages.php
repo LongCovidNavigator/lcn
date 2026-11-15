@@ -113,7 +113,7 @@ function ndRelationshipStages(array $g,int $id): array {
     return compact('title','stages','edges','selected','drug');
 }
 function ndStageAdd(array $a): string {
-    return '<button type="button" class="ux-stage-add" data-treatment-relation-add'.(!empty($a['sources'])?' data-source-options="'.ndEscape(json_encode($a['sources'],JSON_UNESCAPED_UNICODE)).'"':'').' data-kind="'.ndEscape($a['kind']).'" data-source-id="'.$a['source'].'" data-group-id="'.$a['group'].'" data-dialog-title="'.ndEscape($a['label']).'">＋ '.ndEscape($a['label']).'</button>';
+    return '<button type="button" class="ux-stage-add" data-treatment-relation-add'.(!empty($a['sources'])?' data-source-options="'.ndEscape(json_encode($a['sources'],JSON_UNESCAPED_UNICODE)).'"':'').' data-kind="'.ndEscape($a['kind']).'" data-source-id="'.$a['source'].'" data-group-id="'.$a['group'].'" data-dialog-title="'.ndEscape($a['label']).'"><span class="ux-stage-add-icon" aria-hidden="true">＋</span><span>'.ndEscape($a['label']).'</span></button>';
 }
 function ndRenderRelationshipStages(array $g,int $id): string {
     $m=ndRelationshipStages($g,$id);

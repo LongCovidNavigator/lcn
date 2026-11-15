@@ -60,19 +60,22 @@ try {
         throw new Exception("GEOAPIFY_API_KEY fehlt in der .env-Datei.");
     }
 
+    $country = strtolower((string)($_GET['country'] ?? 'de'));
+    if(!in_array($country,['de','at','ch'],true))$country='de';
     $suggestions = ($_GET['suggest'] ?? '') === '1';
     $type = '';
     if ($suggestions) {
         if (preg_match('/^\d{2,5}$/', $query)) $type = 'postcode';
         elseif (!preg_match('/[\d,]|(?:straße|strasse|str\.|weg|platz|allee|gasse|ring|ufer|damm)\b|^(?:am|im|auf|an der|an den|unter den)\s/iu', $query)) $type = 'city';
     }
+    if (($_GET['city_only'] ?? '') === '1') $type = 'city';
     $url =
         'https://api.geoapify.com/v1/geocode/' . ($suggestions ? 'autocomplete' : 'search') .
         '?text=' . urlencode($query) .
         ($type !== '' ? '&type=' . $type : '') .
         '&format=json' .
         '&limit=5' .
-        '&filter=countrycode:de' .
+        '&filter=countrycode:' . $country .
         '&lang=de' .
         '&apiKey=' . urlencode($apiKey);
 

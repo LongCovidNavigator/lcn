@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__.'/_catalog_relations.php';
+require_once __DIR__.'/_provider_location.php';
 require_once __DIR__.'/_voting.php';
 require_once __DIR__.'/_vote_abuse.php';
 header('Cache-Control: private, no-store');
@@ -20,7 +21,7 @@ try {
  }
  $type=$_GET['type']??'';$id=(int)($_GET['id']??0);
  if($type==='treatment'&&lcnNdRows($p,'SELECT 1 FROM tbl_treatments_nd WHERE treat_nd_id=?',[$id])){
-  $items=lcnNdRows($p,"SELECT e.lcn_id id,e.anzeigename name,COALESCE(l.loc_city,'') meta,l.loc_plz,l.loc_city,l.loc_lat,l.loc_lng FROM tbl_entities_nd e LEFT JOIN tbl_drs_locations_03 l ON l.loc_id=(SELECT loc_id FROM tbl_drs_locations_03 WHERE dr_id=e.lcn_id ORDER BY loc_is_primary DESC,loc_id LIMIT 1) WHERE e.aktiv=1 ORDER BY e.anzeigename");
+  $items=lcnNdRows($p,"SELECT e.lcn_id id,e.anzeigename name,COALESCE(l.loc_city,'') meta,l.loc_plz,l.loc_city,l.loc_country,l.loc_lat,l.loc_lng FROM tbl_entities_nd e LEFT JOIN tbl_drs_locations_03 l ON l.loc_id=(SELECT loc_id FROM tbl_drs_locations_03 WHERE dr_id=e.lcn_id ORDER BY loc_is_primary DESC,loc_id LIMIT 1) WHERE e.aktiv=1 ORDER BY e.anzeigename");
   $linked=array_column(lcnNdRows($p,"SELECT DISTINCT lcn_id id FROM tbl_cpl_entities2treatments_nd WHERE treat_nd_id=? AND lcn_id IS NOT NULL AND relation_status IN ('bestand','belegt')",[$id]),'id');
  }elseif($type==='doctor'&&lcnDoctorExists($id)){
   $items=lcnNdRows($p,"SELECT treat_nd_id id,treatmentname name,COALESCE(typ,'') meta FROM tbl_treatments_nd ORDER BY treatmentname");
@@ -36,7 +37,12 @@ try {
   if(!$match||($other&&in_array($other,array_map('intval',$linked),true)))continue;
   $key=$other?'id:'.$other:'name:'.mb_strtolower($name);$own=$viewer!==null&&hash_equals((string)$submission['submitter_key'],$viewer);
   if(isset($pending[$key])){$pending[$key]['own']=$pending[$key]['own']||$own;continue;}
-  $pending[$key]=['submission_id'=>(int)$submission['submission_id'],'id'=>$other,'name'=>$name,'own'=>$own];
+  $location=[];
+  if($type==='treatment'&&$submission['entity_type']==='doctor'){
+   $providerPayload=lcnProviderLocationPayload($payload);
+   $location=['city'=>(string)($providerPayload['city']??''),'postal_code'=>(string)($providerPayload['postal_code']??''),'address'=>(string)($providerPayload['address']??''),'country'=>(string)($providerPayload['country']??''),'lat'=>$providerPayload['lat']??null,'lng'=>$providerPayload['lng']??null];
+  }
+  $pending[$key]=['submission_id'=>(int)$submission['submission_id'],'id'=>$other,'name'=>$name,'own'=>$own,'location'=>$location];
  }
  if($type==='doctor'){
   require_once __DIR__.'/_doctor_treatment_ratings.php';

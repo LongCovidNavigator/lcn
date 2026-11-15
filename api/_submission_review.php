@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_provider_location.php';
 require_once __DIR__.'/_symptom_proposals.php';
 require_once __DIR__ . '/_submission_treatments.php';
 require_once __DIR__ . '/_catalog_relations.php';
@@ -77,6 +78,7 @@ function lcnApproveDoctorSubmission(PDO $pdo, array $row, array $payload): int {
         $institution=in_array($providerType,['practice','clinic','therapy_center'],true);
         $stmt->execute([$institution?'Institution':($providerType==='doctor'?'Behandler':null),$providerType==='doctor'?'Arzt':null,$institution?(['practice'=>'Praxis','clinic'=>'Klinik','therapy_center'=>'Therapiezentrum'][$providerType]):null,lcnNullable($payload,'title'),lcnNullable($payload,'firstname'),lcnNullable($payload,'lastname'),lcnNullable($payload,'organization')??($institution?$row['name']:null),$row['name'],$row['website']?:null,$row['email']?:null,in_array('gkv',$insurance,true)?'GKV':null,in_array('pkv',$insurance,true)?'PKV':null,'Geprüfter Community-Vorschlag #'.$row['submission_id']]);$drId=(int)$pdo->lastInsertId();
     }
+    $payload = lcnProviderLocationPayload($payload);
     $hasLocation = array_filter([$payload['street']??'', $payload['postal_code']??'', $payload['city']??'', $row['phone']??'']);
     if ($hasLocation) {
         $country = strtoupper(trim((string)($payload['country'] ?? ''))); $country = ['DEUTSCHLAND'=>'DE','GERMANY'=>'DE','ÖSTERREICH'=>'AT','AUSTRIA'=>'AT','SCHWEIZ'=>'CH','SWITZERLAND'=>'CH'][$country]??$country; $country=in_array($country,['DE','AT','CH'],true)?$country:null;
