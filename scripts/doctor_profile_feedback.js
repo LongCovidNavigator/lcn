@@ -42,7 +42,7 @@
       const title=groups()[key].title;
       el.innerHTML=`<div class="catalog-feedback catalog-feedback-standard" role="group" aria-label="${esc(title)} prüfen">${[1,-1].map(stance=>{
         const selected=vote===stance, count=totals[key]?.[stance===1?'confirm':'oppose']||0;
-        const action=stance===1?(selected?'Bestätigung zurücknehmen':'Bestätigen'):(vote===-1?'Widerspruch zurücknehmen':'Widersprechen');
+        const action=stance===1?(selected?'Zustimmung zurücknehmen':'Zustimmen'):(vote===-1?'Widerspruch zurücknehmen':'Widersprechen');
         const subject=stance===1?`Die Angaben im Bereich „${title}“ sind korrekt.`:`Die Angaben im Bereich „${title}“ sind nicht korrekt oder unvollständig. Du kannst sie korrigieren und ergänzen.`;
         return `<button type="button" data-profile-${stance===1?'confirm':'oppose'}="${key}" data-stance="${stance}" aria-pressed="${selected}" data-feedback-action="${esc(action)}" data-feedback-subject="${esc(subject)}" data-feedback-tone="${selected?'neutral':stance===1?'confirm':'oppose'}" data-lcn-tooltip="${esc(action+': '+subject)}" aria-label="${esc(action+': '+subject)} · ${count} Stimmen" ${busy?'disabled':''}>${stance===1?'✓':'×'} ${count}</button>`;
       }).join('')}</div>`;
@@ -83,7 +83,7 @@
     const group=groups()[key],dialog=document.createElement('dialog');
     dialog.className='catalog-report-dialog ux-taxonomy-dialog ux-taxonomy-community doctor-profile-dialog';
     dialog.setAttribute('aria-labelledby','profile-correction-title');
-    dialog.innerHTML=`<h3 id="profile-correction-title">${esc(group.title)} korrigieren</h3><p>Schlage eine Änderung vor oder unterstütze einen Vorschlag der Community.</p><div class="ux-taxonomy-community-fields"></div><p role="status" aria-live="polite"></p><div class="ux-taxonomy-dialog-footer"><small>Änderungen und Stimmen werden direkt gespeichert. Mit Enter oder ✓ bestätigen.</small><button type="button" data-close>Schließen</button></div>`;
+    dialog.innerHTML=`<h3 id="profile-correction-title">${esc(group.title)} korrigieren</h3><p>Schlage eine Änderung vor oder unterstütze einen Vorschlag der Community.</p><div class="ux-taxonomy-community-fields"></div><p role="status" aria-live="polite"></p><div class="ux-taxonomy-dialog-footer"><small>Änderungen und Stimmen werden direkt gespeichert. Mit Enter oder Zustimmen (✓) bestätigen.</small><button type="button" data-close>Schließen</button></div>`;
     const content=dialog.querySelector('.ux-taxonomy-community-fields'),status=dialog.querySelector('[role="status"]');
     let saving=false;
     const display=(field,value)=>field==='type'?typeLabel(value):field==='country'?countryLabel(value):value;
@@ -96,7 +96,7 @@
       if(stance===-1){
         value=String(value??'').trim();
         const current=String(group.fields.find(f=>f[0]===field)[2]||'').trim();
-        if(value===current){status.textContent='Diese Angabe entspricht dem aktuellen Eintrag. Du kannst ihn mit ✓ bestätigen.';return false;}
+        if(value===current){status.textContent='Diese Angabe entspricht dem aktuellen Eintrag. Du kannst ihn mit Zustimmen (✓) bestätigen.';return false;}
         if(value===own[key]?.corrections?.[field]){status.textContent='Diese Auswahl ist bereits gespeichert.';return false;}
       }
       saving=true;busy=true;paint();dialog.querySelectorAll('button,input,select').forEach(el=>el.disabled=true);
@@ -120,7 +120,7 @@
       const vote=itemVotes[key]?.[field]?.[entry]||{confirm:0,own:0};
       const controls=document.createElement('span');controls.className='catalog-feedback catalog-feedback-standard ux-taxonomy-proposal-actions profile-entry-votes';
       const button=document.createElement('button');button.type='button';button.dataset.entryConfirm=entry;button.textContent='✓ '+vote.confirm;button.setAttribute('aria-pressed',String(vote.own===1));
-      tooltip(button,vote.own===1?'Bestätigung zurücknehmen':'Bestätigen',display(field,entry),vote.own===1?'neutral':'confirm');button.onclick=()=>voteEntry(field,entry,vote.own===1?0:1);controls.append(button);return controls;
+      tooltip(button,vote.own===1?'Zustimmung zurücknehmen':'Zustimmen',display(field,entry),vote.own===1?'neutral':'confirm');button.onclick=()=>voteEntry(field,entry,vote.own===1?0:1);controls.append(button);return controls;
     }
     function render(){
       content.replaceChildren();
@@ -128,9 +128,9 @@
         const correction=own[key]?.corrections?.[field],vote=fieldVotes[key]?.[field]||{confirm:0,oppose:0,own:0};
         const section=document.createElement('section');section.dataset.profileField=field;
         section.innerHTML=`<h4 class="ux-taxonomy-field-title">${esc(label)}</h4><p class="ux-taxonomy-current">${esc(display(field,current)||'Noch keine Angabe')}</p><button type="button" class="ux-taxonomy-edit">${esc(label)} ändern</button><div class="ux-taxonomy-editor" hidden></div><div class="ux-taxonomy-proposals"><h5>Aktuelle Angabe und Vorschläge</h5><article class="ux-taxonomy-current-option"><strong>${esc(display(field,current)||'Noch keine Angabe')}</strong><small>Aktueller Eintrag · Bestätigungen dieser Angabe</small><span class="catalog-feedback catalog-feedback-standard ux-taxonomy-proposal-actions"><button type="button" data-current-confirm aria-pressed="${vote.own===1}">✓ ${vote.confirm}</button>${vote.own===1?'<button type="button" data-current-undo>×</button>':''}</span></article></div>`;
-        const confirm=section.querySelector('[data-current-confirm]');tooltip(confirm,vote.own===1?'Bestätigung zurücknehmen':'Bestätigen',label);
+        const confirm=section.querySelector('[data-current-confirm]');tooltip(confirm,vote.own===1?'Zustimmung zurücknehmen':'Zustimmen',label);
         confirm.onclick=()=>save(field,vote.own===1?0:1);
-        const undo=section.querySelector('[data-current-undo]');if(undo){tooltip(undo,'Bestätigung zurücknehmen',label,'neutral');undo.onclick=()=>save(field,0);}
+        const undo=section.querySelector('[data-current-undo]');if(undo){tooltip(undo,'Zustimmung zurücknehmen',label,'neutral');undo.onclick=()=>save(field,0);}
         if(correction!==undefined){const selected=document.createElement('p');selected.className='ux-taxonomy-selected';selected.textContent='Deine Auswahl: '+(display(field,correction)||'Angabe entfernen');section.prepend(selected);}
         const list=section.querySelector('.ux-taxonomy-proposals');
         let pending=proposals.filter(p=>p.section===key&&p.field===field);
@@ -162,7 +162,7 @@
             list.append(row);continue;
           }
           row.innerHTML=`<strong>${esc(display(field,proposal.value)||'Angabe entfernen')}</strong><small>Prüfung ausstehend</small><span class="catalog-feedback catalog-feedback-standard ux-taxonomy-proposal-actions"><button type="button" data-proposal-confirm aria-pressed="${supported}">✓ ${proposal.count}</button>${supported?'<button type="button" data-proposal-undo>×</button>':''}</span>`;
-          const join=row.querySelector('[data-proposal-confirm]');tooltip(join,supported?'Vorschlag zurücknehmen':'Bestätigen',display(field,proposal.value)||'Angabe entfernen',supported?'neutral':'confirm');join.onclick=()=>save(field,supported?0:-1,proposal.value);
+          const join=row.querySelector('[data-proposal-confirm]');tooltip(join,supported?'Vorschlag zurücknehmen':'Zustimmen',display(field,proposal.value)||'Angabe entfernen',supported?'neutral':'confirm');join.onclick=()=>save(field,supported?0:-1,proposal.value);
           const remove=row.querySelector('[data-proposal-undo]');if(remove){tooltip(remove,'Eigenen Vorschlag zurücknehmen',label,'neutral');remove.onclick=()=>save(field,0);}
           list.append(row);
         }

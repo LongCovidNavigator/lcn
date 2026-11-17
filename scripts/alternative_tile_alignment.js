@@ -1,6 +1,29 @@
 /* Size shared rows from all cards, including alternatives outside the scroll viewport. */
 document.addEventListener('DOMContentLoaded',()=>{
  document.querySelectorAll('.ux-alternative-strip').forEach(strip=>{
+  const options=strip.querySelector('.ux-alternative-options');
+  if(options){
+   const label=document.createElement('label');label.className='ux-alternative-sort';
+   label.append(document.createTextNode('Sortieren: '));
+   const select=document.createElement('select');
+   for(const [value,text] of [['original','Standard'],['confirm','Meiste Zustimmung (✓)'],['oppose','Meiste Widersprüche (×)']]){
+    const option=document.createElement('option');option.value=value;option.textContent=text;select.append(option);
+   }
+   label.append(select);strip.before(label);
+   let feedback={};const order=new WeakMap();let next=0;
+   function sort(){
+    const tiles=[...options.querySelectorAll(':scope > .ux-feedback-relation')];
+    tiles.forEach(tile=>{if(!order.has(tile))order.set(tile,next++);});
+    const score=tile=>Number(feedback[tile.querySelector('[data-treatment-relation-feedback]')?.dataset.treatmentRelationFeedback]?.[select.value]||0);
+    const sorted=[...tiles].sort((a,b)=>(select.value==='original'?0:score(b)-score(a))||order.get(a)-order.get(b));
+    if(sorted.every((tile,i)=>tile===tiles[i]))return;
+    const anchor=tiles.at(-1)?.nextSibling||null;
+    sorted.forEach(tile=>options.insertBefore(tile,anchor));
+   }
+   select.addEventListener('change',()=>{sort();options.scrollLeft=0;});
+   window.addEventListener('lcn-relation-feedback',event=>{feedback=event.detail||{};sort();});
+   new MutationObserver(sort).observe(options,{childList:true});sort();
+  }
   const rows={role:'small:first-child',name:'.ux-alternative-name,.ux-alternative-current>strong',category:'.ux-alternative-category',subcategory:'.ux-alternative-subcategory'};
   let scheduled=false,lastWidth=-1;
   function align(){

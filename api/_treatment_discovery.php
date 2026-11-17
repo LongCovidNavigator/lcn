@@ -4,7 +4,26 @@ function lcnDiscoveryName(string $name): string {
     return mb_strtolower(trim(preg_replace('/\s+/u', ' ', str_replace('⁺', '+', $name))));
 }
 function lcnTreatmentDiscoveryGraph(PDO $pdo): array {
-    return lcnBuildTreatmentDiscoveryGraph(lcnNdRows($pdo, 'SELECT t.treat_nd_id,t.treatmentname,t.typ,t.review_status,a.alias_id,a.alias,a.alias_type,c.relation_type AS member_relation_type FROM tbl_treatments_nd t LEFT JOIN tbl_cpl_treatments_nd2aliases c ON c.treat_nd_id=t.treat_nd_id LEFT JOIN tbl_aliases_03 a ON a.alias_id=c.alias_id WHERE t.review_status<>\'rejected_group\' ORDER BY t.treat_nd_id,a.alias_id'));
+    $graph=lcnBuildTreatmentDiscoveryGraph(lcnNdRows($pdo, 'SELECT t.treat_nd_id,t.treatmentname,t.typ,t.review_status,a.alias_id,a.alias,a.alias_type,c.relation_type AS member_relation_type FROM tbl_treatments_nd t LEFT JOIN tbl_cpl_treatments_nd2aliases c ON c.treat_nd_id=t.treat_nd_id LEFT JOIN tbl_aliases_03 a ON a.alias_id=c.alias_id WHERE t.review_status<>\'rejected_group\' ORDER BY t.treat_nd_id,a.alias_id'));
+    $proposals=lcnNdRows($pdo,"SELECT s.payload FROM community_submissions s LEFT JOIN catalog_relation_feedback f ON f.relation_key=CONCAT('s:',s.submission_id) WHERE s.entity_type='treatment' AND s.review_status IN ('pending','reviewing') GROUP BY s.submission_id,s.payload ORDER BY COUNT(CASE WHEN f.stance=1 THEN 1 END) DESC,s.submission_id");
+    $selected=[];
+    foreach($proposals as $proposal){
+        $r=json_decode($proposal['payload'],true)['treatment_relationship']??[];
+        $child=(int)($r['left_id']??0);$parent=(int)($r['right_id']??0);
+        $type=match($r['kind']??''){'brand'=>'brand','form'=>'application_form','variant'=>'substance_variant','detail'=>'detailed_method',default=>null};
+        if(!$type||isset($selected[$parent.':'.$child]))continue;
+        foreach($graph['groups'] as &$group){
+            if($group['root']!==$parent||!isset($group['members'][$child])||lcnGroupMemberRelation($group,$child)!=='unspecified')continue;
+            $selected[$parent.':'.$child]=true;
+            $graph['entries'][$child]['hypothesis']=true;
+            if($type==='brand'){
+                unset($group['members'][$child]);
+                $graph['brands'][$parent][$child]=$child;$graph['generics'][$child][$parent]=$parent;
+            }else $group['member_relations'][$child]=$type;
+            break;
+        }unset($group);
+    }
+    return $graph;
 }
 /** The coupling describes the relationship; an unspecified umbrella never implies a form. */
 function lcnGroupMemberRelation(array $group,int $id): string {
@@ -56,7 +75,7 @@ function lcnBuildTreatmentDiscoveryGraph(array $rows): array {
     }
     $brands=[]; $generics=[]; $bases=[];
     foreach ($entries as $id=>$e) {
-        if (($e['typ'] ?? '')!=='Arzneimittel' || isset($roots[$id])) continue;
+        if (!in_array($e['typ']??'', ['Arzneimittel','Nahrungsergänzungsmittel','Infusionen'],true) || isset($roots[$id])) continue;
         $hasTradeAlias=false;
         foreach ($e['aliases'] ?? [] as $aid) if ($aliases[$aid]['type']==='trade_name') $hasTradeAlias=true;
         foreach ($e['aliases'] ?? [] as $aid) {
@@ -164,7 +183,7 @@ function lcnTreatmentAliasNavigation(array $graph,int $id): array {
                 [$title,$label]=match($relation){
                     'application_form'=>[($isRoot?'Anwendungsformen von ':'Weitere Anwendungsformen von ').$g['name'],'Anwendungsform'],
                     'substance_variant'=>[($isRoot?'Stoffvarianten von ':'Weitere Stoffvarianten von ').$g['name'],'Stoffvariante'],
-                    'detailed_method'=>['Detailliertere Verfahren von '.$g['name'],'Detaillierteres Verfahren'],
+                    'detailed_method'=>['Anwendungen von '.$g['name'],'Anwendung'],
                     'group_member'=>[$g['medication']?($isRoot?'Wirkstoffe dieser Medikamentengruppe':'Weitere Wirkstoffe dieser Medikamentengruppe'):($g['procedures']?($isRoot?'Verfahren dieser Gruppe':'Weitere Verfahren dieser Gruppe'):($isRoot?'Einträge dieser Gruppe':'Weitere Einträge dieser Gruppe')),$g['medication']?'Wirkstoff':($g['procedures']?'Verfahren':'Gruppenmitglied')],
                     default=>['Zugeordnete Einträge – Verbindungsart offen','Zugeordneter Eintrag'],
                 };
@@ -177,7 +196,7 @@ function lcnTreatmentAliasNavigation(array $graph,int $id): array {
         $parts=$links($graph['components'][$id] ?? []);
         foreach ($graph['componentNames'][$id] ?? [] as $name) $parts[]=['treat_nd_id'=>null,'treatmentname'=>$name];
         $sections[]=['title'=>'Bestandteile dieser Kombination','label'=>'Bestandteil','entries'=>$parts,'group'=>null,'root'=>null,
-            'note'=>!empty($graph['componentIncomplete'][$id]) ? 'Weitere Bestandteile sind noch nicht eindeutig zugeordnet.' : null];
+            'note'=>null];
     }
     $diagnostic=($entry['typ'] ?? '')==='Diagnostik';
     $add(($diagnostic ? 'Kombinierte Untersuchungen mit ' : 'Kombinationstherapien mit ').$entry['treatmentname'],$diagnostic ? 'Kombinierte Untersuchung' : 'Kombinationstherapie',$graph['combinations'][$id] ?? []);

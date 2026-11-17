@@ -1,0 +1,662 @@
+[
+  {
+    "dr_id": 1548,
+    "anzeigename": "Universitätsklinikum Freiburg, Infektionsambulanz",
+    "loc_city": "Freiburg",
+    "loc_website": "https://www.uniklinik-freiburg.de/infektiologie/patientenversorgung/infektionsambulanzen-1.html"
+  },
+  {
+    "dr_id": 1549,
+    "anzeigename": "Universitätsklinikum Heidelberg, Post-COVID-Ambulanz",
+    "loc_city": "Heidelberg",
+    "loc_website": "https://www.klinikum.uni-heidelberg.de/einrichtungen/postinfektionssyndrom-ambulanz-2290/"
+  },
+  {
+    "dr_id": 1550,
+    "anzeigename": "Neuropsychologisches Zentrum Heidelberg",
+    "loc_city": "Heidelberg",
+    "loc_website": "https://www.npz-heidelberg.de/das-zentrum/"
+  },
+  {
+    "dr_id": 1551,
+    "anzeigename": "SRH Klinikum Karlsbad-Langensteinbach",
+    "loc_city": "Karlsbad",
+    "loc_website": "https://www.klinikum-karlsbad.de/medizin-und-pflege/fachabteilungen-zentren/klinische-psychologie-neuropsychologie/post-covid-ambulanz/"
+  },
+  {
+    "dr_id": 1552,
+    "anzeigename": "Zentralinstitut für Seelische Gesundheit",
+    "loc_city": "Mannheim",
+    "loc_website": "https://www.zi-mannheim.de/behandlung/ambulante-angebote-ambulanz.html"
+  },
+  {
+    "dr_id": 1553,
+    "anzeigename": "Universitätsklinikum Tübingen",
+    "loc_city": "Tübingen",
+    "loc_website": "https://www.medizin.uni-tuebingen.de/de/das-klinikum/einrichtungen/kliniken/medizinische-klinik/innere-medizin-1/ambulanzen-stationen/infektion"
+  },
+  {
+    "dr_id": 1554,
+    "anzeigename": "Universitätsklinikum Freiburg, Klinik für Pneumologie",
+    "loc_city": "Freiburg",
+    "loc_website": "https://www.uniklinik-freiburg.de/pneumologie/klinische-schwerpunkte-1/default-8893da7409.html"
+  },
+  {
+    "dr_id": 1555,
+    "anzeigename": "Universitätsklinikum Augsburg, Long-COVID-Ambulanz",
+    "loc_city": "Augsburg",
+    "loc_website": "https://www.uk-augsburg.de/gesundheit-medizin/coronavirus/covid-ambulanz"
+  },
+  {
+    "dr_id": 1556,
+    "anzeigename": "Klinikum Donaustauf",
+    "loc_city": "Donaustauf",
+    "loc_website": "https://www.klinikum-donaustauf.de/aktuelles.php"
+  },
+  {
+    "dr_id": 1557,
+    "anzeigename": "Klinikum Memmingen",
+    "loc_city": "Memmingen",
+    "loc_website": "https://www.klinikum-memmingen.de/kliniken-institute/paediatrie.html"
+  },
+  {
+    "dr_id": 1558,
+    "anzeigename": "Kinderklinik und Kinderpoliklinik im Dr. von Haunerschen Kinderspital",
+    "loc_city": "München",
+    "loc_website": "https://www.lmu-klinikum.de/hauner/kinder-und-kinderpoliklinik"
+  },
+  {
+    "dr_id": 1559,
+    "anzeigename": "LMU Klinikum",
+    "loc_city": "München",
+    "loc_website": "https://www.lmu-klinikum.de/medizin-pflege/einrichtungen/post-covid-ambulanz/c716a7727172c169"
+  },
+  {
+    "dr_id": 1560,
+    "anzeigename": "Max-Planck-Institut für Psychiatrie",
+    "loc_city": "München",
+    "loc_website": "https://www.psych.mpg.de/post-covid"
+  },
+  {
+    "dr_id": 1561,
+    "anzeigename": "kbo-Inn-Salzach-Klinikum",
+    "loc_city": "Wasserburg am Inn",
+    "loc_website": "https://kbo-isk.de/post-covid-tagesklinik"
+  },
+  {
+    "dr_id": 1562,
+    "anzeigename": "Kinderklinik Dritter Orden",
+    "loc_city": "Passau",
+    "loc_website": "https://kinderklinik-passau.de/behandlungsspektrum/besondere-angebote/long-covid-ambulanz"
+  },
+  {
+    "dr_id": 1563,
+    "anzeigename": "KUNO Klinik St. Hedwig der Universität Regensburg",
+    "loc_city": "Regensburg",
+    "loc_website": "https://www.barmherzige-hedwig.de/wecare/follow-cokiba-studie.html"
+  },
+  {
+    "dr_id": 1564,
+    "anzeigename": "Asklepios Klinik Schaufling",
+    "loc_city": "Schaufling",
+    "loc_website": "https://www.asklepios.com/schaufling/"
+  },
+  {
+    "dr_id": 1565,
+    "anzeigename": "Schön Klinik Berchtesgadener Land",
+    "loc_city": "Schönau am Königssee",
+    "loc_website": "https://www.schoen-klinik.de/berchtesgadener-land/Corona/post-long-covid/behandlung"
+  },
+  {
+    "dr_id": 1566,
+    "anzeigename": "kbo-Isar-Amper-Klinikum",
+    "loc_city": "Haar",
+    "loc_website": "https://kbo-iak.de/kliniken-und-bereiche/tagesklinik-postcovid"
+  },
+  {
+    "dr_id": 1567,
+    "anzeigename": "Josefinum KFJ Klinik Augsburg",
+    "loc_city": "Augsburg",
+    "loc_website": "https://www.josefinum.de/"
+  },
+  {
+    "dr_id": 1568,
+    "anzeigename": "Psychiatrische Institutsambulanz Aichach",
+    "loc_city": "Aichach",
+    "loc_website": "https://www.bezirkskliniken-schwaben.de/kliniken/psychiatrische-institutsambulanz-aichach"
+  },
+  {
+    "dr_id": 1569,
+    "anzeigename": "Klinikum Nürnberg Nord",
+    "loc_city": "Nürnberg",
+    "loc_website": "https://www.klinikum-nuernberg.de/behandlung/seelische-gesundheit/psychosomatik-und-psychotherapie/psychosomatische-post-covid-behandlung/"
+  },
+  {
+    "dr_id": 1570,
+    "anzeigename": "Asklepios Lungenklinik Gauting",
+    "loc_city": "München-Gauting",
+    "loc_website": "https://www.asklepios.com/gauting/"
+  },
+  {
+    "dr_id": 1571,
+    "anzeigename": "Charité Universitätsmedizin Berlin, Post-COVID-Diagnostikzentrum",
+    "loc_city": "Berlin",
+    "loc_website": "https://anaesthesie.charite.de/patienten_angehoerige/postcovid_diagnostikzentrum/"
+  },
+  {
+    "dr_id": 1572,
+    "anzeigename": "Charité Universitätsmedizin Berlin, Medizinische Klinik für Kardiologie am Campus Benjamin Franklin",
+    "loc_city": "Berlin",
+    "loc_website": "https://pcn.charite.de/netzwerk/"
+  },
+  {
+    "dr_id": 1573,
+    "anzeigename": "Charité Universitätsmedizin Berlin, Medizinische Klinik für Infektiologie und Pneumologie",
+    "loc_city": "Berlin",
+    "loc_website": "https://pcn.charite.de/netzwerk/"
+  },
+  {
+    "dr_id": 1574,
+    "anzeigename": "Charité Universitätsmedizin Berlin, Neurologie am Charité Campus Benjamin Franklin",
+    "loc_city": "Berlin",
+    "loc_website": "https://pcn.charite.de/netzwerk/"
+  },
+  {
+    "dr_id": 1575,
+    "anzeigename": "Charité Universitätsmedizin Berlin, Physikalische Medizin am Campus Charité Mitte und Campus Benjamin Franklin",
+    "loc_city": "Berlin",
+    "loc_website": "https://pcn.charite.de/netzwerk/"
+  },
+  {
+    "dr_id": 1576,
+    "anzeigename": "Charité Universitätsmedizin Berlin, Psychosomatik am Charité Campus Benjamin Franklin",
+    "loc_city": "Berlin",
+    "loc_website": "https://www.charite.de/die_charite/campi/campus_benjamin_franklin"
+  },
+  {
+    "dr_id": 1577,
+    "anzeigename": "Charité Universitätsmedizin Berlin, HNO-Sprechstunde",
+    "loc_city": "Berlin",
+    "loc_website": "https://hno.charite.de/fuer_patienten/sprechstunden/"
+  },
+  {
+    "dr_id": 1578,
+    "anzeigename": "Sana Kliniken Sommerfeld",
+    "loc_city": "Kremmen",
+    "loc_website": "https://www.sana.de/sommerfeld/medizin-pflege/pneumologische-rehabilitation/long-covid-reha"
+  },
+  {
+    "dr_id": 1579,
+    "anzeigename": "Universitätsklinikum Ruppin-Brandenburg",
+    "loc_city": "Neuruppin",
+    "loc_website": "https://www.ukrb.de/aktuelles/details/long-und-post-covid-sprechstunde-in-hochschulambulanz.html"
+  },
+  {
+    "dr_id": 1580,
+    "anzeigename": "Asklepios Fachklinikum Teupitz",
+    "loc_city": "Teupitz",
+    "loc_website": "https://www.asklepios.com/teupitz/abteilungen-spezialistinnen/abteilungen/psychiatrie"
+  },
+  {
+    "dr_id": 1581,
+    "anzeigename": "Asklepios Fachklinikum Lübben",
+    "loc_city": "Lübben",
+    "loc_website": "https://www.asklepios.com/luebben/abteilungen-spezialistinnen/abteilungen/neurologie"
+  },
+  {
+    "dr_id": 1582,
+    "anzeigename": "Helios Klinikum Bad Saarow",
+    "loc_city": "Bad Saarow",
+    "loc_website": "https://www.helios-gesundheit.de/standorte-angebote/kliniken/bad-saarow/leistungen/fachbereiche/neurologie-schmerztherapie/#accordion-e285f9072c-item-ed9494d5c7"
+  },
+  {
+    "dr_id": 1583,
+    "anzeigename": "Immanuel Klinik Rüdersdorf",
+    "loc_city": "Rüdersdorf",
+    "loc_website": "https://ruedersdorf.immanuel.de/abteilungen/neurologie/leistungsspektrum/krankheitsbilder/neuro-covid-post-covid/"
+  },
+  {
+    "dr_id": 1584,
+    "anzeigename": "Klinikum Bremen-Mitte, Eltern-Kind-Zentrum Prof. Hess",
+    "loc_city": "Bremen",
+    "loc_website": "https://www.gesundheitnord.de/presseaktuell/pressemitteilung/long-lockdown-oder-long-covid.html"
+  },
+  {
+    "dr_id": 1585,
+    "anzeigename": "Lungenfachklinik Immenhausen",
+    "loc_city": "Immenhausen",
+    "loc_website": "https://lungenfachklinik-immenhausen.de/"
+  },
+  {
+    "dr_id": 1586,
+    "anzeigename": "Sana Klinikum Offenbach",
+    "loc_city": "Offenbach",
+    "loc_website": "https://www.sana.de/offenbach/medizin-pflege/mvz-pneumologie"
+  },
+  {
+    "dr_id": 1587,
+    "anzeigename": "DKD Helios Klinik Wiesbaden",
+    "loc_city": "Wiesbaden",
+    "loc_website": "https://www.helios-gesundheit.de/standorte-angebote/kliniken/wiesbaden-dkd/"
+  },
+  {
+    "dr_id": 1588,
+    "anzeigename": "Universitätsklinikum Frankfurt",
+    "loc_city": "Frankfurt am Main",
+    "loc_website": "https://www.unimedizin-ffm.de/einrichtungen/kliniken/zentrum-der-inneren-medizin/medizinische-klinik-2-haematologie-onkologie-haemostaseologie-rheumatologie-infektiologiehiv/infektiologie/post-covid-ambulanz"
+  },
+  {
+    "dr_id": 1589,
+    "anzeigename": "Klinikum Werra-Meißner",
+    "loc_city": "Eschwege",
+    "loc_website": "https://www.klinikum-werra-meissner.de/klinikum/medizin-pflege/fachabteilungen/pneumologie-beatmungs-und-schlafmedizin.php"
+  },
+  {
+    "dr_id": 1590,
+    "anzeigename": "Universitätsmedizin Greifswald",
+    "loc_city": "Greifswald",
+    "loc_website": "https://www2.unimedizin-greifswald.de/physmed/struktur/clocc/"
+  },
+  {
+    "dr_id": 1591,
+    "anzeigename": "Klinikum Emden",
+    "loc_city": "Emden",
+    "loc_website": "https://www.anevita.de/kliniken/klinik-emden"
+  },
+  {
+    "dr_id": 1592,
+    "anzeigename": "Asklepios Fachklinikum Göttingen",
+    "loc_city": "Göttingen",
+    "loc_website": "https://www.asklepios.com/goettingen/abteilungen-spezialistinnen/pias/pia-goettingen/covid"
+  },
+  {
+    "dr_id": 1593,
+    "anzeigename": "KRH Klinikum Siloah",
+    "loc_city": "Hannover",
+    "loc_website": "https://siloah.krh.de/kliniken-zentren/pneumologie-intensiv-und-schlafmedizin#c37423"
+  },
+  {
+    "dr_id": 1594,
+    "anzeigename": "Asklepios Fachklinikum Tiefenbrunn",
+    "loc_city": "Rosdorf",
+    "loc_website": "https://www.asklepios.com/tiefenbrunn/experten/privatstation/long-covid/"
+  },
+  {
+    "dr_id": 1595,
+    "anzeigename": "AMEOS Klinikum Osnabrück",
+    "loc_city": "Osnabrück",
+    "loc_website": "https://www.ameos.de/klinikum-osnabrueck/aktuelles/nachrichten/artikel/long-covid-ameos-klinikum-osnabrueck-bietet-behandlung-von-psychischen-corona-spaetfolgen"
+  },
+  {
+    "dr_id": 1596,
+    "anzeigename": "Katholisches Klinikum Bochum",
+    "loc_city": "Bochum",
+    "loc_website": "https://www.klinikum-bochum.de/fachbereiche/neurologie/im-fokus-post-covid-ambulanz.html"
+  },
+  {
+    "dr_id": 1597,
+    "anzeigename": "Universitätsklinikum Bonn",
+    "loc_city": "Bonn",
+    "loc_website": "https://www.ukbonn.de/psychiatrie-und-psychotherapie/klinik/ambulante-behandlung/post-covid/"
+  },
+  {
+    "dr_id": 1598,
+    "anzeigename": "Universitätsklinikum Düsseldorf",
+    "loc_city": "Düsseldorf",
+    "loc_website": "https://www.uniklinik-duesseldorf.de/patienten-besucher/klinikeninstitutezentren/klinik-fuer-gastroenterologie-hepatologie-und-infektiologie/klinik/fuer-patienten/ambulanzen-und-sprechstunden/post-covid-ambulanz"
+  },
+  {
+    "dr_id": 1599,
+    "anzeigename": "Universitätsklinikum Essen, Pädiatrische infektiologische Ambulanz",
+    "loc_city": "Essen",
+    "loc_website": "https://kinderklinik1.uk-essen.de/paediatrische-infektiologie/"
+  },
+  {
+    "dr_id": 1600,
+    "anzeigename": "Universitätsklinikum Essen, Post-COVID-Ambulanz",
+    "loc_city": "Essen",
+    "loc_website": "https://infektiologie.uk-essen.de/index.php?id=4562"
+  },
+  {
+    "dr_id": 1601,
+    "anzeigename": "Universitätsmedizin Essen Ruhrlandklinik",
+    "loc_city": "Essen",
+    "loc_website": "https://www.ruhrlandklinik.de/unternehmen/aktuelles/neue-ambulanz-fuer-patienten-nach-covid-infektion/"
+  },
+  {
+    "dr_id": 1602,
+    "anzeigename": "Uniklinik Köln, Allgemeinmedizinische Long-COVID-Sprechstunde",
+    "loc_city": "Köln",
+    "loc_website": "https://www.uk-koeln.de/patienten-besucher/post-covid-zentrum/"
+  },
+  {
+    "dr_id": 1603,
+    "anzeigename": "Uniklinik Köln, Post-COVID-Sprechstunde in der Klinik für Psychiatrie und Psychotherapie",
+    "loc_city": "Köln",
+    "loc_website": "https://www.uk-koeln.de/patienten-besucher/post-covid-zentrum/"
+  },
+  {
+    "dr_id": 1604,
+    "anzeigename": "Uniklinik Köln, Kinderklinik",
+    "loc_city": "Köln",
+    "loc_website": "https://kinderklinik.uk-koeln.de/klinik/ambulante-behandlung/postvirale-sprechstunde/"
+  },
+  {
+    "dr_id": 1605,
+    "anzeigename": "Helios Klinikum Krefeld",
+    "loc_city": "Krefeld",
+    "loc_website": "https://www.helios-gesundheit.de/standorte-angebote/kliniken/krefeld/leistungen/fachbereiche/pneumologie/post-covid-syndrom/"
+  },
+  {
+    "dr_id": 1606,
+    "anzeigename": "Klinikum Vest",
+    "loc_city": "Recklinghausen",
+    "loc_website": "https://www.klinikum-vest.de/Inhalt/Unternehmen/Aktuelles/Aktuelles_aus_dem_Klinikum/_Meldungen/Klinikum_Vest_eroeffnet_erste_Post-Covid_Ambulanz_im_Kreis_Recklinghausen.php"
+  },
+  {
+    "dr_id": 1607,
+    "anzeigename": "Elisabeth-Krankenhaus Rheydt",
+    "loc_city": "Mönchengladbach",
+    "loc_website": "https://www.sk-mg.de/de/Zentrum-fuer-Kinder--Jugendmedizin.htm"
+  },
+  {
+    "dr_id": 1608,
+    "anzeigename": "Krankenhaus Bethanien",
+    "loc_city": "Solingen",
+    "loc_website": "https://www.klinik-bethanien.de/aktuelles-wichtiges/corona/long-covid/"
+  },
+  {
+    "dr_id": 1609,
+    "anzeigename": "Hufeland-Klinik",
+    "loc_city": "Bad Ems",
+    "loc_website": "https://www.hufeland-klinik.com/krankheitsbild-postcovid"
+  },
+  {
+    "dr_id": 1610,
+    "anzeigename": "Diakonie Kliniken Zschadraß",
+    "loc_city": "Colditz",
+    "loc_website": "https://www.diakoniezschadrass.de/gesundheitsleistungen/post-covid-spezialambulanz/"
+  },
+  {
+    "dr_id": 1611,
+    "anzeigename": "Universitätsklinikum Leipzig",
+    "loc_city": "Leipzig",
+    "loc_website": "https://www.uniklinikum-leipzig.de/Seiten/post-covid-ambulanz.aspx"
+  },
+  {
+    "dr_id": 1612,
+    "anzeigename": "Sächsisches Krankenhaus Rodewisch",
+    "loc_city": "Rodewisch",
+    "loc_website": "https://www.skh-rodewisch.sachsen.de/medizinische-einrichtungen/ambulanzen/institutsambulanz-der-klinik-fuer-psychiatrie-psychotherapie-und-psychosomatik-erwachsenenpsychiatrie/"
+  },
+  {
+    "dr_id": 1613,
+    "anzeigename": "Sächsisches Krankenhaus Altscherbitz",
+    "loc_city": "Schkeuditz",
+    "loc_website": "https://www.skh-altscherbitz.sachsen.de/aktuelles/tagesklinisches-psychotherapeutisches-angebot-fuer-patienten-mit-post-covid-syndrom-am-skh-altscherbitz/"
+  },
+  {
+    "dr_id": 1614,
+    "anzeigename": "Asklepios Parkklinik Bad Salzungen",
+    "loc_city": "Bad Salzungen",
+    "loc_website": "https://www.asklepios.com/bad-salzungen/parkklinik/abteilungen/post-covid-behandlung/"
+  },
+  {
+    "dr_id": 1615,
+    "anzeigename": "Charité Universitätsmedizin Berlin, PICS Ambulanz – Ambulanz für intensivstationäre Nachsorge",
+    "loc_city": "Berlin",
+    "loc_website": "https://pcn.charite.de/netzwerk/"
+  },
+  {
+    "dr_id": 1616,
+    "anzeigename": "Charité Universitätsmedizin Berlin, Schmerz- und Palliativmedizin am Charité Campus Benjamin Franklin",
+    "loc_city": "Berlin",
+    "loc_website": "https://pcn.charite.de/netzwerk/"
+  },
+  {
+    "dr_id": 1617,
+    "anzeigename": "Heiligenfeld Klinik Berlin",
+    "loc_city": "Berlin",
+    "loc_website": "https://www.heiligenfeld.de/kliniken/heiligenfeld-klinik-berlin/post-covid-long-covid-heiligenfeld-klinik-berlin/"
+  },
+  {
+    "dr_id": 1618,
+    "anzeigename": "Christophsbad Klinikgruppe, Psychosomatische Long-COVID-/ Post-COVID-Spezialambulanz",
+    "loc_city": "Göppingen",
+    "loc_website": "https://www.christophsbad.de/medizin-pflege/fachbereiche/psychosomatische-medizin-und-psychotherapie/"
+  },
+  {
+    "dr_id": 1619,
+    "anzeigename": "Vitos Waldkrankenhaus Köppern",
+    "loc_city": "Friedrichsdorf",
+    "loc_website": "https://www.vitos.de/gesellschaften/vitos-hochtaunus/einrichtungen/vitos-psychiatrische-ambulanz-bad-homburg/"
+  },
+  {
+    "dr_id": 1620,
+    "anzeigename": "Johanniter Krankenhaus Treuenbrietzen",
+    "loc_city": "Treuenbrietzen",
+    "loc_website": "https://www.johanniter.de/johanniter-kliniken/johanniter-krankenhaus-treuenbrietzen/medizin-pflege/fachklinik-pneumologie-thoraxchirurgie-und-allergologie/hilfe-bei-long-covid-/-post-covid/"
+  },
+  {
+    "dr_id": 1621,
+    "anzeigename": "Post COVID Ambulanz Worms",
+    "loc_city": "Worms",
+    "loc_website": "https://www.woge-worms.de/Page/Informationen_Post-Covid-Ambulanz_Worms-Ludwigshafen"
+  },
+  {
+    "dr_id": 1622,
+    "anzeigename": "BG Klinik Ludwigshafen",
+    "loc_city": "Ludwigshafen",
+    "loc_website": "https://www.bg-kliniken.de/klinik-ludwigshafen/leistungen/detail/post-covid-check/#scrollto"
+  },
+  {
+    "dr_id": 1623,
+    "anzeigename": "BG Klinik Tübingen",
+    "loc_city": "Tübingen",
+    "loc_website": "https://www.bg-kliniken.de/klinik-tuebingen/leistungen/detail/post-covid-check/#scrollto"
+  },
+  {
+    "dr_id": 1624,
+    "anzeigename": "BG Klinikum Bergmannstrost Halle",
+    "loc_city": "Halle",
+    "loc_website": "https://www.bg-kliniken.de/klinikum-bergmannstrost-halle/leistungen/detail/post-covid-check/#scrollto"
+  },
+  {
+    "dr_id": 1625,
+    "anzeigename": "BG Klinikum Duisburg",
+    "loc_city": "Duisburg",
+    "loc_website": "https://www.bg-kliniken.de/klinikum-duisburg/leistungen/detail/post-covid-check/#scrollto"
+  },
+  {
+    "dr_id": 1626,
+    "anzeigename": "BG Klinikum Hamburg",
+    "loc_city": "Hamburg",
+    "loc_website": "https://www.bg-kliniken.de/klinikum-hamburg/leistungen-detail/post-covid-check/#scrollto"
+  },
+  {
+    "dr_id": 1627,
+    "anzeigename": "BG Klinikum Unfallkrankenhaus Berlin",
+    "loc_city": "Berlin",
+    "loc_website": "https://www.bg-kliniken.de/unfallkrankenhaus-berlin/leistungen/detail/post-covid-check/#scrollto"
+  },
+  {
+    "dr_id": 1628,
+    "anzeigename": "BG Unfallklinik Frankfurt am Main",
+    "loc_city": "Frankfurt am Main",
+    "loc_website": "https://www.bg-kliniken.de/unfallklinik-frankfurt/leistungen/detail/post-covid-check/#scrollto"
+  },
+  {
+    "dr_id": 1629,
+    "anzeigename": "BG Unfallklinik Murnau",
+    "loc_city": "Murnau",
+    "loc_website": "https://www.bg-kliniken.de/unfallklinik-murnau/detail/post-covid-check/#scrollto"
+  },
+  {
+    "dr_id": 1630,
+    "anzeigename": "BG Universitätsklinikum Bergmannsheil Bochum",
+    "loc_city": "Bochum",
+    "loc_website": "https://www.bg-kliniken.de/universitaetsklinikum-bergmannsheil-bochum/ueber-uns/klinikum-blaupause/aktuelles/pressemitteilungen/post-covid-check-hilfe-bei-covid-19-folgen/"
+  },
+  {
+    "dr_id": 1631,
+    "anzeigename": "ALB FILS KLINIKEN GmbH",
+    "loc_city": "Göppingen",
+    "loc_website": "https://www.alb-fils-kliniken.de/medizin/lunge-brustkorb/"
+  },
+  {
+    "dr_id": 1632,
+    "anzeigename": "Klinikum Bielefeld",
+    "loc_city": "Bielefeld",
+    "loc_website": "https://www.klinikumbielefeld.de/long-covid-behandlung.html"
+  },
+  {
+    "dr_id": 1633,
+    "anzeigename": "Universitätsklinikum des Saarlandes",
+    "loc_city": "Homburg",
+    "loc_website": "https://www.uks.eu/kliniken-einrichtungen/nervenzentrum/psychiatrie-psychotherapie/schwerpunkte"
+  },
+  {
+    "dr_id": 1634,
+    "anzeigename": "Universitätsmedizin Göttingen",
+    "loc_city": "Göttingen",
+    "loc_website": "https://www.umg.eu/news-detail/news-detail/detail/news/long-post-covid-ambulanzen-an-mhh-und-umg-eingerichtet-haus-und-fachaerzte-stellen-vordiagnose-und-u/"
+  },
+  {
+    "dr_id": 1635,
+    "anzeigename": "Agaplesion e.V. Krankenhaus Mittelhessen",
+    "loc_city": "Gießen",
+    "loc_website": "https://www.ekm-gi.de/leistungsspektrum/fachabteilungen/med-klinik-iii-pneumologische-klinik-waldhof"
+  },
+  {
+    "dr_id": 1636,
+    "anzeigename": "Ökumenisches Hainach-Klinikum",
+    "loc_city": "Mühlhausen",
+    "loc_website": "https://www.oehk.de/fachbereiche/psychosomatik"
+  },
+  {
+    "dr_id": 1637,
+    "anzeigename": "Bundeswehr Krankenhaus",
+    "loc_city": "Berlin",
+    "loc_website": "https://www.bwkrankenhaus.de/de/bundeswehrkrankenhaus-berlin/kliniken-und-medizinische-abteilungen/neurologie"
+  },
+  {
+    "dr_id": 1638,
+    "anzeigename": "Meine.Klinik",
+    "loc_city": "Bonn",
+    "loc_website": "https://meine-klinik.com/neurologie/"
+  },
+  {
+    "dr_id": 1639,
+    "anzeigename": "Universitätsmedizin Rostock",
+    "loc_city": "Rostock",
+    "loc_website": "https://tropen.med.uni-rostock.de/patienten-besucher/sprechstunden/spezialsprechstunde-long-covid-fuer-erwachsene"
+  },
+  {
+    "dr_id": 1640,
+    "anzeigename": "Robert Bosch Krankenhaus",
+    "loc_city": "Stuttgart",
+    "loc_website": "https://www.rbk.de/behandlung/abteilungen/pneumologie-und-beatmungsmedizin"
+  },
+  {
+    "dr_id": 1641,
+    "anzeigename": "BG Kliniken Bremen",
+    "loc_city": "Bremen",
+    "loc_website": "https://www.bg-kliniken.de/ambulanz-bremen/unfallversicherungstraeger/sprechstunden/"
+  },
+  {
+    "dr_id": 1643,
+    "anzeigename": "Paracelsus-Krankenhaus",
+    "loc_city": "Bad Liebenzell",
+    "loc_website": "https://www.paracelsus-krankenhaus.de/behandlungsspektrum/long-covid"
+  },
+  {
+    "dr_id": 1644,
+    "anzeigename": "AMEOS Klinikum Am Bürgerpark Bremerhaven",
+    "loc_city": "Bremerhaven",
+    "loc_website": "https://www.ameos.de/poliklinika-bremerhaven/praxen/pneumologie/"
+  },
+  {
+    "dr_id": 1645,
+    "anzeigename": "Thoraxklinik Heidelberg",
+    "loc_city": "Heidelberg",
+    "loc_website": "https://www.thoraxklinik-heidelberg.de/fachbereiche/pneumologie-und-beatmungsmedizin"
+  },
+  {
+    "dr_id": 1646,
+    "anzeigename": "Helios Klinik Herzberg/Osterode",
+    "loc_city": "Herzberg am Harz",
+    "loc_website": "https://www.helios-gesundheit.de/standorte-angebote/kliniken/herzberg-osterode/fachbereiche/kardiologie/"
+  },
+  {
+    "dr_id": 1647,
+    "anzeigename": "Frankenalb-Klinik Engelthal",
+    "loc_city": "Engelthal",
+    "loc_website": "https://www.bezirkskliniken-mfr.de/standorte-und-kliniken/engelthal/"
+  },
+  {
+    "dr_id": 1648,
+    "anzeigename": "LungenClinic Grosshansdorf",
+    "loc_city": "Großhansdorf",
+    "loc_website": "https://www.lungenclinic.de/aufenthalt/ambulant/termin-pneumologische-ambulanzen"
+  },
+  {
+    "dr_id": 1649,
+    "anzeigename": "Fachkrankenhaus Kreischa",
+    "loc_city": "Kreischa",
+    "loc_website": "https://www.klinik-bavaria.de/medizinische-bereiche/kompetenzzentren/fatigue"
+  },
+  {
+    "dr_id": 1650,
+    "anzeigename": "Klinikum Bamberg - Betriebsstätte am Bruderwald; Post COVID-Tagesklinik",
+    "loc_city": "Bamberg",
+    "loc_website": "https://www.sozialstiftung-bamberg.de/ratgeber-gesundheit/long-covid/"
+  },
+  {
+    "dr_id": 1651,
+    "anzeigename": "Helios Klinikum Hildesheim",
+    "loc_city": "Hildesheim",
+    "loc_website": "https://www.helios-gesundheit.de/standorte-angebote/kliniken/hildesheim/leistungen/fachbereiche/kardiologie/"
+  },
+  {
+    "dr_id": 1652,
+    "anzeigename": "Asklepios Fachklinikum Brandenburg",
+    "loc_city": "Brandenburg an der Havel",
+    "loc_website": "https://www.asklepios.com/brandenburg/abteilungen-spezialistinnen/abteilungen/allgemeinpsychiatrie"
+  },
+  {
+    "dr_id": 1653,
+    "anzeigename": "Evangelisches Krankenhaus Bad Dürkheim",
+    "loc_city": "Bad Dürkheim",
+    "loc_website": "https://www.diakonissen.de/evangelisches-krankenhaus-bad-duerkheim/innere-medizin/startseite/"
+  },
+  {
+    "dr_id": 1654,
+    "anzeigename": "AMEOS Klinikum Haldensleben",
+    "loc_city": "Haldensleben",
+    "loc_website": "https://www.ameos.de/klinikum-haldensleben/leistungen/medizinische-fachbereiche/psychiatrische-und-psychotherapeutische-tagesklinik/"
+  },
+  {
+    "dr_id": 1655,
+    "anzeigename": "Marianne-Strauß-Klinik",
+    "loc_city": "Berg",
+    "loc_website": "https://www.ms-klinik.de/de/leistungsspektrum/medizin/long-covid.html"
+  },
+  {
+    "dr_id": 1656,
+    "anzeigename": "VITREA Klinik Kipfenberg GmbH",
+    "loc_city": "Kipfenberg",
+    "loc_website": "https://www.vitrea-gesundheit.de/post-covid-reha/"
+  },
+  {
+    "dr_id": 1657,
+    "anzeigename": "Lungenklinik Neustadt GmbH",
+    "loc_city": "Harztor / OT Neustadt",
+    "loc_website": "https://doceins.de/neustadt/"
+  },
+  {
+    "dr_id": 1745,
+    "anzeigename": "Kathrin Thurner",
+    "loc_city": null,
+    "loc_website": null
+  }
+]

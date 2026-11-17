@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
-<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=touch-pan-20261107"><script src="scripts/map_viewport.js?v=wheel-zoom-20261108"></script>
+<head><link rel="stylesheet" href="styles/doctor_map_edges.css?v=touch-pan-20261107"><script src="scripts/map_viewport.js?v=wheel-first-event-20261117"></script>
 <script src="scripts/online_access.js?v=doctor-appointments-20261107" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,11 +15,11 @@
         rel="stylesheet"
         href="assets/vendor/leaflet/leaflet.css"
     >
-	<link rel="stylesheet" href="styles/aerzte_karte.css?v=wheel-zoom-20261108">
+	<link rel="stylesheet" href="styles/aerzte_karte.css?v=count-pins-20261117">
     <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
-    <script src="scripts/access-nav.js?v=local-only-20261107" defer></script>
-<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=8f1296b5fe"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=local-only-20261107"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/doctor_cards.css?v=profile-website-only-20261031"><link rel="stylesheet" href="styles/search_tables.css?v=fit-result-tables-20261107"><script src="scripts/search_layout.js?v=shared-layout-20261031" defer></script><link rel="stylesheet" href="styles/doctor_search_responsive.css?v=fit-result-tables-20261107"><link rel="stylesheet" href="styles/more_results_bar.css?v=unified-blue-20261105"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=fit-result-tables-20261107"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=wide-tablet-banner-copy-20261107"><link rel="stylesheet" href="styles/search_navigation_blue.css?v=banner-blue-20261105"><link rel="stylesheet" href="styles/provider_type_filter.css">
-<script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script><script src="scripts/scroll_restore.js" defer></script></head>
+    <script src="scripts/access-nav.js?v=copy-fragment-20261116" defer></script>
+<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/public_detail_theme.css?v=8f1296b5fe"><link rel="stylesheet" href="styles/experience_summary.css?v=search-experience-sort-20261031"><script src="scripts/experience_summary.js?v=local-only-20261107"></script><link rel="stylesheet" href="styles/search_header.css?v=centered-20261031"><script src="scripts/search_header.js?v=20261031" defer></script><link rel="stylesheet" href="styles/doctor_cards.css?v=profile-website-only-20261031"><link rel="stylesheet" href="styles/search_tables.css?v=fit-result-tables-20261107"><script src="scripts/search_layout.js?v=filter-panel-memory-20261117" defer></script><link rel="stylesheet" href="styles/doctor_search_responsive.css?v=fit-result-tables-20261107"><link rel="stylesheet" href="styles/more_results_bar.css?v=unified-blue-20261105"><link rel="stylesheet" href="styles/catalog_table_alignment.css?v=fit-result-tables-20261107"><link rel="stylesheet" href="styles/destination_photo_banner.css?v=wide-tablet-banner-copy-20261107"><link rel="stylesheet" href="styles/search_navigation_blue.css?v=banner-blue-20261105"><link rel="stylesheet" href="styles/provider_type_filter.css">
+<script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script><script src="scripts/scroll_restore.js" defer></script><link rel="stylesheet" href="styles/multi_filter.css?v=1"><script src="scripts/multi_filter.js?v=outside-click-20261117"></script></head>
 
 <script>
     function toggleMobileMenu() {
@@ -73,7 +73,7 @@
                     <section class="doctor-nav-section doctor-nav-section-specialty">
 						<h3 class="doctor-nav-heading">
 							Fachliches Profil
-							<span class="doctor-nav-info" data-tooltip="Filtert nach recherchierter Fachrichtung, Spezialisierung und Zusatzqualifikation. Ausgewählte Kriterien werden miteinander kombiniert." data-lcn-tooltip="Filtert nach recherchierter Fachrichtung, Spezialisierung und Zusatzqualifikation. Ausgewählte Kriterien werden miteinander kombiniert." tabindex="0" aria-label="Info: Fachliches Profil">i</span>
+							<span class="doctor-nav-info" data-tooltip="Filtert nach recherchierter Fachrichtung, Spezialisierung und Zusatzqualifikation. Mehrere Werte innerhalb eines Filters gelten als Oder-Auswahl. Unterschiedliche Filter werden miteinander kombiniert." data-lcn-tooltip="Filtert nach recherchierter Fachrichtung, Spezialisierung und Zusatzqualifikation. Mehrere Werte innerhalb eines Filters gelten als Oder-Auswahl. Unterschiedliche Filter werden miteinander kombiniert." tabindex="0" aria-label="Info: Fachliches Profil">i</span>
 						</h3>
 
 						<div class="doctor-nav-field"><label class="doctor-nav-label" for="doctor-specialty-select">Fachrichtung</label>
@@ -503,9 +503,9 @@
     <script src="assets/vendor/leaflet/leaflet.js"></script>
 	<script>window.LCNImages.configureLeaflet(window.L);</script>
 		<script src="scripts/dummy_preferences.js?v=local-only-20261107"></script>
-    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/provider_type_filter.js?v=colon-20261105"></script>
+    <script src="scripts/doctor_list_names.js?v=1"></script><script src="scripts/provider_type_filter.js?v=multi-filter-20261117"></script>
 <script src="scripts/search_online_groups.js?v=20261107"></script>
-<script src="scripts/aerzte_karte.js?v=wheel-zoom-20261108"></script>
+<script src="scripts/aerzte_karte.js?v=multi-filter-20261117"></script>
 
     <div id="footer-placeholder"></div>
 

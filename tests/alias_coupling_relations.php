@@ -16,7 +16,7 @@ couplingCheck($blocks['Anwendungsformen']===[2]&&$blocks['Stoffvarianten']===[3]
 couplingCheck(str_contains(ndRelationshipAssertion($g,'ag:10:t:2')['statement'],'Anwendungsform'),'Feedback lost specific meaning');
 $p=lcnTreatmentsNdDatabase();$g=lcnTreatmentDiscoveryGraph($p);
 $combination=ndRelationshipStages($g,397);
-couplingCheck($combination['stages'][1]['title']==='Therapie / Verfahren','Supplement combination must remain a normal therapy');
+couplingCheck($combination['stages'][1]['title']==='Verfahren','Supplement combination must remain a normal therapy');
 couplingCheck(!in_array('Stoffvarianten',array_column($combination['stages'][2]['blocks'],'heading'),true)&&!in_array('Anwendungsformen',array_column($combination['stages'][2]['blocks'],'heading'),true),'Empty substance blocks invented for a combination');
 foreach($g['groups'] as $group){
  if($group['name']==='Psychotherapie')couplingCheck(lcnGroupMemberRelation($group,515)==='group_member','EMDR must be group member, not detailed method');

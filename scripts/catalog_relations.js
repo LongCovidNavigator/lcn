@@ -70,6 +70,7 @@
    return short(statement.replace(/ \(Vorschlag.*$/, '').replace(/\.$/,''))||'diese Zuordnung';
   }
   function feedbackTooltipSubject(box){
+   if(box.closest('[data-relationship-stages]')&&box.dataset.feedbackStatement)return box.dataset.feedbackStatement;
    const statement=(box.dataset.feedbackStatement||'').replace(/„[^“]*“/g,'');
    const key=box.dataset.relationFeedback||'';
    if(key.startsWith('d:')||/^Behandler:innen /.test(statement)||box.closest('.catalog-report-column,.catalog-card-report,.nd-provider-footer,[data-pending-relation]'))return type==='doctor'?'Die angezeigte Therapie wird von dieser Person oder Praxis angeboten.':'Die angezeigte Person oder Praxis bietet die oben genannte Therapie an.';
@@ -80,7 +81,7 @@
    if(key.startsWith('bn:')||/Handelsname/.test(statement))return 'Die angezeigte Therapie ist ein Handelsname für den zugehörigen Wirkstoff.';
    if(/Anwendungsform/.test(statement))return 'Die angezeigte Therapie ist eine Anwendungsform der zugehörigen Substanz.';
    if(/Stoffvariante/.test(statement))return 'Die angezeigte Therapie ist eine Stoffvariante der zugehörigen Substanz.';
-   if(/detaillierteres Verfahren/.test(statement))return 'Die angezeigte Therapie ist ein detaillierteres Verfahren der zugehörigen Therapie.';
+   if(/Anwendung/.test(statement))return 'Der angezeigte Eintrag ist eine Anwendung des zugehörigen Verfahrens.';
    if(key.startsWith('bs:'))return 'Die angezeigte Therapie ist der zugehörigen Substanz zugeordnet.';
    if(key.startsWith('ag:')||box.closest('[data-relationship-stages]'))return box.closest('[data-relationship-stages]')?.querySelector('[data-stage="0"] h4')?.textContent==='Medikamentengruppe'?'Der angezeigte Wirkstoff gehört zur zugehörigen Medikamentengruppe.':'Die angezeigte Therapie ist ein Verfahren der zugehörigen Gruppe.';
    return feedbackSubject(box);
@@ -114,10 +115,10 @@
    const value=feedback[box.dataset.relationFeedback]||{confirm:0,oppose:0,own:0};
    box.querySelectorAll('[data-stance]').forEach(button=>{
     const stance=Number(button.dataset.stance),count=stance===1?value.confirm:value.oppose;
-    button.textContent=box.dataset.feedbackStatement&&!box.classList.contains('catalog-feedback-standard')?((stance===1?'Bestätigen':'Widersprechen')+' · '+count):(stance===1?'✓ ':'× ')+count;
+    button.textContent=box.dataset.feedbackStatement&&!box.classList.contains('catalog-feedback-standard')?((stance===1?'Zustimmen':'Widersprechen')+' · '+count):(stance===1?'✓ ':'× ')+count;
     button.setAttribute('aria-pressed',String(value.own===stance));
     const selected=value.own===stance;
-    const action=selected?(stance===1?'Bestätigung zurücknehmen':'Widerspruch zurücknehmen'):(stance===1?'Bestätigen':'Widersprechen');
+    const action=selected?(stance===1?'Zustimmung zurücknehmen':'Widerspruch zurücknehmen'):(stance===1?'Zustimmen':'Widersprechen');
     const positiveSubject=feedbackTooltipSubject(box),subject=stance===-1?negateFeedbackSubject(positiveSubject):positiveSubject;
     button.dataset.feedbackAction=action;button.dataset.feedbackSubject=subject;
     button.dataset.feedbackTone=selected?'neutral':stance===1?'confirm':'oppose';

@@ -26,19 +26,20 @@ function renderProviderTypePicker(doctors, select) {
  const group=window.providerTypeGroup||'';
  const scoped=group?doctors.filter(d=>groupOf(d)===group):doctors;
  const types=[...new Set(scoped.map(typeOf).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'de'));
- const selected=select.value;
+ const selected=select._filterValues || [select.value].filter(Boolean);
  select.replaceChildren(new Option('Alle Behandlerarten',''),...types.map(t=>new Option(t,t)));
- select.value=types.includes(selected)?selected:'';
- const active=select.value;
- const choose=(value,nextGroup)=>{select.value=value;window.providerTypeGroup=nextGroup;select.dispatchEvent(new Event('change',{bubbles:true}));};
+ select._filterValues=selected;
+ select.value=selected[0]||'';
+ const active=selected;
+ const choose=(value,nextGroup)=>{select._filterValues=value?(active.includes(value)?active.filter(v=>v!==value):[...active,value]):[];select.value=select._filterValues[0]||'';window.providerTypeGroup=nextGroup;renderProviderTypePicker(doctors,select);select.dispatchEvent(new Event('change',{bubbles:true}));};
  const button=(label,n,onClick,pressed)=>{
   const el=document.createElement('button');el.type='button';el.className='provider-filter-option';el.setAttribute('aria-pressed',String(pressed));
   const text=document.createElement('span');text.textContent=label;
   const total=document.createElement('span');total.className='provider-filter-count';total.textContent=`(${n})`;el.append(text,total);el.addEventListener('click',onClick);return el;
  };
  picker.querySelector('.provider-filter-groups').replaceChildren(...[['','Alle'],['person','Einzelperson'],['institution','Institution']].map(([g,label])=>button(label,count(g?doctors.filter(d=>groupOf(d)===g):doctors),()=>choose('',g),group===g)));
- picker.querySelector('.provider-filter-options').replaceChildren(button('Alle Behandlerarten',count(scoped),()=>{choose('',group);picker.open=false;},!active),...types.map(t=>button(t,count(scoped.filter(d=>typeOf(d)===t)),()=>{choose(t,group);picker.open=false;},active===t)));
- picker.querySelector('summary').textContent=active||(group==='person'?'Alle Einzelpersonen':group==='institution'?'Alle Institutionen':'Alle Behandlerarten');
- if(!picker.dataset.bound){picker.dataset.bound='1';document.addEventListener('click',e=>{if(!picker.contains(e.target))picker.open=false;});picker.addEventListener('keydown',e=>{if(e.key==='Escape'){picker.open=false;picker.querySelector('summary').focus();}});}
- return active?scoped.filter(d=>typeOf(d)===active):scoped;
+ picker.querySelector('.provider-filter-options').replaceChildren(button('Alle Behandlerarten',count(scoped),()=>{choose('',group);},!active.length),...types.map(t=>button(t,count(scoped.filter(d=>typeOf(d)===t)),()=>{choose(t,group);},active.includes(t))));
+ picker.querySelector('summary').textContent=active.join(', ')||(group==='person'?'Alle Einzelpersonen':group==='institution'?'Alle Institutionen':'Alle Behandlerarten');
+ if(!picker.dataset.bound){picker.dataset.bound='1';picker.addEventListener('keydown',e=>{if(e.key==='Escape'){picker.open=false;picker.querySelector('summary').focus();}});}
+ return active.length?scoped.filter(d=>active.includes(typeOf(d))):scoped;
 }

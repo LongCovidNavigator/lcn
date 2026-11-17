@@ -74,6 +74,9 @@
     }
     function configureWheelZoom(map) {
         const element = map.getContainer();
+        // Moving/replacing markers must not become browser scroll anchors during zoom.
+        const previousOverflowAnchor = element.style.overflowAnchor;
+        element.style.overflowAnchor = 'none';
         let activated = false;
         const stopWheel = () => {
             activated = false;
@@ -87,14 +90,18 @@
                 map.scrollWheelZoom.disable();
             } else {
                 map.scrollWheelZoom.enable();
+                // The first wheel event may already be dispatching before Leaflet adds its listener.
+                // Claim it here as well so zooming never also scrolls the document.
+                event.preventDefault();
             }
         };
         // Enable Leaflet before the same wheel event reaches its listener.
-        element.addEventListener('wheel', prepareWheel, { capture: true, passive: true });
+        element.addEventListener('wheel', prepareWheel, { capture: true, passive: false });
         element.addEventListener('click', activate);
         element.addEventListener('mouseleave', stopWheel);
         map.on('lcn-resume-page-scroll', stopWheel);
         map.once('unload', () => {
+            element.style.overflowAnchor = previousOverflowAnchor;
             element.removeEventListener('wheel', prepareWheel, true);
             element.removeEventListener('click', activate);
             element.removeEventListener('mouseleave', stopWheel);

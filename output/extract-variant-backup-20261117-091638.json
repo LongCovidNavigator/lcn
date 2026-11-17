@@ -1,0 +1,41 @@
+[
+    {
+        "alias_id": 1422,
+        "alias": "EGCG",
+        "alias_type": "primary_name",
+        "source_examples": "EGCG",
+        "notes_internal": null,
+        "created_at": "2026-09-13 22:21:07",
+        "updated_at": "2026-09-13 22:21:07",
+        "coupling_id": 1709,
+        "treat_nd_id": 625,
+        "relation_type": null,
+        "note": null
+    },
+    {
+        "alias_id": 1429,
+        "alias": "Oligomere Proanthocyanidine (OPC)",
+        "alias_type": "primary_name",
+        "source_examples": "Oligomere Proanthocyanidine (OPC)",
+        "notes_internal": null,
+        "created_at": "2026-09-13 22:21:07",
+        "updated_at": "2026-09-13 22:21:07",
+        "coupling_id": 1716,
+        "treat_nd_id": 627,
+        "relation_type": null,
+        "note": null
+    },
+    {
+        "alias_id": 1423,
+        "alias": "Sulforaphan",
+        "alias_type": "primary_name",
+        "source_examples": "Sulforaphan",
+        "notes_internal": null,
+        "created_at": "2026-09-13 22:21:07",
+        "updated_at": "2026-09-13 22:21:07",
+        "coupling_id": 1710,
+        "treat_nd_id": 636,
+        "relation_type": null,
+        "note": null
+    }
+]

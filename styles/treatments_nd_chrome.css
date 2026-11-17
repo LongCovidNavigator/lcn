@@ -173,3 +173,10 @@ body.compact-doctor-header #header-placeholder .profile>.detail-menu-toggle{righ
   .ux-community-ratings .ux-gamechanger-layout{grid-template-columns:minmax(0,1fr)}
 }
 .ux-page :is(#community-bewertung,#anbieter){scroll-margin-top:calc(var(--detail-header-height, 100px) + 70px)}
+
+/* Give long navigation labels enough room without automatic hyphenation. */
+.ux-page .side-nav strong { min-width:0; hyphens:none; overflow-wrap:break-word; }
+@media(min-width:651px) {
+  .ux-page .side-nav a { gap:10px; padding-inline:8px; }
+  .ux-page .side-nav strong { font-size:14px; }
+}

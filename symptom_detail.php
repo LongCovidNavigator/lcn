@@ -73,7 +73,7 @@ $title = symptomDetailEscape($symptom['sym_name'] ?? 'Symptomdetails');
     <link rel="stylesheet" href="styles/symptoms.css">
     <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
     <link rel="stylesheet" href="styles/symptom_detail.css?v=direct-providers">
-    <script src="scripts/access-nav.js?v=local-only-20261107" defer></script>
+    <script src="scripts/access-nav.js?v=copy-fragment-20261116" defer></script>
     <script src="assets/vendor/leaflet/leaflet.js" defer></script>
     <script src="scripts/image-registry.js" defer></script>
     <script src="scripts/map_viewport.js?v=direct-providers" defer></script>

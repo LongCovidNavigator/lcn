@@ -280,7 +280,7 @@ function esc(value){return String(value??'').replace(/[&<>'"]/g,char=>({'&':'&am
 kindFilter.addEventListener('change',event=>{reviewKind=event.target.value;saveReviewFilters();renderOverview();});
 searchFilter.addEventListener('input',event=>{reviewSearch=event.target.value.trim().toLocaleLowerCase('de');renderOverview();});
 
-function feedbackHint(item){if(['doctor_profile','medication_classification'].includes(item.source))return 'Unterstützungen für genau diesen Vorschlag.';return kind(item)==='remove'?'Rückmeldungen zur bestehenden Zuordnung: ✓ bestätigt das Behandlungsangebot, × widerspricht ihm. Keine Abstimmung über den Löschantrag.':'Community-Rückmeldungen zur Zuordnung oder zum Vorschlag. Erfahrungsbewertungen zur Wirksamkeit werden hier nicht mitgezählt.';}
+function feedbackHint(item){if(['doctor_profile','medication_classification'].includes(item.source))return 'Unterstützungen für genau diesen Vorschlag.';return kind(item)==='remove'?'Rückmeldungen zur bestehenden Zuordnung: Zustimmen (✓) bestätigt das Behandlungsangebot, Widersprechen (×) widerspricht ihm. Keine Abstimmung über den Löschantrag.':'Community-Rückmeldungen zur Zuordnung oder zum Vorschlag. Erfahrungsbewertungen zur Wirksamkeit werden hier nicht mitgezählt.';}
 
 function duplicatePair(item){
  if(!item.duplicate_target_id)return '';

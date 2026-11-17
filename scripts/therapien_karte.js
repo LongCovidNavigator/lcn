@@ -308,6 +308,8 @@ function buildTreatmentSearchUrl(includeMap = false) {
     }
 
     if (filters.subcategory) params.set("subcategory", filters.subcategory);
+    params.set("categories", JSON.stringify(filterValues("treatment-category-select")));
+    params.set("subcategories", JSON.stringify(filterValues("treatment-subcategory-select")));
 
     const currentCity = getCurrentTreatmentCity();
 
@@ -462,6 +464,7 @@ function bindTreatmentNavigationEvents() {
     if (categorySelect) {
         categorySelect.addEventListener("change", function () {
             setInputValue("treatment-subcategory-select", "");
+            document.getElementById("treatment-subcategory-select")._filterValues=[];
             populateTreatmentSubcategorySelect();
             applyTreatmentFiltersFromControls();
         });
@@ -1287,7 +1290,7 @@ function populateTreatmentSubcategorySelect() {
     const select = document.getElementById("treatment-subcategory-select");
     if (!field || !select) return;
     const category = document.getElementById("treatment-category-select")?.value || "";
-    const options = category ? currentSubcategoriesByCategory[category] || [] : [];
+    const options = [...new Set(filterValues("treatment-category-select").flatMap(c => currentSubcategoriesByCategory[c] || []))];
     const previous = select.value;
     select.innerHTML = '<option value="">Alle Unterkategorien</option>' + options.map(value =>
         `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");

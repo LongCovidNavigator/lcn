@@ -177,27 +177,11 @@ function attachSpecialtyTermsToDoctors($pdo, &$items) {
 }
 
 function getAllSpecialtyTerms($pdo) {
-    $ids = implode(',', lcnAllDoctorIds());
-    $sql = "SELECT MIN(f.id) AS term_id, 'specialty' AS term_type, '' AS term_code,
-        f.fachrichtung AS term_label, '' AS term_desc, COUNT(DISTINCT f.lcn_id) AS doctor_count
-        FROM tbl_fachrichtungen_nd f JOIN tbl_entities_nd e ON e.lcn_id = f.lcn_id
-        WHERE f.lcn_id IN ($ids) AND e.aktiv = 1 GROUP BY f.fachrichtung ORDER BY f.fachrichtung";
-
-    $stmt = $pdo->query($sql);
-    $items = [];
-
-    foreach ($stmt->fetchAll() as $term) {
-        $items[] = [
-            'term_id' => (int)$term['term_id'],
-            'term_type' => (string)$term['term_type'],
-            'term_code' => (string)($term['term_code'] ?? ''),
-            'term_label' => (string)($term['term_label'] ?? ''),
-            'term_desc' => (string)($term['term_desc'] ?? ''),
-            'doctor_count' => (int)($term['doctor_count'] ?? 0),
-        ];
-    }
-
-    return $items;
+    return $pdo->query("SELECT MIN(f.id) AS term_id, 'specialty' AS term_type,
+        '' AS term_code, f.fachrichtung AS term_label, '' AS term_desc,
+        COUNT(DISTINCT f.lcn_id) AS doctor_count
+        FROM tbl_fachrichtungen_nd f JOIN tbl_entities_nd e ON e.lcn_id=f.lcn_id
+        WHERE e.aktiv=1 GROUP BY f.fachrichtung ORDER BY f.fachrichtung")->fetchAll();
 }
 
 // Table and column names are supplied only by the fixed profile-field mapping.
@@ -333,20 +317,16 @@ try {
             $whereParts[] = "loc_city LIKE :city";
         }
 
-        if ($specialtyTermId > 0) {
-            $whereParts[] = "EXISTS (
-                SELECT 1
-                FROM tbl_fachrichtungen_nd cst
-                WHERE cst.lcn_id = results.dr_id
-                  AND cst.fachrichtung = (SELECT fachrichtung FROM tbl_fachrichtungen_nd WHERE id = :specialtyTermId)
-            )";
-        }
-
-        foreach (['specializationTermId' => [$specializationTermId, 'tbl_spezialisierungen_nd', 'spezialisierung'],
-                  'qualificationTermId' => [$qualificationTermId, 'tbl_zusatzqualifikationen_nd', 'zusatzqualifikation']] as $parameter => [$termId, $table, $column]) {
-            if ($termId > 0) $whereParts[] = "EXISTS (SELECT 1 FROM $table profile_term
-                WHERE profile_term.lcn_id = results.dr_id
-                AND profile_term.$column = (SELECT $column FROM $table WHERE id = :$parameter))";
+        foreach (['specialty' => [$specialtyTermId, 'tbl_fachrichtungen_nd', 'fachrichtung'],
+                  'specialization' => [$specializationTermId, 'tbl_spezialisierungen_nd', 'spezialisierung'],
+                  'qualification' => [$qualificationTermId, 'tbl_zusatzqualifikationen_nd', 'zusatzqualifikation']] as $kind => [$single, $table, $column]) {
+            $raw = $_GET[$kind . 'TermIds'] ?? (string)$single;
+            if (!is_string($raw) || ($raw !== '' && !preg_match('/^\d+(,\d+)*$/D', $raw))) throw new InvalidArgumentException('Ungültige Filterauswahl');
+            $ids = array_values(array_unique(array_filter(array_map('intval', explode(',', $raw)), fn($id) => $id > 0)));
+            if ($ids) {
+                $idSql = implode(',', $ids);
+                $whereParts[] = "EXISTS (SELECT 1 FROM $table profile_term WHERE profile_term.lcn_id = results.dr_id AND profile_term.$column IN (SELECT $column FROM $table WHERE id IN ($idSql)))";
+            }
         }
 
         if ($search !== '') {
@@ -432,8 +412,8 @@ try {
                 SELECT
                     d.dr_id,
                     d.dr_display_name,
-                    (SELECT COUNT(DISTINCT pt.treat_id) FROM v_lcn_provider_treatments pt JOIN v_lcn_treatments t ON t.treat_id=pt.treat_id WHERE pt.dr_id = d.dr_id) AS treatment_count,
-                    (SELECT COUNT(DISTINCT NULLIF(TRIM(t.typ), '')) FROM v_lcn_provider_treatments pt JOIN v_lcn_treatments t ON t.treat_id=pt.treat_id WHERE pt.dr_id = d.dr_id) AS category_count,
+                    COALESCE(offers.treatment_count, 0) AS treatment_count,
+                    COALESCE(offers.category_count, 0) AS category_count,
                     d.dr_type,
                     d.dr_entity_kind,
                     d.dr_is_dr,
@@ -534,18 +514,15 @@ try {
                     ON d.dr_id = l.dr_id
                    AND l.loc_id = (SELECT ll.loc_id FROM tbl_drs_locations_03 ll WHERE ll.dr_id = d.dr_id ORDER BY ll.loc_is_primary DESC, ll.loc_id LIMIT 1)
 
-                LEFT JOIN v_lcn_empty_doctor_votes rv
-                    ON d.dr_id = rv.dr_id
-
+                -- Aggregate offers once instead of repeating both joins for every provider.
                 LEFT JOIN (
-                    SELECT dr_id,
-                           SUM(vote = 'pro') AS vote_improved,
-                           SUM(vote = 'neutral') AS vote_neutral,
-                           SUM(vote = 'contra') AS vote_worsened
-                    FROM v_lcn_doctor_votes
-                    WHERE review_status IN ('active', 'approved')
-                    GROUP BY dr_id
-                ) wv ON d.dr_id = wv.dr_id
+                    SELECT pt.dr_id,
+                           COUNT(DISTINCT pt.treat_id) AS treatment_count,
+                           COUNT(DISTINCT NULLIF(TRIM(t.typ), '')) AS category_count
+                    FROM v_lcn_provider_treatments pt
+                    JOIN v_lcn_treatments t ON t.treat_id = pt.treat_id
+                    GROUP BY pt.dr_id
+                ) offers ON offers.dr_id = d.dr_id
             ) AS base
         ) AS results
         {$whereSql}
@@ -576,11 +553,6 @@ try {
             $stmt->bindValue(':city', '%' . $city . '%');
         }
 
-        if ($specialtyTermId > 0) {
-            $stmt->bindValue(':specialtyTermId', $specialtyTermId, PDO::PARAM_INT);
-        }
-        if ($specializationTermId > 0) $stmt->bindValue(':specializationTermId', $specializationTermId, PDO::PARAM_INT);
-        if ($qualificationTermId > 0) $stmt->bindValue(':qualificationTermId', $qualificationTermId, PDO::PARAM_INT);
 
         if ($search !== '') {
             $stmt->bindValue(':search', '%' . $search . '%');

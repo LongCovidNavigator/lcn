@@ -10,7 +10,7 @@ function ndRenderTreatmentCombinations(array $g,int $id): string {
     };
     ob_start(); ?>
 <section class="card ux-combinations" data-combination-section data-is-combination="<?= isset($g['comboIds'][$id])?'1':'0' ?>">
-<h3><?= $diagnostic?'Kombinierte Untersuchungen':'Kombinationstherapien' ?> <span class="ux-heading-info"><button type="button" aria-label="Information zu Kombinationen" aria-describedby="therapy-combinations-help">ⓘ</button><p id="therapy-combinations-help" role="tooltip"><?= $diagnostic?'Welche Untersuchungen werden gemeinsam durchgeführt? Hier sammelt die Community solche Kombinationen und ihre Bestandteile. Eine Zuordnung bedeutet nicht, dass alle Untersuchungen immer zusammen nötig sind.':'Welche Behandlungen bilden gemeinsam eine eigenständige Therapie? Bei einer Kombinationstherapie werden die Therapien zusammen angewendet, um einen zusätzlichen oder anderen Effekt zu erzielen.' ?><?= $diagnostic?' Noch ungeprüfte Vorschläge sind gekennzeichnet.':'' ?></p></span></h3>
+<h3><?= $diagnostic?'Kombinierte Untersuchungen':'Kombinationstherapien' ?> <span class="ux-heading-info"><button type="button" aria-label="Information zu Kombinationen" aria-describedby="therapy-combinations-help">ⓘ</button><p id="therapy-combinations-help" role="tooltip"><?= $diagnostic?'Welche Untersuchungen werden gemeinsam durchgeführt? Hier sammelt die Community solche Kombinationen und ihre Bestandteile. Eine Zuordnung bedeutet nicht, dass alle Untersuchungen immer zusammen nötig sind.':'Welche Behandlungen bilden gemeinsam eine eigenständige Therapie? Bei einer Kombinationstherapie werden die Therapien zusammen angewendet, um einen zusätzlichen oder anderen Effekt zu erzielen.' ?> Die Verbindungslinien zeigen, welche Bestandteile zu welcher Kombination gehören. Mit ✓ oder × bewertest du die jeweils angezeigte Aussage. Über ＋ kannst du die angebotenen Ergänzungen vorschlagen. Ungeprüfte Vorschläge sind gekennzeichnet.</p></span></h3>
 <?php if(!$ids): ?><p class="ux-combination-empty">Noch keine Kombination hinterlegt. Du kannst eine vorhandene Kombination verknüpfen oder eine neue vorschlagen.</p><?php endif; ?>
 <?php foreach($ids as $combo):
     $parts=[];foreach($g['components'][$combo]??[] as $part)$parts[]=['id'=>$part,'name'=>$g['entries'][$part]['treatmentname'],'key'=>'cp:'.$combo.':'.$part,'alias'=>false];
@@ -34,7 +34,6 @@ function ndRenderTreatmentCombinations(array $g,int $id): string {
 <?php endforeach; ?>
 <?php if($addPart): ?><button type="button" class="ux-combination-add-part" data-combination-add-part data-treatment-relation-add data-kind="has_component" data-source-id="<?= $combo ?>" data-dialog-title="Weitere Therapie hinzufügen">＋ Weitere Therapie hinzufügen</button><?php endif; ?>
 </div>
-<?php if(!empty($g['componentIncomplete'][$combo])): ?><p class="ux-combination-empty">Weitere Bestandteile sind noch nicht eindeutig zugeordnet.</p><?php endif; ?>
 </div></div>
 <?php endforeach; ?>
 <?php if(!isset($g['comboIds'][$id])): ?>

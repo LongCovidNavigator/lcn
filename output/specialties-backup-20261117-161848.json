@@ -1,0 +1,1052 @@
+[
+    {
+        "id": 1,
+        "lcn_id": 627,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 2,
+        "lcn_id": 679,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 3,
+        "lcn_id": 613,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 4,
+        "lcn_id": 613,
+        "fachrichtung": "Angiologie"
+    },
+    {
+        "id": 5,
+        "lcn_id": 542,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 6,
+        "lcn_id": 542,
+        "fachrichtung": "Chirurgie (allgemein)"
+    },
+    {
+        "id": 7,
+        "lcn_id": 581,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 8,
+        "lcn_id": 673,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 9,
+        "lcn_id": 673,
+        "fachrichtung": "Kardiologie"
+    },
+    {
+        "id": 10,
+        "lcn_id": 690,
+        "fachrichtung": "Hämatologie und Onkologie"
+    },
+    {
+        "id": 11,
+        "lcn_id": 690,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 12,
+        "lcn_id": 609,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 13,
+        "lcn_id": 609,
+        "fachrichtung": "Kardiologie"
+    },
+    {
+        "id": 14,
+        "lcn_id": 589,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 15,
+        "lcn_id": 676,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 16,
+        "lcn_id": 608,
+        "fachrichtung": "Hals-Nasen-Ohrenheilkunde"
+    },
+    {
+        "id": 17,
+        "lcn_id": 2,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 18,
+        "lcn_id": 2,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 19,
+        "lcn_id": 686,
+        "fachrichtung": "Psychiatrie"
+    },
+    {
+        "id": 20,
+        "lcn_id": 694,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 21,
+        "lcn_id": 645,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 22,
+        "lcn_id": 1148,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 23,
+        "lcn_id": 1057,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 24,
+        "lcn_id": 1057,
+        "fachrichtung": "Hämatologie und Onkologie"
+    },
+    {
+        "id": 25,
+        "lcn_id": 1059,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 26,
+        "lcn_id": 1161,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 27,
+        "lcn_id": 1159,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 28,
+        "lcn_id": 1158,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 29,
+        "lcn_id": 1157,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 30,
+        "lcn_id": 1155,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 31,
+        "lcn_id": 1154,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 32,
+        "lcn_id": 1154,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 33,
+        "lcn_id": 1147,
+        "fachrichtung": "Augenheilkunde"
+    },
+    {
+        "id": 34,
+        "lcn_id": 1150,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 35,
+        "lcn_id": 1149,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 36,
+        "lcn_id": 1149,
+        "fachrichtung": "Hämatologie und Onkologie"
+    },
+    {
+        "id": 37,
+        "lcn_id": 1151,
+        "fachrichtung": "Rheumatologie"
+    },
+    {
+        "id": 38,
+        "lcn_id": 1056,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 39,
+        "lcn_id": 1074,
+        "fachrichtung": "Orthopädie"
+    },
+    {
+        "id": 40,
+        "lcn_id": 1111,
+        "fachrichtung": "Laboratoriumsmedizin"
+    },
+    {
+        "id": 41,
+        "lcn_id": 1112,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 42,
+        "lcn_id": 1160,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 44,
+        "lcn_id": 775,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 45,
+        "lcn_id": 686,
+        "fachrichtung": "Psychosomatische Medizin"
+    },
+    {
+        "id": 46,
+        "lcn_id": 542,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 47,
+        "lcn_id": 542,
+        "fachrichtung": "Laboratoriumsmedizin"
+    },
+    {
+        "id": 48,
+        "lcn_id": 679,
+        "fachrichtung": "Hämatologie und Onkologie"
+    },
+    {
+        "id": 49,
+        "lcn_id": 676,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 50,
+        "lcn_id": 676,
+        "fachrichtung": "Gastroenterologie"
+    },
+    {
+        "id": 51,
+        "lcn_id": 589,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 52,
+        "lcn_id": 1161,
+        "fachrichtung": "Praktische Ärztin"
+    },
+    {
+        "id": 53,
+        "lcn_id": 1074,
+        "fachrichtung": "Unfallchirurgie"
+    },
+    {
+        "id": 54,
+        "lcn_id": 1156,
+        "fachrichtung": "Immunologie"
+    },
+    {
+        "id": 55,
+        "lcn_id": 679,
+        "fachrichtung": "Immunologie"
+    },
+    {
+        "id": 153,
+        "lcn_id": 1548,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 154,
+        "lcn_id": 1548,
+        "fachrichtung": "Infektiologie"
+    },
+    {
+        "id": 155,
+        "lcn_id": 1550,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 156,
+        "lcn_id": 1550,
+        "fachrichtung": "Psychologie"
+    },
+    {
+        "id": 157,
+        "lcn_id": 1551,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 158,
+        "lcn_id": 1551,
+        "fachrichtung": "Psychologie"
+    },
+    {
+        "id": 159,
+        "lcn_id": 1552,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 160,
+        "lcn_id": 1552,
+        "fachrichtung": "Psychologie"
+    },
+    {
+        "id": 161,
+        "lcn_id": 1553,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 162,
+        "lcn_id": 1553,
+        "fachrichtung": "Infektiologie"
+    },
+    {
+        "id": 163,
+        "lcn_id": 1554,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 164,
+        "lcn_id": 1556,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 165,
+        "lcn_id": 1556,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 166,
+        "lcn_id": 1557,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 167,
+        "lcn_id": 1558,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 168,
+        "lcn_id": 1560,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 169,
+        "lcn_id": 1560,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 170,
+        "lcn_id": 1561,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 171,
+        "lcn_id": 1561,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 172,
+        "lcn_id": 1562,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 173,
+        "lcn_id": 1563,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 174,
+        "lcn_id": 1565,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 175,
+        "lcn_id": 1565,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 176,
+        "lcn_id": 1567,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 177,
+        "lcn_id": 1568,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 178,
+        "lcn_id": 1569,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 179,
+        "lcn_id": 1570,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 180,
+        "lcn_id": 1572,
+        "fachrichtung": "Kardiologie"
+    },
+    {
+        "id": 181,
+        "lcn_id": 1573,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 182,
+        "lcn_id": 1574,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 183,
+        "lcn_id": 1575,
+        "fachrichtung": "Physikalische Medizin"
+    },
+    {
+        "id": 184,
+        "lcn_id": 1576,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 185,
+        "lcn_id": 1577,
+        "fachrichtung": "Hals-Nasen-Ohrenheilkunde"
+    },
+    {
+        "id": 186,
+        "lcn_id": 1578,
+        "fachrichtung": "Physikalische Medizin"
+    },
+    {
+        "id": 187,
+        "lcn_id": 1580,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 188,
+        "lcn_id": 1581,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 189,
+        "lcn_id": 1582,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 190,
+        "lcn_id": 1583,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 191,
+        "lcn_id": 1584,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 192,
+        "lcn_id": 1585,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 193,
+        "lcn_id": 1586,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 194,
+        "lcn_id": 1589,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 195,
+        "lcn_id": 1591,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 196,
+        "lcn_id": 1592,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 197,
+        "lcn_id": 1592,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 198,
+        "lcn_id": 1594,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 199,
+        "lcn_id": 1595,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 200,
+        "lcn_id": 1596,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 201,
+        "lcn_id": 1597,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 202,
+        "lcn_id": 1597,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 203,
+        "lcn_id": 1598,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 204,
+        "lcn_id": 1598,
+        "fachrichtung": "Infektiologie"
+    },
+    {
+        "id": 205,
+        "lcn_id": 1599,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 206,
+        "lcn_id": 1603,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 207,
+        "lcn_id": 1604,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 208,
+        "lcn_id": 1605,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 209,
+        "lcn_id": 1606,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 210,
+        "lcn_id": 1607,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 211,
+        "lcn_id": 1607,
+        "fachrichtung": "Kardiologie"
+    },
+    {
+        "id": 212,
+        "lcn_id": 1608,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 213,
+        "lcn_id": 1611,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 214,
+        "lcn_id": 1612,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 215,
+        "lcn_id": 1613,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 216,
+        "lcn_id": 1614,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 217,
+        "lcn_id": 1616,
+        "fachrichtung": "Schmerzmedizin"
+    },
+    {
+        "id": 218,
+        "lcn_id": 1617,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 219,
+        "lcn_id": 1618,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 220,
+        "lcn_id": 1619,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 221,
+        "lcn_id": 1619,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 222,
+        "lcn_id": 1620,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 223,
+        "lcn_id": 1620,
+        "fachrichtung": "Rheumatologie"
+    },
+    {
+        "id": 224,
+        "lcn_id": 1631,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 225,
+        "lcn_id": 1632,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 226,
+        "lcn_id": 1633,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 227,
+        "lcn_id": 1635,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 228,
+        "lcn_id": 1636,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 229,
+        "lcn_id": 1637,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 230,
+        "lcn_id": 1638,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 231,
+        "lcn_id": 1639,
+        "fachrichtung": "Infektiologie"
+    },
+    {
+        "id": 232,
+        "lcn_id": 1640,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 233,
+        "lcn_id": 1641,
+        "fachrichtung": "Rehabilitationsmedizin"
+    },
+    {
+        "id": 234,
+        "lcn_id": 1644,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 235,
+        "lcn_id": 1645,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 236,
+        "lcn_id": 1646,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 237,
+        "lcn_id": 1646,
+        "fachrichtung": "Kardiologie"
+    },
+    {
+        "id": 238,
+        "lcn_id": 1647,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 239,
+        "lcn_id": 1648,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 240,
+        "lcn_id": 1651,
+        "fachrichtung": "Kardiologie"
+    },
+    {
+        "id": 241,
+        "lcn_id": 1651,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 242,
+        "lcn_id": 1652,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 243,
+        "lcn_id": 1652,
+        "fachrichtung": "Kinder- und Jugendmedizin"
+    },
+    {
+        "id": 244,
+        "lcn_id": 1653,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 245,
+        "lcn_id": 1653,
+        "fachrichtung": "Psychosomatische Medizin und Psychotherapie"
+    },
+    {
+        "id": 246,
+        "lcn_id": 1654,
+        "fachrichtung": "Psychiatrie und Psychotherapie"
+    },
+    {
+        "id": 247,
+        "lcn_id": 1656,
+        "fachrichtung": "Neurologie"
+    },
+    {
+        "id": 248,
+        "lcn_id": 1657,
+        "fachrichtung": "Pneumologie"
+    },
+    {
+        "id": 249,
+        "lcn_id": 1657,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 250,
+        "lcn_id": 526,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 251,
+        "lcn_id": 527,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 252,
+        "lcn_id": 532,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 253,
+        "lcn_id": 536,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 254,
+        "lcn_id": 537,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 255,
+        "lcn_id": 548,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 256,
+        "lcn_id": 548,
+        "fachrichtung": "Chirurgie (allgemein)"
+    },
+    {
+        "id": 257,
+        "lcn_id": 548,
+        "fachrichtung": "Gefäßchirurgie"
+    },
+    {
+        "id": 258,
+        "lcn_id": 549,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 259,
+        "lcn_id": 549,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 260,
+        "lcn_id": 557,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 261,
+        "lcn_id": 562,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 262,
+        "lcn_id": 563,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 263,
+        "lcn_id": 566,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 264,
+        "lcn_id": 568,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 265,
+        "lcn_id": 573,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 266,
+        "lcn_id": 579,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 267,
+        "lcn_id": 582,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 268,
+        "lcn_id": 585,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 269,
+        "lcn_id": 591,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 270,
+        "lcn_id": 595,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 271,
+        "lcn_id": 612,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 272,
+        "lcn_id": 617,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 273,
+        "lcn_id": 624,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 274,
+        "lcn_id": 628,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 275,
+        "lcn_id": 633,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 276,
+        "lcn_id": 634,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 277,
+        "lcn_id": 646,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 278,
+        "lcn_id": 649,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 279,
+        "lcn_id": 649,
+        "fachrichtung": "Kardiologie"
+    },
+    {
+        "id": 280,
+        "lcn_id": 655,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 281,
+        "lcn_id": 656,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 282,
+        "lcn_id": 661,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 283,
+        "lcn_id": 665,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 284,
+        "lcn_id": 668,
+        "fachrichtung": "Innere und Allgemeinmedizin"
+    },
+    {
+        "id": 285,
+        "lcn_id": 681,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 286,
+        "lcn_id": 682,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 287,
+        "lcn_id": 691,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 288,
+        "lcn_id": 693,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 289,
+        "lcn_id": 696,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 290,
+        "lcn_id": 774,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 291,
+        "lcn_id": 780,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 292,
+        "lcn_id": 1062,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 293,
+        "lcn_id": 1068,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 294,
+        "lcn_id": 1079,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 295,
+        "lcn_id": 1087,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 296,
+        "lcn_id": 1088,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 297,
+        "lcn_id": 1091,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 298,
+        "lcn_id": 1093,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 299,
+        "lcn_id": 1101,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 300,
+        "lcn_id": 1105,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 301,
+        "lcn_id": 1109,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 302,
+        "lcn_id": 1128,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 303,
+        "lcn_id": 1128,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 304,
+        "lcn_id": 1130,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 305,
+        "lcn_id": 1137,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 306,
+        "lcn_id": 1137,
+        "fachrichtung": "Innere Medizin"
+    },
+    {
+        "id": 307,
+        "lcn_id": 1146,
+        "fachrichtung": "Allgemeinmedizin"
+    },
+    {
+        "id": 308,
+        "lcn_id": 1164,
+        "fachrichtung": "Allgemeinmedizin"
+    }
+]

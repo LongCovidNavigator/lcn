@@ -1,0 +1,687 @@
+[
+    {
+        "id": 22,
+        "lcn_id": 2,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 66,
+        "lcn_id": 542,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 5,
+        "lcn_id": 581,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 18,
+        "lcn_id": 589,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 20,
+        "lcn_id": 608,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 13,
+        "lcn_id": 609,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 68,
+        "lcn_id": 613,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 1,
+        "lcn_id": 627,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 7,
+        "lcn_id": 673,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 71,
+        "lcn_id": 676,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 70,
+        "lcn_id": 679,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 64,
+        "lcn_id": 686,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 8,
+        "lcn_id": 690,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 28,
+        "lcn_id": 694,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 33,
+        "lcn_id": 775,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 60,
+        "lcn_id": 1112,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 51,
+        "lcn_id": 1147,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 53,
+        "lcn_id": 1150,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 47,
+        "lcn_id": 1152,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 46,
+        "lcn_id": 1154,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 44,
+        "lcn_id": 1155,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 42,
+        "lcn_id": 1157,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 40,
+        "lcn_id": 1158,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 38,
+        "lcn_id": 1159,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 61,
+        "lcn_id": 1160,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 62,
+        "lcn_id": 1162,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 56,
+        "lcn_id": 1163,
+        "spezialisierung": "Long Covid \/ Post Covid"
+    },
+    {
+        "id": 193,
+        "lcn_id": 1548,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 194,
+        "lcn_id": 1549,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 195,
+        "lcn_id": 1550,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 196,
+        "lcn_id": 1551,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 197,
+        "lcn_id": 1552,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 198,
+        "lcn_id": 1553,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 199,
+        "lcn_id": 1554,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 200,
+        "lcn_id": 1555,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 201,
+        "lcn_id": 1556,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 202,
+        "lcn_id": 1557,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 203,
+        "lcn_id": 1558,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 204,
+        "lcn_id": 1559,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 205,
+        "lcn_id": 1560,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 206,
+        "lcn_id": 1561,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 207,
+        "lcn_id": 1562,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 208,
+        "lcn_id": 1563,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 209,
+        "lcn_id": 1564,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 210,
+        "lcn_id": 1565,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 211,
+        "lcn_id": 1566,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 212,
+        "lcn_id": 1567,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 213,
+        "lcn_id": 1568,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 214,
+        "lcn_id": 1569,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 215,
+        "lcn_id": 1570,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 216,
+        "lcn_id": 1571,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 217,
+        "lcn_id": 1572,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 218,
+        "lcn_id": 1573,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 219,
+        "lcn_id": 1574,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 220,
+        "lcn_id": 1575,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 221,
+        "lcn_id": 1576,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 222,
+        "lcn_id": 1577,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 223,
+        "lcn_id": 1578,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 224,
+        "lcn_id": 1579,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 225,
+        "lcn_id": 1580,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 226,
+        "lcn_id": 1581,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 227,
+        "lcn_id": 1582,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 228,
+        "lcn_id": 1583,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 229,
+        "lcn_id": 1584,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 230,
+        "lcn_id": 1585,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 231,
+        "lcn_id": 1586,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 232,
+        "lcn_id": 1587,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 233,
+        "lcn_id": 1588,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 234,
+        "lcn_id": 1589,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 235,
+        "lcn_id": 1590,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 236,
+        "lcn_id": 1591,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 237,
+        "lcn_id": 1592,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 238,
+        "lcn_id": 1593,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 239,
+        "lcn_id": 1594,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 240,
+        "lcn_id": 1595,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 241,
+        "lcn_id": 1596,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 242,
+        "lcn_id": 1597,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 243,
+        "lcn_id": 1598,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 244,
+        "lcn_id": 1599,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 245,
+        "lcn_id": 1600,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 246,
+        "lcn_id": 1601,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 247,
+        "lcn_id": 1602,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 248,
+        "lcn_id": 1603,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 249,
+        "lcn_id": 1604,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 250,
+        "lcn_id": 1605,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 251,
+        "lcn_id": 1606,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 252,
+        "lcn_id": 1607,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 253,
+        "lcn_id": 1608,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 254,
+        "lcn_id": 1609,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 255,
+        "lcn_id": 1610,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 256,
+        "lcn_id": 1611,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 257,
+        "lcn_id": 1612,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 258,
+        "lcn_id": 1613,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 259,
+        "lcn_id": 1614,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 260,
+        "lcn_id": 1615,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 261,
+        "lcn_id": 1616,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 262,
+        "lcn_id": 1617,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 263,
+        "lcn_id": 1618,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 264,
+        "lcn_id": 1619,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 265,
+        "lcn_id": 1620,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 266,
+        "lcn_id": 1621,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 267,
+        "lcn_id": 1622,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 268,
+        "lcn_id": 1623,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 269,
+        "lcn_id": 1624,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 270,
+        "lcn_id": 1625,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 271,
+        "lcn_id": 1626,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 272,
+        "lcn_id": 1627,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 273,
+        "lcn_id": 1628,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 274,
+        "lcn_id": 1629,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 275,
+        "lcn_id": 1630,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 276,
+        "lcn_id": 1631,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 277,
+        "lcn_id": 1632,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 278,
+        "lcn_id": 1633,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 279,
+        "lcn_id": 1634,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 280,
+        "lcn_id": 1635,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 281,
+        "lcn_id": 1636,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 282,
+        "lcn_id": 1637,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 283,
+        "lcn_id": 1638,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 284,
+        "lcn_id": 1639,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 285,
+        "lcn_id": 1640,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 286,
+        "lcn_id": 1641,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 287,
+        "lcn_id": 1642,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 288,
+        "lcn_id": 1643,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 289,
+        "lcn_id": 1644,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 290,
+        "lcn_id": 1645,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 291,
+        "lcn_id": 1646,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 292,
+        "lcn_id": 1647,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 293,
+        "lcn_id": 1648,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 294,
+        "lcn_id": 1649,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 296,
+        "lcn_id": 1650,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 297,
+        "lcn_id": 1651,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 298,
+        "lcn_id": 1652,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 299,
+        "lcn_id": 1653,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 300,
+        "lcn_id": 1654,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 302,
+        "lcn_id": 1655,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 303,
+        "lcn_id": 1656,
+        "spezialisierung": "Long COVID"
+    },
+    {
+        "id": 304,
+        "lcn_id": 1657,
+        "spezialisierung": "Long COVID"
+    }
+]

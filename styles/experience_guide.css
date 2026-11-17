@@ -74,6 +74,29 @@
 }
 .experience-guide button:hover { filter: brightness(.94); }
 .experience-guide button:focus-visible { outline: 2px solid var(--experience-ink); outline-offset: 3px; }
+.therapy-finish-poll,.therapy-finish-feedback{margin-top:1rem;padding-top:1rem;border-top:1px solid #b7a4cd}
+.therapy-finish-poll h3,.therapy-finish-feedback h3{font-size:1rem;margin:0 0 .4rem}
+.therapy-finish-poll button[aria-pressed="true"]{background:var(--experience-accent);color:#fff}
+.therapy-finish-poll button:disabled{opacity:.65;cursor:wait}
+.therapy-finish-poll-status{font-size:.85rem}
+.therapy-finish-poll-status:empty{display:none}
+.therapy-finish-tools{align-items:center}
+.therapy-finish-tools .therapy-finish-share{display:contents}
+.therapy-finish-tools .therapy-finish-share > .experience-guide-actions{margin:0}
+.therapy-finish-tools .therapy-finish-share button{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;padding:7px}
+.therapy-finish-share > p:empty{display:none}
+.therapy-finish-dialog .experience-guide-actions{gap:8px;margin-top:.5rem;align-items:center}
+.therapy-finish-dialog .experience-guide-actions button{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:7px 12px;font-size:13px;line-height:20px;border-radius:9px}
+.therapy-finish-dialog .therapy-finish-share{display:block;margin:0;padding:0;border:0;background:none}
+.therapy-finish-count{font-size:12px;font-weight:400}
+.therapy-finish-info{display:inline-block;position:relative;vertical-align:middle}
+.therapy-finish-dialog .therapy-finish-info button{min-height:24px;min-width:24px;padding:0;border:0;background:transparent;font-size:17px;line-height:24px}
+.therapy-finish-poll{position:relative}
+.therapy-finish-dialog .therapy-finish-tooltip{position:absolute;z-index:4;top:var(--info-top,1rem);left:var(--info-left,100%);right:auto;width:230px;max-width:calc(50vw - 200px);padding:10px 14px;background:#fff;border:1px solid #dbe5f1;box-shadow:0 6px 22px #17365d20;border-radius:8px;font:400 14px/1.6 Arial,sans-serif;color:#62769a;pointer-events:auto}
+.therapy-finish-tooltip[hidden]{display:none}
+.therapy-share-invitation{grid-template-columns:minmax(0,1fr)}
+dialog.therapy-orientation .experience-guide-copy > button{min-height:36px;padding:7px 12px;font-size:13px;line-height:20px}
+@media(max-width:700px){.therapy-finish-dialog .therapy-finish-tooltip{position:static;width:auto;max-width:100%;margin:.5rem 0}}
 dialog.experience-guide {
   position: fixed;
   inset: 0;
@@ -584,9 +607,13 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 .experience-guide-banner.therapy-guide-personal .therapy-guide-personal-footer .therapy-guide-dismiss:hover { background: #fff!important; }
 .therapy-guide-note .experience-guide-actions > .therapy-guide-dismiss { margin-left: auto; }
 .therapy-guide-collapsed {
+  position: sticky; top: var(--detail-header-height, 76px); z-index: 5;
   display: flex; justify-content: flex-end; align-items: center; box-sizing: border-box;
   min-height: 40px; width: 100%; margin-bottom: 1rem; padding: .1rem 1rem;
   background: #eee7f5; border: 1px solid #e0d4eb; border-radius: 9px;
+}
+@media (max-width: 760px) {
+  .therapy-guide-collapsed { top: calc(var(--detail-header-height, 68px) + 64px); }
 }
 .therapy-guide-collapsed button {
   min-height: 36px; padding: .3rem 0; border: 0; background: transparent;
@@ -622,11 +649,43 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
   background: transparent; border: 0; border-bottom: 1px solid #c8b8d8; border-radius: 0; margin: 0;
 }
 .therapy-guide-reading summary { padding: .65rem 0; font-weight: 600; }
+.therapy-guide-reading .therapy-guide-answer-count { font-weight: 400; }
 .therapy-guide-reading summary::before,
 .therapy-guide-reading details.is-complete summary::before { display: none; }
-.therapy-guide-reading details p { margin: 0 0 .65rem; max-width: 60rem; }
+.therapy-guide-reading details p { margin: 0 0 .65rem; max-width: none; }
 .therapy-guide-reading .therapy-guide-sharing { border: 0; padding: 0; background: transparent; margin: 0 0 .65rem; }
 .therapy-guide-reading .therapy-guide-sharing .experience-guide-actions { gap: .35rem .65rem; }
+.therapy-guide-sharing > p:first-child { display: inline; margin: 0; }
+.therapy-guide-sharing > .experience-guide-actions { display: inline-flex; margin: 0 0 0 .35rem; vertical-align: middle; }
+.therapy-guide-reading .therapy-guide-sharing > .experience-guide-actions { margin: 0 0 0 .35rem; }
+.therapy-guide-sharing > .experience-guide-actions button { min-height: 30px; padding: 5px 12px; font-size: 13px; line-height: 18px; }
+.therapy-guide-reading .therapy-guide-sharing-first {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .65rem 20px;
+  background: rgba(255,255,255,.32); border: 1px solid rgba(97,68,132,.12);
+  border-radius: 12px; padding: 13px 16px; margin: 0 0 22px;
+}
+.therapy-guide-sharing-first > p:first-child { flex: 1; min-width: 0; line-height: 1.5; }
+.therapy-guide-sharing-first > p:first-child strong { display: block; font-size: 15px; font-weight: 600; }
+.therapy-guide-sharing-first > p:first-child span { display: block; font-size: 13px; margin-top: 2px; opacity: .82; }
+.therapy-guide-reading .therapy-guide-sharing-first > .experience-guide-actions { margin: 0; flex-shrink: 0; }
+.therapy-guide-sharing-first > .experience-guide-actions button {
+  display: inline-flex; align-items: center; gap: 8px; border-radius: 8px;
+  background: #624784; color: #fff; border: 1px solid #624784; box-shadow: none;
+}
+.therapy-guide-sharing-first > .experience-guide-actions button:hover { background: #51376f; }
+.therapy-guide-sharing-first > .experience-guide-actions button svg { flex-shrink: 0; }
+.therapy-guide-sharing-first > input, .therapy-guide-sharing-first > [role="status"] { flex-basis: 100%; margin: 0; }
+@media (max-width: 600px) {
+  .therapy-guide-sharing-first > p:first-child { flex-basis: 100%; }
+}
+.therapy-guide-reading h2 { margin-bottom: .65rem; }
+.therapy-guide-note .therapy-guide-annotation {
+  margin: 1rem 0; padding: .8rem 1rem;
+  border: 1px solid rgba(97,68,132,.14); border-radius: 10px;
+  background: rgba(255,255,255,.25); font-size: .85rem; line-height: 1.55;
+}
+.therapy-guide-annotation > strong { display: block; margin-bottom: .3rem; font-weight: 600; }
+.therapy-guide-note .therapy-guide-annotation > p { margin: 0; }
 .therapy-guide-reading .therapy-guide-invitation { margin-top: .65rem; border-bottom: 0; }
 .therapy-guide-reading .therapy-guide-invitation > summary { font-size: .8rem; font-weight: 500; padding-block: .35rem; }
 .therapy-guide-reading .therapy-guide-invitation > summary::after { content: ' +'; margin-left: auto; }
@@ -683,3 +742,68 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 .therapy-guide-note .therapy-guide-navigation-pair > button{flex:0 1 auto;width:auto;min-height:36px;padding:7px 12px;font-size:13px;line-height:20px}
 .therapy-guide-navigation-pair > .therapy-guide-navigation-divider{flex:0 0 1px;height:20px}
 @media(max-width:750px){.therapy-guide-note .therapy-guide-navigation-pair{flex-basis:auto}.therapy-guide-note .therapy-guide-navigation-pair > button{font-size:12px;padding:6px 10px}}
+
+
+/* Match the symbols in the catalog feedback buttons. */
+.therapy-guide-feedback-symbol { font: 400 12px/1.4 Arial, sans-serif; }
+
+
+/* Give the longer classification explanations their own readable sections. */
+.therapy-guide-note details.therapy-guide-classification > p {
+ margin: .5rem 1rem 1rem;
+ max-width: none;
+}
+.therapy-guide-note details.therapy-guide-classification .therapy-guide-options {
+ display: block;
+ margin: 0 1rem 1rem;
+ padding: 0;
+ max-width: none;
+}
+.therapy-guide-note details.therapy-guide-classification .therapy-guide-options li {
+ display: block;
+ padding: 1rem 0;
+ border-top: 1px solid #d9cde5;
+}
+.therapy-guide-classification .therapy-guide-options li::before { content: none; }
+.therapy-guide-classification .therapy-guide-options li > strong {
+ display: inline;
+ margin-right: .3em;
+ overflow-wrap: normal;
+}
+.therapy-guide-classification .therapy-guide-options li > span { display: inline; }
+.therapy-guide-note details.therapy-guide-classification .therapy-guide-options > li {
+ padding: 0;
+}
+.therapy-guide-note details.therapy-guide-classification .therapy-guide-classification-topic {
+ margin: 0;
+ background: transparent;
+ border-radius: 0;
+}
+.therapy-guide-note .therapy-guide-classification-topic > summary {
+ padding: .8rem 0;
+ min-height: 44px;
+}
+.therapy-guide-note .therapy-guide-classification-topic > summary::before {
+ display: none;
+}
+.therapy-guide-note .therapy-guide-classification-topic > summary::after {
+ content: '+';
+ margin-left: auto;
+}
+.therapy-guide-note .therapy-guide-classification-topic[open] > summary::after { content: '−'; }
+.therapy-guide-classification-content { padding-bottom: 1rem; }
+.therapy-guide-classification .therapy-guide-classification-actions {
+ margin: .65rem 0 0;
+ padding-left: 1.4rem;
+ list-style: disc;
+}
+.therapy-guide-note details.therapy-guide-classification .therapy-guide-classification-actions > li {
+ display: list-item;
+ padding: 0;
+ margin: .35rem 0;
+ border: 0;
+}
+@media(max-width:650px) {
+ .therapy-guide-note details.therapy-guide-classification > p { margin-inline: .75rem; }
+ .therapy-guide-note details.therapy-guide-classification .therapy-guide-options { margin-inline: .75rem; }
+}

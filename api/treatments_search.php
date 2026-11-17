@@ -950,15 +950,18 @@ try {
 			$params[':search'] = '%' . $normalizedSearch . '%';
 		}
 
-		if ($category !== '') {
-			$whereParts[] = "results.typ COLLATE utf8mb4_unicode_ci = :category";
-			$params[':category'] = $category;
-		}
-
-		if ($subcategory !== '') {
-			$whereParts[] = "results.unterkategorie COLLATE utf8mb4_unicode_ci = :subcategory";
-			$params[':subcategory'] = $subcategory;
-		}
+        foreach (['categories' => [$category, 'typ'], 'subcategories' => [$subcategory, 'unterkategorie']] as $key => [$single, $column]) {
+            $values = isset($_GET[$key]) ? json_decode($_GET[$key], true) : ($single !== '' ? [$single] : []);
+            if (!is_array($values)) throw new InvalidArgumentException('Ungültige Filterauswahl');
+            $holders = [];
+            foreach (array_values($values) as $i => $value) {
+                if (!is_string($value)) throw new InvalidArgumentException('Ungültige Filterauswahl');
+                $holder = ':' . $key . $i;
+                $holders[] = $holder;
+                $params[$holder] = $value;
+            }
+            if ($holders) $whereParts[] = "results.$column COLLATE utf8mb4_unicode_ci IN (" . implode(',', $holders) . ")";
+        }
 
         if ($providerCity !== '' || $hasProviderRadius || $acceptsGkv) {
             $providerMatches = ['results.matching_provider_count > 0'];

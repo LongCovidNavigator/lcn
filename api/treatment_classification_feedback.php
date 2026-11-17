@@ -14,11 +14,13 @@ try {
     $graph=lcnTreatmentDiscoveryGraph($p);
     if(!isset($graph['entries'][$id]))throw new InvalidArgumentException('Therapie nicht gefunden.');
     $model=ndRelationshipStages($graph,$id);
-    if(!$model['drug'])throw new InvalidArgumentException('Diese Einordnung ist nur für Medikamente verfügbar.');
-    $roles=['group','ingredient','brand'];
+    $roles=['group','ingredient','brand','therapy_group','therapy','detailed_method','substance','substance_variant','application_form','combination'];
     $keys=array_map(fn($role)=>'classification:'.$id.':'.$role,$roles);
+    $placeholders=implode(',',array_fill(0,count($keys),'?'));
     if($write){
         $choice=$input['choice']??null;
+        $note=$input['note']??'';
+        if(!is_string($note)||mb_strlen($note)>2000)throw new InvalidArgumentException('Die Begründung darf höchstens 2000 Zeichen enthalten.');
         if(!is_string($choice)||($choice!==''&&!in_array($choice,$roles,true)))throw new InvalidArgumentException('Bitte eine gültige Einordnung auswählen.');
         $user=lcnVoterKey();
         lcnBeginVoteSecurity($p,'treatment',$id,'neutral',$user);
@@ -28,8 +30,8 @@ try {
         if((int)$query->fetchColumn()!==1)throw new RuntimeException('Rückmeldung wird gerade gespeichert.');
         try {
             $p->beginTransaction();
-            $p->prepare('DELETE FROM catalog_relation_feedback WHERE respondent_key=? AND relation_key IN (?,?,?)')->execute(array_merge([$user],$keys));
-            if($choice!=='')$p->prepare('INSERT INTO catalog_relation_feedback(relation_key,respondent_key,stance) VALUES(?,?,1)')->execute(['classification:'.$id.':'.$choice,$user]);
+            $p->prepare('DELETE FROM catalog_relation_feedback WHERE respondent_key=? AND relation_key IN ('.$placeholders.')')->execute(array_merge([$user],$keys));
+            if($choice!=='')$p->prepare('INSERT INTO catalog_relation_feedback(relation_key,respondent_key,stance,classification_note) VALUES(?,?,1,?)')->execute(['classification:'.$id.':'.$choice,$user,trim($note)?:null]);
             $p->commit();
         } finally {
             if($p->inTransaction())$p->rollBack();
@@ -37,7 +39,7 @@ try {
         }
     }
     $user=lcnExistingVoterKey();$result=[];
-    $query=$p->prepare('SELECT relation_key,COUNT(*) votes,MAX(respondent_key=?) own FROM catalog_relation_feedback WHERE relation_key IN (?,?,?) AND stance=1 GROUP BY relation_key');
+    $query=$p->prepare('SELECT relation_key,COUNT(*) votes,MAX(respondent_key=?) own FROM catalog_relation_feedback WHERE relation_key IN ('.$placeholders.') AND stance=1 GROUP BY relation_key');
     $query->execute(array_merge([$user??''],$keys));
     foreach($roles as $role)$result[$role]=['count'=>0,'own'=>false];
     foreach($query as $row){$role=substr($row['relation_key'],strrpos($row['relation_key'],':')+1);$result[$role]=['count'=>(int)$row['votes'],'own'=>(bool)$row['own']];}

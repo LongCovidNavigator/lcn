@@ -168,3 +168,24 @@
 
 // Shared, independent product-feedback entry point on all pages with navigation.
 (()=>{if(document.querySelector('script[data-lcn-feedback-loader]'))return;const script=document.createElement('script');script.dataset.lcnFeedbackLoader='';script.src='scripts/feedback_context.js?v=f582b5a910';script.defer=true;document.head.append(script);})();
+
+// Keep rich-text clipboard exports limited to the selected fragment on every page.
+(() => {
+    document.addEventListener('copy', event => {
+        if (event.defaultPrevented || !event.clipboardData) return;
+        const active = document.activeElement;
+        if (active?.closest('input, textarea, [contenteditable]:not([contenteditable="false"])')) return;
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed || !selection.rangeCount) return;
+        const text = selection.toString();
+        if (!text) return;
+        const fragment = document.createElement('div');
+        for (let index = 0; index < selection.rangeCount; index++) {
+            fragment.append(selection.getRangeAt(index).cloneContents());
+        }
+        fragment.querySelectorAll('script, style, iframe, object, embed').forEach(node => node.remove());
+        event.clipboardData.setData('text/plain', text);
+        event.clipboardData.setData('text/html', fragment.innerHTML);
+        event.preventDefault();
+    });
+})();

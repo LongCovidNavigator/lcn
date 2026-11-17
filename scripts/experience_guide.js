@@ -49,6 +49,14 @@
 
   restoreProgress();
 
+  // Keep native selection anchors intact when background data has not changed.
+  function updateText(node, text) {
+    if (node.textContent === text) return;
+    if (node.childNodes.length === 1 && node.firstChild.nodeType === Node.TEXT_NODE) {
+      node.firstChild.data = text;
+    } else node.textContent = text;
+  }
+
   function make(tag, text, className) {
     const node = document.createElement(tag);
     if (text) node.textContent = text;
@@ -94,46 +102,46 @@
     const storageKey = 'lcn_therapy_guide:' + content.closest('[data-treatment-id]').dataset.treatmentId;
     const topics = {
       effect: [
-        {"intro": "Unter Community-Bewertung fassen wir zusammen, wie sich der Gesamtzustand der Betroffenen bei Anwendung der ausgewählten Therapie verändert hat. Du kannst zwischen vier Antworten wählen:", "options": ["Verschlechterung: Die Behandlung hatte einen negativen Effekt auf deine Gesundheit.", "Neutral: Dein Gesamtzustand ist gleich geblieben.", "Verbesserung: Du hast einen positiven Effekt auf deinen Gesamtzustand gespürt.", "Heilung: Die Therapie hat bei dir zu einer Genesung geführt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die Therapie besser einzuschätzen."},
-        'Die Abbildung zeigt, wie andere die Wirkung erlebt haben. Beachte auch, wie viele Angaben vorliegen.'
+        {"intro": "Unter Community-Bewertung fasst die Community zusammen, wie sich der Gesamtzustand bei Anwendung der ausgewählten Therapie verändert hat. Du kannst zwischen vier Antworten wählen:", "options": ["Verschlechterung: Die Behandlung hatte einen negativen Effekt auf deine Gesundheit.", "Neutral: Dein Gesamtzustand ist gleich geblieben.", "Verbesserung: Du hast einen positiven Effekt auf deinen Gesamtzustand gespürt.", "Heilung: Die Therapie hat bei dir zu einer Genesung geführt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die Therapie besser einzuschätzen."},
+        'Hier geht es um die Veränderung des Gesamtzustands während der Anwendung: Verschlechterung, Neutral (keine Veränderung), Verbesserung oder Heilung. Die Balken und Prozentangaben zeigen, wie sich die Antworten auf diese vier Möglichkeiten verteilen. Lies auch die Anzahl der Angaben: Ein hoher Anteil bei wenigen Antworten beschreibt zunächst nur diese wenigen Erfahrungen. Die Auswertung zeigt persönliche Einschätzungen und belegt nicht, dass die Therapie allein die Veränderung verursacht hat.'
       ],
       gamechanger: [
-        {"intro": "Als Gamechanger bezeichnen wir eine Therapie, die deinen Genesungsprozess entscheidend vorangetrieben hat. Du kannst zwischen zwei Antworten wählen:", "options": ["Ja: Die ausgewählte Therapie hat deinen Genesungsprozess entscheidend vorangetrieben.", "Nein: Die ausgewählte Therapie hat deinen Genesungsprozess leider nicht entscheidend vorangetrieben."], "closing": "Klicke in der Abbildung auf die passende Antwort. Damit hilfst du anderen, die Bedeutung der Therapie für den Genesungsprozess einzuschätzen."},
-        'Hier siehst du, bei wie vielen Teilnehmenden die Therapie den Genesungsprozess entscheidend vorangetrieben hat.'
+        {"intro": "Als Gamechanger gilt eine Therapie, die deinen Genesungsprozess entscheidend vorangetrieben hat. Du kannst zwischen zwei Antworten wählen:", "options": ["Ja: Die ausgewählte Therapie hat deinen Genesungsprozess entscheidend vorangetrieben.", "Nein: Die ausgewählte Therapie hat deinen Genesungsprozess leider nicht entscheidend vorangetrieben."], "closing": "Klicke in der Abbildung auf die passende Antwort. Damit hilfst du anderen, die Bedeutung der Therapie für den Genesungsprozess einzuschätzen."},
+        'Die Frage lautet: Hat die Therapie den Genesungsprozess entscheidend vorangetrieben? Im Ring und neben den Antworten siehst du den Anteil von Ja und Nein. Ein Ja steht für einen entscheidenden Fortschritt, nicht zwingend für Heilung. Ein Nein bedeutet umgekehrt nicht automatisch, dass die Therapie gar nicht geholfen hat. Vergleiche diese Angabe deshalb mit der Community-Bewertung des Gesamtzustands.'
       ],
       symptoms: [
-        {"intro": "Hier sammeln wir, welche Symptome bei Betroffenen durch die ausgewählte Therapie gelindert wurden. Du hast folgende Möglichkeiten:", "options": ["Symptome auswählen: Klicke auf die passenden Symptome in der Auflistung unten, um deine Erfahrung zu ergänzen.", "Weitere Symptome ergänzen: Ergänze Symptome, die durch die Therapie gelindert wurden und noch nicht aufgelistet sind."], "closing": "Damit hilfst du anderen mit ähnlichen Symptomen, die Therapie besser einzuschätzen."},
-        'Die Liste zeigt, bei welchen Symptomen die ausgewählte Therapie laut Community helfen kann. Eine Person kann mehrere Symptome angeben.'
+        {"intro": "Hier sammelt die Community, welche Symptome durch die ausgewählte Therapie gelindert wurden. Du hast folgende Möglichkeiten:", "options": ["Symptome auswählen: Klicke auf die passenden Symptome in der Auflistung unten, um deine Erfahrung zu ergänzen.", "Weitere Symptome ergänzen: Ergänze Symptome, die durch die Therapie gelindert wurden und noch nicht aufgelistet sind."], "closing": "Damit hilfst du anderen mit ähnlichen Symptomen, die Therapie besser einzuschätzen."},
+        'Die Liste zeigt, bei welchen Symptomen die Community eine Linderung durch die Therapie berichtet. Die Zahl neben einem Symptom zählt die entsprechenden Nennungen. Eine Person kann mehrere Symptome auswählen; die Zahlen lassen sich deshalb nicht zu einer Zahl behandelter Personen addieren. Viele Nennungen sind keine Erfolgsquote: Hier wird nicht erfasst, wie viele Menschen das jeweilige Symptom hatten, ohne eine Linderung zu erleben. Ein Symptom ohne Stimmen bedeutet, dass bisher keine entsprechende Linderung eingetragen wurde.'
       ],
       setting: [
-        {"intro": "Das Durchführungssetting beschreibt, wo und in welchem Rahmen du die ausgewählte Therapie angewendet hast. Damit erfassen wir, wie komplex oder aufwendig die Durchführung der Behandlung für Betroffene ist. Zur Auswahl stehen:", "options": ["Selbstständig zu Hause: Du wendest die Therapie eigenständig zu Hause an, ohne zusätzlichen Reiseaufwand oder die Hilfe einer Behandlerin oder eines Behandlers.", "Hausbesuch: Du benötigst Unterstützung durch Fachpersonal, kannst die Behandlung aber zu Hause durchführen.", "Ambulant: Du hast einzelne Termine vor Ort, zum Beispiel in einer Praxis.", "Stationär: Du hältst dich zur Behandlung für einen längeren Zeitraum in einer Einrichtung auf."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die Durchführung der Therapie zu planen."},
-        'Hier siehst du, wo andere die Therapie gemacht haben, zum Beispiel zu Hause oder in einer Praxis.'
+        {"intro": "Die Community erfasst, wo und in welchem Rahmen du die ausgewählte Therapie angewendet hast. Dieses Durchführungssetting hilft anderen einzuschätzen, welcher Aufwand damit für sie verbunden wäre und ob der Rahmen zu ihnen passt. Zur Auswahl stehen:", "options": ["Selbstständig zu Hause: Du wendest die Therapie eigenständig zu Hause an, ohne zusätzlichen Reiseaufwand oder die Hilfe einer Behandlerin oder eines Behandlers.", "Hausbesuch: Du benötigst Unterstützung durch Fachpersonal, kannst die Behandlung aber zu Hause durchführen.", "Ambulant: Du hast einzelne Termine vor Ort, zum Beispiel in einer Praxis.", "Stationär: Du hältst dich zur Behandlung für einen längeren Zeitraum in einer Einrichtung auf."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die Durchführung der Therapie zu planen."},
+        'Die Verteilung zeigt, in welchem Rahmen andere die Therapie durchgeführt haben: selbstständig zu Hause, als Hausbesuch, ambulant mit einzelnen Terminen vor Ort oder stationär mit Aufenthalt in einer Einrichtung. Vergleiche die Anteile, um einen Eindruck von möglichen Abläufen zu bekommen. Das häufigste Setting ist keine verbindliche Vorgabe für jede Anwendung. Lies die Angaben zusammen mit dem Anreiseaufwand und der Einschätzung zum Verschlechterungsrisiko.'
       ],
       pem: [
-        {"intro": "Hier geht es um deine Einschätzung aus eigener Erfahrung: Wie hoch hältst du das Risiko, dass die ausgewählte Behandlung bei anderen Betroffenen zu einer Zustandsverschlechterung führt? Zur Auswahl stehen:", "options": ["Keines: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung nicht vorhanden ist.", "Niedrig: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung gering ist.", "Mittel: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung mittel ist.", "Hoch: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung hoch ist."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die mögliche Belastung durch die Therapie besser einzuordnen."},
-        'Hier siehst du, wie andere das Risiko einer Verschlechterung nach Belastung einschätzen.'
+        {"intro": "Hier geht es um deine Einschätzung aus eigener Erfahrung: Wie hoch hältst du das Risiko, dass die ausgewählte Behandlung bei anderen zu einer Zustandsverschlechterung führt? Zur Auswahl stehen:", "options": ["Keines: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung nicht vorhanden ist.", "Niedrig: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung gering ist.", "Mittel: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung mittel ist.", "Hoch: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung hoch ist."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die mögliche Belastung durch die Therapie besser einzuordnen."},
+        'Hier teilt die Community ihre Einschätzung aus eigener Erfahrung zum Risiko einer Zustandsverschlechterung durch die Behandlung: keines, niedrig, mittel oder hoch. Die Prozentwerte zeigen die Verteilung dieser Einschätzungen. Sie geben nicht an, bei wie vielen Personen tatsächlich eine Verschlechterung aufgetreten ist. Achte auch auf Stimmen bei höheren Risikostufen, selbst wenn eine niedrigere Stufe häufiger gewählt wurde. „Keines“ ist eine persönliche Einschätzung und keine Zusicherung für die eigene Anwendung.'
       ],
       access: [
-        {"intro": "Hier erfassen wir die Zugänglichkeit der ausgewählten Therapie: Wie hoch ist der Aufwand für Betroffene, Zugang zu dieser Therapie zu erhalten? Vier Zugangswege im Vergleich:", "options": ["Selbstmanagement / eigenständig umsetzbar: Du kannst die Maßnahme selbst umsetzen. Du benötigst weder eine Behandlerin oder einen Behandler noch eine ärztliche Verordnung. Der Zugang ist mit geringem Aufwand verbunden.", "Frei erhältlich / private Behandler:innen: Du kaufst das Mittel selbst oder vereinbarst die Behandlung direkt mit privaten Behandler:innen. Eine ärztliche Verordnung ist nicht nötig. Der Zugang ist mit mittlerem Aufwand verbunden.", "Ärztliche Verordnung oder Rezept erforderlich: Du benötigst eine ärztliche Verordnung oder ein Rezept, um die Therapie zu erhalten. Der Zugang ist mit hohem Aufwand verbunden.", "Nur im Rahmen einer Studie möglich: Du kannst die Behandlung nur erhalten, wenn du zur Teilnahme an einer entsprechenden Studie zugelassen wirst. Der Zugang ist mit sehr hohem Aufwand verbunden."], "closing": "Klicke in der Abbildung auf den Zugangsweg, der deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, einen passenden Weg zur Therapie zu finden."},
-        'Hier siehst du, wie andere Zugang zur Therapie bekommen haben, etwa mit einer Verordnung oder ohne Rezept.'
+        {"intro": "Hier erfasst die Community die Zugänglichkeit der ausgewählten Therapie: Wie aufwendig ist es, Zugang zu dieser Therapie zu erhalten? Vier Zugangswege im Vergleich:", "options": ["Selbstmanagement / eigenständig umsetzbar: Du kannst die Maßnahme selbst umsetzen. Du benötigst weder eine Behandlerin oder einen Behandler noch eine ärztliche Verordnung. Der Zugang ist mit geringem Aufwand verbunden.", "Frei erhältlich / private Behandler:innen: Du kaufst das Mittel selbst oder vereinbarst die Behandlung direkt mit privaten Behandler:innen. Eine ärztliche Verordnung ist nicht nötig. Der Zugang ist mit mittlerem Aufwand verbunden.", "Ärztliche Verordnung oder Rezept erforderlich: Du benötigst eine ärztliche Verordnung oder ein Rezept, um die Therapie zu erhalten. Der Zugang ist mit hohem Aufwand verbunden.", "Nur im Rahmen einer Studie möglich: Du kannst die Behandlung nur erhalten, wenn du zur Teilnahme an einer entsprechenden Studie zugelassen wirst. Der Zugang ist mit sehr hohem Aufwand verbunden."], "closing": "Klicke in der Abbildung auf den Zugangsweg, der deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, einen passenden Weg zur Therapie zu finden."},
+        'Hier berichtet die Community über ihre Zugangswege zur Therapie: durch Selbstmanagement, frei erhältlich oder über private Behandler:innen, mit ärztlicher Verordnung beziehungsweise Rezept oder im Rahmen einer Studie. Die Anteile zeigen die berichteten Zugangswege. Mehrere vertretene Wege können auf unterschiedliche Anwendungen oder Rahmenbedingungen hinweisen. Eine Nennung sagt noch nichts über aktuelle Verfügbarkeit, Wartezeit oder Kostenübernahme aus.'
       ],
       unit_cost: [
-        {"intro": "Hier erfassen wir, was du pro Therapieeinheit selbst bezahlt hast – zum Beispiel pro Anwendung, Behandlung, Packung oder Ampulle. Ziehe den Betrag ab, den deine Krankenkasse übernommen hat. Falls sich die Kosten nicht pro Einheit angeben lassen, wähle „Nicht anwendbar“ und trage stattdessen die Gesamtkosten ein.", "options": ["Nicht anwendbar: Eine Kostenangabe pro Einheit passt nicht zu dieser Therapie.", "Kostenlos: Für die Therapie sind keine Kosten angefallen.", "Komplett übernommen: Die Kosten wurden vollständig von deiner Krankenkasse übernommen.", "Kostenspannen: Wähle den ungefähr passenden Betrag pro Einheit. Eine grobe Schätzung genügt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die eigenen Kosten besser einzuplanen.", "insuranceIntro": "Wähle zuerst das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Für Deutschland stehen zur Auswahl:", "insuranceOptions": ["GKV: Du bist gesetzlich krankenversichert.", "PKV: Du bist privat krankenversichert.", "Aus dem Ausland: Du nimmst aus dem Ausland teil. Wähle diese Option, wenn deine Versicherung nicht zum ausgewählten Krankenversicherungssystem gehört."], "optionsIntro": "Mache anschließend eine Angabe zu deinem Kostenanteil:"},
-        'Hier siehst du die Kosten pro Behandlung oder Einheit. Wähle das Versicherungssystem, das zu dir passt.'
+        {"intro": "Hier erfasst die Community, was du pro Therapieeinheit selbst bezahlt hast – zum Beispiel pro Anwendung, Behandlung, Packung oder Ampulle. Ziehe den Betrag ab, den deine Krankenkasse übernommen hat. Falls sich die Kosten nicht pro Einheit angeben lassen, wähle „Nicht anwendbar“ und trage stattdessen die Gesamtkosten ein.", "options": ["Nicht anwendbar: Eine Kostenangabe pro Einheit passt nicht zu dieser Therapie.", "Kostenlos: Für die Therapie sind keine Kosten angefallen.", "Komplett übernommen: Die Kosten wurden vollständig von deiner Krankenkasse übernommen.", "Kostenspannen: Wähle den ungefähr passenden Betrag pro Einheit. Eine grobe Schätzung genügt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die eigenen Kosten besser einzuplanen.", "insuranceIntro": "Wähle zuerst das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Für Deutschland stehen zur Auswahl:", "insuranceOptions": ["GKV: Du bist gesetzlich krankenversichert.", "PKV: Du bist privat krankenversichert.", "Aus dem Ausland: Du nimmst aus dem Ausland teil. Wähle diese Option, wenn deine Versicherung nicht zum ausgewählten Krankenversicherungssystem gehört."], "optionsIntro": "Mache anschließend eine Angabe zu deinem Kostenanteil:"},
+        'Die Verteilung zeigt den selbst bezahlten Betrag pro Therapieeinheit nach Abzug der Kostenübernahme, etwa pro Anwendung, Packung oder Ampulle. Prüfe zuerst das ausgewählte Krankenversicherungssystem und die Versicherungsart: Die Anzeige bezieht sich auf diesen Kontext. „Kostenlos“ bedeutet, dass keine Kosten anfielen; „Komplett übernommen“, dass die Krankenkasse die Kosten vollständig getragen hat. „Nicht anwendbar“ ist keine Kostenangabe von null Euro. Die Betragsstufen sind ungefähre Angaben; bei unterschiedlich großen Einheiten sind sie nur eingeschränkt vergleichbar.'
       ],
       total_cost: [
-        {"intro": "Hier erfassen wir, was du bisher insgesamt selbst für die Therapie bezahlt hast. Zähle alle bisherigen Anwendungen und Ausgaben zusammen und ziehe den Betrag ab, den deine Krankenkasse übernommen hat. Ist die Therapie noch nicht abgeschlossen, schätze die Gesamtkosten. Bei einer fortlaufenden Therapie kannst du „Nicht anwendbar“ wählen und stattdessen die Kosten pro Einheit angeben.", "options": ["Nicht anwendbar: Eine Angabe zu Gesamtkosten lässt sich auf diese Therapie nicht anwenden.", "Kostenlos: Für die Therapie sind keine Kosten angefallen.", "Komplett übernommen: Die Kosten wurden vollständig von deiner Krankenkasse übernommen.", "Kostenspannen: Wähle den ungefähr passenden Gesamtbetrag. Eine grobe Schätzung genügt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die Kosten eines Therapieverlaufs besser einzuplanen.", "insuranceIntro": "Wähle zuerst das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Für Deutschland stehen zur Auswahl:", "insuranceOptions": ["GKV: Du bist gesetzlich krankenversichert.", "PKV: Du bist privat krankenversichert.", "Aus dem Ausland: Du nimmst aus dem Ausland teil. Wähle diese Option, wenn deine Versicherung nicht zum ausgewählten Krankenversicherungssystem gehört."], "optionsIntro": "Mache anschließend eine Angabe zu deinem Kostenanteil:"},
-        'Hier siehst du, was andere für den gesamten Therapieverlauf bezahlt haben.'
+        {"intro": "Hier erfasst die Community, was du bisher insgesamt selbst für die Therapie bezahlt hast. Zähle alle bisherigen Anwendungen und Ausgaben zusammen und ziehe den Betrag ab, den deine Krankenkasse übernommen hat. Ist die Therapie noch nicht abgeschlossen, schätze die Gesamtkosten. Bei einer fortlaufenden Therapie kannst du „Nicht anwendbar“ wählen und stattdessen die Kosten pro Einheit angeben.", "options": ["Nicht anwendbar: Eine Angabe zu Gesamtkosten lässt sich auf diese Therapie nicht anwenden.", "Kostenlos: Für die Therapie sind keine Kosten angefallen.", "Komplett übernommen: Die Kosten wurden vollständig von deiner Krankenkasse übernommen.", "Kostenspannen: Wähle den ungefähr passenden Gesamtbetrag. Eine grobe Schätzung genügt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die Kosten eines Therapieverlaufs besser einzuplanen.", "insuranceIntro": "Wähle zuerst das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Für Deutschland stehen zur Auswahl:", "insuranceOptions": ["GKV: Du bist gesetzlich krankenversichert.", "PKV: Du bist privat krankenversichert.", "Aus dem Ausland: Du nimmst aus dem Ausland teil. Wähle diese Option, wenn deine Versicherung nicht zum ausgewählten Krankenversicherungssystem gehört."], "optionsIntro": "Mache anschließend eine Angabe zu deinem Kostenanteil:"},
+        'Hier siehst du, welche selbst getragenen Gesamtkosten für den Therapieverlauf die Community berichtet, nach Abzug einer Kostenübernahme. Bei noch laufenden Behandlungen können die Angaben geschätzt sein. Prüfe das ausgewählte Krankenversicherungssystem und die Versicherungsart und unterscheide „Kostenlos“, „Komplett übernommen“ und „Nicht anwendbar“. Die Betragsstufen sind keine Preisangebote. Unterschiedliche Behandlungsdauern und Anwendungszahlen können zu unterschiedlichen Gesamtkosten führen; lies diese deshalb zusammen mit den Kosten pro Einheit.'
       ]
     };
     const encouragement = {
-      symptome: ['Bei welchen Symptomen hat dir die Therapie geholfen? Wähle die passenden Symptome aus oder suche weitere. Du entscheidest, was du beitragen möchtest.', 'Bei welchen Symptomen hilft die Therapie? Hier siehst du, bei welchen Beschwerden die Community Verbesserungen berichtet.'],
+      symptome: ['Bei welchen Symptomen hat dir die Therapie geholfen? Wähle die passenden Symptome aus oder suche weitere. Du entscheidest, was du beitragen möchtest.', 'Bei welchen deiner Symptome könnte die Therapie helfen? Um dir hierfür eine Einschätzungsmöglichkeit zu geben, trägt die Community Erfahrungen zur Linderung einzelner Beschwerden zusammen.'],
       wirkung: ['Was du erlebt hast, kann anderen helfen, ihre Fragen an die Therapie zu finden. Jede Angabe zählt.',
-        'Ob eine Therapie zu dir passt, ist eine persönliche Frage. Die Erfahrungen anderer können dir helfen, genauer hinzuschauen.'],
+        'Kann dir diese Therapie helfen – und wenn ja, wie sehr? Hier teilt die Community ihre Erfahrungen. Sie zeigen dir, ob und in welchem Maß andere von der Therapie profitiert haben. Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest – auch wenn die Wirkung von Person zu Person unterschiedlich ist.'],
       termin: ['Deine Erfahrung mit Durchführung und Belastung hilft anderen, ihren Alltag rund um die Therapie zu planen.',
-        'Schau dir an, wie die Therapie abläuft und welche Belastung andere erlebt haben. So kannst du besser einschätzen, was du dafür einplanen möchtest.'],
+        'Ist die Behandlung mit deinem aktuellen Gesundheitszustand überhaupt machbar? Um dir hierfür eine Einschätzungsmöglichkeit zu geben, trägt die Community Erfahrungen zur Durchführung zusammen. Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest – auch wenn die Wirkung von Person zu Person unterschiedlich ist.'],
       zugang: ['Dein Weg zur Therapie und deine ungefähren Kosten geben anderen eine Vorstellung davon, womit sie rechnen können.',
-        'Wenn du weißt, wie der Zugang funktioniert und welche Kosten möglich sind, kannst du deinen nächsten Schritt besser planen.'],
+        'Wie aufwendig ist es, Zugang zur Behandlung zu bekommen, und welche Kosten kommen auf dich zu? Um dir hierfür eine Einschätzungsmöglichkeit zu geben, trägt die Community Erfahrungen zu Zugangswegen und Kosten zusammen.'],
       anreise: ['Du hast schon etwas beigetragen? Danke dafür. Hier kannst du bei Bedarf noch nach Behandler:innen schauen.',
         'Wenn du die Therapie weiter erkunden möchtest, kannst du hier nach Behandler:innen in deiner Nähe schauen.'],
       alternativen: ['Danke, dass du dir Zeit für die Community genommen hast. Hier kannst du zum Abschluss noch verwandte Behandlungen ansehen.',
@@ -212,8 +220,7 @@
       }
       url.searchParams.set('treatment_id', content.closest('[data-treatment-id]').dataset.treatmentId);
       url.searchParams.set('anliegen', 'erfahrung');
-      if (alternatives) url.hash = 'alternativen';
-      if (providers) url.hash = 'anreise';
+      url.hash = 'ueberblick';
       const text = providers
         ? 'Kennst du Behandler:innen für diese Therapie aus eigener Erfahrung? Schau dir die Einträge im Long Covid Navigator an, bestätige oder korrigiere Angaben und ergänze fehlende Behandler:innen. Teile deine Behandlungserfahrung im jeweiligen Praxiseintrag.'
         : alternatives
@@ -228,14 +235,7 @@
       fallback.hidden = true;
       fallback.value = url.href;
       fallback.setAttribute('aria-label', 'Link zur Therapie');
-      const email = make('a', 'Per E-Mail');
-      email.href = 'mailto:?subject=' + encodeURIComponent(providers ? 'Behandler:innen und Erfahrungen ergänzen' : alternatives ? 'Wissen zu Therapiealternativen ergänzen' : 'Erfahrungen mit dieser Therapie') +
-        '&body=' + encodeURIComponent(text + '\n\n' + url.href);
-      const whatsapp = make('a', 'Per WhatsApp');
-      whatsapp.href = 'https://wa.me/?text=' + encodeURIComponent(text + ' ' + url.href);
-      whatsapp.target = '_blank';
-      whatsapp.rel = 'noopener noreferrer';
-      const copy = button('Link kopieren', async () => {
+      async function copyLink() {
         try {
           await navigator.clipboard.writeText(url.href);
           status.textContent = 'Link kopiert.';
@@ -244,51 +244,80 @@
           fallback.select();
           status.textContent = 'Du kannst den markierten Link kopieren.';
         }
+      }
+      const share = button('Teilen', async () => {
+        if (navigator.share) {
+          try { await navigator.share({title: document.title, text, url: url.href}); }
+          catch (error) { if (error.name !== 'AbortError') await copyLink(); }
+        } else await copyLink();
       });
-      if (navigator.share) actions.append(button('Teilen', async () => {
-        try { await navigator.share({title: document.title, text, url: url.href}); }
-        catch (error) { if (error.name !== 'AbortError') copy.focus(); }
-      }));
-      actions.append(copy, email, whatsapp);
-      block.append(message, actions, fallback, status);
+      const shareIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      shareIcon.setAttribute('viewBox', '0 0 24 24');
+      shareIcon.setAttribute('width', '19');
+      shareIcon.setAttribute('height', '19');
+      shareIcon.setAttribute('fill', 'none');
+      shareIcon.setAttribute('stroke', 'currentColor');
+      shareIcon.setAttribute('stroke-width', '1.6');
+      shareIcon.setAttribute('aria-hidden', 'true');
+      shareIcon.innerHTML = '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.6 6.6-4.2M8.7 13.4l6.6 4.2"/>';
+      share.prepend(shareIcon);
+      actions.append(share);
+      block.append(message, document.createTextNode(' '), actions, fallback, status);
       return {block, message, alternatives, providers};
     }
 
     function refreshTopics() {
       refreshEntryAvailability();
-      entries.forEach(({card, example}) => {
+      entries.forEach(({card, disclosure, example}) => {
+        const countLabel = disclosure?.querySelector('[data-guide-answer-count]');
+        if (countLabel) {
+          const count = cardCount(card);
+          const label = card.matches('.ux-symptom-help')
+            ? '(bis zu ' + count + ' ' + (count === 1 ? 'Angabe' : 'Angaben') + ' je Symptom)'
+            : '(' + count + ' ' + (count === 1 ? 'Angabe' : 'Angaben') + ')';
+          updateText(countLabel, label);
+        }
         if (!example) return;
         const demo = window.LCNDummy?.get();
         const count = Number(card.dataset.displayAnswerCount);
         const symptoms = JSON.parse(card.dataset.guideSymptoms || '[]');
         const prefix = demo ? 'Mit Beispieldaten: ' : '';
-        example.textContent = symptoms.length
-          ? prefix + 'Die meisten Stimmen in der Liste entfallen auf ' + symptoms
+        const exampleText = symptoms.length
+          ? prefix + 'Zu den Symptomen mit den meisten Nennungen gehören ' + symptoms
             .map(({name, count}) => name + ' (' + count + (count === 1 ? ' Stimme)' : ' Stimmen)')).join(' und ') + '.'
-          : count ? prefix + 'Aktuell siehst du ' + count + (count === 1 ? ' Angabe.' : ' Angaben.') : '';
-        example.hidden = !example.textContent;
+          : count ? ''
+            : 'Zu diesem Thema werden aktuell keine Angaben angezeigt. Daraus lässt sich keine Bewertung ableiten.';
+        updateText(example, exampleText);
+        example.hidden = !exampleText;
       });
       updateProgress();
       if (sharing) {
         const count = experienceCount(panel);
-        sharing.block.hidden = !sharing.alternatives && !sharing.providers && count >= 10;
-        if(sharing.toggle) sharing.toggle.hidden = !sharing.alternatives && !sharing.providers && count >= 10;
-        sharing.message.textContent = sharing.providers
+        sharing.block.hidden = false;
+        const message = sharing.providers
           ? 'Kennst du jemanden, der diese Therapie schon bei einer Behandler:in gemacht hat? Leite diese Seite weiter und lade die Person ein, Angaben zu bestätigen oder zu korrigieren, fehlende Behandler:innen zu ergänzen und ihre Erfahrung im jeweiligen Praxiseintrag zu teilen.'
           : sharing.alternatives
           ? 'Kennst du jemanden, der diese Therapie oder eine der Alternativen schon ausprobiert hat? Leite diese Seite weiter und lade die Person ein, Einträge zu bestätigen, ihnen zu widersprechen oder fehlendes Wissen zu ergänzen.'
           : count === 0
           ? 'Kennst du jemanden, der diese Therapie ausprobiert hat? Lade die Person ein, ihre Erfahrung zu teilen. Das hilft dir und anderen bei der Orientierung.'
           : 'Kennst du jemanden, der diese Therapie ausprobiert hat? Jede weitere Erfahrung hilft, die Therapie besser einzuschätzen.';
+        // The invitation contains formatting; rebuild it only when its wording changes.
+        if (sharing.message.dataset.message !== message) {
+          sharing.message.dataset.message = message;
+          const messageParts = message.split('? ');
+          if (messageParts.length > 1) {
+            sharing.message.replaceChildren(make('strong', messageParts.shift() + '?'), make('span', messageParts.join('? ')));
+          } else updateText(sharing.message, message);
+        }
       }
       content.querySelectorAll('.therapy-guide-data-status').forEach(node => {
         const count = experienceCount(node.closest('.nd-panel'));
         node.dataset.level = count >= 10 ? 'full' : count ? 'few' : 'none';
-        node.textContent = count >= 10 ? 'Gesamtauswertung verfügbar · Bitte beachte die Anzahl der Angaben je Thema.'
-          : count ? 'Einzelne Erfahrungen · Noch keine Gesamtauswertung.' : 'Noch keine Erfahrungen';
+        node.hidden = count < 10;
+        updateText(node, count < 10 ? '' : 'Erfahrungen vorhanden.');
       });
       entries.forEach(({card, disclosure}) => {
-        if (disclosure) disclosure.hidden = mode !== 'review' && !card.dataset.guideContribution && cardCount(card) === 0;
+        if (disclosure) disclosure.hidden = false;
       });
     }
 
@@ -314,8 +343,8 @@
       });
       if (completion) {
         const count = entries.filter(({card}) => answered(card)).length;
-        completion.textContent = count === entries.length
-          ? 'Danke! Deine Angaben sind gespeichert.' : count + ' von ' + entries.length + ' Themen ausgefüllt';
+        updateText(completion, count === entries.length
+          ? 'Danke! Deine Angaben sind gespeichert.' : count + ' von ' + entries.length + ' Themen ausgefüllt');
         completion.classList.toggle('is-complete', count === entries.length);
       }
     }
@@ -332,7 +361,7 @@
       const count = experienceCount();
       scope.querySelectorAll('[data-therapy-experience-availability]').forEach(node => {
         node.hidden = !loaded;
-        node.textContent = !loaded ? '' : count === 0 ? 'Keine Angaben vorhanden' : count < 10 ? 'Bisher wenige Angaben' : 'Zahlreiche Angaben vorhanden';
+        updateText(node, !loaded ? '' : count === 0 ? 'Keine Angaben vorhanden' : count < 10 ? 'Bisher wenige Angaben' : 'Zahlreiche Angaben vorhanden');
         node.dataset.level = count === 0 ? 'none' : count < 10 ? 'few' : 'many';
       });
     }
@@ -377,7 +406,7 @@
       completion = sharing = null;
 
       updateProgress();
-      if (panel.id !== 'ueberblick' && panel.id !== 'dashboard' && minimized) {
+      if (minimized) {
         guide = make('section', '', 'therapy-guide-collapsed');
         guide.setAttribute('aria-label', 'Orientierung ausgeschaltet');
         guide.append(button('Orientierung zurückholen', enableOrientation));
@@ -386,6 +415,7 @@
       }
       if (panel.id === 'dashboard' || (panel.id !== 'ueberblick' && !mode)) {
         guide = null;
+        if (panel.id !== 'dashboard' && !minimized) showOrientation();
         return;
       }
 
@@ -424,41 +454,144 @@
       if (!review) guide.classList.add('therapy-guide-reading');
       const body = [make('p', review ? (panel.querySelector('[data-question], .ux-symptom-help') ? 'Klicke in den Abbildungen oder Listen auf das, was deiner bisherigen Erfahrung entspricht. Jede Angabe hilft anderen.' : encouragement[panel.id][0]) : encouragement[panel.id][1])];
       if (review && panel.id === 'symptome') body[0].textContent = 'Klicke auf die Symptome, die sich bei dir durch diese Therapie verbessert haben, oder ergänze entsprechende Symptome.';
-      if (!review && panel.querySelector('[data-question], .ux-symptom-help')) body.push(make('p', '', 'therapy-guide-data-status')); 
+      if (!review && panel.querySelector('[data-question], .ux-symptom-help')) {
+        body.push(make('p', '', 'therapy-guide-data-status'));
+      }
+      const feedbackNote = text => {
+        const note = make('aside', '', 'therapy-guide-annotation');
+        note.setAttribute('aria-label', 'Anmerkung zu den Rückmeldungen');
+        const description = make('p');
+        text.split(/([✓×])/).forEach(part => {
+          description.append(part === '✓' || part === '×'
+            ? make('span', part, 'therapy-guide-feedback-symbol')
+            : document.createTextNode(part));
+        });
+        note.append(make('strong', 'Anmerkung'), description);
+        return note;
+      };
       const cards = panel.querySelectorAll('[data-question], .ux-symptom-help');
       if (cards.length) {
 
         if (!review) {
           sharing = shareTherapy();
-          sharing.toggle = make('details', '', 'therapy-guide-invitation');
-          sharing.toggle.append(make('summary', 'Jemanden zur Erfahrung einladen'), sharing.block);
         }
       } else if (panel.id === 'anreise' && !review) {
-        body[0].textContent = 'Du suchst Behandler:innen für diese Therapie? Hier findest du eingetragene Praxen auf einer Karte und in einer Ergebnisliste. Öffne die Hinweise, um die Suche einzugrenzen, den Anreiseaufwand einzuordnen und die Angaben zu einer Praxis näher anzusehen.';
+        body[0].textContent = 'Wo findest du Behandler:innen für diese Therapie? Die Community sammelt Einträge, damit du eine Auswahl hast und sehen kannst, wer die Behandlung in deiner Nähe anbietet. So kannst du Behandler:innen mit möglichst wenig Anreiseaufwand finden.';
         const help = [
-          ['Standort, Karte und Filter', 'Gib eine Adresse, Postleitzahl oder einen Ort ein und übernimm den Standort. Im Modus „Radius“ kannst du den Suchradius aktivieren und in Kilometern einstellen; im Modus „Ort“ wählst du eine Stadt aus. Einträge ohne Koordinaten können in der Liste berücksichtigt werden, auch wenn sie nicht auf der Karte erscheinen. Die Trefferzahl zeigt, wie viele Behandler:innen zu den aktuellen Filtern passen.'],
-          ['Anreiseaufwand verstehen', 'Die hervorgehobene Stufe ordnet die nächstgelegene behandelnde Person im aktuellen Filter nach Entfernung ein. Die Kilometerangabe ist die Luftlinie; die Zeitangaben sind grobe Orientierung und keine berechnete Reiseroute. „Online-Behandlung“ bedeutet hier, dass Erst- und Folgetermin online möglich sind. Unter „Wie wird eingeordnet?“ findest du weitere Erläuterungen.'],
-          ['Praxiseinträge und Erfahrungen lesen', 'Wechsle zwischen Kacheln und Tabelle, suche nach Name oder Ort und sortiere nach Name oder Entfernung. Ein Online-Hinweis steht direkt unter dem Namen und wird nur angezeigt, wenn Erst- und Folgetermin online möglich sind. Öffne einen Praxiseintrag, um die dort vorhandenen Angaben und Erfahrungen zu lesen. Achte bei Bewertungen auch auf die Anzahl der Angaben.'],
-          ['Angaben bestätigen, korrigieren oder ergänzen', 'Kennst du eine der Praxen aus eigener Erfahrung? Öffne ihren Eintrag und bestätige passende Angaben oder widersprich mit den dort angebotenen Rückmeldungen. Ergänze deine Erfahrung dort, wo du etwas beitragen kannst. Fehlt eine Praxis, nutze „Behandler:innen hinzufügen“.']
+          ['Anreiseaufwand', 'Die hervorgehobene Stufe ordnet die nächstgelegene behandelnde Person im aktuellen Filter nach Entfernung ein. Die Kilometerangabe ist die Luftlinie; die Zeitangaben sind grobe Orientierung und keine berechnete Reiseroute. „Online-Behandlung“ bedeutet hier, dass Erst- und Folgetermin online möglich sind.'],
+          ['Karte', 'Die Community sammelt Behandler:innen, die diese Therapie anbieten, und ihre Standorte. Mithilfe der Karte kannst du Behandler:innen für diese Therapie in deiner Nähe finden. Gib dazu eine Adresse, Postleitzahl oder einen Ort ein und übernimm den Standort.'],
+          ['Einträge ansehen und vergleichen', 'Nutze die Übersicht der Behandler:innen, die diese Therapie anbieten, um sie untereinander zu vergleichen und die für dich passendste Anlaufstelle zu finden. Öffne einen Eintrag, um mehr über das Behandlungsangebot zu erfahren. Bei Bedarf kannst du zwischen Kachel- und Tabellenansicht wechseln.'],
         ];
         help.forEach(([title, text]) => {
           const disclosure = make('details');
-          disclosure.append(make('summary', title), make('p', text));
+          const description = make('p', text);
+          if (title === 'Karte') {
+            const [before, after] = text.split('für diese Therapie');
+            description.replaceChildren(document.createTextNode(before), make('u', 'für diese Therapie'), document.createTextNode(after));
+          }
+          disclosure.append(make('summary', title), description);
           body.push(disclosure);
         });
+        body.push(feedbackNote('Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie die Community die Angabe einschätzt, dass die jeweilige Behandler:in diese Therapie tatsächlich anbietet. Sie helfen dir einzuordnen, wie gesichert diese Information ist. Sie bewerten weder die Qualität der Behandlung noch ihre Wirksamkeit.'));
         sharing = shareTherapy(false, true);
         body.push(sharing.block);
       }
       cards.forEach(card => {
         const topic = topics[card.dataset.question || 'symptoms'];
         if (!topic) return;
+        const readingTopics = {
+          effect: {
+            intro: 'Unter Community-Bewertung fasst die Community zusammen, wie sich der Gesundheitszustand bei Anwendung der ausgewählten Therapie verändert hat. So siehst du, welchen Effekt die Behandlung aus Sicht der Community hatte. Die Antworten werden in vier Kategorien erfasst:',
+            options: [
+              'Verschlechterung: Die Behandlung hatte einen negativen Effekt auf die Gesundheit.',
+              'Neutral: Der Gesamtzustand ist gleich geblieben.',
+              'Verbesserung: Der Gesamtzustand hat sich spürbar verbessert.',
+              'Heilung: Die Therapie hat nach eigener Einschätzung zu einer Genesung geführt.'
+            ],
+            closing: 'Die Auswertung beschreibt die Erfahrungen der Teilnehmenden und berechnet nicht deine persönliche Erfolgschance'
+          },
+          gamechanger: {
+            intro: 'Als Gamechanger gilt eine Therapie, die den Genesungsprozess entscheidend vorangetrieben hat. Hier siehst du, für wie viele die ausgewählte Therapie diese Bedeutung hatte. Die Antworten werden in zwei Kategorien erfasst:',
+            options: [
+              'Ja: Die ausgewählte Therapie hat den Genesungsprozess entscheidend vorangetrieben.',
+              'Nein: Die ausgewählte Therapie hat den Genesungsprozess leider nicht entscheidend vorangetrieben.'
+            ],
+            closing: 'Ein Nein bedeutet nicht automatisch, dass sie gar nicht geholfen hat; ein Ja bedeutet nicht automatisch Heilung. Lies diese Angabe deshalb zusammen mit der Community-Bewertung und beachte die Anzahl der Angaben.'
+          }
+        };
+        Object.assign(readingTopics, {
+          setting: {
+            intro: 'Die Community erfasst, wo und in welchem Rahmen sie die ausgewählte Therapie angewendet haben. Diese Angabe hilft dir einzuschätzen, welcher Aufwand damit für dich verbunden wäre und ob der Rahmen zu dir passt. Die Antworten werden in vier Kategorien erfasst:',
+            options: [
+              'Selbstständig zu Hause: Die Therapie wird eigenständig zu Hause angewendet, ohne zusätzlichen Reiseaufwand oder Unterstützung durch Fachpersonal.',
+              'Hausbesuch: Die Behandlung findet mit Unterstützung durch Fachpersonal zu Hause statt.',
+              'Ambulant: Die Behandlung findet bei einzelnen Terminen vor Ort statt, zum Beispiel in einer Praxis.',
+              'Stationär: Die Behandlung erfordert einen längeren Aufenthalt in einer Einrichtung.'
+            ],
+            closing: 'Die mögliche Durchführung kann je nach Anwendung variieren. Berücksichtige auch das Verschlechterungsrisiko und den Anreiseaufwand.'
+          },
+          pem: {
+            intro: 'Bei der Entscheidung für eine Therapie ist es hilfreich, das Crash-Risiko einschätzen zu können. Hier sammelt die Community ihre Einschätzungen dazu, wie hoch das Risiko ist, dass die ausgewählte Therapie einen Crash auslöst und damit zu einer Zustandsverschlechterung führt. Diese Einschätzungen können dir als Orientierung dienen. Die Antworten werden in vier Kategorien erfasst:',
+            options: [
+              'Keines: Aus eigener Erfahrung schätzt die Community ein, dass das Risiko einer Zustandsverschlechterung nicht vorhanden ist.',
+              'Niedrig: Aus eigener Erfahrung schätzt die Community ein, dass das Risiko einer Zustandsverschlechterung gering ist.',
+              'Mittel: Aus eigener Erfahrung schätzt die Community ein, dass das Risiko einer Zustandsverschlechterung mittel ist.',
+              'Hoch: Aus eigener Erfahrung schätzt die Community ein, dass das Risiko einer Zustandsverschlechterung hoch ist.'
+            ],
+            closing: 'Die Anteile beschreiben Risikoeinschätzungen, nicht die Häufigkeit tatsächlich aufgetretener Verschlechterungen. „Keines“ ist keine Zusicherung für deine eigene Anwendung.'
+          },
+          access: {
+            intro: 'Die Zugänglichkeit beschreibt, wie aufwendig es ist, Zugang zur ausgewählten Therapie zu erhalten. Hier siehst du, welche Wege andere genutzt haben. Vier Zugangswege im Vergleich:',
+            options: [
+              'Selbstmanagement / eigenständig umsetzbar: Du kannst die Maßnahme eigenständig umsetzen und benötigst weder Behandler:innen noch eine ärztliche Verordnung. Der Zugang ist mit geringem Aufwand verbunden.',
+              'Frei erhältlich / private Behandler:innen: Du kannst das Mittel frei kaufen oder die Therapie direkt mit privaten Behandler:innen vereinbaren. Eine ärztliche Verordnung ist nicht nötig. Der Zugang ist mit mittlerem Aufwand verbunden.',
+              'Ärztliche Verordnung oder Rezept erforderlich: Du benötigst eine ärztliche Verordnung oder ein Rezept, um die Therapie zu erhalten. Der Zugang ist mit hohem Aufwand verbunden.',
+              'Nur im Rahmen einer Studie möglich: Du kannst die Behandlung nur erhalten, wenn du zur Teilnahme an einer entsprechenden Studie zugelassen wirst. Der Zugang ist mit sehr hohem Aufwand verbunden.'
+            ],
+            closing: 'Ein berichteter Zugangsweg bestätigt weder die aktuelle Verfügbarkeit noch eine Kostenübernahme.'
+          },
+          symptoms: {
+            intro: 'Hier sammelt die Community, welche Symptome durch die ausgewählte Therapie gelindert wurden. So kannst du sehen, für welche deiner Beschwerden Erfahrungen vorliegen. Die Liste liest du so:',
+            options: [
+              'Symptome: Die aufgelisteten Beschwerden zeigen, zu welchen Symptomen Angaben gesammelt werden.',
+              'Nennungen: Die Zahl bei einem Symptom zeigt, wie viele Angaben zu einer Linderung vorliegen. Eine Person kann mehrere Symptome angeben.',
+              'Keine Nennungen: Bisher ist keine entsprechende Linderung eingetragen. Daraus lässt sich nicht ableiten, dass die Therapie bei diesem Symptom nicht hilft.'
+            ],
+            closing: 'Nennungen sind keine Erfolgsquote: Angaben zu ausgebliebener Linderung werden hier nicht erfasst. Mehrfachnennungen lassen sich nicht zu einer Gesamtzahl behandelter Personen addieren.'
+          }
+        });
+        for (const key of ['unit_cost', 'total_cost']) {
+          const unit = key === 'unit_cost';
+          readingTopics[key] = {
+            intro: unit
+              ? 'Hier erfasst die Community, welche selbst getragenen Kosten pro Therapieeinheit anfallen – zum Beispiel pro Anwendung, Behandlung, Packung oder Ampulle. Beträge, die die Krankenkasse übernommen hat, sind bereits abgezogen. Die Angaben werden so eingeordnet:'
+              : 'Hier erfasst die Community, welche selbst getragenen Gesamtkosten bisher für die Therapie angefallen sind. Dazu zählen die bisherigen Anwendungen und Ausgaben abzüglich einer Kostenübernahme. Ist die Behandlung noch nicht abgeschlossen, können die Gesamtkosten geschätzt sein. Die Angaben werden so eingeordnet:',
+            options: [
+              'Nicht anwendbar: Eine Kostenangabe ' + (unit ? 'pro Einheit' : 'zum gesamten Therapieverlauf') + ' passt nicht zu dieser Behandlung. Das bedeutet nicht, dass die Therapie kostenlos ist.',
+              'Kostenlos: Für die Therapie sind keine Kosten angefallen.',
+              'Komplett übernommen: Die Kosten wurden vollständig von der Krankenkasse übernommen.',
+              'Kostenspannen: Die Community hat den ungefähr passenden ' + (unit ? 'Betrag pro Einheit' : 'Gesamtbetrag') + ' angegeben. Die Stufen zeigen eine grobe Einordnung der selbst bezahlten Kosten.'
+            ],
+            insuranceOptions: topic[0].insuranceOptions,
+            optionsIntro: 'Die Kostenangaben unterscheiden folgende Antworten:',
+            closing: unit
+              ? 'Vergleiche nur passende Einheiten: Eine Packung entspricht nicht unbedingt einer Anwendung. Berücksichtige zusätzlich die Gesamtkosten.'
+              : 'Behandlungsdauer und Anwendungszahl beeinflussen die Gesamtkosten. Die Angaben sind keine Preisangebote oder Zusagen einer Kostenübernahme.'
+          };
+        }
+        const instructions = review ? topic[0] : readingTopics[card.dataset.question || 'symptoms'];
         const title = card.querySelector('h3').firstChild.textContent.trim();
         const disclosure = make('details');
         disclosure.append(make('summary', title));
-        if (review) {
+        if (!review) {
+          const countLabel = make('span', '', 'therapy-guide-answer-count');
+          countLabel.dataset.guideAnswerCount = '';
+          disclosure.querySelector('summary').append(document.createTextNode(' '), countLabel);
+        }
+        if (instructions) {
           const list = make('ul', '', 'therapy-guide-options');
           if (card.dataset.question === 'access') list.classList.add('therapy-guide-access-options');
-          topic[0].options.forEach(option => {
+          instructions.options.forEach(option => {
             const item = make('li');
             const separator = option.indexOf(': ');
             const label = separator >= 0 ? option.slice(0, separator)
@@ -491,15 +624,16 @@
             item.append(heading, description);
             list.append(item);
           });
-          disclosure.append(make('p', topic[0].intro));
-          if (topic[0].insuranceOptions) {
+          disclosure.append(make('p', instructions.intro));
+          if (instructions.insuranceOptions) {
             const insuranceList = make('ul', '', 'therapy-guide-options');
             insuranceList.dataset.guideInsuranceList = '';
             const insuranceIntro = make('p');insuranceIntro.dataset.guideInsuranceIntro = '';
-            disclosure.append(insuranceIntro, insuranceList, make('p', topic[0].optionsIntro));
+            disclosure.append(insuranceIntro, insuranceList, make('p', instructions.optionsIntro));
             refreshInsuranceHelp(disclosure);
+            if (!review) insuranceIntro.textContent = 'Wähle das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Die Auswertung zeigt die Angaben für diesen Versicherungskontext.';
           }
-          disclosure.append(list, make('p', topic[0].closing));
+          disclosure.append(list, make('p', instructions.closing));
         } else disclosure.append(make('p', topic[1]));
         const example = review ? null : make('p');
         if (example) disclosure.append(example);
@@ -508,20 +642,20 @@
       });
       if(panel.id === 'alternativen' || (review && panel.id === 'anreise')) {
         const readingHelp = {
-          alternative: 'Hier findest du andere Behandlungen, die die Community für einen ähnlichen Einsatz als Alternative zur ausgewählten Therapie eingetragen hat. Die aktuelle Therapie steht links, die Alternativen rechts daneben; scrolle seitlich, um weitere zu sehen. Die Angaben unter dem Namen zeigen die Einordnung der Therapie. Klicke auf einen verlinkten Namen, um den jeweiligen Eintrag näher anzusehen. Eine Zuordnung bedeutet nicht, dass die Therapien gleich wirksam oder für jede Person austauschbar sind. Noch ungeprüfte Vorschläge sind gekennzeichnet.',
-          classification: 'Hier siehst du, wie die ausgewählte Therapie eingeordnet ist: von übergeordneten Gruppen über zugehörige Therapien oder Verfahren bis zu genaueren Einträgen. So kannst du verwandte Ansätze und konkrete Varianten entdecken. Wähle einen Eintrag in der mittleren Spalte aus, um die dazugehörigen Einträge rechts zu sehen. Eine gemeinsame Gruppe bedeutet noch nicht, dass die Therapien austauschbar sind.',
-          combination: 'Hier findest du gezielte Kombinationen und ihre Bestandteile. Die Behandlungen sollen im Zusammenspiel einen zusätzlichen oder anderen Effekt erzielen oder zusammen eine eigenständige Therapie bilden. Es geht also um mehr als die gleichzeitige Anwendung. Eine Kombination ist keine einzelne Ersatztherapie; die Zuordnung allein sagt noch nichts darüber aus, wie wirksam sie ist.'
+          alternative: 'Hier sammelt die Community frei vorgeschlagene Therapiealternativen. Die Einträge beruhen auf diesen Vorschlägen; ein fachlicher Zusammenhang wird damit nicht vorausgesetzt. Scrolle seitlich und öffne die Namen für Details.',
+          classification: 'Die Community ordnet Therapien übergeordneten Gruppen zu und ergänzt konkrete Verfahren. So wird deutlich, welche unterschiedlichen Ansätze unter einem Oberbegriff stehen können. Wähle einen Eintrag in der Mitte, um die zugehörigen Details rechts zu sehen. Eine gemeinsame Gruppe bedeutet keine Austauschbarkeit.',
+          combination: 'Hier sammelt die Community Kombinationen aus Therapien oder Wirkstoffen, deren Zusammenspiel einen zusätzlichen oder anderen Effekt erzielen soll. Du siehst, welche Bestandteile jeweils zusammengehören und welche Kombinationen die Community vorschlägt.'
         };
         const prompts = panel.id === 'anreise' ? [
-          ['provider', '.nd-provider-map', 'Behandler:innen und Erfahrungen', 'Hier erfassen wir, wo Betroffene Hilfe erhalten und die ausgewählte Therapie in Anspruch nehmen können. Wähle einen Ort aus, um auf der Karte Behandler:innen in der Nähe zu finden. Die Liste zeigt dir außerdem Alternativen, wenn du mit deiner bisherigen Behandler:in nicht zufrieden bist und die Therapie weiterführen möchtest. Deine Erfahrung mit der Behandlung kannst du im jeweiligen Eintrag teilen.']
+          ['provider', '.nd-provider-map', 'Behandler:innen und Erfahrungen', 'Hier erfasst die Community, wo man Hilfe erhalten und die ausgewählte Therapie in Anspruch nehmen kann. Wähle einen Ort aus, um auf der Karte Behandler:innen in der Nähe zu finden. Die Liste zeigt dir außerdem Alternativen, wenn du mit deiner bisherigen Behandler:in nicht zufrieden bist und die Therapie weiterführen möchtest. Deine Erfahrung mit der Behandlung kannst du im jeweiligen Eintrag teilen.']
         ] : [
-          ['alternative', '.ux-alternative-section', 'Alternative Therapien', 'Hier tragen wir das Community-Wissen zu Therapiealternativen zusammen. Ergänze frei, was du für eine Alternative hältst – aus eigener Erfahrung, von anderen Betroffenen oder vom Hörensagen. Eigene Behandlungserfahrung ist nicht nötig. Genauso wichtig: Bestätige bestehende Einträge, die du ebenfalls als Alternative ansiehst.'],
-          ['classification', '[data-relationship-stages]', 'Gruppen und genauere Verfahren', 'Hilf mit, diesen Eintrag im Therapiespektrum einzuordnen und zu konkretisieren. Ergänze fehlende Zuordnungen oder bestätige bestehende Zu- und Einordnungen.'],
-          ['combination', '[data-combination-section]', 'Therapiekombinationen', 'Welche Behandlungen ergeben zusammen mehr als ihre einzelnen Bestandteile? Gesucht sind gezielte Kombinationen, die einen zusätzlichen oder anderen Effekt erzielen sollen, den Genesungsprozess unterstützen oder zusammen eine eigenständige Therapie bilden. Entscheidend ist dieses Zusammenspiel, nicht allein die gleichzeitige Anwendung. Ergänze Kombinationen und ihre Bestandteile, die du kennst, oder bestätige bestehende Einträge. Eigene Behandlungserfahrung ist dafür nicht nötig.']
+          ['alternative', '.ux-alternative-section', 'Alternative Therapien', 'Hier trägt die Community ihr Wissen zu Therapiealternativen zusammen. Ergänze frei, was du für eine Alternative hältst – aus eigener Erfahrung, von anderen oder vom Hörensagen. Eigene Behandlungserfahrung ist nicht nötig.'],
+          ['classification', '[data-relationship-stages]', 'Therapieansatz und Umsetzung', 'Hilf mit, diesen Eintrag im Therapiespektrum einzuordnen und zu konkretisieren. Ergänze fehlende Zuordnungen oder bestätige bestehende Zu- und Einordnungen.'],
+          ['combination', '[data-combination-section]', 'Therapiekombinationen', 'Welche Behandlungen ergeben zusammen mehr als ihre einzelnen Bestandteile? Gesucht sind gezielte Kombinationen, die einen zusätzlichen oder anderen Effekt erzielen sollen, den Genesungsprozess unterstützen oder zusammen eine eigenständige Therapie bilden. Entscheidend ist dieses Zusammenspiel, nicht allein die gleichzeitige Anwendung. Eigene Behandlungserfahrung ist dafür nicht nötig.']
         ];
         if(panel.id === 'alternativen') body[0].textContent = review
           ? 'Prüfe die vorhandenen Alternativen, Einordnungen und Kombinationen. Bestätige passende Einträge oder ergänze fehlende über die Schaltflächen im jeweiligen Bereich. Eigene Behandlungserfahrung ist dafür nicht nötig.'
-          : 'Du suchst nach Therapiealternativen? Hier findest du mögliche Alternativen, verwandte und genauer beschriebene Verfahren sowie gezielte Therapiekombinationen. Öffne die Hinweise, um zu erfahren, wie du die einzelnen Bereiche lesen kannst.';
+          : 'Du bist unsicher, ob diese Therapie zu dir passt, oder suchst nach etwas, das dir mehr hilft? Hier trägt die Community Alternativen und konkrete Varianten zusammen. So kannst du entdecken, wie die Behandlung aussehen könnte und welche weiteren Möglichkeiten du hast.';
         if(panel.id === 'anreise') body[0].textContent = 'Suche in der Liste nach deiner Behandler:in. Fehlt er oder sie, kannst du den Eintrag unter „Behandler:innen hinzufügen“ ergänzen.';
         prompts.forEach(([key, selector, title, text]) => {
           const target = panel.querySelector(selector);
@@ -529,48 +663,152 @@
           target.dataset.guideContribution = key;
           const disclosure = make('details');
           if(key === 'classification') {
+            disclosure.classList.add('therapy-guide-classification');
             title = target.querySelector('h3')?.firstChild?.textContent.trim() || title;
           }
           disclosure.append(make('summary', title), make('p', !review && readingHelp[key] ? readingHelp[key] : text));
           if(key === 'classification') {
-            const explanations = {
-              'Zugeordnete Gruppen': 'In welche übergeordneten Gruppen gehört der Eintrag?',
-              'Therapie / Verfahren': 'Welche konkreten Therapien oder Verfahren gehören dazu?',
-              'Detailliertere Verfahren': 'Welche genaueren Verfahren konkretisieren die Therapie?',
-              'Medikamentengruppe': 'Zu welchen Medikamentengruppen gehört der Eintrag?',
-              'Wirkstoffe': 'Welche Wirkstoffe sind zugeordnet?',
-              'Handelsnamen': 'Unter welchen Handelsnamen werden die Wirkstoffe angeboten?',
-              'Übergeordnete Substanz': 'Welcher übergeordneten Substanz ist der Eintrag zugeordnet?',
-              'Anwendungsform': 'In welcher Form wird die Substanz angewendet?',
-              'Weitere Anwendungsformen': 'Welche weiteren Anwendungsformen gehören dazu?',
-              'Stoffvariante': 'Welche Variante der übergeordneten Substanz ist gemeint?',
-              'Varianten und Anwendungsformen': 'Welche Stoffvarianten oder Anwendungsformen konkretisieren den Eintrag?'
+            const current = target.querySelector('.ux-stage-node[aria-current="page"]');
+            const currentColumn = current?.closest('.ux-stage-column');
+            const level = currentColumn?.dataset.stage;
+            const domain = target.dataset.relationshipDomain;
+            const medication = domain === 'medication';
+            const substance = domain === 'substance';
+            const currentRole = current?.querySelector('[data-stage-classification]')?.dataset.classificationCurrent;
+            const groupPage = level === '0' && !!currentRole;
+            disclosure.querySelector('p').textContent = medication
+              ? 'Hier ordnet die Community Arzneimittel ein: Zu welchen Medikamentengruppen gehört ein Wirkstoff, und welche Handelsnamen gibt es dazu?'
+              : substance
+                ? 'Hier ordnet die Community Therapien einer von drei Ebenen zu, die vom Groben zum Feinen führen. Du hilfst also, die oben genannte Therapie als Gruppe, als Wirkstoff / Substanz oder als Stoffvariante / Darreichung einzuordnen.'
+                : 'Hier ordnet die Community Therapien und Verfahren im Therapiespektrum ein: Zu welchen übergeordneten Gruppen gehört die Therapie, und welche konkreten Anwendungen gibt es dazu?';
+            if (review) disclosure.append(make('p', 'Mit Zustimmen (✓) bestätigst du die Einordnung eines Eintrags oder seine Zuordnung zu einem anderen Eintrag. Mit Widersprechen (×) kannst du widersprechen. Wenn du die Einordnung als Gruppe, Wirkstoff oder Anwendungsform für unpassend hältst, kannst du dabei eine andere Einordnung vorschlagen.'));
+            const actionsHelp = {
+              belongs_to_group: medication ? 'Du kannst eine weitere Medikamentengruppe zuordnen.' : 'Du kannst eine passende übergeordnete Gruppe zuordnen, die verwandte Ansätze unter einem gemeinsamen Oberbegriff zusammenfasst.',
+              group_contains: medication ? 'Außerdem kannst du weitere Wirkstoffe hinzufügen, die deiner Meinung nach fehlen.' : substance ? 'Du kannst weitere zugehörige Einträge hinzufügen, die deiner Meinung nach fehlen.' : 'Außerdem kannst du weitere Verfahren hinzufügen, die deiner Meinung nach fehlen.',
+              has_detail: 'Du kannst ein genaueres Verfahren ergänzen, das eine konkretere Ausgestaltung des geöffneten Eintrags beschreibt.',
+              detail_of: 'Du kannst das übergeordnete Verfahren zuordnen.',
+              has_trade: 'Hierzu gehören die Produkt- oder Markennamen, unter denen dieser Wirkstoff angeboten wird. Kennst du einen solchen Handelsnamen, der noch fehlt, kannst du ihn hier als zugehörigen Eintrag hinzufügen.',
+              trade_of: 'Du kannst diesem Handelsnamen einen weiteren zugehörigen Wirkstoff zuordnen.',
+              has_form: 'Hier wird unterschieden, auf welchem Weg die Substanz angewendet wird, etwa oral oder als Infusion. Fehlt ein Anwendungsweg, kannst du die Substanz mit dieser Anwendungsform als eigenen Eintrag ergänzen.',
+              form_of: 'Du kannst die zugehörige übergeordnete Substanz zuordnen.',
+              has_variant: 'Hierzu gehören andere chemische Formen der Substanz sowie Extrakte oder Präparate, die als Quelle dieses Stoffes dienen. Kennst du eine solche Variante, kannst du sie als zugehörigen Eintrag ergänzen. Den Anwendungsweg erfasst du getrennt unter Anwendungsformen.',
+              variant_of: 'Du kannst die übergeordnete Substanz zuordnen.'
             };
+            const roleLabels = {therapy_group:'übergeordnete Gruppe', therapy:'Verfahren', detailed_method:'Anwendung', group:'Medikamentengruppe', ingredient:'Wirkstoff / Substanz', brand:'Handelsname', substance:'Wirkstoff / Substanz', substance_variant:'Stoffvariante', application_form:'Anwendungsform', combination:'Wirkstoff / Substanz (Kombination)'};
             const list = make('ul', '', 'therapy-guide-options');
-            target.querySelectorAll('.ux-stage-column > h4').forEach(column => {
-              const label = column.textContent.trim();
-              const item = make('li');
-              item.append(make('strong', label + ':'), make('span', explanations[label] || 'Welche zugehörigen Einträge kennst du?'));
-              list.append(item);
+            target.querySelectorAll('.ux-stage-column').forEach(column => {
+              const label = column.querySelector('h4').textContent.trim();
+              const controls = [...column.querySelectorAll('[data-treatment-relation-add]')].filter(control => !control.closest('[hidden]'));
+              const kinds = [...new Set(controls.map(control => control.dataset.kind))];
+              const nodes = [...column.querySelectorAll('.ux-stage-node')].filter(node => !node.closest('[hidden]'));
+              const hosts = nodes.flatMap(node => [...node.querySelectorAll('[data-treatment-relation-feedback]')]);
+              const hasVotes = hosts.length > 0;
+              const isCurrentColumn = column === currentColumn;
+              if (!kinds.length && !nodes.length) return;
+              const parts = [];
+              if (isCurrentColumn && currentRole) {
+                const entry = 'Der ausgewählte Eintrag';
+                parts.push(entry + ' ist bisher als ' + roleLabels[currentRole] + ' einsortiert.');
+                if (!review) parts.push('Die Zahlen bei Zustimmen (✓) und Widersprechen (×) zeigen, wie die Community diese Einordnung einschätzt.');
+              } else if (isCurrentColumn) {
+                parts.push('Hier steht der geöffnete Eintrag: ' + currentColumn.querySelector('h4').textContent.trim() + '.');
+                parts.push('Die Verbindungen zu diesem Eintrag findest du in den anderen Spalten.');
+              }
+              if (hasVotes) {
+                if (groupPage && column.dataset.stage === '1') {
+                  parts.push(medication ? 'Dieser Medikamentengruppe sind bereits Wirkstoffe zugeordnet.' : 'Dieser Gruppe sind bereits Verfahren zugeordnet.');
+                } else {
+                  const relationshipText = {
+                    Medikamentengruppe: 'Der geöffnete Wirkstoff ist den angezeigten Medikamentengruppen zugeordnet.',
+                    'Zugeordnete Gruppen': 'Der geöffnete Eintrag ist den angezeigten übergeordneten Gruppen zugeordnet.',
+                    'Übergeordnete Substanz': 'Der geöffnete Eintrag ist der angezeigten übergeordneten Substanz zugeordnet.',
+                    Wirkstoffe: 'Dem geöffneten Handelsnamen sind die angezeigten Wirkstoffe zugeordnet.',
+                    Handelsnamen: 'Dem geöffneten Wirkstoff sind die angezeigten Handelsnamen zugeordnet.',
+                    'Stoffvarianten und Darreichung': 'Unter „Stoffvarianten und Darreichung“ findest du die zugehörigen Handelsnamen, Anwendungsformen und Stoffvarianten.',
+                    'Anwendung': 'Dem geöffneten Verfahren sind die angezeigten Anwendungen zugeordnet.'
+                  };
+                  parts.push(relationshipText[label] || 'Die angezeigten Einträge sind dem geöffneten Eintrag zugeordnet.');
+                }
+                if (!review) parts.push('Die Zahlen bei Zustimmen (✓) und Widersprechen (×) zeigen, wie viele Personen die jeweilige Zuordnung bestätigen oder ihr widersprechen.');
+              }
+              if (!nodes.length) parts.push(column.dataset.stage === '0' ? 'Bisher ist keine übergeordnete Zuordnung hinterlegt.' : 'Bisher sind hier keine zugehörigen Einträge hinterlegt.');
+              if (review) parts.push(...kinds.map(kind => actionsHelp[kind] || 'Du kannst eine passende Zuordnung über die angebotene Schaltfläche ergänzen.'));
+              if (nodes.length && !hasVotes && !isCurrentColumn && !kinds.length) {
+                const forms = currentColumn?.querySelector('h4')?.textContent.trim() === 'Anwendungsform';
+                parts.push(forms && column.dataset.stage === '2'
+                  ? 'Diese Einträge kannst du von hier aus nicht bearbeiten. Öffne die übergeordnete Substanz in der linken Spalte, um dort deine Erfahrungen zu teilen.'
+                  : 'Diese Einträge kannst du von hier aus nicht bearbeiten. Öffne den passenden übergeordneten Eintrag in der mittleren Spalte, um dort deine Erfahrungen zu teilen.');
+              }
+              const row = make('li');
+              const topic = make('details', '', 'therapy-guide-classification-topic');
+              topic.append(make('summary', label));
+              const item = make('div', '', 'therapy-guide-classification-content');
+              if (substance) {
+                const levelHelp = {
+                  '0': 'Gruppen fassen verwandte Therapien, Wirkstoffe oder Substanzen unter einem gemeinsamen Oberbegriff zusammen. Sie geben eine grobe Orientierung, zu welcher Kategorie ein Ansatz gehört. Die Einträge einer Gruppe müssen deshalb nicht gleich wirken oder austauschbar sein.',
+                  '1': 'Diese Ebene erfasst einzelne Wirkstoffe / Substanzen unabhängig von einem bestimmten Produkt oder Anwendungsweg.'
+                };
+                const explanation = /Gruppen|Medikamentengruppe/.test(label)
+                  ? levelHelp['0']
+                  : /^(Wirkstoffe und Substanzen|Übergeordnete Substanz|Substanz)$/.test(label) ? levelHelp['1'] : null;
+                if (explanation && !(/Gruppen|Medikamentengruppe/.test(label) && !nodes.length && review)) parts.unshift(explanation);
+              }
+              if (substance && review && /Gruppen|Medikamentengruppe/.test(label) && !nodes.length) {
+                parts.splice(0, parts.length,
+                  'Gruppen bündeln verwandte Wirkstoffe / Substanzen unter einem gemeinsamen Oberbegriff.',
+                  'Bisher ist keine Gruppe zugeordnet – du kannst eine passende übergeordnete Gruppe ergänzen.');
+              }
+              if (review && label === 'Stoffvarianten und Darreichung') {
+                const actionKinds = ['has_trade', 'has_form', 'has_variant'].filter(kind => kinds.includes(kind));
+                item.append(make('span', 'Diese Ebene erfasst konkrete Ausgestaltungen eines Wirkstoffs / einer Substanz. Du kannst zugehörige Einträge in folgenden Bereichen ergänzen:'));
+                const options = make('ul', '', 'therapy-guide-classification-actions');
+                const actionLabels = {has_trade: 'Handelsnamen', has_form: 'Anwendungsformen', has_variant: 'Stoffvarianten und Darreichung'};
+                actionKinds.forEach(kind => {
+                  const option = make('li');
+                  option.append(make('strong', actionLabels[kind] + ':'), document.createTextNode(' ' + actionsHelp[kind]));
+                  options.append(option);
+                });
+                if (options.children.length) item.append(options);
+              } else {
+                item.append(make('span', parts.join(' ')));
+              }
+              topic.append(item);
+              row.append(topic);
+              list.append(row);
             });
             disclosure.append(list);
           }
-          const instructions = {
-            alternative: 'So machst du mit: Scrolle die Alternativen ganz nach rechts und klicke auf das Plus-Feld, um eine weitere Therapie hinzuzufügen. Mit ✓ bestätigst du einen Eintrag als Alternative, mit × widersprichst du dieser Zuordnung.',
-            classification: 'So machst du mit: Klicke auf die Plus-Felder in der jeweiligen Spalte, um eine Gruppe zuzuordnen oder weitere Einträge zu ergänzen. Wähle einen Eintrag in der mittleren Spalte aus, um die dazugehörigen genaueren Einträge rechts zu sehen und zu ergänzen. Mit ✓ bestätigst du eine Zuordnung, mit × widersprichst du ihr.',
-            combination: 'So machst du mit: Über die Schaltflächen unter den Kombinationen kannst du diese Therapie einer bestehenden Kombination zuordnen oder eine neue Kombination erstellen. Weitere Bestandteile ergänzt du über das Plus-Feld bei der jeweiligen Kombination. Mit ✓ bestätigst du die Kombination oder die Zuordnung eines Bestandteils, mit × widersprichst du der jeweiligen Aussage.'
-          };
-          if(instructions[key])disclosure.append(make('p', instructions[key]));
+          if (panel.id === 'alternativen' && review && key !== 'classification') {
+            const explanations = {
+              alternative: review
+                ? 'Mit Zustimmen (✓) bestätigst du, dass du den vorgeschlagenen Eintrag als passende Alternative zur hier geöffneten Therapie ansiehst. Mit Widersprechen (×) widersprichst du diesem Vorschlag. Du bewertest damit weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.'
+                : 'Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie viele Personen den Eintrag als passende Alternative ansehen oder diesem Vorschlag widersprechen. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien. Du kannst die Alternativen nach Zustimmung oder Widerspruch sortieren.',
+              classification: review
+                ? 'Mit Zustimmen (✓) bestätigst du die angezeigte Zuordnung zwischen zwei Einträgen, mit Widersprechen (×) widersprichst du ihr. Es geht zum Beispiel darum, ob eine Therapie zu einer übergeordneten Gruppe gehört oder ein Verfahren eine genauere Ausgestaltung ist. Du bewertest die Einordnung, nicht die Wirksamkeit.'
+                : 'Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie viele Personen die jeweilige Zuordnung zwischen zwei Einträgen für passend oder unpassend halten – etwa die Zugehörigkeit zu einer Gruppe oder die Einordnung als genaueres Verfahren. Sie bewerten die Einordnung, nicht die Wirksamkeit.',
+              combination: review
+                ? 'Mit Zustimmen (✓) bestätigst du, dass der angezeigte Bestandteil zur vorgeschlagenen Therapiekombination gehört. Mit Widersprechen (×) widersprichst du dieser Zuordnung. Deine Rückmeldung bezieht sich auf die Zusammensetzung der Kombination, nicht auf ihre Wirksamkeit.'
+                : 'Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie viele Personen der Zugehörigkeit des angezeigten Bestandteils zur vorgeschlagenen Therapiekombination zustimmen oder widersprechen. Sie bewerten die Zusammensetzung der Kombination, nicht ihre Wirksamkeit.'
+            };
+            const section = make('section');
+            const votingHeading = make('h4', 'Zustimmung und Widerspruch');
+            votingHeading.style.marginInlineStart = '.9rem';
+            section.append(votingHeading, make('p', explanations[key]));
+            disclosure.append(section);
+          }
           body.push(disclosure);
           entries.push({card:target, disclosure});
         });
+        if(panel.id === 'anreise' && review) {
+          body.push(feedbackNote('Mit Zustimmen (✓) stimmst du der Angabe zu, dass die jeweilige Behandler:in diese Therapie anbietet. Mit Widersprechen (×) widersprichst du dieser Angabe. Deine Rückmeldung bezieht sich auf das Therapieangebot, nicht auf die Qualität oder Wirksamkeit der Behandlung.'));
+        }
         if(panel.id === 'alternativen' && !review) {
-          body.push(make('p', 'So liest du die Rückmeldungen: Die Zahlen neben ✓ und × zeigen, wie viele Personen eine Zuordnung bestätigen oder ihr widersprechen. Sie bewerten die Zuordnung, nicht die Wirksamkeit der Therapie. Wenn du Erfahrung oder Wissen dazu hast, bestätige passende Einträge mit ✓, widersprich mit × oder ergänze fehlende Alternativen, Zuordnungen und Kombinationen über die jeweiligen Plus-Felder und Schaltflächen.'));
+          body.push(feedbackNote('Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie die Community die jeweilige Zuordnung einschätzt, etwa als Therapiealternative. Sie helfen dir einzuordnen, wie gesichert diese Zuordnung ist. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.'));
           sharing = shareTherapy(true);
           body.push(sharing.block);
         }
       }
-      if(sharing?.toggle) body.push(sharing.toggle);
+      if(sharing && !body.includes(sharing.block)) body.push(sharing.block);
       const next = nextView();
       const nextLabel = next && 'Weiter zu „' + viewName(next) + '“ →';
       const finish = () => {
@@ -580,8 +818,121 @@
         thanks.setAttribute('aria-label', 'Danke, dass du dabei bist');
         const thanksActions = make('div', '', 'experience-guide-actions');
         thanksActions.append(button('Hier bleiben', () => thanks.close(), true), button('Anderes Anliegen wählen', () => {thanks.close();showOrientation();}));
-        illustrated(thanks, 'Für heute geschafft', make('h2', 'Danke, dass du dabei bist!'),
-          make('p', 'Schön, dass du dir Zeit genommen hast, dich hier umzusehen und dein Wissen zu teilen. So wächst unser gemeinsames Wissen – und andere Betroffene finden leichter ihren Weg.'),
+        if (mode === 'explore') {
+          thanks.classList.add('therapy-finish-dialog');
+          const polls = make('div');
+          const invitation = shareTherapy();
+          const share = invitation.block.querySelector('button');
+          const shareIcon = share.querySelector('svg');
+          invitation.message.remove();
+          invitation.block.querySelector('.experience-guide-actions').remove();
+          invitation.block.classList.add('therapy-finish-share');
+          const offerSharing = () => {
+            if (document.querySelector('.therapy-share-invitation')) return;
+            const dialog = make('dialog', '', 'experience-guide therapy-finish-dialog therapy-share-invitation');
+            dialog.setAttribute('aria-label', 'Erfahrungen weitergeben');
+            const copy = make('div', '', 'experience-guide-copy');
+            const actions = make('div', '', 'experience-guide-actions');
+            actions.append(button('Teilen', () => share.click(), true), button('Nein, danke', () => dialog.close()));
+            copy.append(make('h2', 'Kennst du jemanden, der diese Therapie schon ausprobiert hat?'),
+              make('p', 'Teile die Seite zu dieser Therapie mit dieser Person und lade sie ein, ihre Erfahrung beizutragen.'), actions, invitation.block);
+            dialog.append(copy);
+            document.body.append(dialog);
+            dialog.addEventListener('close', () => dialog.remove(), {once: true});
+            dialog.showModal();
+          };
+          const treatmentId = Number(content.closest('[data-treatment-id]').dataset.treatmentId);
+          for (const [question, title] of [['helpful', 'Hat dir der Einblick geholfen?'], ['more', 'Wünschst du dir mehr Community-Angaben?']]) {
+            const poll = make('section', '', 'therapy-finish-poll');
+            poll.setAttribute('aria-label', title);
+            const options = make('div', '', 'experience-guide-actions');
+            const status = make('p', '', 'therapy-finish-poll-status');
+            status.setAttribute('role', 'status');
+            const controls = {};
+            let busy = false;
+            const request = async answer => {
+              if (busy) return;
+              busy = true;
+              Object.values(controls).forEach(control => control.disabled = true);
+              status.textContent = '';
+              try {
+                const endpoint = 'api/therapy_information_poll.php';
+                const writing = answer !== undefined;
+                const response = await fetch(writing ? endpoint : endpoint + '?treatment_id=' + treatmentId + '&question=' + question, writing ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({treatment_id: treatmentId, question, answer})} : {});
+                const result = await response.json();
+                if (!response.ok || !result.ok) throw new Error(result.error || 'Bitte später erneut versuchen.');
+                Object.entries(controls).forEach(([key, control]) => {
+                  control.setAttribute('aria-pressed', String(result.own === key));
+                  control.querySelector('.therapy-finish-count').textContent = '(' + result.counts[key] + ')';
+                });
+                status.textContent = '';
+              } catch (error) { status.textContent = error.message; }
+              finally { busy = false; Object.values(controls).forEach(control => control.disabled = false); }
+            };
+            const labels = question === 'more' ? [['yes', 'Ja, gerne'], ['no', 'Ist ausreichend']] : [['yes', 'Ja'], ['no', 'Nein']];
+            for (const [key, label] of labels) {
+              controls[key] = button(label, () => {
+                if (busy) return;
+                const selected = controls[key].getAttribute('aria-pressed') === 'true';
+                if (question === 'more' && key === 'yes' && !selected) offerSharing();
+                request(selected ? null : key);
+              });
+              if (question === 'more' && key === 'yes') controls[key].prepend(shareIcon.cloneNode(true));
+              controls[key].append(make('span', '', 'therapy-finish-count'));
+              controls[key].setAttribute('aria-pressed', 'false');
+              options.append(controls[key]);
+            }
+            if (question === 'helpful') options.append(button('Feedback', () => {
+              document.querySelector('.lcn-feedback-float')?.click();
+            }));
+            const heading = make('h3', title + ' ');
+            const info = make('span', '', 'therapy-finish-info');
+            const setInfoOpen = open => {
+              if (open) thanks.querySelectorAll('.therapy-finish-info > button').forEach(other => {
+                if (other !== toggle) {
+                  other.setAttribute('aria-expanded', 'false');
+                  document.getElementById(other.getAttribute('aria-controls'))?.setAttribute('hidden', '');
+                }
+              });
+              toggle.setAttribute('aria-expanded', String(open));
+              help.hidden = !open;
+              if (open) {
+                const iconRect = toggle.getBoundingClientRect();
+                const pollRect = poll.getBoundingClientRect();
+                help.style.setProperty('--info-left', (iconRect.right - pollRect.left + 8) + 'px');
+                help.style.setProperty('--info-top', (iconRect.top - pollRect.top) + 'px');
+              }
+            };
+            const toggle = button('ⓘ', () => setInfoOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+            toggle.setAttribute('aria-label', 'Information zur Frage');
+            toggle.setAttribute('aria-expanded', 'false');
+            const help = make('span', question === 'helpful'
+              ? 'Konntest du die Therapie durch diesen Einblick besser einordnen? Die Zahlen zählen Stimmen. Deine Auswahl lässt sich ändern.'
+              : 'Wünschst du dir weitere Erfahrungen? Nach „Ja, gerne“ bieten wir dir an, die Seite zu dieser Therapie zu teilen. Das ist freiwillig. Die Zahlen zählen Stimmen. Deine Auswahl lässt sich ändern.', 'therapy-finish-tooltip lcn-shared-tooltip');
+            help.id = 'therapy-finish-help-' + question;
+            help.setAttribute('role', 'tooltip');
+            help.hidden = true;
+            toggle.setAttribute('aria-controls', help.id);
+            toggle.setAttribute('aria-describedby', help.id);
+            info.append(toggle);
+            info.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') setInfoOpen(true); });
+            info.addEventListener('pointerleave', event => { if (event.pointerType !== 'touch' && !help.contains(event.relatedTarget)) setInfoOpen(false); });
+            help.addEventListener('pointerleave', event => { if (event.pointerType !== 'touch' && !info.contains(event.relatedTarget)) setInfoOpen(false); });
+            poll.addEventListener('pointerleave', event => { if (event.pointerType !== 'touch') setInfoOpen(false); });
+            toggle.addEventListener('focus', () => { if (toggle.matches(':focus-visible')) setInfoOpen(true); });
+            toggle.addEventListener('blur', () => setInfoOpen(false));
+            thanks.addEventListener('pointerdown', event => { if (!info.contains(event.target) && !help.contains(event.target)) setInfoOpen(false); });
+            thanks.addEventListener('keydown', event => {
+              if (event.key === 'Escape' && !help.hidden) { event.preventDefault(); setInfoOpen(false); }
+            });
+            heading.append(info);
+            poll.append(heading, help, options, status);
+            polls.append(poll);
+            request();
+          }
+          illustrated(thanks, 'Zum Abschluss', make('h2', 'Dein kurzer Eindruck'), polls, thanksActions);
+        } else illustrated(thanks, 'Für heute geschafft', make('h2', 'Danke, dass du dabei bist!'),
+          make('p', 'Schön, dass du dir Zeit genommen hast, dich hier umzusehen und dein Wissen zu teilen. So wächst unser gemeinsames Wissen – und andere finden leichter ihren Weg.'),
           make('p', 'Du musst nicht alles ausfüllen. Für heute darf es genug sein. Du kannst jederzeit zurückkommen, etwas ergänzen oder einfach weiterlesen.'), thanksActions);
         document.body.append(thanks);
         thanks.addEventListener('close', () => thanks.remove(), {once:true});
@@ -595,22 +946,35 @@
       const previous = views[views.findIndex(link => link.dataset.view === panel.id) - 1];
       const backButton = previous ? button('← Zurück zu „' + viewName(previous) + '“', () => openView(previous)) : null;
       backButton?.classList.add('therapy-guide-back');
-      const changeIntent = button('Ich bin hier fertig', finish);
+      const changeIntent = button(next ? 'Ich bin hier fertig' : 'Ich bin fertig', finish, !next);
       changeIntent.classList.add('therapy-guide-change-intent');
+      if (!next) changeIntent.classList.add('therapy-guide-finish');
       if (review && entries.length) {
         completion = make('p', '', 'therapy-guide-progress');
         completion.setAttribute('role', 'status');
         body.push(completion);
       }
       const secondaryActions = make('div', '', 'therapy-guide-secondary-actions');
-      secondaryActions.append(changeIntent, close);
+      if (next) secondaryActions.append(changeIntent);
+      secondaryActions.append(close);
       actions.classList.add('therapy-guide-navigation');
       const navigationPair = make('div', '', 'therapy-guide-navigation-pair');
       if(backButton)navigationPair.append(backButton);
-      if(backButton && nextButton){const divider=make('span', '', 'therapy-guide-navigation-divider');divider.setAttribute('aria-hidden','true');navigationPair.append(divider);}
+      if(backButton){const divider=make('span', '', 'therapy-guide-navigation-divider');divider.setAttribute('aria-hidden','true');navigationPair.append(divider);}
       if(nextButton)navigationPair.append(nextButton);
+      if(!next)navigationPair.append(changeIntent);
       actions.append(navigationPair, secondaryActions);
+      if (!review && !['anreise', 'alternativen'].includes(panel.id)) {
+        const orientationClosing = panel.id === 'zugang'
+          ? 'Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest'
+          : 'Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest – auch wenn die Wirkung von Person zu Person unterschiedlich ist.';
+        if (!body[0].textContent.includes(orientationClosing)) body[0].append(document.createTextNode(' ' + orientationClosing));
+      }
       illustrated(guide, review ? (panel.id === 'alternativen' ? 'Community-Wissen' : 'Deine Erfahrung zählt') : 'Erfahrungen verstehen', heading, ...body, actions);
+      if (!review && sharing) {
+        sharing.block.classList.add('therapy-guide-sharing-first');
+        guide.querySelector('.experience-guide-copy').prepend(sharing.block);
+      }
       panel.prepend(guide);
       refreshTopics();
     }
@@ -653,12 +1017,16 @@
         mode = value;
         minimized = false;
         save();
-        const target = value === 'explore'
+        // Reading and contributing change the mode of the current section.
+        // Only the initial overview and intents with a specific destination navigate.
+        const keepCurrentView = ['review', 'explore'].includes(value)
+          && panel && !['ueberblick', 'dashboard'].includes(panel.id);
+        const target = keepCurrentView ? null : value === 'explore'
           ? views.find(link => !['ueberblick', 'anreise', 'alternativen'].includes(link.dataset.view) && hasInformation(link))
             || views.find(link => link.dataset.view === 'wirkung')
           : views.find(link => link.dataset.view === view);
         paint(true);
-        openView(target);
+        if (target) openView(target);
         if (value === 'explore' && experienceCount() === 0) showEmptyState();
       }, true);
       copy.append(description, follow);
@@ -674,6 +1042,7 @@
       let expanded = false;
       let scrolling = false;
       let settleTimer;
+      let openAfterScroll = null;
       let suppressClick = false;
 
       function paintWheel() {
@@ -741,10 +1110,16 @@
         position.textContent = (current + 1) + ' / ' + choices.length;
         previous.disabled = false;
         next.disabled = false;
+        // Start revealing as the clicked option enters the centre, while it is still rolling.
+        if (openAfterScroll !== null && current === openAfterScroll) {
+          openAfterScroll = null;
+          setExpanded(true);
+        }
         paintWheel();
       }
 
-      function go(index, visiblePosition = false) {
+      function go(index, visiblePosition = false, open = false) {
+        openAfterScroll = open ? wrapIndex(index) : null;
         setExpanded(false);
         const row = track.scrollTop / rowHeight;
         // Use the same wrapped distance as the visible labels, including during rotation.
@@ -753,6 +1128,8 @@
           : Math.round(row) + index - current;
         track.scrollTo({top: target * rowHeight,
           behavior: reducedMotion ? 'instant' : 'smooth'});
+        update();
+        settle();
       }
       choices.forEach((choice, index) => {
         const control = make('div', '', 'therapy-intent-title therapy-wheel-visual-option');
@@ -772,7 +1149,7 @@
         control.addEventListener('click', () => {
           if (suppressClick) return;
           if (index === current && !scrolling) setExpanded(!expanded);
-          else go(index, true);
+          else go(index, true, true);
         });
         rows.push(control);
         visualRows.push(control);
@@ -852,6 +1229,7 @@
       }).observe(reveal);
       viewport.addEventListener('wheel', event => {
         if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+        openAfterScroll = null;
         const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? viewport.clientHeight : 1;
         const delta = event.deltaY * factor;
         const maximum = (choices.length * 3 - 1) * rowHeight;
@@ -870,6 +1248,7 @@
         const distance = drag.y - event.clientY;
         if (!drag.moved && Math.abs(distance) < 6) return;
         drag.moved = true;
+        openAfterScroll = null;
         viewport.setPointerCapture(event.pointerId);
         if (expanded) setExpanded(false);
         event.preventDefault();
@@ -894,8 +1273,11 @@
     }
 
     function enableOrientation() {
+      if (!mode) {
+        showOrientation();
+        return;
+      }
       minimized = false;
-      if (!mode) mode = 'explore';
       save();
       paint(true);
     }
@@ -908,14 +1290,12 @@
       addChoices(actions, dialog);
       illustrated(dialog, 'Orientierung', make('h2', 'Was möchtest du tun?'),
         make('p', 'Blättere zu deinem Anliegen und öffne die Erklärung.'), actions,
-        button('Schließen', () => dialog.close()),
-        button(minimized ? 'Orientierung wieder einschalten' : 'Ich brauche keine Orientierung', () => {
-          if (minimized) {
-            dialog.close();
-            enableOrientation();
-          } else disableOrientation(dialog);
-        }));
+        button('Ich brauche keine Orientierung', () => disableOrientation(dialog)));
       document.body.append(dialog);
+      dialog.addEventListener('cancel', event => {
+        event.preventDefault();
+        disableOrientation(dialog);
+      });
       dialog.addEventListener('close', () => dialog.remove(), {once: true});
       dialog.showModal();
     }
@@ -931,34 +1311,6 @@
       dialog.addEventListener('close', () => dialog.remove(), {once: true});
       dialog.showModal();
     }
-
-    const orientation = button('Orientierung', showOrientation);
-    orientation.classList.add('therapy-orientation-fab');
-    orientation.setAttribute('aria-haspopup', 'dialog');
-    document.body.append(orientation);
-
-    let observedFeedback;
-    const feedbackSize = new ResizeObserver(syncFloatingButtons);
-    function syncFloatingButtons() {
-      const feedback = document.querySelector('.lcn-feedback-float');
-      if (!feedback) return;
-      if (observedFeedback !== feedback) {
-        observedFeedback = feedback;
-        feedbackSize.observe(feedback);
-        new MutationObserver(syncFloatingButtons).observe(feedback, {attributes: true, attributeFilter: ['style', 'class']});
-      }
-      const rect = feedback.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      orientation.style.width = rect.width + 'px';
-      orientation.style.height = rect.height + 'px';
-      orientation.style.right = (document.documentElement.clientWidth - rect.right) + 'px';
-      orientation.style.bottom = (innerHeight - rect.top + 12) + 'px';
-      orientation.style.font = getComputedStyle(feedback).font;
-    }
-    new MutationObserver(syncFloatingButtons).observe(document.body, {childList: true});
-    window.addEventListener('resize', syncFloatingButtons);
-    window.addEventListener('scroll', syncFloatingButtons, {passive: true});
-    syncFloatingButtons();
 
     document.addEventListener('lcn-guide-contributed', event => {
       const topic = event.detail?.topic;
@@ -976,8 +1328,12 @@
     restore();
     document.addEventListener('lcn-treatment-view-changed', () => paint());
     document.addEventListener('lcn-treatment-answers-rendered', () => {
-      if (mode === 'explore' && panel?.id !== 'ueberblick' && !minimized) paint(true);
-      else refreshTopics();
+      // Counts and visibility can change without replacing the reading guide.
+      // Replacing it during a drag invalidates the browser's selection endpoints.
+      content.querySelectorAll('[data-question], .ux-symptom-help').forEach(card => {
+        card.hidden = mode === 'explore' && cardCount(card) === 0;
+      });
+      refreshTopics();
     });
     window.addEventListener('pageshow', event => {
       if (event.persisted) {
@@ -989,7 +1345,7 @@
       mode = 'review';
       minimized = false;
       save();
-      openView(views.find(link => link.dataset.view === 'wirkung'));
+      openView(views.find(link => link.dataset.view === 'ueberblick'));
     }
     paint();
   }
@@ -1222,4 +1578,32 @@
     if (event.target.closest('.side-nav [data-view]')) queueMicrotask(paint);
   });
   mount();
+})();
+
+// Remember native disclosures, including guide panels mounted after page load.
+(() => {
+  const root = document.querySelector('.ux-detail[data-treatment-id]');
+  if (!root) return;
+  const storageKey = 'lcn_therapy_disclosures:' + root.dataset.treatmentId;
+  let saved = {};
+  try { saved = JSON.parse(sessionStorage.getItem(storageKey)) || {}; } catch {}
+  const initialized = new WeakSet();
+  function restore() {
+    root.querySelectorAll('details').forEach(details => {
+      if (initialized.has(details)) return;
+      initialized.add(details);
+      const section = details.closest('.view-panel, [data-view-panel], section[id], [id]');
+      const summary = details.querySelector(':scope > summary');
+      const title = summary?.cloneNode(true);
+      title?.querySelectorAll('[data-guide-answer-count]').forEach(node => node.remove());
+      const key = (section?.id || 'page') + ':' + (details.id || title?.textContent.trim());
+      if (typeof saved[key] === 'boolean') details.open = saved[key];
+      details.addEventListener('toggle', () => {
+        saved[key] = details.open;
+        try { sessionStorage.setItem(storageKey, JSON.stringify(saved)); } catch {}
+      });
+    });
+  }
+  restore();
+  new MutationObserver(restore).observe(root, {childList: true, subtree: true});
 })();

@@ -15,7 +15,7 @@
     try {
       const response=await fetch(payload?endpoint:endpoint+'?treatment_id='+encodeURIComponent(root.dataset.treatmentId),payload?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({treatment_id:Number(root.dataset.treatmentId),...payload})}:{cache:'no-store'});
       const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Bewertungen konnten nicht geladen werden.');
-      draft=data.own_answers||{};serverCounts=data.counts||{};comparisonProfiles=data.comparison_profiles||[];symptomHelp=data.symptom_help||{symptoms:[],catalog:[]};loaded=true;renderAll();notify(payload?(payload.action==='clear'?'Deine Stimme wurde zurückgenommen.':'Deine Angabe wurde gespeichert.'):'',Boolean(payload));
+      draft=data.own_answers||{};serverCounts=data.counts||{};comparisonProfiles=data.comparison_profiles||[];symptomHelp=data.symptom_help||{symptoms:[],catalog:[]};loaded=true;renderAfterSelection();notify(payload?(payload.action==='clear'?'Deine Stimme wurde zurückgenommen.':'Deine Angabe wurde gespeichert.'):'',Boolean(payload));
       if (payload?.action === 'answer') window.dispatchEvent(new CustomEvent('lcn-experience-answer-saved', {detail: payload.question}));
       return true;
     }catch(error){notify(error.message+' Deine letzte bestätigte Auswahl bleibt unverändert.');return false;}
@@ -92,8 +92,8 @@
     pem:'Wie hoch ist das Crash-/PEM-Risiko bei dieser Therapie? Wähle die Stufe, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Angaben der Community zu einer Verschlechterung nach Belastung.',
     effect:'Wie hat sich dein Zustand durch die Therapie verändert? Wähle die Bewertung, die auf deine Erfahrung zutrifft. Die Verteilung zeigt subjektive Erfahrungen der Community und ist kein Wirksamkeitsnachweis.',
     gamechanger:'War die Therapie für dich ein Gamechanger, hat sie also deinen Genesungsprozess entscheidend vorangetrieben? Wähle die Antwort, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Antworten der Community.',
-    unit_cost:'Wie hoch ist dein eigener Kostenanteil pro Anwendung, Packung oder Therapieeinheit? Wähle eine grob passende Stufe.',
-    total_cost:'Wie hoch sind deine eigenen Gesamtkosten für diese Therapie bis zum jetzigen Zeitpunkt? Berücksichtige die bisherigen Anwendungen und Ausgaben zusammen. Je nach Dauer, Häufigkeit und Verlauf können sich die Kosten unterscheiden; eine grobe Schätzung genügt.',
+    unit_cost:'Wie hoch ist dein eigener Kostenanteil pro Anwendung, Packung oder Therapieeinheit? Wähle eine grob passende Stufe. GKV und PKV trennen die Kostenangaben nach Versicherung; die Beträge richten sich nach der gewählten Währung.',
+    total_cost:'Wie hoch sind deine eigenen Gesamtkosten für diese Therapie bis zum jetzigen Zeitpunkt? Berücksichtige die bisherigen Anwendungen und Ausgaben zusammen. Je nach Dauer, Häufigkeit und Verlauf können sich die Kosten unterscheiden; eine grobe Schätzung genügt. GKV und PKV trennen die Kostenangaben nach Versicherung; die Beträge richten sich nach der gewählten Währung.',
     setting:'Wo findet die Therapie statt? Wähle das Setting, das auf deine Erfahrung zutrifft.',
     access:'Wie erhältst du Zugang zur Therapie? Wähle den Zugang, der auf deine Erfahrung zutrifft.'
   };
@@ -132,7 +132,7 @@
     }
   });
   appendHelp(root.querySelector('.card:has(>.nd-provider-map)>h3'), 'Wo findest du Behandler:innen für diese Therapie? Wähle einen Ausgangsort aus und übernimm ihn mit Enter oder einem Suchvorschlag. Du kannst die Behandler:innen nach Ort und Radius filtern. Die Karte zeigt gespeicherte Hauptstandorte; Entfernungen sind Luftlinien. Vorläufige Zuordnungen sind gekennzeichnet.');
-  appendHelp(root.querySelector('#symptom-help-heading'), 'Bei welchen Symptomen hat dir die Therapie geholfen? Wähle die passenden Symptome aus oder ergänze eines über die Suche. Erneutes Anklicken deiner Auswahl nimmt sie zurück.');
+  appendHelp(root.querySelector('#symptom-help-heading'), 'Bei welchen Symptomen hat dir die Therapie geholfen? Klicke auf ein vorhandenes Symptom oder wähle ein weiteres über die Suche. Ein noch fehlendes Symptom kannst du zur Prüfung vorschlagen; dafür ist eine Abstimmung erst nach Freigabe möglich. Erneutes Anklicken deiner Auswahl nimmt sie zurück.');
   function currentCounts(){return Object.fromEntries(questions.map(card=>[key(card),countsFor(card).counts]));}
   function topPercentLabel(percent){
     if(percent==null)return null;
@@ -204,7 +204,7 @@
     const valid=ready&&result.dataCoverage>70&&result.score!=null&&values.length;
     const range=valid?comparisonRange(result.score,values):null;
     const average=valid?values.reduce((sum,value)=>sum+value,0)/values.length:null;
-    return '<section class="therapy-final-comparison therapy-precise-comparison"><h3>'+(valid?'Vergleich mit anderen Therapien':'Gesamtauswertung')+' '+helpMarkup('Gesamtauswertung','Wie schneidet diese Therapie im Vergleich zu anderen Therapien ab? Die Gesamtauswertung fasst Belastung, Zugang und Erfahrungen zusammen. Punkte und Rang zeigen die relative Einordnung; unter Weitere Infos findest du die Berechnungsgrundlage.')+'</h3><div class="therapy-precise-summary"><div><span>Gesamtauswertung</span><strong class="score-number">'+(result.coverage?wholePoints(result.earned):'–')+'<small> / '+wholePoints(result.coverage)+' Punkte</small></strong></div>'+(valid?'<dl><div><dt>Minimum</dt><dd>'+wholePoints(range.min)+'</dd></div><div><dt>Durchschnitt</dt><dd>'+wholePoints(average)+'</dd></div><div><dt>Maximum</dt><dd>'+wholePoints(range.max)+'</dd></div></dl>':'')+'</div>'+(valid?rankPreview(result.score,values):'<div class="score-track" role="img" aria-label="'+(result.coverage?wholePoints(result.earned)+' von '+wholePoints(result.coverage)+' auswertbaren Punkten':'Noch keine auswertbaren Punkte')+'"><span style="width:'+(result.score||0)+'%"></span></div><p class="field-note">Für einen Therapievergleich liegen noch nicht genügend Angaben vor.</p>')+'</section>';
+    return '<section class="therapy-final-comparison therapy-precise-comparison"><h3>'+(valid?'Vergleich mit anderen Therapien':'Gesamtauswertung')+' '+helpMarkup(valid?'Vergleich mit anderen Therapien':'Gesamtauswertung','Wie schneidet diese Therapie im Vergleich zu anderen Therapien ab? Die Gesamtauswertung fasst Belastung, Zugang und Erfahrungen zusammen. Die Punkte zeigen den erreichten Beitrag der auswertbaren Teilwerte. Ein Rang wird erst bei ausreichender Datengrundlage angezeigt; für den Vergleich wird der Wert auf 0 bis 100 umgerechnet. Unter Weitere Infos findest du die Berechnungsgrundlage.')+'</h3><div class="therapy-precise-summary"><div><span>Gesamtauswertung</span><strong class="score-number">'+(result.coverage?wholePoints(result.earned):'–')+'<small> / '+wholePoints(result.coverage)+' Punkte</small></strong></div>'+(valid?'<dl><div><dt>Minimum</dt><dd>'+wholePoints(range.min)+'</dd></div><div><dt>Durchschnitt</dt><dd>'+wholePoints(average)+'</dd></div><div><dt>Maximum</dt><dd>'+wholePoints(range.max)+'</dd></div></dl>':'')+'</div>'+(valid?rankPreview(result.score,values):'<div class="score-track" role="img" aria-label="'+(result.coverage?wholePoints(result.earned)+' von '+wholePoints(result.coverage)+' auswertbaren Punkten':'Noch keine auswertbaren Punkte')+'"><span style="width:'+(result.score||0)+'%"></span></div><p class="field-note">Für einen Therapievergleich liegen noch nicht genügend Angaben vor.</p>')+'</section>';
   }
 
   const comparisonOrientation='<p class="field-note therapy-orientation-note">Praktische Orientierung aus subjektiven Erfahrungen, kein Nachweis medizinischer Wirksamkeit oder Eignung.</p>';
@@ -440,6 +440,21 @@
     if(focused)list.querySelector('[data-symptom-id="'+focused+'"]')?.focus({preventScroll:true});
   }
   root.addEventListener('click',event=>{const button=event.target.closest('[data-symptom-id]');if(!button||busy||!loaded)return;const symptom=symptomHelp.symptoms.find(s=>s.id===Number(button.dataset.symptomId));if(!symptom)return;sync({action:symptom.selected?'clear':'answer',question:'symptom-help-'+symptom.id,value:'Ja'});});
+  // A background repaint must not remove the text the user is copying.
+  let selectionRenderPending = false;
+  function renderAfterSelection() {
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed && selection.rangeCount &&
+        selection.getRangeAt(0).intersectsNode(root)) {
+      selectionRenderPending = true;
+      return;
+    }
+    selectionRenderPending = false;
+    renderAll();
+  }
+  document.addEventListener('selectionchange', () => {
+    if (selectionRenderPending) renderAfterSelection();
+  });
   function renderAll() {
     renderCostControls();
     if (toggle) {
@@ -458,7 +473,7 @@
   window.addEventListener('storage',event=>{if(event.key===window.LCNDummy.key){demo=window.LCNDummy.get();renderAll();}if(['lcn_shared_location_preference','lcn_shared_location_cleared'].includes(event.key))renderSummaries();});
   window.addEventListener('lcn-dummy-change',()=>{const next=window.LCNDummy.get();if(next!==demo){demo=next;renderAll();}});
   window.addEventListener('homepage:location-changed',()=>renderSummaries());
-  window.addEventListener('lcn-online-ready',()=>renderAll());
+  window.addEventListener('lcn-online-ready',()=>renderAfterSelection());
   window.addEventListener('lcn-exchange-rates',()=>{renderCostControls();});
   window.addEventListener('lcn-symptoms-updated',()=>{if(busy)setTimeout(()=>sync(),300);else sync();});
   renderAll();

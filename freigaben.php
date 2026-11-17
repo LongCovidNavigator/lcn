@@ -13,7 +13,7 @@ header('Cache-Control: no-store, private');
     <link rel="stylesheet" href="styles/footer-style.css?v=b4b1163611">
     <link rel="stylesheet" href="styles/freigaben.css?v=undo-review-20261108">
     <script src="scripts/image-registry.js?v=shared-count-pins-20261105"></script>
-    <script src="scripts/access-nav.js?v=local-only-20261107" defer></script>
+    <script src="scripts/access-nav.js?v=copy-fragment-20261116" defer></script>
 <script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script><script src="scripts/scroll_restore.js?v=admin-ready-20261108" defer></script></head>
 <body>
     <div id="header-placeholder"></div>

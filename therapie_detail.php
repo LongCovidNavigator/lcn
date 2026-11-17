@@ -42,12 +42,12 @@ $isAdmin = lcnCurrentSiteRole() === 'admin';
 header('Cache-Control: no-store, private');
 ndStart($item['treatmentname'] ?? 'Therapie', true, true);
 if ($error) { echo '<section class="card" role="alert"><h1>Therapie nicht verfügbar</h1><p>'.ndEscape($error).'</p><a href="therapien_suche.html">Zur Therapiesuche</a></section>'; ndEnd(); return; }
-$views = ['ueberblick'=>'Überblick','wirkung'=>'Erfahrungen aus der Community','termin'=>'Belastungseinschätzung','zugang'=>'Kosten und Verfügbarkeit','symptome'=>'Symptome','anreise'=>'Behandler:innen finden (Karte)','alternativen'=>'Therapiealternativen'];
+$views = ['ueberblick'=>'Überblick','wirkung'=>'Erfahrungen aus der Community','termin'=>'Belastungseinschätzung','zugang'=>'Kosten und Verfügbarkeit','symptome'=>'Symptome','anreise'=>'Behandler:innen finden (Karte)','alternativen'=>'Alternativen und Ausgestaltung'];
 if ($isAdmin) $views['dashboard'] = 'Dashboard';
 ?>
 <div class="detail-layout ux-detail" data-home-delivery="<?= lcnNdCanTreatAtHome($item) ? '1' : '0' ?>" data-independent-at-home="<?= lcnNdIndependentAtHome($item) ? '1' : '0' ?>" data-treatment-id="<?= (int)$id ?>" data-previous-treatment-id="<?= (int)array_search((int)$id, LCN_PREVIOUS_ND_IDS, true) ?>">
 <nav class="side-nav" aria-label="Ansichten der Therapie"><div class="nav-items">
-<?php $n=0; foreach ($views as $view=>$label): ?><a href="#<?= $view ?>" data-view="<?= $view ?>"><span class="nav-number"><?= ++$n ?></span><span><strong><?= str_replace("Therapiealternativen", "Therapie&shy;alternativen", ndEscape($label)) ?></strong></span></a><?php endforeach; ?>
+<?php $n=0; foreach ($views as $view=>$label): ?><a href="#<?= $view ?>" data-view="<?= $view ?>"><span class="nav-number"><?= ++$n ?></span><span><strong><?= ndEscape($label) ?></strong></span></a><?php endforeach; ?>
 </div></nav>
 <div id="view-content" tabindex="-1">
 <?php if (($item['review_status'] ?? '') === 'pending_group'): ?><p class="ux-test-notice" role="status">Community-Vorschlag · Prüfung ausstehend</p><?php endif; ?>
@@ -55,7 +55,7 @@ if ($isAdmin) $views['dashboard'] = 'Dashboard';
 <noscript>Bitte JavaScript aktivieren, um zwischen den Ansichten zu wechseln und eigene Angaben auszuwählen.</noscript>
 <section id="ueberblick" class="nd-panel" aria-label="Überblick">
 <?php if (($item['review_status'] ?? '') === 'altbestand_ungeprueft'): ?><p class="ux-test-notice">Übernommener Bestand · Angaben noch nicht geprüft.</p><?php endif; ?>
-<section class="card ux-overview-frame"><div class="ux-overview-heading"><h2>Überblick</h2><span class="ux-heading-info"><button type="button" aria-label="Information zum Überblick" aria-describedby="therapy-overview-help">ⓘ</button><p id="therapy-overview-help" role="tooltip">Hier findest du die Einordnung der Therapie und kannst die Begleitung starten.</p></span></div>
+<section class="card ux-overview-frame"><div class="ux-overview-heading"><h2>Überblick</h2><span class="ux-heading-info"><button type="button" aria-label="Information zum Überblick" aria-describedby="therapy-overview-help">ⓘ</button><p id="therapy-overview-help" role="tooltip">Hier siehst du den Namen und die Kategorie des Eintrags. Über die Kategorie kannst du eine Korrektur vorschlagen. Die Begleitung führt dich je nach Auswahl durch die Informationen oder deine eigenen Erfahrungen.</p></span></div>
 <div class="ux-overview-summary">
 <aside class="card ux-treatment-identity"><div class="overview-icon ux-treatment-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/><path d="M3 12h4l2-4 4 8 2-4h6"/></svg></div>
 <h3><?= ndEscape($item['treatmentname']) ?></h3>
@@ -95,8 +95,8 @@ if ($isAdmin) $views['dashboard'] = 'Dashboard';
 <div class="ux-symptom-grid"><ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol>
 <div class="ux-symptom-picker" data-symptom-combobox><label for="symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="symptom-search" type="text" role="combobox" data-symptom-search placeholder="＋ Weiteres Symptom hinzufügen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="symptom-picker"></div><div id="symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div></div>
 </section></section>
-<section id="alternativen" class="nd-panel" aria-label="Therapiealternativen" hidden>
-<section class="card ux-discovery ux-alternative-section"><h3>Alternative Therapien <span class="ux-heading-info"><button type="button" aria-label="Information zu alternativen Therapien" aria-describedby="therapy-alternatives-help">ⓘ</button><p id="therapy-alternatives-help" role="tooltip">Welche anderen Behandlungen kommen für einen ähnlichen Einsatz infrage? Hier sammelt die Community mögliche Alternativen zu dieser Therapie. Du kannst weitere Optionen ergänzen. Ein Eintrag bedeutet nicht, dass die Behandlungen gleich wirksam oder für jede Person austauschbar sind. Noch ungeprüfte Vorschläge sind gekennzeichnet.</p></span></h3>
+<section id="alternativen" class="nd-panel" aria-label="Alternativen und Ausgestaltung" hidden>
+<section class="card ux-discovery ux-alternative-section"><h3>Alternative Therapien <span class="ux-heading-info"><button type="button" aria-label="Information zu alternativen Therapien" aria-describedby="therapy-alternatives-help">ⓘ</button><p id="therapy-alternatives-help" role="tooltip">Die Alternativen beruhen auf freien Vorschlägen der Community. Ein fachlicher Zusammenhang wird damit nicht vorausgesetzt. ✓ zeigt, wie viele den Vorschlag für eine passende Alternative halten; × zeigt, wie viele widersprechen. Über ＋ kannst du eine weitere Alternative vorschlagen. Erneutes Anklicken deiner gewählten Stimme nimmt sie zurück. Die Zahlen bewerten keine Wirksamkeit oder Gleichwertigkeit.</p></span></h3>
 <div class="ux-alternative-strip" role="group" aria-label="Aktuelle Therapie und Alternativen">
 <article class="ux-alternative-tile ux-alternative-current"><small>Aktuelle Therapie</small><strong><?= ndEscape($item['treatmentname']) ?></strong>
 <?php if(ndHas($item['typ'])): ?><span class="ux-alternative-category"><?= ndEscape($item['typ']) ?></span><?php endif; ?>

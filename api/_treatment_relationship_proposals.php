@@ -8,8 +8,8 @@ const LCN_TREATMENT_RELATION_KINDS=[
  'belongs_to_group'=>'Gehört zur Gruppe', 'group_contains'=>'Weiterer Eintrag dieser Gruppe',
  'trade_of'=>'Ist Handelsname von', 'has_trade'=>'Hat den Handelsnamen',
  'form_of'=>'Ist Anwendungsform von', 'has_form'=>'Hat die Anwendungsform',
- 'variant_of'=>'Ist Stoffvariante von', 'has_variant'=>'Hat die Stoffvariante',
- 'detail_of'=>'Ist detaillierteres Verfahren von', 'has_detail'=>'Hat das detailliertere Verfahren',
+ 'variant_of'=>'Ist Stoffvariante / Darreichung von', 'has_variant'=>'Hat die Stoffvariante / Darreichung',
+ 'detail_of'=>'Ist Anwendung von', 'has_detail'=>'Hat die Anwendung',
  'component_of'=>'Ist Bestandteil von', 'has_component'=>'Hat den Bestandteil'
 ];
 /** Serialize proposal publication so simultaneous requests reuse the same catalog identity. */
@@ -45,20 +45,20 @@ function lcnNormalizeTreatmentRelationship(PDO $p,array $input,?array $graph=nul
   $left=$reverse?$target:$source;$right=$reverse?$source:$target;$r['left_id']=$left;$r['right_id']=$right;
   if(in_array($kind,['trade_of','has_trade'],true)){
    if(isset($g['generics'][$right]))throw new InvalidArgumentException('Bitte den zugehörigen Wirkstoff statt eines weiteren Handelsnamens auswählen.');
-   if(($g['entries'][$left]['typ']??'')!=='Arzneimittel'||($g['entries'][$right]['typ']??'')!=='Arzneimittel')throw new InvalidArgumentException('Handelsnamen können hier nur Arzneimitteln zugeordnet werden.');
+   if(!in_array($g['entries'][$left]['typ']??'', ['Arzneimittel','Nahrungsergänzungsmittel','Infusionen'],true)||!in_array($g['entries'][$right]['typ']??'', ['Arzneimittel','Nahrungsergänzungsmittel','Infusionen'],true))throw new InvalidArgumentException('Handelsnamen können Arzneimitteln, Nahrungsergänzungsmitteln und Infusionen zugeordnet werden.');
    if(isset($g['roots'][$left],$g['roots'][$right])||isset($g['roots'][$left])||isset($g['roots'][$right]))throw new InvalidArgumentException('Bitte einen Wirkstoff oder ein Präparat statt eines Oberbegriffs auswählen.');
    if(isset($g['brands'][$right][$left]))throw new InvalidArgumentException('Dieser Handelsname ist bereits zugeordnet.');
    $r['kind']='brand';$r['description']=$g['entries'][$left]['treatmentname'].' ist Handelsname von '.$g['entries'][$right]['treatmentname'];
   }elseif(in_array($kind,['form_of','has_form'],true)){
    if(isset($g['generics'][$left])||isset($g['comboIds'][$left]))throw new InvalidArgumentException('Bitte eine Anwendungsform statt eines Handelsnamens oder einer Kombination auswählen.');
-   foreach($g['groups'] as $group)if($group['root']===$right&&isset($group['members'][$left]))throw new InvalidArgumentException('Dieser Eintrag ist bereits zugeordnet.');
+   foreach($g['groups'] as $group)if($group['root']===$right&&isset($group['members'][$left])&&lcnGroupMemberRelation($group,$left)!=='unspecified')throw new InvalidArgumentException('Dieser Eintrag ist bereits zugeordnet.');
    $r['kind']='form';$r['description']=$g['entries'][$left]['treatmentname'].' ist Anwendungsform von '.$g['entries'][$right]['treatmentname'];
   }elseif(in_array($kind,['variant_of','has_variant','detail_of','has_detail'],true)){
    $type=in_array($kind,['variant_of','has_variant'],true)?'substance_variant':'detailed_method';
    $queue=[$left];$seen=[];
    while($queue){$next=array_pop($queue);if($next===$right)throw new InvalidArgumentException('Eine Verknüpfung darf keinen Kreis bilden.');if(isset($seen[$next]))continue;$seen[$next]=true;foreach($g['groups'] as $group)if($group['root']===$next)foreach($group['members'] as $member)$queue[]=$member;}
-   foreach($g['groups'] as $group)if($group['root']===$right&&isset($group['members'][$left]))throw new InvalidArgumentException('Diese Zuordnung ist bereits vorhanden.');
-   $r['kind']=$type==='substance_variant'?'variant':'detail';$r['description']=$g['entries'][$left]['treatmentname'].($type==='substance_variant'?' ist Stoffvariante von ':' ist detaillierteres Verfahren von ').$g['entries'][$right]['treatmentname'];
+   foreach($g['groups'] as $group)if($group['root']===$right&&isset($group['members'][$left])&&lcnGroupMemberRelation($group,$left)!=='unspecified')throw new InvalidArgumentException('Diese Zuordnung ist bereits vorhanden.');
+   $r['kind']=$type==='substance_variant'?'variant':'detail';$r['description']=$g['entries'][$left]['treatmentname'].($type==='substance_variant'?' ist Stoffvariante / Darreichung von ':' ist Anwendung von ').$g['entries'][$right]['treatmentname'];
   }elseif(in_array($kind,['component_of','has_component'],true)){
    $queue=[$left];$seen=[];while($queue){$next=array_pop($queue);if($next===$right)throw new InvalidArgumentException('Eine Kombination darf nicht ihr eigener Bestandteil werden.');if(isset($seen[$next]))continue;$seen[$next]=true;foreach($g['components'][$next]??[] as $part)$queue[]=$part;}
    if(isset($g['components'][$right][$left]))throw new InvalidArgumentException('Dieser Bestandteil ist bereits zugeordnet.');
@@ -83,7 +83,7 @@ function lcnTreatmentProposalLink(PDO $p,int $id,int $alias,int $submission,?str
  }
  if($relation!==null){
   $existing=lcnNdRows($p,'SELECT relation_type FROM tbl_cpl_treatments_nd2aliases WHERE treat_nd_id=? AND alias_id=?',[$id,$alias])[0]['relation_type'];
-  if($existing!==null&&$existing!==$relation)throw new DomainException('Die Kopplung hat bereits eine andere Verbindungsart.');
+  if($existing!==null&&$existing!=='unspecified'&&$existing!==$relation)throw new DomainException('Die Kopplung hat bereits eine andere Verbindungsart.');
   $p->prepare('UPDATE tbl_cpl_treatments_nd2aliases SET relation_type=? WHERE treat_nd_id=? AND alias_id=?')->execute([$relation,$id,$alias]);
  }
 }
@@ -138,7 +138,7 @@ function lcnApproveTreatmentRelationship(PDO $p,array $row,array $payload): int 
   if($groupId)lcnTreatmentProposalLink($p,$groupId,$alias,$sid,'reference');
   lcnTreatmentProposalLink($p,$left,$alias,$sid,'group_member');$key='ag:'.$alias.':t:'.$left;
  }elseif($kind==='brand'){
-  if(($g['entries'][$left]['typ']??'')!=='Arzneimittel'||($g['entries'][$right]['typ']??'')!=='Arzneimittel'||isset($g['roots'][$left])||isset($g['roots'][$right]))throw new DomainException('Ungültige Wirkstoff-/Handelsnamen-Zuordnung.');
+  if(!in_array($g['entries'][$left]['typ']??'', ['Arzneimittel','Nahrungsergänzungsmittel','Infusionen'],true)||!in_array($g['entries'][$right]['typ']??'', ['Arzneimittel','Nahrungsergänzungsmittel','Infusionen'],true)||isset($g['roots'][$left])||isset($g['roots'][$right]))throw new DomainException('Ungültige Wirkstoff-/Handelsnamen-Zuordnung.');
   lcnTreatmentProposalLink($p,$right,lcnTreatmentProposalAlias($p,$g['entries'][$left]['treatmentname'],'trade_name'),$sid);
   lcnTreatmentProposalLink($p,$left,lcnTreatmentProposalAlias($p,$g['entries'][$right]['treatmentname'],'generic_name'),$sid);$key='bn:'.$right.':'.$left;
  }elseif($kind==='form'){

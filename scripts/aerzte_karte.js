@@ -1,6 +1,7 @@
 let map;
 let radiusCircle = null;
 let doctorMarkerGroup = null;
+let clusteredDoctors = [];
 let userLocationMarker = null;
 let userLocationIcon = null;
 
@@ -59,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     map = window.LCNMapViewport.createMap(mapElement, { viewKey: 'doctor-search' });
     userLocationIcon = window.LCNMapViewport.originIcon();
+    if (location.pathname.endsWith('/behandler_suche.html')) map.on('zoomend', renderDoctorClusters);
 
     setupDoctorNavigationPanel();
     setupDoctorMapPanel();
@@ -887,6 +889,7 @@ function resetDoctorNavigationControls() {
     const providerSelect = document.getElementById("doctor-provider-type-select");
     if (providerSelect) providerSelect.value = "";
     window.providerTypeGroup = "";
+    if(providerSelect) providerSelect._filterValues=[];
     document.getElementById("doctor-specialization-select").value = "0";
     document.getElementById("doctor-qualification-select").value = "0";
     currentSpecializationTermId = 0;
@@ -1099,7 +1102,9 @@ async function geocodeLocation(query) {
     };
 }
 
+let doctorFilterRequestId = 0;
 async function loadDoctorsFromSearchApi(settings) {
+    const requestId = ++doctorFilterRequestId;
     currentMinTreatmentCount = normalizeDoctorOfferMinimum("doctor-min-treatments-input");
     currentMinCategoryCount = normalizeDoctorOfferMinimum("doctor-min-categories-input");
     currentSpecializationTermId = Number(document.getElementById("doctor-specialization-select").value || 0);
@@ -1143,13 +1148,16 @@ async function loadDoctorsFromSearchApi(settings) {
         `&qualificationTermId=${encodeURIComponent(currentQualificationTermId)}` +
         `&minTreatmentCount=${currentMinTreatmentCount}&minCategoryCount=${currentMinCategoryCount}`;
 
-    const searchResponse = await fetch(url);
+    const multiParams = new URLSearchParams();
+    for (const kind of ["specialty", "specialization", "qualification"]) multiParams.set(kind + "TermIds", filterValues("doctor-" + kind + "-select").join(","));
+    const searchResponse = await fetch(url + "&" + multiParams);
 
     if (!searchResponse.ok) {
         throw new Error(`HTTP-Fehler: ${searchResponse.status}`);
     }
 
     const data = await searchResponse.json();
+    if (requestId !== doctorFilterRequestId) return;
 
     if (!data.ok) {
         throw new Error(data.message || "API-Antwort war nicht erfolgreich.");
@@ -1173,6 +1181,7 @@ async function loadDoctorsFromSearchApi(settings) {
       } catch(error) { console.error(error); setMapStatus('Community-Einträge konnten nicht geladen werden.'); }
     }
 
+    if (requestId !== doctorFilterRequestId) return;
     const providerSelect = document.getElementById("doctor-provider-type-select");
     if (providerSelect) {
         apiDoctors = renderProviderTypePicker(apiDoctors, providerSelect);
@@ -1430,6 +1439,8 @@ function renderDoctorMarkers(doctors) {
     }
 
     doctorMarkerGroup = L.featureGroup();
+    const useClusters = location.pathname.endsWith('/behandler_suche.html');
+    clusteredDoctors = [];
 
     (doctors || []).forEach(function (doctor) {
         if (!doctor.has_coordinates || doctor.loc_lat === null || doctor.loc_lng === null || doctor.loc_lat === "" || doctor.loc_lng === "") {
@@ -1443,12 +1454,21 @@ function renderDoctorMarkers(doctors) {
             return;
         }
 
+        if (useClusters) {
+            clusteredDoctors.push({doctor, lat, lng});
+            return;
+        }
         const marker=L.marker([lat, lng])
             .bindPopup(buildDoctorPopupHtml(doctor))
             .addTo(doctorMarkerGroup);
         window.LCNOnline?.track(marker,doctor.dr_id);
     });
 
+    if (useClusters) {
+        // Viewport fitting must use the actual locations, not cluster centers.
+        map.options.lcnResultLocations = clusteredDoctors.map(p => [p.lat, p.lng]);
+        renderDoctorClusters();
+    }
     doctorMarkerGroup.addTo(map);
 
     // Der eigene Standort gehört unabhängig vom Suchmodus dauerhaft zur Karte.
@@ -1480,6 +1500,39 @@ function renderDoctorMarkers(doctors) {
             map.fitBounds(bounds, { padding: [30, 30] });
         }
     }
+}
+
+// Group in projected pixels so the same distance works on desktop and mobile.
+function renderDoctorClusters() {
+    if (!doctorMarkerGroup) return;
+    doctorMarkerGroup.clearLayers();
+    const groups = [];
+    clusteredDoctors.forEach(point => {
+        const pixel = map.project([point.lat, point.lng], map.getZoom());
+        const group = groups.find(g => g.pixel.distanceTo(pixel) < 56);
+        if (group) group.points.push(point);
+        else groups.push({pixel, points: [point]});
+    });
+    groups.forEach(({points}) => {
+        if (points.length === 1) {
+            const p = points[0];
+            const marker = L.marker([p.lat, p.lng]).bindPopup(buildDoctorPopupHtml(p.doctor)).addTo(doctorMarkerGroup);
+            window.LCNOnline?.track(marker, p.doctor.dr_id);
+            return;
+        }
+        const center = [points.reduce((s,p) => s+p.lat,0)/points.length, points.reduce((s,p) => s+p.lng,0)/points.length];
+        const marker = L.marker(center, {
+            title: points.length + ' Behandler:innen – zum Vergrößern anklicken',
+            icon: window.LCNImages.countMarkerIcon(points.length)
+        }).addTo(doctorMarkerGroup);
+        marker.on('click', () => {
+            const bounds = L.latLngBounds(points.map(p => [p.lat,p.lng]));
+            const nextZoom = Math.min(map.getMaxZoom(), Math.max(map.getZoom()+2, map.getBoundsZoom(bounds, false, L.point(80,80))));
+            if (map.getZoom() >= map.getMaxZoom() || bounds.getNorthEast().equals(bounds.getSouthWest())) {
+                marker.bindPopup('<div class="doctor-cluster-results">'+points.map(p => buildDoctorPopupHtml(p.doctor)).join('<hr>')+'</div>', {maxHeight:300}).openPopup();
+            } else map.setView(center, nextZoom);
+        });
+    });
 }
 
 function renderDoctorCards(doctors) {

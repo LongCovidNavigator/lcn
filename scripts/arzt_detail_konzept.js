@@ -115,7 +115,7 @@
     updateDummyToggle();
     window.LCNOnline?.update(doctorId,onlineAppointments());
     if (document.getElementById('community-mode')) document.getElementById('community-mode').textContent = state.community ? '' : 'Community-Daten derzeit nicht verfügbar.';
-    render();
+    renderAfterSelection();
   }
   function applyCommunityResponse(data) {
     if (isSubmission) {
@@ -269,7 +269,7 @@
       document.getElementById('profile-specialty').textContent = 'Praxisinformationen derzeit nicht verfügbar';
     } finally {
       state.loading = false;
-      render();
+      renderAfterSelection();
     }
   }
   // Same Leaflet map, tile layer, marker registry and controls as arzt_detail.js.
@@ -816,6 +816,21 @@
     }
   }
   window.addEventListener('resize',()=>requestAnimationFrame(alignDashboardStatus));
+  // A background repaint must not remove the text the user is copying.
+  let selectionRenderPending = false;
+  function renderAfterSelection() {
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed && selection.rangeCount &&
+        selection.getRangeAt(0).intersectsNode(content)) {
+      selectionRenderPending = true;
+      return;
+    }
+    selectionRenderPending = false;
+    render();
+  }
+  document.addEventListener('selectionchange', () => {
+    if (selectionRenderPending) renderAfterSelection();
+  });
   function render(focus = false) {
     detailMap?.remove();
     detailMap = null;
@@ -869,8 +884,8 @@
 
     if (focus) { content.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'instant' }); }
   }
-  window.addEventListener('lcn-online-ready',()=>{if(state.data)render();});
-  window.addEventListener('lcn-exchange-rates',()=>{if(state.data)render();});
+  window.addEventListener('lcn-online-ready',()=>{if(state.data)renderAfterSelection();});
+  window.addEventListener('lcn-exchange-rates',()=>{if(state.data)renderAfterSelection();});
   async function changeDoctorCostPreferences(patch){if(state.saving||communityLoading)return;const previous=window.LCNCost.get(),insurance=state.insurance,before=costContext();window.LCNCost.set(patch);state.insurance=window.LCNCost.get().insurance.toLowerCase();const next=costContext();if(before!==next&&Object.keys(state.selections).some(k=>k.startsWith('costs-'))){if(!await saveAnswer({action:'move_cost_context',question:'costs-'+next})){window.LCNCost.set(previous);state.insurance=insurance;}}render();}
   content.addEventListener('change',event=>{const target=event.target;if(target.matches('[data-doctor-radius-enabled]')){locationRadiusEnabled=target.checked;render();return;}if(target.matches('[data-doctor-radius]')){if(target.validity.valid){locationRadius=Number(target.value);render();}return;}if(state.saving)return;if(event.target.matches('[data-cost-country]'))changeDoctorCostPreferences({country:event.target.value});else if(event.target.matches('[data-cost-custom-country]'))changeDoctorCostPreferences({customCountry:event.target.value});else if(event.target.matches('[data-cost-currency]'))changeDoctorCostPreferences({currency:event.target.value});});
   function navigate(focus) {

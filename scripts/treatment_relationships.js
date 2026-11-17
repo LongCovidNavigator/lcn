@@ -45,7 +45,7 @@
    const current=rootPage?null:middle.querySelector('[data-stage-node="'+pageId+'"]');if(current)current.dataset.pendingGroupMember=[current.dataset.pendingGroupMember,key].filter(Boolean).join(' ');
    for(const item of memberships.filter(n=>n.group_name===name&&Number(n.left_id)!==pageId)){
     const entry=catalog.items.find(n=>n.id===Number(item.left_id));if(!entry)continue;
-    const node=make('article'),link=make('a',entry.name),feedback=make('span');node.className='ux-stage-node ux-relation-entry is-linked';node.dataset.pendingRelationship=item.submission_id;node.dataset.pendingGroupMember=key;link.className='ux-stage-name';link.href='therapie_detail.php?treatment_id='+entry.id+'#alternativen';feedback.dataset.treatmentRelationFeedback='s:'+item.submission_id;feedback.dataset.feedbackStatement=item.description;feedback.dataset.feedbackStandard='1';node.append(link,make('small','Prüfung ausstehend'),feedback);alignPendingStage(node);middle.append(node);
+    const node=make('article'),link=make('a',entry.name),feedback=make('span');node.className='ux-stage-node ux-relation-entry is-linked';node.dataset.pendingRelationship=item.submission_id;node.dataset.pendingGroupMember=key;link.className='ux-stage-name';link.href='therapie_detail.php?treatment_id='+entry.id+'#alternativen';feedback.dataset.treatmentRelationFeedback='s:'+item.submission_id;feedback.dataset.feedbackStatement=item.description;feedback.dataset.feedbackStandard='1';node.append(link,make('small','Prüfung ausstehend'));if(rootPage)node.append(feedback);alignPendingStage(node);middle.append(node);
    }
    if(rootPage)middle.querySelectorAll('[data-kind="group_contains"]').forEach(n=>n.remove());
    if(!rootPage)continue;
@@ -61,6 +61,7 @@
   const alternatives=document.querySelector('.ux-alternative-options');alternatives?.querySelectorAll('[data-pending-alternative]').forEach(n=>n.remove());
   combinations?.querySelectorAll('[data-pending-combination]').forEach(n=>(n.closest('.ux-combination-group')||n).remove());let remaining=0;
   for(const item of catalog.pending){
+   if(['brand','form','variant','detail'].includes(item.kind)&&[...document.querySelectorAll('[data-stage-node="'+item.left_id+'"] small')].some(n=>n.textContent.includes('Arbeitshypothese')))continue;
    if(item.kind==='group'&&document.querySelector('[data-pending-relationship="'+item.submission_id+'"]'))continue;
    if(item.kind==='alternative'&&alternatives&&[Number(item.left_id),Number(item.right_id)].includes(pageId)&&renderPendingAlternative(item,alternatives))continue;
    if(item.kind==='new_combination'&&item.combination&&combinations){combinations.insertBefore(renderPendingCombination(item),combinations.querySelector('.ux-combination-actions'));continue;}
@@ -79,6 +80,7 @@
    const container=button?.parentElement||document.querySelector('[data-stage="0"] .ux-stage-stack');if(!container)continue;
    const tile=make('article'),host=make('span'),other=Number(item.left_id)===pageId?Number(item.right_id):Number(item.left_id),entry=catalog.items.find(n=>n.id===other);
    tile.className='ux-stage-node ux-relation-entry is-linked';tile.dataset.pendingRelationship=item.submission_id;
+   if(['brand','form','variant','detail'].includes(item.kind)){tile.dataset.pendingParentId=item.right_id;tile.dataset.pendingChildId=item.left_id;}
    if(entry){const link=make('a',entry.name);link.className='ux-stage-name';link.href='therapie_detail.php?treatment_id='+other+'#alternativen';tile.append(link);}
    tile.append(make('small','Prüfung ausstehend'),make('p',item.description));host.dataset.treatmentRelationFeedback='s:'+item.submission_id;host.dataset.feedbackStandard='1';host.dataset.feedbackStatement=item.description;tile.append(host);
    if(container.classList.contains('ux-combination-parts')){
@@ -106,13 +108,13 @@
    for(const [value,label] of Object.entries(data.kinds)){const option=make('option',label);option.value=value;kind.append(option);}kind.value=button.dataset.kind||'alternative';kindLabel.append(kind);
    url.type='url';url.maxLength=1000;url.placeholder='https://…';note.maxLength=2000;urlLabel.append(url);noteLabel.append(note);extras.className='treatment-relation-extras';extras.append(extraTitle,urlLabel,noteLabel);send.type='submit';cancel.type='button';cancel.addEventListener('click',()=>dialog.close());message.setAttribute('role','status');selection.className='treatment-relation-preview';selection.setAttribute('aria-live','polite');actions.className='catalog-preview-actions';actions.append(send,cancel);
    form.append(heading,context);
-   if(sourceOptions.length){const label=make('label','Übergeordnete Therapie / Verfahren auswählen'),select=make('select'),placeholder=make('option','Bitte auswählen …');placeholder.value='';select.append(placeholder);select.setAttribute('aria-label','Übergeordnete Therapie / Verfahren auswählen');for(const item of sourceOptions){const option=make('option',item.name);option.value=item.id;select.append(option);}label.append(select);form.append(label);select.addEventListener('change',()=>{source=Number(select.value);context.textContent=sourceOptions.find(n=>n.id===source)?.name||'';fields();});}
+   if(sourceOptions.length){const label=make('label','Übergeordnetes Verfahren auswählen'),select=make('select'),placeholder=make('option','Bitte auswählen …');placeholder.value='';select.append(placeholder);select.setAttribute('aria-label','Übergeordnetes Verfahren auswählen');for(const item of sourceOptions){const option=make('option',item.name);option.value=item.id;select.append(option);}label.append(select);form.append(label);select.addEventListener('change',()=>{source=Number(select.value);context.textContent=sourceOptions.find(n=>n.id===source)?.name||'';fields();});}
    if(button.dataset.chooseKind==='1')form.append(kindLabel);
    form.append(groupField,targetField,selection,extras,hint,message,actions);dialog.append(form);document.body.append(dialog);dialog.addEventListener('close',()=>dialog.remove());
    let target=null,group=null,targets=[],groups=[],saving=false;let targetCombo,groupCombo;
    hint.textContent='Du kannst mehrere Einträge auswählen und danach weitersuchen. Alle Vorschläge erscheinen mit „Prüfung ausstehend“.';
-   const titles={alternative:'Alternative Therapie vorschlagen',group_contains:'Eintrag zur Gruppe hinzufügen',belongs_to_group:'Gruppe zuordnen',has_trade:'Handelsname ergänzen',trade_of:'Wirkstoff zuordnen',has_form:'Anwendungsform ergänzen',form_of:'Anwendungsform zuordnen',has_component:'Bestandteil ergänzen',component_of:'Kombination ergänzen',has_variant:'Stoffvariante ergänzen',variant_of:'Übergeordnete Substanz zuordnen',has_detail:'Detaillierteres Verfahren ergänzen',detail_of:'Übergeordnetes Verfahren zuordnen'};
-   const targetLabels={alternative:'Alternative Therapie auswählen',group_contains:'Eintrag auswählen',has_trade:'Handelsname auswählen',trade_of:'Wirkstoff auswählen',has_form:'Anwendungsform auswählen',form_of:'Übergeordneten Eintrag auswählen',has_component:'Bestandteil auswählen',component_of:'Kombination auswählen',has_variant:'Stoffvariante auswählen',variant_of:'Übergeordnete Substanz auswählen',has_detail:'Detaillierteres Verfahren auswählen',detail_of:'Übergeordnetes Verfahren auswählen'};
+   const titles={alternative:'Alternative Therapie vorschlagen',group_contains:'Eintrag zur Gruppe hinzufügen',belongs_to_group:'Gruppe zuordnen',has_trade:'Handelsname ergänzen',trade_of:'Wirkstoff zuordnen',has_form:'Anwendungsform ergänzen',form_of:'Übergeordnete Substanz zuordnen',has_component:'Bestandteil ergänzen',component_of:'Kombination ergänzen',has_variant:'Stoffvariante / Darreichung ergänzen',variant_of:'Übergeordnete Substanz zuordnen',has_detail:'Anwendung ergänzen',detail_of:'Übergeordnetes Verfahren zuordnen'};
+   const targetLabels={alternative:'Alternative Therapie auswählen',group_contains:'Eintrag auswählen',has_trade:'Handelsname auswählen',trade_of:'Wirkstoff auswählen',has_form:'Anwendungsform auswählen',form_of:'Übergeordneten Eintrag auswählen',has_component:'Bestandteil auswählen',component_of:'Kombination auswählen',has_variant:'Stoffvariante / Darreichung auswählen',variant_of:'Übergeordnete Substanz auswählen',has_detail:'Anwendung auswählen',detail_of:'Übergeordnetes Verfahren auswählen'};
    function preview(){
     const grouped=['belongs_to_group','group_contains'].includes(kind.value),entries=kind.value==='belongs_to_group'?groups:targets;
     send.disabled=saving||!source||!entries.length||(grouped&&kind.value!=='belongs_to_group'&&!group);
@@ -127,7 +129,7 @@
      if(group&&button.dataset.chooseKind!=='1')groupField.append(make('p','Gruppe: '+group.name));
      else groupCombo=api.combo(groupField,{label:'Gruppe auswählen',retainSelection:kind.value!=='belongs_to_group',keepOpenOnSelect:kind.value==='belongs_to_group',missingLabel:'＋ Neue Gruppe vorschlagen',items:()=>data.groups.filter(n=>!groups.some(g=>g.id===n.id)),onInput:()=>{if(kind.value!=='belongs_to_group')group=null;preview();},onSelect:item=>{group=data.groups.find(n=>n.id===item.id)||item;if(kind.value==='belongs_to_group')groups.push(group);preview();},onMissing:name=>{if(name.trim().length<2){message.textContent='Bitte einen Gruppennamen eingeben.';return;}group={id:0,name:name.trim()};if(kind.value==='belongs_to_group'&&!groups.some(g=>g.name===group.name))groups.push(group);preview();}});
     }
-    if(!targetField.hidden)targetCombo=api.combo(targetField,{label:button.dataset.targetLabel||targetLabels[kind.value],keepOpenOnSelect:true,items:()=>data.items.filter(n=>!targets.some(t=>t.id===n.id)&&n.id!==source&&n.id!==pageId&&!(sourceOptions.length?[...document.querySelectorAll('[data-stage="2"] .ux-stage-block')].filter(b=>Number(b.dataset.branch)===source).some(b=>[...b.querySelectorAll('a[href*="treatment_id="]')].some(a=>Number(new URL(a.href).searchParams.get('treatment_id'))===n.id)):existing.has(n.id))&&(kind.value!=='component_of'||n.is_combination)&&(!['trade_of','has_trade'].includes(kind.value)||n.meta.split(' · ')[0]==='Arzneimittel')),onInput:()=>{},onSelect:item=>{target=data.items.find(n=>n.id===item.id)||item;targets.push(target);preview();},onMissing:name=>api.entryDialog('treatment',name,{},async()=>{Object.assign(data,await load());message.textContent='Die neue Therapie ist jetzt auswählbar. Prüfung ausstehend.';targetCombo?.refresh();})});
+    if(!targetField.hidden)targetCombo=api.combo(targetField,{label:button.dataset.targetLabel||targetLabels[kind.value],keepOpenOnSelect:true,items:()=>data.items.filter(n=>!targets.some(t=>t.id===n.id)&&n.id!==source&&n.id!==pageId&&!(sourceOptions.length?[...document.querySelectorAll('[data-stage="2"] .ux-stage-block')].filter(b=>Number(b.dataset.branch)===source).some(b=>[...b.querySelectorAll('a[href*="treatment_id="]')].some(a=>Number(new URL(a.href).searchParams.get('treatment_id'))===n.id)):existing.has(n.id))&&(kind.value!=='component_of'||n.is_combination)&&(!['trade_of','has_trade'].includes(kind.value)||['Arzneimittel','Nahrungsergänzungsmittel','Infusionen'].includes(n.meta.split(' · ')[0]))),onInput:()=>{},onSelect:item=>{target=data.items.find(n=>n.id===item.id)||item;targets.push(target);preview();},onMissing:name=>api.entryDialog('treatment',name,{},async()=>{Object.assign(data,await load());message.textContent='Die neue Therapie ist jetzt auswählbar. Prüfung ausstehend.';targetCombo?.refresh();})});
     preview();
    }
    kind.addEventListener('change',fields);fields();
@@ -176,11 +178,14 @@
    // Compact diagrams stay centered; long lists follow the viewport.
    const left=columns.querySelector('[data-stage="0"]'),stack=left.querySelector('.ux-stage-stack');
    stack.style.transform='';
+   [...stack.children].forEach(row=>row.style.transform='');
    const middleStack=columns.querySelector('[data-stage="1"] .ux-stage-stack');
    middleStack.style.transform='';
    const middleNodes=middleStack.querySelectorAll('.ux-stage-node');
+   middleStack.style.justifyContent=middleNodes.length>1?'flex-start':'';
    // The middle column is centered by shared CSS and stays independent of scrolling.
    const right=columns.querySelector('[data-stage="2"]');
+   right.querySelector('.ux-stage-stack').style.justifyContent=middleNodes.length>1?'flex-start':'';
    const blocks=[...right.querySelectorAll('.ux-stage-block')];
    blocks.forEach(block=>{block.style.transform='';block.style.marginTop='';block.querySelectorAll('.ux-stage-add').forEach(button=>button.style.transform='');});
    // Different relationship types for one substance form one ordered stack.
@@ -189,14 +194,20 @@
    // Snap a nearly aligned current substance to a saved child row for a straight connector.
    // This shared tolerance uses diagram geometry only, so scrolling cannot move the card.
    const rowAlignmentTolerance=32;
-   if(innerWidth>650&&middleNodes.length===1&&middleNodes[0].classList.contains('is-current')){
+   if(middleNodes.length===1){
     const current=middleNodes[0],box=current.getBoundingClientRect(),center=box.top+box.height/2;
     const offsets=edges.filter(([from,id,to])=>from===1&&String(id)===current.dataset.stageNode&&to===2)
      .map(([, ,to,id])=>node(to,id)).filter(child=>child?.getClientRects().length)
      .map(child=>{const rect=child.getBoundingClientRect();return rect.top+rect.height/2-center;})
      .sort((a,b)=>Math.abs(a)-Math.abs(b));
     const tradeBlock=blocks.find(block=>block.getClientRects().length&&block.dataset.relationshipKind==='has_trade');
-    if(tradeBlock){
+    if(stackedRelationships){
+     // Center all relationship types together, including saved entries and add rows.
+     const centers=blocks.filter(block=>block.getClientRects().length)
+      .flatMap(block=>[...block.querySelectorAll('.ux-stage-node:not([hidden]),.ux-stage-add')])
+      .map(row=>{const r=row.getBoundingClientRect();return r.top+r.height/2;});
+     if(centers.length)middleStack.style.transform=`translateY(${(Math.min(...centers)+Math.max(...centers))/2-center}px)`;
+    }else if(tradeBlock){
      // Use the middle row(s) of the full brand list, including its add row.
      const rows=[...tradeBlock.querySelectorAll('.ux-stage-node:not([hidden]),.ux-stage-add')];
      if(rows.length){
@@ -204,21 +215,13 @@
       const target=(rowCenter(rows[Math.floor((rows.length-1)/2)])+rowCenter(rows[Math.floor(rows.length/2)]))/2;
       middleStack.style.transform=`translateY(${target-center}px)`;
      }
-    }else if(stackedRelationships&&!offsets.length){
-     // With empty relationship blocks, center on the full connector span,
-     // not on column height (which also includes the subsection headings).
-     const centers=blocks.filter(block=>block.getClientRects().length)
-      .flatMap(block=>[...block.querySelectorAll('.ux-stage-add')])
-      .filter(button=>String(button.dataset.sourceId)===current.dataset.stageNode)
-      .map(button=>{const r=button.getBoundingClientRect();return r.top+r.height/2;});
-     if(centers.length)middleStack.style.transform=`translateY(${(Math.min(...centers)+Math.max(...centers))/2-center}px)`;
     }else if(offsets.length&&Math.abs(offsets[0])<=rowAlignmentTolerance)middleStack.style.transform=`translateY(${offsets[0]}px)`;
    }
-   if(innerWidth>650&&!stack.querySelector('.ux-stage-node')&&stack.querySelectorAll('.ux-stage-add').length===1){
+   if(!stack.querySelector('.ux-stage-node')&&stack.querySelectorAll('.ux-stage-add').length===1){
     const button=stack.querySelector('.ux-stage-add'),parent=node(1,button.dataset.sourceId);
     if(parent){const a=button.getBoundingClientRect(),b=parent.getBoundingClientRect();stack.style.transform=`translateY(${b.top+b.height/2-a.top-a.height/2}px)`;}
    }
-   if(innerWidth>650&&stack.querySelector('.is-current')&&stack.querySelectorAll('.ux-stage-node').length===1){
+   if(stack.querySelector('.is-current')&&stack.querySelectorAll('.ux-stage-node').length===1){
     const box=stack.getBoundingClientRect(),currentNode=stack.querySelector('.is-current');
     const children=edges.filter(([from,id,to])=>from===0&&String(id)===currentNode.dataset.stageNode&&to===1).map(([, ,to,id])=>node(to,id));
     if(currentNode.dataset.pendingGroup)section.querySelectorAll('[data-pending-group-member]').forEach(child=>{if(child.dataset.pendingGroupMember.split(' ').includes(currentNode.dataset.pendingGroup))children.push(child);});
@@ -228,12 +231,13 @@
     const current=currentNode.getBoundingClientRect();
     const target=top+(innerHeight-16-top)/2;
     if(centers.length&&box.height<innerHeight-top-16){
-     const center=compact?(Math.min(...centers)+Math.max(...centers))/2:Math.max(Math.min(...centers),Math.min(target,Math.max(...centers)));
+     const desired=compact?(Math.min(...centers)+Math.max(...centers))/2:Math.max(Math.min(...centers),Math.min(target,Math.max(...centers)));
+     const center=centers.reduce((best,y)=>Math.abs(y-desired)<Math.abs(best-desired)?y:best,centers[0]);
      stack.style.transform=`translateY(${center-current.top-current.height/2}px)`;
     }
    }
    // Saved details keep their place beside their parent; only the add action follows scrolling.
-   if(innerWidth>650&&!stackedRelationships){
+   if(!stackedRelationships){
     if(section.querySelectorAll('[data-stage="1"] [data-stage-node]').length>1&&!right.querySelector('.is-current')){
      blocks.filter(b=>!b.hidden&&b.dataset.branch).forEach(block=>{const parent=node(1,block.dataset.branch);if(parent)parent.style.minHeight=block.getBoundingClientRect().height+'px';});
     }
@@ -249,7 +253,7 @@
       else block.style.transform=`translateY(${offset}px)`;
      }else{
       const gap=parent.getBoundingClientRect().top-block.getBoundingClientRect().top;
-      if(gap>0&&!(middleNodes.length===1&&middleNodes[0].classList.contains('is-current')))block.style.marginTop=gap+'px';
+      if(gap>0&&middleNodes.length!==1)block.style.marginTop=gap+'px';
      }
     }
     const header=document.querySelector('#header-placeholder .profile,.treatment-detail-sticky-header'),headerBox=header?.getBoundingClientRect();
@@ -268,7 +272,7 @@
      });
     }
    }
-   if(innerWidth>650&&!stackedRelationships)for(const block of blocks){
+   if(!stackedRelationships)for(const block of blocks){
     const cards=[...block.querySelectorAll('.ux-stage-node:not([hidden])')],add=block.querySelector('.ux-stage-add'),parent=node(1,block.dataset.branch);
     if(block.hidden||cards.length!==1||!add||!parent)continue;
     const center=n=>{const r=n.getBoundingClientRect();return r.top+r.height/2;};
@@ -276,7 +280,7 @@
     const previous=Number(block.style.transform.match(/translateY\(([-\d.]+)px\)/)?.[1]||0);
     block.style.transform=`translateY(${previous+correction}px)`;
    }
-   if(innerWidth>650&&!stackedRelationships){
+   if(!stackedRelationships){
     const current=right.querySelector('.ux-stage-block:not([hidden]) .is-current');
     if(current){
      const parents=edges.filter(([from,,to,id])=>from===1&&to===2&&String(id)===current.dataset.stageNode).map(([,id])=>node(1,id));
@@ -288,16 +292,46 @@
      }
     }
    }
-   // A single group-to-substance link shares one horizontal center line.
-   // Align after the other columns have finished positioning their cards.
-   if(innerWidth>650){
-    const parents=[...stack.querySelectorAll('.ux-stage-node')].filter(n=>n.getClientRects().length);
-    if(parents.length===1&&!parents[0].classList.contains('is-current')){
-     const parent=parents[0],children=edges.filter(([from,id,to])=>from===0&&String(id)===parent.dataset.stageNode&&to===1)
-      .map(([, ,to,id])=>node(to,id)).filter(n=>n?.getClientRects().length);
-     if(children.length===1){
-      const a=parent.getBoundingClientRect(),b=children[0].getBoundingClientRect();
-      stack.style.transform=`translateY(${b.top+b.height/2-a.top-a.height/2}px)`;
+   // Shared details have one card, centered between all of their parents.
+   for(const block of blocks){
+    const cards=[...block.querySelectorAll('.ux-stage-node:not([hidden])')];
+    if(cards.length!==1||!block.getClientRects().length)continue;
+    const card=cards[0];
+    const parents=edges.filter(([from,,to,id])=>from===1&&to===2&&String(id)===card.dataset.stageNode)
+     .map(([,id])=>node(1,id)).filter(n=>n?.getClientRects().length);
+    if(parents.length<2)continue;
+    const centers=parents.map(n=>{const r=n.getBoundingClientRect();return r.top+r.height/2;});
+    const r=card.getBoundingClientRect(),previous=Number(block.style.transform.match(/translateY\(([-\d.]+)px\)/)?.[1]||0);
+    block.style.transform='translateY('+(previous+(Math.min(...centers)+Math.max(...centers))/2-r.top-r.height/2)+'px)';
+   }
+   // Multiple substances keep their details in normal flow, directly opposite the parent.
+   // Never pull a block above its heading or across the preceding block.
+   if(middleNodes.length>1){
+    const visible=blocks.filter(block=>block.getClientRects().length&&block.querySelector('.ux-stage-node:not([hidden])'));
+    visible.sort((a,b)=>(node(1,a.dataset.branch)?.getBoundingClientRect().top||0)-(node(1,b.dataset.branch)?.getBoundingClientRect().top||0));
+    const host=right.querySelector('.ux-stage-stack'),hint=host.querySelector('.ux-stage-add-hint');
+    const order=[...host.children].filter(block=>visible.includes(block));
+    if(order.some((block,i)=>block!==visible[i]))visible.forEach(block=>host.insertBefore(block,hint));
+    visible.forEach(block=>{block.style.transform='';block.style.marginTop='';block.style.flexShrink='0';});
+    visible.forEach(block=>{
+     const parent=node(1,block.dataset.branch),cards=[...block.querySelectorAll('.ux-stage-node:not([hidden])')];
+     if(!parent||!cards.length)return;
+     const a=parent.getBoundingClientRect(),first=cards[0].getBoundingClientRect(),last=cards[cards.length-1].getBoundingClientRect();
+     block.style.marginTop=Math.max(0,a.top+a.height/2-(first.top+first.height/2+last.top+last.height/2)/2)+'px';
+    });
+   }
+   // Balance both sides around a single substance. Equal row counts share row axes.
+   if(middleNodes.length===1){
+    const center=row=>{const r=row.getBoundingClientRect();return r.top+r.height/2;};
+    const leftRows=[...stack.children].filter(row=>row.matches('.ux-stage-node,.ux-stage-add')&&row.getClientRects().length);
+    const rightRows=blocks.filter(block=>block.getClientRects().length).flatMap(block=>[...block.querySelectorAll('.ux-stage-node:not([hidden]),.ux-stage-add')]).filter(row=>row.getClientRects().length);
+    if(leftRows.length>1){
+     stack.style.transform='';
+     if(leftRows.length===rightRows.length){
+      leftRows.forEach((row,i)=>row.style.transform=`translateY(${center(rightRows[i])-center(row)}px)`);
+     }else{
+      const target=center(middleNodes[0]);
+      stack.style.transform=`translateY(${target-(center(leftRows[0])+center(leftRows[leftRows.length-1]))/2}px)`;
      }
     }
    }
@@ -312,14 +346,23 @@
     groups.get(key).targets.add(b);
    }
    for(const [from,a,to,b] of edges)line(node(from,a),node(to,b),false,to===2);
+   section.querySelectorAll('[data-pending-parent-id]').forEach(tile=>{
+    const level=Number(tile.closest('[data-stage]')?.dataset.stage);
+    if(level===2)line(node(1,tile.dataset.pendingParentId),tile,false,true);
+    else if(level===0)line(tile,node(1,tile.dataset.pendingChildId),false,false);
+   });
    section.querySelectorAll('[data-pending-group]').forEach(parent=>{section.querySelectorAll('[data-pending-group-member]').forEach(child=>{if(child.dataset.pendingGroupMember.split(' ').includes(parent.dataset.pendingGroup))line(parent,child,false,false);});});
    section.querySelectorAll('.ux-stage-add').forEach(button=>{const level=Number(button.closest('[data-stage]').dataset.stage),id=Number(button.dataset.sourceId);if(level===0)line(button,node(1,id),true,false);else if(level===2&&!button.dataset.sourceOptions)line(node(1,id)||node(0,id),button,true,true);else if(level===1)line(node(0,id),button,true,false);});
    for(const {a,targets,added,right} of groups.values()){
     const ra=a.getBoundingClientRect(),ay=ra.top+ra.height/2-rect.top;
     const boxes=[...targets].map(b=>b.getBoundingClientRect()),forward=boxes[0].left>ra.left;
     const ax=(forward?ra.right:ra.left)-rect.left;
-    const bx=(forward?Math.min(...boxes.map(b=>b.left)):Math.max(...boxes.map(b=>b.right)))-rect.left;
-    const bus=(ax+bx)/2,ys=boxes.map(b=>b.top+b.height/2-rect.top);
+    // Use the column gutter for every branch, including dashed add actions.
+    // Card widths can differ slightly; their midpoints would create offset buses.
+    const sourceColumn=a.closest('[data-stage]').getBoundingClientRect();
+    const targetColumn=[...targets][0].closest('[data-stage]').getBoundingClientRect();
+    const bus=(forward?(sourceColumn.right+targetColumn.left)/2:(sourceColumn.left+targetColumn.right)/2)-rect.left;
+    const ys=boxes.map(b=>b.top+b.height/2-rect.top);
     let d=`M${ax},${ay} H${bus} M${bus},${Math.min(ay,...ys)} V${Math.max(ay,...ys)}`;
     boxes.forEach((b,i)=>{d+=` M${bus},${ys[i]} H${(forward?b.left:b.right)-rect.left}`;});
     path(d,added,right);
@@ -327,6 +370,7 @@
    svg.replaceChildren(...paths);
   }
   function schedule(){if(!frame)frame=requestAnimationFrame(draw);}
+  document.fonts?.ready.then(schedule);
   schedule();
   new ResizeObserver(schedule).observe(columns);new MutationObserver(schedule).observe(columns,{childList:true,subtree:true});window.addEventListener('hashchange',schedule);window.addEventListener('resize',schedule);window.addEventListener('scroll',schedule,{capture:true,passive:true});
  });
