@@ -3,7 +3,9 @@
   const root = document.querySelector('.ux-detail');
   if (!root) return;
   const grid = root.querySelector('[data-treatment-dashboard]');
-  let draft = {}, serverCounts = {}, comparisonProfiles = [], symptomHelp = {symptoms:[],catalog:[]}, busy = false, loaded = false;
+  const treatmentId = Number(root.dataset.treatmentId);
+  const answerParams = {treatment_id:treatmentId, ...(grid ? {} : {include_comparison:'0'})};
+  let draft = {}, serverCounts = {}, comparisonProfiles = [], dummyCounts = {}, symptomHelp = {symptoms:[],catalog:[]}, busy = false, loaded = false;
   const endpoint = 'api/treatment_answer.php';
   const statusNode = document.createElement('p');statusNode.setAttribute('role','status');statusNode.className='ux-test-notice ux-answer-status';root.querySelector('#view-content').prepend(statusNode);
   let feedbackTimer;
@@ -13,9 +15,11 @@
     root.querySelectorAll('[data-option],[data-clear],[data-segment],[data-symptom-id],[data-symptom-search],[data-symptom-toggle]').forEach(b=>{b.disabled=true;b.setAttribute('aria-disabled','true');});
     notify(payload?'Wird gespeichert …':'Bewertungen werden geladen …');
     try {
-      const response=await fetch(payload?endpoint:endpoint+'?treatment_id='+encodeURIComponent(root.dataset.treatmentId),payload?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({treatment_id:Number(root.dataset.treatmentId),...payload})}:{cache:'no-store'});
+      const response=await fetch(payload?endpoint:endpoint+'?'+new URLSearchParams(answerParams),payload?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...answerParams,...payload})}:{cache:'no-store'});
       const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'Bewertungen konnten nicht geladen werden.');
-      draft=data.own_answers||{};serverCounts=data.counts||{};comparisonProfiles=data.comparison_profiles||[];symptomHelp=data.symptom_help||{symptoms:[],catalog:[]};loaded=true;renderAfterSelection();notify(payload?(payload.action==='clear'?'Deine Stimme wurde zurückgenommen.':'Deine Angabe wurde gespeichert.'):'',Boolean(payload));
+      draft=data.own_answers||{};serverCounts=data.counts||{};comparisonProfiles=data.comparison_profiles||[];
+      dummyCounts=data.dummy_counts??comparisonProfiles.find(profile=>profile.id===treatmentId)?.dummy_counts??{};
+      symptomHelp=data.symptom_help||{symptoms:[],catalog:[]};loaded=true;renderAfterSelection();notify(payload?(payload.action==='clear'?'Deine Stimme wurde zurückgenommen.':'Deine Angabe wurde gespeichert.'):'',Boolean(payload));
       if (payload?.action === 'answer') window.dispatchEvent(new CustomEvent('lcn-experience-answer-saved', {detail: payload.question}));
       return true;
     }catch(error){notify(error.message+' Deine letzte bestätigte Auswahl bleibt unverändert.');return false;}
@@ -30,7 +34,7 @@
   function displayedCounts(card,contextKey=key(card)) {
     // Real counts already include the saved answer; examples are added only for display.
     const real=serverCounts[contextKey] || (contextKey===key(card)?JSON.parse(card.dataset.counts):[]);
-    const sample=demo?comparisonProfiles.find(p=>p.id===Number(root.dataset.treatmentId))?.dummy_counts?.[card.dataset.question]:null;
+    const sample=demo?dummyCounts[card.dataset.question]:null;
     return Array.from({length:card.querySelectorAll('[data-option]').length},(_,i)=>Number(real[i]||0)+Number(sample?.[i]||0));
   }
   function countsFor(card) {
@@ -477,6 +481,6 @@
   window.addEventListener('lcn-exchange-rates',()=>{renderCostControls();});
   window.addEventListener('lcn-symptoms-updated',()=>{if(busy)setTimeout(()=>sync(),300);else sync();});
   renderAll();
-  sync();
+  root.lcnInitialAnswers = sync();
 })();
 

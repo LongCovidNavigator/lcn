@@ -858,8 +858,7 @@ let nearbyGpsProviderIcon = null;
 let nearbyGpsMarkersByLocation = new Map();
 const homepageSharedLocationStorageKey = "lcn_shared_location_preference";
 const homepageSharedLocationClearedStorageKey = "lcn_shared_location_cleared";
-const homepageGermanyCenter = { lat: 51.1657, lng: 10.4515, label: "Deutschland" };
-const homepagePrimaryCareTreatmentId = 409;
+const homepageGermanyCenter = window.LCNPrimaryCare?.germanyCenter || { lat: 51.1657, lng: 10.4515, label: "Deutschland" };
 
 function initNearbyGps() {
     const form = document.getElementById("nearby-gps-form");
@@ -993,9 +992,7 @@ async function loadGpsAcrossGermany() {
     status.classList.remove("is-error");
     status.textContent = "Hausärztliche Anlaufstellen in Deutschland werden geladen …";
     try {
-        const response = await fetch(buildHomepagePrimaryCareUrl(homepageGermanyCenter));
-        const data = await response.json();
-        if (!response.ok || !data.ok) throw new Error("Die hausärztlichen Therapien sind gerade nicht verfügbar.");
+        const data = await window.LCNPrimaryCare.loadMap(homepageGermanyCenter);
         const gps = getHomepagePrimaryCareProviders(data, false);
         renderNearbyGps(homepageGermanyCenter, gps, false);
         status.textContent = `${gps.length} hausärztliche Anlaufstellen in Deutschland auf der Karte.`;
@@ -1021,9 +1018,7 @@ async function loadNearbyGpsForLocation(location, restored, requestedRadiusKm) {
     status.textContent = restored ? "Hausärztliche Anlaufstellen am gespeicherten Standort werden geladen …" : "Hausärzt:innen in der Nähe werden geladen …";
     const discovery = usesNearbyDiscovery();
     const discoveryRadiusKm = document.body.dataset.searchTitle === 'Hausarztsuche' ? 25 : 50;
-    const response = await fetch(buildHomepagePrimaryCareUrl(location, discovery ? undefined : radiusKm));
-    const data = await response.json();
-    if (!response.ok || !data.ok) throw new Error("Die hausärztlichen Therapien sind gerade nicht verfügbar.");
+    const data = await window.LCNPrimaryCare.loadMap(location, discovery ? undefined : radiusKm);
     let gps = getHomepagePrimaryCareProviders(data, true);
     if (discovery) {
         gps = getNearestHomepagePrimaryCareProviders(gps);
@@ -1038,23 +1033,6 @@ async function loadNearbyGpsForLocation(location, restored, requestedRadiusKm) {
     status.textContent = gps.length
         ? `${gps.length} Behandler:innen der hausärztlichen Therapie im Umkreis von ${radiusKm} km gefunden.`
         : `Im Umkreis von ${radiusKm} km wurden aktuell keine Behandler:innen der hausärztlichen Therapie gefunden.`;
-}
-
-function buildHomepagePrimaryCareUrl(location, radiusKm) {
-    const params = new URLSearchParams({
-        treat_ids: String(homepagePrimaryCareTreatmentId),
-        only_with_provider: "1",
-        include_map: "1",
-        mapped_providers_only: "1",
-        lat: String(location.lat),
-        lng: String(location.lng)
-    });
-    if (Number.isFinite(radiusKm)) {
-        params.set("provider_lat", String(location.lat));
-        params.set("provider_lng", String(location.lng));
-        params.set("radius_km", String(radiusKm));
-    }
-    return `api/treatments_search.php?${params.toString()}`;
 }
 
 function getHomepagePrimaryCareProviders(data, sortByDistance) {
@@ -1112,7 +1090,7 @@ function renderNearbyGps(location, doctors, hasUserLocation, radiusKm) {
     }
     list.innerHTML = doctors.length ? doctors.map(function (doctor, index) { return buildNearbyGpCard(doctor, hasUserLocation, index + 1); }).join("")
         : '<p class="nearby-gps-status">Versuche alternativ die vollständige Behandler:innen-Suche.</p>';
-    allLink.href = `therapie_detail.html?treat_id=${homepagePrimaryCareTreatmentId}`;
+    allLink.href = `therapie_detail.html?treat_id=${window.LCNPrimaryCare.treatmentId}`;
 
     if (typeof L === "undefined") return;
     if (!nearbyGpsMap) {

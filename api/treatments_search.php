@@ -4,6 +4,7 @@ require_once __DIR__ . '/_experience_search.php';
 require_once __DIR__ . '/_treatment_routes.php';
 require_once __DIR__ . '/_doctor_online.php';
 require_once __DIR__ . '/_search_normalization.php';
+require_once __DIR__ . '/_search_response.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -694,6 +695,8 @@ try {
     }
 
     $experienceSql = lcnExperienceSearchSql('treatment', ($_GET['include_dummy'] ?? '') === '1');
+    $hasCoordinatesSql = "l.loc_lat IS NOT NULL AND l.loc_lng IS NOT NULL
+                          AND l.loc_lat <> '' AND l.loc_lng <> ''";
     $baseSql = "
         FROM (
             SELECT
@@ -740,143 +743,62 @@ try {
                     COALESCE(experience.healing, 0) AS healing,
                     COALESCE(experience.total_votes, 0) AS total_votes,
 
-                    COALESCE(pc.provider_count, 0) AS total_provider_count,
+                    COALESCE(pc.total_provider_count, 0) AS total_provider_count,
 
                     CASE
                         WHEN :mapped_providers_only_for_select = 1
-                        THEN COALESCE(kpc.mapped_provider_count, 0)
-                        ELSE COALESCE(pc.provider_count, 0)
+                        THEN COALESCE(pc.mapped_provider_count, 0)
+                        ELSE COALESCE(pc.total_provider_count, 0)
                     END AS provider_count,
 
-                    COALESCE(mpc.matching_provider_count, 0) AS matching_provider_count
-                    ,COALESCE(upc.unlocated_provider_count, 0) AS unlocated_provider_count
+                    COALESCE(pc.matching_provider_count, 0) AS matching_provider_count,
+                    COALESCE(pc.unlocated_provider_count, 0) AS unlocated_provider_count
 
                 FROM {$catalogSql} t
                 LEFT JOIN {$experienceSql} experience ON experience.id = t.treat_id
 
                 LEFT JOIN (
-                    SELECT treat_id,
-                           SUM(vote = 'pro') AS pro,
-                           SUM(vote = 'neutral') AS neutral,
-                           SUM(vote = 'contra') AS contra
-                    FROM v_lcn_treatment_votes
-                    WHERE review_status IN ('active', 'approved')
-                    GROUP BY treat_id
-                ) lv ON lv.treat_id = t.treat_id
-
-                LEFT JOIN (
-                    SELECT
-                        TRIM(Behandlung) AS behandlung_key,
-                        SUM(COALESCE(pro, 0)) AS pro,
-                        SUM(COALESCE(neutral, 0)) AS neutral,
-                        SUM(COALESCE(contra, 0)) AS contra
-                    FROM v_lcn_empty_treatment_votes
-                    WHERE Behandlung IS NOT NULL
-                      AND TRIM(Behandlung) <> ''
-                    GROUP BY TRIM(Behandlung)
-                ) rv
-                    ON LOWER(TRIM(t.behandlung)) COLLATE utf8mb4_unicode_ci
-                     = LOWER(rv.behandlung_key) COLLATE utf8mb4_unicode_ci
-
-                LEFT JOIN (
-                    SELECT
-                        treat_id,
-                        COUNT(DISTINCT dr_id) AS provider_count
-                    FROM {$providerSourceSql} provider_relations
-                    WHERE treat_id IS NOT NULL
-                      AND dr_id IS NOT NULL
-                    GROUP BY treat_id
-                ) pc
-                    ON t.treat_id = pc.treat_id
-
-                LEFT JOIN (
                     SELECT
                         c.treat_id,
-                        COUNT(DISTINCT c.dr_id) AS mapped_provider_count
-                    FROM {$providerSourceSql} c
-                    INNER JOIN v_lcn_doctors d
-                        ON c.dr_id = d.dr_id
-                    INNER JOIN tbl_drs_locations_03 l
-                        ON c.dr_id = l.dr_id
-                    WHERE c.treat_id IS NOT NULL
-                      AND c.dr_id IS NOT NULL
-                      AND l.loc_lat IS NOT NULL
-                      AND l.loc_lng IS NOT NULL
-                      AND l.loc_lat <> ''
-                      AND l.loc_lng <> ''
-                      AND (:accepts_gkv_for_mapped = 0 OR d.dr_accepts_gkv = 'yes')
-                    GROUP BY c.treat_id
-                ) kpc
-                    ON t.treat_id = kpc.treat_id
-
-                LEFT JOIN (
-                    SELECT
-                        c.treat_id,
-                        COUNT(DISTINCT c.dr_id) AS matching_provider_count
-                    FROM {$providerSourceSql} c
-                    INNER JOIN v_lcn_doctors d
-                        ON c.dr_id = d.dr_id
-                    INNER JOIN tbl_drs_locations_03 l
-                        ON c.dr_id = l.dr_id
-                    WHERE c.treat_id IS NOT NULL
-                      AND c.dr_id IS NOT NULL
-                      AND (:accepts_gkv_for_count = 0 OR d.dr_accepts_gkv = 'yes')
-                      AND (
-                            :mapped_providers_only_for_count = 0
-                            OR (
-                                l.loc_lat IS NOT NULL
-                                AND l.loc_lng IS NOT NULL
-                                AND l.loc_lat <> ''
-                                AND l.loc_lng <> ''
-                            )
-                      )
-                      AND (:provider_city_for_count = ''
-                           OR l.loc_city COLLATE utf8mb4_unicode_ci LIKE :provider_city_like_for_count)
-                      AND (
-                            :has_provider_radius_for_count = 0
-                            OR (
-                                l.loc_lat IS NOT NULL
-                                AND l.loc_lng IS NOT NULL
-                                AND l.loc_lat <> ''
-                                AND l.loc_lng <> ''
-                                AND (
-                                    6371 * 2 * ASIN(
-                                        SQRT(
-                                            POW(SIN(RADIANS(l.loc_lat - :provider_lat_for_count_a) / 2), 2)
-                                            + COS(RADIANS(:provider_lat_for_count_b))
-                                            * COS(RADIANS(l.loc_lat))
-                                            * POW(SIN(RADIANS(l.loc_lng - :provider_lng_for_count) / 2), 2)
-                                        )
+                        COUNT(DISTINCT c.dr_id) AS total_provider_count,
+                        COUNT(DISTINCT CASE WHEN {$hasCoordinatesSql}
+                            THEN c.dr_id END) AS mapped_provider_count,
+                        COUNT(DISTINCT CASE
+                            WHEN l.dr_id IS NOT NULL
+                            AND (:mapped_providers_only_for_count = 0 OR ({$hasCoordinatesSql}))
+                            AND (:provider_city_for_count = ''
+                                 OR l.loc_city COLLATE utf8mb4_unicode_ci LIKE :provider_city_like_for_count)
+                            AND (:has_provider_radius_for_count = 0 OR (
+                                {$hasCoordinatesSql}
+                                AND 6371 * 2 * ASIN(
+                                    SQRT(
+                                        POW(SIN(RADIANS(l.loc_lat - :provider_lat_for_count_a) / 2), 2)
+                                        + COS(RADIANS(:provider_lat_for_count_b))
+                                        * COS(RADIANS(l.loc_lat))
+                                        * POW(SIN(RADIANS(l.loc_lng - :provider_lng_for_count) / 2), 2)
                                     )
                                 ) <= :radius_km_for_count
-                            )
-                      )
-                    GROUP BY c.treat_id
-                ) mpc
-                    ON t.treat_id = mpc.treat_id
-
-                LEFT JOIN (
-                    SELECT
-                        c.treat_id,
-                        COUNT(DISTINCT c.dr_id) AS unlocated_provider_count
+                            ))
+                            THEN c.dr_id END) AS matching_provider_count,
+                        COUNT(DISTINCT CASE WHEN d.dr_id IS NOT NULL AND NOT EXISTS (
+                            SELECT 1
+                            FROM tbl_drs_locations_03 ul
+                            WHERE ul.dr_id = d.dr_id
+                              AND ul.loc_lat IS NOT NULL
+                              AND ul.loc_lng IS NOT NULL
+                              AND ul.loc_lat <> ''
+                              AND ul.loc_lng <> ''
+                        ) THEN c.dr_id END) AS unlocated_provider_count
                     FROM {$providerSourceSql} c
-                    INNER JOIN v_lcn_doctors d
+                    LEFT JOIN v_lcn_doctors d
                         ON c.dr_id = d.dr_id
+                        AND (:accepts_gkv_for_count = 0 OR d.dr_accepts_gkv = 'yes')
+                    LEFT JOIN tbl_drs_locations_03 l
+                        ON d.dr_id = l.dr_id
                     WHERE c.treat_id IS NOT NULL
                       AND c.dr_id IS NOT NULL
-                      AND (:accepts_gkv_for_unlocated = 0 OR d.dr_accepts_gkv = 'yes')
-                      AND NOT EXISTS (
-                          SELECT 1
-                          FROM tbl_drs_locations_03 ul
-                          WHERE ul.dr_id = c.dr_id
-                            AND ul.loc_lat IS NOT NULL
-                            AND ul.loc_lng IS NOT NULL
-                            AND ul.loc_lat <> ''
-                            AND ul.loc_lng <> ''
-                      )
                     GROUP BY c.treat_id
-                ) upc
-                    ON t.treat_id = upc.treat_id
+                ) pc ON t.treat_id = pc.treat_id
             ) AS calculated
         ) AS results
     ";
@@ -894,8 +816,6 @@ try {
         ':radius_km_for_count' => $hasProviderRadius ? (float)$radiusKm : 0,
         ':accepts_gkv_for_count' => $acceptsGkv ? 1 : 0,
         ':mapped_providers_only_for_count' => $mappedProvidersOnly ? 1 : 0,
-        ':accepts_gkv_for_unlocated' => $acceptsGkv ? 1 : 0,
-        ':accepts_gkv_for_mapped' => $acceptsGkv ? 1 : 0,
     ];
 
     if ($hasTreatIdsParam) {
@@ -1037,21 +957,6 @@ try {
 		? ($subcategoriesByCategory[$category] ?? [])
 		: [];
 
-    $countSql = "
-        SELECT COUNT(*)
-        {$baseSql}
-        {$whereSql}
-    ";
-
-    $countStmt = $pdo->prepare($countSql);
-
-    foreach ($params as $key => $value) {
-        $countStmt->bindValue($key, $value);
-    }
-
-    $countStmt->execute();
-    $filteredCount = (int)$countStmt->fetchColumn();
-
     $itemsSql = "
         SELECT
             results.*
@@ -1061,14 +966,13 @@ try {
         " . ($limit > 0 ? "LIMIT {$limit}" : "") . "
     ";
 
-    $itemsStmt = $pdo->prepare($itemsSql);
-
-    foreach ($params as $key => $value) {
-        $itemsStmt->bindValue($key, $value);
+    $items = lcnNdRows($pdo, $itemsSql, $params);
+    $filteredCount = count($items);
+    if ($limit > 0 && $filteredCount === $limit) {
+        $countStmt = $pdo->prepare("SELECT COUNT(*) {$baseSql} {$whereSql}");
+        $countStmt->execute($params);
+        $filteredCount = (int)$countStmt->fetchColumn();
     }
-
-    $itemsStmt->execute();
-    $items = $itemsStmt->fetchAll();
 
     foreach ($items as &$item) {
         $item['treat_id'] = (int)$item['treat_id'];
@@ -1123,7 +1027,7 @@ try {
         unset($item);
     }
 
-    echo json_encode([
+    lcnSendSearchResults([
 		'ok' => true,
 		'count' => $filteredCount,
 		'total_count' => $totalCount,
@@ -1157,8 +1061,8 @@ try {
             'lat' => $hasUserLocationForMap ? (float)$userLat : null,
             'lng' => $hasUserLocationForMap ? (float)$userLng : null,
         ],
-        'map' => $map,
-    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+		'map' => $map,
+    ]);
 
 } catch (InvalidArgumentException $e) {
     http_response_code(400);

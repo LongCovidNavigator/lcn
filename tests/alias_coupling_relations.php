@@ -12,12 +12,12 @@ couplingCheck($group['root']===1,'Saved reference ignored');
 couplingCheck(lcnGroupMemberRelation($group,2)==='application_form'&&lcnGroupMemberRelation($group,3)==='substance_variant','Mixed relationship types lost');
 couplingCheck(lcnGroupMemberRelation($group,4)==='unspecified','Oral keyword incorrectly classified');
 $m=ndRelationshipStages($g,1);$blocks=[];foreach($m['stages'][2]['blocks'] as $b)$blocks[$b['heading']]=array_keys($b['nodes']);
-couplingCheck($blocks['Anwendungsformen']===[2]&&$blocks['Stoffvarianten']===[3]&&$blocks['Zugeordnete Einträge (Art offen)']===[4],'Display guessed or mixed relationship types');
+couplingCheck($blocks['Applikation']===[2]&&$blocks['Stoffvarianten']===[3]&&$blocks['Zugeordnete Einträge (Art offen)']===[4],'Display guessed or mixed relationship types');
 couplingCheck(str_contains(ndRelationshipAssertion($g,'ag:10:t:2')['statement'],'Anwendungsform'),'Feedback lost specific meaning');
 $p=lcnTreatmentsNdDatabase();$g=lcnTreatmentDiscoveryGraph($p);
 $combination=ndRelationshipStages($g,397);
 couplingCheck($combination['stages'][1]['title']==='Verfahren','Supplement combination must remain a normal therapy');
-couplingCheck(!in_array('Stoffvarianten',array_column($combination['stages'][2]['blocks'],'heading'),true)&&!in_array('Anwendungsformen',array_column($combination['stages'][2]['blocks'],'heading'),true),'Empty substance blocks invented for a combination');
+couplingCheck(!in_array('Stoffvarianten',array_column($combination['stages'][2]['blocks'],'heading'),true)&&!in_array('Applikation',array_column($combination['stages'][2]['blocks'],'heading'),true),'Empty substance blocks invented for a combination');
 foreach($g['groups'] as $group){
  if($group['name']==='Psychotherapie')couplingCheck(lcnGroupMemberRelation($group,515)==='group_member','EMDR must be group member, not detailed method');
  if($group['name']==='Magnesium')foreach($group['members'] as $id){$name=$g['entries'][$id]['treatmentname'];couplingCheck(lcnGroupMemberRelation($group,$id)===($name==='Magnesium-Infusion'?'application_form':'substance_variant'),'Magnesium coupling not explicit');}

@@ -1,8 +1,11 @@
 /* Contextual relationship proposals: choose one entry, keep the choice visible, then submit. */
 (()=>{document.addEventListener('DOMContentLoaded',()=>{
  const page=document.querySelector('.ux-detail[data-treatment-id]');if(!page)return;
- const pageId=Number(page.dataset.treatmentId),api=window.LCNCatalogRelations,status=document.querySelector('[data-treatment-relation-status]');if(!api)return;
- const make=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};let catalog;
+ const pageId=Number(page.dataset.treatmentId),api=window.LCNCatalogRelations;
+ const panel=document.getElementById('alternativen'),status=panel?.querySelector('[data-treatment-relation-status]');
+ if(!api||!status)return;
+ const make=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};
+ let catalog,catalogRequest;
  // Pending classifications use the same header and feedback position as saved nodes.
  function alignPendingStage(node){
   if(!node.classList.contains('ux-stage-node'))return;
@@ -49,10 +52,11 @@
    }
    if(rootPage)middle.querySelectorAll('[data-kind="group_contains"]').forEach(n=>n.remove());
    if(!rootPage)continue;
-   const add=make('button','＋ Weiteren Eintrag zu „'+name+'“ hinzufügen');add.type='button';add.className='ux-stage-add';const icon=make('span','＋'),label=make('span','Weiteren Eintrag zu „'+name+'“ hinzufügen');icon.className='ux-stage-add-icon';icon.setAttribute('aria-hidden','true');add.replaceChildren(icon,label);add.dataset.pendingRelationship='add-'+own.submission_id;add.dataset.treatmentRelationAdd='';add.dataset.kind='group_contains';add.dataset.sourceId=pageId;add.dataset.groupId=own.group_alias_id||0;add.dataset.groupName=name;middle.append(add);
+   const label=section.dataset.relationshipDomain==='therapy'?'Weiteren Eintrag hinzufügen':'Weiteren Eintrag zu „'+name+'“ hinzufügen';
+   const add=make('button'),icon=make('span','＋');add.type='button';add.className='ux-stage-add';icon.className='ux-stage-add-icon';icon.setAttribute('aria-hidden','true');add.append(icon,make('span',label));add.dataset.pendingRelationship='add-'+own.submission_id;add.dataset.treatmentRelationAdd='';add.dataset.kind='group_contains';add.dataset.sourceId=pageId;add.dataset.groupId=own.group_alias_id||0;add.dataset.groupName=name;middle.append(add);
   }
  }
- async function load(){
+ async function fetchAndRenderCatalog(){
   catalog=await api.request('api/treatment_relationship_proposals.php?id='+pageId);status.textContent='';
   const combinations=document.querySelector('[data-combination-section]');
   document.querySelectorAll('[data-pending-relationship]').forEach(n=>n.remove());
@@ -94,8 +98,24 @@
   const empty=combinations?.querySelector('.ux-combination-empty');if(empty)empty.hidden=!!combinations.querySelector('[data-pending-combination]');
   document.dispatchEvent(new CustomEvent('lcn-combination-diagrams-changed'));return catalog;
  }
- load().catch(e=>{status.textContent=e.message;});
- document.addEventListener('lcn-treatment-relations-changed',()=>load().catch(e=>{status.textContent=e.message;}));
+ async function load(refresh=false){
+  if(refresh&&catalogRequest)await catalogRequest.catch(()=>{});
+  if(!catalogRequest&&(refresh||!catalog)){
+   catalogRequest=fetchAndRenderCatalog().catch(error=>{
+    catalog=null;
+    throw error;
+   }).finally(()=>{catalogRequest=null;});
+  }
+  return catalogRequest||catalog;
+ }
+ const showError=error=>{status.textContent=error.message;};
+ function loadVisibleCatalog(){
+  if(!panel.hidden)load().catch(showError);
+ }
+ page.lcnLoadRelationshipCatalog=load;
+ document.addEventListener('lcn-treatment-view-changed',loadVisibleCatalog);
+ document.addEventListener('lcn-treatment-relations-changed',()=>load(true).catch(showError));
+ loadVisibleCatalog();
  document.addEventListener('click',async event=>{
   const button=event.target.closest('[data-treatment-relation-add]');if(!button)return;
   const existingContainer=button.closest('.ux-stage-block,.ux-stage-column')||button.closest('.card');
@@ -113,8 +133,8 @@
    form.append(groupField,targetField,selection,extras,hint,message,actions);dialog.append(form);document.body.append(dialog);dialog.addEventListener('close',()=>dialog.remove());
    let target=null,group=null,targets=[],groups=[],saving=false;let targetCombo,groupCombo;
    hint.textContent='Du kannst mehrere Einträge auswählen und danach weitersuchen. Alle Vorschläge erscheinen mit „Prüfung ausstehend“.';
-   const titles={alternative:'Alternative Therapie vorschlagen',group_contains:'Eintrag zur Gruppe hinzufügen',belongs_to_group:'Gruppe zuordnen',has_trade:'Handelsname ergänzen',trade_of:'Wirkstoff zuordnen',has_form:'Anwendungsform ergänzen',form_of:'Übergeordnete Substanz zuordnen',has_component:'Bestandteil ergänzen',component_of:'Kombination ergänzen',has_variant:'Stoffvariante / Darreichung ergänzen',variant_of:'Übergeordnete Substanz zuordnen',has_detail:'Anwendung ergänzen',detail_of:'Übergeordnetes Verfahren zuordnen'};
-   const targetLabels={alternative:'Alternative Therapie auswählen',group_contains:'Eintrag auswählen',has_trade:'Handelsname auswählen',trade_of:'Wirkstoff auswählen',has_form:'Anwendungsform auswählen',form_of:'Übergeordneten Eintrag auswählen',has_component:'Bestandteil auswählen',component_of:'Kombination auswählen',has_variant:'Stoffvariante / Darreichung auswählen',variant_of:'Übergeordnete Substanz auswählen',has_detail:'Anwendung auswählen',detail_of:'Übergeordnetes Verfahren auswählen'};
+   const titles={alternative:'Alternative Therapie vorschlagen',group_contains:'Eintrag zur Gruppe hinzufügen',belongs_to_group:'Gruppe zuordnen',has_trade:'Handelsname ergänzen',trade_of:'Wirkstoff zuordnen',has_form:'Applikation ergänzen',form_of:'Übergeordnete Substanz zuordnen',has_component:'Bestandteil ergänzen',component_of:'Kombination ergänzen',has_variant:'Stoffvariante / Darreichung ergänzen',variant_of:'Übergeordnete Substanz zuordnen',has_detail:'Anwendung ergänzen',detail_of:'Übergeordnetes Verfahren zuordnen'};
+   const targetLabels={alternative:'Alternative Therapie auswählen',group_contains:'Eintrag auswählen',has_trade:'Handelsname auswählen',trade_of:'Wirkstoff auswählen',has_form:'Applikation auswählen',form_of:'Übergeordneten Eintrag auswählen',has_component:'Bestandteil auswählen',component_of:'Kombination auswählen',has_variant:'Stoffvariante / Darreichung auswählen',variant_of:'Übergeordnete Substanz auswählen',has_detail:'Anwendung auswählen',detail_of:'Übergeordnetes Verfahren auswählen'};
    function preview(){
     const grouped=['belongs_to_group','group_contains'].includes(kind.value),entries=kind.value==='belongs_to_group'?groups:targets;
     send.disabled=saving||!source||!entries.length||(grouped&&kind.value!=='belongs_to_group'&&!group);
@@ -129,7 +149,7 @@
      if(group&&button.dataset.chooseKind!=='1')groupField.append(make('p','Gruppe: '+group.name));
      else groupCombo=api.combo(groupField,{label:'Gruppe auswählen',retainSelection:kind.value!=='belongs_to_group',keepOpenOnSelect:kind.value==='belongs_to_group',missingLabel:'＋ Neue Gruppe vorschlagen',items:()=>data.groups.filter(n=>!groups.some(g=>g.id===n.id)),onInput:()=>{if(kind.value!=='belongs_to_group')group=null;preview();},onSelect:item=>{group=data.groups.find(n=>n.id===item.id)||item;if(kind.value==='belongs_to_group')groups.push(group);preview();},onMissing:name=>{if(name.trim().length<2){message.textContent='Bitte einen Gruppennamen eingeben.';return;}group={id:0,name:name.trim()};if(kind.value==='belongs_to_group'&&!groups.some(g=>g.name===group.name))groups.push(group);preview();}});
     }
-    if(!targetField.hidden)targetCombo=api.combo(targetField,{label:button.dataset.targetLabel||targetLabels[kind.value],keepOpenOnSelect:true,items:()=>data.items.filter(n=>!targets.some(t=>t.id===n.id)&&n.id!==source&&n.id!==pageId&&!(sourceOptions.length?[...document.querySelectorAll('[data-stage="2"] .ux-stage-block')].filter(b=>Number(b.dataset.branch)===source).some(b=>[...b.querySelectorAll('a[href*="treatment_id="]')].some(a=>Number(new URL(a.href).searchParams.get('treatment_id'))===n.id)):existing.has(n.id))&&(kind.value!=='component_of'||n.is_combination)&&(!['trade_of','has_trade'].includes(kind.value)||['Arzneimittel','Nahrungsergänzungsmittel','Infusionen'].includes(n.meta.split(' · ')[0]))),onInput:()=>{},onSelect:item=>{target=data.items.find(n=>n.id===item.id)||item;targets.push(target);preview();},onMissing:name=>api.entryDialog('treatment',name,{},async()=>{Object.assign(data,await load());message.textContent='Die neue Therapie ist jetzt auswählbar. Prüfung ausstehend.';targetCombo?.refresh();})});
+    if(!targetField.hidden)targetCombo=api.combo(targetField,{label:button.dataset.targetLabel||targetLabels[kind.value],keepOpenOnSelect:true,items:()=>data.items.filter(n=>!targets.some(t=>t.id===n.id)&&n.id!==source&&n.id!==pageId&&!(sourceOptions.length?[...document.querySelectorAll('[data-stage="2"] .ux-stage-block')].filter(b=>Number(b.dataset.branch)===source).some(b=>[...b.querySelectorAll('a[href*="treatment_id="]')].some(a=>Number(new URL(a.href).searchParams.get('treatment_id'))===n.id)):existing.has(n.id))&&(kind.value!=='component_of'||n.is_combination)&&(!['trade_of','has_trade'].includes(kind.value)||['Arzneimittel','Nahrungsergänzungsmittel','Infusionen'].includes(n.meta.split(' · ')[0]))),onInput:()=>{},onSelect:item=>{target=data.items.find(n=>n.id===item.id)||item;targets.push(target);preview();},onMissing:name=>api.entryDialog('treatment',name,{},async()=>{Object.assign(data,await load(true));message.textContent='Die neue Therapie ist jetzt auswählbar. Prüfung ausstehend.';targetCombo?.refresh();})});
     preview();
    }
    kind.addEventListener('change',fields);fields();
@@ -138,12 +158,12 @@
     const entries=[...(kind.value==='belongs_to_group'?groups:targets)];let completed=0;
     try{
      for(const entry of entries){await api.request('api/treatment_relationship_proposals.php',{source_id:source,context_id:pageId,kind:kind.value,target_id:kind.value==='belongs_to_group'?0:entry.id,group_alias_id:kind.value==='belongs_to_group'?entry.id:(group?.id||0),group_name:kind.value==='belongs_to_group'?entry.name:(group?.name||''),note:note.value,source_url:url.value});completed++;document.dispatchEvent(new CustomEvent('lcn-guide-contributed',{detail:{topic:kind.value==='alternative'?'alternative':kind.value==='component'?'combination':'classification'}}));if(kind.value==='belongs_to_group')groups=groups.filter(n=>n!==entry);else{targets=targets.filter(n=>n!==entry);existing.add(entry.id);}}
-     await load();message.textContent=completed===1?'Dein Vorschlag ist gespeichert und erscheint mit „Prüfung ausstehend“.':'Alle '+completed+' Vorschläge sind gespeichert und erscheinen mit „Prüfung ausstehend“. Du kannst weitere Einträge auswählen.';cancel.textContent='Schließen';
-    }catch(e){message.textContent=(completed?completed+' Vorschläge gespeichert. ':'')+e.message;await load().catch(()=>{});}
+     await load(true);message.textContent=completed===1?'Dein Vorschlag ist gespeichert und erscheint mit „Prüfung ausstehend“.':'Alle '+completed+' Vorschläge sind gespeichert und erscheinen mit „Prüfung ausstehend“. Du kannst weitere Einträge auswählen.';cancel.textContent='Schließen';
+    }catch(e){message.textContent=(completed?completed+' Vorschläge gespeichert. ':'')+e.message;await load(true).catch(()=>{});}
     finally{saving=false;form.inert=false;preview();targetCombo?.refresh();groupCombo?.refresh();}
 
    });
-   const refreshCatalog=async()=>{if(!dialog.open||saving)return;try{Object.assign(data,await load());targetCombo?.refresh();groupCombo?.refresh();}catch(e){message.textContent=e.message;}};window.addEventListener('focus',refreshCatalog);dialog.addEventListener('close',()=>window.removeEventListener('focus',refreshCatalog));
+   const refreshCatalog=async()=>{if(!dialog.open||saving)return;try{Object.assign(data,await load(true));targetCombo?.refresh();groupCombo?.refresh();}catch(e){message.textContent=e.message;}};window.addEventListener('focus',refreshCatalog);dialog.addEventListener('close',()=>window.removeEventListener('focus',refreshCatalog));
    dialog.showModal();
   }catch(e){status.textContent=e.message;}finally{button.disabled=false;}
  });
@@ -181,13 +201,23 @@
    [...stack.children].forEach(row=>row.style.transform='');
    const middleStack=columns.querySelector('[data-stage="1"] .ux-stage-stack');
    middleStack.style.transform='';
+   middleStack.style.marginTop='';
    const middleNodes=middleStack.querySelectorAll('.ux-stage-node');
    middleStack.style.justifyContent=middleNodes.length>1?'flex-start':'';
    // The middle column is centered by shared CSS and stays independent of scrolling.
    const right=columns.querySelector('[data-stage="2"]');
-   right.querySelector('.ux-stage-stack').style.justifyContent=middleNodes.length>1?'flex-start':'';
+   const rightStack=right.querySelector('.ux-stage-stack');
+   rightStack.style.justifyContent=middleNodes.length>1?'flex-start':'';
+   rightStack.style.marginTop='';
    const blocks=[...right.querySelectorAll('.ux-stage-block')];
    blocks.forEach(block=>{block.style.transform='';block.style.marginTop='';block.querySelectorAll('.ux-stage-add').forEach(button=>button.style.transform='');});
+   const fitOffset=(offset,bounds,top,bottom)=>Math.max(bounds.top-top,Math.min(offset,bounds.bottom-bottom));
+   function shiftRightBlock(block,offset){
+    const bounds=rightStack.getBoundingClientRect(),box=block.getBoundingClientRect();
+    const previous=Number(block.style.transform.match(/translateY\(([-\d.]+)px\)/)?.[1]||0);
+    const shift=fitOffset(offset,bounds,box.top,box.bottom);
+    block.style.transform=`translateY(${previous+shift}px)`;
+   }
    // Different relationship types for one substance form one ordered stack.
    // Moving its blocks independently would let headings and add actions overlap.
    const stackedRelationships=middleNodes.length===1&&blocks.filter(block=>block.getClientRects().length).length>1;
@@ -195,6 +225,7 @@
    // This shared tolerance uses diagram geometry only, so scrolling cannot move the card.
    const rowAlignmentTolerance=32;
    if(middleNodes.length===1){
+    let offset=0;
     const current=middleNodes[0],box=current.getBoundingClientRect(),center=box.top+box.height/2;
     const offsets=edges.filter(([from,id,to])=>from===1&&String(id)===current.dataset.stageNode&&to===2)
      .map(([, ,to,id])=>node(to,id)).filter(child=>child?.getClientRects().length)
@@ -206,16 +237,31 @@
      const centers=blocks.filter(block=>block.getClientRects().length)
       .flatMap(block=>[...block.querySelectorAll('.ux-stage-node:not([hidden]),.ux-stage-add')])
       .map(row=>{const r=row.getBoundingClientRect();return r.top+r.height/2;});
-     if(centers.length)middleStack.style.transform=`translateY(${(Math.min(...centers)+Math.max(...centers))/2-center}px)`;
+     if(centers.length)offset=(Math.min(...centers)+Math.max(...centers))/2-center;
     }else if(tradeBlock){
-     // Use the middle row(s) of the full brand list, including its add row.
      const rows=[...tradeBlock.querySelectorAll('.ux-stage-node:not([hidden]),.ux-stage-add')];
-     if(rows.length){
-      const rowCenter=row=>{const r=row.getBoundingClientRect();return r.top+r.height/2;};
+     const rowCenter=row=>{const r=row.getBoundingClientRect();return r.top+r.height/2;};
+     if(rows.length>1&&middleStack.querySelector('.ux-stage-add')){
+      // Reserve room below the centered parent for its add action in normal flow.
+      middleStack.style.justifyContent=rightStack.style.justifyContent='flex-start';
+      const target=(rowCenter(rows[0])+rowCenter(rows[rows.length-1]))/2;
+      const shift=target-rowCenter(current);
+      if(shift>=0)middleStack.style.marginTop=shift+'px';
+      else rightStack.style.marginTop=-shift+'px';
+     }else if(rows.length){
+      // Use the middle row(s) of the full brand list, including its add row.
       const target=(rowCenter(rows[Math.floor((rows.length-1)/2)])+rowCenter(rows[Math.floor(rows.length/2)]))/2;
-      middleStack.style.transform=`translateY(${target-center}px)`;
+      offset=target-center;
      }
-    }else if(offsets.length&&Math.abs(offsets[0])<=rowAlignmentTolerance)middleStack.style.transform=`translateY(${offsets[0]}px)`;
+    }else if(offsets.length&&Math.abs(offsets[0])<=rowAlignmentTolerance)offset=offsets[0];
+    if(offset){
+     const bounds=middleStack.getBoundingClientRect();
+     const rows=[...middleStack.children].filter(row=>row.getClientRects().length);
+     const first=rows[0].getBoundingClientRect(),last=rows[rows.length-1].getBoundingClientRect();
+     // Keep all middle rows, including the add action, within the column's content area.
+     const shift=fitOffset(offset,bounds,first.top,last.bottom);
+     middleStack.style.transform=`translateY(${shift}px)`;
+    }
    }
    if(!stack.querySelector('.ux-stage-node')&&stack.querySelectorAll('.ux-stage-add').length===1){
     const button=stack.querySelector('.ux-stage-add'),parent=node(1,button.dataset.sourceId);
@@ -250,7 +296,7 @@
       const center=addBox?(b.top+b.height/2+addBox.top+addBox.height/2)/2:b.top+b.height/2;
       const offset=a.top+a.height/2-center;
       if(offset>=0)block.style.marginTop=offset+'px';
-      else block.style.transform=`translateY(${offset}px)`;
+      else shiftRightBlock(block,offset);
      }else{
       const gap=parent.getBoundingClientRect().top-block.getBoundingClientRect().top;
       if(gap>0&&middleNodes.length!==1)block.style.marginTop=gap+'px';
@@ -266,7 +312,7 @@
       const button=block.querySelector('.ux-stage-add');if(!button)return;
       if(block.querySelectorAll('.ux-stage-node:not([hidden])').length===1)return;
       const box=button.getBoundingClientRect(),next=visible[index+1];
-      const bottom=Math.min(right.getBoundingClientRect().bottom-16,next?next.getBoundingClientRect().top-12:Infinity);
+      const bottom=Math.min(rightStack.getBoundingClientRect().bottom,next?next.getBoundingClientRect().top-12:Infinity);
       const offset=Math.max(0,Math.min(center-box.top-box.height/2,bottom-box.bottom));
       button.style.transform=`translateY(${offset}px)`;
      });
@@ -277,8 +323,7 @@
     if(block.hidden||cards.length!==1||!add||!parent)continue;
     const center=n=>{const r=n.getBoundingClientRect();return r.top+r.height/2;};
     const correction=center(parent)-(center(cards[0])+center(add))/2;
-    const previous=Number(block.style.transform.match(/translateY\(([-\d.]+)px\)/)?.[1]||0);
-    block.style.transform=`translateY(${previous+correction}px)`;
+    shiftRightBlock(block,correction);
    }
    if(!stackedRelationships){
     const current=right.querySelector('.ux-stage-block:not([hidden]) .is-current');
@@ -287,8 +332,7 @@
      const centers=parents.filter(n=>n?.getClientRects().length).map(n=>{const r=n.getBoundingClientRect();return r.top+r.height/2;});
      if(centers.length>1){
       const block=current.closest('.ux-stage-block'),r=current.getBoundingClientRect();
-      const previous=Number(block.style.transform.match(/translateY\(([-\d.]+)px\)/)?.[1]||0);
-      block.style.transform=`translateY(${previous+(Math.min(...centers)+Math.max(...centers))/2-r.top-r.height/2}px)`;
+      shiftRightBlock(block,(Math.min(...centers)+Math.max(...centers))/2-r.top-r.height/2);
      }
     }
    }
@@ -301,17 +345,16 @@
      .map(([,id])=>node(1,id)).filter(n=>n?.getClientRects().length);
     if(parents.length<2)continue;
     const centers=parents.map(n=>{const r=n.getBoundingClientRect();return r.top+r.height/2;});
-    const r=card.getBoundingClientRect(),previous=Number(block.style.transform.match(/translateY\(([-\d.]+)px\)/)?.[1]||0);
-    block.style.transform='translateY('+(previous+(Math.min(...centers)+Math.max(...centers))/2-r.top-r.height/2)+'px)';
+    const r=card.getBoundingClientRect();
+    shiftRightBlock(block,(Math.min(...centers)+Math.max(...centers))/2-r.top-r.height/2);
    }
    // Multiple substances keep their details in normal flow, directly opposite the parent.
    // Never pull a block above its heading or across the preceding block.
    if(middleNodes.length>1){
     const visible=blocks.filter(block=>block.getClientRects().length&&block.querySelector('.ux-stage-node:not([hidden])'));
     visible.sort((a,b)=>(node(1,a.dataset.branch)?.getBoundingClientRect().top||0)-(node(1,b.dataset.branch)?.getBoundingClientRect().top||0));
-    const host=right.querySelector('.ux-stage-stack'),hint=host.querySelector('.ux-stage-add-hint');
-    const order=[...host.children].filter(block=>visible.includes(block));
-    if(order.some((block,i)=>block!==visible[i]))visible.forEach(block=>host.insertBefore(block,hint));
+    const order=[...rightStack.children].filter(block=>visible.includes(block));
+    if(order.some((block,i)=>block!==visible[i]))rightStack.append(...visible);
     visible.forEach(block=>{block.style.transform='';block.style.marginTop='';block.style.flexShrink='0';});
     visible.forEach(block=>{
      const parent=node(1,block.dataset.branch),cards=[...block.querySelectorAll('.ux-stage-node:not([hidden])')];

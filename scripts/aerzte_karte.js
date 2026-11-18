@@ -338,8 +338,10 @@ function setupDoctorLocationModeControls() {
             const suggestion = doctorLocationSuggestions[Number(button.dataset.locationSuggestionIndex)];
             if (!suggestion || !locationInput) return;
             locationInput.value = suggestion.formatted;
+            clearTimeout(doctorLocationSuggestionTimer);
+            doctorLocationSuggestionController?.abort();
             hideDoctorLocationSuggestions();
-            applyDoctorFiltersFromControls();
+            applyDoctorFiltersFromControls(suggestion);
         });
     }
 
@@ -350,7 +352,7 @@ function setupDoctorLocationModeControls() {
     }
 }
 
-function applyDoctorFiltersFromControls() {
+function applyDoctorFiltersFromControls(locationSuggestion = null) {
     clearDoctorSearchDebounce();
 
     const filterSettings = getRatingFilterSettingsFromControls();
@@ -375,7 +377,7 @@ function applyDoctorFiltersFromControls() {
     // Publish the location only after geocoding, so other pages never receive
     // a new label paired with the previous coordinates.
     renderDoctorCompareSelection();
-    applySearchFromControls(true);
+    applySearchFromControls(true, true, locationSuggestion);
 }
 
 function setupDoctorCompareControls() {
@@ -1022,7 +1024,7 @@ function getSearchSettingsFromControls() {
     };
 }
 
-async function applySearchFromControls(resetEmptyLocation = false, persistLocation = true) {
+async function applySearchFromControls(resetEmptyLocation = false, persistLocation = true, locationSuggestion = null) {
     const locationField = document.getElementById('doctor-location-input');
     if (resetEmptyLocation && locationField && !locationField.value.trim()) {
         removeDoctorLocationPreference(false);
@@ -1050,14 +1052,18 @@ async function applySearchFromControls(resetEmptyLocation = false, persistLocati
 
     try {
         if (settings.isCityMode && settings.cityQuery !== "") {
-            const geocodedCity = currentLocation?.label === settings.cityQuery ? currentLocation : await geocodeLocation(settings.cityQuery);
+            const geocodedCity = !locationSuggestion && currentLocation?.label === settings.cityQuery
+                ? currentLocation
+                : await geocodeLocation(settings.cityQuery, locationSuggestion);
             currentCityFilter = geocodedCity.city || settings.cityQuery;
             settings.cityCenter = geocodedCity;
             currentLocation = geocodedCity;
             updateUserLocationMarker();
             if (persistLocation) saveDoctorLocationPreference();
         } else if (settings.locationQuery !== "") {
-            const geocodedLocation = currentLocation?.label === settings.locationQuery ? currentLocation : await geocodeLocation(settings.locationQuery);
+            const geocodedLocation = !locationSuggestion && currentLocation?.label === settings.locationQuery
+                ? currentLocation
+                : await geocodeLocation(settings.locationQuery, locationSuggestion);
             currentLocation = geocodedLocation;
 
             if (locationInput) {
@@ -1080,25 +1086,22 @@ async function applySearchFromControls(resetEmptyLocation = false, persistLocati
     }
 }
 
-async function geocodeLocation(query) {
-    const response = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}`);
-
-    if (!response.ok) {
-        throw new Error(`HTTP-Fehler beim Geocoding: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.ok) {
-        throw new Error(data.message || "Standort konnte nicht gefunden werden.");
+async function geocodeLocation(query, suggestion = null) {
+    let result = suggestion;
+    if (!Number.isFinite(result?.lat) || !Number.isFinite(result?.lng) || (result.lat === 0 && result.lng === 0)) {
+        const response = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error(`HTTP-Fehler beim Geocoding: ${response.status}`);
+        const data = await response.json();
+        if (!data.ok) throw new Error(data.message || "Standort konnte nicht gefunden werden.");
+        result = data.result;
     }
 
     return {
-        lat: Number(data.result.lat),
-        lng: Number(data.result.lng),
-        label: data.result.formatted || query,
-        city: data.result.city || "",
-        postcode: data.result.postcode || ""
+        lat: Number(result.lat),
+        lng: Number(result.lng),
+        label: result.formatted || query,
+        city: result.city || "",
+        postcode: result.postcode || ""
     };
 }
 

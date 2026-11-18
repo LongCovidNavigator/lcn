@@ -540,7 +540,6 @@ function bindTreatmentNavigationEvents() {
         locationInput.addEventListener("keydown", function (event) {
             if (event.key === "Enter") {
                 event.preventDefault();
-                hideTreatmentLocationSuggestions();
                 applyTreatmentLocationFromInput();
             }
 
@@ -556,8 +555,7 @@ function bindTreatmentNavigationEvents() {
             const suggestion = treatmentLocationSuggestions[Number(button.dataset.locationSuggestionIndex)];
             if (!suggestion || !locationInput) return;
             locationInput.value = suggestion.formatted;
-            hideTreatmentLocationSuggestions();
-            applyTreatmentLocationFromInput();
+            applyTreatmentLocationFromInput(suggestion);
         });
     }
 
@@ -2174,9 +2172,12 @@ function bindTreatmentMapEvents() {
     }
 }
 
-async function applyTreatmentLocationFromInput() {
+async function applyTreatmentLocationFromInput(locationSuggestion = null) {
     const locationInput = document.getElementById("treatment-location-input");
     const query = locationInput ? String(locationInput.value || "").trim() : "";
+    clearTimeout(treatmentLocationSuggestionTimer);
+    treatmentLocationSuggestionController?.abort();
+    hideTreatmentLocationSuggestions();
 
     if (query === "") {
         resetTreatmentLocation();
@@ -2187,7 +2188,7 @@ async function applyTreatmentLocationFromInput() {
     updateTreatmentMapStatus("Kartenstandort wird gesucht ...");
 
     try {
-        const geocodedLocation = await geocodeTreatmentLocation(query);
+        const geocodedLocation = await geocodeTreatmentLocation(query, locationSuggestion);
         currentTreatmentUserLocation = geocodedLocation;
 
         if (locationInput) {
@@ -2363,24 +2364,21 @@ function updateTreatmentLocationClearButton() {
     if (button) button.classList.toggle("is-hidden", !document.getElementById("treatment-location-input")?.value.trim());
 }
 
-async function geocodeTreatmentLocation(query) {
-    const response = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}`);
-
-    if (!response.ok) {
-        throw new Error(`HTTP-Fehler beim Geocoding: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.ok) {
-        throw new Error(data.message || "Standort konnte nicht gefunden werden.");
+async function geocodeTreatmentLocation(query, suggestion = null) {
+    let result = suggestion;
+    if (!Number.isFinite(result?.lat) || !Number.isFinite(result?.lng) || (result.lat === 0 && result.lng === 0)) {
+        const response = await fetch(`api/geocode_location.php?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error(`HTTP-Fehler beim Geocoding: ${response.status}`);
+        const data = await response.json();
+        if (!data.ok) throw new Error(data.message || "Standort konnte nicht gefunden werden.");
+        result = data.result;
     }
 
     return {
-        lat: Number(data.result.lat),
-        lng: Number(data.result.lng),
-        label: data.result.formatted || query,
-        city: data.result.city || ""
+        lat: Number(result.lat),
+        lng: Number(result.lng),
+        label: result.formatted || query,
+        city: result.city || ""
     };
 }
 

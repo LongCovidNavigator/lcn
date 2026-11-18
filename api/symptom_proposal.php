@@ -19,8 +19,16 @@ try{
   if(!in_array($type,['doctor','treatment'],true)||$id<1)throw new InvalidArgumentException('Ungültiger Eintrag.');
   $user=lcnVoterKey();$p->beginTransaction();
   $q=$p->prepare("SELECT submission_id,payload FROM community_submissions WHERE entity_type=? AND existing_target_id=? AND submitter_key=? AND review_status IN ('pending','reviewing') FOR UPDATE");$q->execute([$type,$id,$user]);
-  foreach($q->fetchAll(PDO::FETCH_ASSOC) as $row){$payload=json_decode($row['payload'],true);$name=trim((string)($payload['symptom_proposal']??''));if($name===''||isset($payload['registered_symptom_id']))continue;$payload['registered_symptom_id']=lcnRegisterHelpfulSymptom($p,$type,$id,$name,$user);$p->prepare('UPDATE community_submissions SET payload=? WHERE submission_id=?')->execute([json_encode($payload,JSON_UNESCAPED_UNICODE),$row['submission_id']]);}
-  $p->commit();lcnSendVoteJson(['ok'=>true]);
+  $activated=0;
+  foreach($q->fetchAll(PDO::FETCH_ASSOC) as $row){
+   $payload=json_decode($row['payload'],true);
+   $name=trim((string)($payload['symptom_proposal']??''));
+   if($name===''||isset($payload['registered_symptom_id']))continue;
+   $payload['registered_symptom_id']=lcnRegisterHelpfulSymptom($p,$type,$id,$name,$user);
+   $p->prepare('UPDATE community_submissions SET payload=? WHERE submission_id=?')->execute([json_encode($payload,JSON_UNESCAPED_UNICODE),$row['submission_id']]);
+   $activated++;
+  }
+  $p->commit();lcnSendVoteJson(['ok'=>true,'activated'=>$activated]);
  }
 
  if(!in_array($type,['doctor','treatment'],true)||mb_strlen($name)<2||mb_strlen($name)>100)throw new InvalidArgumentException('Bitte einen Symptomnamen mit 2 bis 100 Zeichen eingeben.');

@@ -1,20 +1,33 @@
 /* Classification choices describe the entry itself; relationship votes describe a link. */
 document.addEventListener('DOMContentLoaded', () => {
-  const medicationLabels = {group: 'Medikamentengruppe', ingredient: 'Wirkstoff', brand: 'Handelsname'};
-  const therapyLabels = {therapy_group: 'Übergeordnete Gruppe', therapy: 'Verfahren', detailed_method: 'Anwendung'};
+  const labels = {
+    group: 'Wirkstoffgruppe', ingredient: 'Wirkstoff', substance: 'Substanz', combination: 'Kombination',
+    brand: 'Handelsname', application_form: 'Applikation', substance_variant: 'Stoffvariante',
+    therapy_group: 'Gruppe', therapy: 'Verfahren', detailed_method: 'Anwendung'
+  };
+  const substanceRoles = ['group', 'substance'];
+  const applicationRoles = ['brand', 'application_form', 'substance_variant'];
+  const therapyRoles = ['therapy_group', 'therapy', 'detailed_method'];
+  const specificCategories = ['Arzneimittel', 'Infusionen', 'Nahrungsergänzungsmittel'];
   document.querySelectorAll('[data-stage-classification]').forEach(host => {
     const id = Number(host.dataset.stageClassification), name = host.dataset.classificationName;
     const currentRole = host.dataset.classificationCurrent;
-    const labels = {...therapyLabels, ...medicationLabels, ingredient: 'Wirkstoff / Substanz', substance: 'Wirkstoff / Substanz', substance_variant: 'Stoffvariante / Darreichung', application_form: 'Anwendungsform', combination: 'Wirkstoff / Substanz (Kombination)'};
-    if (!(currentRole in labels)) return;
+    const category = host.dataset.classificationCategory;
+    const domain = host.closest('[data-relationship-stages]')?.dataset.relationshipDomain;
+    const substanceLayout = domain === 'substance' || domain === 'medication';
+    if (!Object.hasOwn(labels, currentRole)) return;
+    const currentLabel = substanceLayout && currentRole === 'therapy_group' ? labels.group : labels[currentRole];
+    const equivalentRoles = ['ingredient', 'substance', 'combination'].includes(currentRole)
+      ? ['ingredient', 'substance', 'combination'] : currentRole === 'group' || currentRole === 'therapy_group'
+        ? ['group', 'therapy_group'] : [currentRole];
     const box = document.createElement('span'), yes = document.createElement('button'), no = document.createElement('button');
     box.className = 'catalog-feedback catalog-feedback-standard';
     box.setAttribute('role', 'group');
-    box.setAttribute('aria-label', 'Einordnung von „' + name + '“ als ' + labels[currentRole]);
+    box.setAttribute('aria-label', 'Einordnung von „' + name + '“ als ' + currentLabel);
     yes.type = no.type = 'button';
     let data = {}, busy = true, loaded = false;
     const alternatives = Object.keys(labels).filter(role => role !== currentRole);
-    const subject = '„' + name + '“ ist als ' + labels[currentRole] + ' einsortiert.';
+    const subject = '„' + name + '“ ist als ' + currentLabel + ' einsortiert.';
     function paint() {
       yes.textContent = '✓ ' + (data[currentRole]?.count || 0);
       no.textContent = '× ' + alternatives.reduce((sum, role) => sum + (data[role]?.count || 0), 0);
@@ -23,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
       yes.disabled = no.disabled = busy || !loaded;
       for (const [button, stance] of [[yes, 1], [no, -1]]) {
         const action = stance === 1 ? (ownYes ? 'Zustimmung zurücknehmen' : 'Zustimmen') : 'Widersprechen';
-        const explanation = stance === 1 ? subject : '„' + name + '“ ist nicht als ' + labels[currentRole] + ' einzuordnen. Eine alternative Einordnung wählen.';
+        const explanation = stance === 1 ? subject : '„' + name + '“ ist nicht als ' + currentLabel + ' einzuordnen. Eine alternative Einordnung wählen.';
         button.dataset.stance = String(stance);
         button.dataset.feedbackAction = action; button.dataset.feedbackSubject = explanation;
         button.dataset.feedbackTone = stance === 1 ? (ownYes ? 'neutral' : 'confirm') : 'oppose';
@@ -44,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.dispatchEvent(new CustomEvent('lcn-guide-contributed', {detail: {topic: 'classification'}}));
     }
     yes.addEventListener('click', async () => {
-      if (!host.dataset.classificationCategory) { no.click(); return; }
+      if (!category) { no.click(); return; }
       busy = true; paint();
       try { await request(data[currentRole]?.own ? '' : currentRole); notifyChanged(); }
       catch (error) { window.LCNCatalogRelations?.showFeedbackNotice(error.message, true); }
@@ -65,47 +78,64 @@ document.addEventListener('DOMContentLoaded', () => {
       async function save(choice) {
         dialog.querySelectorAll('button').forEach(button => button.disabled = true);
         busy = true; paint();
-        try { await request(choice, (!host.dataset.classificationCategory ? "Vorgeschlagene Kategorie: " + selectedCategory + "\n" : "") + note.value); notifyChanged(); dialog.close(); }
+        try { await request(choice, (!category && selectedCategory ? 'Vorgeschlagene Kategorie: ' + selectedCategory + '\n' : '') + note.value); notifyChanged(); dialog.close(); }
         catch (error) { status.textContent = error.message; }
         finally { busy = false; paint(); dialog.querySelectorAll('button').forEach(button => button.disabled = false); }
       }
-      let selectedCategory = host.dataset.classificationCategory || '';
-      const specificCategories = ['Arzneimittel', 'Infusionen', 'Nahrungsergänzungsmittel'];
-      const addOption = (label, action) => {
-        const button = document.createElement('button'); button.type = 'button'; button.className = 'ux-reclassify-option'; button.textContent = label; button.addEventListener('click', action); choices.append(button); return button;
+      let selectedCategory = category || '';
+      const addOption = (label, action, container = choices) => {
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'ux-reclassify-option'; button.textContent = label; button.addEventListener('click', action); container.append(button); return button;
       };
-      function selectRole(role) {
-        choices.replaceChildren(); help.textContent = 'Vorschlag: ' + labels[role]; noteLabel.hidden = false;
+      function selectRole(role, label) {
+        choices.replaceChildren(); help.textContent = 'Vorschlag: ' + label; noteLabel.hidden = false;
         addOption('Vorschlag absenden', () => save(role)); addOption('Zurück', showRoles);
+        note.focus();
+      }
+      function addRoleOption(role, container = choices) {
+        if (equivalentRoles.includes(role)) return;
+        const label = role === 'substance' ? 'Wirkstoff oder Substanz' : labels[role];
+        const button = addOption(label, () => selectRole(role, label), container);
+        button.dataset.classificationChoice = role;
+        const count = data[role]?.count || 0;
+        if (count) {
+          const badge = document.createElement('span');
+          badge.className = 'ux-reclassify-count';
+          badge.textContent = count;
+          badge.setAttribute('aria-label', count + (count === 1 ? ' Vorschlag' : ' Vorschläge'));
+          button.append(badge);
+        }
       }
       function showRoles() {
         choices.replaceChildren(); noteLabel.hidden = true; help.textContent = 'Was passt besser?';
-        const specific = specificCategories.includes(selectedCategory);
-        const sets = specific ? [
-          ['Gruppe', ['group']], ['Wirkstoff / Substanz', ['substance']],
-          ['Handelsname, Stoffvariante / Darreichung oder Anwendungsform', ['brand', 'substance_variant', 'application_form']]
-        ] : [['Gruppe', ['therapy_group']], ['Verfahren', ['therapy']], ['Anwendung', ['detailed_method']]];
-        const equivalentRoles = ['ingredient', 'substance', 'combination'].includes(currentRole)
-          ? ['ingredient', 'substance', 'combination'] : currentRole === 'group' || currentRole === 'therapy_group'
-            ? ['group', 'therapy_group'] : [currentRole];
-        for (const [label, candidates] of sets) {
-          const roles = candidates.filter(role => !equivalentRoles.includes(role));
-          if (!roles.length) continue;
-          const optionLabel = roles.length === candidates.length ? label : roles.map(role => labels[role]).join(', ');
-          addOption(optionLabel, () => {
-          if (roles.length === 1) return selectRole(roles[0]);
-          choices.replaceChildren(); help.textContent = 'Welche Zuordnung passt?';
-          for (const role of roles) { const button = addOption(labels[role] + ' · ' + (data[role]?.count || 0), () => selectRole(role)); button.dataset.classificationChoice = role; }
-          addOption('Zurück', showRoles);
-          });
+        const specific = specificCategories.includes(selectedCategory) || (substanceLayout && selectedCategory === (category || ''));
+        for (const role of specific ? substanceRoles : therapyRoles) addRoleOption(role);
+        if (specific) {
+          const group = document.createElement('div');
+          group.className = 'ux-reclassify-application';
+          group.setAttribute('role', 'group');
+          const heading = document.createElement('h4');
+          heading.id = 'reclassify-application-title';
+          heading.textContent = 'Anwendungsform';
+          group.setAttribute('aria-labelledby', heading.id);
+          group.append(heading);
+          if (applicationRoles.includes(currentRole)) {
+            const hint = document.createElement('p');
+            hint.id = 'reclassify-application-hint';
+            hint.textContent = 'Bleibt in der rechten Spalte';
+            group.setAttribute('aria-describedby', hint.id);
+            group.append(hint);
+          }
+          for (const role of applicationRoles) addRoleOption(role, group);
+          choices.append(group);
         }
-        if (!host.dataset.classificationCategory) addOption('Richtung ändern', chooseCategory);
+        if (!category) addOption('Kategorie auswählen', chooseCategory);
+        choices.firstElementChild?.focus();
       }
       function chooseCategory() {
         choices.replaceChildren(); noteLabel.hidden = true; help.textContent = 'In welche Kategorie gehört der Eintrag?';
         for (const category of [...specificCategories, 'Andere Kategorie']) addOption(category, () => { selectedCategory = category; showRoles(); });
       }
-      if (selectedCategory) showRoles(); else chooseCategory();
+      if (selectedCategory || substanceLayout) showRoles(); else chooseCategory();
       if (alternatives.some(role => data[role]?.own)) {
         const undo = document.createElement('button'); undo.type = 'button'; undo.className = 'ux-reclassify-undo'; undo.textContent = 'Rückmeldung zurücknehmen'; undo.addEventListener('click', () => save('')); actions.append(undo);
       }

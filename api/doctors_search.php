@@ -3,6 +3,7 @@ require_once __DIR__ . '/_voting.php';
 require_once __DIR__ . '/_experience_search.php';
 require_once __DIR__ . '/_doctor_online.php';
 require_once __DIR__ . '/_search_normalization.php';
+require_once __DIR__ . '/_search_response.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -610,7 +611,7 @@ try {
 
     lcnAttachOwnVotes($pdo, $items, 'doctor');
 
-    echo json_encode([
+    lcnSendSearchResults([
         'ok' => true,
         'center' => [
             'lat' => $lat,
@@ -644,7 +645,7 @@ try {
         'specializations' => getAllDoctorProfileTerms($pdo, 'tbl_spezialisierungen_nd', 'spezialisierung'),
         'qualifications' => getAllDoctorProfileTerms($pdo, 'tbl_zusatzqualifikationen_nd', 'zusatzqualifikation'),
         'items' => $items,
-    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    ]);
 
 } catch (InvalidArgumentException $e) {
     http_response_code(400);

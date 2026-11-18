@@ -112,18 +112,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const current = ++request;
         try {
             const saved = getHomepageSharedLocation();
-            const origin = saved || homepageGermanyCenter;
-            const response = await fetch(buildHomepagePrimaryCareUrl(origin));
-            const data = await response.json();
-            if (!response.ok || !data.ok) throw new Error('load');
+            const origin = saved || window.LCNPrimaryCare.germanyCenter;
+            const [data, details] = await Promise.all([
+                window.LCNPrimaryCare.loadMap(origin),
+                window.LCNPrimaryCare.loadDetails(origin)
+            ]);
             const seen = new Set();
             const mapped = getHomepagePrimaryCareProviders(data,false).filter(row => {
                 const key = locationKey(row);
                 if(seen.has(key)) return false; seen.add(key); return true;
             });
-            const detailResponse = await fetch(`api/doctors_search.php?treat_id=${homepagePrimaryCareTreatmentId}&lat=${encodeURIComponent(origin.lat)}&lng=${encodeURIComponent(origin.lng)}&radiusKm=all&includeNoCoords=1`);
-            const details = await detailResponse.json();
-            if(!detailResponse.ok || !details.ok) throw new Error('details');
             if (current !== request) return;
             hasOrigin = Boolean(saved);
             const byId = new Map(details.items.map(row => [Number(row.dr_id),row]));

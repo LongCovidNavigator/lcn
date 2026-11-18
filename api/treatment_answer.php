@@ -26,5 +26,8 @@ try {
  }
  if($write&&($input['action']??'')==='move_cost_context'){lcnBeginVoteSecurity($p,'treatment',$id,'neutral',$respondent);lcnMoveTreatmentCostContext($p,$id,$respondent,(string)($input['context']??''));}
  elseif($write){lcnBeginVoteSecurity($p,'treatment',$id,'neutral',$respondent);$action=$input['action']??'answer';if(!in_array($action,['answer','clear'],true)||!is_string($input['question']??null)||!is_string($input['context']??'')||($action==='answer'&&!is_string($input['value']??null)))throw new InvalidArgumentException('Ungültige Antwort.');if(preg_match('/^symptom-help-([1-9][0-9]*)$/',$input['question'],$match)){if(($input['context']??'')!==''||($action==='answer'&&$input['value']!=='Ja'))throw new InvalidArgumentException('Ungültige Symptomangabe.');lcnSaveTreatmentSymptomHelp($p,$id,(int)$match[1],$respondent,$action!=='clear');}else{lcnSaveTreatmentAnswer($p,$id,$respondent,$input['question'],$input['context']??'',$action==='clear'?null:$input['value']);}}
- lcnSendVoteJson(['ok'=>true,'comparison_profiles'=>lcnTreatmentComparisonProfiles($p),'symptom_help'=>lcnTreatmentSymptomHelp($p,$id,$respondent)]+lcnTreatmentAnswers($p,$id,$respondent));
+ $comparison = ($input['include_comparison'] ?? '') === '0'
+    ? ['dummy_counts'=>(object)(lcnTreatmentDummyCounts($p,$id)[$id] ?? [])]
+    : ['comparison_profiles'=>lcnTreatmentComparisonProfiles($p)];
+ lcnSendVoteJson(['ok'=>true]+$comparison+['symptom_help'=>lcnTreatmentSymptomHelp($p,$id,$respondent)]+lcnTreatmentAnswers($p,$id,$respondent));
 }catch(InvalidArgumentException $e){lcnSendVoteJson(['ok'=>false,'error'=>$e->getMessage()],400);}catch(Throwable $e){lcnLogApiError('treatment_answer',$e);lcnSendVoteJson(['ok'=>false,'error'=>'Die Antwort konnte nicht gespeichert oder geladen werden. Bitte erneut versuchen.'],500);}

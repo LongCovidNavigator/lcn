@@ -47,7 +47,9 @@
     if(type!=='treatment')return;const name=String(event.detail?.name||'').trim();if(name.length<2)return;
     try{await request('api/symptom_proposal.php',{type,id,name});await refreshPendingSymptoms();window.dispatchEvent(new Event('lcn-symptoms-updated'));const input=document.querySelector('[data-symptom-search]');if(input)input.value='';}catch(error){alert(error.message);}
   });
-  request('api/symptom_proposal.php',{type,id,action:'activate_own_pending'}).then(()=>{refreshPendingSymptoms();window.dispatchEvent(new Event('lcn-symptoms-updated'));}).catch(()=>refreshPendingSymptoms());
+  request('api/symptom_proposal.php',{type,id,action:'activate_own_pending'}).then(data=>{
+   if(data.activated!==0)window.dispatchEvent(new Event('lcn-symptoms-updated'));
+  }).finally(refreshPendingSymptoms).catch(()=>{});
   async function load(){if(loading){reloadRequested=true;return new Promise(resolve=>loadWaiters.push(resolve));}loading=true;try{catalog=await request('api/catalog_relations.php?type='+type+'&id='+id);if(type==='treatment'){
    const toProvider=(item,pending=false)=>{const data=catalog.items.find(n=>n.id===item.id)||item,loc=item.location||{};return {dr_id:item.id||0,name:item.name||data.name,href:item.id?'arzt_detail.html?id='+item.id:'arzt_detail.html?submission_id='+item.submission_id,lat:loc.lat??(data.loc_lat==null?null:Number(data.loc_lat)),lng:loc.lng??(data.loc_lng==null?null:Number(data.loc_lng)),city:loc.city||data.loc_city||data.meta||'',country:loc.country||data.loc_country||'',place:[loc.postal_code||data.loc_plz,loc.city||data.loc_city||data.meta].filter(Boolean).join(' '),pending,own:item.own,submission_id:item.submission_id,status:pending?'Prüfung ausstehend':''};};
    const providers=(catalog.linked||[]).map(other=>catalog.items.find(item=>item.id===other)).filter(Boolean).map(item=>toProvider(item));
@@ -126,6 +128,17 @@
     button.dataset.lcnTooltip=description;button.removeAttribute('title');button.setAttribute('aria-label',description+' · '+count+' Stimmen');
    });
   }
+  const pendingFeedback=new Map();
+  function withStance(value,next){
+   const own=value?.own||0;
+   return {confirm:Math.max(0,Number(value?.confirm||0)-(own===1?1:0)+(next===1?1:0)),oppose:Math.max(0,Number(value?.oppose||0)-(own===-1?1:0)+(next===-1?1:0)),own:next};
+  }
+  function paintFeedbackKey(key){
+   document.querySelectorAll('[data-relation-feedback]').forEach(box=>{
+    if(box.dataset.relationFeedback!==key)return;
+    updateFeedback(box);
+   });
+  }
   function feedbackControl(key,statement='',standardStyle=false){
    const box=make('span',null,'catalog-feedback');box.dataset.relationFeedback=key;
    if(statement){box.dataset.feedbackStatement=statement;box.classList.add(standardStyle?'catalog-feedback-standard':'catalog-feedback-explicit');}
@@ -133,17 +146,35 @@
    [1,-1].forEach(stance=>{
     const button=make('button');button.type='button';button.dataset.stance=String(stance);
     button.addEventListener('click',async()=>{
+     const previous=feedback[key]&&{...feedback[key]};
      const own=feedback[key]?.own||0,next=own===stance?0:stance;
      const description=next?feedbackMessage(box,stance):'Zurückgenommen: '+feedbackSubject(box);
-     box.querySelectorAll('button').forEach(b=>b.disabled=true);
+     feedback[key]=withStance(previous,next);
+     paintFeedbackKey(key);
+     showFeedbackNotice(description,false,next===0?'neutral':stance===1?'confirm':'oppose');
+     const pending=pendingFeedback.get(key);
+     if(pending){pending.next=next;pending.revision++;return;}
+     const state={next,revision:0,confirmed:previous};
+     pendingFeedback.set(key,state);
      try{
-      feedback=(await request('api/catalog_relation_feedback.php',{key,stance:next})).feedback;
-      if(next!==0){const section=box.closest('.ux-alternative-section,[data-relationship-stages],[data-combination-section],.nd-provider-map');if(section)document.dispatchEvent(new CustomEvent('lcn-guide-contributed',{detail:{topic:section.matches('.nd-provider-map')?'provider':section.matches('.ux-alternative-section')?'alternative':section.matches('[data-relationship-stages]')?'classification':'combination'}}));}
-      document.querySelectorAll('[data-relation-feedback]').forEach(updateFeedback);
-      showFeedbackNotice(description,false,next===0?'neutral':stance===1?'confirm':'oppose');
+      while(true){
+       const sent=state.next,revision=state.revision;
+       try{
+        const result=await request('api/catalog_relation_feedback.php',{key,stance:sent});
+        state.confirmed=result.feedback[key];
+       }catch(error){
+        if(revision!==state.revision)continue;
+        if(state.confirmed)feedback[key]=state.confirmed;else delete feedback[key];
+        showFeedbackNotice('Rückmeldung fehlgeschlagen. Bitte erneut versuchen.',true);break;
+       }
+       // Never let an older response undo a more recent click.
+       if(revision!==state.revision){feedback[key]=withStance(state.confirmed,state.next);paintFeedbackKey(key);continue;}
+       if(state.confirmed)feedback[key]=state.confirmed;else delete feedback[key];
+       if(sent!==0){const section=box.closest('.ux-alternative-section,[data-relationship-stages],[data-combination-section],.nd-provider-map');if(section)document.dispatchEvent(new CustomEvent('lcn-guide-contributed',{detail:{topic:section.matches('.nd-provider-map')?'provider':section.matches('.ux-alternative-section')?'alternative':section.matches('[data-relationship-stages]')?'classification':'combination'}}));}
+       break;
+      }
       window.dispatchEvent(new CustomEvent('lcn-relation-feedback',{detail:feedback}));
-     }catch(error){showFeedbackNotice('Rückmeldung fehlgeschlagen. Bitte erneut versuchen.',true);}
-     finally{box.querySelectorAll('button').forEach(b=>b.disabled=false);}
+     }finally{pendingFeedback.delete(key);paintFeedbackKey(key);}
     });box.append(button);
    });updateFeedback(box);return box;
   }

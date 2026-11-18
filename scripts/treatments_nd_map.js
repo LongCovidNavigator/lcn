@@ -24,16 +24,18 @@
   const mobileResults=matchMedia('(max-width: 760px)');
   let view='cards';try{view=localStorage.getItem('lcn_result_view_preference')==='table'?'table':'cards';}catch{}
   const entries = hosts.map(host => {const providers=JSON.parse(host.querySelector('.nd-map-data').textContent);return {host,providers,points:providers.filter(valid),map:null};});
+  const isVisible = ({host}) => !host.closest('[hidden]');
   window.addEventListener('lcn-pending-providers',event=>{entries.forEach(entry=>{entry.providers=entry.providers.filter(p=>!p.pending);const ids=new Set(entry.providers.map(p=>Number(p.dr_id)));entry.providers.push(...(event.detail||[]).filter(p=>!p.dr_id||!ids.has(Number(p.dr_id))));entry.points=entry.providers.filter(valid);const citySelect=entry.host.querySelector('[data-provider-city]');[...new Set(entry.providers.map(p=>p.city).filter(Boolean))].forEach(city=>{if(![...citySelect.options].some(o=>o.value===city)){const option=document.createElement('option');option.value=option.textContent=city;citySelect.append(option);}});render(entry);});});
   const cityLocations=new Map();
   async function approximateCities(entry){
     for(const provider of entry.providers){
+      if(!isVisible(entry))return;
       if(valid(provider)||!provider.city)continue;
       const country=({'Deutschland':'de','Österreich':'at','Schweiz':'ch'}[provider.country]||provider.country||'de').toLowerCase();
       const key=country+':'+provider.city;
       if(!cityLocations.has(key))cityLocations.set(key,fetch('api/geocode_location.php?q='+encodeURIComponent(provider.city)+'&country='+encodeURIComponent(country)+'&city_only=1').then(r=>r.json()).then(data=>data.ok&&valid(data.result)?data.result:null).catch(()=>null));
       const point=await cityLocations.get(key);
-      if(point&&entry.providers.includes(provider)){
+      if(point&&entry.providers.includes(provider)&&!valid(provider)){
         provider.lat=Number(point.lat);provider.lng=Number(point.lng);provider.approximate=true;
         entry.points=entry.providers.filter(valid);render(entry);
       }
@@ -49,8 +51,23 @@
       render(entry);approximateCities(entry);
     });
   });
-  let ratingRequest=0;async function loadRatings(){const request=++ratingRequest;try{const demo=document.getElementById('nd-demo-header-toggle')?.getAttribute('aria-pressed')==='true';const response=await fetch('api/provider_positive_ratings.php?include_dummy='+(demo?'1':'0'));const data=await response.json();if(request!==ratingRequest||!data.ok)return;ratings=data.ratings;ratingsLoaded=true;entries.forEach(render);}catch{}}
-  const demoButton=document.getElementById('nd-demo-header-toggle');if(demoButton)new MutationObserver(loadRatings).observe(demoButton,{attributes:true,attributeFilter:['aria-pressed']});loadRatings();
+  const demoButton=document.getElementById('nd-demo-header-toggle');
+  let ratingRequest=0,lastRatingMode=null;
+  async function loadRatings(){
+    if(!entries.some(isVisible))return;
+    const demo=demoButton?.getAttribute('aria-pressed')==='true';
+    if(lastRatingMode===demo)return;
+    lastRatingMode=demo;
+    const request=++ratingRequest;
+    try{
+      const response=await fetch('api/provider_positive_ratings.php?include_dummy='+(demo?'1':'0'));
+      const data=await response.json();
+      if(!response.ok||!data.ok)throw new Error();
+      if(request!==ratingRequest)return;
+      ratings=data.ratings;ratingsLoaded=true;entries.forEach(render);
+    }catch{if(request===ratingRequest)lastRatingMode=null;}
+  }
+  if(demoButton)new MutationObserver(loadRatings).observe(demoButton,{attributes:true,attributeFilter:['aria-pressed']});
   function distance(point) {
     const rad = v => Number(v)*Math.PI/180, a = rad(point.lat)-rad(origin.lat), b = rad(point.lng)-rad(origin.lng);
     const h = Math.sin(a/2)**2+Math.cos(rad(origin.lat))*Math.cos(rad(point.lat))*Math.sin(b/2)**2;
@@ -293,6 +310,7 @@
   async function init(){
     if(!window.L){const css=document.createElement('link');css.rel='stylesheet';css.href='assets/vendor/leaflet/leaflet.css';document.head.append(css);await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='assets/vendor/leaflet/leaflet.js';script.onload=resolve;script.onerror=reject;document.head.append(script);});}
     entries.forEach(entry=>{
+      if(entry.map)return;
       const canvas = entry.host.querySelector('.nd-map-canvas');
       const treatmentId = new URLSearchParams(location.search).get('treatment_id');
       entry.map = window.LCNMapViewport.createMap(canvas, {
@@ -304,7 +322,20 @@
     });
   }
   window.addEventListener('lcn-online-ready',()=>entries.forEach(render));
-  init().catch(()=>entries.forEach(({host})=>{host.querySelector('.nd-map-canvas').textContent='Karte konnte nicht geladen werden. Behandler:innen und Entfernungen stehen weiterhin in der Liste.';}));
+  let mapLoading=false;
+  function activateMap(){
+    const visibleEntries=entries.filter(isVisible);
+    if(!visibleEntries.length)return;
+    loadRatings();
+    visibleEntries.forEach(approximateCities);
+    if(mapLoading||entries.every(entry=>entry.map))return;
+    mapLoading=true;
+    init().catch(()=>entries.filter(entry=>!entry.map).forEach(({host})=>{
+      host.querySelector('.nd-map-canvas').textContent='Karte konnte nicht geladen werden. Behandler:innen und Entfernungen stehen weiterhin in der Liste.';
+    })).finally(()=>{mapLoading=false;});
+  }
+  document.addEventListener('lcn-treatment-view-changed',activateMap);
+  activateMap();
 })();
 
 

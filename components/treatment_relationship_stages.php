@@ -6,7 +6,7 @@ function ndRelationshipAssertion(array $g,string $key): array {
     if($parts[0]==='ag'){
         $group=$g['groups'][(int)$parts[1]];$parent=(int)$group['root'];$child=(int)$parts[3];
         $parentName=$parent?$g['entries'][$parent]['treatmentname']:$group['name'];
-        $meaning=match(lcnGroupMemberRelation($group,$child)){'application_form'=>'ist eine Anwendungsform von','substance_variant'=>'ist eine Stoffvariante / Darreichung von','detailed_method'=>'ist eine Anwendung von','group_member'=>'gehört zur Gruppe',default=>'ist zugeordnet zu'};
+        $meaning=match(lcnGroupMemberRelation($group,$child)){'application_form'=>'ist eine Anwendungsform von','substance_variant'=>'ist eine Stoffvariante von','detailed_method'=>'ist eine Anwendung von','group_member'=>'gehört zur Gruppe',default=>'ist zugeordnet zu'};
     }elseif($parts[0]==='bn'){$parent=(int)$parts[1];$child=(int)$parts[2];$meaning='ist ein Handelsname von';}
     elseif($parts[0]==='bs'){$child=(int)$parts[1];$parent=(int)$parts[2];$meaning='ist zugeordnet zu';}
     else throw new LogicException('Unsupported stage relationship key: '.$key);
@@ -55,7 +55,7 @@ function ndRelationshipStages(array $g,int $id,array $path=[]): array {
     $edges=[];$selected=0;
     $node=static function(int $key,string $feedback='')use($g,$id):array{return ['id'=>$key,'name'=>$g['entries'][$key]['treatmentname'],'current'=>$key===$id,'feedback'=>$feedback,'note'=>!empty($g['entries'][$key]['hypothesis'])?'Arbeitshypothese · Prüfung ausstehend':''];};
     $add=static fn(string $label,string $kind,int $source,int $group=0)=>['label'=>$label,'kind'=>$kind,'source'=>$source,'group'=>$group];
-    $block=static fn(string $heading,int $source,string $kind)=>['heading'=>$heading,'source'=>$source,'nodes'=>[],'add'=>$add($heading==='Handelsnamen'?'Handelsnamen hinzufügen':($kind==='has_form'?'Anwendungsform hinzufügen':($kind==='has_variant'?'Stoffvariante / Darreichung hinzufügen':($kind==='group_contains'?'Zugehörigen Eintrag hinzufügen':'Anwendung hinzufügen'))),$kind,$source)];
+    $block=static fn(string $heading,int $source,string $kind)=>['heading'=>$heading,'source'=>$source,'nodes'=>[],'add'=>$add($heading==='Handelsnamen'?'Handelsnamen hinzufügen':($kind==='has_form'?$vocabulary['application_title'].' hinzufügen':($kind==='has_variant'?'Stoffvariante hinzufügen':($kind==='group_contains'?'Zugehörigen Eintrag hinzufügen':'Anwendung hinzufügen'))),$kind,$source)];
     // Medication classes keep their position on the left. A brand always stays on the right.
     $hasGroupChildren=false;foreach($children as $group)if(lcnGroupHasRelation($group,['group_member']))$hasGroupChildren=true;
     $isRootPage=$hasGroupChildren&&!$parents&&!$isTrade&&!($isSubstance&&!$isClass);
@@ -63,7 +63,7 @@ function ndRelationshipStages(array $g,int $id,array $path=[]): array {
         $stages[0]['nodes'][$id]=$node($id);
         foreach($children as $group){
             foreach($group['members'] as $member){if(!in_array(lcnGroupMemberRelation($group,$member),['group_member','unspecified'],true))continue;$stages[1]['nodes'][$member]=$node($member,'ag:'.$group['alias_id'].':t:'.$member);$edges[]=[0,$id,1,$member];}
-            $stages[1]['adds'][]=$add($drug?'Wirkstoff hinzufügen':'Verfahren hinzufügen','group_contains',$id,$group['alias_id']);
+            $stages[1]['adds'][]=$add($drug?'Wirkstoff hinzufügen':'Weiteren Eintrag hinzufügen','group_contains',$id,$group['alias_id']);
         }
         $selected=(int)array_key_first($stages[1]['nodes']);
     }else{
@@ -91,7 +91,7 @@ function ndRelationshipStages(array $g,int $id,array $path=[]): array {
             $blocks[]=$b;
         }else{
             if($formParent&&$formParent['root']){
-                $b=$block('Anwendungsformen',$formParent['root'],'has_form');
+                $b=$block($vocabulary['application_title'],$formParent['root'],'has_form');
                 foreach($formParent['members'] as $member)if($member!==$id&&lcnGroupMemberRelation($formParent,$member)==='application_form'){$b['nodes'][$member]=$node($member,'ag:'.$formParent['alias_id'].':t:'.$member);$edges[]=[1,$mid,2,$member];}
                 $blocks['has_form']=$b;
             }
@@ -100,7 +100,7 @@ function ndRelationshipStages(array $g,int $id,array $path=[]): array {
                     $name=$g['entries'][$member]['treatmentname'];
                     $relation=lcnGroupMemberRelation($group,$member);
                     $kind=match($relation){'application_form'=>'has_form','substance_variant'=>'has_variant','detailed_method'=>'has_detail',default=>'group_contains'};
-                    $heading=match($relation){'application_form'=>'Anwendungsformen','substance_variant'=>'Stoffvarianten und Darreichung','detailed_method'=>'Anwendung','group_member'=>'Verfahren dieser Gruppe',default=>'Zugeordnete Einträge (Art offen)'};
+                    $heading=match($relation){'application_form'=>$vocabulary['application_title'],'substance_variant'=>$vocabulary['variant_title'],'detailed_method'=>'Anwendung','group_member'=>'Verfahren dieser Gruppe',default=>'Zugeordnete Einträge (Art offen)'};
                     $blockKey=$relation;
                     if(!isset($blocks[$blockKey])){$blocks[$blockKey]=$block($heading,$mid,$kind);if($kind==='group_contains')$blocks[$blockKey]['add']['group']=$group['alias_id'];}
                     $n=$node($member,'ag:'.$group['alias_id'].':t:'.$member);
@@ -110,7 +110,7 @@ function ndRelationshipStages(array $g,int $id,array $path=[]): array {
             }
             // A specific formulation can link back to its base without creating a fake drug class.
             foreach($g['bases'][$mid]??[] as $base){$stages[0]['nodes'][$base]=$node($base);$stages[1]['nodes'][$mid]['feedback']='bs:'.$mid.':'.$base;$edges[]=[0,$base,1,$mid];}
-            if($isSubstance&&!$formParent){foreach(['substance_variant'=>['has_variant','Stoffvarianten und Darreichung'],'application_form'=>['has_form','Anwendungsformen']] as $key=>[$kind,$heading])if(!isset($blocks[$key]))$blocks[$key]=$block($heading,$mid,$kind);}
+            if($isSubstance&&!$formParent){foreach(['substance_variant'=>['has_variant',$vocabulary['variant_title']],'application_form'=>['has_form',$vocabulary['application_title']]] as $key=>[$kind,$heading])if(!isset($blocks[$key]))$blocks[$key]=$block($heading,$mid,$kind);}
             elseif(!$blocks)$blocks[]=$block('Anwendung',$mid,'has_detail');
             // Brands of a nested substance remain a separate relationship block.
             if(!empty($g['brands'][$mid])){$b=$block('Handelsnamen',$mid,'has_trade');foreach($g['brands'][$mid] as $brand){$b['nodes'][$brand]=$node($brand,'bn:'.$mid.':'.$brand);$edges[]=[1,$mid,2,$brand];}$blocks[]=$b;}
@@ -164,13 +164,13 @@ function ndRelationshipStages(array $g,int $id,array $path=[]): array {
         foreach($stage['nodes']??[] as $key=>$unused)if($stage['nodes'][$key]['current'])$stage['nodes'][$key]['classification_role']=$drug?['group','ingredient','brand'][$li]:($li===0?'therapy_group':($isSubstance?(isset($g['comboIds'][$id])?'combination':'substance'):'therapy'));
         foreach($stage['blocks']??[] as $bi=>$unused)foreach($stage['blocks'][$bi]['nodes'] as $key=>$n)if($n['current']&&!isset($n['classification_role']))$stage['blocks'][$bi]['nodes'][$key]['classification_role']=$drug?'brand':'detailed_method';
     }unset($stage);
-    $stages[0]['title']='Gruppen';
+    $stages[0]['title']='Gruppe';
     if($specific){
         foreach($stages[1]['adds'] as &$a)if($a['kind']==='group_contains')$a['label']='Wirkstoff / Substanz hinzufügen';unset($a);
         $stages[2]['blocks']=array_values(array_filter($stages[2]['blocks'],static fn($b)=>$b['nodes']||$b['add']['kind']!=='has_detail'));
         $title=$vocabulary['section_title'];$stages[1]['title']=isset($g['comboIds'][$id])?'Wirkstoffe und Substanzen (Kombination)':'Wirkstoffe und Substanzen';$stages[2]['title']=$vocabulary['variants_title'];
         foreach($stages[1]['nodes'] as $mid=>$n){
-            foreach(['has_trade'=>'Handelsnamen','has_form'=>'Anwendungsformen','has_variant'=>'Stoffvarianten und Darreichung'] as $kind=>$heading){
+            foreach(['has_trade'=>'Handelsnamen','has_form'=>$vocabulary['application_title'],'has_variant'=>$vocabulary['variant_title']] as $kind=>$heading){
                 $exists=false;foreach($stages[2]['blocks'] as $b)if($b['focus']===$mid&&$b['add']['kind']===$kind)$exists=true;
                 if(!$exists){$b=$block($heading,$mid,$kind);$b['focus']=$mid;$stages[2]['blocks'][]=$b;}
             }
@@ -229,11 +229,11 @@ else foreach($stage['blocks'] as $blockIndex=>$b):
     $visible=$currentOnRight ? $b['focus']===$m['selected'] : (!$multiple || ($hasKnown ? (bool)$b['nodes'] : $b['focus']===$m['selected']));
 ?>
 <?php if($multiple){$b['add']['sources']=array_values(array_map(static fn($n)=>['id'=>$n['id'],'name'=>$n['name']],$m['stages'][1]['nodes']));} ?>
-<div class="ux-stage-block" data-branch="<?= $b['focus'] ?>" data-relationship-kind="<?= ndEscape($b['add']['kind']) ?>"<?= !$visible?' hidden':'' ?>><?php if(in_array($b['add']['kind'],['has_trade','has_form','has_variant'],true)||(!$multiple&&$b['heading']!==$stage['title'])): ?><h5><?= ndEscape($b['heading']) ?><?php
+<div class="ux-stage-block" data-branch="<?= $b['focus'] ?>" data-relationship-kind="<?= ndEscape($b['add']['kind']) ?>" data-relationship-label="<?= ndEscape($b['heading']) ?>"<?= !$visible?' hidden':'' ?>><?php if(in_array($b['add']['kind'],['has_trade','has_form','has_variant'],true)||(!$multiple&&$b['heading']!==$stage['title'])): ?><h5><?= ndEscape($b['heading']) ?><?php
 $helpText=match($b['add']['kind']){
     'has_trade'=>'Ein Handelsname bezeichnet ein bestimmtes Präparat, das diesen Wirkstoff beziehungsweise diese Bestandteile enthält.',
-    'has_form'=>'Eine Anwendungsform beschreibt, wie der Stoff oder die Kombination angewendet wird, zum Beispiel oral, als Infusion oder als Injektion.',
-    'has_variant'=>'Hier stehen andere chemische Formen eines Stoffes sowie Extrakte oder Präparate, die den Stoff enthalten oder als Quelle dafür dienen. Beispiel: Grüntee-Extrakt als Quelle für EGCG. Der Gehalt und die Zusammensetzung können je nach Präparat variieren. Den Anwendungsweg, etwa oral oder als Infusion, findest du unter Anwendungsformen.',
+    'has_form'=>'Hier siehst du, wie der Stoff oder die Kombination verabreicht wird, zum Beispiel oral, als Infusion oder als Injektion.',
+    'has_variant'=>'Hier stehen andere chemische Formen eines Stoffes sowie Extrakte oder Präparate, die den Stoff enthalten oder als Quelle dafür dienen. Beispiel: Grüntee-Extrakt als Quelle für EGCG. Der Gehalt und die Zusammensetzung können je nach Präparat variieren. Den Anwendungsweg, etwa oral oder als Infusion, findest du unter „'.$vocabulary['application_title'].'“.',
     default=>null
 };
 $helpId='relationship-kind-help-'.$id.'-'.$blockIndex;
@@ -242,13 +242,14 @@ if($helpText): ?> <span class="ux-heading-info"><button type="button" aria-label
 <?php if(!$multiple&&$b['add']['source']===$id): ?><?= ndStageAdd($b['add']) ?><?php endif; ?>
 </div>
 <?php endforeach; ?>
+</div>
 <?php if($index===2&&!$middleCurrent&&!$rightCurrent&&$stage['blocks']): ?>
-<div class="ux-stage-add-hint">Wähle <?= $m['drug']?'einen Wirkstoff':(str_starts_with($m['stages'][1]['title'],'Wirkstoffe und Substanzen')?'einen Wirkstoff oder eine Substanz':'ein Verfahren') ?> in der mittleren Spalte aus, um gezielt <?= ndEscape(match($stage['title']){'Handelsnamen'=>'Handelsnamen','Stoffvarianten und Darreichung'=>'Stoffvarianten und Darreichungen','Weitere Anwendungsformen'=>'weitere Anwendungsformen',default=>'Anwendungen'}) ?> hinzuzufügen.</div>
+<div class="ux-stage-add-hint">Wähle <?= $m['drug']?'einen Wirkstoff':(str_starts_with($m['stages'][1]['title'],'Wirkstoffe und Substanzen')?'einen Wirkstoff oder eine Substanz':'ein Verfahren') ?> im mittleren Feld <?= ndEscape($m['stages'][1]['title']) ?> aus, um gezielt <?= ndEscape(match($stage['title']){'Handelsnamen'=>'Handelsnamen',$vocabulary['variants_title']=>'Stoffvarianten oder Applikationen','Weitere Anwendungsformen'=>'weitere Anwendungsformen',default=>'Anwendungen'}) ?> hinzuzufügen.</div>
 <?php endif; ?>
 <?php if($index===0&&$rightCurrent): ?>
-<div class="ux-stage-add-hint">Wähle <?= $m['drug']?'einen Wirkstoff':(str_starts_with($m['stages'][1]['title'],'Wirkstoffe und Substanzen')?'einen Wirkstoff oder eine Substanz':'ein Verfahren') ?> in der mittleren Spalte aus, um gezielt eine Gruppe zuzuordnen.</div>
+<div class="ux-stage-add-hint">Wähle <?= $m['drug']?'einen Wirkstoff':(str_starts_with($m['stages'][1]['title'],'Wirkstoffe und Substanzen')?'einen Wirkstoff oder eine Substanz':'ein Verfahren') ?> im mittleren Feld <?= ndEscape($m['stages'][1]['title']) ?> aus, um gezielt eine Gruppe zuzuordnen.</div>
 <?php endif; ?>
-</div></section><?php endforeach; ?>
+</section><?php endforeach; ?>
 </div></div><script type="application/json" data-stage-edges><?= json_encode($m['edges'],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?></script>
 </section>
 <?php return ob_get_clean();

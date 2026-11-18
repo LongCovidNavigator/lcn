@@ -186,12 +186,13 @@ body.compact-doctor-header #header-placeholder .profile>.contact>a,body.compact-
 .ux-stage-lines path.is-add{stroke-dasharray:5 5;opacity:.8}
 .ux-stage-lines path.is-right{stroke:#9fc9bf}
 .ux-stage-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.95fr) minmax(0,1.1fr);gap:25px;align-items:stretch}
-.ux-stage-column{min-width:0;padding:16px 12px;border:1px solid #e2edf7;border-radius:9px;background:#f0f7fc}
-.ux-stage-column-1{background:#fcfdff;border-color:#edf2f7;display:flex;flex-direction:column}
-.ux-stage-column-1>.ux-stage-stack{flex:1;justify-content:center}
-.ux-stage-column-2{background:#f0faf6;border-color:#e0f0e9;display:flex;flex-direction:column}
-.ux-stage-column-2>.ux-stage-stack{flex:1;justify-content:center}
+.ux-stage-column{display:flex;flex-direction:column;min-width:0;padding:16px 12px;border:1px solid #e2edf7;border-radius:9px;background:#f0f7fc}
+.ux-stage-column-1{background:#fcfdff;border-color:#edf2f7}
+.ux-stage-column-2{background:#f0faf6;border-color:#e0f0e9}
+.ux-stage-column-1>.ux-stage-stack,.ux-stage-column-2>.ux-stage-stack{flex:1;justify-content:center}
 .ux-stage-section h4{position:relative;z-index:2;font-size:13px;line-height:1.5;color:#355773;margin:0 0 16px;font-weight:600}
+.ux-stage-column-2>h4{flex-shrink:0;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #cfe5dc}
+.ux-stage-column-2>.ux-stage-stack{justify-content:safe center}
 .ux-stage-stack{display:flex;flex-direction:column;gap:12px}
 .ux-stage-section .ux-stage-node,.ux-stage-section .ux-stage-add{position:relative;z-index:2;box-sizing:border-box;min-width:0;width:100%;min-height:90px;padding:13px 12px;border:1px solid #d8e6f1;border-radius:7px;background:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:7px;overflow-wrap:anywhere;color:#355773;text-align:left;font:400 12px/1.5 Arial,Helvetica,sans-serif}
 .ux-stage-node .ux-stage-name{font-weight:600;color:#173b62;font-size:14px;text-decoration:none}
@@ -203,17 +204,25 @@ body.compact-doctor-header #header-placeholder .profile>.contact>a,body.compact-
 .ux-stage-node small{font-size:10px;color:#668098}
 .ux-stage-section .ux-stage-node.is-current{border:2px solid #2876c1;background:#eaf3fd;padding:12px 11px;box-shadow:0 0 0 2px #e0edfa}
 .ux-stage-node .ux-stage-current{display:inline-block;align-self:flex-start;background:#176fc3;color:#fff;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;line-height:1.4}
-.ux-stage-section .ux-stage-add{border-style:dashed;background:#ffffff80;justify-content:center;color:#5a7792;cursor:pointer}
-.ux-stage-section .ux-stage-add:hover{background:#fff;border-color:#9cb8d0}
+.ux-stage-section .ux-stage-add{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;align-content:center;gap:8px;border:1px dashed #9fbdda;background:#f4f9ff;color:#315d84;cursor:pointer}
+.ux-stage-section .ux-stage-add:hover{background:#eaf4ff;border-color:#6b9bc7}
+.ux-stage-section .ux-stage-add:focus-visible{outline:2px solid #2876c1;outline-offset:2px}
+.ux-stage-add-icon{font-weight:600}
 .ux-stage-node [data-treatment-relation-feedback]{max-width:100%;margin-top:auto}
 .ux-stage-node .catalog-feedback{justify-content:flex-end;white-space:normal;flex-wrap:wrap}
 .ux-stage-block{display:flex;flex-direction:column;gap:10px;min-width:0}
 .ux-stage-block[hidden]{display:none!important}
-.ux-stage-section h5{position:relative;z-index:2;margin:0;color:#527967;font-size:12px;font-weight:600}
+.ux-stage-section h5{position:relative;z-index:2;margin:0;color:#527967;font-size:12px;line-height:1.5;font-weight:600}
 .ux-stage-section .ux-stage-empty{position:relative;z-index:2;color:#71889a;font-size:11px;margin:0}
 .ux-stage-column:focus-within{z-index:3}
 @media(max-width:900px){.ux-stage-columns{gap:16px}.ux-stage-column{padding:12px 8px}.ux-stage-section .ux-stage-node,.ux-stage-section .ux-stage-add{padding:10px 8px}.ux-stage-section .ux-stage-node.is-current{padding:9px 7px}.ux-stage-node .ux-stage-name{font-size:13px}}
-@media(max-width:650px){.ux-stage-canvas{overflow-x:auto;padding-bottom:10px}.ux-stage-columns{min-width:700px}.ux-stage-lines{min-width:700px}.ux-stage-column{padding:12px}.ux-stage-section .ux-stage-help{font-size:11px}}
+@media(max-width:650px){
+  body.compact-doctor-header #view-content .ux-stage-section>h3{display:flex;align-items:baseline;gap:6px;font-size:18px}
+  .ux-stage-canvas{overflow-x:auto;padding-bottom:10px}
+  .ux-stage-columns,.ux-stage-lines{min-width:700px}
+  .ux-stage-column{padding:12px}
+  .ux-stage-section .ux-stage-help{font-size:11px}
+}
 /* Feedback names the saved relationship and stays separate from the card's navigation. */
 .ux-stage-assertion{position:relative;z-index:2;align-self:stretch;margin-top:auto;padding-top:10px;border-top:1px solid #e0e9f1;cursor:default}
 .ux-stage-node .ux-stage-assertion-label{font-size:10px;font-weight:600;color:#56718a}
@@ -384,7 +393,10 @@ body #feedback,body.ux-page .ux-answer-status,.catalog-feedback-notice,.catalog-
 .ux-stage-node>small{grid-column:1 / -1}
 .ux-stage-section .ux-stage-add{min-height:52px;padding:9px 10px}
 
-.ux-stage-add-hint{position:relative;z-index:2;box-sizing:border-box;padding:14px 12px;border:1px solid #dce1e5;border-radius:7px;background:#f2f4f5;color:#626b73;font:400 12px/1.5 Arial,sans-serif;text-align:center;overflow-wrap:anywhere}
+.ux-stage-add-hint{position:relative;z-index:2;margin:0;color:#47637c;font:400 12px/1.5 Arial,sans-serif;overflow-wrap:anywhere}
+.ux-stage-column>.ux-stage-stack:has(>*)+.ux-stage-add-hint{margin-top:12px;padding-top:10px;border-top:1px solid #d8e6f1}
+.ux-stage-column-0>.ux-stage-stack:has(>*):has(+.ux-stage-add-hint){flex:1}
+.ux-stage-column>.ux-stage-stack:not(:has(>*)):has(+.ux-stage-add-hint){flex:0}
 
 .ux-combinations [data-pending-combination] .ux-combination-parent{border-style:solid}
 .ux-combinations .ux-combination-part[data-pending-relationship]{border-style:solid}
@@ -542,16 +554,7 @@ body #feedback,body.ux-page .ux-answer-status,.catalog-feedback-notice,.catalog-
 .ux-stage-section .ux-stage-node[data-pending-relationship] > .ux-stage-node-header{grid-row:1 / 3;align-self:center}
 .ux-stage-section .ux-stage-node[data-pending-relationship] > small{grid-column:1;grid-row:2;margin:0;line-height:1.4}
 
-/* Keep wrapped add labels aligned with the text, independently of the plus. */
-.ux-stage-section .ux-stage-add{display:flex;flex-direction:row;align-items:center;gap:6px}
-.ux-stage-add-icon{flex:0 0 auto;align-self:flex-start}
-.ux-stage-add > span:last-child{min-width:0;text-align:left}
-
 .ux-alternative-sort{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-size:14px}.ux-alternative-sort select{max-width:100%;padding:6px 10px;border:1px solid #cddfec;border-radius:6px;background:#fff;color:#17365d;font:inherit}
-
-/* Keep branch guidance outside the moving relationship stack. */
-.ux-stage-column:has(>.ux-stage-stack>.ux-stage-add-hint){position:relative;padding-bottom:120px}
-.ux-stage-column>.ux-stage-stack>.ux-stage-add-hint{position:absolute;bottom:16px;left:12px;right:12px}
 
 
 /* Compact classification choice with a counter on each option. */
@@ -563,6 +566,10 @@ body #feedback,body.ux-page .ux-answer-status,.catalog-feedback-notice,.catalog-
 .ux-reclassify-options{display:grid;gap:8px}
 .catalog-report-dialog.ux-reclassify-dialog button{font:500 13px/1.4 Arial,sans-serif;border-radius:8px;min-height:36px;padding:7px 11px;transition:background .15s,border-color .15s}
 .catalog-report-dialog.ux-reclassify-dialog .ux-reclassify-option{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;color:#17365d;background:#f7faff;border:1px solid #d6e4f1;min-height:42px}
+.ux-reclassify-application{display:grid;gap:8px;margin-top:4px;padding:11px 12px 12px;border:1px solid #dceee5;border-radius:10px;background:#f0faf6}
+.ux-reclassify-application h4{margin:0;color:#265b53;font-size:13px;line-height:1.4}
+.ux-reclassify-application p{margin:-5px 0 1px;color:#46645f;font-size:12px;line-height:1.4}
+.ux-reclassify-dialog .ux-reclassify-application .ux-reclassify-option{background:#fff;border-color:#cee3d9}
 .catalog-report-dialog.ux-reclassify-dialog .ux-reclassify-option:hover{background:#edf5ff;border-color:#83b5ed}
 .catalog-report-dialog.ux-reclassify-dialog .ux-reclassify-option[aria-pressed=true]{background:#eaf3ff;border-color:#1976d2}
 .ux-reclassify-count{display:inline-flex;align-items:center;justify-content:center;min-width:25px;height:23px;padding:0 5px;box-sizing:border-box;border-radius:12px;background:#e7eef6;color:#45627e;font-size:11px;font-weight:600;flex:none}
