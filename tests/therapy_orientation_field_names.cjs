@@ -18,8 +18,11 @@ async function renderGuide(page, labels, current, populated, {
   const columns = labels.map((label, index) => {
     const additions = addTo.includes(index) ? addButton : '';
     if (index === 2 && rightBlocks.length) {
-      const blocks = rightBlocks.map(block => `<div class="ux-stage-block" data-relationship-label="${block.label}" data-relationship-kind="${block.kind}">
-        ${block.current ? currentNode : linkedNode(block.kind)}${additions}</div>`);
+      const blocks = rightBlocks.map(block => {
+        const blockAdditions = (block.add ?? addTo.includes(index)) ? addButton : '';
+        return `<div class="ux-stage-block" data-relationship-label="${block.label}" data-relationship-kind="${block.kind}">
+          ${block.current ? currentNode : linkedNode(block.kind)}${blockAdditions}</div>`;
+      });
       return `<section class="ux-stage-column" aria-label="${label}">${blocks.join('')}</section>`;
     }
     const node = index === current ? currentNode : populated.includes(index) ? linkedNode(index === 2 ? rightKind : '') : '';
@@ -84,6 +87,8 @@ async function checkModeCopy(page, mode) {
     assert.match(text, /Hier sammelt die Community frei vorgeschlagene/);
     assert.match(text, /Hier sammelt die Community Kombinationen/);
     assert.equal(await guide.locator('.therapy-guide-annotation').count(), 1);
+    assert.equal(await guide.locator('.therapy-guide-annotation p').innerText(),
+      'Die Zahlen neben ✓ und × zeigen, wie viele Zustimmungen und Widersprüche es zur jeweiligen Zuordnung gibt. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.');
     assert.equal(await guide.locator('.therapy-guide-sharing').count(), 1);
     assert.equal(await topics.locator('h4, [data-guide-stage]').count(), 0);
     assert.doesNotMatch(text, /Prüfe die vorhandenen Alternativen|Ergänze frei|Welche Behandlungen ergeben zusammen mehr/);
@@ -145,8 +150,10 @@ async function checkContributionCases(page) {
     ['Gruppe', 'linken', 'Anwendungsformen', 'rechten']);
   assert.equal(await text.nth(2).innerText(), combinationText);
   const application = await openStage(guide, 2);
-  assert.deepEqual(await application.allTextContents(), blocks.map(block => block.definition
-    + ' Mit „Weiteren Eintrag hinzufügen“ kannst du Ergänzungen vorschlagen. Bei vorhandenen Einträgen kannst du Zustimmen (✓) oder Widersprechen (×) wählen.'));
+  const addHint = 'Mit „Weiteren Eintrag hinzufügen“ kannst du Ergänzungen vorschlagen.';
+  const voteHint = 'Bei vorhandenen Einträgen kannst du Zustimmen (✓) oder Widersprechen (×) wählen.';
+  assert.deepEqual(await application.allTextContents(), [...blocks.map(block => block.definition + ' ' + voteHint), addHint]);
+  assert.equal(await guide.locator('ul.therapy-guide-application-list + p').innerText(), addHint);
   const bullets = guide.locator('ul.therapy-guide-application-list > li');
   assert.equal(await bullets.count(), 3);
   const bulletLayout = await bullets.evaluateAll(items => items.map(item => {
@@ -162,6 +169,14 @@ async function checkContributionCases(page) {
   assert.deepEqual(bulletLayout, ['Handelsname', 'Applikation', 'Stoffvariante'].map(term =>
     ({term, bold: true, bullet: true, indented: true})));
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+
+  guide = await renderGuide(page, substances, 1, [], {
+    mode, rightBlocks: blocks.map(block => ({...block, add: block.kind === 'has_form'}))
+  });
+  const mixed = await openStage(guide, 2);
+  assert.equal(await guide.locator('ul.therapy-guide-application-list + p').count(), 0);
+  assert.deepEqual(await mixed.allTextContents(), blocks.map(block =>
+    block.definition + (block.kind === 'has_form' ? ' ' + addHint : '') + ' ' + voteHint));
 
   for (const block of blocks) {
     guide = await renderGuide(page, substances, 2, [0, 1], {mode, rightBlocks: [{...block, current: true}]});
@@ -199,6 +214,93 @@ async function checkEmptyContributionFields(page) {
   assert.equal(await (await openStage(therapy, 2)).innerText(), 'Eine Anwendung beschreibt, wie die Therapie konkret durchgeführt werden könnte.');
 }
 
+async function checkReadingCases(page) {
+  const therapy = ['Gruppe', 'Verfahren', 'Anwendung'];
+  const substances = ['Gruppe', 'Wirkstoffe und Substanzen', 'Anwendungsformen'];
+  const comboText = 'Unter Kombinationstherapien findest du die einzelnen Bestandteile dieser Therapie.';
+  const paragraphs = guide => guide.locator(':scope > p');
+  const definitions = [
+    'Eine Gruppe fasst verwandte Behandlungsverfahren unter einem Oberbegriff zusammen und gibt dir eine erste Orientierung.',
+    'Ein Verfahren beschreibt eine allgemeine Umsetzungsmöglichkeit der Therapie.',
+    'Eine Anwendung beschreibt, wie die Therapie konkret durchgeführt werden könnte.'
+  ];
+  const references = [
+    [/^Wenn du dich für allgemeine Umsetzungsmöglichkeiten dieser Therapie interessierst, dann schau im mittleren Feld unter Verfahren nach\. Im rechten Feld findest du konkrete Anwendungen\.$/,
+      ['mittleren', 'Verfahren', 'rechten', 'Anwendungen']],
+    [/^Wenn du breiter nach verwandten Behandlungsverfahren suchen möchtest, schau im linken Feld unter Gruppe nach\. Im rechten Feld findest du konkrete Anwendungen\.$/,
+      ['linken', 'Gruppe', 'rechten', 'Anwendungen']],
+    [/^Wenn du breiter nach verwandten Behandlungsverfahren suchen möchtest, schau im linken Feld unter Gruppe nach\. Im mittleren Feld findest du die zugehörigen Einträge unter Verfahren\.$/,
+      ['linken', 'Gruppe', 'mittleren', 'Verfahren']]
+  ];
+  for (const [index, label] of therapy.entries()) {
+    const guide = await renderGuide(page, therapy, index, [0, 1, 2], {rightKind: 'has_detail', combination: index === 1});
+    const copy = paragraphs(guide);
+    assert.equal(await copy.count(), index === 1 ? 3 : 2);
+    assert.equal(await copy.first().innerText(), `Die Community ordnet diese Therapie bei ${label} ein. ${definitions[index]}`);
+    assert.equal(await copy.first().locator('strong').innerText(), label);
+    await checkText(copy.nth(1), ...references[index]);
+    if (index === 1) assert.equal(await copy.nth(2).innerText(), comboText);
+  }
+
+  let guide = await renderGuide(page, therapy, 0, [1]);
+  await checkText(paragraphs(guide).nth(1),
+    /^Wenn du dich für allgemeine Umsetzungsmöglichkeiten dieser Therapie interessierst, dann schau im mittleren Feld unter Verfahren nach\. Leider sind noch keine Einträge zur Anwendung im rechten Feld hinterlegt\.$/,
+    ['mittleren', 'Verfahren', 'Anwendung', 'rechten']);
+
+  const rightBlocks = [
+    {label: 'Handelsnamen', kind: 'has_trade', term: 'Handelsname'},
+    {label: 'Applikation', kind: 'has_form', term: 'Applikation'},
+    {label: 'Stoffvarianten', kind: 'has_variant', term: 'Stoffvariante'}
+  ];
+  for (const mode of ['explore', 'alternatives']) {
+    guide = await renderGuide(page, substances, 0, [1], {mode, rightBlocks});
+    assert.equal(await paragraphs(guide).first().innerText(),
+      'Die Community ordnet diese Therapie bei Gruppe ein. Eine Gruppe fasst verwandte Wirkstoffe oder Substanzen unter einem Oberbegriff zusammen und gibt dir eine erste Orientierung.');
+    await checkText(paragraphs(guide).nth(1),
+      /^Wenn du dich für allgemeine Umsetzungsmöglichkeiten dieser Therapie interessierst, dann schau im mittleren Feld unter Wirkstoffe und Substanzen nach\. Im rechten Feld findest du konkrete Anwendungsformen\.$/,
+      ['mittleren', 'Wirkstoffe und Substanzen', 'rechten', 'Anwendungsformen']);
+  }
+
+  guide = await renderGuide(page, substances, 1, [0], {rightBlocks});
+  assert.equal(await paragraphs(guide).first().innerText(),
+    'Die Community ordnet diese Therapie bei Wirkstoffe und Substanzen ein. Ein Wirkstoff bzw. eine Substanz beschreibt eine allgemeine Umsetzungsmöglichkeit der Therapie.');
+  await checkText(paragraphs(guide).nth(1),
+    /^Wenn du nach verwandten Wirkstoffen oder Substanzen suchen möchtest, schau im linken Feld unter Gruppe nach\. Im rechten Feld findest du konkrete Anwendungsformen\.$/,
+    ['linken', 'Gruppe', 'rechten', 'Anwendungsformen']);
+
+  for (const block of rightBlocks) {
+    guide = await renderGuide(page, substances, 2, [0, 1], {rightBlocks: [{...block, current: true}]});
+    const intro = paragraphs(guide).first();
+    const article = block.term === 'Handelsname' ? 'Ein' : 'Eine';
+    assert.ok((await intro.innerText()).startsWith(`Die Community ordnet diese Therapie bei Anwendungsformen unter ${block.label} ein. ${article} ${block.term} `));
+    assert.deepEqual(await intro.locator('strong').allTextContents(), ['Anwendungsformen', block.label, block.term]);
+    await checkText(paragraphs(guide).nth(1),
+      /^Wenn du nach verwandten Wirkstoffen oder Substanzen suchen möchtest, schau im linken Feld unter Gruppe nach\. Den zugehörigen Wirkstoff bzw\. die Substanz findest du im mittleren Feld\.$/,
+      ['linken', 'Gruppe', 'Wirkstoff', 'Substanz', 'mittleren']);
+  }
+
+  guide = await renderGuide(page, ['Gruppe', 'Wirkstoffe und Substanzen (Kombination)', 'Anwendungsformen'], 1, [], {combination: true});
+  let copy = paragraphs(guide);
+  assert.equal(await copy.first().innerText(),
+    'Die Community ordnet diese Therapie bei Wirkstoffe und Substanzen (Kombination) ein. Ein Wirkstoff bzw. eine Substanz beschreibt eine allgemeine Umsetzungsmöglichkeit der Therapie.');
+  await checkText(copy.nth(1),
+    /^Leider ist im linken Feld noch keine übergeordnete Gruppe hinterlegt\. Auch im rechten Feld unter Anwendungsformen sind noch keine Einträge hinterlegt\.$/,
+    ['linken', 'Gruppe', 'rechten', 'Anwendungsformen']);
+  assert.equal(await copy.nth(2).innerText(), comboText);
+
+  guide = await renderGuide(page, ['Wirkstoffgruppen', 'Wirkstoffe', 'Handelsnamen'], 0, []);
+  await checkText(paragraphs(guide).nth(1),
+    /^Leider sind noch keine Einträge im mittleren Feld unter Wirkstoffe hinterlegt\. Auch im rechten Feld unter Handelsnamen sind noch keine Einträge hinterlegt\.$/,
+    ['mittleren', 'Wirkstoffe', 'rechten', 'Handelsnamen']);
+
+  guide = await renderGuide(page, ['Übergeordnete Substanz', 'Anwendungsform', 'Weitere Anwendungsformen'], 1, [0, 2]);
+  copy = paragraphs(guide);
+  await checkText(copy.nth(1),
+    /^Wenn du mehr über den zugrunde liegenden Stoff erfahren möchtest, schau im linken Feld unter Übergeordnete Substanz nach\. Im rechten Feld findest du Weitere Anwendungsformen\.$/,
+    ['linken', 'Übergeordnete Substanz', 'rechten', 'Weitere Anwendungsformen']);
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+}
+
 (async () => {
   const browser = await chromium.launch({channel: 'chrome', headless: true});
   try {
@@ -206,27 +308,7 @@ async function checkEmptyContributionFields(page) {
       const page = await browser.newPage({viewport: {width, height: 900}});
       page.setDefaultTimeout(4000);
       try {
-        const paragraphs = '.therapy-guide-classification > p';
-        await renderGuide(page, ['Gruppen', 'Wirkstoffe und Substanzen (Kombination)', 'Anwendungsformen'], 1, []);
-        await checkText(page.locator(paragraphs), /Leider ist im Feld links noch keine übergeordnete Gruppe hinterlegt\. Auch im Feld rechts unter Anwendungsformen sind noch keine Einträge hinterlegt\./, ['Gruppe', 'Anwendungsformen']);
-        assert.equal(await page.locator(`${paragraphs} strong`).innerText(), 'Wirkstoffe und Substanzen (Kombination)');
-
-        await renderGuide(page, ['Gruppen', 'Verfahren', 'Anwendung'], 0, [1]);
-        await checkText(page.locator(paragraphs), /schau im mittleren Feld unter Verfahren nach\. Leider sind noch keine Einträge zur Anwendung im Feld ganz rechts hinterlegt\./, ['Verfahren', 'Anwendung']);
-
-        await renderGuide(page, ['Gruppen', 'Verfahren', 'Anwendung'], 1, [2], {rightKind: 'has_detail'});
-        await checkText(page.locator(paragraphs), /^Die Community ordnet diese Therapie bei Verfahren ein\. Im Feld rechts findest du konkrete Anwendungen\. Leider ist im Feld links noch keine übergeordnete Gruppe hinterlegt\.$/, ['Anwendungen', 'Gruppe']);
-        assert.equal(await page.locator(`${paragraphs} strong`).innerText(), 'Verfahren');
-
-        await renderGuide(page, ['Wirkstoffgruppen', 'Wirkstoffe', 'Handelsnamen'], 0, []);
-        await checkText(page.locator(paragraphs), /im mittleren Feld unter Wirkstoffe hinterlegt\. Auch im Feld ganz rechts unter Handelsnamen/, ['Wirkstoffe', 'Handelsnamen']);
-
-        await renderGuide(page, ['Wirkstoffgruppen', 'Wirkstoffe und Substanzen', 'Anwendungsformen'], 2, [0, 1]);
-        await checkText(page.locator(paragraphs), /ganz links ins Feld Wirkstoffgruppen\. Den zugehörigen Wirkstoff bzw\. die Substanz findest du im mittleren Feld\./, ['Wirkstoffgruppen', 'Wirkstoff', 'Substanz']);
-
-        await renderGuide(page, ['Übergeordnete Substanz', 'Anwendungsform', 'Weitere Anwendungsformen'], 1, [0, 2]);
-        await checkText(page.locator(paragraphs), /links ins Feld Übergeordnete Substanz\. Im Feld rechts unter Weitere Anwendungsformen findest du/, ['Übergeordnete Substanz', 'Weitere Anwendungsformen']);
-
+        await checkReadingCases(page);
         await checkContributionCases(page);
         await checkEmptyContributionFields(page);
         const readingStyle = await checkModeCopy(page, 'explore');

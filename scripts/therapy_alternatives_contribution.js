@@ -115,16 +115,19 @@ window.LCNTherapyAlternativesContribution = ({make, classificationContext, field
     return {subsections: false, sections: [{name: label, containers: [column], nodes}]};
   }
 
-  function describeSection(section, {current, classificationName, addLabel, substanceBranch, groupDestination}) {
-    const {name, containers, nodes} = section;
-    const canAdd = containers.some(container => [...container.querySelectorAll('[data-treatment-relation-add]')].some(visible));
+  function appendAddHint(paragraph, label) {
+    appendSentence(paragraph, 'Mit ', make('strong', '„' + label + '“'), ' kannst du Ergänzungen vorschlagen.');
+  }
+
+  function describeSection(section, {current, classificationName, addLabel, substanceBranch, groupDestination, sharedAddHint}) {
+    const {name, nodes, canAdd} = section;
     const linked = nodes.filter(node => node !== current);
     const paragraph = make('p');
     const includesCurrent = current && (nodes.includes(current) || name === classificationName);
     if (!includesCurrent) appendDefinition(paragraph, name, substanceBranch);
-    if (canAdd) {
-      appendSentence(paragraph, 'Mit ', make('strong', '„' + addLabel + '“'), ' kannst du Ergänzungen vorschlagen.');
-    } else if (groupDestination) {
+    if (canAdd && !sharedAddHint) {
+      appendAddHint(paragraph, addLabel);
+    } else if (!canAdd && groupDestination) {
       appendSentence(paragraph, 'Um eine Gruppe zuzuordnen, öffne den zugehörigen Eintrag im ',
         make('u', 'mittleren'), ' Feld unter ', fieldReference(groupDestination), '.');
     }
@@ -176,15 +179,21 @@ window.LCNTherapyAlternativesContribution = ({make, classificationContext, field
       const groupDestination = index === 0 && Object.hasOwn(groupNames, label)
         && field.column.querySelector('.ux-stage-add-hint')
         && middle?.nodes.some(node => node.querySelector('a.ux-stage-name[href]')) ? middle : null;
+      const {subsections, sections} = descriptionSections(field);
+      const sectionsWithActions = sections.map(section => ({
+        ...section,
+        canAdd: section.containers.some(container => [...container.querySelectorAll('[data-treatment-relation-add]')].some(visible))
+      }));
+      const sharedAddHint = subsections && sectionsWithActions.length > 1 && sectionsWithActions.every(section => section.canAdd);
       const description = {
         current: isCurrent && classification ? current : null,
         classificationName,
         addLabel: target.dataset.addEntryLabel,
         substanceBranch,
-        groupDestination
+        groupDestination,
+        sharedAddHint
       };
-      const {subsections, sections} = descriptionSections(field);
-      const paragraphs = sections.map(section => describeSection(section, description)).filter(paragraph => paragraph.hasChildNodes());
+      const paragraphs = sectionsWithActions.map(section => describeSection(section, description)).filter(paragraph => paragraph.hasChildNodes());
       if (subsections && paragraphs.length) {
         const applicationList = make('ul', '', 'therapy-guide-application-list');
         for (const paragraph of paragraphs) {
@@ -195,6 +204,11 @@ window.LCNTherapyAlternativesContribution = ({make, classificationContext, field
         item.append(applicationList);
       } else {
         item.append(...paragraphs);
+      }
+      if (sharedAddHint) {
+        const hint = make('p');
+        appendAddHint(hint, description.addLabel);
+        item.append(hint);
       }
       if (!item.hasChildNodes() && applicationFields.has(label)) {
         item.append(make('p', definitions.Anwendungsformen));

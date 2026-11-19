@@ -137,6 +137,11 @@ dialog.therapy-empty-state[open]::backdrop {
   animation: therapy-empty-state-backdrop 1050ms ease-out both;
 }
 .therapy-empty-state .experience-guide-eyebrow:empty { display: none; }
+.therapy-empty-state .experience-guide-copy > .experience-guide-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  inline-size: fit-content;
+}
 @keyframes therapy-empty-state-enter {
   from { opacity: 0; transform: translateY(3rem); }
   to { opacity: 1; transform: translateY(0); }
@@ -814,6 +819,7 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 }
 .therapy-guide-note details.therapy-guide-classification .therapy-guide-application-list > li + li { margin-block-start: .5rem; }
 .therapy-guide-note details .therapy-guide-application-list > li > p { margin: 0; }
+.therapy-guide-note details .therapy-guide-classification-content > .therapy-guide-application-list + p { margin-block-start: .5rem; }
 .therapy-guide-current-level { font-weight: 400; }
 @media(max-width:650px) {
  .therapy-guide-note details.therapy-guide-classification > p { margin-inline: .75rem; }

@@ -1,4 +1,29 @@
 window.LCNTherapyAlternativesReading = ({make, classificationContext, fieldReference, classificationContents, relationshipTypeLabels}) => {
+  const groupFields = new Set(['Gruppe', 'Gruppen', 'Wirkstoffgruppen', 'Medikamentengruppe']);
+  const applicationFields = new Set(['Anwendungsformen', 'Weitere Anwendungsformen']);
+  const definitions = {
+    therapyGroup: 'Eine Gruppe fasst verwandte Behandlungsverfahren unter einem Oberbegriff zusammen und gibt dir eine erste Orientierung.',
+    substanceGroup: 'Eine Gruppe fasst verwandte Wirkstoffe oder Substanzen unter einem Oberbegriff zusammen und gibt dir eine erste Orientierung.',
+    Verfahren: 'Ein Verfahren beschreibt eine allgemeine Umsetzungsmöglichkeit der Therapie.',
+    Anwendung: 'Eine Anwendung beschreibt, wie die Therapie konkret durchgeführt werden könnte.',
+    Wirkstoffe: 'Ein Wirkstoff beschreibt eine allgemeine Umsetzungsmöglichkeit der Therapie.',
+    Substanz: 'Eine Substanz beschreibt eine allgemeine Umsetzungsmöglichkeit der Therapie.',
+    'Wirkstoffe und Substanzen': 'Ein Wirkstoff bzw. eine Substanz beschreibt eine allgemeine Umsetzungsmöglichkeit der Therapie.',
+    Anwendungsformen: 'Anwendungsformen umfassen Handelsnamen, Applikationen und Stoffvarianten zu einem Wirkstoff bzw. einer Substanz.'
+  };
+  const definitionAliases = {
+    'Wirkstoffe und Substanzen (Kombination)': 'Wirkstoffe und Substanzen',
+    'Übergeordnete Substanz': 'Substanz',
+    'Weitere Anwendungsformen': 'Anwendungsformen',
+    Anwendungsform: 'Applikation',
+    Stoffvariante: 'Stoffvarianten'
+  };
+  const applicationDefinitions = {
+    Handelsnamen: ['Ein ', 'Handelsname', ' ist der Produktname eines Präparats, das den übergeordneten Wirkstoff bzw. die Substanz enthält.'],
+    Applikation: ['Eine ', 'Applikation', ' beschreibt, auf welchem Weg ein Wirkstoff bzw. eine Substanz verabreicht wird, etwa oral oder als Infusion.'],
+    Stoffvarianten: ['Eine ', 'Stoffvariante', ' kann eine andere Form eines Wirkstoffs sowie Extrakte oder Präparate beschreiben, die den übergeordneten Wirkstoff bzw. die Substanz enthalten.']
+  };
+
   function renderClassification(disclosure, section) {
     const previous = [...disclosure.querySelectorAll(':scope > p')];
     const paragraphs = classificationParagraphs(section);
@@ -7,20 +32,32 @@ window.LCNTherapyAlternativesReading = ({make, classificationContext, fieldRefer
     disclosure.append(...paragraphs);
   }
 
-  function classificationIntro(current, fields, index) {
-    const label = fields[index].label;
+  function classificationIntro(current, label, substanceBranch) {
     const block = current.closest('.ux-stage-block')?.dataset.relationshipLabel;
     const paragraph = make('p', 'Die Community ordnet diese Therapie bei ');
     paragraph.append(make('strong', label));
     if (block && block !== label) paragraph.append(' unter ', make('strong', block));
     paragraph.append(' ein.');
+
+    const key = groupFields.has(label)
+      ? (substanceBranch ? 'substanceGroup' : 'therapyGroup')
+      : definitionAliases[block || label] || block || label;
+    const applicationDefinition = applicationDefinitions[key];
+    if (applicationDefinition) {
+      const [prefix, term, explanation] = applicationDefinition;
+      paragraph.append(' ', prefix, make('strong', term), explanation);
+    } else {
+      const definition = definitions[key] || definitions[definitionAliases[label] || label];
+      if (definition) paragraph.append(' ', definition);
+    }
     return paragraph;
   }
 
-  function appendClassificationFields(paragraph, fields, index) {
+  function classificationReferences(fields, index, substanceBranch) {
     const [left, middle, right] = fields;
-    const leftDirection = index === 2 ? 'ganz links' : 'links';
-    const rightDirection = index === 0 ? 'ganz rechts' : 'rechts';
+    const leftField = [make('u', 'linken'), ' Feld'];
+    const middleField = [make('u', 'mittleren'), ' Feld'];
+    const rightField = [make('u', 'rechten'), ' Feld'];
     const filledFields = [];
     const emptyFields = [];
     const addEmptyField = (location, missing = ['keine Einträge']) => {
@@ -30,38 +67,45 @@ window.LCNTherapyAlternativesReading = ({make, classificationContext, fieldRefer
     };
 
     if (index !== 0) {
-      const isSubstance = left.label === 'Übergeordnete Substanz';
+      const isBaseSubstance = left.label === 'Übergeordnete Substanz';
       if (!left.nodes.length) {
-        const missing = isSubstance ? 'Substanz' : 'Gruppe';
-        emptyFields.push([`Leider ist im Feld ${leftDirection} noch keine übergeordnete `, make('u', missing), ' hinterlegt.']);
+        const missing = isBaseSubstance ? 'Substanz' : 'Gruppe';
+        emptyFields.push(['Leider ist im ', ...leftField, ' noch keine übergeordnete ', make('u', missing), ' hinterlegt.']);
       } else {
-        const purpose = isSubstance
-          ? 'Wenn du mehr über den zugrunde liegenden Stoff erfahren möchtest, schau '
-          : 'Wenn du breiter nach verwandten Therapien suchen möchtest, schau ';
-        filledFields.push([`${purpose}${leftDirection} ins Feld `, fieldReference(left), '.']);
+        const searchTarget = substanceBranch
+          ? 'nach verwandten Wirkstoffen oder Substanzen'
+          : 'breiter nach verwandten Behandlungsverfahren';
+        const purpose = isBaseSubstance ? 'mehr über den zugrunde liegenden Stoff erfahren' : searchTarget + ' suchen';
+        filledFields.push(['Wenn du ', purpose, ' möchtest, schau im ', ...leftField, ' unter ', fieldReference(left), ' nach.']);
       }
     }
     if (index !== 1) {
       const name = fieldReference(middle);
       if (!middle.nodes.length) {
-        addEmptyField(['mittleren Feld unter ', name]);
+        addEmptyField([...middleField, ' unter ', name]);
       } else if (index === 0) {
-        filledFields.push(['Wenn du deine Behandlung konkretisieren möchtest, schau im mittleren Feld unter ', name, ' nach.']);
+        filledFields.push(['Wenn du dich für allgemeine Umsetzungsmöglichkeiten dieser Therapie interessierst, dann schau im ',
+          ...middleField, ' unter ', name, ' nach.']);
       } else if (middle.label === 'Wirkstoffe und Substanzen') {
-        filledFields.push(['Den zugehörigen ', make('u', 'Wirkstoff'), ' bzw. die ', make('u', 'Substanz'), ' findest du im mittleren Feld.']);
+        filledFields.push(['Den zugehörigen ', make('u', 'Wirkstoff'), ' bzw. die ', make('u', 'Substanz'),
+          ' findest du im ', ...middleField, '.']);
       } else {
-        filledFields.push(['Im mittleren Feld findest du die zugehörigen Einträge unter ', name, '.']);
+        filledFields.push(['Im ', ...middleField, ' findest du die zugehörigen Einträge unter ', name, '.']);
       }
     }
     if (index !== 2) {
-      const field = `Feld ${rightDirection}`;
       const name = fieldReference(right);
-      const location = [field, ' unter ', name];
+      const location = [...rightField, ' unter ', name];
       if (!right.nodes.length) {
-        if (index === 0 && right.label === 'Anwendung') addEmptyField([field], ['keine Einträge zur ', name]);
+        if (index === 0 && right.label === 'Anwendung') addEmptyField(rightField, ['keine Einträge zur ', name]);
         else addEmptyField(location);
+      } else if (applicationFields.has(right.label)) {
+        const forms = right.label === 'Anwendungsformen' ? 'konkrete ' : '';
+        filledFields.push(['Im ', ...rightField, ' findest du ', forms, name, '.']);
+      } else if (right.label === 'Handelsnamen') {
+        filledFields.push(['Im ', ...rightField, ' findest du ', name, '.']);
       } else {
-        const destination = right.label === 'Anwendung' ? [field] : location;
+        const destination = right.label === 'Anwendung' ? rightField : location;
         const description = new Intl.ListFormat('de').formatToParts(classificationContents(right.nodes)).flatMap(({type, value}) => {
           if (right.label === 'Anwendung' && type === 'element' && value === relationshipTypeLabels.has_detail) {
             return ['konkrete ', make('u', 'Anwendungen')];
@@ -72,18 +116,23 @@ window.LCNTherapyAlternativesReading = ({make, classificationContext, fieldRefer
       }
     }
 
+    const paragraph = make('p');
     for (const sentence of [...filledFields, ...emptyFields]) {
       if (paragraph.hasChildNodes()) paragraph.append(' ');
       paragraph.append(...sentence);
     }
+    return paragraph;
   }
 
   function classificationParagraphs(section) {
     const {fields, current, index} = classificationContext(section);
     if (index < 0) return [make('p', 'Hier siehst du, wie die Community den Eintrag einordnet.')];
-    const paragraph = classificationIntro(current, fields, index);
-    appendClassificationFields(paragraph, fields, index);
-    const paragraphs = [paragraph];
+    const substanceBranch = section.dataset.relationshipDomain
+      ? section.dataset.relationshipDomain !== 'therapy'
+      : fields[1]?.label !== 'Verfahren';
+    const paragraphs = [classificationIntro(current, fields[index].label, substanceBranch)];
+    const references = classificationReferences(fields, index, substanceBranch);
+    if (references.hasChildNodes()) paragraphs.push(references);
 
     if (index === 1) {
       const combination = section.closest('.nd-panel')?.querySelector('[data-combination-section][data-is-combination="1"]');
@@ -105,7 +154,7 @@ window.LCNTherapyAlternativesReading = ({make, classificationContext, fieldRefer
       alternative: {description: 'Hier sammelt die Community frei vorgeschlagene Therapiealternativen. Die Einträge beruhen auf diesen Vorschlägen; ein fachlicher Zusammenhang wird damit nicht vorausgesetzt. Scrolle seitlich und öffne die Namen für Details.'},
       combination: {description: 'Hier sammelt die Community Kombinationen aus Therapien oder Wirkstoffen, deren Zusammenspiel einen zusätzlichen oder anderen Effekt erzielen soll. Du siehst, welche Bestandteile jeweils zusammengehören und welche Kombinationen die Community vorschlägt.'}
     },
-    feedbackNote: 'Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie die Community die jeweilige Zuordnung einschätzt, etwa als Therapiealternative. Sie helfen dir einzuordnen, wie gesichert diese Zuordnung ist. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.',
+    feedbackNote: 'Die Zahlen neben ✓ und × zeigen, wie viele Zustimmungen und Widersprüche es zur jeweiligen Zuordnung gibt. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.',
     sharing: {
       invitation: 'Kennst du jemanden, der diese Therapie oder eine der Alternativen schon ausprobiert hat? Leite diese Seite weiter und lade die Person ein, Einträge zu bestätigen, ihnen zu widersprechen oder fehlendes Wissen zu ergänzen.',
       shareText: 'Hast du diese Therapie oder eine Alternative dazu ausprobiert? Schau dir die Alternativen, Einordnungen und Kombinationen im Long Covid Navigator an. Bestätige passende Einträge, widersprich unpassenden Zuordnungen oder ergänze, was du kennst.'

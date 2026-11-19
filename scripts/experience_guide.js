@@ -1366,6 +1366,16 @@
       const description = make('p');
       const actions = make('div', '', 'experience-guide-actions');
       let destinationLink;
+      const stay = () => {
+        dialog.close();
+        chooseMode('explore');
+        paint(true);
+        const heading = guide?.querySelector('h2, h3');
+        if (heading) {
+          heading.tabIndex = -1;
+          heading.focus({preventScroll: true});
+        }
+      };
       const proceed = button('', () => {
         dialog.close();
         chooseMode('explore');
@@ -1373,7 +1383,10 @@
         openView(destinationLink);
       }, true);
       proceed.autofocus = true;
-      actions.append(proceed, button('Hier bleiben', () => dialog.close()));
+      actions.append(proceed, button('Trotzdem wechseln', stay));
+      if (mode && mode !== 'explore' && !orientationIsOff()) {
+        actions.append(button('Zurück zum vorherigen Orientierungsmodus', () => dialog.close()));
+      }
 
       const invitation = shareEntry();
       invitation.message.textContent = 'Kennst du jemanden, der die Therapie ausprobiert hat? Teile die Seite und lade die Person ein, ihre Erfahrung beizutragen.';
@@ -1389,6 +1402,10 @@
       window.addEventListener('lcn-provider-catalog', updateDestination, {signal: listeners.signal});
       document.addEventListener('lcn-combination-diagrams-changed', updateDestination, {signal: listeners.signal});
       document.body.append(dialog);
+      dialog.addEventListener('cancel', event => {
+        event.preventDefault();
+        stay();
+      });
       dialog.addEventListener('close', () => {
         listeners.abort();
         dialog.remove();
