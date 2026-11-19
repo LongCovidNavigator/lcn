@@ -1,6 +1,7 @@
 // Keep the full question accessible while using compact chapter names on touch layouts.
 (() => {
   const compact = matchMedia('(max-width: 1100px)');
+  const touch = matchMedia('(pointer: coarse)');
   const labels = {ueberblick:'Überblick',termin:'Belastung',zugang:'Zugang & Kosten',wirkung:'Erfahrungen',alternativen:'Alternativen',dashboard:'Dashboard'};
   const links = [...document.querySelectorAll('.side-nav a[data-view]')].map(link => {
     const strong = link.querySelector('strong');
@@ -14,18 +15,26 @@
     reveal();
   }
   function reveal() {
-    if (!compact.matches) return;
+    if (!compact.matches && !touch.matches) return;
     requestAnimationFrame(() => {
       const active = document.querySelector('.side-nav a[aria-current]');
       if (!active) return;
       const rail = active.closest('.nav-items');
       const bounds = active.getBoundingClientRect(), frame = rail.getBoundingClientRect();
-      if (bounds.left < frame.left) rail.scrollLeft -= frame.left - bounds.left;
-      else if (bounds.right > frame.right) rail.scrollLeft += bounds.right - frame.right;
+      if (compact.matches) {
+        if (bounds.left < frame.left) rail.scrollLeft -= frame.left - bounds.left;
+        else if (bounds.right > frame.right) rail.scrollLeft += bounds.right - frame.right;
+      } else {
+        if (bounds.top < frame.top) rail.scrollTop -= frame.top - bounds.top;
+        else if (bounds.bottom > frame.bottom) rail.scrollTop += bounds.bottom - frame.bottom;
+      }
     });
   }
   compact.addEventListener('change',update);
+  document.addEventListener('lcn-treatment-view-changed', reveal);
+  window.addEventListener('lcn-doctor-rendered', reveal);
   window.addEventListener('hashchange',reveal);
+  window.addEventListener('resize', reveal);
   update();
 })();
 

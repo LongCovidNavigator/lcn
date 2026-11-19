@@ -648,15 +648,28 @@
     return '<section class="card" id="treatment-section"><h3 tabindex="-1">Therapien <span class="total-count">'+all.length+'</span></h3><p>Das recherchierte Therapieprofil von '+escape(state.data.item.dr_display_name)+'.</p>'+summary+'<p class="treatment-specializations"><strong>Erfasste Spezialisierungen:</strong> '+(escape(specializations)||'<span class="overview-missing">Noch keine Angabe</span>')+'</p><p class="field-note">Der Vergleich beschreibt dokumentierte Einträge, nicht Qualität oder Wirksamkeit. Die Vergleichsgruppe wächst mit weiteren Katalogprofilen mit mehr als fünf Einträgen. Die Community-Empfehlung für Therapien dient zur Orientierung.</p>'+editorialNotes+'<div class="treatment-view-switch" role="group" aria-label="Therapieansicht">'+[['categories','Kategorien'],['list','Tabelle'],['cards','Kacheln']].filter(([key])=>key!=='categories'||categories.length).map(([key,label])=>'<button type="button" data-treatment-view="'+key+'" aria-pressed="'+(treatmentView===key)+'">'+label+'</button>').join('')+'</div>'+filterControls+'<div id="treatment-results" tabindex="-1" aria-label="Therapien und Kategorien">'+body+'</div></section>';
 
   }
+  function appointmentAnswerCount() {
+    let total = 0;
+    for (const row of [0, 1]) {
+      for (const column of [0, 1, 2]) {
+        total += Number(question('appointment-' + row + '-' + column).total) || 0;
+      }
+    }
+    return total;
+  }
   function appointmentCountNote() {
     if(!state.community)return communityNote('appointment-0-0');
-    let total=0;
-    for(let r=0;r<2;r++)for(let c=0;c<3;c++){const q=question('appointment-'+r+'-'+c);total+=Number(q.total)||0;}
+    const total = appointmentAnswerCount();
     return total?total+' Einzelangaben':'Noch keine Community-Angaben';
   }
   function alignCommunityCounters() {
     content.querySelectorAll('.appointment-variant').forEach(card=>{const note=document.createElement('p');note.className='community-label';note.textContent=appointmentCountNote();note.title='Summe über sechs Terminfragen; eine Person kann mehrere Angaben machen.';card.append(note);});
     content.querySelectorAll('.card').forEach(card=>{
+      if (livePage && state.community) {
+        const key = card.querySelector('[data-choice]')?.dataset.choice;
+        if (card.matches('.appointment-variant')) card.dataset.guideAnswerCount = appointmentAnswerCount();
+        else if (key) card.dataset.guideAnswerCount = Number(question(key).total) || 0;
+      }
       const note=card.querySelector('.community-label')||card.querySelector('.chart-heading > span'),heading=card.querySelector('.cost-heading, .chart-heading, .block-heading');
       if(!note||!heading)return;
       let row=heading;
@@ -852,7 +865,19 @@
     panel.id = state.view;
     panel.setAttribute('aria-label', activeLink.getAttribute('aria-label') || activeLink.querySelector('strong').textContent);
     panel.innerHTML = views[state.view]();
-    content.replaceChildren(panel);
+    const currentPanel = content.firstElementChild;
+    const welcome = livePage && state.data && state.view === 'ueberblick' && currentPanel?.matches('#ueberblick[data-profile-loaded]')
+      ? currentPanel.querySelector(':scope > [data-doctor-welcome]:has(.therapy-guide-personal)') : null;
+    if (welcome) {
+      // Keep the wheel connected when background data refreshes the profile.
+      for (const node of [...currentPanel.childNodes]) {
+        if (node !== welcome) node.remove();
+      }
+      panel.querySelector('[data-doctor-welcome]').remove();
+      welcome.after(...panel.childNodes);
+    } else {
+      content.replaceChildren(panel);
+    }
     content.querySelectorAll('.cost-contexts,.dashboard-insurance').forEach(node=>{
       const control=document.createElement('div');control.className='cost-preferences';control.innerHTML=(window.LCNCost?.countryControl()||'')+(window.LCNCost?.currencyControl()||'')+'<small>'+(window.LCNCost?.rateNote(costSystem().code==='CH'?'CHF':'EUR')||'')+'</small>';node.closest('.card').append(control);
     });

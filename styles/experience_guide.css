@@ -586,10 +586,16 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 }
 @media(max-width:700px) {
   [data-therapy-welcome] .therapy-guide-personal,
+  [data-doctor-welcome] .therapy-guide-personal,
+  .doctor-detail-live dialog.therapy-orientation,
   dialog.therapy-orientation:has(.therapy-wheel-availability) { grid-template-columns: minmax(0, 1fr); }
   [data-therapy-welcome] .therapy-guide-personal .experience-guide-art,
+  [data-doctor-welcome] .therapy-guide-personal .experience-guide-art,
+  .doctor-detail-live dialog.therapy-orientation .experience-guide-art,
   dialog.therapy-orientation:has(.therapy-wheel-availability) .experience-guide-art { display: none; }
   [data-therapy-welcome] .therapy-wheel-viewport,
+  [data-doctor-welcome] .therapy-wheel-viewport,
+  .doctor-detail-live dialog.therapy-orientation .therapy-wheel-viewport,
   dialog.therapy-orientation .therapy-wheel-viewport:has(.therapy-wheel-availability) { --therapy-wheel-row-height: 76px; }
   .therapy-guide-personal .experience-guide-copy { padding: 1rem .85rem; }
   .experience-guide-banner.therapy-guide-personal h2 { font-size: 1.3rem; }
@@ -619,9 +625,11 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 .therapy-intent-wheel .therapy-wheel-availability[hidden] { display: none; }
 @media (max-width: 360px) {
   [data-therapy-welcome] .therapy-wheel-viewport,
+  [data-doctor-welcome] .therapy-wheel-viewport,
+  .doctor-detail-live dialog.therapy-orientation .therapy-wheel-viewport,
   dialog.therapy-orientation .therapy-wheel-viewport:has(.therapy-wheel-availability) { --therapy-wheel-row-height: 96px; }
-  [data-therapy-welcome] .therapy-guide-personal .experience-guide-copy { padding-inline: .5rem; }
-  [data-therapy-welcome] .therapy-intent-wheel .therapy-wheel-visual-option {
+  :is([data-therapy-welcome], [data-doctor-welcome]) .therapy-guide-personal .experience-guide-copy { padding-inline: .5rem; }
+  :is([data-therapy-welcome], [data-doctor-welcome]) .therapy-intent-wheel .therapy-wheel-visual-option {
     gap: .4rem; padding-inline: .4rem!important;
   }
 }
@@ -775,7 +783,16 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 .therapy-guide-note .therapy-guide-navigation-pair{display:flex;flex:0 1 auto;align-items:center;flex-wrap:wrap;gap:10px;width:auto;max-width:100%}
 .therapy-guide-note .therapy-guide-navigation-pair > button{flex:0 1 auto;width:auto;min-height:36px;padding:7px 12px;font-size:13px;line-height:20px}
 .therapy-guide-navigation-pair > .therapy-guide-navigation-divider{flex:0 0 1px;height:20px}
-@media(max-width:750px){.therapy-guide-note .therapy-guide-navigation-pair{flex-basis:auto}.therapy-guide-note .therapy-guide-navigation-pair > button{font-size:12px;padding:6px 10px}}
+@media(max-width:750px) {
+  .therapy-guide-note .therapy-guide-navigation-pair {
+    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); flex:1 1 100%; align-items:stretch; gap:8px;
+  }
+  .therapy-guide-note .therapy-guide-navigation-pair > button {
+    width:100%; min-width:0; min-height:44px; font-size:12px; padding:6px 10px;
+  }
+  .therapy-guide-navigation-pair > :is(.therapy-guide-next,.therapy-guide-finish) { grid-column:2; grid-row:1; }
+  .therapy-guide-note .therapy-guide-navigation-pair > .therapy-guide-navigation-divider { display:none; }
+}
 
 
 /* Match the symbols in the catalog feedback buttons. */

@@ -59,8 +59,32 @@
   document.addEventListener('click',event=>{if(!host.contains(event.target))close();});
   menu.addEventListener('click',event=>{if(event.target.closest('a'))close();});
   host.addEventListener('focusout',event=>{if(event.relatedTarget&&!host.contains(event.relatedTarget))close();});
+
+  // A direct chapter link can scroll before the profile header has its final height.
+  const initialChapter = location.hash;
+  const linkedChapter = initialChapter && initialChapter !== '#ueberblick'
+    && matchMedia('(max-width: 1200px)').matches
+    && performance.getEntriesByType('navigation')[0]?.type === 'navigate'
+    ? new AbortController() : null;
+  function keepLinkedChapterVisible() {
+    if (!linkedChapter || linkedChapter.signal.aborted || initialChapter !== location.hash || scrollY <= 0) return;
+    const panel = document.getElementById(initialChapter.slice(1));
+    if (!panel?.matches('.nd-panel[data-profile-loaded]')) return;
+    const obscured = host.getBoundingClientRect().bottom - panel.getBoundingClientRect().top;
+    if (obscured > 0) window.scrollBy({top: -(obscured + 12), behavior:'instant'});
+  }
+  if (linkedChapter) {
+    const {signal} = linkedChapter;
+    for (const event of ['wheel','touchmove','pointerdown','keydown','hashchange']) {
+      window.addEventListener(event, () => linkedChapter.abort(), {capture:true, passive:true, signal});
+    }
+    const align = () => requestAnimationFrame(keepLinkedChapterVisible);
+    window.addEventListener('lcn-doctor-rendered', align, {signal});
+    window.addEventListener('load', align, {once:true, signal});
+  }
   new ResizeObserver(()=>{
     document.documentElement.style.setProperty('--detail-header-height',host.getBoundingClientRect().height+'px');
+    keepLinkedChapterVisible();
   }).observe(host);
   fetch('components/header.html?v=two-add-links-20261105').then(r=>{if(!r.ok)throw Error();return r.text();}).then(html=>{
     const parsed=new DOMParser().parseFromString(html,'text/html');

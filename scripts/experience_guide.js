@@ -110,28 +110,129 @@
         'Vielleicht findest du hier eine weitere Behandlung, über die du dich informieren möchtest. Schau dir mögliche Alternativen und verwandte Therapien an.']
     };
     const doctorIntroductions = {
-      wirkung: 'Hier siehst du, wie sich der Gesamtzustand anderer Menschen während der Behandlung verändert hat.',
-      termin: 'Hier siehst du, wie andere die Belastung rund um den Termin erlebt haben und welche Terminformen möglich waren.',
-      zugang: 'Hier findest du Erfahrungen zu selbst getragenen Behandlungskosten und Wartezeiten.',
-      symptome: 'Hier siehst du, bei welchen Symptomen andere eine Linderung erlebt haben.',
-      therapien: 'Hier findest du die Therapien, die dieser Praxis zugeordnet sind. Du kannst Therapien suchen, filtern oder eine Zuordnung ergänzen.',
-      anreise: 'Auf der Karte siehst du die Praxisstandorte. Gib deinen Ausgangsort ein, um die Entfernung und den Anreiseaufwand einzuschätzen.'
+      wirkung: [
+        'Wie hat sich dein Gesamtzustand im Verlauf der Behandlung verändert? Wähle die Antwort, die deiner Erfahrung entspricht.',
+        'Wie haben andere die Behandlung erlebt? Die Community sammelt Erfahrungen dazu, wie sich der Gesamtzustand im Verlauf der Behandlung verändert hat.'
+      ],
+      termin: [
+        'Wie belastend war dein Termin und welche Terminformen waren möglich? Teile, was du selbst erlebt hast.',
+        'Wie lässt sich ein Termin mit deiner Belastbarkeit vereinbaren? Die Community sammelt Erfahrungen zur Anpassung der Termine und dazu, welche Terminformen möglich waren.'
+      ],
+      zugang: [
+        'Was hast du selbst bezahlt und wie lange hast du auf Termine gewartet? Wähle die Stufen, die zu deiner Erfahrung passen.',
+        'Mit welchen Kosten und Wartezeiten kannst du rechnen? Die Community sammelt Angaben zu selbst getragenen Behandlungskosten und zur Wartezeit auf Erst- und Folgetermine.'
+      ],
+      symptome: [
+        'Wähle die Symptome aus, bei denen du eine Linderung erlebt hast. Über die Suche kannst du weitere Symptome ergänzen.',
+        'Bei welchen Symptomen berichtet die Community von einer Linderung? Die Liste zeigt, zu welchen Beschwerden Erfahrungen vorliegen.'
+      ],
+      therapien: [
+        'Prüfe, welche Therapien hier angeboten werden. Bestätige passende Zuordnungen oder schlage Ergänzungen vor.',
+        'Welche Therapien sind dieser Praxis zugeordnet? Die Übersicht bündelt recherchierte Zuordnungen und Rückmeldungen der Community zum Therapieangebot.'
+      ],
+      anreise: [
+        'Hier kannst du den Praxisstandort ansehen und die Entfernung von deinem Ausgangsort einschätzen.',
+        'Wie weit ist es bis zur Praxis? Auf der Karte siehst du die Standorte und kannst den Anreiseaufwand von deinem Ausgangsort aus einschätzen.'
+      ]
     };
     const doctorTopics = {
       wirkung: [
-        ['Community-Bewertung', '.effect-chart', 'Wähle, ob sich dein Gesamtzustand verschlechtert, nicht verändert, verbessert oder vollständig erholt hat.', 'Die Balken zeigen, wie sich die Antworten auf die vier Stufen verteilen. Achte auch darauf, wie viele Menschen eine Angabe gemacht haben.']
+        {
+          title: 'Community-Bewertung', selector: '.effect-chart', answers: 'Angaben',
+          review: 'Wähle in der Abbildung die Antwort, die zu deiner bisherigen Erfahrung passt.',
+          reading: 'Die Balken zeigen, wie sich die Angaben auf vier Antwortmöglichkeiten verteilen. Achte auch auf die Anzahl der Angaben.',
+          options: [
+            ['Verschlechterung', 'Der Gesamtzustand hat sich verschlechtert.'],
+            ['Neutral', 'Der Gesamtzustand ist gleich geblieben.'],
+            ['Verbesserung', 'Der Gesamtzustand hat sich verbessert.'],
+            ['Heilung', 'Der Gesamtzustand hat sich bis zur Genesung verbessert.']
+          ],
+          readingNote: 'Die Antworten beschreiben persönliche Erfahrungen. Aus ihnen lässt sich die Wirkung für einzelne Personen nicht vorhersagen.'
+        }
       ],
       termin: [
-        ['Long-Covid-gerechter Termin', '.adaptation-matched', 'Wähle die Stufe, die am besten zu deinem Termin passt. Berücksichtige Wartezeit, Ruhe und die Möglichkeit, im Liegen zu warten oder dich zurückzuziehen.', 'Die Verteilung zeigt, wie gut andere den Termin an ihre Belastbarkeit angepasst fanden.'],
-        ['Terminform', '.appointment-variant', 'Gib für den Ersttermin und für Folgetermine an, welche Termine vor Ort, per Telefon oder per Video möglich waren.', 'Die Zahlen zeigen für jede Terminform, wie viele Personen sie als möglich oder als nicht möglich gemeldet haben.']
+        {
+          title: 'Long-Covid-gerechter Termin', selector: '.adaptation-matched', answers: 'Angaben',
+          review: 'Wähle die Stufe, die am besten zu deinem Termin passt.',
+          reading: 'Die Verteilung zeigt, wie gut andere ihren Termin an ihre Belastbarkeit angepasst fanden. Die Stufen berücksichtigen diese Kriterien.',
+          options: [
+            ['Wartezeit', 'Wie lange dauerte das Warten vor Ort?'],
+            ['Wartezimmer', 'War der Wartebereich ruhig?'],
+            ['Warten im Liegen', 'Konntest du dich beim Warten hinlegen?'],
+            ['Rückzug', 'Konntest du dich bei Bedarf zurückziehen?']
+          ]
+        },
+        {
+          title: 'Terminform', selector: '.appointment-variant', answers: 'Einzelangaben',
+          review: 'Wähle für die Terminformen, zu denen du etwas sagen kannst, **Möglich** oder **Nicht möglich**.',
+          reading: 'Die Tabelle zeigt für jede Terminform, wie oft sie als möglich oder als nicht möglich gemeldet wurde.',
+          options: [
+            ['Ersttermin', 'Hier geht es um den ersten Termin vor Ort, per Telefon oder per Video.'],
+            ['Folgetermin', 'Hier geht es um dieselben Terminformen für weitere Termine.']
+          ],
+          readingNote: 'Eine Person kann mehrere Angaben machen. Die Gesamtzahl zählt die einzelnen Antworten.'
+        }
       ],
       zugang: [
-        ['Behandlungskosten (Eigenanteil)', '.cost-heading', 'Wähle dein Versicherungssystem und gib an, wie viel du für Untersuchungen und Behandlungen selbst bezahlt hast.', 'Die Kostenspannen beziehen sich auf das ausgewählte Versicherungssystem und den selbst gezahlten Betrag.'],
-        ['Wartezeit auf den Ersttermin', '[data-choice="wait"]', 'Wähle die Stufe, die zu deiner Wartezeit auf den Ersttermin passt.', 'Die Verteilung zeigt, wie lange andere auf ihren ersten Termin gewartet haben.'],
-        ['Wartezeit auf Folgetermine', '[data-choice="wait-followup"]', 'Wähle die Stufe, die zu deiner Wartezeit auf einen Folgetermin passt.', 'Hier siehst du die berichteten Wartezeiten auf weitere Termine.']
+        {
+          title: 'Behandlungskosten (Eigenanteil)', selector: '.cost-heading', answers: 'Angaben', insurance: true,
+          review: 'Gib an, wie viel du bisher für Untersuchungen und Behandlungen bei dieser Praxis selbst bezahlt hast. Ziehe die Kostenübernahme ab.',
+          reading: 'Die Auswertung zeigt die selbst getragenen Kosten für das gewählte Land und die gewählte Versicherungsart.',
+          options: [
+            ['Komplett übernommen', 'Die Krankenkasse oder Versicherung hat die Kosten vollständig getragen.'],
+            ['Kostenspannen', 'Die Stufen ordnen den ungefähr selbst bezahlten Betrag ein.']
+          ],
+          readingNote: 'Die Kosten beziehen sich auf die bisherigen Untersuchungen und Behandlungen. Der Umfang kann von Person zu Person unterschiedlich sein.'
+        },
+        {
+          title: 'Wartezeit auf den Ersttermin', selector: '[data-choice="wait"]', answers: 'Angaben',
+          review: 'Wähle die Stufe, die zu deiner Wartezeit auf den ersten Termin passt.',
+          reading: 'Die Verteilung zeigt, wie lange andere auf den ersten Termin gewartet haben. Die aktuelle Verfügbarkeit kann davon abweichen.'
+        },
+        {
+          title: 'Wartezeit auf Folgetermine', selector: '[data-choice="wait-followup"]', answers: 'Angaben',
+          review: 'Wähle die Stufe, die zu deiner Wartezeit auf einen weiteren Termin passt.',
+          reading: 'Die Verteilung zeigt die berichteten Wartezeiten auf weitere Termine. Vergleiche sie mit der Wartezeit auf den Ersttermin.'
+        }
       ],
       symptome: [
-        ['Symptome', '[data-doctor-symptom-help]', 'Wähle die Symptome aus, bei denen dir die Behandlung geholfen hat. Über die Suche kannst du weitere Symptome ergänzen.', 'Die Zahl neben einem Symptom zeigt, wie viele Menschen dort eine Linderung gemeldet haben. Eine Person kann mehrere Symptome auswählen.']
+        {
+          title: 'Symptome', selector: '[data-doctor-symptom-help]', answers: 'Symptome',
+          review: 'Du kannst mehrere Symptome angeben, bei denen du eine Linderung erlebt hast.',
+          reading: 'Die Zahl neben einem Symptom zeigt, wie viele Personen dort eine Linderung gemeldet haben. Eine Person kann mehrere Symptome angeben.',
+          reviewOptions: [
+            ['Vorhandene Symptome auswählen', 'Wähle die passenden Symptome in der Liste. Durch erneutes Auswählen nimmst du deine Angabe zurück.'],
+            ['Weitere Symptome ergänzen', 'Suche unter „Weiteres Symptom auswählen“ nach einem passenden Eintrag.']
+          ],
+          readingNote: 'Die Liste erfasst berichtete Linderungen. Für eine Erfolgsquote wären auch Angaben von Personen nötig, die beim selben Symptom keine Linderung erlebt haben.'
+        }
+      ],
+      therapien: [
+        {
+          title: 'Einträge ansehen und vergleichen', selector: '#treatment-section', jump: true,
+          review: 'Wenn Therapien zugeordnet sind, kannst du die passende Therapie suchen oder zwischen „Kategorien“, „Tabelle“ und „Kacheln“ wechseln.',
+          reading: 'Wenn Therapien zugeordnet sind, kannst du nach Namen suchen und nach Kategorien filtern. Unter „Tabelle“ und „Kacheln“ kannst du die Einträge vergleichen. Über den Namen gelangst du zur jeweiligen Therapieseite.'
+        },
+        {
+          title: 'Zuordnungen prüfen und ergänzen', selector: '#treatment-section', publishedOnly: true,
+          review: 'Mit **Zustimmen (✓)** bestätigst du, dass die Therapie hier angeboten wird. Mit **Widersprechen (×)** widersprichst du der Zuordnung. Über „Therapie hinzufügen“ kannst du fehlende Einträge vorschlagen.',
+          reading: 'Die Zahlen neben **Zustimmen (✓)** und **Widersprechen (×)** zählen Rückmeldungen dazu, ob eine Therapie hier angeboten wird. Erfahrungen zur Wirkung findest du auf der jeweiligen Therapieseite.'
+        }
+      ],
+      anreise: [
+        {
+          title: 'Anreiseaufwand', selector: '.travel-estimate',
+          review: 'Die Entfernungsstufe nutzt die Luftlinie von deinem Ausgangsort. Die Fahrzeit dient als grobe Orientierung.',
+          reading: 'Die Entfernungsstufe nutzt die Luftlinie von deinem Ausgangsort. Die Fahrzeit dient als grobe Orientierung.',
+          options: [
+            ['Erst- und Folgetermin online', 'Wenn beide Termine online möglich sind, entfällt die Anreise zu diesen Terminen.']
+          ]
+        },
+        {
+          title: 'Karte', selector: '#doctor-detail-map',
+          review: 'Gib unter „Adresse, PLZ oder Ort“ deinen Ausgangsort ein und wähle „Standort übernehmen“.',
+          reading: 'Auf der Karte siehst du die Praxisstandorte. Gib unter „Adresse, PLZ oder Ort“ deinen Ausgangsort ein und wähle „Standort übernehmen“, um die Entfernung zu sehen.'
+        }
       ]
     };
     let mode = '';
@@ -264,7 +365,7 @@
       else url.searchParams.set('treatment_id', entryId);
       url.searchParams.set('anliegen', 'erfahrung');
       url.hash = 'ueberblick';
-      const text = shareText ?? (doctor ? 'Kennst du diese Praxis aus eigener Erfahrung? Teile sie im Long Covid Navigator.'
+      const text = shareText ?? (doctor ? 'Warst du hier in Behandlung? Teile deine Erfahrung im Long Covid Navigator.'
         : providers
         ? 'Kennst du Behandler:innen für diese Therapie aus eigener Erfahrung? Schau dir die Einträge im Long Covid Navigator an, bestätige oder korrigiere Angaben und ergänze fehlende Behandler:innen. Teile deine Behandlungserfahrung im jeweiligen Praxiseintrag.'
         : 'Kennst du diese Therapie aus eigener Erfahrung? Teile sie im Long Covid Navigator.');
@@ -308,6 +409,16 @@
       return {block, message, invitation, providers};
     }
 
+    function formatShareInvitation(node, message) {
+      // Rebuild the formatting only when the wording changes.
+      if (node.dataset.message === message) return;
+      node.dataset.message = message;
+      const parts = message.split('? ');
+      if (parts.length > 1) {
+        node.replaceChildren(make('strong', parts.shift() + '?'), make('span', parts.join('? ')));
+      } else updateText(node, message);
+    }
+
     function refreshTopics() {
       refreshEntryAvailability();
       entries.forEach(({card, disclosure, example}) => {
@@ -341,14 +452,7 @@
           : count === 0
           ? 'Kennst du jemanden, der diese Therapie ausprobiert hat? Lade die Person ein, ihre Erfahrung zu teilen. Das hilft dir und anderen bei der Orientierung.'
           : 'Kennst du jemanden, der diese Therapie ausprobiert hat? Jede weitere Erfahrung hilft, die Therapie besser einzuschätzen.');
-        // The invitation contains formatting; rebuild it only when its wording changes.
-        if (sharing.message.dataset.message !== message) {
-          sharing.message.dataset.message = message;
-          const messageParts = message.split('? ');
-          if (messageParts.length > 1) {
-            sharing.message.replaceChildren(make('strong', messageParts.shift() + '?'), make('span', messageParts.join('? ')));
-          } else updateText(sharing.message, message);
-        }
+        formatShareInvitation(sharing.message, message);
       }
       content.querySelectorAll('.therapy-guide-data-status').forEach(node => {
         const count = experienceCount(node.closest('.nd-panel'));
@@ -450,14 +554,69 @@
     }
 
     function renderDoctorTopics(review) {
-      return (doctorTopics[panel.id] || []).flatMap(([title, selector, contribute, read]) => {
-        if (!doctorTopicCard(selector)) return [];
+      const withHighlights = text => text.split(/(„[^“]+“|\*\*[^*]+\*\*)/).map((part, i) => {
+        if (i % 2 === 0) return part;
+        return part.startsWith('**') ? make('strong', part.slice(2, -2)) : make('u', part.slice(1, -1));
+      });
+      return (doctorTopics[panel.id] || []).flatMap(topic => {
+        const {title, selector, answers, insurance, jump, options, reviewOptions, readingNote, publishedOnly} = topic;
+        if (!doctorTopicCard(selector) || (publishedOnly && profileParam !== 'id')) return [];
         const disclosure = make('details');
-        disclosure.append(make('summary', title), make('p', review ? contribute : read),
-          button('Zum Bereich ↓', () => scrollTo(doctorTopicCard(selector))));
-        entries.push({selector, disclosure});
+        const summary = make('summary', title);
+        const description = make('p');
+        description.append(...withHighlights(review ? topic.review : topic.reading));
+        disclosure.append(summary, description);
+        if (answers && !review) {
+          const count = make('span', '', 'therapy-guide-answer-count');
+          count.dataset.guideAnswerCount = '';
+          count.hidden = true;
+          summary.append(' ', count);
+        }
+        if (insurance) {
+          const intro = make('p');
+          intro.dataset.guideInsuranceIntro = review ? 'review' : 'reading';
+          const list = make('ul', '', 'therapy-guide-options');
+          list.dataset.guideInsuranceList = '';
+          disclosure.append(intro, list);
+          refreshInsuranceHelp(disclosure);
+        }
+        const choices = review ? reviewOptions || options : options;
+        if (choices?.length) {
+          const list = make('ul', '', 'therapy-guide-options');
+          for (const [label, text] of choices) {
+            const item = make('li');
+            const detail = make('span');
+            detail.append(...withHighlights(text));
+            item.append(make('strong', label + ':'), detail);
+            list.append(item);
+          }
+          disclosure.append(list);
+        }
+        if (!review && readingNote) disclosure.append(make('p', readingNote));
+        if (answers || jump) disclosure.append(button('Zum Bereich ↓', () => scrollTo(doctorTopicCard(selector))));
+        if (answers) entries.push({selector, disclosure, answers});
         return [disclosure];
       });
+    }
+
+    function refreshDoctorTopics() {
+      for (const {selector, disclosure, answers} of entries) {
+        const badge = disclosure.querySelector('[data-guide-answer-count]');
+        if (!badge) continue;
+        const rawCount = doctorTopicCard(selector)?.dataset.guideAnswerCount;
+        const count = Number(rawCount);
+        badge.hidden = rawCount === undefined;
+        if (badge.hidden) {
+          updateText(badge, '');
+          continue;
+        }
+        const unit = answers === 'Einzelangaben'
+          ? (count === 1 ? 'Einzelangabe' : 'Einzelangaben')
+          : (count === 1 ? 'Angabe' : 'Angaben');
+        const label = answers === 'Symptome' ? 'bis zu ' + count + ' ' + unit + ' je Symptom' : count + ' ' + unit;
+        updateText(badge, '(' + label + ')');
+      }
+      updateProgress();
     }
 
     function classificationContext(section) {
@@ -543,7 +702,7 @@
       if (doctor && !force && panel?.id === active.id) {
         panel = active;
         if (guide) (collapsed ? panel : welcome || panel).prepend(guide);
-        updateProgress();
+        refreshDoctorTopics();
         return;
       }
       guide?.remove();
@@ -572,16 +731,6 @@
 
 
       if (panel.id === 'ueberblick') {
-        const activeChoice = doctor && choices.find(choice => choice[0] === mode);
-        if (activeChoice) {
-          actions.append(button(activeChoice[4] + ' →', () => openView(startView(activeChoice)), true),
-            button('Anliegen ändern', showOrientation), close);
-          guide.classList.add('experience-guide-banner');
-          illustrated(guide, '', make('h2', 'Orientierung fortsetzen'), make('p', activeChoice[1]), actions);
-          guide.querySelector('.experience-guide-eyebrow')?.remove();
-          welcome.append(guide);
-          return;
-        }
         actions.classList.add('therapy-guide-choices');
         addChoices(actions);
         guide.classList.add('experience-guide-banner', 'therapy-guide-personal');
@@ -608,8 +757,12 @@
       if (!review) guide.classList.add('therapy-guide-reading');
       const contributionPrompt = 'Klicke in den Abbildungen oder Listen auf das, was deiner bisherigen Erfahrung entspricht. Jede Angabe hilft anderen.';
       const body = [make('p', doctor
-        ? (review && doctorTopics[panel.id]?.some(([, selector]) => doctorTopicCard(selector)) ? contributionPrompt : doctorIntroductions[panel.id])
+        ? doctorIntroductions[panel.id]?.[review ? 0 : 1]
         : review ? (panel.querySelector('[data-question], .ux-symptom-help') ? contributionPrompt : encouragement[panel.id][0]) : encouragement[panel.id][1])];
+      if (doctor && profileParam === 'submission_id') {
+        if (panel.id === 'symptome') body[0].textContent = 'Hier werden nach der Freigabe des Profils Erfahrungen zur Linderung einzelner Beschwerden gesammelt.';
+        if (panel.id === 'therapien') body[0].textContent = 'Hier siehst du, welche Therapien dem vorgeschlagenen Profil bereits zugeordnet sind.';
+      }
       if (!doctor && review && panel.id === 'symptome') body[0].textContent = 'Klicke auf die Symptome, die sich bei dir durch diese Therapie verbessert haben, oder ergänze entsprechende Symptome.';
       if (!doctor && !review && panel.querySelector('[data-question], .ux-symptom-help')) {
         body.push(make('p', '', 'therapy-guide-data-status'));
@@ -629,11 +782,11 @@
       const cards = doctor ? [] : panel.querySelectorAll('[data-question], .ux-symptom-help');
       if (doctor) {
         body.push(...renderDoctorTopics(review));
-        if (panel.id === 'anreise') {
+        if (panel.id === 'anreise' && panel.querySelector('#doctor-detail-map')) {
           body.push(button('Zur Karte ↓', () => scrollTo(panel.querySelector('#doctor-detail-map'))));
-        } else if (!review && profileParam === 'id' && panel.id !== 'therapien') {
+        } else if (!review && entries.length && profileParam === 'id') {
           sharing = shareEntry();
-          sharing.message.textContent = 'Kennst du jemanden, der in dieser Praxis behandelt wurde? Lade die Person ein, ihre Erfahrung zu teilen.';
+          formatShareInvitation(sharing.message, 'Kennst du jemanden, der hier behandelt wurde? Lade die Person ein, ihre Erfahrung zu teilen.');
         }
       } else if (cards.length) {
 
@@ -946,6 +1099,11 @@
             request();
           }
           illustrated(thanks, 'Zum Abschluss', make('h2', 'Dein kurzer Eindruck'), polls, thanksActions);
+        } else if (doctor && !review) {
+          const title = 'Danke, dass du dich umgesehen hast!';
+          thanks.setAttribute('aria-label', title);
+          illustrated(thanks, 'Zum Abschluss', make('h2', title),
+            make('p', 'Du kannst jederzeit zurückkommen, weiterlesen oder ein anderes Anliegen wählen.'), thanksActions);
         } else illustrated(thanks, 'Für heute geschafft', make('h2', 'Danke, dass du dabei bist!'),
           make('p', 'Schön, dass du dir Zeit genommen hast, dich hier umzusehen und dein Wissen zu teilen. So wächst unser gemeinsames Wissen – und andere finden leichter ihren Weg.'),
           make('p', 'Du musst nicht alles ausfüllen. Für heute darf es genug sein. Du kannst jederzeit zurückkommen, etwas ergänzen oder einfach weiterlesen.'), thanksActions);
@@ -991,15 +1149,16 @@
         guide.querySelector('.experience-guide-copy').prepend(sharing.block);
       }
       panel.prepend(guide);
-      if (doctor) updateProgress();
+      if (doctor) refreshDoctorTopics();
       else refreshTopics();
     }
 
     const choices = doctor ? [
       ['review', 'Meine Erfahrung teilen', 'Berichte Schritt für Schritt, wie es dir mit der Behandlung und den Terminen ging. Du entscheidest, welche Fragen du beantworten möchtest.', 'wirkung', 'Erfahrung teilen'],
       ['travel', 'Anreise', 'Sieh dir die Praxisstandorte auf der Karte an und schätze die Entfernung von deinem Ausgangsort ein.', 'anreise', 'Anreise ansehen'],
-      ['symptoms', 'Bei welchen Symptomen hat die Behandlung geholfen?', 'Schau nach, bei welchen Symptomen Menschen von einer Linderung berichten.', 'symptome', 'Symptome ansehen'],
-      ['explore', 'Erfahrungsberichte der Community ansehen', 'Lies, was andere über die Behandlung, die Belastung bei Terminen und die Kosten berichten.', 'wirkung', 'Erfahrungen ansehen']
+      ['symptoms', 'Bei welchem Symptom berichtet die Community von einer Linderung?', 'Sieh nach, bei welchen Symptomen andere von einer Linderung berichten.', 'symptome', 'Symptome ansehen'],
+      ['explore', 'Erfahrungen der Community ansehen', 'Lies, was andere über die Behandlung, die Belastung bei Terminen und die Kosten berichten.', 'wirkung', 'Erfahrungen ansehen'],
+      ['treatments', 'Therapien dieser Praxis', 'Sieh dir die zugeordneten Therapien an. Du kannst nach Kategorien filtern und findest über den Namen mehr zur jeweiligen Therapie.', 'therapien', 'Therapien ansehen']
     ] : [
       ['review', 'Meine Erfahrung teilen', 'Berichte Schritt für Schritt, wie es dir mit der Therapie ging. Du entscheidest, welche Fragen du beantworten möchtest.', 'wirkung', 'Erfahrung teilen'],
       ['providers', 'Behandler:innen finden (Karte)', 'Suche auf der Karte nach Behandler:innen, die diese Therapie anbieten. Wähle einen Ort aus, um Behandler:innen in der Nähe zu finden.', 'anreise', 'Behandler:innen suchen'],
@@ -1420,7 +1579,7 @@
     restore();
     if (doctor) {
       window.addEventListener('lcn-doctor-rendered', () => paint());
-      window.addEventListener('lcn-doctor-symptoms-rendered', updateProgress);
+      window.addEventListener('lcn-doctor-symptoms-rendered', refreshDoctorTopics);
     } else {
       document.addEventListener('lcn-guide-contributed', event => {
         const topic = event.detail?.topic;
@@ -1461,14 +1620,20 @@
 
 // Remember native disclosures, including guide panels mounted after page load.
 (() => {
-  const root = document.querySelector('.ux-detail[data-treatment-id]');
+  const doctor = document.body.dataset.doctorPage === 'live';
+  const root = doctor ? document.getElementById('view-content') : document.querySelector('.ux-detail[data-treatment-id]');
   if (!root) return;
-  const storageKey = 'lcn_therapy_disclosures:' + root.dataset.treatmentId;
+  const params = new URLSearchParams(location.search);
+  const entryId = doctor
+    ? (params.has('submission_id') ? 'submission:' + params.get('submission_id') : params.get('id'))
+    : root.dataset.treatmentId;
+  if (!entryId) return;
+  const storageKey = (doctor ? 'lcn_doctor_disclosures:' : 'lcn_therapy_disclosures:') + entryId;
   let saved = {};
   try { saved = JSON.parse(sessionStorage.getItem(storageKey)) || {}; } catch {}
   const initialized = new WeakSet();
   function restore() {
-    root.querySelectorAll('details').forEach(details => {
+    root.querySelectorAll(doctor ? '.therapy-guide-note details' : 'details').forEach(details => {
       if (initialized.has(details)) return;
       initialized.add(details);
       const section = details.closest('.view-panel, [data-view-panel], section[id], [id]');

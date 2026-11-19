@@ -10,6 +10,7 @@ const doctor = {
   loc_city: 'Berlin', loc_country: 'DE', loc_plz: '10117', loc_lat: 52.52, loc_lng: 13.405
 };
 const treatments = {Diagnostik: [{treat_id: 42, behandlung: 'Testdiagnostik'}]};
+const answerTotal = total => ({total, options: []});
 
 async function routeFixture(page) {
   let selected = false;
@@ -22,7 +23,10 @@ async function routeFixture(page) {
       if (file === 'api/doctor_detail.php') {
         json = {ok: true, item: doctor, research: {locations: [doctor]}, treatments_grouped: treatments};
       } else if (file === 'api/doctor_community.php') {
-        json = {ok: true, community: {include_dummy: false, questions: {}}, own_answers: {}};
+        json = {ok: true, community: {include_dummy: false, questions: {
+          effect: answerTotal(3), 'appointment-0-0': answerTotal(3), 'appointment-1-2': answerTotal(1),
+          'costs-gkv': answerTotal(2), 'costs-at-public': answerTotal(4)
+        }}, own_answers: {}};
       } else if (file === 'api/catalog_relation_feedback.php') {
         json = {ok: true, feedback: {}};
       } else if (file === 'api/geocode_location.php') {
@@ -104,6 +108,18 @@ async function check(browser, width) {
     assert.equal(await noOverflow(), true);
     assert.equal(await page.locator('#ueberblick .effect-chart').count(), 0);
     assert.equal(await page.locator('#treatment-section').count(), 0);
+    assert.deepEqual(await welcome.getByRole('option').locator('strong').allTextContents(), [
+      'Meine Erfahrung teilen', 'Anreise', 'Bei welchem Symptom berichtet die Community von einer Linderung?',
+      'Erfahrungen der Community ansehen', 'Therapien dieser Praxis'
+    ]);
+    const overviewWheel = welcome.getByRole('listbox');
+    await overviewWheel.press('ArrowDown');
+    await welcome.getByRole('option', {name: 'Anreise', selected: true}).waitFor();
+    await page.evaluate(() => window.dispatchEvent(new Event('lcn-exchange-rates')));
+    assert.equal(await overviewWheel.evaluate(wheel => document.activeElement === wheel), true);
+    await page.keyboard.press('ArrowDown');
+    await welcome.getByRole('option', {name: 'Bei welchem Symptom berichtet die Community von einer Linderung?', selected: true}).waitFor();
+    await overviewWheel.press('Home');
     await welcome.getByRole('option', {name: 'Meine Erfahrung teilen', exact: true}).click();
     await welcome.getByRole('button', {name: 'Erfahrung teilen →', exact: true}).click();
     await active('wirkung');
@@ -170,7 +186,8 @@ async function check(browser, width) {
     await page.getByRole('button', {name: 'Ich brauche keine Orientierung', exact: true}).click();
     await go('ueberblick');
     await page.getByRole('button', {name: 'Orientierung zurückholen'}).click();
-    await welcome.getByRole('heading', {name: 'Orientierung fortsetzen'}).waitFor();
+    await welcome.getByRole('option', {name: 'Meine Erfahrung teilen', selected: true}).waitFor();
+    assert.equal(await welcome.getByRole('button', {name: 'Erfahrung teilen →', exact: true}).isVisible(), false);
 
     await page.evaluate(() => sessionStorage.removeItem('lcn_doctor_guide:627'));
     await page.goto(url + '#anreise');
@@ -183,6 +200,51 @@ async function check(browser, width) {
     await dialog.getByRole('button', {name: 'Anreise ansehen →'}).click();
     await active('anreise');
     await map.locator('.leaflet-marker-icon').first().waitFor();
+    await page.locator('#anreise .therapy-guide-note summary').getByText('Karte', {exact: true}).click();
+    assert.deepEqual(await page.locator('#anreise .therapy-guide-note details[open] u').allTextContents(), [
+      'Adresse, PLZ oder Ort', 'Standort übernehmen'
+    ]);
+
+    await go('ueberblick');
+    const wheel = welcome.getByRole('listbox');
+    await wheel.press('End');
+    await wheel.press('ArrowUp');
+    await wheel.press('Enter');
+    await welcome.getByRole('button', {name: 'Erfahrungen ansehen →'}).click();
+    await active('wirkung');
+    const assessment = page.locator('#wirkung .therapy-guide-note details');
+    await assessment.getByText('(3 Angaben)', {exact: true}).waitFor();
+    await assessment.locator('summary').click();
+    assert.deepEqual(await assessment.locator('li strong').allTextContents(), ['Verschlechterung:', 'Neutral:', 'Verbesserung:', 'Heilung:']);
+    await page.reload();
+    await assessment.and(page.locator('[open]')).waitFor();
+    await page.locator('#wirkung .therapy-guide-sharing strong').getByText('Kennst du jemanden, der hier behandelt wurde?').waitFor();
+
+    await go('termin');
+    await page.locator('#termin .therapy-guide-note summary').getByText('(4 Einzelangaben)', {exact: true}).waitFor();
+    await go('zugang');
+    const costs = page.locator('#zugang .therapy-guide-note details').first();
+    await costs.getByText('(2 Angaben)', {exact: true}).waitFor();
+    await costs.locator('summary').click();
+    await page.locator('#zugang select[data-cost-country]').selectOption('AT');
+    await costs.getByText('(4 Angaben)', {exact: true}).waitFor();
+    await costs.getByText('Für Österreich stehen zur Auswahl:').waitFor();
+    assert.match(await costs.innerText(), /Die Auswertung zeigt die selbst getragenen Kosten für das gewählte Land/);
+    await page.locator('#zugang [data-choice="wait-followup"]').first().waitFor();
+
+    await go('symptome');
+    await page.locator('#symptome .therapy-guide-note summary').getByText('(bis zu 1 Angabe je Symptom)', {exact: true}).waitFor();
+    await go('ueberblick');
+    await wheel.press('End');
+    await wheel.press('Enter');
+    await welcome.getByRole('button', {name: 'Therapien ansehen →'}).click();
+    await active('therapien');
+    const assignments = page.locator('#therapien .therapy-guide-note details').last();
+    await assignments.locator('summary').getByText('Zuordnungen prüfen und ergänzen').click();
+    assert.deepEqual(await assignments.locator('p strong').allTextContents(), ['Zustimmen (✓)', 'Widersprechen (×)']);
+    await page.getByRole('button', {name: 'Ich bin hier fertig', exact: true}).click();
+    const finish = page.getByRole('dialog', {name: 'Danke, dass du dich umgesehen hast!'});
+    await finish.getByRole('button', {name: 'Hier bleiben', exact: true}).click();
     assert.equal(await noOverflow(), true);
     assert.deepEqual(errors, []);
     console.log(`PASS ${width}px: guided navigation, symptom voting, therapy tab, travel map, back/forward and reload`);

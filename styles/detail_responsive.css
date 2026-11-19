@@ -91,7 +91,7 @@ body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-co
   gap:clamp(4px,1vw,16px);
 }
 body.compact-doctor-header #header-placeholder .profile > .lcn-local-view-controls { display:contents; }
-body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) :is(.detail-brand-group,.lcn-role-toggle,.profile-copy,.contact,.detail-menu-toggle,#doctor-demo-toggle,#nd-demo-header-toggle) { grid-row:1; }
+body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) :where(.detail-brand-group,.lcn-role-toggle,.profile-copy,.contact,.detail-menu-toggle,#doctor-demo-toggle,#nd-demo-header-toggle) { grid-row:1; }
 body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .lcn-local-view-controls > .lcn-role-toggle { grid-column:2; }
 body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .profile-copy { grid-column:3; padding:0; text-align:center; overflow-wrap:anywhere; }
 body.compact-doctor-header #header-placeholder .profile > .lcn-local-view-controls > :is(#doctor-demo-toggle,#nd-demo-header-toggle) { grid-column:4; width:100%; max-width:12rem; }
@@ -110,30 +110,47 @@ body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-co
   body.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .detail-menu-toggle { width:32px; min-width:32px; padding:3px; }
 }
 /* Therapy titles align with the whole header, independently of local controls. */
-@media(min-width:1100px) {
+@media(min-width:1201px) {
   body.ux-page.compact-doctor-header #header-placeholder .profile > .profile-copy {
     position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
     width: min(32rem, calc(100% - 880px)); margin: 0; padding: 0; text-align: center;
   }
 }
-@media(max-width:1099px) {
-  body.ux-page.compact-doctor-header #header-placeholder .profile,
-  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) {
+@media(max-width:1200px) {
+  body:is(.ux-page,.doctor-detail-live).compact-doctor-header #view-content > .nd-panel {
+    scroll-margin-top:calc(var(--detail-header-height,76px) + 12px);
+  }
+  body:is(.ux-page,.doctor-detail-live).compact-doctor-header #header-placeholder .profile,
+  body:is(.ux-page,.doctor-detail-live).compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) {
     grid-template-columns: auto minmax(0,1fr) auto auto auto; gap: 8px; padding: 10px 12px;
   }
-  body.ux-page.compact-doctor-header #header-placeholder .profile > .profile-copy,
-  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .profile-copy {
+  body:is(.ux-page,.doctor-detail-live).compact-doctor-header #header-placeholder .profile > .profile-copy,
+  body:is(.ux-page,.doctor-detail-live).compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .profile-copy {
     position: static; grid-column: 1/-1; grid-row: 1; width: 100%; transform: none; padding: 0; text-align: center;
   }
-  body.ux-page.compact-doctor-header #header-placeholder .profile > .detail-brand-group { grid-column: 1; grid-row: 2; }
-  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .lcn-local-view-controls > .lcn-role-toggle { grid-column: 2; grid-row: 2; }
+  body:is(.ux-page,.doctor-detail-live).compact-doctor-header #header-placeholder .profile > .detail-brand-group { grid-column: 1; grid-row: 2; }
+  body:is(.ux-page,.doctor-detail-live).compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .lcn-local-view-controls > .lcn-role-toggle { grid-column: 2; grid-row: 2; }
   body.ux-page.compact-doctor-header #header-placeholder .profile > .nd-local-controls,
-  body.ux-page.compact-doctor-header #header-placeholder .profile > .lcn-local-view-controls > #nd-demo-header-toggle { grid-column: 3; grid-row: 2; margin: 0; }
-  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .contact { grid-column: 4; grid-row: 2; }
-  body.ux-page.compact-doctor-header #header-placeholder .profile > .detail-menu-toggle,
-  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .detail-menu-toggle { grid-column: 5; grid-row: 2; position: static; transform: none; }
+  body:is(.ux-page,.doctor-detail-live).compact-doctor-header #header-placeholder .profile > .lcn-local-view-controls > :is(#nd-demo-header-toggle,#doctor-demo-toggle) { grid-column: 3; grid-row: 2; margin: 0; }
+  body.ux-page.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .contact,
+  body.doctor-detail-live.compact-doctor-header #header-placeholder .profile > .contact,
+  body.doctor-detail-live.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .contact { grid-column: 4; grid-row: 2; margin: 0; }
+  body:is(.ux-page,.doctor-detail-live).compact-doctor-header #header-placeholder .profile > .detail-menu-toggle,
+  body:is(.ux-page,.doctor-detail-live).compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .detail-menu-toggle { grid-column: 5; grid-row: 2; position: static; transform: none; }
 }
-@media(min-width:1100px) {
+@media(max-width:600px) {
+  body.doctor-detail-live.compact-doctor-header #header-placeholder .profile .profile-copy h1 { font-size: clamp(16px, 4vw, 19px); }
+  body.doctor-detail-live.compact-doctor-header #header-placeholder .profile:has(> .lcn-local-view-controls) > .contact {
+    width:auto; flex-direction:row;
+  }
+  :root[data-lcn-site-role="admin"] body.doctor-detail-live.compact-doctor-header #header-placeholder .profile > .lcn-local-view-controls > .lcn-role-toggle {
+    grid-column:1/3; grid-row:3;
+  }
+  :root[data-lcn-site-role="admin"] body.doctor-detail-live.compact-doctor-header #header-placeholder .profile > .lcn-local-view-controls > #doctor-demo-toggle {
+    grid-column:3/-1; grid-row:3; justify-self:end;
+  }
+}
+@media(min-width:1201px) {
   body.ux-page.compact-doctor-header #header-placeholder .profile > .profile-copy {
     grid-column: 1/-1; grid-row: 1/-1;
   }
