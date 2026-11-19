@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+function lcnTreatmentCombinationStatement(bool $diagnostic): string {
+    return $diagnostic
+        ? 'Die angezeigten Untersuchungen werden gemeinsam durchgeführt.'
+        : 'Die angezeigten Behandlungen bilden zusammen eine eigenständige Kombinationstherapie.';
+}
+
 /** One moderated proposal contains the new entry and all of its component links. */
 function lcnNormalizeNewTreatmentCombination(array $g,array $input): array {
     if(!is_string($input['name']??null))throw new InvalidArgumentException('Bitte einen Namen für die Kombination eingeben.');

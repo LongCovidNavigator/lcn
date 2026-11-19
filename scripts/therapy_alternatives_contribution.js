@@ -1,4 +1,4 @@
-window.LCNTherapyAlternativesContribution = ({make, classificationContext, fieldReference}) => {
+window.LCNTherapyAlternativesContribution = ({make, classificationContext, fieldReference, diagnostic}) => {
   const positions = ['linken', 'mittleren', 'rechten'];
   const applicationFields = new Set(['Anwendungsformen', 'Weitere Anwendungsformen']);
   const definitions = {
@@ -94,7 +94,9 @@ window.LCNTherapyAlternativesContribution = ({make, classificationContext, field
     const heading = combination?.querySelector('h3')?.firstChild?.textContent.trim();
     if (!heading || !tree || ![...tree.querySelectorAll('[data-combination-part]')].some(visible)) return;
     const paragraph = make('p', 'Unter ');
-    paragraph.append(make('u', heading), ' findest du die einzelnen Bestandteile dieser Therapie.');
+    paragraph.append(make('u', heading), diagnostic
+      ? ' findest du die einzelnen Bestandteile dieser Untersuchung.'
+      : ' findest du die einzelnen Bestandteile dieser Therapie.');
     item.append(paragraph);
   }
 
@@ -239,8 +241,12 @@ window.LCNTherapyAlternativesContribution = ({make, classificationContext, field
         voting: 'Mit Zustimmen (✓) bestätigst du, dass du den vorgeschlagenen Eintrag als passende Alternative zur hier geöffneten Therapie ansiehst. Mit Widersprechen (×) widersprichst du diesem Vorschlag. Du bewertest damit weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.'
       },
       combination: {
-        description: 'Welche Behandlungen ergeben zusammen mehr als ihre einzelnen Bestandteile? Gesucht sind gezielte Kombinationen, die einen zusätzlichen oder anderen Effekt erzielen sollen, den Genesungsprozess unterstützen oder zusammen eine eigenständige Therapie bilden. Entscheidend ist dieses Zusammenspiel, nicht allein die gleichzeitige Anwendung. Eigene Behandlungserfahrung ist dafür nicht nötig.',
-        voting: 'Mit Zustimmen (✓) bestätigst du, dass der angezeigte Bestandteil zur vorgeschlagenen Therapiekombination gehört. Mit Widersprechen (×) widersprichst du dieser Zuordnung. Deine Rückmeldung bezieht sich auf die Zusammensetzung der Kombination, nicht auf ihre Wirksamkeit.'
+        description: diagnostic
+          ? 'Welche Untersuchungen werden gemeinsam durchgeführt? Ergänze bekannte Kombinationen und ihre Bestandteile.'
+          : 'Welche Behandlungen ergeben zusammen mehr als ihre einzelnen Bestandteile? Gesucht sind gezielte Kombinationen, die einen zusätzlichen oder anderen Effekt erzielen sollen, den Genesungsprozess unterstützen oder zusammen eine eigenständige Therapie bilden. Entscheidend ist dieses Zusammenspiel, nicht allein die gleichzeitige Anwendung. Eigene Behandlungserfahrung ist dafür nicht nötig.',
+        voting: diagnostic
+          ? 'Mit Zustimmen (✓) bestätigst du die angezeigte Aussage. Bei der Kombination geht es darum, ob die Untersuchungen gemeinsam durchgeführt werden. Bei einem Bestandteil geht es um seine Zuordnung zur Kombination. Mit Widersprechen (×) widersprichst du der jeweiligen Aussage.'
+          : 'Mit Zustimmen (✓) bestätigst du die angezeigte Aussage. Bei der Kombination geht es darum, ob die Behandlungen zusammen eine eigenständige Kombinationstherapie bilden. Bei einem Bestandteil geht es um seine Zuordnung zur Kombination. Mit Widersprechen (×) widersprichst du der jeweiligen Aussage.'
       }
     },
     renderClassification

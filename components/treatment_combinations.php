@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../api/_treatment_combinations.php';
+
 /** Combination parent and its components keep the same positions on both page types. */
 function ndRenderTreatmentCombinations(array $g,int $id): string {
     $ids=$g['combinations'][$id]??[];if(isset($g['comboIds'][$id]))$ids=[$id=>$id]+$ids;
@@ -9,7 +11,7 @@ function ndRenderTreatmentCombinations(array $g,int $id): string {
         else echo '<strong>'.ndEscape($name).'</strong>';
     };
     ob_start(); ?>
-<section class="card ux-combinations" data-combination-section data-is-combination="<?= isset($g['comboIds'][$id])?'1':'0' ?>">
+<section class="card ux-combinations" data-combination-section data-is-combination="<?= isset($g['comboIds'][$id])?'1':'0' ?>"<?= $diagnostic?' data-diagnostic-combinations':'' ?>>
 <h3><?= $diagnostic?'Kombinierte Untersuchungen':'Kombinationstherapien' ?> <span class="ux-heading-info"><button type="button" aria-label="Information zu Kombinationen" aria-describedby="therapy-combinations-help">ⓘ</button><p id="therapy-combinations-help" role="tooltip"><?= $diagnostic?'Welche Untersuchungen werden gemeinsam durchgeführt? Hier sammelt die Community solche Kombinationen und ihre Bestandteile. Eine Zuordnung bedeutet nicht, dass alle Untersuchungen immer zusammen nötig sind.':'Welche Behandlungen bilden gemeinsam eine eigenständige Therapie? Bei einer Kombinationstherapie werden die Therapien zusammen angewendet, um einen zusätzlichen oder anderen Effekt zu erzielen.' ?> Die Verbindungslinien zeigen, welche Bestandteile zu welcher Kombination gehören. Mit ✓ oder × bewertest du die jeweils angezeigte Aussage. Über ＋ kannst du die angebotenen Ergänzungen vorschlagen. Ungeprüfte Vorschläge sind gekennzeichnet.</p></span></h3>
 <?php if(!$ids): ?><p class="ux-combination-empty">Noch keine Kombination hinterlegt. Du kannst eine vorhandene Kombination verknüpfen oder eine neue vorschlagen.</p><?php endif; ?>
 <?php foreach($ids as $combo):
@@ -20,7 +22,7 @@ function ndRenderTreatmentCombinations(array $g,int $id): string {
 ?>
 <div class="ux-combination-tree" data-combination-tree="<?= $combo ?>"><div class="ux-combination-drawing" style="--combination-columns:<?= max(1,$count) ?>">
 <svg class="ux-combination-lines" aria-hidden="true"></svg>
-<article class="ux-combination-parent<?= $combo===$id?' is-current':'' ?>" data-combination-parent data-combination-entry="<?= $combo ?>"><?php $renderName($combo,$g['entries'][$combo]['treatmentname']); ?><div class="ux-combination-assertion"><span data-treatment-relation-feedback="combo:<?= $combo ?>" data-feedback-statement="<?= ndEscape('„'.$g['entries'][$combo]['treatmentname'].'“ bildet eine eigenständige Therapie, die einen zusätzlichen oder anderen Effekt erzielt.') ?>" data-feedback-standard="1"></span></div>
+<article class="ux-combination-parent<?= $combo===$id?' is-current':'' ?>" data-combination-parent data-combination-entry="<?= $combo ?>"><?php $renderName($combo,$g['entries'][$combo]['treatmentname']); ?><div class="ux-combination-assertion"><span data-treatment-relation-feedback="combo:<?= $combo ?>" data-feedback-statement="<?= ndEscape(lcnTreatmentCombinationStatement(($g['entries'][$combo]['typ']??'')==='Diagnostik')) ?>" data-feedback-standard="1"></span></div>
 </article>
 <p class="ux-combination-parts-label">Bestandteile<?= array_filter($parts,fn($p)=>$p['alias'])?' und weitere Alias-Verknüpfungen':'' ?></p>
 <div class="ux-combination-parts">

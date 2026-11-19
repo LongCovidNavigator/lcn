@@ -330,7 +330,7 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 }
 .therapy-intent-wheel .therapy-intent-title {
   box-sizing: border-box; display: flex; align-items: center; gap: .65rem; width: 100%;
-  height: 52px; min-height: 52px!important; padding: .3rem .65rem!important;
+  height: var(--therapy-wheel-row-height); min-height: var(--therapy-wheel-row-height)!important; padding: .3rem .65rem!important;
   scroll-snap-align: center; cursor: pointer; opacity: .2;
   transform: scale(.91); transform-origin: left center;
   transition: opacity 140ms, transform 140ms; color: #6f5b82;
@@ -349,6 +349,7 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 @media(prefers-reduced-motion:reduce) { .therapy-intent-wheel .therapy-intent-title { transition: none; } }
 /* Rounded focus band and bounded options. */
 .therapy-wheel-viewport {
+  --therapy-wheel-row-height: 52px;
   position: relative;
   grid-template-columns: minmax(0, 1fr) 30px;
   width: min(100%, max(calc(363px + 30px + .4rem), calc(77% + 30px + .4rem)));
@@ -357,7 +358,7 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 .therapy-wheel-viewport::before {
   content: ''; position: absolute; top: 52px; left: 0;
   width: calc(100% - 30px - .4rem);
-  height: 52px; border-radius: 12px; background: #f4eefb; pointer-events: none;
+  height: var(--therapy-wheel-row-height); border-radius: 12px; background: #f4eefb; pointer-events: none;
 }
 .therapy-intent-wheel .therapy-intent-track { background: transparent; padding-inline: 0; }
 .therapy-wheel-controls button:disabled { opacity: .22; cursor: default; }
@@ -367,7 +368,7 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 }
 /* Variant 2: the focused choice opens into a floating card in the same place. */
 .therapy-wheel-viewport::before {
-  top: calc(50% - 26px); background: #fff; border-radius: 16px;
+  top: calc(50% - var(--therapy-wheel-row-height) / 2); background: #fff; border-radius: 16px;
   box-shadow: 0 3px 12px #49305f0d;
 }
 .therapy-intent-wheel .therapy-intent-title.is-current { color: #362649; }
@@ -482,22 +483,24 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
   position: absolute; left: 0; width: calc(100% - 30px - .4rem);
   top: calc(50% - 78px - var(--therapy-reveal-height, 0px) / 2);
 }
-.therapy-intent-focus-card { top: calc(50% - 26px - var(--therapy-reveal-height, 0px) / 2); }
+.therapy-intent-focus-card { top: calc(50% - (var(--therapy-wheel-row-height) + var(--therapy-reveal-height, 0px)) / 2); }
 .therapy-wheel-controls { top: 50%; }
 .therapy-card-neighbour-before { top: calc(50% - 78px - var(--therapy-reveal-height, 0px) / 2); }
 .therapy-card-neighbour-after { top: calc(50% + 26px + var(--therapy-reveal-height, 0px) / 2); }
 /* Continuous wheel: every label travels with the scroll position. */
 .therapy-wheel-viewport { touch-action: pan-x; }
 .therapy-wheel-viewport .therapy-intent-track {
-  height: 260px; padding-block: 104px; scroll-padding-block: 104px;
-  scroll-snap-type: none; top: calc(50% - 130px); pointer-events: none;
+  height: calc(var(--therapy-wheel-row-height) * 5);
+  padding-block: calc(var(--therapy-wheel-row-height) * 2);
+  scroll-padding-block: calc(var(--therapy-wheel-row-height) * 2);
+  scroll-snap-type: none; top: calc(50% - var(--therapy-wheel-row-height) * 2.5); pointer-events: none;
 }
 .therapy-wheel-visual {
   position: absolute; inset: 0 calc(30px + .4rem) 0 0; overflow: hidden;
   mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 84%, transparent);
 }
 .therapy-intent-wheel .therapy-wheel-visual-option {
-  position: absolute; top: 0; left: 0; height: 52px; width: 100%;
+  position: absolute; top: 0; left: 0;
   transform-origin: center center; transition: none; visibility: visible;
   color: #6f5b82; user-select: none;
 }
@@ -506,7 +509,7 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
   visibility: hidden;
 }
 .therapy-wheel-viewport.is-scrolling::before {
-  display: block; opacity: 1; top: calc(50% - 26px); z-index: -1;
+  display: block; opacity: 1; z-index: -1;
 }
 @media(prefers-reduced-motion:reduce) {
   .therapy-wheel-visual-option { will-change: auto; }
@@ -522,7 +525,7 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 }
 .therapy-intent-wheel .therapy-wheel-visual-option.is-current { color: #362649; }
 .therapy-wheel-visual-option.is-current strong { font-weight: 700!important; }
-.therapy-intent-scroll-spacer { height: 52px; }
+.therapy-intent-scroll-spacer { height: var(--therapy-wheel-row-height); }
 .therapy-intent-wheel .therapy-intent-card-toggle { justify-content: flex-end; }
 .therapy-wheel-viewport.is-scrolling .therapy-intent-focus-card { visibility: visible; }
 .therapy-intent-wheel .therapy-wheel-marker {
@@ -543,10 +546,10 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 .therapy-wheel-visual {
   mask-image: linear-gradient(to bottom,
     transparent, #000 16%,
-    #000 calc(50% - var(--therapy-reveal-height, 0px) / 2 + 26px),
-    transparent calc(50% - var(--therapy-reveal-height, 0px) / 2 + 26px),
-    transparent calc(50% + var(--therapy-reveal-height, 0px) / 2 + 26px),
-    #000 calc(50% + var(--therapy-reveal-height, 0px) / 2 + 26px),
+    #000 calc(50% + (var(--therapy-wheel-row-height) - var(--therapy-reveal-height, 0px)) / 2),
+    transparent calc(50% + (var(--therapy-wheel-row-height) - var(--therapy-reveal-height, 0px)) / 2),
+    transparent calc(50% + (var(--therapy-wheel-row-height) + var(--therapy-reveal-height, 0px)) / 2),
+    #000 calc(50% + (var(--therapy-wheel-row-height) + var(--therapy-reveal-height, 0px)) / 2),
     #000 84%, transparent);
 }
 /* Personal and inviting typography, matching design proposal 2. */
@@ -582,6 +585,12 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
   font-size: .75rem; line-height: 1.5; color: #7b658c;
 }
 @media(max-width:700px) {
+  [data-therapy-welcome] .therapy-guide-personal,
+  dialog.therapy-orientation:has(.therapy-wheel-availability) { grid-template-columns: minmax(0, 1fr); }
+  [data-therapy-welcome] .therapy-guide-personal .experience-guide-art,
+  dialog.therapy-orientation:has(.therapy-wheel-availability) .experience-guide-art { display: none; }
+  [data-therapy-welcome] .therapy-wheel-viewport,
+  dialog.therapy-orientation .therapy-wheel-viewport:has(.therapy-wheel-availability) { --therapy-wheel-row-height: 76px; }
   .therapy-guide-personal .experience-guide-copy { padding: 1rem .85rem; }
   .experience-guide-banner.therapy-guide-personal h2 { font-size: 1.3rem; }
   .experience-guide-banner.therapy-guide-personal .therapy-guide-intro { font-size: .9rem; }
@@ -604,7 +613,18 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 .therapy-intent-wheel .therapy-wheel-availability {
   display: block; font-size: .65rem; font-weight: 500; line-height: 1.2; color: #896329; margin: 0; opacity: 1;
 }
+[data-therapy-welcome] .therapy-wheel-availability[data-level="none"] {
+  color: inherit; font-weight: 400; letter-spacing: normal;
+}
 .therapy-intent-wheel .therapy-wheel-availability[hidden] { display: none; }
+@media (max-width: 360px) {
+  [data-therapy-welcome] .therapy-wheel-viewport,
+  dialog.therapy-orientation .therapy-wheel-viewport:has(.therapy-wheel-availability) { --therapy-wheel-row-height: 96px; }
+  [data-therapy-welcome] .therapy-guide-personal .experience-guide-copy { padding-inline: .5rem; }
+  [data-therapy-welcome] .therapy-intent-wheel .therapy-wheel-visual-option {
+    gap: .4rem; padding-inline: .4rem!important;
+  }
+}
 .therapy-guide-note details .therapy-guide-options {
   display: grid; grid-template-columns: fit-content(42%) minmax(0, 1fr); column-gap: .5rem;
   margin: .35rem .9rem .5rem; padding-left: 1.6rem; list-style: none;

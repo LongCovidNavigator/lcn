@@ -20,7 +20,12 @@
   tree.className='ux-combination-tree';tree.dataset.combinationTree='proposal-'+item.submission_id;tree.dataset.pendingCombination=item.submission_id;
   drawing.className='ux-combination-drawing';drawing.style.setProperty('--combination-columns',item.combination.component_ids.length);svg.classList.add('ux-combination-lines');svg.setAttribute('aria-hidden','true');
   parent.className='ux-combination-parent';parent.dataset.combinationParent='';parent.append(make('strong',item.combination.name),make('small','Vorschlag · Prüfung ausstehend'));
-  const feedback=make('div'),host=make('span');feedback.className='ux-combination-assertion';host.dataset.treatmentRelationFeedback='s:'+item.submission_id;host.dataset.feedbackStandard='1';host.dataset.feedbackStatement=item.description||'Vorgeschlagene Kombination „'+item.combination.name+'“ mit den angezeigten Bestandteilen.';feedback.append(host);host.dataset.treatmentRelationFeedback=item.combination.id?'combo:'+item.combination.id:'s:'+item.submission_id;host.dataset.feedbackStatement='„'+item.combination.name+'“ bildet eine eigenständige Therapie, die einen zusätzlichen oder anderen Effekt erzielt.';parent.append(feedback);
+  const feedback=make('div'),host=make('span');
+  feedback.className='ux-combination-assertion';
+  host.dataset.treatmentRelationFeedback=item.combination.id?'combo:'+item.combination.id:'s:'+item.submission_id;
+  host.dataset.feedbackStandard='1';
+  host.dataset.feedbackStatement=item.combination.statement||'Die angezeigten Einträge sind Bestandteile dieser Kombination.';
+  feedback.append(host);parent.append(feedback);
   const label=make('p','Bestandteile');label.className='ux-combination-parts-label';parts.className='ux-combination-parts';
   for(const id of item.combination.component_ids){const entry=catalog.items.find(n=>n.id===id);if(!entry)continue;const part=make('article');part.className='ux-combination-part ux-relation-entry';part.dataset.combinationPart='';part.dataset.componentId=id;
    if(id===pageId){part.classList.add('is-current');const badge=make('small','Du bist hier');badge.className='ux-combination-current';part.append(badge,make('strong',entry.name));}else{const link=make('a',entry.name);link.href='therapie_detail.php?treatment_id='+id+'#alternativen';part.append(link);}{const feedback=make('div'),host=make('span');feedback.className='ux-combination-assertion';host.dataset.treatmentRelationFeedback='s:'+item.submission_id;host.dataset.feedbackStandard='1';host.dataset.treatmentRelationFeedback=item.combination.id?((item.combination.accepted_ids||[]).includes(id)?'cp:'+item.combination.id+':'+id:'s:'+(catalog.pending.find(n=>n.kind==='component'&&Number(n.right_id)===item.combination.id&&Number(n.left_id)===id)?.submission_id||item.submission_id)):'pc:'+item.submission_id+':'+id;host.dataset.feedbackStatement='„'+entry.name+'“ ist Bestandteil von „'+item.combination.name+'“.';feedback.append(host);part.append(feedback);}parts.append(part);
@@ -73,7 +78,7 @@
     const entry=catalog.items.find(n=>n.id===Number(item.right_id));if(!entry)continue;
     const componentIds=[...new Set([...(entry.component_ids||[]),...catalog.pending.filter(n=>n.kind==='component'&&Number(n.right_id)===entry.id).map(n=>Number(n.left_id)),pageId])];
     if(combinations.querySelector('[data-pending-combination-target="'+entry.id+'"]'))continue;
-    const tree=renderPendingCombination({...item,combination:{id:entry.id,accepted_ids:entry.component_ids||[],name:entry.name,component_ids:componentIds}});tree.dataset.pendingCombinationTarget=entry.id;
+    const tree=renderPendingCombination({...item,combination:{id:entry.id,accepted_ids:entry.component_ids||[],name:entry.name,component_ids:componentIds,statement:entry.combination_statement}});tree.dataset.pendingCombinationTarget=entry.id;
     const parent=tree.querySelector('[data-combination-parent]'),title=parent.querySelector('strong'),link=make('a',entry.name);
     link.href='therapie_detail.php?treatment_id='+entry.id+'#alternativen';title.replaceWith(link);
     tree.querySelector('.ux-combination-parts-label').textContent='Bestandteile';

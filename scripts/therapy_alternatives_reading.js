@@ -1,4 +1,4 @@
-window.LCNTherapyAlternativesReading = ({make, classificationContext, fieldReference, classificationContents, relationshipTypeLabels}) => {
+window.LCNTherapyAlternativesReading = ({make, classificationContext, fieldReference, classificationContents, relationshipTypeLabels, diagnostic}) => {
   const groupFields = new Set(['Gruppe', 'Gruppen', 'Wirkstoffgruppen', 'Medikamentengruppe']);
   const applicationFields = new Set(['Anwendungsformen', 'Weitere Anwendungsformen']);
   const definitions = {
@@ -140,7 +140,9 @@ window.LCNTherapyAlternativesReading = ({make, classificationContext, fieldRefer
       const heading = combination?.querySelector('h3')?.firstChild?.textContent.trim();
       if (parts && !parts.closest('[hidden]') && heading) {
         const components = make('p', 'Unter ');
-        components.append(make('u', heading), ' findest du die einzelnen Bestandteile dieser Therapie.');
+        components.append(make('u', heading), diagnostic
+          ? ' findest du die einzelnen Bestandteile dieser Untersuchung.'
+          : ' findest du die einzelnen Bestandteile dieser Therapie.');
         paragraphs.push(components);
       }
     }
@@ -152,7 +154,9 @@ window.LCNTherapyAlternativesReading = ({make, classificationContext, fieldRefer
     introduction: 'Du bist unsicher, ob diese Therapie zu dir passt, oder suchst nach etwas, das dir mehr hilft? Hier trägt die Community Alternativen und konkrete Varianten zusammen. So kannst du entdecken, wie die Behandlung aussehen könnte und welche weiteren Möglichkeiten du hast.',
     topics: {
       alternative: {description: 'Hier sammelt die Community frei vorgeschlagene Therapiealternativen. Die Einträge beruhen auf diesen Vorschlägen; ein fachlicher Zusammenhang wird damit nicht vorausgesetzt. Scrolle seitlich und öffne die Namen für Details.'},
-      combination: {description: 'Hier sammelt die Community Kombinationen aus Therapien oder Wirkstoffen, deren Zusammenspiel einen zusätzlichen oder anderen Effekt erzielen soll. Du siehst, welche Bestandteile jeweils zusammengehören und welche Kombinationen die Community vorschlägt.'}
+      combination: {description: diagnostic
+        ? 'Hier sammelt die Community Untersuchungen, die gemeinsam durchgeführt werden. Du siehst, welche Untersuchungen jeweils zusammengehören und welche Kombinationen die Community vorschlägt.'
+        : 'Hier sammelt die Community Kombinationen aus Therapien oder Wirkstoffen, deren Zusammenspiel einen zusätzlichen oder anderen Effekt erzielen soll. Du siehst, welche Bestandteile jeweils zusammengehören und welche Kombinationen die Community vorschlägt.'}
     },
     feedbackNote: 'Die Zahlen neben ✓ und × zeigen, wie viele Zustimmungen und Widersprüche es zur jeweiligen Zuordnung gibt. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.',
     sharing: {

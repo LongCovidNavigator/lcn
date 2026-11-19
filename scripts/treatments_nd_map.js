@@ -103,7 +103,7 @@
       scale.append(li);
     });box.append(scale);
     const details=document.createElement('details'),summary=document.createElement('summary'),note=document.createElement('p');summary.textContent='Wie wird eingeordnet?';
-    note.textContent='Die Einordnung zeigt die Luftlinienentfernung zum nächstgelegenen behandelnden Person im aktuellen Filter. Fahrzeiten sind grobe Orientierungswerte, keine Routenberechnung. Sind Erst- und Folgetermin online möglich, entfällt die Anreise zu diesen Terminen. Ob Untersuchungen oder Behandlungen vor Ort nötig sind, muss zusätzlich mit der Praxis geklärt werden.';
+    note.textContent='Die Einordnung zeigt die Luftlinienentfernung zur nächstgelegenen behandelnden Person im aktuellen Filter. Fahrzeiten sind grobe Orientierungswerte, keine Routenberechnung. Sind Erst- und Folgetermin online möglich, entfällt die Anreise zu diesen Terminen. Ob Untersuchungen oder Behandlungen vor Ort nötig sind, muss zusätzlich mit der Praxis geklärt werden.';
     details.append(summary,note);box.append(details);
   }
   function filteredProviders(entry) {

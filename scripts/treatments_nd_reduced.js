@@ -423,7 +423,6 @@
     const focused=document.activeElement?.dataset.symptomId;
     const card = list.closest('.ux-symptom-help');
     card.dataset.realAnswerCount = Math.max(0, ...symptomHelp.symptoms.map(symptom => symptom.count));
-    card.toggleAttribute('data-pinned-symptom', symptomHelp.symptoms.some(symptom => symptom.pinned));
     const rows=symptomHelp.symptoms.map(symptom=>({...symptom,count:symptom.count+(demo&&symptom.editorial&&!symptom.pinned?(symptom.id*7)%31:0)})).sort((a,b)=>b.count-a.count||Number(b.editorial)-Number(a.editorial)||a.name.localeCompare(b.name,'de'));
     card.dataset.guideSymptoms = JSON.stringify(
       rows.filter(symptom => symptom.count > 0).slice(0, 2).map(({name, count}) => ({name, count}))

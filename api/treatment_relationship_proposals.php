@@ -29,9 +29,21 @@ try{
   $groupRoot=$g['groups'][(int)($r['group_alias_id']??0)]['root']??null;
   if(!$groupRoot&&($r['kind']??'')==='group')foreach($g['groups'] as $group)if(lcnDiscoveryName($group['name'])===lcnDiscoveryName($r['group_name']??'')){$groupRoot=$group['root'];break;}
   if(!in_array($id,array_merge([(int)$r['source_id'],(int)$r['left_id'],(int)$r['right_id'],(int)($r['context_id']??0),$groupRoot],$r['component_ids']??[]),true))continue;
-  $pending[]=['submission_id'=>(int)$row['submission_id'],'description'=>$r['description'],'kind'=>$r['kind'],'left_id'=>(int)$r['left_id'],'right_id'=>(int)$r['right_id'],'group_alias_id'=>(int)($r['group_alias_id']??0),'group_name'=>$r['group_name']??null,'group_root_id'=>$groupRoot,'combination'=>$r['kind']==='new_combination'?['name'=>$r['name'],'component_ids'=>array_values($r['component_ids'])]:null];
+  $combination=null;
+  if($r['kind']==='new_combination'){
+   $components=array_values($r['component_ids']);
+   $diagnostic=$components && !array_filter($components,fn($part)=>($g['entries'][$part]['typ']??'')!=='Diagnostik');
+   $combination=['name'=>$r['name'],'component_ids'=>$components,'statement'=>lcnTreatmentCombinationStatement($diagnostic)];
+  }
+  $pending[]=['submission_id'=>(int)$row['submission_id'],'description'=>$r['description'],'kind'=>$r['kind'],'left_id'=>(int)$r['left_id'],'right_id'=>(int)$r['right_id'],'group_alias_id'=>(int)($r['group_alias_id']??0),'group_name'=>$r['group_name']??null,'group_root_id'=>$groupRoot,'combination'=>$combination];
  }
- $items=[];foreach($g['entries'] as $entry)$items[]=['id'=>$entry['treat_nd_id'],'name'=>$entry['treatmentname'],'meta'=>($entry['typ']??'').(!empty($entry['review_pending'])?' · Prüfung ausstehend':''),'review_pending'=>!empty($entry['review_pending']),'component_ids'=>array_values($g['components'][$entry['treat_nd_id']]??[]),'is_combination'=>isset($g['comboIds'][$entry['treat_nd_id']])];
+ $items=[];foreach($g['entries'] as $entry){
+  $idOfEntry=$entry['treat_nd_id'];
+  $isCombination=isset($g['comboIds'][$idOfEntry]);
+  $item=['id'=>$idOfEntry,'name'=>$entry['treatmentname'],'meta'=>($entry['typ']??'').(!empty($entry['review_pending'])?' · Prüfung ausstehend':''),'review_pending'=>!empty($entry['review_pending']),'component_ids'=>array_values($g['components'][$idOfEntry]??[]),'is_combination'=>$isCombination];
+  if($isCombination)$item['combination_statement']=lcnTreatmentCombinationStatement(($entry['typ']??'')==='Diagnostik');
+  $items[]=$item;
+ }
  usort($items,fn($a,$b)=>strnatcasecmp($a['name'],$b['name']));
  $groups=[];foreach($g['groups'] as $group)$groups[]=['id'=>$group['alias_id'],'name'=>$group['name'],'meta'=>($group['forms']?'Anwendungsformen':'Gruppe').(!empty($g['entries'][$group['root']]['review_pending'])?' · Prüfung ausstehend':'')];
  lcnSendVoteJson(['ok'=>true,'items'=>$items,'groups'=>$groups,'kinds'=>LCN_TREATMENT_RELATION_KINDS,'pending'=>$pending]);

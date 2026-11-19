@@ -73,11 +73,12 @@
   }
   function feedbackTooltipSubject(box){
    if(box.closest('[data-relationship-stages]')&&box.dataset.feedbackStatement)return box.dataset.feedbackStatement;
+   if(box.closest('.ux-combination-assertion')&&box.dataset.feedbackStatement)return box.dataset.feedbackStatement;
    const statement=(box.dataset.feedbackStatement||'').replace(/„[^“]*“/g,'');
    const key=box.dataset.relationFeedback||'';
    if(key.startsWith('d:')||/^Behandler:innen /.test(statement)||box.closest('.catalog-report-column,.catalog-card-report,.nd-provider-footer,[data-pending-relation]'))return type==='doctor'?'Die angezeigte Therapie wird von dieser Person oder Praxis angeboten.':'Die angezeigte Person oder Praxis bietet die oben genannte Therapie an.';
    if(box.closest('.ux-alternative-tile,.ux-alternative-feedback'))return 'Die angezeigte Therapie stellt eine Alternative zur aktuell geöffneten Therapie dar.';
-   if(key.startsWith('combo:')||box.closest('[data-combination-parent]'))return 'Die angezeigte Kombination bildet eine eigenständige Therapie, die einen zusätzlichen oder anderen Effekt erzielt.';
+   if(key.startsWith('combo:')||box.closest('[data-combination-parent]'))return 'Die angezeigten Einträge bilden zusammen diese Kombination.';
    if(/Alias/.test(statement))return 'Die angezeigten Einträge bezeichnen dieselbe Therapie.';
    if(/Bestandteil/.test(statement)||box.closest('.ux-combination-part'))return 'Die angezeigte Therapie ist Bestandteil dieser Kombination.';
    if(key.startsWith('bn:')||/Handelsname/.test(statement))return 'Die angezeigte Therapie ist ein Handelsname für den zugehörigen Wirkstoff.';
@@ -91,7 +92,8 @@
   function negateFeedbackSubject(subject){
    for(const [positive,negative] of [
     [' stellt eine Alternative',' stellt nicht eine Alternative'],
-    [' bildet eine eigenständige Therapie, die einen zusätzlichen oder anderen Effekt erzielt.',' bildet keine eigenständige Therapie, die einen zusätzlichen oder anderen Effekt erzielt.'],
+    [' bilden zusammen eine eigenständige Kombinationstherapie.',' bilden zusammen keine eigenständige Kombinationstherapie.'],
+    [' werden gemeinsam durchgeführt.',' werden nicht gemeinsam durchgeführt.'],
     [' bezeichnen dieselbe',' bezeichnen nicht dieselbe'],
     [' ist ',' ist nicht '],
     [' gehört zur ',' gehört nicht zur '],

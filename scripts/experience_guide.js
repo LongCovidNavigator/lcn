@@ -216,7 +216,12 @@
         AT:['Kassenarzt: Die Behandlung erfolgt bei einer Ärztin oder einem Arzt mit Kassenvertrag.','Wahlarzt: Die Behandlung erfolgt bei einer Ärztin oder einem Arzt ohne Kassenvertrag.',abroad],
         CH:['Grundversicherung: Die Behandlung wird über die obligatorische Krankenpflegeversicherung eingeordnet.','Zusatzversicherung: Die Behandlung wird über eine freiwillige Zusatzversicherung eingeordnet.',abroad]
       };
-      scope.querySelectorAll('[data-guide-insurance-intro]').forEach(node => node.textContent = 'Wähle zuerst das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Für ' + countryName + ' stehen zur Auswahl:');
+      const countryIntro = 'Für ' + countryName + ' stehen zur Auswahl:';
+      scope.querySelectorAll('[data-guide-insurance-intro]').forEach(node => {
+        updateText(node, node.dataset.guideInsuranceIntro === 'review'
+          ? 'Wähle zuerst das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. ' + countryIntro
+          : countryIntro);
+      });
       scope.querySelectorAll('[data-guide-insurance-list]').forEach(list => {
         list.replaceChildren(...(options[country] || options.DE).map(option => {
           const at=option.indexOf(': '),item=make('li');
@@ -406,7 +411,7 @@
       const count = experienceCount();
       scope.querySelectorAll('[data-therapy-experience-availability]').forEach(node => {
         node.hidden = !loaded;
-        updateText(node, !loaded ? '' : count === 0 ? 'Keine Angaben vorhanden' : count < 10 ? 'Bisher wenige Angaben' : 'Zahlreiche Angaben vorhanden');
+        updateText(node, !loaded ? '' : count === 0 ? '(Noch keine Angabe vorhanden)' : count < 10 ? 'Bisher wenige Angaben' : 'Zahlreiche Angaben vorhanden');
         node.dataset.level = count === 0 ? 'none' : count < 10 ? 'few' : 'many';
       });
     }
@@ -421,12 +426,6 @@
 
     function experienceCount(scope = content) {
       return Math.max(0, ...[...scope.querySelectorAll('[data-question], .ux-symptom-help')].map(cardCount));
-    }
-
-    function updateReadingVisibility(onlyAnswered) {
-      content.querySelectorAll('[data-question], .ux-symptom-help').forEach(card => {
-        card.hidden = onlyAnswered && cardCount(card) === 0 && !card.hasAttribute('data-pinned-symptom');
-      });
     }
 
     function hasInformation(link) {
@@ -496,7 +495,7 @@
 
       card.dataset.guideContribution = key;
       const disclosure = make('details');
-      disclosure.append(make('summary', title));
+      disclosure.append(make('summary', title ?? card.querySelector('h3')?.firstChild?.textContent.trim()));
       if (description) disclosure.append(make('p', description));
       body.push(disclosure);
 
@@ -508,8 +507,8 @@
     function renderAlternativesTopics(body, copy) {
       const topics = [
         ['alternative', '.ux-alternative-section', 'Alternative Therapien'],
-        ['classification', '[data-relationship-stages]', 'Therapieansatz und Umsetzung'],
-        ['combination', '[data-combination-section]', 'Therapiekombinationen']
+        ['classification', '[data-relationship-stages]'],
+        ['combination', '[data-combination-section]']
       ];
       for (const [key, selector, title] of topics) {
         const topic = copy.topics[key];
@@ -519,8 +518,6 @@
         const {card, disclosure} = entry;
         if (key === 'classification') {
           disclosure.classList.add('therapy-guide-classification');
-          const label = card.querySelector('h3')?.firstChild?.textContent.trim();
-          if (label) disclosure.firstElementChild.textContent = label;
           entry.refreshClassification = () => copy.renderClassification(disclosure, card);
           entry.refreshClassification();
         } else if (topic.voting) {
@@ -550,7 +547,6 @@
         return;
       }
       guide?.remove();
-      if (!doctor) updateReadingVisibility(!collapsed && mode === 'explore');
       panel = active;
       entries = [];
       completion = sharing = null;
@@ -576,7 +572,7 @@
 
 
       if (panel.id === 'ueberblick') {
-        const activeChoice = choices.find(choice => choice[0] === mode);
+        const activeChoice = doctor && choices.find(choice => choice[0] === mode);
         if (activeChoice) {
           actions.append(button(activeChoice[4] + ' →', () => openView(startView(activeChoice)), true),
             button('Anliegen ändern', showOrientation), close);
@@ -690,7 +686,7 @@
         };
         Object.assign(readingTopics, {
           setting: {
-            intro: 'Die Community erfasst, wo und in welchem Rahmen sie die ausgewählte Therapie angewendet haben. Diese Angabe hilft dir einzuschätzen, welcher Aufwand damit für dich verbunden wäre und ob der Rahmen zu dir passt. Die Antworten werden in vier Kategorien erfasst:',
+            intro: 'Hier erfasst die Community, wo und in welchem Rahmen andere Betroffene die Therapie angewendet haben. Diese Angabe hilft dir einzuschätzen, welcher Aufwand damit für dich verbunden wäre und ob der Rahmen zu dir passt. Die Antworten werden in vier Kategorien erfasst:',
             options: [
               'Selbstständig zu Hause: Die Therapie wird eigenständig zu Hause angewendet, ohne zusätzlichen Reiseaufwand oder Unterstützung durch Fachpersonal.',
               'Hausbesuch: Die Behandlung findet mit Unterstützung durch Fachpersonal zu Hause statt.',
@@ -797,10 +793,13 @@
           if (instructions.insuranceOptions) {
             const insuranceList = make('ul', '', 'therapy-guide-options');
             insuranceList.dataset.guideInsuranceList = '';
-            const insuranceIntro = make('p');insuranceIntro.dataset.guideInsuranceIntro = '';
+            const insuranceIntro = make('p');
+            insuranceIntro.dataset.guideInsuranceIntro = review ? 'review' : 'reading';
+            if (!review) {
+              disclosure.append(make('p', 'Die Auswertung zeigt die Angaben für das gewählte Land und die gewählte Versicherungsart.'));
+            }
             disclosure.append(insuranceIntro, insuranceList, make('p', instructions.optionsIntro));
             refreshInsuranceHelp(disclosure);
-            if (!review) insuranceIntro.textContent = 'Wähle das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Die Auswertung zeigt die Angaben für diesen Versicherungskontext.';
           }
           disclosure.append(list, make('p', instructions.closing));
         } else disclosure.append(make('p', topic[1]));
@@ -811,7 +810,8 @@
       });
       if (!doctor && panel.id === 'alternativen') {
         const createAlternativesContent = review ? window.LCNTherapyAlternativesContribution : window.LCNTherapyAlternativesReading;
-        const copy = createAlternativesContent({make, classificationContext, fieldReference, classificationContents, relationshipTypeLabels});
+        const diagnostic = panel.querySelector('[data-combination-section]')?.hasAttribute('data-diagnostic-combinations');
+        const copy = createAlternativesContent({make, classificationContext, fieldReference, classificationContents, relationshipTypeLabels, diagnostic});
         eyebrow = copy.eyebrow;
         body[0].textContent = copy.introduction;
         renderAlternativesTopics(body, copy);
@@ -1003,8 +1003,8 @@
     ] : [
       ['review', 'Meine Erfahrung teilen', 'Berichte Schritt für Schritt, wie es dir mit der Therapie ging. Du entscheidest, welche Fragen du beantworten möchtest.', 'wirkung', 'Erfahrung teilen'],
       ['providers', 'Behandler:innen finden (Karte)', 'Suche auf der Karte nach Behandler:innen, die diese Therapie anbieten. Wähle einen Ort aus, um Behandler:innen in der Nähe zu finden.', 'anreise', 'Behandler:innen suchen'],
-      ['symptoms', 'Bei welchem Symptom hilft die Therapie?', 'Sieh nach, bei welchen Symptomen die ausgewählte Therapie laut Community helfen kann.', 'symptome', 'Symptome ansehen'],
-      ['explore', 'Erfahrungsberichte der Community ansehen', 'Sieh dir die Erfahrungsberichte der Community zu Themen wie Wirkung, Belastung und Kosten an. Wir führen dich als Nächstes Schritt für Schritt durch alle vorhandenen Angaben der Community.', 'wirkung', 'Erfahrungen ansehen'],
+      ['symptoms', 'Bei welchem Symptom berichtet die Community von einer Linderung?', 'Sieh nach, bei welchen Symptomen andere von einer Linderung berichten.', 'symptome', 'Symptome ansehen'],
+      ['explore', 'Erfahrungen der Community ansehen', 'Sieh dir die Erfahrungen der Community zu Themen wie Wirkung, Belastung und Kosten an. Wir führen dich als Nächstes Schritt für Schritt durch alle vorhandenen Angaben der Community.', 'wirkung', 'Erfahrungen ansehen'],
       ['alternatives', 'Therapiealternativen', 'Entdecke weitere Alternativen zur ausgewählten Therapie. Nutze das breite Wissen der Community und finde Inspiration für deinen Therapieplan.', 'alternativen', 'Alternativen ansehen']
     ];
 
@@ -1020,7 +1020,7 @@
     function addChoices(host, dialog) {
       host.classList.add('therapy-intent-carousel', 'therapy-intent-wheel');
       const instance = 'therapy-wheel-' + (++wheelSerial);
-      const rowHeight = 52;
+      let rowHeight = 52;
       const wrapIndex = index => ((index % choices.length) + choices.length) % choices.length;
       const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
       const track = make('div', '', 'therapy-intent-track');
@@ -1044,7 +1044,8 @@
       const follow = button(choices[initial][4] + ' →', async () => {
         const choice = choices[current];
         const [value] = choice;
-        if (!doctor && value === 'explore' && experienceCount() === 0) {
+        const resuming = !dialog && value === mode;
+        if (!doctor && value === 'explore' && !resuming && experienceCount() === 0) {
           follow.disabled = true;
           const loaded = await treatment.lcnInitialAnswers;
           follow.disabled = false;
@@ -1240,6 +1241,12 @@
       let measuredWidth = 0;
       function reserveSpace() {
         if (!host.isConnected || !copy.clientWidth) return;
+        const spacerHeight = track.firstElementChild.offsetHeight;
+        if (spacerHeight && spacerHeight !== rowHeight) {
+          rowHeight = spacerHeight;
+          track.scrollTop = (choices.length + current) * rowHeight;
+          update();
+        }
         const measure = copy.cloneNode(true);
         measure.setAttribute('aria-hidden', 'true');
         measure.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;box-sizing:border-box;width:' + copy.clientWidth + 'px;height:auto';
@@ -1251,11 +1258,11 @@
           maximum = Math.max(maximum, measure.getBoundingClientRect().height);
         });
         measure.remove();
-        viewport.style.height = Math.max(260, 130 + Math.ceil(maximum)) + 'px';
+        viewport.style.height = Math.max(5 * rowHeight, 2.5 * rowHeight + Math.ceil(maximum)) + 'px';
         paintWheel();
       }
       new ResizeObserver(() => {
-        if (measuredWidth !== header.clientWidth) {
+        if (measuredWidth !== header.clientWidth || rowHeight !== track.firstElementChild.offsetHeight) {
           measuredWidth = header.clientWidth;
           reserveSpace();
         }
@@ -1402,10 +1409,7 @@
       window.addEventListener('lcn-provider-catalog', updateDestination, {signal: listeners.signal});
       document.addEventListener('lcn-combination-diagrams-changed', updateDestination, {signal: listeners.signal});
       document.body.append(dialog);
-      dialog.addEventListener('cancel', event => {
-        event.preventDefault();
-        stay();
-      });
+      dialog.addEventListener('cancel', event => event.preventDefault());
       dialog.addEventListener('close', () => {
         listeners.abort();
         dialog.remove();
@@ -1435,12 +1439,8 @@
       document.addEventListener('lcn-treatment-view-changed', () => paint());
       document.addEventListener('lcn-combination-diagrams-changed', refreshClassificationGuide);
       window.addEventListener('lcn-relation-feedback', () => queueMicrotask(refreshClassificationGuide));
-      document.addEventListener('lcn-treatment-answers-rendered', () => {
-        // Counts and visibility can change without replacing the reading guide.
-        // Replacing it during a drag invalidates the browser's selection endpoints.
-        updateReadingVisibility(mode === 'explore' && !orientationIsOff());
-        refreshTopics();
-      });
+      // Refresh the counts in place to preserve any text selection in the guide.
+      document.addEventListener('lcn-treatment-answers-rendered', refreshTopics);
     }
     window.addEventListener('pageshow', event => {
       if (event.persisted) {

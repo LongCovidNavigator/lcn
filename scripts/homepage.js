@@ -717,7 +717,7 @@ function buildFeaturedExpertSupplyHtml(doctor) {
     if ([1, "1", true, "true"].includes(doctor.dr_accepts_pkv)) badges.push("PKV");
     return badges.length
         ? badges.map(function (label) { return `<span class="featured-expert-table-badge">${label}</span>`; }).join(" ")
-        : '<span class="featured-expert-supply-empty">Keine Angabe vorhanden</span>';
+        : '<span class="featured-expert-supply-empty">(Noch keine Angabe vorhanden)</span>';
 }
 
 function buildFeaturedExpertContactHtml(doctor) {
