@@ -17,7 +17,7 @@ const assert=require('node:assert/strict');
     }
    }
   }
-  await p.goto(base+'arzt_detail.html?id=613&demo=1#wirkung');await p.waitForSelector('#treatment-healing-range');assert.equal(await p.locator('.treatment-rating-controls input[type=range]').count(),3);
+  await p.goto(base+'arzt_detail.html?id=613&demo=1#wirkung');await p.getByRole('button',{name:'Ich brauche keine Orientierung',exact:true}).click();await p.waitForSelector('#treatment-healing-range');assert.equal(await p.locator('.treatment-rating-controls input[type=range]').count(),3);
   const initial=await p.locator('.treatment-result-count').innerText();
   for(const key of ['positive','healing','negative']){
    const input=p.locator(`#treatment-${key}-number`);await input.evaluate((el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));},key==='negative'?'0':'100');assert.equal(await p.locator(`#treatment-${key}-range`).inputValue(),key==='negative'?'0':'100');

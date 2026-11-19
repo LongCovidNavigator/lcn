@@ -10,7 +10,6 @@
  async function sync(payload){if(busy)return;busy=true;renderSymptomHelp();if(payload)notify('Wird gespeichert …');try{
  const response=await fetch('api/doctor_symptom_help.php'+(payload?'':'?dr_id='+doctorId),payload?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dr_id:doctorId,symptom_id:Number(payload.question.replace('symptom-help-','')),action:payload.action||'answer'})}:{cache:'no-store'});
  const data=await response.json();if(!response.ok||!data.ok)throw Error(data.error||'Symptome konnten nicht geladen werden.');cached=symptomHelp=data.symptom_help;loaded=true;if(payload)notify(payload.action==='clear'?'Deine Stimme wurde zurückgenommen.':'Deine Angabe wurde gespeichert.');
- if(payload && payload.action !== 'clear') window.dispatchEvent(new CustomEvent('lcn-experience-answer-saved', {detail: payload.question}));
  }catch(error){notify(error.message);}finally{busy=false;renderSymptomHelp();}}
   let symptomSearch='',symptomOpen=false,symptomActive=-1;
   function closeSymptomPicker(){symptomOpen=false;symptomActive=-1;filterSymptomPicker();}
@@ -42,9 +41,10 @@
       button.setAttribute('aria-label',symptom.name+': '+symptom.count+' hilfreiche Erfahrungen'+(symptom.selected?' – eigene Stimme zurücknehmen':' – hat mir geholfen'));
       button.append(label,count,check);li.append(button);list.append(li);
     });
-    if(!rows.length){const empty=document.createElement('li');empty.className='ux-symptom-empty';empty.textContent=loaded?'Wähle unten ein Symptom aus, bei dem dir die Therapie geholfen hat.':'Symptome werden geladen …';list.append(empty);}
+    if(!rows.length){const empty=document.createElement('li');empty.className='ux-symptom-empty';empty.textContent=loaded?'Wähle ein Symptom aus, bei dem dir die Behandlung geholfen hat.':'Symptome werden geladen …';list.append(empty);}
     filterSymptomPicker();
     if(focused)list.querySelector('[data-symptom-id="'+focused+'"]')?.focus({preventScroll:true});
+    window.dispatchEvent(new Event('lcn-doctor-symptoms-rendered'));
   }
   root.addEventListener('click',event=>{const button=event.target.closest('[data-symptom-id]');if(!button||busy||!loaded)return;const symptom=symptomHelp.symptoms.find(s=>s.id===Number(button.dataset.symptomId));if(!symptom)return;sync({action:symptom.selected?'clear':'answer',question:'symptom-help-'+symptom.id,value:'Ja'});});
 

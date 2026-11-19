@@ -259,8 +259,8 @@ dialog.therapy-empty-state[open]::backdrop {
 .therapy-guide-note details.is-complete summary::before { border-color: #34805a; background: #34805a; box-shadow: inset 0 0 0 2px #f4eefb; }
 .therapy-guide-progress { color: #665972; font-size: .8rem!important; }
 .therapy-guide-progress.is-complete { color: #28714d; }
-.side-nav a.therapy-section-complete .nav-number { background: #e1f2e8; color: #236846; border: 1px solid #4f956d; }
-.side-nav a.therapy-section-complete .nav-number::after { content: '✓'; position: absolute; font-size: 11px; margin: 24px 0 0 28px; background: #34805a; color: #fff; border-radius: 50%; width: 16px; height: 16px; line-height: 16px; text-align: center; }
+.doctor-detail-live .side-nav .nav-number { position: relative; }
+.doctor-detail-live .therapy-guide-collapsed { top: var(--detail-header-height, 76px); }
 @media (max-width: 700px) {
   .experience-guide-banner .experience-guide-art { display: none; }
   .therapy-guide-note .experience-guide-copy { padding: .85rem; }
@@ -646,7 +646,7 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 .ux-page .ux-detail .side-nav a[data-view] .nav-number {
   position: relative; background: #e7f3ff; border: 1px solid #d9ebfc; color: #0878e3;
 }
-.ux-page .ux-detail .side-nav a.therapy-section-complete .nav-number::after {
+.side-nav a.therapy-section-complete .nav-number::after {
   content: '\2713'; position: absolute; right: -4px; bottom: -2px; margin: 0;
   display: inline-flex; align-items: center; justify-content: center;
   width: 16px; height: 16px; border-radius: 50%; background: #34805a; color: #fff;

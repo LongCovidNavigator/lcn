@@ -3,51 +3,14 @@
   const content = document.getElementById('view-content');
   if (!content) return;
   const doctor = document.body.dataset.doctorPage === 'live';
-  if (!doctor) {
-    const welcome = content.querySelector('[data-therapy-welcome]');
-    if (welcome) mountTherapyGuide(welcome);
-    return;
-  }
-  const preference = 'lcn_experience_guide_disabled';
   const params = new URLSearchParams(location.search);
-  const profile = params.has('submission_id') ? 'submission:' + params.get('submission_id') : 'practice:' + params.get('id');
-  const progressKey = 'lcn_experience_guide_progress:' + profile;
-  const rating = '[data-choice="effect"]';
-  const steps = [
-    ['termin', '[data-choice="adaptation"]', 'Belastung rund um den Termin', 'Wie hast du das Warten und den Termin erlebt? Deine Einschätzung hilft anderen, ihren Besuch zu planen.', /^adaptation$/],
-    ['termin', '.appointment-variant[data-variant="3"]', 'Terminform', 'Welche Terminformen waren für deinen Erst- oder Folgetermin möglich? Ergänze gern mehrere Angaben.', /^appointment-/, 'appointments'],
-    ['zugang', '[data-choice^="costs-"]', 'Kosten', 'Wie viel hast du selbst bezahlt? Eine ungefähre Angabe hilft anderen bei der Planung.', /^costs-/],
-    ['wirkung', '[data-doctor-symptom-help]', 'Symptome', 'Bei welchen Symptomen hat dir die Behandlung geholfen? Du kannst mehrere auswählen.', /^symptom-help-/, 'manual'],
-    ['ueberblick', '#treatment-section', 'Therapien der Praxis', 'Stimmen die zugeordneten Therapien mit deiner Erfahrung überein? Du kannst Einträge ergänzen oder eine Korrektur melden.']
-  ];
-
-  let step = -1;
-  let saved = false;
-  let prompted = false;
-  let offered = false;
-  let dismissed = false;
-  let disabled = false;
-  try { disabled = localStorage.getItem(preference) === '1'; } catch {}
-
-  function restoreProgress() {
-    try {
-      const progress = JSON.parse(sessionStorage.getItem(progressKey));
-      if (!progress || disabled) return;
-      step = Number.isInteger(progress.step) && steps[progress.step] ? progress.step : -1;
-      saved = step >= 0 && progress.saved === true;
-      prompted = step >= 0 && progress.prompted === true;
-      offered = progress.offered === true;
-      dismissed = step < 0 && progress.dismissed === true;
-    } catch {}
-  }
-
-  function saveProgress() {
-    try {
-      sessionStorage.setItem(progressKey, JSON.stringify({step, saved, prompted, offered, dismissed}));
-    } catch {}
-  }
-
-  restoreProgress();
+  const treatment = content.closest('[data-treatment-id]');
+  const profileParam = params.has('submission_id') ? 'submission_id' : 'id';
+  const profileId = query => query.has('submission_id')
+    ? 'submission:' + query.get('submission_id') : query.get('id');
+  const entryId = doctor ? profileId(params) : treatment?.dataset.treatmentId;
+  if (!entryId || (!doctor && !content.querySelector('[data-therapy-welcome]'))) return;
+  mountGuide();
 
   // Keep native selection anchors intact when background data has not changed.
   function updateText(node, text) {
@@ -80,10 +43,6 @@
     window.scrollBy({top: target.getBoundingClientRect().top - headerOffset, behavior: 'instant'});
   }
 
-  function cardFor(selector) {
-    return selector && content.querySelector(selector)?.closest('.card');
-  }
-
   function illustrated(panel, eyebrow, title, ...body) {
     panel.classList.add('experience-guide');
     const copy = make('div', '', 'experience-guide-copy');
@@ -96,14 +55,13 @@
     panel.append(copy, image);
   }
 
-  function mountTherapyGuide(welcome) {
+  function mountGuide() {
     const views = [...document.querySelectorAll('.side-nav [data-view]')]
       .filter(link => link.dataset.view !== 'dashboard');
-    const treatment = content.closest('[data-treatment-id]');
-    const treatmentId = treatment.dataset.treatmentId;
-    const storagePrefix = 'lcn_therapy_guide:';
-    const preferredModeKey = 'lcn_therapy_guide_preferred_mode';
-    const orientationDisabledKey = 'lcn_therapy_guide_disabled';
+    const storageBase = doctor ? 'lcn_doctor_guide' : 'lcn_therapy_guide';
+    const storagePrefix = storageBase + ':';
+    const preferredModeKey = storageBase + '_preferred_mode';
+    const orientationDisabledKey = storageBase + '_disabled';
     const topics = {
       effect: [
         {"intro": "Unter Community-Bewertung fasst die Community zusammen, wie sich der Gesamtzustand bei Anwendung der ausgewählten Therapie verändert hat. Du kannst zwischen vier Antworten wählen:", "options": ["Verschlechterung: Die Behandlung hatte einen negativen Effekt auf deine Gesundheit.", "Neutral: Dein Gesamtzustand ist gleich geblieben.", "Verbesserung: Du hast einen positiven Effekt auf deinen Gesamtzustand gespürt.", "Heilung: Die Therapie hat bei dir zu einer Genesung geführt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die Therapie besser einzuschätzen."},
@@ -151,9 +109,33 @@
       alternativen: ['Danke, dass du dir Zeit für die Community genommen hast. Hier kannst du zum Abschluss noch verwandte Behandlungen ansehen.',
         'Vielleicht findest du hier eine weitere Behandlung, über die du dich informieren möchtest. Schau dir mögliche Alternativen und verwandte Therapien an.']
     };
+    const doctorIntroductions = {
+      wirkung: 'Hier siehst du, wie sich der Gesamtzustand anderer Menschen während der Behandlung verändert hat.',
+      termin: 'Hier siehst du, wie andere die Belastung rund um den Termin erlebt haben und welche Terminformen möglich waren.',
+      zugang: 'Hier findest du Erfahrungen zu selbst getragenen Behandlungskosten und Wartezeiten.',
+      symptome: 'Hier siehst du, bei welchen Symptomen andere eine Linderung erlebt haben.',
+      anreise: 'Auf der Karte siehst du die Praxisstandorte. Gib deinen Ausgangsort ein, um die Entfernung und den Anreiseaufwand einzuschätzen.'
+    };
+    const doctorTopics = {
+      wirkung: [
+        ['Community-Bewertung', '.effect-chart', 'Wähle, ob sich dein Gesamtzustand verschlechtert, nicht verändert, verbessert oder vollständig erholt hat.', 'Die Balken zeigen, wie sich die Antworten auf die vier Stufen verteilen. Achte auch darauf, wie viele Menschen eine Angabe gemacht haben.']
+      ],
+      termin: [
+        ['Long-Covid-gerechter Termin', '.adaptation-matched', 'Wähle die Stufe, die am besten zu deinem Termin passt. Berücksichtige Wartezeit, Ruhe und die Möglichkeit, im Liegen zu warten oder dich zurückzuziehen.', 'Die Verteilung zeigt, wie gut andere den Termin an ihre Belastbarkeit angepasst fanden.'],
+        ['Terminform', '.appointment-variant', 'Gib für den Ersttermin und für Folgetermine an, welche Termine vor Ort, per Telefon oder per Video möglich waren.', 'Die Zahlen zeigen für jede Terminform, wie viele Personen sie als möglich oder als nicht möglich gemeldet haben.']
+      ],
+      zugang: [
+        ['Behandlungskosten (Eigenanteil)', '.cost-heading', 'Wähle dein Versicherungssystem und gib an, wie viel du für Untersuchungen und Behandlungen selbst bezahlt hast.', 'Die Kostenspannen beziehen sich auf das ausgewählte Versicherungssystem und den selbst gezahlten Betrag.'],
+        ['Wartezeit auf den Ersttermin', '[data-choice="wait"]', 'Wähle die Stufe, die zu deiner Wartezeit auf den Ersttermin passt.', 'Die Verteilung zeigt, wie lange andere auf ihren ersten Termin gewartet haben.'],
+        ['Wartezeit auf Folgetermine', '[data-choice="wait-followup"]', 'Wähle die Stufe, die zu deiner Wartezeit auf einen Folgetermin passt.', 'Hier siehst du die berichteten Wartezeiten auf weitere Termine.']
+      ],
+      symptome: [
+        ['Symptome', '[data-doctor-symptom-help]', 'Wähle die Symptome aus, bei denen dir die Behandlung geholfen hat. Über die Suche kannst du weitere Symptome ergänzen.', 'Die Zahl neben einem Symptom zeigt, wie viele Menschen dort eine Linderung gemeldet haben. Eine Person kann mehrere Symptome auswählen.']
+      ]
+    };
     let mode = '';
     let minimized = false;
-    let providerCount = JSON.parse(content.querySelector('#anreise .nd-map-data').textContent).length;
+    let providerCount = doctor ? 0 : JSON.parse(content.querySelector('#anreise .nd-map-data').textContent).length;
     let providerContributed = false;
     let relationshipContributions = {};
     let finishedSections = {};
@@ -176,14 +158,14 @@
       try { return localStorage.getItem(orientationDisabledKey) === '1'; } catch { return false; }
     }
 
-    function treatmentState(id) {
+    function entryState(id) {
       try {
         return JSON.parse(sessionStorage.getItem(storagePrefix + id));
       } catch { return null; }
     }
 
     function restore() {
-      const state = treatmentState(treatmentId);
+      const state = entryState(entryId);
       mode = validMode(state?.mode);
       minimized = state?.minimized === true;
       providerContributed = state?.providerContributed === true;
@@ -192,7 +174,7 @@
     }
 
     function save() {
-      try { sessionStorage.setItem(storagePrefix + treatmentId, JSON.stringify({mode, minimized, providerContributed, relationshipContributions, finishedSections})); } catch {}
+      try { sessionStorage.setItem(storagePrefix + entryId, JSON.stringify({mode, minimized, providerContributed, relationshipContributions, finishedSections})); } catch {}
     }
 
     function chooseMode(value) {
@@ -210,10 +192,11 @@
       if (!document.referrer || (navigation && navigation.type !== 'navigate')) return;
       const source = new URL(document.referrer);
       if (source.origin !== location.origin || source.pathname !== location.pathname) return;
-      const sourceId = source.searchParams.get('treatment_id') || source.searchParams.get('treat_id');
-      if (!sourceId || sourceId === treatmentId) return;
+      const sourceId = doctor ? profileId(source.searchParams)
+        : source.searchParams.get('treatment_id') || source.searchParams.get('treat_id');
+      if (!sourceId || sourceId === entryId) return;
 
-      const sourceState = treatmentState(sourceId);
+      const sourceState = entryState(sourceId);
       // A link opened in a new tab can lack the source tab's session state.
       const sourceMode = validMode(sourceState?.mode) || (!sourceState ? preferredMode() : '');
       const sourceMinimized = sourceState?.minimized === true;
@@ -264,17 +247,19 @@
       dialog.showModal();
     }
 
-    function shareTherapy(alternatives = false, providers = false) {
+    function shareEntry(alternatives = false, providers = false) {
       const block = make('div', '', 'therapy-guide-sharing');
       const message = make('p');
       const url = new URL(location.pathname, location.origin);
       if (window.LCNDummy?.available || ['lcn.localhost.test', 'localhost.test'].includes(url.hostname)) {
-        url.href = 'https://long-covid-navigator.de/therapie_detail.php';
+        url.href = 'https://long-covid-navigator.de/' + (doctor ? 'arzt_detail.html' : 'therapie_detail.php');
       }
-      url.searchParams.set('treatment_id', treatment.dataset.treatmentId);
+      if (doctor) url.searchParams.set(profileParam, params.get(profileParam));
+      else url.searchParams.set('treatment_id', entryId);
       url.searchParams.set('anliegen', 'erfahrung');
       url.hash = 'ueberblick';
-      const text = providers
+      const text = doctor ? 'Kennst du diese Praxis aus eigener Erfahrung? Teile sie im Long Covid Navigator.'
+        : providers
         ? 'Kennst du Behandler:innen für diese Therapie aus eigener Erfahrung? Schau dir die Einträge im Long Covid Navigator an, bestätige oder korrigiere Angaben und ergänze fehlende Behandler:innen. Teile deine Behandlungserfahrung im jeweiligen Praxiseintrag.'
         : alternatives
         ? 'Hast du diese Therapie oder eine Alternative dazu ausprobiert? Schau dir die Alternativen, Einordnungen und Kombinationen im Long Covid Navigator an. Bestätige passende Einträge, widersprich unpassenden Zuordnungen oder ergänze, was du kennst.'
@@ -287,7 +272,7 @@
       fallback.readOnly = true;
       fallback.hidden = true;
       fallback.value = url.href;
-      fallback.setAttribute('aria-label', 'Link zur Therapie');
+      fallback.setAttribute('aria-label', doctor ? 'Link zum Behandler:innen-Profil' : 'Link zur Therapie');
       async function copyLink() {
         try {
           await navigator.clipboard.writeText(url.href);
@@ -375,27 +360,31 @@
     }
 
     function answered(card) {
+      if (!card) return false;
+      if (doctor) return !!card.querySelector('[data-choice][aria-pressed="true"], [data-symptom-id][aria-pressed="true"]');
       if(card.dataset.guideContribution === 'provider') return providerContributed;
       if(card.dataset.guideContribution) return relationshipContributions[card.dataset.guideContribution] === true;
       return !!card.querySelector('[data-option][aria-pressed="true"], [data-symptom-id][aria-pressed="true"]');
     }
 
     function updateProgress() {
-      entries.forEach(({card, disclosure}) => {
-        const done = answered(card);
+      const doneEntries = entries.map(({card, selector, disclosure}) => {
+        const done = answered(doctor ? doctorTopicCard(selector) : card);
         disclosure?.classList.toggle('is-complete', mode === 'review' && done);
         const summary = disclosure?.querySelector('summary');
         if (summary) summary.setAttribute('aria-label', summary.textContent + (mode === 'review' ? (done ? ' – Angabe gespeichert' : ' – noch offen') : ''));
+        return done;
       });
       views.forEach(link => {
-        const cards = [...document.getElementById(link.dataset.view).querySelectorAll('[data-question], .ux-symptom-help')];
-        const done = finishedSections[link.dataset.view] === true || (link.dataset.view === 'anreise' && providerContributed) || (link.dataset.view === 'alternativen' && Object.values(relationshipContributions).some(Boolean)) || (cards.length > 0 && cards.every(answered));
+        const view = link.dataset.view;
+        const cards = doctor ? [] : [...document.getElementById(view).querySelectorAll('[data-question], .ux-symptom-help')];
+        const done = finishedSections[view] === true || (view === 'anreise' && providerContributed) || (view === 'alternativen' && Object.values(relationshipContributions).some(Boolean)) || (cards.length > 0 && cards.every(answered));
         link.classList.toggle('therapy-section-complete', done);
         const number = link.querySelector('.nav-number');
         number?.setAttribute('aria-label', finishedSections[link.dataset.view] ? 'Für dich abgeschlossen' : done ? 'Beitrag gespeichert' : '');
       });
       if (completion) {
-        const count = entries.filter(({card}) => answered(card)).length;
+        const count = doneEntries.filter(Boolean).length;
         updateText(completion, count === entries.length
           ? 'Danke! Deine Angaben sind gespeichert.' : count + ' von ' + entries.length + ' Themen ausgefüllt');
         completion.classList.toggle('is-complete', count === entries.length);
@@ -450,7 +439,23 @@
     }
 
     function viewName(link) {
+      if (doctor && link.hasAttribute('aria-label')) return link.getAttribute('aria-label');
       return link.querySelector('strong').textContent.replaceAll('­', '');
+    }
+
+    function doctorTopicCard(selector) {
+      return panel?.querySelector(selector)?.closest('.card');
+    }
+
+    function renderDoctorTopics(review) {
+      return (doctorTopics[panel.id] || []).flatMap(([title, selector, contribute, read]) => {
+        if (!doctorTopicCard(selector)) return [];
+        const disclosure = make('details');
+        disclosure.append(make('summary', title), make('p', review ? contribute : read),
+          button('Zum Bereich ↓', () => scrollTo(doctorTopicCard(selector))));
+        entries.push({selector, disclosure});
+        return [disclosure];
+      });
     }
 
     function classificationFields(section) {
@@ -706,13 +711,22 @@
     }
 
     function paint(force = false) {
-      const active = content.querySelector('.nd-panel:not([hidden])');
+      const active = content.querySelector(doctor ? '.nd-panel[data-profile-loaded]' : '.nd-panel:not([hidden])');
       if (!active || (!force && panel === active)) return;
-      guide?.remove();
+      const welcome = active.querySelector('[data-doctor-welcome], [data-therapy-welcome]');
       const collapsed = orientationIsOff();
-      content.querySelectorAll('[data-question], .ux-symptom-help').forEach(card => {
-        card.hidden = !collapsed && mode === 'explore' && cardCount(card) === 0;
-      });
+      if (doctor && !force && panel?.id === active.id) {
+        panel = active;
+        if (guide) (collapsed ? panel : welcome || panel).prepend(guide);
+        updateProgress();
+        return;
+      }
+      guide?.remove();
+      if (!doctor) {
+        content.querySelectorAll('[data-question], .ux-symptom-help').forEach(card => {
+          card.hidden = !collapsed && mode === 'explore' && cardCount(card) === 0;
+        });
+      }
       panel = active;
       entries = [];
       completion = sharing = null;
@@ -771,9 +785,12 @@
       const heading = make('h2', panel.getAttribute('aria-label'));
       const review = mode === 'review';
       if (!review) guide.classList.add('therapy-guide-reading');
-      const body = [make('p', review ? (panel.querySelector('[data-question], .ux-symptom-help') ? 'Klicke in den Abbildungen oder Listen auf das, was deiner bisherigen Erfahrung entspricht. Jede Angabe hilft anderen.' : encouragement[panel.id][0]) : encouragement[panel.id][1])];
-      if (review && panel.id === 'symptome') body[0].textContent = 'Klicke auf die Symptome, die sich bei dir durch diese Therapie verbessert haben, oder ergänze entsprechende Symptome.';
-      if (!review && panel.querySelector('[data-question], .ux-symptom-help')) {
+      const contributionPrompt = 'Klicke in den Abbildungen oder Listen auf das, was deiner bisherigen Erfahrung entspricht. Jede Angabe hilft anderen.';
+      const body = [make('p', doctor
+        ? (review && doctorTopics[panel.id]?.some(([, selector]) => doctorTopicCard(selector)) ? contributionPrompt : doctorIntroductions[panel.id])
+        : review ? (panel.querySelector('[data-question], .ux-symptom-help') ? contributionPrompt : encouragement[panel.id][0]) : encouragement[panel.id][1])];
+      if (!doctor && review && panel.id === 'symptome') body[0].textContent = 'Klicke auf die Symptome, die sich bei dir durch diese Therapie verbessert haben, oder ergänze entsprechende Symptome.';
+      if (!doctor && !review && panel.querySelector('[data-question], .ux-symptom-help')) {
         body.push(make('p', '', 'therapy-guide-data-status'));
       }
       const feedbackNote = text => {
@@ -788,11 +805,19 @@
         note.append(make('strong', 'Anmerkung'), description);
         return note;
       };
-      const cards = panel.querySelectorAll('[data-question], .ux-symptom-help');
-      if (cards.length) {
+      const cards = doctor ? [] : panel.querySelectorAll('[data-question], .ux-symptom-help');
+      if (doctor) {
+        body.push(...renderDoctorTopics(review));
+        if (panel.id === 'anreise') {
+          body.push(button('Zur Karte ↓', () => scrollTo(panel.querySelector('#doctor-detail-map'))));
+        } else if (!review && profileParam === 'id') {
+          sharing = shareEntry();
+          sharing.message.textContent = 'Kennst du jemanden, der in dieser Praxis behandelt wurde? Lade die Person ein, ihre Erfahrung zu teilen.';
+        }
+      } else if (cards.length) {
 
         if (!review) {
-          sharing = shareTherapy();
+          sharing = shareEntry();
         }
       } else if (panel.id === 'anreise' && !review) {
         body[0].textContent = 'Wo findest du Behandler:innen für diese Therapie? Die Community sammelt Einträge, damit du eine Auswahl hast und sehen kannst, wer die Behandlung in deiner Nähe anbietet. So kannst du Behandler:innen mit möglichst wenig Anreiseaufwand finden.';
@@ -812,7 +837,7 @@
           body.push(disclosure);
         });
         body.push(feedbackNote('Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie die Community die Angabe einschätzt, dass die jeweilige Behandler:in diese Therapie tatsächlich anbietet. Sie helfen dir einzuordnen, wie gesichert diese Information ist. Sie bewerten weder die Qualität der Behandlung noch ihre Wirksamkeit.'));
-        sharing = shareTherapy(false, true);
+        sharing = shareEntry(false, true);
         body.push(sharing.block);
       }
       cards.forEach(card => {
@@ -959,7 +984,7 @@
         body.push(disclosure);
         entries.push({card, example, disclosure});
       });
-      if(panel.id === 'alternativen' || (review && panel.id === 'anreise')) {
+      if (!doctor && (panel.id === 'alternativen' || (review && panel.id === 'anreise'))) {
         const readingHelp = {
           alternative: 'Hier sammelt die Community frei vorgeschlagene Therapiealternativen. Die Einträge beruhen auf diesen Vorschlägen; ein fachlicher Zusammenhang wird damit nicht vorausgesetzt. Scrolle seitlich und öffne die Namen für Details.',
           combination: 'Hier sammelt die Community Kombinationen aus Therapien oder Wirkstoffen, deren Zusammenspiel einen zusätzlichen oder anderen Effekt erzielen soll. Du siehst, welche Bestandteile jeweils zusammengehören und welche Kombinationen die Community vorschlägt.'
@@ -1011,7 +1036,7 @@
         }
         if(panel.id === 'alternativen' && !review) {
           body.push(feedbackNote('Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie die Community die jeweilige Zuordnung einschätzt, etwa als Therapiealternative. Sie helfen dir einzuordnen, wie gesichert diese Zuordnung ist. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.'));
-          sharing = shareTherapy(true);
+          sharing = shareEntry(true);
           body.push(sharing.block);
         }
       }
@@ -1025,10 +1050,10 @@
         thanks.setAttribute('aria-label', 'Danke, dass du dabei bist');
         const thanksActions = make('div', '', 'experience-guide-actions');
         thanksActions.append(button('Hier bleiben', () => thanks.close(), true), button('Anderes Anliegen wählen', () => {thanks.close();showOrientation();}));
-        if (mode === 'explore') {
+        if (!doctor && mode === 'explore') {
           thanks.classList.add('therapy-finish-dialog');
           const polls = make('div');
-          const invitation = shareTherapy();
+          const invitation = shareEntry();
           const share = invitation.block.querySelector('button');
           const shareIcon = share.querySelector('svg');
           invitation.message.remove();
@@ -1171,7 +1196,7 @@
       if(nextButton)navigationPair.append(nextButton);
       if(!next)navigationPair.append(changeIntent);
       actions.append(navigationPair, secondaryActions);
-      if (!review && !['anreise', 'alternativen'].includes(panel.id)) {
+      if (!doctor && !review && !['anreise', 'alternativen'].includes(panel.id)) {
         const orientationClosing = panel.id === 'zugang'
           ? 'Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest'
           : 'Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest – auch wenn die Wirkung von Person zu Person unterschiedlich ist.';
@@ -1183,10 +1208,16 @@
         guide.querySelector('.experience-guide-copy').prepend(sharing.block);
       }
       panel.prepend(guide);
-      refreshTopics();
+      if (doctor) updateProgress();
+      else refreshTopics();
     }
 
-    const choices = [
+    const choices = doctor ? [
+      ['review', 'Meine Erfahrung teilen', 'Berichte Schritt für Schritt, wie es dir mit der Behandlung und den Terminen ging. Du entscheidest, welche Fragen du beantworten möchtest.', 'wirkung', 'Erfahrung teilen'],
+      ['travel', 'Anreise', 'Sieh dir die Praxisstandorte auf der Karte an und schätze die Entfernung von deinem Ausgangsort ein.', 'anreise', 'Anreise ansehen'],
+      ['symptoms', 'Bei welchen Symptomen hat die Behandlung geholfen?', 'Schau nach, bei welchen Symptomen Menschen von einer Linderung berichten.', 'symptome', 'Symptome ansehen'],
+      ['explore', 'Erfahrungsberichte der Community ansehen', 'Lies, was andere über die Behandlung, die Belastung bei Terminen und die Kosten berichten.', 'wirkung', 'Erfahrungen ansehen']
+    ] : [
       ['review', 'Meine Erfahrung teilen', 'Berichte Schritt für Schritt, wie es dir mit der Therapie ging. Du entscheidest, welche Fragen du beantworten möchtest.', 'wirkung', 'Erfahrung teilen'],
       ['providers', 'Behandler:innen finden (Karte)', 'Suche auf der Karte nach Behandler:innen, die diese Therapie anbieten. Wähle einen Ort aus, um Behandler:innen in der Nähe zu finden.', 'anreise', 'Behandler:innen suchen'],
       ['symptoms', 'Bei welchem Symptom hilft die Therapie?', 'Sieh nach, bei welchen Symptomen die ausgewählte Therapie laut Community helfen kann.', 'symptome', 'Symptome ansehen'],
@@ -1195,7 +1226,7 @@
     ];
 
     function startView([value, , , view]) {
-      if (value === 'explore') {
+      if (!doctor && value === 'explore') {
         const first = views.find(link => !['ueberblick', 'anreise', 'alternativen'].includes(link.dataset.view) && hasInformation(link));
         if (first) return first;
       }
@@ -1230,7 +1261,7 @@
       const follow = button(choices[initial][4] + ' →', async () => {
         const choice = choices[current];
         const [value] = choice;
-        if (value === 'explore' && experienceCount() === 0) {
+        if (!doctor && value === 'explore' && experienceCount() === 0) {
           follow.disabled = true;
           const loaded = await treatment.lcnInitialAnswers;
           follow.disabled = false;
@@ -1359,7 +1390,7 @@
         marker.setAttribute('aria-hidden', 'true');
         const label = make('span', '', 'therapy-wheel-label');
         label.append(make('strong', choice[1]));
-        if (choice[0] === 'explore') {
+        if (!doctor && choice[0] === 'explore') {
           const availability = make('small', '', 'therapy-wheel-availability');
           availability.dataset.therapyExperienceAvailability = '';
           availability.hidden = true;
@@ -1561,7 +1592,7 @@
       proceed.autofocus = true;
       actions.append(proceed, button('Hier bleiben', () => dialog.close()));
 
-      const invitation = shareTherapy();
+      const invitation = shareEntry();
       invitation.message.textContent = 'Kennst du jemanden, der die Therapie ausprobiert hat? Teile die Seite und lade die Person ein, ihre Erfahrung beizutragen.';
       illustrated(dialog, '', title, description, actions, invitation.block);
       function updateDestination() {
@@ -1582,40 +1613,45 @@
       dialog.showModal();
     }
 
-    document.addEventListener('lcn-guide-contributed', event => {
-      const topic = event.detail?.topic;
-      if(topic === 'provider')providerContributed = true;
-      else if(['alternative','classification','combination'].includes(topic))relationshipContributions[topic] = true;
-      else return;
-      save();updateProgress();
-    });
-    window.addEventListener('lcn-provider-contributed', () => {
-      providerContributed = true;save();updateProgress();
-    });
-    window.addEventListener('lcn-provider-catalog', event => {
-      providerCount = event.detail.providers.length;
-      if(event.detail?.contributed){providerContributed=true;save();updateProgress();}
-    });
     restore();
-    document.addEventListener('lcn-treatment-view-changed', () => paint());
-    document.addEventListener('lcn-combination-diagrams-changed', refreshClassificationGuide);
-    window.addEventListener('lcn-relation-feedback', () => queueMicrotask(refreshClassificationGuide));
-    document.addEventListener('lcn-treatment-answers-rendered', () => {
-      // Counts and visibility can change without replacing the reading guide.
-      // Replacing it during a drag invalidates the browser's selection endpoints.
-      const onlyAnswered = mode === 'explore' && !orientationIsOff();
-      content.querySelectorAll('[data-question], .ux-symptom-help').forEach(card => {
-        card.hidden = onlyAnswered && cardCount(card) === 0;
+    if (doctor) {
+      window.addEventListener('lcn-doctor-rendered', () => paint());
+      window.addEventListener('lcn-doctor-symptoms-rendered', updateProgress);
+    } else {
+      document.addEventListener('lcn-guide-contributed', event => {
+        const topic = event.detail?.topic;
+        if(topic === 'provider')providerContributed = true;
+        else if(['alternative','classification','combination'].includes(topic))relationshipContributions[topic] = true;
+        else return;
+        save();updateProgress();
       });
-      refreshTopics();
-    });
+      window.addEventListener('lcn-provider-contributed', () => {
+        providerContributed = true;save();updateProgress();
+      });
+      window.addEventListener('lcn-provider-catalog', event => {
+        providerCount = event.detail.providers.length;
+        if(event.detail?.contributed){providerContributed=true;save();updateProgress();}
+      });
+      document.addEventListener('lcn-treatment-view-changed', () => paint());
+      document.addEventListener('lcn-combination-diagrams-changed', refreshClassificationGuide);
+      window.addEventListener('lcn-relation-feedback', () => queueMicrotask(refreshClassificationGuide));
+      document.addEventListener('lcn-treatment-answers-rendered', () => {
+        // Counts and visibility can change without replacing the reading guide.
+        // Replacing it during a drag invalidates the browser's selection endpoints.
+        const onlyAnswered = mode === 'explore' && !orientationIsOff();
+        content.querySelectorAll('[data-question], .ux-symptom-help').forEach(card => {
+          card.hidden = onlyAnswered && cardCount(card) === 0;
+        });
+        refreshTopics();
+      });
+    }
     window.addEventListener('pageshow', event => {
       if (event.persisted) {
         restore();
         paint(true);
       }
     });
-    if (new URLSearchParams(location.search).get('anliegen') === 'erfahrung') {
+    if (params.get('anliegen') === 'erfahrung') {
       mode = 'review';
       minimized = false;
       save();
@@ -1624,234 +1660,6 @@
     paint();
   }
 
-  function nextLabel() {
-    if (saved || !steps[step][4] || steps[step][5] === 'manual') return 'Schritt abschließen';
-    return step === steps.length - 1 ? 'Begleitung abschließen' : 'Schritt überspringen';
-  }
-
-  function paintContext(host, view) {
-    if (!host || disabled || dismissed) return;
-    const local = view === 'ueberblick' ? -1 : steps.findIndex(item => item[0] === view && cardFor(item[1]));
-    if (local < 0 && step < 0) return;
-    const key = view + ':' + step;
-    const existing = content.querySelector('[data-experience-context]');
-    if (existing?.dataset.experienceContext === key) return;
-    existing?.remove();
-    const note = make('section');
-    note.dataset.experienceContext = key;
-    const actions = make('div', '', 'experience-guide-actions');
-    if (local >= 0) {
-      actions.append(
-        button('Hier weitermachen ↓', () => {
-          goTo(local);
-          scrollTo(cardFor(steps[local][1]));
-        }, true),
-        button('Diesen Bereich überspringen', () => {
-          const next = steps.findIndex((item, index) => index > local && item[0] !== view);
-          if (next >= 0) goTo(next);
-          else end();
-        })
-      );
-    }
-    if (step >= 0) actions.append(button('Zurück zu „' + steps[step][2] + '“', showStep, local < 0));
-    actions.append(button('Rest überspringen', end));
-    const description = local >= 0
-      ? steps.filter(item => item[0] === view).map(item => item[3]).join(' ')
-      : 'Du kannst dich hier umsehen und zu deinem offenen Schritt zurückkehren, wenn du soweit bist.';
-    illustrated(note, 'Deine Erfahrung zählt', make('h2', local >= 0 ? 'Hier kannst du etwas beitragen' : 'Deine Begleitung wartet'),
-      make('p', description), actions);
-    host.prepend(note);
-  }
-
-  function paint() {
-    const current = steps[step];
-    const target = current && cardFor(current[1]);
-    const host = content;
-    const activeView = location.hash.slice(1) || 'ueberblick';
-    const context = content.querySelector('[data-experience-context]');
-    if (context && context.dataset.experienceContext !== activeView + ':' + step) context.remove();
-    const visible = target && activeView === current[0] && !target.closest('[hidden]');
-    const existing = content.querySelector('[data-experience-step]');
-    if (existing && (!visible || existing.parentElement !== host || step !== Number(existing.dataset.experienceStep))) existing.remove();
-    const banner = content.querySelector('[data-experience-banner]');
-    if (banner) banner.hidden = activeView === 'ueberblick' && step >= 0;
-    if (!visible) {
-      paintContext(content, activeView);
-      return;
-    }
-    context?.remove();
-    if (existing?.isConnected) {
-      existing.querySelector('[role="status"]').textContent = saved ? 'Danke, deine Angabe ist gespeichert.' : '';
-      existing.querySelector('[data-experience-next]').textContent = nextLabel();
-      existing.querySelector('[data-experience-skip]').hidden = nextLabel() !== 'Schritt abschließen';
-      return;
-    }
-    const note = make('section');
-    note.dataset.experienceStep = String(step);
-    const status = make('p', saved ? 'Danke, deine Angabe ist gespeichert.' : '', 'experience-guide-status');
-    status.setAttribute('role', 'status');
-    const actions = make('div', '', 'experience-guide-actions');
-    const next = button(nextLabel(), () => {
-      if (saved || step === steps.length - 1 || !current[4]) checkpoint();
-      else advance();
-    });
-    next.dataset.experienceNext = '';
-    const jump = button(current[4] ? 'Zur Angabe ↓' : 'Zu den Therapien ↓', () => scrollTo(cardFor(current[1])), true);
-    actions.append(jump, next);
-    const skip = button('Schritt überspringen', advance);
-    skip.dataset.experienceSkip = '';
-    skip.hidden = nextLabel() !== 'Schritt abschließen';
-    actions.append(skip);
-    actions.append(button('Rest überspringen', end));
-    illustrated(note, 'Deine Erfahrung zählt · ' + (step + 1) + ' von ' + steps.length,
-      make('h2', current[2]), make('p', 'Lass dir Zeit. Teile nur, was du gerade beitragen kannst.'),
-      make('p', current[3]), status, actions);
-    host.prepend(note);
-  }
-
-  function end() {
-    step = -1;
-    offered = true;
-    dismissed = true;
-    saveProgress();
-    content.querySelector('[data-experience-context]')?.remove();
-    paint();
-    scrollTo(content);
-  }
-
-  function showStep() {
-    const link = document.querySelector('.side-nav [data-view="' + steps[step][0] + '"]');
-    if (link?.getAttribute('aria-current') !== 'page') link?.click();
-    paint();
-    scrollTo(content.querySelector('[data-experience-step]'));
-  }
-
-  function goTo(index) {
-    step = index;
-    saved = false;
-    prompted = false;
-    dismissed = false;
-    offered = true;
-    saveProgress();
-    showStep();
-  }
-
-  function advance() {
-    if (step === steps.length - 1) end();
-    else goTo(step + 1);
-  }
-
-  function prompt(titleText, message, configure) {
-    if (disabled || document.getElementById('experience-guide-dialog')) return;
-    const dialog = make('dialog');
-    dialog.id = 'experience-guide-dialog';
-    dialog.setAttribute('aria-labelledby', 'experience-guide-title');
-    const title = make('h2', titleText);
-    title.id = 'experience-guide-title';
-    const actions = make('div', '', 'experience-guide-actions');
-    configure(dialog, actions);
-    illustrated(dialog, 'Deine Erfahrung zählt', title, make('p', message), actions);
-    document.body.append(dialog);
-    dialog.addEventListener('close', () => dialog.remove(), {once: true});
-    dialog.showModal();
-  }
-
-  function offer(afterSave) {
-    if (disabled || step >= 0) return;
-    offered = true;
-    saveProgress();
-    prompt(
-      afterSave ? 'Danke für deine Community-Bewertung!' : 'Möchtest du deine Erfahrung ergänzen?',
-      'Deine Erfahrung gibt anderen Orientierung. Wenn du gerade Kraft dafür hast, gehen wir mit dir Schritt für Schritt weiter. Du kannst jederzeit pausieren.',
-      (dialog, actions) => actions.append(
-        button('Schritt für Schritt weiter', () => { dialog.close(); advance(); }, true),
-        button('Jetzt nicht', () => dialog.close()),
-        button('Hinweise ausschalten', () => {
-          disabled = true;
-          try { localStorage.setItem(preference, '1'); } catch {}
-          dialog.close();
-        })
-      )
-    );
-  }
-
-  function checkpoint() {
-    const next = steps[step + 1];
-    prompted = true;
-    saveProgress();
-    prompt(
-      next ? 'Danke, dass du deine Erfahrung teilst!' : 'Danke für deine Zeit!',
-      next
-        ? 'Deine Angaben helfen anderen in der Community. Hast du noch Kraft für den nächsten Schritt? Dann nehmen wir dich mit zu „' + next[2] + '“.'
-        : 'Was du aus deiner Erfahrung beigetragen hast, kann anderen bei ihrer Entscheidung helfen.',
-      (dialog, actions) => {
-        actions.append(button(next ? 'Zum nächsten Schritt →' : 'Begleitung abschließen', () => { dialog.close(); advance(); }, true));
-        if (next) actions.append(
-          button('Hier noch ergänzen', () => dialog.close()),
-          button('Für heute fertig', () => { dialog.close(); end(); })
-        );
-      }
-    );
-  }
-
-  function answersComplete(mode) {
-    if (mode === 'manual') return false;
-    if (mode === 'appointments') {
-      return cardFor(steps[step][1])?.querySelectorAll('[data-choice][aria-pressed="true"]').length === 6;
-    }
-    if (mode === 'costs') {
-      return ['unit_cost', 'total_cost'].every(key =>
-        content.querySelector('[data-question="' + key + '"] [data-option][aria-pressed="true"]'));
-    }
-    return true;
-  }
-
-  function mount() {
-    const chart = cardFor(rating);
-    if (chart && content.querySelector('.overview-facts') && !content.querySelector('[data-experience-banner]')) {
-      const banner = make('section', '', 'experience-guide-banner');
-      banner.dataset.experienceBanner = '';
-      const intro = make('p');
-      intro.append(
-        make('strong', 'Wie hast du deine Behandlung erlebt?'),
-        ' Teile, was dir geholfen hat oder schwierig war. So hilfst du anderen, eine passende Anlaufstelle zu finden.'
-      );
-      const actions = make('div', '', 'experience-guide-actions');
-      actions.append(button('Erfahrung teilen ↓', () => {
-        if (content.querySelector(rating + '[aria-pressed="true"]') && !disabled && step < 0) offer(false);
-        else scrollTo(cardFor(rating));
-      }, true));
-      illustrated(banner, 'Deine Erfahrung zählt',
-        make('h2', 'Teile deine Erfahrung mit dieser Praxis'),
-        intro, make('p', 'Starte mit deiner Community-Bewertung. Danach kannst du freiwillig weitere Angaben ergänzen.'), actions);
-      content.prepend(banner);
-    }
-    paint();
-  }
-
-  window.addEventListener('lcn-doctor-rendered', mount);
-  window.addEventListener('lcn-experience-answer-saved', event => {
-    const question = event.detail;
-    if (question === 'effect' && !offered) offer(true);
-    if (steps[step]?.[4]?.test(question) && content.querySelector('[data-experience-step]')) {
-      saved = true;
-      saveProgress();
-      paint();
-      if (!prompted && answersComplete(steps[step][5])) checkpoint();
-    }
-  });
-  window.addEventListener('hashchange', paint);
-  window.addEventListener('popstate', paint);
-  window.addEventListener('pageshow', event => {
-    if (event.persisted) {
-      restoreProgress();
-      paint();
-    }
-  });
-  document.addEventListener('click', event => {
-    if (event.target.closest('.side-nav [data-view]')) queueMicrotask(paint);
-  });
-  mount();
 })();
 
 // Remember native disclosures, including guide panels mounted after page load.
