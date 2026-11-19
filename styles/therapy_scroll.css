@@ -1,7 +1,8 @@
 /* Page content uses the browser scrollbar; only the navigation scrolls internally. */
 body.nd-detail.ux-page .ux-detail {overflow:visible}
 @media (min-width:1101px) {
-  body.nd-detail.ux-page .side-nav .nav-items {
+  body.doctor-detail-live .detail-layout {overflow:visible}
+  body:is(.nd-detail.ux-page, .doctor-detail-live) .side-nav .nav-items {
     position:fixed;
     top:var(--therapy-nav-top,calc(var(--detail-header-height,76px) + 8px));
     left:var(--therapy-nav-left);

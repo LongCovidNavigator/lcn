@@ -52,7 +52,7 @@
    }
    if(rootPage)middle.querySelectorAll('[data-kind="group_contains"]').forEach(n=>n.remove());
    if(!rootPage)continue;
-   const label=section.dataset.relationshipDomain==='therapy'?'Weiteren Eintrag hinzufügen':'Weiteren Eintrag zu „'+name+'“ hinzufügen';
+   const label=section.dataset.addEntryLabel;
    const add=make('button'),icon=make('span','＋');add.type='button';add.className='ux-stage-add';icon.className='ux-stage-add-icon';icon.setAttribute('aria-hidden','true');add.append(icon,make('span',label));add.dataset.pendingRelationship='add-'+own.submission_id;add.dataset.treatmentRelationAdd='';add.dataset.kind='group_contains';add.dataset.sourceId=pageId;add.dataset.groupId=own.group_alias_id||0;add.dataset.groupName=name;middle.append(add);
   }
  }

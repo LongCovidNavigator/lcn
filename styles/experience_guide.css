@@ -802,6 +802,18 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 .therapy-guide-classification-content { padding-bottom: 1rem; }
 .therapy-guide-note details .therapy-guide-classification-content > p { margin: 0 0 .5rem; }
 .therapy-guide-note details .therapy-guide-classification-content > p:last-child { margin-bottom: 0; }
+.therapy-guide-note details.therapy-guide-classification .therapy-guide-options .therapy-guide-application-list {
+ margin: 0;
+ padding-inline-start: 1.4rem;
+ list-style: disc;
+}
+.therapy-guide-note details.therapy-guide-classification .therapy-guide-options .therapy-guide-application-list > li {
+ display: list-item;
+ padding: 0;
+ border: 0;
+}
+.therapy-guide-note details.therapy-guide-classification .therapy-guide-application-list > li + li { margin-block-start: .5rem; }
+.therapy-guide-note details .therapy-guide-application-list > li > p { margin: 0; }
 .therapy-guide-current-level { font-weight: 400; }
 @media(max-width:650px) {
  .therapy-guide-note details.therapy-guide-classification > p { margin-inline: .75rem; }

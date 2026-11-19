@@ -114,6 +114,7 @@
       termin: 'Hier siehst du, wie andere die Belastung rund um den Termin erlebt haben und welche Terminformen möglich waren.',
       zugang: 'Hier findest du Erfahrungen zu selbst getragenen Behandlungskosten und Wartezeiten.',
       symptome: 'Hier siehst du, bei welchen Symptomen andere eine Linderung erlebt haben.',
+      therapien: 'Hier findest du die Therapien, die dieser Praxis zugeordnet sind. Du kannst Therapien suchen, filtern oder eine Zuordnung ergänzen.',
       anreise: 'Auf der Karte siehst du die Praxisstandorte. Gib deinen Ausgangsort ein, um die Entfernung und den Anreiseaufwand einzuschätzen.'
     };
     const doctorTopics = {
@@ -247,7 +248,7 @@
       dialog.showModal();
     }
 
-    function shareEntry(alternatives = false, providers = false) {
+    function shareEntry({providers = false, invitation, shareText} = {}) {
       const block = make('div', '', 'therapy-guide-sharing');
       const message = make('p');
       const url = new URL(location.pathname, location.origin);
@@ -258,12 +259,10 @@
       else url.searchParams.set('treatment_id', entryId);
       url.searchParams.set('anliegen', 'erfahrung');
       url.hash = 'ueberblick';
-      const text = doctor ? 'Kennst du diese Praxis aus eigener Erfahrung? Teile sie im Long Covid Navigator.'
+      const text = shareText ?? (doctor ? 'Kennst du diese Praxis aus eigener Erfahrung? Teile sie im Long Covid Navigator.'
         : providers
         ? 'Kennst du Behandler:innen für diese Therapie aus eigener Erfahrung? Schau dir die Einträge im Long Covid Navigator an, bestätige oder korrigiere Angaben und ergänze fehlende Behandler:innen. Teile deine Behandlungserfahrung im jeweiligen Praxiseintrag.'
-        : alternatives
-        ? 'Hast du diese Therapie oder eine Alternative dazu ausprobiert? Schau dir die Alternativen, Einordnungen und Kombinationen im Long Covid Navigator an. Bestätige passende Einträge, widersprich unpassenden Zuordnungen oder ergänze, was du kennst.'
-        : 'Kennst du diese Therapie aus eigener Erfahrung? Teile sie im Long Covid Navigator.';
+        : 'Kennst du diese Therapie aus eigener Erfahrung? Teile sie im Long Covid Navigator.');
       const actions = make('div', '', 'experience-guide-actions');
       const status = make('p');
       status.setAttribute('role', 'status');
@@ -301,7 +300,7 @@
       share.prepend(shareIcon);
       actions.append(share);
       block.append(message, document.createTextNode(' '), actions, fallback, status);
-      return {block, message, alternatives, providers};
+      return {block, message, invitation, providers};
     }
 
     function refreshTopics() {
@@ -332,13 +331,11 @@
       if (sharing) {
         const count = experienceCount(panel);
         sharing.block.hidden = false;
-        const message = sharing.providers
+        const message = sharing.invitation ?? (sharing.providers
           ? 'Kennst du jemanden, der diese Therapie schon bei einer Behandler:in gemacht hat? Leite diese Seite weiter und lade die Person ein, Angaben zu bestätigen oder zu korrigieren, fehlende Behandler:innen zu ergänzen und ihre Erfahrung im jeweiligen Praxiseintrag zu teilen.'
-          : sharing.alternatives
-          ? 'Kennst du jemanden, der diese Therapie oder eine der Alternativen schon ausprobiert hat? Leite diese Seite weiter und lade die Person ein, Einträge zu bestätigen, ihnen zu widersprechen oder fehlendes Wissen zu ergänzen.'
           : count === 0
           ? 'Kennst du jemanden, der diese Therapie ausprobiert hat? Lade die Person ein, ihre Erfahrung zu teilen. Das hilft dir und anderen bei der Orientierung.'
-          : 'Kennst du jemanden, der diese Therapie ausprobiert hat? Jede weitere Erfahrung hilft, die Therapie besser einzuschätzen.';
+          : 'Kennst du jemanden, der diese Therapie ausprobiert hat? Jede weitere Erfahrung hilft, die Therapie besser einzuschätzen.');
         // The invitation contains formatting; rebuild it only when its wording changes.
         if (sharing.message.dataset.message !== message) {
           sharing.message.dataset.message = message;
@@ -426,6 +423,12 @@
       return Math.max(0, ...[...scope.querySelectorAll('[data-question], .ux-symptom-help')].map(cardCount));
     }
 
+    function updateReadingVisibility(onlyAnswered) {
+      content.querySelectorAll('[data-question], .ux-symptom-help').forEach(card => {
+        card.hidden = onlyAnswered && cardCount(card) === 0 && !card.hasAttribute('data-pinned-symptom');
+      });
+    }
+
     function hasInformation(link) {
       const section = document.getElementById(link.dataset.view);
       if (link.dataset.view === 'alternativen') return !!section.querySelector('.ux-feedback-relation');
@@ -458,12 +461,15 @@
       });
     }
 
-    function classificationFields(section) {
-      return [...section.querySelectorAll('.ux-stage-column')].map(column => ({
+    function classificationContext(section) {
+      const fields = [...section.querySelectorAll('.ux-stage-column')].map(column => ({
         column,
         label: column.getAttribute('aria-label'),
         nodes: [...column.querySelectorAll('.ux-stage-node')].filter(node => !node.closest('[hidden]'))
       }));
+      const current = section.querySelector('.ux-stage-node[aria-current="page"]');
+      const index = fields.findIndex(({column}) => column.contains(current));
+      return {fields, current, index};
     }
 
     function fieldReference(field) {
@@ -484,230 +490,52 @@
       }))];
     }
 
-    function renderClassificationContribution(disclosure, target) {
-      const fields = classificationFields(target);
-      const current = target.querySelector('.ux-stage-node[aria-current="page"]');
-      const currentIndex = fields.findIndex(({column}) => column.contains(current));
-      const classification = current?.querySelector('[data-stage-classification]');
-      const previous = disclosure.querySelector(':scope > ul');
-      const list = make('ul', '', 'therapy-guide-options');
-      const agree = () => make('strong', 'Zustimmen (✓)');
-      const disagree = () => make('strong', 'Widersprechen (×)');
-      const related = {
-        Gruppe: 'Die zugeordneten Gruppen',
-        Gruppen: 'Die zugeordneten Gruppen',
-        Wirkstoffgruppen: 'Die zugeordneten Wirkstoffgruppen',
-        Medikamentengruppe: 'Die zugeordnete Medikamentengruppe',
-        'Übergeordnete Substanz': 'Die übergeordnete Substanz',
-        Verfahren: 'Das zugehörige Verfahren',
-        Substanz: 'Die zugehörige Substanz',
-        Wirkstoffe: 'Die zugehörigen Wirkstoffe',
-        'Wirkstoffe und Substanzen': 'Den zugehörigen Wirkstoff oder die Substanz',
-        'Wirkstoffe und Substanzen (Kombination)': 'Die zugehörige Kombination',
-        Anwendung: 'Die zugeordneten Anwendungen',
-        Handelsnamen: 'Die zugehörigen Handelsnamen',
-        'Weitere Anwendungsformen': 'Weitere Anwendungsformen'
-      };
+    function appendRelationshipTopic(body, key, selector, title, description) {
+      const card = panel.querySelector(selector);
+      if (!card) return null;
 
-      fields.forEach(({column, label, nodes}, index) => {
-        const additions = [...column.querySelectorAll('[data-treatment-relation-add]')].filter(button => !button.closest('[hidden]'));
-        const hint = column.querySelector('.ux-stage-add-hint')?.textContent.trim();
-        const isCurrent = index === currentIndex;
-        const item = make('div', '', 'therapy-guide-classification-content');
-        if (isCurrent && classification) {
-          const field = current.closest('.ux-stage-block')?.dataset.relationshipLabel || label;
-          const summary = make('p', 'Die Community ordnet diese Therapie bei ');
-          summary.append(make('strong', field));
-          if (field !== label) summary.append(' im Bereich ', make('strong', label));
-          summary.append(' ein.');
-          if (classification.dataset.classificationCategory) {
-            summary.append(' Mit ', agree(), ' bestätigst du die Einordnung.');
-          }
-          summary.append(' Über ', disagree(), ' kannst du eine andere Einordnung vorschlagen.');
-          item.append(summary);
+      card.dataset.guideContribution = key;
+      const disclosure = make('details');
+      disclosure.append(make('summary', title));
+      if (description) disclosure.append(make('p', description));
+      body.push(disclosure);
 
-          const neighbors = make('p');
-          for (const [offset, direction] of [[-1, 'links'], [1, 'rechts']]) {
-            const neighbor = fields[index + offset];
-            if (!neighbor?.nodes.length) continue;
-            if (neighbors.hasChildNodes()) neighbors.append(' ');
-            if (neighbor.label === 'Anwendungsformen') {
-              const contents = new Intl.ListFormat('de').format(classificationContents(neighbor.nodes));
-              neighbors.append('Im Feld ', make('u', direction), ' unter ', fieldReference(neighbor),
-                ' findest du ', contents, ' zu dieser Therapie.');
-              continue;
-            }
-            if (index === 0) {
-              neighbors.append('Die ', fieldReference(neighbor), ', die sie dieser Gruppe zuordnet,');
-            } else {
-              neighbors.append(related[neighbor.label] || 'Die zugehörigen Einträge');
-            }
-            neighbors.append(' findest du im Feld ', make('u', direction));
-            if (index === 0) neighbors.append(' daneben');
-            else neighbors.append(' unter ', fieldReference(neighbor));
-            neighbors.append('.');
-          }
-          if (neighbors.hasChildNodes()) item.append(neighbors);
-        }
+      const entry = {card, disclosure};
+      entries.push(entry);
+      return entry;
+    }
 
-        const actions = make('p');
-        const addLabels = [...new Set(additions.map(button => button.textContent.replace(/^[＋+]\s*/, '').trim()).filter(Boolean))];
-        const groupMembers = currentIndex === 0 && index === 1;
-        const procedureMembers = groupMembers && label === 'Verfahren';
-        if (addLabels.length) {
-          actions.append('Über ');
-          addLabels.forEach((name, position) => {
-            if (position) actions.append(position === addLabels.length - 1 ? ' oder ' : ', ');
-            actions.append(make('strong', '„' + name.replace(/[„“]/g, '') + '“'));
-          });
-          if (procedureMembers) actions.append(' kannst du Verfahren für diese Gruppe ergänzen.');
-          else actions.append(groupMembers ? ' kannst du die Gruppe ergänzen.' : ' kannst du Zuordnungen ergänzen.');
-        }
-        const linked = nodes.filter(node => node !== current);
-        const voteCount = linked.filter(node => node.querySelector('[data-treatment-relation-feedback]')).length;
-        if (voteCount) {
-          if (actions.hasChildNodes()) actions.append(' ');
-          if (procedureMembers) {
-            const perEntry = voteCount < linked.length ? 'Bei Einträgen mit Abstimmungsbuttons kannst du '
-              : 'Beim jeweiligen Eintrag kannst du ';
-            actions.append('Gehört das Verfahren aus deiner Sicht in diese Gruppe? ', perEntry, agree(), ' oder ', disagree(), ' wählen.');
-          } else {
-            const perEntry = voteCount < linked.length ? 'Bei Einträgen mit Abstimmungsbuttons kannst du mit '
-              : 'Bei jedem vorhandenen Eintrag kannst du mit ';
-            actions.append(perEntry, agree(), groupMembers ? ' die Zuordnung zur Gruppe bestätigen oder ihr mit '
-              : ' die angezeigte Zuordnung bestätigen oder ihr mit ', disagree(), ' widersprechen.');
-          }
-        }
-        if (linked.some(node => node.querySelector('[data-clarify-parent]'))) {
-          if (actions.hasChildNodes()) actions.append(' ');
-          actions.append('Über ', make('strong', '„Zuordnung offen · Genauer einordnen“'), ' kannst du eine Zuordnung vorschlagen.');
-        }
-        if (!isCurrent && !actions.hasChildNodes() && linked.length && hint) actions.textContent = hint;
-        if (actions.hasChildNodes()) item.append(actions);
-        if (!item.hasChildNodes()) return;
+    function renderAlternativesTopics(body, copy) {
+      const topics = [
+        ['alternative', '.ux-alternative-section', 'Alternative Therapien'],
+        ['classification', '[data-relationship-stages]', 'Therapieansatz und Umsetzung'],
+        ['combination', '[data-combination-section]', 'Therapiekombinationen']
+      ];
+      for (const [key, selector, title] of topics) {
+        const topic = copy.topics[key];
+        const entry = appendRelationshipTopic(body, key, selector, title, topic?.description);
+        if (!entry) continue;
 
-        const topic = make('details', '', 'therapy-guide-classification-topic');
-        topic.dataset.guideStage = index;
-        topic.open = previous?.querySelector(`[data-guide-stage="${index}"]`)?.open || false;
-        const heading = make('summary', label);
-        if (isCurrent) heading.append(make('span', ' (hier eingeordnet)', 'therapy-guide-current-level'));
-        topic.append(heading, item);
-        const row = make('li');
-        row.append(topic);
-        list.append(row);
-      });
-      if (!previous) disclosure.append(list);
-      else if (!previous.isEqualNode(list)) previous.replaceWith(list);
+        const {card, disclosure} = entry;
+        if (key === 'classification') {
+          disclosure.classList.add('therapy-guide-classification');
+          const label = card.querySelector('h3')?.firstChild?.textContent.trim();
+          if (label) disclosure.firstElementChild.textContent = label;
+          entry.refreshClassification = () => copy.renderClassification(disclosure, card);
+          entry.refreshClassification();
+        } else if (topic.voting) {
+          const section = make('section');
+          const heading = make('h4', copy.votingTitle);
+          heading.style.marginInlineStart = '.9rem';
+          section.append(heading, make('p', topic.voting));
+          disclosure.append(section);
+        }
+      }
     }
 
     function refreshClassificationGuide() {
-      const entry = entries.find(({card}) => card.matches('[data-relationship-stages]'));
-      if (entry) renderClassificationGuide(entry.disclosure, entry.card);
-    }
-
-    function renderClassificationGuide(disclosure, section) {
-      if (mode === 'review') {
-        renderClassificationContribution(disclosure, section);
-        return;
-      }
-      const previous = [...disclosure.querySelectorAll(':scope > p')];
-      const paragraphs = classificationParagraphs(section);
-      if (previous.length === paragraphs.length && previous.every((paragraph, index) => paragraph.isEqualNode(paragraphs[index]))) return;
-      previous.forEach(paragraph => paragraph.remove());
-      disclosure.append(...paragraphs);
-    }
-
-    function classificationIntro(current, fields, index) {
-      const label = fields[index].label;
-      const block = current.closest('.ux-stage-block')?.dataset.relationshipLabel;
-      const paragraph = make('p', 'Die Community ordnet diese Therapie bei ');
-      paragraph.append(make('strong', label));
-      if (block && block !== label) paragraph.append(' unter ', make('strong', block));
-      paragraph.append(' ein.');
-      return paragraph;
-    }
-
-    function appendClassificationFields(paragraph, fields, index) {
-      const [left, middle, right] = fields;
-      const leftDirection = index === 2 ? 'ganz links' : 'links';
-      const rightDirection = index === 0 ? 'ganz rechts' : 'rechts';
-      const filledFields = [];
-      const emptyFields = [];
-      const addEmptyField = (location, missing = ['keine Einträge']) => {
-        emptyFields.push(emptyFields.length
-          ? ['Auch im ', ...location, ' sind noch ', ...missing, ' hinterlegt.']
-          : ['Leider sind noch ', ...missing, ' im ', ...location, ' hinterlegt.']);
-      };
-
-      if (index !== 0) {
-        const isSubstance = left.label === 'Übergeordnete Substanz';
-        if (!left.nodes.length) {
-          const missing = isSubstance ? 'Substanz' : 'Gruppe';
-          emptyFields.push([`Leider ist im Feld ${leftDirection} noch keine übergeordnete `, make('u', missing), ' hinterlegt.']);
-        } else {
-          const purpose = isSubstance
-            ? 'Wenn du mehr über den zugrunde liegenden Stoff erfahren möchtest, schau '
-            : 'Wenn du breiter nach verwandten Therapien suchen möchtest, schau ';
-          filledFields.push([`${purpose}${leftDirection} ins Feld `, fieldReference(left), '.']);
-        }
-      }
-      if (index !== 1) {
-        const name = fieldReference(middle);
-        if (!middle.nodes.length) {
-          addEmptyField(['mittleren Feld unter ', name]);
-        } else if (index === 0) {
-          filledFields.push(['Wenn du deine Behandlung konkretisieren möchtest, schau im mittleren Feld unter ', name, ' nach.']);
-        } else if (middle.label === 'Wirkstoffe und Substanzen') {
-          filledFields.push(['Den zugehörigen ', make('u', 'Wirkstoff'), ' bzw. die ', make('u', 'Substanz'), ' findest du im mittleren Feld.']);
-        } else {
-          filledFields.push(['Im mittleren Feld findest du die zugehörigen Einträge unter ', name, '.']);
-        }
-      }
-      if (index !== 2) {
-        const field = `Feld ${rightDirection}`;
-        const name = fieldReference(right);
-        const location = [field, ' unter ', name];
-        if (!right.nodes.length) {
-          if (index === 0 && right.label === 'Anwendung') addEmptyField([field], ['keine Einträge zur ', name]);
-          else addEmptyField(location);
-        } else {
-          const destination = right.label === 'Anwendung' ? [field] : location;
-          const description = new Intl.ListFormat('de').formatToParts(classificationContents(right.nodes)).flatMap(({type, value}) => {
-            if (right.label === 'Anwendung' && type === 'element' && value === relationshipTypeLabels.has_detail) {
-              return ['konkrete ', make('u', 'Anwendungen')];
-            }
-            return [value];
-          });
-          filledFields.push(['Im ', ...destination, ' findest du ', ...description, '.']);
-        }
-      }
-
-      for (const sentence of [...filledFields, ...emptyFields]) {
-        if (paragraph.hasChildNodes()) paragraph.append(' ');
-        paragraph.append(...sentence);
-      }
-    }
-
-    function classificationParagraphs(section) {
-      const fields = classificationFields(section);
-      const current = section.querySelector('.ux-stage-node[aria-current="page"]');
-      const index = fields.findIndex(({column}) => column.contains(current));
-      if (index < 0) return [make('p', 'Hier siehst du, wie die Community den Eintrag einordnet.')];
-      const paragraph = classificationIntro(current, fields, index);
-      appendClassificationFields(paragraph, fields, index);
-      const paragraphs = [paragraph];
-
-      if (index === 1) {
-        const combination = section.closest('.nd-panel')?.querySelector('[data-combination-section][data-is-combination="1"]');
-        const parts = combination?.querySelector('[data-combination-tree]:has([data-combination-parent].is-current) [data-combination-part]');
-        const heading = combination?.querySelector('h3')?.firstChild?.textContent.trim();
-        if (parts && !parts.closest('[hidden]') && heading) {
-          const components = make('p', 'Unter ');
-          components.append(make('u', heading), ' findest du die einzelnen Bestandteile dieser Therapie.');
-          paragraphs.push(components);
-        }
-      }
-      return paragraphs;
+      const entry = entries.find(({refreshClassification}) => refreshClassification);
+      entry?.refreshClassification();
     }
 
     function paint(force = false) {
@@ -722,11 +550,7 @@
         return;
       }
       guide?.remove();
-      if (!doctor) {
-        content.querySelectorAll('[data-question], .ux-symptom-help').forEach(card => {
-          card.hidden = !collapsed && mode === 'explore' && cardCount(card) === 0;
-        });
-      }
+      if (!doctor) updateReadingVisibility(!collapsed && mode === 'explore');
       panel = active;
       entries = [];
       completion = sharing = null;
@@ -784,6 +608,7 @@
       guide.classList.add('therapy-guide-note');
       const heading = make('h2', panel.getAttribute('aria-label'));
       const review = mode === 'review';
+      let eyebrow = review ? 'Deine Erfahrung zählt' : 'Erfahrungen verstehen';
       if (!review) guide.classList.add('therapy-guide-reading');
       const contributionPrompt = 'Klicke in den Abbildungen oder Listen auf das, was deiner bisherigen Erfahrung entspricht. Jede Angabe hilft anderen.';
       const body = [make('p', doctor
@@ -810,7 +635,7 @@
         body.push(...renderDoctorTopics(review));
         if (panel.id === 'anreise') {
           body.push(button('Zur Karte ↓', () => scrollTo(panel.querySelector('#doctor-detail-map'))));
-        } else if (!review && profileParam === 'id') {
+        } else if (!review && profileParam === 'id' && panel.id !== 'therapien') {
           sharing = shareEntry();
           sharing.message.textContent = 'Kennst du jemanden, der in dieser Praxis behandelt wurde? Lade die Person ein, ihre Erfahrung zu teilen.';
         }
@@ -837,7 +662,7 @@
           body.push(disclosure);
         });
         body.push(feedbackNote('Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie die Community die Angabe einschätzt, dass die jeweilige Behandler:in diese Therapie tatsächlich anbietet. Sie helfen dir einzuordnen, wie gesichert diese Information ist. Sie bewerten weder die Qualität der Behandlung noch ihre Wirksamkeit.'));
-        sharing = shareEntry(false, true);
+        sharing = shareEntry({providers: true});
         body.push(sharing.block);
       }
       cards.forEach(card => {
@@ -984,61 +809,19 @@
         body.push(disclosure);
         entries.push({card, example, disclosure});
       });
-      if (!doctor && (panel.id === 'alternativen' || (review && panel.id === 'anreise'))) {
-        const readingHelp = {
-          alternative: 'Hier sammelt die Community frei vorgeschlagene Therapiealternativen. Die Einträge beruhen auf diesen Vorschlägen; ein fachlicher Zusammenhang wird damit nicht vorausgesetzt. Scrolle seitlich und öffne die Namen für Details.',
-          combination: 'Hier sammelt die Community Kombinationen aus Therapien oder Wirkstoffen, deren Zusammenspiel einen zusätzlichen oder anderen Effekt erzielen soll. Du siehst, welche Bestandteile jeweils zusammengehören und welche Kombinationen die Community vorschlägt.'
-        };
-        const prompts = panel.id === 'anreise' ? [
-          ['provider', '.nd-provider-map', 'Behandler:innen und Erfahrungen', 'Hier erfasst die Community, wo man Hilfe erhalten und die ausgewählte Therapie in Anspruch nehmen kann. Wähle einen Ort aus, um auf der Karte Behandler:innen in der Nähe zu finden. Die Liste zeigt dir außerdem Alternativen, wenn du mit deiner bisherigen Behandler:in nicht zufrieden bist und die Therapie weiterführen möchtest. Deine Erfahrung mit der Behandlung kannst du im jeweiligen Eintrag teilen.']
-        ] : [
-          ['alternative', '.ux-alternative-section', 'Alternative Therapien', 'Hier trägt die Community ihr Wissen zu Therapiealternativen zusammen. Ergänze frei, was du für eine Alternative hältst – aus eigener Erfahrung, von anderen oder vom Hörensagen. Eigene Behandlungserfahrung ist nicht nötig.'],
-          ['classification', '[data-relationship-stages]', 'Therapieansatz und Umsetzung'],
-          ['combination', '[data-combination-section]', 'Therapiekombinationen', 'Welche Behandlungen ergeben zusammen mehr als ihre einzelnen Bestandteile? Gesucht sind gezielte Kombinationen, die einen zusätzlichen oder anderen Effekt erzielen sollen, den Genesungsprozess unterstützen oder zusammen eine eigenständige Therapie bilden. Entscheidend ist dieses Zusammenspiel, nicht allein die gleichzeitige Anwendung. Eigene Behandlungserfahrung ist dafür nicht nötig.']
-        ];
-        if(panel.id === 'alternativen') body[0].textContent = review
-          ? 'Prüfe die vorhandenen Alternativen, Einordnungen und Kombinationen. Bestätige passende Einträge oder ergänze fehlende über die Schaltflächen im jeweiligen Bereich. Eigene Behandlungserfahrung ist dafür nicht nötig.'
-          : 'Du bist unsicher, ob diese Therapie zu dir passt, oder suchst nach etwas, das dir mehr hilft? Hier trägt die Community Alternativen und konkrete Varianten zusammen. So kannst du entdecken, wie die Behandlung aussehen könnte und welche weiteren Möglichkeiten du hast.';
-        if(panel.id === 'anreise') body[0].textContent = 'Suche in der Liste nach deiner Behandler:in. Fehlt er oder sie, kannst du den Eintrag unter Behandler:innen hinzufügen ergänzen.';
-        prompts.forEach(([key, selector, title, text]) => {
-          const target = panel.querySelector(selector);
-          if(!target)return;
-          target.dataset.guideContribution = key;
-          const disclosure = make('details');
-          if (key === 'classification') {
-            disclosure.classList.add('therapy-guide-classification');
-            title = target.querySelector('h3')?.firstChild?.textContent.trim() || title;
-            disclosure.append(make('summary', title));
-            renderClassificationGuide(disclosure, target);
-          } else {
-            disclosure.append(make('summary', title), make('p', !review && readingHelp[key] ? readingHelp[key] : text));
-          }
-          if (panel.id === 'alternativen' && review && key !== 'classification') {
-            const explanations = {
-              alternative: review
-                ? 'Mit Zustimmen (✓) bestätigst du, dass du den vorgeschlagenen Eintrag als passende Alternative zur hier geöffneten Therapie ansiehst. Mit Widersprechen (×) widersprichst du diesem Vorschlag. Du bewertest damit weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.'
-                : 'Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie viele Personen den Eintrag als passende Alternative ansehen oder diesem Vorschlag widersprechen. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien. Du kannst die Alternativen nach Zustimmung oder Widerspruch sortieren.',
-              combination: review
-                ? 'Mit Zustimmen (✓) bestätigst du, dass der angezeigte Bestandteil zur vorgeschlagenen Therapiekombination gehört. Mit Widersprechen (×) widersprichst du dieser Zuordnung. Deine Rückmeldung bezieht sich auf die Zusammensetzung der Kombination, nicht auf ihre Wirksamkeit.'
-                : 'Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie viele Personen der Zugehörigkeit des angezeigten Bestandteils zur vorgeschlagenen Therapiekombination zustimmen oder widersprechen. Sie bewerten die Zusammensetzung der Kombination, nicht ihre Wirksamkeit.'
-            };
-            const section = make('section');
-            const votingHeading = make('h4', 'Zustimmung und Widerspruch');
-            votingHeading.style.marginInlineStart = '.9rem';
-            section.append(votingHeading, make('p', explanations[key]));
-            disclosure.append(section);
-          }
-          body.push(disclosure);
-          entries.push({card:target, disclosure});
-        });
-        if(panel.id === 'anreise' && review) {
-          body.push(feedbackNote('Mit Zustimmen (✓) stimmst du der Angabe zu, dass die jeweilige Behandler:in diese Therapie anbietet. Mit Widersprechen (×) widersprichst du dieser Angabe. Deine Rückmeldung bezieht sich auf das Therapieangebot, nicht auf die Qualität oder Wirksamkeit der Behandlung.'));
-        }
-        if(panel.id === 'alternativen' && !review) {
-          body.push(feedbackNote('Die Zahlen neben Zustimmen (✓) und Widersprechen (×) zeigen, wie die Community die jeweilige Zuordnung einschätzt, etwa als Therapiealternative. Sie helfen dir einzuordnen, wie gesichert diese Zuordnung ist. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.'));
-          sharing = shareEntry(true);
-          body.push(sharing.block);
-        }
+      if (!doctor && panel.id === 'alternativen') {
+        const createAlternativesContent = review ? window.LCNTherapyAlternativesContribution : window.LCNTherapyAlternativesReading;
+        const copy = createAlternativesContent({make, classificationContext, fieldReference, classificationContents, relationshipTypeLabels});
+        eyebrow = copy.eyebrow;
+        body[0].textContent = copy.introduction;
+        renderAlternativesTopics(body, copy);
+        if (copy.feedbackNote) body.push(feedbackNote(copy.feedbackNote));
+        if (copy.sharing) sharing = shareEntry(copy.sharing);
+      } else if (!doctor && review && panel.id === 'anreise') {
+        body[0].textContent = 'Suche in der Liste nach deiner Behandler:in. Fehlt er oder sie, kannst du den Eintrag unter Behandler:innen hinzufügen ergänzen.';
+        appendRelationshipTopic(body, 'provider', '.nd-provider-map', 'Behandler:innen und Erfahrungen',
+          'Hier erfasst die Community, wo man Hilfe erhalten und die ausgewählte Therapie in Anspruch nehmen kann. Wähle einen Ort aus, um auf der Karte Behandler:innen in der Nähe zu finden. Die Liste zeigt dir außerdem Alternativen, wenn du mit deiner bisherigen Behandler:in nicht zufrieden bist und die Therapie weiterführen möchtest. Deine Erfahrung mit der Behandlung kannst du im jeweiligen Eintrag teilen.');
+        body.push(feedbackNote('Mit Zustimmen (✓) stimmst du der Angabe zu, dass die jeweilige Behandler:in diese Therapie anbietet. Mit Widersprechen (×) widersprichst du dieser Angabe. Deine Rückmeldung bezieht sich auf das Therapieangebot, nicht auf die Qualität oder Wirksamkeit der Behandlung.'));
       }
       if(sharing && !body.includes(sharing.block)) body.push(sharing.block);
       const next = nextView();
@@ -1202,7 +985,7 @@
           : 'Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest – auch wenn die Wirkung von Person zu Person unterschiedlich ist.';
         if (!body[0].textContent.includes(orientationClosing)) body[0].append(document.createTextNode(' ' + orientationClosing));
       }
-      illustrated(guide, review ? (panel.id === 'alternativen' ? 'Community-Wissen' : 'Deine Erfahrung zählt') : 'Erfahrungen verstehen', heading, ...body, actions);
+      illustrated(guide, eyebrow, heading, ...body, actions);
       if (!review && sharing) {
         sharing.block.classList.add('therapy-guide-sharing-first');
         guide.querySelector('.experience-guide-copy').prepend(sharing.block);
@@ -1638,10 +1421,7 @@
       document.addEventListener('lcn-treatment-answers-rendered', () => {
         // Counts and visibility can change without replacing the reading guide.
         // Replacing it during a drag invalidates the browser's selection endpoints.
-        const onlyAnswered = mode === 'explore' && !orientationIsOff();
-        content.querySelectorAll('[data-question], .ux-symptom-help').forEach(card => {
-          card.hidden = onlyAnswered && cardCount(card) === 0;
-        });
+        updateReadingVisibility(mode === 'explore' && !orientationIsOff());
         refreshTopics();
       });
     }

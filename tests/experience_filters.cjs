@@ -17,7 +17,7 @@ const assert=require('node:assert/strict');
     }
    }
   }
-  await p.goto(base+'arzt_detail.html?id=613&demo=1#wirkung');await p.getByRole('button',{name:'Ich brauche keine Orientierung',exact:true}).click();await p.waitForSelector('#treatment-healing-range');assert.equal(await p.locator('.treatment-rating-controls input[type=range]').count(),3);
+  await p.goto(base+'arzt_detail.html?id=613&demo=1#therapien');await p.getByRole('button',{name:'Ich brauche keine Orientierung',exact:true}).click();await p.waitForSelector('#treatment-healing-range');assert.equal(await p.locator('.treatment-rating-controls input[type=range]').count(),3);
   const initial=await p.locator('.treatment-result-count').innerText();
   for(const key of ['positive','healing','negative']){
    const input=p.locator(`#treatment-${key}-number`);await input.evaluate((el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));},key==='negative'?'0':'100');assert.equal(await p.locator(`#treatment-${key}-range`).inputValue(),key==='negative'?'0':'100');
@@ -25,7 +25,10 @@ const assert=require('node:assert/strict');
   }
   await p.setViewportSize({width:390,height:844});assert.ok(await p.locator('.treatment-controls').evaluate(el=>el.scrollWidth<=el.clientWidth));
   for(const [url,prefix] of [['therapien_karte.html','treatment'],['aerzte_karte.html','doctor']]){
-   await p.goto(base+url);await p.waitForSelector(`#${prefix}-min-healing-range`);assert.equal(await p.locator(`.${prefix}-rating-control input[type=range]`).count(),3);
+   await p.goto(base+url);
+   const filterToggle=p.locator(`#${prefix}-navigation-toggle-button`);
+   if(await filterToggle.getAttribute('aria-expanded')==='false')await filterToggle.click();
+   await p.waitForSelector(`#${prefix}-min-healing-range`);assert.equal(await p.locator(`.${prefix}-rating-control input[type=range]`).count(),3);
    await p.locator(`#${prefix}-min-healing-range`).evaluate(el=>{el.value='25';el.dispatchEvent(new Event('input',{bubbles:true}));});assert.equal(await p.locator(`#${prefix}-min-healing-input`).inputValue(),'25');
    await p.locator(`#${prefix}-filter-reset-button`).click();assert.equal(await p.locator(`#${prefix}-min-healing-input`).inputValue(),'0');
   }

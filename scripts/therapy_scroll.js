@@ -1,6 +1,6 @@
 // The rail follows the viewport rather than the bottom edge of the content card.
 (() => {
-  const rail = document.querySelector('body.nd-detail.ux-page .side-nav .nav-items');
+  const rail = document.querySelector('body:is(.nd-detail.ux-page, .doctor-detail-live) .side-nav .nav-items');
   if (!rail) return;
   const sidebar = rail.closest('.side-nav');
   const header = document.getElementById('header-placeholder');

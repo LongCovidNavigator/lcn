@@ -2,6 +2,22 @@
 require_once __DIR__.'/_site_auth.php';
 require_once __DIR__.'/_voting.php';
 
+const LCN_SYMPTOM_OVERALL_CONDITION = 'Gesamtzustand';
+
+function lcnSymptomHelpCatalog(PDO $pdo): array
+{
+    $query = $pdo->prepare('SELECT sym_id AS id, sym_name AS name, (LOWER(TRIM(sym_name)) = LOWER(?)) AS pinned
+        FROM tbl_symptoms ORDER BY pinned DESC, sym_name, sym_id');
+    $query->execute([LCN_SYMPTOM_OVERALL_CONDITION]);
+    $catalog = $query->fetchAll();
+    foreach ($catalog as &$symptom) {
+        $symptom['id'] = (int)$symptom['id'];
+        $symptom['pinned'] = (bool)$symptom['pinned'];
+    }
+    unset($symptom);
+    return $catalog;
+}
+
 function symText(array $in,string $key,int $max,int $min=0): string {
     $v=$in[$key]??'';
     if(!is_string($v)||mb_strlen(trim($v))<$min||mb_strlen($v)>$max)throw new InvalidArgumentException('Bitte das Feld „'.$key.'“ prüfen.');

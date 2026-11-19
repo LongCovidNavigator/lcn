@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__.'/_treatments_nd.php';
+require_once __DIR__.'/_symptom_catalog.php';
 
 function lcnSymptomTreatmentCoverage(PDO $pdo, array $symptomIds): array
 {
@@ -34,17 +35,16 @@ function lcnTreatmentsForSymptom(PDO $pdo, int $symptom): array
 }
 
 function lcnTreatmentSymptomHelp(PDO $pdo,int $treatment,?string $respondent): array {
-    $catalog=lcnNdRows($pdo,'SELECT sym_id AS id,sym_name AS name FROM tbl_symptoms ORDER BY sym_name,sym_id');
+    $catalog=lcnSymptomHelpCatalog($pdo);
     $editorial=array_map('intval',array_column(lcnNdRows($pdo,'SELECT DISTINCT sym_id FROM tbl_cpl_treatments_nd2symptoms WHERE treat_nd_id=? AND aktiv=1 AND sym_id IS NOT NULL',[$treatment]),'sym_id'));
     $linked=array_map('intval',array_column(lcnNdRows($pdo,'SELECT sym_id FROM tbl_treatment_symptom_help_links WHERE treat_nd_id=?',[$treatment]),'sym_id'));
     $counts=[];$own=[];
     foreach(lcnNdRows($pdo,"SELECT sym_id,COUNT(*) AS n FROM tbl_treatment_symptom_help_votes WHERE treat_nd_id=? AND review_status IN ('active','approved') GROUP BY sym_id",[$treatment]) as $row)$counts[(int)$row['sym_id']]=(int)$row['n'];
     if($respondent!==null)$own=array_map('intval',array_column(lcnNdRows($pdo,"SELECT sym_id FROM tbl_treatment_symptom_help_votes WHERE treat_nd_id=? AND respondent_key=?",[$treatment,$respondent]),'sym_id'));
     $ids=array_unique(array_merge($editorial,$linked));$symptoms=[];
-    foreach($catalog as &$symptom){
-        $symptom['id']=(int)$symptom['id'];
-        if(in_array($symptom['id'],$ids,true))$symptoms[]=$symptom+['count'=>$counts[$symptom['id']]??0,'selected'=>in_array($symptom['id'],$own,true),'editorial'=>in_array($symptom['id'],$editorial,true)];
-    }unset($symptom);
+    foreach($catalog as $symptom){
+        if($symptom['pinned']||in_array($symptom['id'],$ids,true))$symptoms[]=$symptom+['count'=>$counts[$symptom['id']]??0,'selected'=>in_array($symptom['id'],$own,true),'editorial'=>in_array($symptom['id'],$editorial,true)];
+    }
     return ['symptoms'=>$symptoms,'catalog'=>$catalog];
 }
 

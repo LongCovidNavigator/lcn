@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__.'/treatment_relationship_vocabulary.php';
+const ND_STAGE_ADD_ENTRY_LABEL = 'Weiteren Eintrag hinzufügen';
+
 /** A vote always addresses this saved relationship key, never the therapy record. */
 function ndRelationshipAssertion(array $g,string $key): array {
     $parts=explode(':',$key);$parent=0;$child=0;$meaning='gehört zu';
@@ -181,7 +183,7 @@ function ndRelationshipStages(array $g,int $id,array $path=[]): array {
     return compact('title','stages','edges','selected','drug');
 }
 function ndStageAdd(array $a): string {
-    return '<button type="button" class="ux-stage-add" data-treatment-relation-add'.(!empty($a['sources'])?' data-source-options="'.ndEscape(json_encode($a['sources'],JSON_UNESCAPED_UNICODE)).'"':'').' data-kind="'.ndEscape($a['kind']).'" data-source-id="'.$a['source'].'" data-group-id="'.$a['group'].'" data-dialog-title="'.ndEscape($a['label']).'"><span class="ux-stage-add-icon" aria-hidden="true">＋</span><span>'.ndEscape($a['label']).'</span></button>';
+    return '<button type="button" class="ux-stage-add" data-treatment-relation-add'.(!empty($a['sources'])?' data-source-options="'.ndEscape(json_encode($a['sources'],JSON_UNESCAPED_UNICODE)).'"':'').' data-kind="'.ndEscape($a['kind']).'" data-source-id="'.$a['source'].'" data-group-id="'.$a['group'].'" data-dialog-title="'.ndEscape($a['label']).'"><span class="ux-stage-add-icon" aria-hidden="true">＋</span><span>'.ndEscape(ND_STAGE_ADD_ENTRY_LABEL).'</span></button>';
 }
 function ndRenderRelationshipStages(array $g,int $id): string {
     $m=ndRelationshipStages($g,$id);
@@ -195,8 +197,8 @@ function ndRenderRelationshipStages(array $g,int $id): string {
     }
     ob_start();
     ?>
-<section class="card ux-discovery ux-stage-section" data-relationship-stages data-relationship-domain="<?= $m['drug']?'medication':(($m['stages'][1]['title']==='Verfahren')?'therapy':'substance') ?>" data-selected-branch="<?= $m['selected'] ?>">
-<h3><?= ndEscape($m['title']) ?> <span class="ux-heading-info"><button type="button" aria-label="Information zu <?= ndEscape($m['title']) ?>" aria-describedby="therapy-classification-help">ⓘ</button><p id="therapy-classification-help" role="tooltip">Die Spalten zeigen <?= ndEscape(implode(' → ', array_column($m['stages'], 'title'))) ?>. „Du bist hier“ markiert den geöffneten Eintrag. ✓ bestätigt die angezeigte Einordnung oder Verbindung; × widerspricht. Beim eigenen Eintrag kannst du über × eine andere Einordnung vorschlagen. Über ＋ ergänzt du fehlende Zuordnungen. Vorschläge und Arbeitshypothesen sind zur Prüfung gekennzeichnet.</p></span></h3>
+<section class="card ux-discovery ux-stage-section" data-relationship-stages data-add-entry-label="<?= ndEscape(ND_STAGE_ADD_ENTRY_LABEL) ?>" data-relationship-domain="<?= $m['drug']?'medication':(($m['stages'][1]['title']==='Verfahren')?'therapy':'substance') ?>" data-selected-branch="<?= $m['selected'] ?>">
+<h3><?= ndEscape($m['title']) ?> <span class="ux-heading-info"><button type="button" aria-label="Information zu <?= ndEscape($m['title']) ?>" aria-describedby="therapy-classification-help">ⓘ</button><p id="therapy-classification-help" role="tooltip">Die Spalten zeigen <?= ndEscape(implode(' → ', array_column($m['stages'], 'title'))) ?>. „Du bist hier“ markiert den geöffneten Eintrag. ✓ bestätigt die angezeigte Einordnung oder Verbindung; × widerspricht. Beim eigenen Eintrag kannst du über × eine andere Einordnung vorschlagen. Über „<?= ndEscape(ND_STAGE_ADD_ENTRY_LABEL) ?>“ ergänzt du fehlende Zuordnungen. Vorschläge und Arbeitshypothesen sind zur Prüfung gekennzeichnet.</p></span></h3>
 <div class="ux-stage-canvas"><svg class="ux-stage-lines" aria-hidden="true"></svg><div class="ux-stage-columns">
 <?php foreach($m['stages'] as $index=>$stage): ?>
 <section class="ux-stage-column ux-stage-column-<?= $index ?>" data-stage="<?= $index ?>" aria-label="<?= ndEscape($stage['title']) ?>"><h4><?= ndEscape($stage['title']) ?></h4><div class="ux-stage-stack">
@@ -243,11 +245,8 @@ if($helpText): ?> <span class="ux-heading-info"><button type="button" aria-label
 </div>
 <?php endforeach; ?>
 </div>
-<?php if($index===2&&!$middleCurrent&&!$rightCurrent&&$stage['blocks']): ?>
-<div class="ux-stage-add-hint">Wähle <?= $m['drug']?'einen Wirkstoff':(str_starts_with($m['stages'][1]['title'],'Wirkstoffe und Substanzen')?'einen Wirkstoff oder eine Substanz':'ein Verfahren') ?> im mittleren Feld <?= ndEscape($m['stages'][1]['title']) ?> aus, um gezielt <?= ndEscape(match($stage['title']){'Handelsnamen'=>'Handelsnamen',$vocabulary['variants_title']=>'Stoffvarianten oder Applikationen','Weitere Anwendungsformen'=>'weitere Anwendungsformen',default=>'Anwendungen'}) ?> hinzuzufügen.</div>
-<?php endif; ?>
-<?php if($index===0&&$rightCurrent): ?>
-<div class="ux-stage-add-hint">Wähle <?= $m['drug']?'einen Wirkstoff':(str_starts_with($m['stages'][1]['title'],'Wirkstoffe und Substanzen')?'einen Wirkstoff oder eine Substanz':'ein Verfahren') ?> im mittleren Feld <?= ndEscape($m['stages'][1]['title']) ?> aus, um gezielt eine Gruppe zuzuordnen.</div>
+<?php if(($index===2&&!$middleCurrent&&!$rightCurrent&&$stage['blocks'])||($index===0&&$rightCurrent)): ?>
+<div class="ux-stage-add-hint">Wähle <?= $m['drug']?'einen Wirkstoff':(str_starts_with($m['stages'][1]['title'],'Wirkstoffe und Substanzen')?'einen Wirkstoff oder eine Substanz':'ein Verfahren') ?> im mittleren Feld <?= ndEscape($m['stages'][1]['title']) ?> aus, um in diesem Feld einen weiteren Eintrag hinzuzufügen.</div>
 <?php endif; ?>
 </section><?php endforeach; ?>
 </div></div><script type="application/json" data-stage-edges><?= json_encode($m['edges'],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?></script>

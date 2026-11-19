@@ -31,7 +31,7 @@
     const list=root.querySelector('[data-symptom-ranking]'),picker=root.querySelector('[data-symptom-picker]');
     if(!list||!picker)return;
     const focused=document.activeElement?.dataset.symptomId;
-    const rows=symptomHelp.symptoms.map(symptom=>({...symptom})).sort((a,b)=>b.count-a.count||a.default_order-b.default_order||a.name.localeCompare(b.name,'de'));
+    const rows=[...symptomHelp.symptoms].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))||b.count-a.count||a.default_order-b.default_order||a.name.localeCompare(b.name,'de'));
     list.replaceChildren();
     rows.forEach(symptom=>{
       const li=document.createElement('li'),button=document.createElement('button');button.type='button';button.dataset.symptomId=String(symptom.id);button.setAttribute('aria-pressed',String(symptom.selected));button.disabled=busy||!loaded;

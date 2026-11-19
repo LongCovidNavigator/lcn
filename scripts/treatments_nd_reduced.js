@@ -421,15 +421,17 @@
     const list=root.querySelector('[data-symptom-ranking]'),picker=root.querySelector('[data-symptom-picker]');
     if(!list||!picker)return;
     const focused=document.activeElement?.dataset.symptomId;
-    root.querySelector('.ux-symptom-help').dataset.realAnswerCount = Math.max(0, ...symptomHelp.symptoms.map(symptom => symptom.count));
-    const rows=symptomHelp.symptoms.map(symptom=>({...symptom,count:symptom.count+(demo&&symptom.editorial?(symptom.id*7)%31:0)})).sort((a,b)=>b.count-a.count||Number(b.editorial)-Number(a.editorial)||a.name.localeCompare(b.name,'de'));
-    list.closest('.ux-symptom-help').dataset.guideSymptoms = JSON.stringify(
+    const card = list.closest('.ux-symptom-help');
+    card.dataset.realAnswerCount = Math.max(0, ...symptomHelp.symptoms.map(symptom => symptom.count));
+    card.toggleAttribute('data-pinned-symptom', symptomHelp.symptoms.some(symptom => symptom.pinned));
+    const rows=symptomHelp.symptoms.map(symptom=>({...symptom,count:symptom.count+(demo&&symptom.editorial&&!symptom.pinned?(symptom.id*7)%31:0)})).sort((a,b)=>b.count-a.count||Number(b.editorial)-Number(a.editorial)||a.name.localeCompare(b.name,'de'));
+    card.dataset.guideSymptoms = JSON.stringify(
       rows.filter(symptom => symptom.count > 0).slice(0, 2).map(({name, count}) => ({name, count}))
     );
-    const visibleRows=rows.filter(symptom=>symptom.editorial||symptom.count>0||symptom.selected);
+    const visibleRows=rows.filter(symptom=>symptom.pinned||symptom.editorial||symptom.count>0||symptom.selected);
     if(loaded&&!busy){const visibleIds=new Set(visibleRows.map(symptom=>symptom.id));for(let i=symptomOrder.length-1;i>=0;i--)if(!visibleIds.has(symptomOrder[i]))symptomOrder.splice(i,1);}
     visibleRows.forEach(symptom=>{if(!symptomOrder.includes(symptom.id))symptomOrder.push(symptom.id);});
-    visibleRows.sort((a,b)=>symptomOrder.indexOf(a.id)-symptomOrder.indexOf(b.id));
+    visibleRows.sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))||symptomOrder.indexOf(a.id)-symptomOrder.indexOf(b.id));
     list.replaceChildren();
     visibleRows.forEach(symptom=>{
       const li=document.createElement('li'),button=document.createElement('button');button.type='button';button.dataset.symptomId=String(symptom.id);button.setAttribute('aria-pressed',String(symptom.selected));button.disabled=busy||!loaded;

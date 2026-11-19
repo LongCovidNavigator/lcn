@@ -516,7 +516,7 @@
   }
 
   function overview() {
-    return (livePage ? '<div data-doctor-welcome></div>' : '') + profileFacts() + (isAdmin ? dashboardScore(true) : '') + treatmentSection();
+    return (livePage ? '<div data-doctor-welcome></div>' : '') + profileFacts() + (isAdmin ? dashboardScore(true) : '');
   }
 
   function adaptationHelp() {
@@ -576,10 +576,6 @@
   function communityRating() {
     return `<section class="card"><div class="chart-heading"><div><h3>Community-Bewertung</h3><p>Subjektive Erfahrungen nach der Therapie.</p></div><span>${communityNote('effect')}</span></div><div class="effect-chart" role="group" aria-label="Zustandsveränderung: Community und deine Auswahl">${[0,1,2,3].map(i => { const label=i===1?'Neutral':scales.effect[i]; const value = percent('effect',i); return `<button type="button" class="effect-column" data-choice="effect" data-value="${i}" aria-pressed="${state.selections.effect === i}" aria-label="${label}: ${percentText(value)}. Als eigene Erfahrung auswählen"><span class="bar-area"><strong>${percentText(value)}</strong><span class="effect-bar effect-${i}" style="height:${(value || 0) * 1.5}px"></span></span><span class="effect-label">${label}</span></button>`; }).join('')}</div>${effectComparison()}</section>`;
   }
-  function effect() {
-    return communityRating() + treatmentSection();
-  }
-
   function symptoms() {
     if (!state.data) return '<section class="card"><h3>Symptome</h3>' + dataStatus() + '</section>';
     if (isSubmission) return '<section class="card"><h3>Symptome</h3><p>Erfahrungen zu einzelnen Symptomen können nach der Freigabe des Profils ergänzt werden.</p></section>';
@@ -783,7 +779,7 @@
       const others=row.comparisonCount-1;
       return 'Für '+label+(others===1?' wird aktuell ein anderer Behandler:innen':' werden aktuell '+number(others)+' andere Behandler:innen')+' mit Therapieeinträgen zum Vergleich herangezogen.';
     }).join(' ');
-    const treatments='<section class="card dashboard-shared-card dashboard-card doctor-dashboard-offer"><div class="assessment-header"><h3><a class="doctor-dashboard-title-link" href="#ueberblick">Therapien</a></h3><span class="assessment-count">'+count+' Einträge</span></div><div class="dashboard-points"><strong>'+(treatmentAvailable?number(treatmentEarned)+' <small>/ 10 Punkte</small>':'Noch nicht auswertbar')+'</strong></div>'+offerGraphic+calculationHelp('Für die Bewertung vergleichen wir die Therapieanzahl und die Kategorienvielfalt der Therapien mit anderen Behandler:innen. Für die Therapieanzahl sind bis zu 7 Punkte möglich, für die Kategorienvielfalt bis zu 3 Punkte. Die oberen 10 % erhalten jeweils die volle Punktzahl, die unteren 10 % erhalten 0 Punkte. Dazwischen werden die Punkte linear nach der Platzierung vergeben. Gleiche Anzahlen erhalten gleich viele Punkte. Fehlen Therapieeinträge oder ausreichende Vergleichsdaten, werden die Teilwerte nicht bewertet und nicht in die Gesamtwertung einbezogen.'+offerComparisonText)+'</section>';
+    const treatments='<section class="card dashboard-shared-card dashboard-card doctor-dashboard-offer"><div class="assessment-header"><h3><a class="doctor-dashboard-title-link" href="#therapien">Therapien</a></h3><span class="assessment-count">'+count+' Einträge</span></div><div class="dashboard-points"><strong>'+(treatmentAvailable?number(treatmentEarned)+' <small>/ 10 Punkte</small>':'Noch nicht auswertbar')+'</strong></div>'+offerGraphic+calculationHelp('Für die Bewertung vergleichen wir die Therapieanzahl und die Kategorienvielfalt der Therapien mit anderen Behandler:innen. Für die Therapieanzahl sind bis zu 7 Punkte möglich, für die Kategorienvielfalt bis zu 3 Punkte. Die oberen 10 % erhalten jeweils die volle Punktzahl, die unteren 10 % erhalten 0 Punkte. Dazwischen werden die Punkte linear nach der Platzierung vergeben. Gleiche Anzahlen erhalten gleich viele Punkte. Fehlen Therapieeinträge oder ausreichende Vergleichsdaten, werden die Teilwerte nicht bewertet und nicht in die Gesamtwertung einbezogen.'+offerComparisonText)+'</section>';
 
     const km=distanceKm(),travelRow=scoreRow('Persönliche Anreise');
     const travelLevels=[
@@ -809,7 +805,10 @@
     return dashboardScore()+group(2,'Welche Belastungshürden gibt es bei einem Termin?',30,card('Long-Covid-gerechter Termin','adaptation',scales.adaptation,'termin')+appointments+travel)+group(3,'Wie zugänglich ist die behandelnde Person?',30,card('Behandlungskosten',costKey,scales.costs.map(label=>window.LCNCost?.amount(label,costSystem().code==='CH'?'CHF':'EUR')||label),'zugang',costChoices)+card('Wartezeit auf den Ersttermin','wait',scales.wait,'zugang')+card('Wartezeit auf Folgetermine','wait-followup',scales.wait,'zugang'))+group(4,'Welche Erfahrungen gibt es?',40,card('Zustandsveränderung','effect',scales.effect,'wirkung')+treatments);
 
   }
-  const views = { ueberblick: overview, wirkung: effect, termin: appointment, zugang: access, symptome: symptoms, anreise: locationCard };
+  const views = {
+    ueberblick: overview, wirkung: communityRating, termin: appointment, zugang: access,
+    therapien: treatmentSection, anreise: locationCard, symptome: symptoms
+  };
   function alignDashboardStatus(){
     const cards=[...content.querySelectorAll('.doctor-aligned-status-card')];
     const slots=cards.map(card=>({card,header:card.querySelector('.doctor-card-header-slot'),notice:card.querySelector('.doctor-card-notice-slot')}));

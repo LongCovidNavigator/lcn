@@ -18,7 +18,9 @@ try{
  elseif($category!==''){$where[]='TRIM(s.sym_category)=?';$args[]=$category;}
  $where=$where?implode(' AND ',$where):'1=1';
  $order=['desc'=>'s.sym_name DESC,s.sym_id','category'=>"COALESCE(s.sym_category,''),s.sym_name,s.sym_id"][$sort]??'s.sym_name,s.sym_id';
- $q=$p->prepare("SELECT s.sym_id,s.sym_name,COALESCE(s.sym_category,'') sym_category FROM tbl_symptoms s WHERE $where ORDER BY $order");$q->execute($args);$items=$q->fetchAll();
+ $orderArgs=$sort===''?[LCN_SYMPTOM_OVERALL_CONDITION]:[];
+ if($sort==='')$order="(s.sym_name = ?) DESC, $order";
+ $q=$p->prepare("SELECT s.sym_id,s.sym_name,COALESCE(s.sym_category,'') sym_category FROM tbl_symptoms s WHERE $where ORDER BY $order");$q->execute([...$args,...$orderArgs]);$items=$q->fetchAll();
  $total=count($items);
  try{$coverage=lcnSymptomTreatmentCoverage($p,array_column($items,'sym_id'));}
  catch(Throwable $e){lcnLogApiError('symptom_treatment_coverage',$e);}
@@ -70,7 +72,7 @@ function symProviderPreview(int $symptomId, array $providers): void { ?>
 <main class="fb-shell"><header class="fb-hero"><span class="fb-eyebrow">Navigator · Übersicht</span><h1>Symptome im Überblick</h1><p>Finde Symptome und ihre Kategorien. Hilf mit, die Zuordnung zu verbessern oder fehlende Symptome zu ergänzen.</p><p class="fb-muted">Diese Übersicht ersetzt keine medizinische Einordnung. Bestätigen und Widersprechen beziehen sich auf die Kategorie, nicht auf die Beschwerden.</p></header>
 <section class="sym-navigation doctor-navigation-panel" aria-labelledby="sym-navigation-title"><h2 class="sym-panel-heading doctor-navigation-header" id="sym-navigation-title"><span aria-hidden="true">☷</span> Navigation</h2><form class="fb-toolbar" id="sym-search-form" role="search"><div class="sym-search-field"><label for="sym-search">Symptom suchen</label><input id="sym-search" type="search" name="q" maxlength="100" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sym-suggestions" value="<?=symEscape($search)?>"><div id="sym-suggestions" role="listbox" aria-label="Suchvorschläge" hidden></div></div>
 <label>Kategorie<select name="category"><option value="">Alle Kategorien</option><option value="__none" <?=$category==='__none'?'selected':''?>>Ohne Kategorie</option><?php foreach($categories as $c): ?><option value="<?=symEscape($c)?>" <?=$category===$c?'selected':''?>><?=symEscape($c)?></option><?php endforeach; ?></select></label>
-<label>Sortierung<select name="sort"><option value="">Name A–Z</option><option value="desc" <?=$sort==='desc'?'selected':''?>>Name Z–A</option><option value="category" <?=$sort==='category'?'selected':''?>>Kategorie</option></select></label><button class="fb-button">Suchen</button><a href="symptome.php">Zurücksetzen</a></form></section>
+<label>Sortierung<select name="sort"><option value="">Gesamtzustand zuerst, dann A–Z</option><option value="desc" <?=$sort==='desc'?'selected':''?>>Name Z–A</option><option value="category" <?=$sort==='category'?'selected':''?>>Kategorie</option></select></label><button class="fb-button">Suchen</button><a href="symptome.php">Zurücksetzen</a></form></section>
 <details class="sym-overview-map" open>
     <summary><span aria-hidden="true">▦</span> Karte</summary>
     <div class="sym-overview-map-content">
