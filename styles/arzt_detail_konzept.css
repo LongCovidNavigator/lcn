@@ -389,6 +389,9 @@ main{padding:24px;min-width:0;outline:none}.eyebrow{text-transform:uppercase;let
 .detail-main-menu[hidden]{display:none;}
 .detail-main-menu ul{list-style:none;margin:0;padding:0;}.detail-main-menu a,.detail-main-menu summary{display:block;padding:11px 12px;border-radius:6px;font-size:15px;cursor:pointer;}.detail-main-menu summary{display:list-item;list-style-position:inside;}.detail-main-menu a:hover,.detail-main-menu summary:hover{background:#eef6ff;}.detail-main-menu details ul{padding-left:16px;}
 .compact-doctor-header #view-content{scroll-margin-top:calc(var(--detail-header-height,76px) + 12px);}
+.compact-doctor-header #ueberblick:has(> .overview-facts + [data-doctor-welcome]) {
+  scroll-margin-top:calc(var(--detail-header-height,76px) + 12px);
+}
 @media(min-width:801px){.compact-doctor-header .nav-items{top:calc(var(--detail-header-height,76px) + 12px);}}
 @media(max-width:800px){.compact-doctor-header .profile{min-height:68px;gap:10px;padding:8px 12px;}.detail-brand span{display:none;}.detail-brand img{width:30px;height:30px;}.compact-doctor-header .profile h1{font-size:17px;}.compact-doctor-header .profile .contact button{padding:0;width:32px;min-width:32px;}.compact-doctor-header .contact .contact-label{display:none;}.compact-doctor-header .contact button>span{margin:0;font-size:18px;}.detail-main-menu{right:12px;}.detail-menu-toggle{width:40px;height:44px;}}
 @media(max-width:420px){.compact-doctor-header .profile{gap:6px;padding:8px;}.compact-doctor-header .profile h1{font-size:15px;}.compact-doctor-header .profile p{font-size:12px;}.detail-brand img{width:26px;height:26px;}}
@@ -734,3 +737,10 @@ body:not(.compact-doctor-header) .profile .profile-copy{min-width:0;overflow-wra
 #view-content .doctor-appointment-requirement>p:last-child{margin-bottom:0}
 
 #view-content .doctor-card-notice-slot>.therapy-data-requirement{margin:4px 0 8px}
+
+@media (max-width: 1000px) {
+  .treatment-profile-summary > div + div {
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+}

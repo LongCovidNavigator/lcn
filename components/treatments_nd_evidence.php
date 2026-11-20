@@ -75,7 +75,7 @@ function ndCommunityReadout(array $item): string
         if ($row['review_status'] === 'suspicious') { $pending += (int)$row['n']; continue; }
         $groups[$row['question_key']][] = $row;
     }
-    $labels = ['gesamtbewertung' => 'Gesamtbewertung', 'gamechanger' => 'Gamechanger', 'crashrisiko' => 'Crash-/PEM-Risiko', 'pem_risiko' => 'Crash-/PEM-Risiko', 'zeit_bis_wirkung' => 'Zeit bis zur Veränderung'];
+    $labels = ['effect' => 'Genesungsfortschritt', 'gesamtbewertung' => 'Genesungsfortschritt', 'gamechanger' => 'Gamechanger', 'crashrisiko' => 'Crash-/PEM-Risiko', 'pem_risiko' => 'Crash-/PEM-Risiko', 'zeit_bis_wirkung' => 'Zeit bis zur Veränderung'];
     $html = '';
     foreach ($groups as $key => $rows) {
         $total = array_sum(array_column($rows, 'n'));

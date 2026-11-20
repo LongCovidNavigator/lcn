@@ -14,6 +14,7 @@ const answerTotal = total => ({total, options: []});
 
 async function routeFixture(page) {
   let selected = false;
+  let ownAnswers = {};
   await page.route('**/*', async route => {
     const url = route.request().url();
     if (!url.startsWith(base)) return route.abort();
@@ -22,11 +23,22 @@ async function routeFixture(page) {
       let json = {ok: true, items: [], pending: [], linked: []};
       if (file === 'api/doctor_detail.php') {
         json = {ok: true, item: doctor, research: {locations: [doctor]}, treatments_grouped: treatments};
-      } else if (file === 'api/doctor_community.php') {
+      } else if (['api/doctor_community.php', 'api/doctor_community_answer.php'].includes(file)) {
+        if (route.request().method() === 'POST') {
+          const {action, question, value} = route.request().postDataJSON();
+          if (action === 'reset') ownAnswers = {};
+          else if (action === 'clear') delete ownAnswers[question];
+          else ownAnswers[question] = value;
+          if (new URL(url).searchParams.get('response') === 'question') {
+            const count = (ownAnswers[question] ? 1 : 0) + 3;
+            return route.fulfill({json: {ok: true, own_answer: ownAnswers[question] ?? null,
+              question: {total: count, options: [{count}, {count: 0}]}}});
+          }
+        }
         json = {ok: true, community: {include_dummy: false, questions: {
           effect: answerTotal(3), 'appointment-0-0': answerTotal(3), 'appointment-1-2': answerTotal(1),
           'costs-gkv': answerTotal(2), 'costs-at-public': answerTotal(4)
-        }}, own_answers: {}};
+        }}, own_answers: ownAnswers, has_own_symptom_answers: selected};
       } else if (file === 'api/catalog_relation_feedback.php') {
         json = {ok: true, feedback: {}};
       } else if (file === 'api/geocode_location.php') {
@@ -96,11 +108,45 @@ async function check(browser, width) {
   const go = view => nav.locator(`[data-view="${view}"]`).click();
   const active = view => nav.locator(`[data-view="${view}"][aria-current="page"]`).waitFor();
   const noOverflow = () => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
+  const checkmark = view => nav.locator(`[data-view="${view}"].therapy-section-complete`);
+  const answer = (question, value = 0) => page.locator(`[data-choice="${question}"][data-value="${value}"]:visible`).first();
+  async function checkTopicDisclosure(view, title) {
+    const guide = page.locator(`#${view} .therapy-guide-note`);
+    const summary = guide.locator('details > summary').filter({hasText: title});
+    const details = summary.locator('..');
+    await summary.waitFor();
+    assert.equal(await guide.locator('details :is(a[href], button)').count(), 0);
+    assert.equal(await guide.getByRole('button', {name: /^(Zum Bereich|Zur Karte) ↓$/, includeHidden: true}).count(), 0);
+    const wasOpen = await details.evaluate(node => node.open);
+    const url = page.url();
+    await summary.click();
+    assert.equal(await details.evaluate(node => node.open), !wasOpen);
+    assert.equal(await summary.evaluate(node => node === document.activeElement), true);
+    assert.equal(page.url(), url);
+    assert.equal(await noOverflow(), true);
+    await summary.press('Space');
+    assert.equal(await details.evaluate(node => node.open), wasOpen);
+  }
+  async function toggleAnswer(question, pressed) {
+    const option = answer(question);
+    await option.click();
+    await option.and(page.locator(`[aria-pressed="${pressed}"]:enabled:not([aria-disabled="true"])`)).waitFor();
+  }
 
   try {
-    await page.goto(url);
+    await page.goto(url + '#ueberblick');
     const welcome = page.locator('[data-doctor-welcome]');
     await welcome.getByRole('heading', {name: 'Was führt dich hierher?'}).waitFor();
+    await page.waitForFunction(() => {
+      const overview = document.querySelector('#ueberblick .overview-structured');
+      const header = document.getElementById('header-placeholder');
+      return overview && overview.getBoundingClientRect().top >= header.getBoundingClientRect().bottom - 1;
+    });
+    const overviewPrecedesWelcome = () => welcome.evaluate(node =>
+      node.previousElementSibling?.matches('.overview-structured') &&
+      node.previousElementSibling.getBoundingClientRect().bottom <= node.getBoundingClientRect().top
+    );
+    assert.equal(await overviewPrecedesWelcome(), true);
     assert.deepEqual(await nav.locator('a:visible').evaluateAll(links => links.map(link => link.getAttribute('aria-label'))), [
       'Überblick', 'Erfahrungen aus der Community', 'Belastungseinschätzung',
       'Kosten und Verfügbarkeit', 'Therapien', 'Anreise', 'Symptome'
@@ -117,6 +163,7 @@ async function check(browser, width) {
     await welcome.getByRole('option', {name: 'Anreise', selected: true}).waitFor();
     await page.evaluate(() => window.dispatchEvent(new Event('lcn-exchange-rates')));
     assert.equal(await overviewWheel.evaluate(wheel => document.activeElement === wheel), true);
+    assert.equal(await overviewPrecedesWelcome(), true);
     await page.keyboard.press('ArrowDown');
     await welcome.getByRole('option', {name: 'Bei welchem Symptom berichtet die Community von einer Linderung?', selected: true}).waitFor();
     await overviewWheel.press('Home');
@@ -127,21 +174,52 @@ async function check(browser, width) {
     if (width > 1100) await checkIndependentDesktopScroll(page);
     assert.equal(await page.locator('#treatment-section').count(), 0);
     assert.equal(await page.locator('[data-doctor-symptom-help]').count(), 0);
+    assert.equal(await checkmark('wirkung').count(), 0);
+    await toggleAnswer('effect', true);
     await page.getByRole('button', {name: 'Weiter zu Belastungseinschätzung →'}).click();
     await active('termin');
     await page.locator('#termin .appointment-variant').waitFor();
     assert.equal(await page.locator('#doctor-detail-map').count(), 0);
-    assert.equal(await nav.locator('[data-view="wirkung"].therapy-section-complete').count(), 1);
+    assert.equal(await checkmark('wirkung').count(), 1);
+    await checkTopicDisclosure('termin', 'Long-Covid-gerechter Termin');
+
+    await toggleAnswer('adaptation', true);
+    await toggleAnswer('appointment-0-0', true);
+    assert.equal(await checkmark('termin').count(), 1);
+    await page.getByRole('button', {name: 'Weiter zu Kosten und Verfügbarkeit →'}).click();
+    await active('zugang');
+    await toggleAnswer('wait', true);
+    assert.equal(await checkmark('zugang').count(), 1);
+    await toggleAnswer('wait', false);
+    assert.equal(await checkmark('zugang').count(), 0);
+    await page.getByRole('button', {name: '← Zurück zu Belastungseinschätzung'}).click();
+    await toggleAnswer('adaptation', false);
+    assert.equal(await checkmark('termin').count(), 1);
+    await toggleAnswer('appointment-0-0', false);
+    assert.equal(await checkmark('termin').count(), 0);
+    assert.match(await page.locator('#termin .therapy-guide-progress').innerText(), /0 von 2/);
+    await go('wirkung');
+    await toggleAnswer('effect', false);
+    assert.equal(await checkmark('wirkung').count(), 0);
+    await page.getByRole('button', {name: 'Weiter zu Belastungseinschätzung →'}).click();
+    await page.reload();
+    await page.locator('#termin .therapy-guide-note').waitFor();
+    assert.equal(await checkmark('wirkung').count(), 0);
+    assert.equal(await checkmark('termin').count(), 0);
 
     await page.getByRole('button', {name: 'Weiter zu Kosten und Verfügbarkeit →'}).click();
     await page.getByRole('button', {name: 'Weiter zu Therapien →'}).click();
     await active('therapien');
     const offer = page.locator('#therapien #treatment-section');
     await offer.getByRole('link', {name: 'Testdiagnostik', exact: true}).waitFor();
+    await checkTopicDisclosure('therapien', 'Therapien');
+    const therapyGuide = page.locator('#therapien .therapy-guide-note');
+    assert.equal(await therapyGuide.locator('details').count(), 1);
+    assert.deepEqual(await therapyGuide.locator('.therapy-guide-annotation .therapy-guide-feedback-symbol').allTextContents(), ['✓', '×']);
     await offer.getByRole('searchbox', {name: 'Therapie suchen'}).fill('Kein Treffer');
     assert.match(await offer.getByRole('status').first().innerText(), /0 von 1/);
     await offer.getByRole('button', {name: 'Zurücksetzen'}).click();
-    await offer.locator('.treatment-view-switch').getByRole('button', {name: 'Tabelle'}).click();
+    await offer.locator('.treatment-view-switch').getByRole('button', {name: 'Liste'}).click();
     await offer.locator('table:visible').getByRole('link', {name: 'Testdiagnostik', exact: true}).waitFor();
     await offer.locator('table:visible [data-relation-feedback]').waitFor();
     await offer.locator('.catalog-relation-add').waitFor();
@@ -154,11 +232,20 @@ async function check(browser, width) {
     await active('anreise');
     const map = page.locator('#anreise #doctor-detail-map');
     await map.locator('.leaflet-marker-icon').first().waitFor();
-    await page.getByRole('button', {name: 'Zur Karte ↓'}).click();
-    assert.equal(await map.evaluate(element => document.activeElement === element), true);
+    const travelGuide = page.locator('#anreise .therapy-guide-note');
+    const travelInstruction = travelGuide.locator('details');
+    assert.equal(await travelInstruction.count(), 1);
+    assert.equal(await travelInstruction.locator('summary').innerText(), 'Anreiseaufwand');
+    assert.deepEqual(await travelInstruction.locator('u').allTextContents(), [
+      'Adresse, PLZ oder Ort', 'Standort übernehmen', 'Anreiseaufwand'
+    ]);
     await page.locator('#own-location').fill('Steglitz');
     await page.locator('#location-form button[type=submit]').click();
     await page.waitForFunction(() => document.querySelector('#own-distance')?.textContent.includes('km'));
+    const travelHeading = page.locator('#anreise .travel-estimate-heading');
+    assert.equal(await travelHeading.locator('strong').innerText(), 'Anreiseaufwand');
+    assert.match(await travelHeading.locator('span').innerText(), / km Luftlinie$/);
+    assert.equal(await page.locator('#anreise .travel-scale [aria-current=true] b').innerText(), 'Deine Entfernung');
     assert.equal(await noOverflow(), true);
     await page.goBack();
     await active('therapien');
@@ -172,14 +259,22 @@ async function check(browser, width) {
     const symptom = page.locator('#symptome [data-symptom-id="3"]:enabled');
     const completion = page.locator('#symptome .therapy-guide-progress');
     await symptom.waitFor();
+    await checkTopicDisclosure('symptome', 'Bei welchen Symptomen hat dir die behandelnde Person geholfen?');
     assert.equal(await page.locator('#symptome [data-symptom-id]').first().getAttribute('data-symptom-id'), '4');
     await symptom.click();
     await page.waitForFunction(() => document.querySelector('#symptome [data-symptom-id="3"]')?.getAttribute('aria-pressed') === 'true');
     assert.match(await completion.innerText(), /Angaben sind gespeichert/);
+    assert.equal(await checkmark('symptome').count(), 1);
+    await go('anreise');
+    await page.reload();
+    await checkmark('symptome').waitFor();
+    await go('symptome');
     await symptom.click();
     await page.waitForFunction(() => document.querySelector('#symptome [data-symptom-id="3"]')?.getAttribute('aria-pressed') === 'false');
     assert.match(await completion.innerText(), /0 von 1/);
-    await page.getByRole('button', {name: 'Ich bin fertig', exact: true}).waitFor();
+    await page.getByRole('button', {name: 'Ich bin fertig', exact: true}).click();
+    await page.getByRole('button', {name: 'Hier bleiben', exact: true}).click();
+    assert.equal(await checkmark('symptome').count(), 0);
     assert.equal(await noOverflow(), true);
     await page.getByRole('button', {name: '← Zurück zu Anreise'}).click();
     await active('anreise');
@@ -214,7 +309,7 @@ async function check(browser, width) {
     await active('wirkung');
     const assessment = page.locator('#wirkung .therapy-guide-note details');
     await assessment.getByText('(3 Angaben)', {exact: true}).waitFor();
-    await assessment.locator('summary').click();
+    await assessment.locator('summary').press('Space');
     assert.deepEqual(await assessment.locator('li strong').allTextContents(), ['Verschlechterung:', 'Neutral:', 'Verbesserung:', 'Heilung:']);
     await page.reload();
     await assessment.and(page.locator('[open]')).waitFor();
@@ -222,10 +317,11 @@ async function check(browser, width) {
 
     await go('termin');
     await page.locator('#termin .therapy-guide-note summary').getByText('(4 Einzelangaben)', {exact: true}).waitFor();
+    await checkTopicDisclosure('termin', 'Terminform');
     await go('zugang');
     const costs = page.locator('#zugang .therapy-guide-note details').first();
     await costs.getByText('(2 Angaben)', {exact: true}).waitFor();
-    await costs.locator('summary').click();
+    await costs.locator('summary').press('Space');
     await page.locator('#zugang select[data-cost-country]').selectOption('AT');
     await costs.getByText('(4 Angaben)', {exact: true}).waitFor();
     await costs.getByText('Für Österreich stehen zur Auswahl:').waitFor();
@@ -240,6 +336,8 @@ async function check(browser, width) {
     await welcome.getByRole('button', {name: 'Therapien ansehen →'}).click();
     await active('therapien');
     const assignments = page.locator('#therapien .therapy-guide-note details').last();
+    assert.equal(await therapyGuide.locator('details').count(), 2);
+    assert.equal(await therapyGuide.locator('.therapy-guide-annotation').count(), 0);
     await assignments.locator('summary').getByText('Zuordnungen prüfen und ergänzen').click();
     assert.deepEqual(await assignments.locator('p strong').allTextContents(), ['Zustimmen (✓)', 'Widersprechen (×)']);
     await page.getByRole('button', {name: 'Ich bin hier fertig', exact: true}).click();

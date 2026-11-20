@@ -109,7 +109,7 @@ function ndTreatmentInputs(string $view, array $item): string
         return $result;
     }
     if ($view === 'wirkung') {
-        $html = '<fieldset class="nd-answer nd-effect-answer" data-answer="effect"><legend>Zustandsveränderung</legend><div class="chart-heading"><p>Subjektive Erfahrung nach der Therapie. Klicke auf einen Balken, um deine Erfahrung auszuwählen.</p><span id="nd-effect-data-label">Keine Community-Daten</span></div><div class="effect-chart" role="group" aria-label="Zustandsveränderung: Community und deine Auswahl">';
+        $html = '<fieldset class="nd-answer nd-effect-answer" data-answer="effect"><legend>Genesungsfortschritt</legend><div class="chart-heading"><p>Subjektive Erfahrung nach der Therapie. Klicke auf einen Balken, um deine Erfahrung auszuwählen.</p><span id="nd-effect-data-label">Keine Community-Daten</span></div><div class="effect-chart" role="group" aria-label="Genesungsfortschritt: Community und deine Auswahl">';
         foreach ([0 => 'Verschlechterung', 1 => 'Keine Veränderung', 2 => 'Verbesserung', 3 => 'Heilung'] as $index => $label) {
             $html .= '<input class="nd-effect-value" type="radio" name="effect" value="' . ndEscape($label) . '" hidden><button type="button" class="effect-column" data-effect-value="' . ndEscape($label) . '" aria-pressed="false"><span class="bar-area"><strong data-effect-percent="' . $index . '">–</strong><span class="effect-bar effect-' . $index . '" data-effect-bar="' . $index . '" style="height:0px"></span></span><span class="effect-label">' . ndEscape($index === 1 ? 'Neutral' : $label) . '</span></button>';
         }

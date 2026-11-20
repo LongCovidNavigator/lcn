@@ -13,7 +13,7 @@ Stand: 17. Oktober 2026 – ersetzt die ältere Gewichtung im Funktionsprüfberi
 | Zugang: 30 | Eigene Gesamtkosten | 20 |
 | | Wartezeit Ersttermin | 5 |
 | | Wartezeit Folgetermin | 5 |
-| Erfahrungen und Angebot: 40 | Zustandsveränderung | 30 |
+| Erfahrungen und Angebot: 40 | Genesungsfortschritt | 30 |
 | | Therapieanzahl | 7 |
 | | Kategorienvielfalt | 3 |
 
@@ -30,12 +30,12 @@ Ohne diesen Sonderfall gelten die bisherigen Stufen relativ zu den neuen Gewicht
 | | Entfernung | 15 |
 | Zugang: 30 | Kosten, eine gemeinsame Basis | 20 |
 | | Zugangsweg | 10 |
-| Erfahrungen: 40 | Zustandsveränderung | 30 |
+| Erfahrungen: 40 | Genesungsfortschritt | 30 |
 | | Gamechanger | 10 |
 
 Anbieteranzahl hat keinen Einfluss auf den Score. Entfernung bezieht sich auf den nächstgelegenen bestätigten Anbieterstandort, unabhängig von Filtern der Behandlerliste. Vorläufige Zuordnungen bleiben ausgeschlossen. Bis 20 / 50 / 100 / 300 / 800 / über 800 km: 12 / 9 / 6 / 3 / 1,5 / 0 Punkte. Selbstmanagement zu Hause erhält 15 Punkte ohne Anreise. Bei einer zu Hause durchführbaren Therapie ist keine Anreise erforderlich, wenn ein bestätigter Anbieter beide Online-Termine oder Hausbesuche ermöglicht. Unbekannte Standorte bleiben fehlende Angaben.
 
-Durchführungssetting selbstständig zu Hause / Hausbesuch / ambulant / stationär: 5 / 3,33 / 1,67 / 0 Punkte. Crash-/PEM-Risiko keines / niedrig / mittel / hoch: 10 / 6,67 / 3,33 / 0. Zugang Selbstmanagement / frei erhältlich oder privater Anbieter / Rezept / nur Studie: 10 / 6,67 / 3,33 / 0. Zustandsveränderung Verschlechterung / keine Veränderung / Verbesserung / Heilung: 0 / 10 / 20 / 30. Gamechanger: Ja-Anteil mal zehn.
+Durchführungssetting selbstständig zu Hause / Hausbesuch / ambulant / stationär: 5 / 3,33 / 1,67 / 0 Punkte. Crash-/PEM-Risiko keines / niedrig / mittel / hoch: 10 / 6,67 / 3,33 / 0. Zugang Selbstmanagement / frei erhältlich oder privater Anbieter / Rezept / nur Studie: 10 / 6,67 / 3,33 / 0. Genesungsfortschritt Verschlechterung / keine Veränderung / Verbesserung / Heilung: 0 / 10 / 20 / 30. Gamechanger: Ja-Anteil mal zehn.
 
 ### Wahl der Kostenbasis
 

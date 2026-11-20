@@ -23,7 +23,7 @@
     addScale('Eigene Behandlungskosten',20,data.costKey,(data.questions?.[data.costKey]?.options?.length===8?[1,.9,.75,.6,.45,.3,.15,0]:[1,.8,.6,.4,.2,0]),'Acht Kostenstufen: komplett übernommen, bis 100 / 500 / 1.000 / 5.000 / 10.000 / 25.000 und über 25.000.');
     addScale('Wartezeit auf Ersttermin',5,'wait',[1,.75,.5,.25,0],'Fünf Wartezeitstufen von 100 bis 0 %.');
     addScale('Wartezeit auf Folgetermine',5,'wait-followup',[1,.75,.5,.25,0],'Dieselbe Skala wie beim Ersttermin: fünf Wartezeitstufen von 100 bis 0 %.');
-    addScale('Berichtete Zustandsveränderung',30,'effect',[0,1/3,2/3,1],'Dieselbe gleichmäßige Skala wie im Community-Durchschnitt: Verschlechterung 0, keine Veränderung 10, Verbesserung 20, Heilung 30 Punkte.');
+    addScale('Genesungsfortschritt',30,'effect',[0,1/3,2/3,1],'Vier gleichmäßig abgestufte Antworten: Verschlechterung 0, keine Veränderung 10, Verbesserung 20, Heilung 30 Punkte.');
     const offerPeers=(data.comparisonProfiles||[]).filter(profile=>profile.treatmentCount>0&&(data.id==null||Number(profile.id)!==Number(data.id)));
     const addOfferRank=(label,weight,key)=>{
       const rawValue=data.treatmentCount>0&&Number.isFinite(data[key])?data[key]:null;

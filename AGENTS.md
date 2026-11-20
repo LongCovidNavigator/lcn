@@ -1,3 +1,7 @@
+# Aufwand bei kleinen Aufgaben
+
+Beantworte einfache Fragen direkt. Begrenze bei kleinen Änderungen Dateizugriffe, Tool-Aufrufe und Prüfungen auf den betroffenen Bereich. Führe die für die Änderung ausdrücklich verlangten Prüfungen durch. Halte Zwischenmeldungen und Abschluss knapp.
+
 # Ergebnislisten
 
 Online-Hinweise für Praxen und Therapien stehen in Tabellen und Kacheln direkt unter dem Namen. Die Entfernungsspalte enthält nur Entfernungs- und Ortsangaben. Prüfe die Position bei Änderungen an diesen Ansichten auf Desktop und Mobilgeräten.

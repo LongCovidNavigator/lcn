@@ -107,7 +107,7 @@ Browserprüfung: node tests/treatments_nd_inputs.cjs. Prüft Auswahl, Mehrfachau
 - Durchführung und zeitlicher Rahmen sowie Anwendung des Medikaments stehen jetzt im Überblick. Persönliche Eingaben bleiben im zweiten Reiter.
 - Konkrete Anlaufstellen wurden aus Reiter 3 entfernt; die Anbieter/Apotheken stehen weiter im Dashboard.
 - Dummydaten sind jetzt standardmäßig an (auch ohne URL-Parameter). demo=0 schaltet sie ab. Der zusätzliche Schalter im Kopf bleibt auch nach dem Scrollen zu einem Reiter erreichbar.
-- Zustandsveränderung verwendet die Arzt-Skala: Verschlechterung / Keine Veränderung / Verbesserung / Heilung, mit denselben CSS-Komponenten effect-chart und effect-column. Die Balken sind zugleich Antwortauswahl. Heilung bleibt ausdrücklich subjektive Selbsteinschätzung.
+- Für den Genesungsfortschritt gilt dieselbe Skala wie bei Behandler:innen: Verschlechterung / Keine Veränderung / Verbesserung / Heilung, mit denselben CSS-Komponenten effect-chart und effect-column. Die Balken sind zugleich Antwortauswahl. Heilung bleibt ausdrücklich subjektive Selbsteinschätzung.
 - Diese UI-Änderung weicht bewusst von der dreistufigen Gesamtbewertung des v0.13-Rechercheschemas ab, entsprechend der ausdrücklichen Nutzeranweisung. Eigene neue Antworten werden separat als effect im Testentwurf gespeichert. Alte rating-Werte werden nicht in die neue Viererskala umgerechnet. Referenzdokumente und Datenbank bleiben unverändert.
 - Layoutprüfung: node tests/treatments_nd_layout.cjs.
 

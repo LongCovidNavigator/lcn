@@ -2,6 +2,7 @@
  let cached=null,controller=null,timer;
  const doctorId=Number(new URLSearchParams(location.search).get('id'));
  if(!doctorId)return;
+ const symptomProgress=document.querySelector('.side-nav [data-view="symptome"][data-own-answers]');
  function mount(){
  const root=document.querySelector('[data-doctor-symptom-help]');if(!root||root.dataset.mounted)return;
  controller?.abort();controller=new AbortController();root.dataset.mounted='1';
@@ -9,7 +10,9 @@
  function notify(message){const feedback=document.getElementById('feedback');if(!feedback)return;clearTimeout(timer);feedback.textContent=message;feedback.classList.add('visible');timer=setTimeout(()=>feedback.classList.remove('visible'),4000);}
  async function sync(payload){if(busy)return;busy=true;renderSymptomHelp();if(payload)notify('Wird gespeichert …');try{
  const response=await fetch('api/doctor_symptom_help.php'+(payload?'':'?dr_id='+doctorId),payload?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dr_id:doctorId,symptom_id:Number(payload.question.replace('symptom-help-','')),action:payload.action||'answer'})}:{cache:'no-store'});
- const data=await response.json();if(!response.ok||!data.ok)throw Error(data.error||'Symptome konnten nicht geladen werden.');cached=symptomHelp=data.symptom_help;loaded=true;if(payload)notify(payload.action==='clear'?'Deine Stimme wurde zurückgenommen.':'Deine Angabe wurde gespeichert.');
+ const data=await response.json();if(!response.ok||!data.ok)throw Error(data.error||'Symptome konnten nicht geladen werden.');cached=symptomHelp=data.symptom_help;loaded=true;
+ if(symptomProgress)symptomProgress.dataset.ownAnswers=String(symptomHelp.symptoms.some(symptom=>symptom.selected));
+ if(payload)notify(payload.action==='clear'?'Deine Stimme wurde zurückgenommen.':'Deine Angabe wurde gespeichert.');
  }catch(error){notify(error.message);}finally{busy=false;renderSymptomHelp();}}
   let symptomSearch='',symptomOpen=false,symptomActive=-1;
   function closeSymptomPicker(){symptomOpen=false;symptomActive=-1;filterSymptomPicker();}

@@ -759,25 +759,39 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 }
 
 /* Compare access paths as readable cards instead of a dense two-column list. */
-.therapy-guide-note details .therapy-guide-options.therapy-guide-access-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 14px;padding:0}
-.therapy-guide-note details .therapy-guide-access-options li{display:flex;flex-direction:column;grid-column:auto;gap:8px;padding:14px 16px;border:1px solid #ddd1e9;border-radius:10px;background:#fffdfebb}
-.therapy-guide-access-options li::before{content:none}
-.therapy-guide-access-options li > strong{font-size:15px;line-height:1.4}
-.therapy-guide-access-options li > span:not(.therapy-guide-access-level){font-size:14px;line-height:1.55}
+.therapy-guide-note details .therapy-guide-options:is(.therapy-guide-access-options,.therapy-guide-criteria){grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 14px;padding:0}
+.therapy-guide-note details :is(.therapy-guide-access-options,.therapy-guide-criteria) li{display:flex;flex-direction:column;grid-column:auto;gap:8px;padding:14px 16px;border:1px solid #ddd1e9;border-radius:10px;background:#fffdfebb}
+:is(.therapy-guide-access-options,.therapy-guide-criteria) li::before{content:none}
+:is(.therapy-guide-access-options,.therapy-guide-criteria) li > strong{font-size:15px;line-height:1.4}
+:is(.therapy-guide-access-options,.therapy-guide-criteria) li > span:not(.therapy-guide-access-level){font-size:14px;line-height:1.55}
 .therapy-guide-access-options .therapy-guide-access-level{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#614584;order:3;margin-top:auto;padding-top:6px}
 .therapy-guide-access-meter{display:flex;gap:3px}
 .therapy-guide-access-meter i{width:13px;height:5px;border-radius:2px;background:#e5ddec}
 .therapy-guide-access-meter i.is-filled{background:#80619f}
-@media(max-width:700px){.therapy-guide-note details .therapy-guide-options.therapy-guide-access-options{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){.therapy-guide-note details .therapy-guide-options:is(.therapy-guide-access-options,.therapy-guide-criteria){grid-template-columns:minmax(0,1fr)}}
+.therapy-guide-note details .therapy-guide-options.therapy-guide-criteria {
+  margin-inline: .9rem;
+  margin-block-end: 0;
+  padding-block-end: .875rem;
+}
+@media (max-width: 700px) {
+  .therapy-guide-note details .therapy-guide-options.therapy-guide-stage-options {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: .45rem;
+  }
+}
 
 /* Inset the comparison and give each access path a consistent numbered layout. */
 .therapy-guide-note details .therapy-guide-options.therapy-guide-access-options{margin:14px 24px 16px;gap:12px}
-.therapy-guide-note details .therapy-guide-access-options li{display:grid;grid-template-columns:28px minmax(0,1fr);grid-template-rows:auto 1fr auto;column-gap:10px;row-gap:8px;padding:16px}
-.therapy-guide-access-options .therapy-guide-access-number{grid-column:1;grid-row:1;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#e9dff2;color:#614584;font-size:13px;font-weight:700;line-height:1}
-.therapy-guide-access-options li > strong{grid-column:2;grid-row:1;align-self:center}
-.therapy-guide-access-options li > span:not(.therapy-guide-access-number):not(.therapy-guide-access-level){grid-column:2;grid-row:2}
+.therapy-guide-note details :is(.therapy-guide-access-options,.therapy-guide-criteria) li{display:grid;grid-template-columns:28px minmax(0,1fr);grid-template-rows:auto 1fr auto;column-gap:10px;row-gap:8px;padding:16px}
+:is(.therapy-guide-access-options,.therapy-guide-criteria) .therapy-guide-access-number{grid-column:1;grid-row:1;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#e9dff2;color:#614584;font-size:13px;font-weight:700;line-height:1}
+:is(.therapy-guide-access-options,.therapy-guide-criteria) li > strong{grid-column:2;grid-row:1;align-self:center}
+:is(.therapy-guide-access-options,.therapy-guide-criteria) li > span:not(.therapy-guide-access-number):not(.therapy-guide-access-level){grid-column:2;grid-row:2}
+.therapy-guide-note details .therapy-guide-options.therapy-guide-criteria{margin-inline:24px}
+.therapy-guide-note details .therapy-guide-criteria li{grid-template-rows:auto 1fr}
+@media(max-width:700px){.therapy-guide-note details .therapy-guide-options.therapy-guide-criteria{margin-inline:16px}}
 .therapy-guide-access-options .therapy-guide-access-level{grid-column:2;grid-row:3;order:initial;padding-top:4px}
-@media(max-width:700px){.therapy-guide-note details .therapy-guide-options.therapy-guide-access-options{margin:12px 16px 14px}.therapy-guide-note details .therapy-guide-access-options li{padding:12px;column-gap:8px}}
+@media(max-width:700px){.therapy-guide-note details .therapy-guide-options.therapy-guide-access-options{margin:12px 16px 14px}.therapy-guide-note details :is(.therapy-guide-access-options,.therapy-guide-criteria) li{padding:12px;column-gap:8px}}
 
 /* Let navigation labels determine width; keep the footer visually light. */
 .therapy-guide-note .therapy-guide-navigation-pair{display:flex;flex:0 1 auto;align-items:center;flex-wrap:wrap;gap:10px;width:auto;max-width:100%}

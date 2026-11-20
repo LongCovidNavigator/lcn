@@ -72,7 +72,7 @@ if ($isAdmin) $views['dashboard'] = 'Dashboard';
 <section id="wirkung" class="nd-panel" aria-label="<?= ndEscape($views['wirkung']) ?>" hidden>
 <div class="ux-community-ratings">
 <div id="community-bewertung">
-<?= ndReducedChart($item,'effect','Community-Bewertung','effect') ?>
+<?= ndReducedChart($item,'effect','Genesungsfortschritt','effect') ?>
 </div>
 <?= ndReducedChart($item,'gamechanger','Gamechanger','donut') ?>
 </div>

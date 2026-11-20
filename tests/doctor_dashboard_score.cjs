@@ -4,7 +4,7 @@ const base={comparisonProfiles:Array.from({length:10},(_,i)=>({id:i+1,treatmentC
 let r=calculate(base);assert.equal(r.coverage,100);assert.equal(r.rows.reduce((n,r)=>n+r.weight,0),100);assert(!r.rows.some(r=>r.label==='Redaktionelle Auswahl'));
 const row=(data,label)=>calculate(data).rows.find(r=>r.label===label);
 assert.equal(row(base,'Termin-Anpassung').weight,6);assert.equal(row(base,'Ersttermin aus der Ferne').weight,3);assert.equal(row(base,'Folgetermin aus der Ferne').weight,3);assert.equal(row(base,'Persönliche Anreise').weight,18);assert.equal(row(base,'Eigene Behandlungskosten').weight,20);assert.equal(row(base,'Anzahl Therapien').weight,7);assert.equal(row(base,'Vielfalt der Kategorien').weight,3);
-for(const [i,points] of [[0,0],[1,10],[2,20],[3,30]])assert.equal(row({...base,questions:{...base.questions,effect:options(10,i,4)}},'Berichtete Zustandsveränderung').value*30,points);
+for(const [i,points] of [[0,0],[1,10],[2,20],[3,30]])assert.equal(row({...base,questions:{...base.questions,effect:options(10,i,4)}},'Genesungsfortschritt').value*30,points);
 const remote={...base,distance:5000,questions:{...base.questions,adaptation:options(10,0,5),'appointment-0-2':options(10,0,2),'appointment-1-2':options(10,0,2)}};
 r=calculate(remote);assert(r.remoteComplete);assert.equal(r.earned,100);assert.equal(r.rows.filter(r=>r.remoteOverride).reduce((n,r)=>n+r.value*r.weight,0),30);
 assert.equal(calculate({...remote,questions:{...remote.questions,'appointment-1-2':options(10,1,2)}}).remoteComplete,false);

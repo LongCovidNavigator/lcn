@@ -94,7 +94,7 @@
   const escape = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const help = {
     pem:'Wie hoch ist das Crash-/PEM-Risiko bei dieser Therapie? Wähle die Stufe, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Angaben der Community zu einer Verschlechterung nach Belastung.',
-    effect:'Wie hat sich dein Zustand durch die Therapie verändert? Wähle die Bewertung, die auf deine Erfahrung zutrifft. Die Verteilung zeigt subjektive Erfahrungen der Community und ist kein Wirksamkeitsnachweis.',
+    effect:'Wie hat sich dein Zustand durch die Therapie verändert? Wähle die Antwort, die zu deiner Erfahrung passt. Die Verteilung zeigt subjektive Erfahrungen der Community und ist kein Wirksamkeitsnachweis.',
     gamechanger:'War die Therapie für dich ein Gamechanger, hat sie also deinen Genesungsprozess entscheidend vorangetrieben? Wähle die Antwort, die auf deine Erfahrung zutrifft. Die Verteilung zeigt die Antworten der Community.',
     unit_cost:'Wie hoch ist dein eigener Kostenanteil pro Anwendung, Packung oder Therapieeinheit? Wähle eine grob passende Stufe. GKV und PKV trennen die Kostenangaben nach Versicherung; die Beträge richten sich nach der gewählten Währung.',
     total_cost:'Wie hoch sind deine eigenen Gesamtkosten für diese Therapie bis zum jetzigen Zeitpunkt? Berücksichtige die bisherigen Anwendungen und Ausgaben zusammen. Je nach Dauer, Häufigkeit und Verlauf können sich die Kosten unterscheiden; eine grobe Schätzung genügt. GKV und PKV trennen die Kostenangaben nach Versicherung; die Beträge richten sich nach der gewählten Währung.',
@@ -234,7 +234,7 @@
     const peerResults=others.map(p=>scoreProfile(p,p.counts,context));
     const rating=result.rows.find(r=>r.key==='effect');
     const values=peerResults.map(peer=>peer.rows.find(r=>r.key==='effect')).filter(r=>r.value!=null).map(r=>1+3*r.value);
-    const ratingComparison=comparison(rating.value==null?null:1+3*rating.value,values,'Community-Bewertung im Vergleich',(demo||loaded)&&rating.total>=10,4);
+    const ratingComparison=comparison(rating.value==null?null:1+3*rating.value,values,'Genesungsfortschritt im Vergleich',(demo||loaded)&&rating.total>=10,4);
     root.querySelectorAll('[data-rating-comparison]').forEach(node=>{node.innerHTML=ratingComparison;});
     const gamechanger=result.rows.find(r=>r.key==='gamechanger');
     const gameValues=peerResults.map(peer=>peer.rows.find(r=>r.key==='gamechanger')).filter(r=>r.value!=null).map(r=>100*r.rawValue);

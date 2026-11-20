@@ -11,7 +11,25 @@ try {
     if (!$id || !lcnDoctorExists($id)) {
         http_response_code(404); echo json_encode(['ok' => false, 'message' => 'Behandler:innen nicht gefunden.']); exit;
     }
-    echo json_encode(['ok' => true, 'dr_id' => $id, 'own_answers' => lcnDoctorOwnAnswers(lcnDoctorDatabase(), $id, lcnExistingVoterKey()), 'community' => lcnDoctorCommunity(lcnDoctorDatabase(), $id, isset($_GET['include_dummy']) ? $_GET['include_dummy'] === '1' : null)], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+    $pdo = lcnDoctorDatabase();
+    $respondent = lcnExistingVoterKey();
+    $hasOwnSymptomAnswers = false;
+    if ($respondent !== null) {
+        try {
+            $query = $pdo->prepare('SELECT 1 FROM tbl_doctor_symptom_help_votes WHERE dr_id = ? AND respondent_key = ? LIMIT 1');
+            $query->execute([$id, $respondent]);
+            $hasOwnSymptomAnswers = $query->fetchColumn() !== false;
+        } catch (PDOException $error) {
+            if ($error->getCode() !== '42S02') throw $error;
+        }
+    }
+    echo json_encode([
+        'ok' => true,
+        'dr_id' => $id,
+        'own_answers' => lcnDoctorOwnAnswers($pdo, $id, $respondent),
+        'has_own_symptom_answers' => $hasOwnSymptomAnswers,
+        'community' => lcnDoctorCommunity($pdo, $id, isset($_GET['include_dummy']) ? $_GET['include_dummy'] === '1' : null)
+    ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 } catch (Throwable $error) {
     lcnLogApiError('doctor_community', $error);
     http_response_code(500);

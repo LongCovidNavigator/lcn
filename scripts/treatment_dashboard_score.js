@@ -1,7 +1,7 @@
 /* Personal orientation score: burden 30, access 30, experiences 40. */
 (function(root){
   const definitions=[
-    ['effect','Berichtete Zustandsveränderung',30,[0,1/3,2/3,1]],
+    ['effect','Genesungsfortschritt',30,[0,1/3,2/3,1]],
     ['pem','Crash-/PEM-Risiko',10,[1,2/3,1/3,0]],
     ['gamechanger','Gamechanger',10,[1,0]],
     ['setting','Durchführungssetting',5,[1,2/3,1/3,0]],

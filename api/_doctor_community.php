@@ -37,19 +37,40 @@ function lcnDoctorCommunity(PDO $pdo, int $doctorId, ?bool $includeDummy = null)
 {
     if (!lcnDoctorExists($doctorId)) throw new InvalidArgumentException('Unknown doctor');
     $includeDummy = lcnDummyDataAllowed() && ($includeDummy ?? lcnDoctorCommunityIncludesDummy());
+    $questions = lcnDoctorCommunityQuestionResults($pdo, $doctorId, $includeDummy);
+    $treatmentExamples = [];
+    if ($includeDummy) {
+        $query = $pdo->prepare('SELECT e.* FROM treatment_experience_dummy_counts e WHERE EXISTS (SELECT 1 FROM v_lcn_provider_treatments p WHERE p.treat_id=e.treat_id AND p.dr_id=?)');
+        $query->execute([$doctorId]);
+        foreach ($query as $row) $treatmentExamples[(int)$row['treat_id']] = array_map('intval', $row);
+    }
+    return ['include_dummy' => $includeDummy, 'schema_version' => 1, 'questions' => $questions, 'treatment_experiences' => (object)$treatmentExamples, 'comparison_profiles' => lcnDoctorComparisonProfiles($pdo, $includeDummy), 'adaptation_benchmark' => lcnDoctorAdaptationBenchmark($pdo, $includeDummy)];
+}
+
+function lcnDoctorCommunityQuestionResults(PDO $pdo, int $doctorId, bool $includeDummy, ?string $onlyKey = null): array
+{
+    $definitions = lcnDoctorCommunityQuestions();
+    $params = [$doctorId];
+    $filter = '';
+    if ($onlyKey !== null) {
+        $definition = $definitions[$onlyKey];
+        $definitions = [$onlyKey => $definition];
+        $filter = ' AND a.question_key = ? AND a.context_key = ?';
+        array_push($params, $definition['question'], $definition['context']);
+    }
     $counts = [];
     $tables = ['doctor_community_answers' => 'real'];
     if ($includeDummy) $tables['doctor_community_dummy_answers'] = 'dummy';
     foreach ($tables as $table => $source) {
-        $statement = $pdo->prepare("SELECT question_key, context_key, option_value, COUNT(*) AS n FROM $table a WHERE dr_id = ? AND NOT (a.question_key='costs' AND EXISTS (SELECT 1 FROM $table newer WHERE newer.dr_id=a.dr_id AND newer.respondent_key=a.respondent_key AND newer.context_key=a.context_key AND newer.question_key='costs_total_v2')) GROUP BY question_key, context_key, option_value");
-        $statement->execute([$doctorId]);
+        $statement = $pdo->prepare("SELECT question_key, context_key, option_value, COUNT(*) AS n FROM $table a WHERE dr_id = ?$filter AND NOT (a.question_key='costs' AND EXISTS (SELECT 1 FROM $table newer WHERE newer.dr_id=a.dr_id AND newer.respondent_key=a.respondent_key AND newer.context_key=a.context_key AND newer.question_key='costs_total_v2')) GROUP BY question_key, context_key, option_value");
+        $statement->execute($params);
         foreach ($statement as $row) {
             if($row['question_key']==='costs') {if($source==='real' && (int)$row['option_value']>2)continue;$row['question_key']='costs_total_v2';$row['option_value']=([1=>1,2=>2,3=>3,4=>5,5=>7,6=>8])[(int)$row['option_value']]??0;}
             $q=$row['question_key'];$c=$row['context_key'];$v=(int)$row['option_value'];$counts[$q][$c][$v][$source]=($counts[$q][$c][$v][$source]??0)+(int)$row['n'];
         }
     }
     $questions = [];
-    foreach (lcnDoctorCommunityQuestions() as $key => $definition) {
+    foreach ($definitions as $key => $definition) {
         $options = [];
         $real = $dummy = 0;
         foreach ($definition['labels'] as $index => $label) {
@@ -71,13 +92,7 @@ function lcnDoctorCommunity(PDO $pdo, int $doctorId, ?bool $includeDummy = null)
             'mode' => count($modes) === 1 ? $modes[0]['value'] : null,
             'mean' => $total ? round($weighted / $total, 1) : null];
     }
-    $treatmentExamples = [];
-    if ($includeDummy) {
-        $query = $pdo->prepare('SELECT e.* FROM treatment_experience_dummy_counts e WHERE EXISTS (SELECT 1 FROM v_lcn_provider_treatments p WHERE p.treat_id=e.treat_id AND p.dr_id=?)');
-        $query->execute([$doctorId]);
-        foreach ($query as $row) $treatmentExamples[(int)$row['treat_id']] = array_map('intval', $row);
-    }
-    return ['include_dummy' => $includeDummy, 'schema_version' => 1, 'questions' => $questions, 'treatment_experiences' => (object)$treatmentExamples, 'comparison_profiles' => lcnDoctorComparisonProfiles($pdo, $includeDummy), 'adaptation_benchmark' => lcnDoctorAdaptationBenchmark($pdo, $includeDummy)];
+    return $questions;
 }
 
 function lcnDoctorComparisonProfiles(PDO $pdo, bool $includeDummy): array

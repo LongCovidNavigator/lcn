@@ -7,7 +7,7 @@ $item=['community'=>[
  ['question_key'=>'gesamtbewertung','answer_value'=>'positiv','review_status'=>'approved','n'=>20],
  ['question_key'=>'gesamtbewertung','answer_value'=>'Heilung','review_status'=>'suspicious','n'=>8],
 ]];
-$html=ndReducedChart($item,'effect','Gesamtbewertung','effect');
+$html=ndReducedChart($item,'effect','Genesungsfortschritt','effect');
 if (!str_contains($html,'data-counts="[0,0,3,0]"')) throw new RuntimeException('Only exact approved categories may count');
 if(count(ND_REDUCED_SCALES['unit_cost'])!==10 || count(ND_REDUCED_SCALES['total_cost'])!==10) throw new RuntimeException('Cost scales incomplete');
 echo "PASS: approved exact categories; legacy/suspicious excluded; complete independent cost scales\n";

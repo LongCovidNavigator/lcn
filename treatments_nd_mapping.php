@@ -20,7 +20,7 @@ $groups = [
  ['Zugänglichkeit', 'Zugang, Zulassung Long COVID / ME/CFS, Off-Label-Status', 'Redaktion', 'tbl_treatments_nd', 'Skalen mit allen Optionen; Zulassung und Off-Label nebeneinander; uneindeutige Angaben bleiben unmarkiert'],
  ['Zugänglichkeit', 'Preis pro Einheit, laufende Kosten, Gesamtkosten', 'Hybrid', 'tbl_treatment_costs_nd + eigene Testeingabe', 'Kosten mit Bezugsgröße, Erstattung davon getrennt'],
  ['Zugänglichkeit', 'GKV-Status Ja/Nein, Kostenübernahme und Hinweis; Apothekenrelevanz und Hinweis', 'Hybrid', 'tbl_treatments_nd / Kostenzeilen + eigene Testeingabe', 'Recherchierter Status plus anklickbare Nutzerverteilung im selben Ergebnisblock; Dummydaten abschaltbar'],
- ['Erfahrungen', 'Zustandsveränderung: Verschlechterung, Keine Veränderung, Verbesserung, Heilung', 'Nutzer', 'Eigener Testentwurf / optionale Simulation', 'Identische anklickbare Balken und vierstufige Skala wie bei Ärzt:innen; fiktive Prozente abschaltbar'],
+ ['Erfahrungen', 'Genesungsfortschritt: Verschlechterung, Keine Veränderung, Verbesserung, Heilung', 'Nutzer', 'Eigener Testentwurf / optionale Simulation', 'Identische anklickbare Balken und vierstufige Skala wie bei Ärzt:innen; fiktive Prozente abschaltbar'],
  ['Erfahrungen', 'Gamechanger: ja, nein', 'Nutzer', 'Eigener Testentwurf / optionale Simulation', 'Entscheidender Anteil an Verbesserung; im Beispiel als Prozentkennzahl'],
  ['Erfahrungen', 'Zeit bis Veränderung: Stunden, Tage, Wochen, Monate, keine Wirkung', 'Nutzer', 'Eigener Testentwurf / optionale Simulation', 'Erklärte Auswahlkarten; Verteilungsbalken bei Simulation'],
  ['Erfahrungen', 'Eigene Symptome / Beschwerden', 'Hybrid', 'Auswahl aus tbl_symptoms; eigener Testentwurf', 'Mehrfachauswahl, getrennt von den vorhandenen Zuordnungen'],

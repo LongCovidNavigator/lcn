@@ -10,17 +10,17 @@
   <link rel="stylesheet" href="styles/navigation.css?v=local-controls-row-20261108">
   <link rel="stylesheet" href="styles/footer-style.css?v=b4b1163611">
   <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=admin-comparisons-20261109">
+  <link rel="stylesheet" href="styles/arzt_detail_konzept.css?v=admin-therapy-summary-20261120">
   <script src="scripts/image-registry.js?v=shared-count-pins-20261105" defer></script>
   <script src="assets/vendor/leaflet/leaflet.js" defer></script>
   <script src="scripts/doctor_relative_score_view.js?v=remove-percentile-caption-20261030" defer></script>
   <link rel="stylesheet" href="styles/doctor_relative_score.css?v=comparison-colors-20261026">
-  <script src="scripts/doctor_dashboard_score.js?v=relative-therapy-offer-20261030" defer></script>
+  <script src="scripts/doctor_dashboard_score.js?v=genesungsfortschritt-20261120" defer></script>
   <script src="scripts/cost_preferences.js?v=standard-country-selection-20261028" defer></script>
-  <script src="scripts/symptom_search.js?v=1" defer></script><script src="scripts/doctor_symptom_help.js?v=doctor-orientation-20261119" defer></script><script src="scripts/arzt_detail_konzept.js?v=touch-layout-20261119" defer></script>
+  <script src="scripts/symptom_search.js?v=1" defer></script><script src="scripts/doctor_symptom_help.js?v=doctor-answer-progress-20261120" defer></script><script src="scripts/arzt_detail_konzept.js?v=admin-therapy-context-20261120" defer></script>
   <link rel="stylesheet" href="styles/doctor_treatment_table_beta.css?v=tablet-tables-20261107">
   <link rel="stylesheet" href="styles/therapy_scroll.css?v=3">
-<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/detail_layout_shared.css?v=local-role-switch-20261108"><link rel="stylesheet" href="styles/catalog_relations.css?v=tablet-tables-20261107"><script src="scripts/catalog_relations.js?v=relationship-feedback-tooltips-20261028-3" defer></script><link rel="stylesheet" href="styles/doctor_profile_feedback.css?v=20261029-entry-confirmations"><script src="scripts/doctor_profile_feedback.js?v=20261029-entry-confirmations" defer></script><link rel="stylesheet" href="styles/detail_responsive.css?v=touch-layout-20261119"><script src="scripts/detail_responsive.js?v=touch-layout-20261119" defer></script><link rel="stylesheet" href="styles/dashboard_shared.css?v=travel-cases-20261030"><link rel="stylesheet" href="styles/feedback.css"><script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script><script src="scripts/scroll_restore.js" defer></script><link rel="stylesheet" href="styles/experience_guide.css?v=touch-layout-20261119"><script src="scripts/experience_guide.js?v=doctor-orientation-20261119" defer></script></head>
+<link rel="stylesheet" href="styles/maps_shared.css?v=location-dark-blue-20261105"><script src="scripts/maps_shared.js?v=neutral-search-20261031" defer></script><link rel="stylesheet" href="styles/detail_layout_shared.css?v=local-role-switch-20261108"><link rel="stylesheet" href="styles/catalog_relations.css?v=tablet-tables-20261107"><script src="scripts/catalog_relations.js?v=relationship-feedback-tooltips-20261028-3" defer></script><link rel="stylesheet" href="styles/doctor_profile_feedback.css?v=20261029-entry-confirmations"><script src="scripts/doctor_profile_feedback.js?v=20261029-entry-confirmations" defer></script><link rel="stylesheet" href="styles/detail_responsive.css?v=touch-layout-20261119"><script src="scripts/detail_responsive.js?v=touch-layout-20261119" defer></script><link rel="stylesheet" href="styles/dashboard_shared.css?v=travel-cases-20261030"><link rel="stylesheet" href="styles/feedback.css"><script src="scripts/feedback_context.js?v=responsive-20261107" defer data-lcn-feedback-loader></script><script src="scripts/scroll_restore.js" defer></script><link rel="stylesheet" href="styles/experience_guide.css?v=themen-aufklappen-20261120"><script src="scripts/experience_guide.js?v=therapien-beitragen-20261120" defer></script></head>
 <body class="doctor-detail-live" data-doctor-page="live">
   <div id="header-placeholder"></div>
   <div class="page-shell"><section id="submission-note" class="card" hidden><strong>Community-Eintrag · noch nicht geprüft</strong><p>Danke fürs Ergänzen! Teile gern, was du über diese Praxis weißt.</p><a href="#termin">Angaben zum Termin ergänzen →</a></section>
@@ -42,12 +42,12 @@
       <nav class="side-nav" aria-label="Ansichten der Behandler:innen-Detailseite">
         <div class="nav-items">
         <a href="#ueberblick" data-view="ueberblick"><span class="nav-number">1</span><span><strong>Überblick</strong></span></a>
-        <a href="#wirkung" data-view="wirkung"><span class="nav-number">2</span><span><strong>Erfahrungen aus der Community</strong></span></a>
-        <a href="#termin" data-view="termin"><span class="nav-number">3</span><span><strong>Belastungseinschätzung</strong></span></a>
-        <a href="#zugang" data-view="zugang"><span class="nav-number">4</span><span><strong>Kosten und Verfügbarkeit</strong></span></a>
+        <a href="#wirkung" data-view="wirkung" data-own-answers=""><span class="nav-number">2</span><span><strong>Erfahrungen aus der Community</strong></span></a>
+        <a href="#termin" data-view="termin" data-own-answers=""><span class="nav-number">3</span><span><strong>Belastungseinschätzung</strong></span></a>
+        <a href="#zugang" data-view="zugang" data-own-answers=""><span class="nav-number">4</span><span><strong>Kosten und Verfügbarkeit</strong></span></a>
         <a href="#therapien" data-view="therapien"><span class="nav-number">5</span><span><strong>Therapien</strong></span></a>
         <a href="#anreise" data-view="anreise"><span class="nav-number">6</span><span><strong>Anreise</strong></span></a>
-        <a href="#symptome" data-view="symptome"><span class="nav-number">7</span><span><strong>Symptome</strong></span></a>
+        <a href="#symptome" data-view="symptome" data-own-answers=""><span class="nav-number">7</span><span><strong>Symptome</strong></span></a>
         <a href="#dashboard" data-view="dashboard" hidden><span class="nav-number">8</span><span><strong>Dashboard</strong></span></a>
         </div>
       </nav>

@@ -89,6 +89,10 @@
       return;
     }
     const online=filteredProviders(entry).find(p=>isOnlineAtHome(entry,p));
+    if(!online && entry.host.dataset.homeVisitSetting==='1'){
+      result.textContent='Bei einem Hausbesuch kommt die behandelnde Person zu dir. Für dich entfällt die Anreise.';
+      return;
+    }
     const km=closest?distance(closest):null,index=online||km===null?-1:travelBand(km);
     result.textContent=online?online.name+' · Online-Behandlung':closest?closest.name+' · '+km.toLocaleString('de-DE',{maximumFractionDigits:1})+' km Luftlinie':origin?'Keine Behandler:innen mit Koordinaten im gewählten Filter.':'Standort eingeben, um die Entfernung einzuordnen.';
     const scale=document.createElement('ol');scale.className='travel-scale';scale.setAttribute('aria-label','Entfernung und Anreiseaufwand');

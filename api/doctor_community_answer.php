@@ -15,6 +15,11 @@ try {
     $pdo = lcnDoctorDatabase();
     $respondent = lcnVoterKey();
     lcnBeginVoteSecurity($pdo,'doctor',$id,'neutral',$respondent);
+    $requestedDummy = isset($_GET['include_dummy']) ? $_GET['include_dummy'] === '1' : null;
+    $questionOnly = ($_GET['response'] ?? '') === 'question'
+        && in_array($action, ['answer', 'clear'], true)
+        && str_starts_with($key, 'appointment-');
+    if ($questionOnly) $pdo->beginTransaction();
     if($action==='move_cost_context'){lcnMoveDoctorCostContext($pdo,$id,$respondent,(string)$key);}
     elseif ($action === 'reset') {
         $query = $pdo->prepare('DELETE FROM doctor_community_answers WHERE dr_id = ? AND respondent_key = ?');
@@ -26,8 +31,15 @@ try {
     } else {
         lcnSaveDoctorAnswer($pdo, $id, $respondent, $key, $value);
     }
-    lcnSendVoteJson(['ok' => true, 'own_answers' => lcnDoctorOwnAnswers($pdo, $id, $respondent), 'community' => lcnDoctorCommunity($pdo, $id, isset($_GET['include_dummy']) ? $_GET['include_dummy'] === '1' : null)]);
+    if ($questionOnly) {
+        $includeDummy = lcnDummyDataAllowed() && ($requestedDummy ?? lcnDoctorCommunityIncludesDummy());
+        $question = lcnDoctorCommunityQuestionResults($pdo, $id, $includeDummy, $key)[$key];
+        $pdo->commit();
+        lcnSendVoteJson(['ok' => true, 'question' => $question, 'own_answer' => $action === 'clear' ? null : $value]);
+    }
+    lcnSendVoteJson(['ok' => true, 'own_answers' => lcnDoctorOwnAnswers($pdo, $id, $respondent), 'community' => lcnDoctorCommunity($pdo, $id, $requestedDummy)]);
 } catch (Throwable $error) {
+    if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
     lcnLogApiError('doctor_community_answer', $error);
     lcnSendVoteJson(['ok' => false, 'error' => 'Speichern konnte nicht bestätigt werden. Bitte erneut versuchen.'], 500);
 }
