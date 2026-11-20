@@ -62,30 +62,37 @@
     const storagePrefix = storageBase + ':';
     const preferredModeKey = storageBase + '_preferred_mode';
     const orientationDisabledKey = storageBase + '_disabled';
-    const contributionPrompt = 'Klicke in den Abbildungen oder Listen auf das, was deiner bisherigen Erfahrung entspricht. Jede Angabe hilft ' + (doctor ? 'Patienten' : 'anderen') + '.';
+    const contributionPrompt = 'Klicke in den Abbildungen oder Listen auf das, was deiner bisherigen Erfahrung entspricht. Jede Angabe hilft Patienten.';
+    const ratingContext = doctor
+      ? 'während der Behandlung bei der ausgewählten Behandlerin oder dem ausgewählten Behandler'
+      : 'bei Anwendung der ausgewählten Therapie';
     const communityRating = {
-      intro: 'Unter „Genesungsfortschritt“ fasst die Community zusammen, wie sich der Gesamtzustand ' + (doctor
-        ? 'während der Behandlung bei der ausgewählten Behandlerin oder dem ausgewählten Behandler'
-        : 'bei Anwendung der ausgewählten Therapie') + ' verändert hat. Du kannst zwischen vier Antworten wählen.',
+      intro: 'Unter „Genesungsfortschritt“ fasst die Community zusammen, wie sich der Gesamtzustand ' + ratingContext + ' verändert hat. Du kannst zwischen vier Antworten wählen.',
+      readingIntro: 'Unter „Genesungsfortschritt“ fasst die Community zusammen, wie sich der Gesundheitszustand ' + ratingContext + ' verändert hat. So siehst du, welchen Effekt die Behandlung aus Sicht der Community hatte. Die Antworten werden in vier Kategorien erfasst:',
+      readingClosing: 'Beachte beim Vergleich auch die Anzahl der Angaben. Die Auswertung beschreibt die Erfahrungen der Community und berechnet nicht die individuelle Erfolgschance.',
       options: [
         ['Verschlechterung', 'verschlechtert'],
         ['Neutral', 'nicht verändert'],
         ['Verbesserung', 'verbessert'],
         ['Heilung', 'bis zur Genesung verbessert']
       ],
-      closing: 'Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du ' + (doctor ? 'Patienten, die Behandlung' : 'anderen, die Therapie') + ' besser einzuschätzen.'
+      closing: 'Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du ' + (doctor ? 'Patienten, die Behandlung' : 'Patienten, die Therapie') + ' besser einzuschätzen.'
     };
 
-    function appendCommunityRating(disclosure) {
+    function communityRatingOptions(review) {
       const list = make('ul', '', 'therapy-guide-options');
       for (const [label, ending] of communityRating.options) {
         const item = make('li');
         const description = make('span');
         description.append('Mein Gesamtzustand hat sich ', make('u', ending), '.');
-        item.append(make('strong', label), description);
+        item.append(make('strong', review ? label : label + ':'), description);
         list.append(item);
       }
-      disclosure.append(make('p', communityRating.intro), list, make('p', communityRating.closing));
+      return list;
+    }
+
+    function appendCommunityRating(disclosure) {
+      disclosure.append(make('p', communityRating.intro), communityRatingOptions(true), make('p', communityRating.closing));
     }
 
     const topics = {
@@ -94,42 +101,42 @@
         'Hier geht es um die Veränderung des Gesamtzustands während der Anwendung: Verschlechterung, Neutral (keine Veränderung), Verbesserung oder Heilung. Die Balken und Prozentangaben zeigen, wie sich die Antworten auf diese vier Möglichkeiten verteilen. Lies auch die Anzahl der Angaben: Ein hoher Anteil bei wenigen Antworten beschreibt zunächst nur diese wenigen Erfahrungen. Die Auswertung zeigt persönliche Einschätzungen und belegt nicht, dass die Therapie allein die Veränderung verursacht hat.'
       ],
       gamechanger: [
-        {"intro": "Als Gamechanger gilt eine Therapie, die deinen Genesungsprozess entscheidend vorangetrieben hat. Du kannst zwischen zwei Antworten wählen:", "options": ["Ja: Die ausgewählte Therapie hat deinen Genesungsprozess entscheidend vorangetrieben.", "Nein: Die ausgewählte Therapie hat deinen Genesungsprozess leider nicht entscheidend vorangetrieben."], "closing": "Klicke in der Abbildung auf die passende Antwort. Damit hilfst du anderen, die Bedeutung der Therapie für den Genesungsprozess einzuschätzen."},
+        {"intro": "Als Gamechanger gilt eine Therapie, die deinen Genesungsprozess entscheidend vorangetrieben hat. Du kannst zwischen zwei Antworten wählen:", "options": ["Ja: Die ausgewählte Therapie hat deinen Genesungsprozess entscheidend vorangetrieben.", "Nein: Die ausgewählte Therapie hat deinen Genesungsprozess leider nicht entscheidend vorangetrieben."], "closing": "Klicke in der Abbildung auf die passende Antwort. Damit hilfst du Patienten, die Bedeutung der Therapie für den Genesungsprozess einzuschätzen."},
         'Die Frage lautet: Hat die Therapie den Genesungsprozess entscheidend vorangetrieben? Im Ring und neben den Antworten siehst du den Anteil von Ja und Nein. Ein Ja steht für einen entscheidenden Fortschritt, nicht zwingend für Heilung. Ein Nein bedeutet umgekehrt nicht automatisch, dass die Therapie gar nicht geholfen hat. Vergleiche diese Angabe deshalb mit den Angaben zum Genesungsfortschritt.'
       ],
       symptoms: [
-        {"intro": "Hier sammelt die Community, welche Symptome durch die ausgewählte Therapie gelindert wurden. Du hast folgende Möglichkeiten:", "options": ["Symptome auswählen: Klicke auf die passenden Symptome in der Auflistung unten, um deine Erfahrung zu ergänzen.", "Weitere Symptome ergänzen: Ergänze Symptome, die durch die Therapie gelindert wurden und noch nicht aufgelistet sind."], "closing": "Damit hilfst du anderen mit ähnlichen Symptomen, die Therapie besser einzuschätzen."},
+        {"intro": "Hier sammelt die Community, welche Symptome durch die ausgewählte Therapie gelindert wurden. Du hast folgende Möglichkeiten:", "options": ["Symptome auswählen: Klicke auf die passenden Symptome in der Auflistung unten, um deine Erfahrung zu ergänzen.", "Weitere Symptome ergänzen: Ergänze Symptome, die durch die Therapie gelindert wurden und noch nicht aufgelistet sind."], "closing": "Damit hilfst du Patienten mit ähnlichen Symptomen, die Therapie besser einzuschätzen."},
         'Die Liste zeigt, bei welchen Symptomen die Community eine Linderung durch die Therapie berichtet. Die Zahl neben einem Symptom zählt die entsprechenden Nennungen. Eine Person kann mehrere Symptome auswählen; die Zahlen lassen sich deshalb nicht zu einer Zahl behandelter Personen addieren. Viele Nennungen sind keine Erfolgsquote: Hier wird nicht erfasst, wie viele Menschen das jeweilige Symptom hatten, ohne eine Linderung zu erleben. Ein Symptom ohne Stimmen bedeutet, dass bisher keine entsprechende Linderung eingetragen wurde.'
       ],
       setting: [
-        {"intro": "Die Community erfasst, wo und in welchem Rahmen du die ausgewählte Therapie angewendet hast. Dieses Durchführungssetting hilft anderen einzuschätzen, welcher Aufwand damit für sie verbunden wäre und ob der Rahmen zu ihnen passt. Zur Auswahl stehen:", "options": ["Selbstständig zu Hause: Du wendest die Therapie eigenständig zu Hause an, ohne zusätzlichen Reiseaufwand oder die Hilfe einer Behandlerin oder eines Behandlers.", "Hausbesuch: Du benötigst Unterstützung durch Fachpersonal, kannst die Behandlung aber zu Hause durchführen.", "Ambulant: Du hast einzelne Termine vor Ort, zum Beispiel in einer Praxis.", "Stationär: Du hältst dich zur Behandlung für einen längeren Zeitraum in einer Einrichtung auf."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die Durchführung der Therapie zu planen."},
-        'Die Verteilung zeigt, in welchem Rahmen andere die Therapie durchgeführt haben: selbstständig zu Hause, als Hausbesuch, ambulant mit einzelnen Terminen vor Ort oder stationär mit Aufenthalt in einer Einrichtung. Vergleiche die Anteile, um einen Eindruck von möglichen Abläufen zu bekommen. Das häufigste Setting ist keine verbindliche Vorgabe für jede Anwendung. Lies die Angaben zusammen mit dem Anreiseaufwand und der Einschätzung zum Verschlechterungsrisiko.'
+        {"intro": "Die Community erfasst, wo und in welchem Rahmen du die ausgewählte Therapie angewendet hast. Dieses Durchführungssetting hilft Patienten einzuschätzen, welcher Aufwand damit für sie verbunden wäre und ob der Rahmen zu ihnen passt. Zur Auswahl stehen:", "options": ["Selbstständig zu Hause: Du wendest die Therapie eigenständig zu Hause an, ohne zusätzlichen Reiseaufwand oder die Hilfe einer Behandlerin oder eines Behandlers.", "Hausbesuch: Du benötigst Unterstützung durch Fachpersonal, kannst die Behandlung aber zu Hause durchführen.", "Ambulant: Du hast einzelne Termine vor Ort, zum Beispiel in einer Praxis.", "Stationär: Du hältst dich zur Behandlung für einen längeren Zeitraum in einer Einrichtung auf."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du Patienten, die Durchführung der Therapie zu planen."},
+        'Die Verteilung zeigt, in welchem Rahmen Patienten die Therapie durchgeführt haben: selbstständig zu Hause, als Hausbesuch, ambulant mit einzelnen Terminen vor Ort oder stationär mit Aufenthalt in einer Einrichtung. Vergleiche die Anteile, um einen Eindruck von möglichen Abläufen zu bekommen. Das häufigste Setting ist keine verbindliche Vorgabe für jede Anwendung. Lies die Angaben zusammen mit dem Anreiseaufwand und der Einschätzung zum Verschlechterungsrisiko.'
       ],
       pem: [
-        {"intro": "Hier geht es um deine Einschätzung aus eigener Erfahrung: Wie hoch hältst du das Risiko, dass die ausgewählte Behandlung bei anderen zu einer Zustandsverschlechterung führt? Zur Auswahl stehen:", "options": ["Keines: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung nicht vorhanden ist.", "Niedrig: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung gering ist.", "Mittel: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung mittel ist.", "Hoch: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung hoch ist."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die mögliche Belastung durch die Therapie besser einzuordnen."},
+        {"intro": "Hier geht es um deine Einschätzung aus eigener Erfahrung: Wie hoch hältst du das Risiko, dass die ausgewählte Behandlung bei Patienten zu einer Zustandsverschlechterung führt? Zur Auswahl stehen:", "options": ["Keines: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung nicht vorhanden ist.", "Niedrig: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung gering ist.", "Mittel: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung mittel ist.", "Hoch: Aus deiner Erfahrung gehst du davon aus, dass das Risiko einer Zustandsverschlechterung hoch ist."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du Patienten, die mögliche Belastung durch die Therapie besser einzuordnen."},
         'Hier teilt die Community ihre Einschätzung aus eigener Erfahrung zum Risiko einer Zustandsverschlechterung durch die Behandlung: keines, niedrig, mittel oder hoch. Die Prozentwerte zeigen die Verteilung dieser Einschätzungen. Sie geben nicht an, bei wie vielen Personen tatsächlich eine Verschlechterung aufgetreten ist. Achte auch auf Stimmen bei höheren Risikostufen, selbst wenn eine niedrigere Stufe häufiger gewählt wurde. Die Antwort Keines ist eine persönliche Einschätzung und keine Zusicherung für die eigene Anwendung.'
       ],
       access: [
-        {"intro": "Hier erfasst die Community die Zugänglichkeit der ausgewählten Therapie: Wie aufwendig ist es, Zugang zu dieser Therapie zu erhalten? Vier Zugangswege im Vergleich:", "options": ["Selbstmanagement / eigenständig umsetzbar: Du kannst die Maßnahme selbst umsetzen. Du benötigst weder eine Behandlerin oder einen Behandler noch eine ärztliche Verordnung. Der Zugang ist mit geringem Aufwand verbunden.", "Frei erhältlich / private Behandler:innen: Du kaufst das Mittel selbst oder vereinbarst die Behandlung direkt mit privaten Behandler:innen. Eine ärztliche Verordnung ist nicht nötig. Der Zugang ist mit mittlerem Aufwand verbunden.", "Ärztliche Verordnung oder Rezept erforderlich: Du benötigst eine ärztliche Verordnung oder ein Rezept, um die Therapie zu erhalten. Der Zugang ist mit hohem Aufwand verbunden.", "Nur im Rahmen einer Studie möglich: Du kannst die Behandlung nur erhalten, wenn du zur Teilnahme an einer entsprechenden Studie zugelassen wirst. Der Zugang ist mit sehr hohem Aufwand verbunden."], "closing": "Klicke in der Abbildung auf den Zugangsweg, der deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, einen passenden Weg zur Therapie zu finden."},
+        {"intro": "Hier erfasst die Community die Zugänglichkeit der ausgewählten Therapie: Wie aufwendig ist es, Zugang zu dieser Therapie zu erhalten? Vier Zugangswege im Vergleich:", "options": ["Selbstmanagement / eigenständig umsetzbar: Du kannst die Maßnahme selbst umsetzen. Du benötigst weder eine Behandlerin oder einen Behandler noch eine ärztliche Verordnung. Der Zugang ist mit geringem Aufwand verbunden.", "Frei erhältlich / private Behandler:innen: Du kaufst das Mittel selbst oder vereinbarst die Behandlung direkt mit privaten Behandler:innen. Eine ärztliche Verordnung ist nicht nötig. Der Zugang ist mit mittlerem Aufwand verbunden.", "Ärztliche Verordnung oder Rezept erforderlich: Du benötigst eine ärztliche Verordnung oder ein Rezept, um die Therapie zu erhalten. Der Zugang ist mit hohem Aufwand verbunden.", "Nur im Rahmen einer Studie möglich: Du kannst die Behandlung nur erhalten, wenn du zur Teilnahme an einer entsprechenden Studie zugelassen wirst. Der Zugang ist mit sehr hohem Aufwand verbunden."], "closing": "Klicke in der Abbildung auf den Zugangsweg, der deiner bisherigen Erfahrung entspricht. Damit hilfst du Patienten, einen passenden Weg zur Therapie zu finden."},
         'Hier berichtet die Community über ihre Zugangswege zur Therapie: durch Selbstmanagement, frei erhältlich oder über private Behandler:innen, mit ärztlicher Verordnung beziehungsweise Rezept oder im Rahmen einer Studie. Die Anteile zeigen die berichteten Zugangswege. Mehrere vertretene Wege können auf unterschiedliche Anwendungen oder Rahmenbedingungen hinweisen. Eine Nennung sagt noch nichts über aktuelle Verfügbarkeit, Wartezeit oder Kostenübernahme aus.'
       ],
       unit_cost: [
-        {"intro": "Hier erfasst die Community, was du pro Therapieeinheit selbst bezahlt hast – zum Beispiel pro Anwendung, Behandlung, Packung oder Ampulle. Ziehe den Betrag ab, den deine Krankenkasse übernommen hat. Falls sich die Kosten nicht pro Einheit angeben lassen, wähle die Option Nicht anwendbar und trage stattdessen die Gesamtkosten ein.", "options": ["Nicht anwendbar: Eine Kostenangabe pro Einheit passt nicht zu dieser Therapie.", "Kostenlos: Für die Therapie sind keine Kosten angefallen.", "Komplett übernommen: Die Kosten wurden vollständig von deiner Krankenkasse übernommen.", "Kostenspannen: Wähle den ungefähr passenden Betrag pro Einheit. Eine grobe Schätzung genügt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die eigenen Kosten besser einzuplanen.", "insuranceIntro": "Wähle zuerst das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Für Deutschland stehen zur Auswahl:", "insuranceOptions": ["GKV: Du bist gesetzlich krankenversichert.", "PKV: Du bist privat krankenversichert.", "Aus dem Ausland: Du nimmst aus dem Ausland teil. Wähle diese Option, wenn deine Versicherung nicht zum ausgewählten Krankenversicherungssystem gehört."], "optionsIntro": "Mache anschließend eine Angabe zu deinem Kostenanteil:"},
+        {"intro": "Hier erfasst die Community, was du pro Therapieeinheit selbst bezahlt hast – zum Beispiel pro Anwendung, Behandlung, Packung oder Ampulle. Ziehe den Betrag ab, den deine Krankenkasse übernommen hat. Falls sich die Kosten nicht pro Einheit angeben lassen, wähle die Option Nicht anwendbar und trage stattdessen die Gesamtkosten ein.", "options": ["Nicht anwendbar: Eine Kostenangabe pro Einheit passt nicht zu dieser Therapie.", "Kostenlos: Für die Therapie sind keine Kosten angefallen.", "Komplett übernommen: Die Kosten wurden vollständig von deiner Krankenkasse übernommen.", "Kostenspannen: Wähle den ungefähr passenden Betrag pro Einheit. Eine grobe Schätzung genügt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du Patienten, die eigenen Kosten besser einzuplanen.", "insuranceIntro": "Wähle zuerst das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Für Deutschland stehen zur Auswahl:", "insuranceOptions": ["GKV: Du bist gesetzlich krankenversichert.", "PKV: Du bist privat krankenversichert.", "Aus dem Ausland: Du nimmst aus dem Ausland teil. Wähle diese Option, wenn deine Versicherung nicht zum ausgewählten Krankenversicherungssystem gehört."], "optionsIntro": "Mache anschließend eine Angabe zu deinem Kostenanteil:"},
         'Die Verteilung zeigt den selbst bezahlten Betrag pro Therapieeinheit nach Abzug der Kostenübernahme, etwa pro Anwendung, Packung oder Ampulle. Prüfe zuerst das ausgewählte Krankenversicherungssystem und die Versicherungsart: Die Anzeige bezieht sich auf diesen Kontext. Kostenlos bedeutet, dass keine Kosten anfielen; Komplett übernommen, dass die Krankenkasse die Kosten vollständig getragen hat. Nicht anwendbar ist keine Kostenangabe von null Euro. Die Betragsstufen sind ungefähre Angaben; bei unterschiedlich großen Einheiten sind sie nur eingeschränkt vergleichbar.'
       ],
       total_cost: [
-        {"intro": "Hier erfasst die Community, was du bisher insgesamt selbst für die Therapie bezahlt hast. Zähle alle bisherigen Anwendungen und Ausgaben zusammen und ziehe den Betrag ab, den deine Krankenkasse übernommen hat. Ist die Therapie noch nicht abgeschlossen, schätze die Gesamtkosten. Bei einer fortlaufenden Therapie kannst du die Option Nicht anwendbar wählen und stattdessen die Kosten pro Einheit angeben.", "options": ["Nicht anwendbar: Eine Angabe zu Gesamtkosten lässt sich auf diese Therapie nicht anwenden.", "Kostenlos: Für die Therapie sind keine Kosten angefallen.", "Komplett übernommen: Die Kosten wurden vollständig von deiner Krankenkasse übernommen.", "Kostenspannen: Wähle den ungefähr passenden Gesamtbetrag. Eine grobe Schätzung genügt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du anderen, die Kosten eines Therapieverlaufs besser einzuplanen.", "insuranceIntro": "Wähle zuerst das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Für Deutschland stehen zur Auswahl:", "insuranceOptions": ["GKV: Du bist gesetzlich krankenversichert.", "PKV: Du bist privat krankenversichert.", "Aus dem Ausland: Du nimmst aus dem Ausland teil. Wähle diese Option, wenn deine Versicherung nicht zum ausgewählten Krankenversicherungssystem gehört."], "optionsIntro": "Mache anschließend eine Angabe zu deinem Kostenanteil:"},
+        {"intro": "Hier erfasst die Community, was du bisher insgesamt selbst für die Therapie bezahlt hast. Zähle alle bisherigen Anwendungen und Ausgaben zusammen und ziehe den Betrag ab, den deine Krankenkasse übernommen hat. Ist die Therapie noch nicht abgeschlossen, schätze die Gesamtkosten. Bei einer fortlaufenden Therapie kannst du die Option Nicht anwendbar wählen und stattdessen die Kosten pro Einheit angeben.", "options": ["Nicht anwendbar: Eine Angabe zu Gesamtkosten lässt sich auf diese Therapie nicht anwenden.", "Kostenlos: Für die Therapie sind keine Kosten angefallen.", "Komplett übernommen: Die Kosten wurden vollständig von deiner Krankenkasse übernommen.", "Kostenspannen: Wähle den ungefähr passenden Gesamtbetrag. Eine grobe Schätzung genügt."], "closing": "Klicke in der Abbildung auf die Antwort, die deiner bisherigen Erfahrung entspricht. Damit hilfst du Patienten, die Kosten eines Therapieverlaufs besser einzuplanen.", "insuranceIntro": "Wähle zuerst das Krankenversicherungssystem (Land) und die passende Versicherungsart aus. Für Deutschland stehen zur Auswahl:", "insuranceOptions": ["GKV: Du bist gesetzlich krankenversichert.", "PKV: Du bist privat krankenversichert.", "Aus dem Ausland: Du nimmst aus dem Ausland teil. Wähle diese Option, wenn deine Versicherung nicht zum ausgewählten Krankenversicherungssystem gehört."], "optionsIntro": "Mache anschließend eine Angabe zu deinem Kostenanteil:"},
         'Hier siehst du, welche selbst getragenen Gesamtkosten für den Therapieverlauf die Community berichtet, nach Abzug einer Kostenübernahme. Bei noch laufenden Behandlungen können die Angaben geschätzt sein. Prüfe das ausgewählte Krankenversicherungssystem und die Versicherungsart und unterscheide Kostenlos, Komplett übernommen und Nicht anwendbar. Die Betragsstufen sind keine Preisangebote. Unterschiedliche Behandlungsdauern und Anwendungszahlen können zu unterschiedlichen Gesamtkosten führen; lies diese deshalb zusammen mit den Kosten pro Einheit.'
       ]
     };
     const encouragement = {
-      symptome: ['Bei welchen Symptomen hat dir die Therapie geholfen? Wähle die passenden Symptome aus oder suche weitere. Du entscheidest, was du beitragen möchtest.', 'Bei welchen deiner Symptome könnte die Therapie helfen? Um dir hierfür eine Einschätzungsmöglichkeit zu geben, trägt die Community Erfahrungen zur Linderung einzelner Beschwerden zusammen.'],
-      wirkung: ['Was du erlebt hast, kann anderen helfen, ihre Fragen an die Therapie zu finden. Jede Angabe zählt.',
-        'Kann dir diese Therapie helfen – und wenn ja, wie sehr? Hier teilt die Community ihre Erfahrungen. Sie zeigen dir, ob und in welchem Maß andere von der Therapie profitiert haben. Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest – auch wenn die Wirkung von Person zu Person unterschiedlich ist.'],
-      termin: ['Deine Erfahrung mit Durchführung und Belastung hilft anderen, ihren Alltag rund um die Therapie zu planen.',
-        'Ist die Behandlung mit deinem aktuellen Gesundheitszustand überhaupt machbar? Um dir hierfür eine Einschätzungsmöglichkeit zu geben, trägt die Community Erfahrungen zur Durchführung zusammen. Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest – auch wenn die Wirkung von Person zu Person unterschiedlich ist.'],
-      zugang: ['Dein Weg zur Therapie und deine ungefähren Kosten geben anderen eine Vorstellung davon, womit sie rechnen können.',
-        'Wie aufwendig ist es, Zugang zur Behandlung zu bekommen, und welche Kosten kommen auf dich zu? Um dir hierfür eine Einschätzungsmöglichkeit zu geben, trägt die Community Erfahrungen zu Zugangswegen und Kosten zusammen.'],
+      symptome: ['Bei welchen Symptomen hat dir die Therapie geholfen? Wähle die passenden Symptome aus oder suche weitere. Du entscheidest, was du beitragen möchtest.', 'Bei welchen Beschwerden haben Patienten eine Linderung erlebt? Die Community sammelt Erfahrungen zu einzelnen Symptomen. So findest du Berichte zu Beschwerden, die du selbst kennst.'],
+      wirkung: ['Was du erlebt hast, kann Patienten helfen, ihre Fragen an die Therapie zu finden. Jede Angabe zählt.',
+        'Wie ging es Patienten mit dieser Therapie? Die Community sammelt Erfahrungen dazu, wie sich der Gesamtzustand verändert hat und für wen die Therapie ein entscheidender Schritt zur Genesung war.'],
+      termin: ['Deine Erfahrung mit Durchführung und Belastung hilft Patienten, ihren Alltag rund um die Therapie zu planen.',
+        'Wie könnte die Therapie in deinen Alltag passen? Die Community sammelt Erfahrungen dazu, wo und wie die Therapie durchgeführt wurde und wie Patienten das Crash-Risiko einschätzen.'],
+      zugang: ['Dein Weg zur Therapie und deine ungefähren Kosten geben Patienten eine Vorstellung davon, womit sie rechnen können.',
+        'Wie sind Patienten an die Therapie gekommen und was haben sie selbst bezahlt? Die Community sammelt Erfahrungen zu Zugangswegen, Kosten pro Einheit und Kosten für den gesamten Verlauf.'],
       anreise: ['Du hast schon etwas beigetragen? Danke dafür. Hier kannst du bei Bedarf noch nach Behandler:innen schauen.',
         'Wenn du die Therapie weiter erkunden möchtest, kannst du hier nach Behandler:innen in deiner Nähe schauen.'],
       alternativen: ['Danke, dass du dir Zeit für die Community genommen hast. Hier kannst du zum Abschluss noch verwandte Behandlungen ansehen.',
@@ -138,7 +145,7 @@
     const doctorIntroductions = {
       wirkung: [
         contributionPrompt,
-        'Wie haben Patienten die Behandlung erlebt? Die Community sammelt Erfahrungen dazu, wie sich der Gesamtzustand im Verlauf der Behandlung verändert hat.'
+        'Kann dir diese Behandlung helfen – und wenn ja, wie sehr? Hier teilt die Community ihre Erfahrungen. Sie zeigen dir, ob und in welchem Maß Patienten von der Behandlung profitiert haben. Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest – auch wenn die Wirkung von Person zu Person unterschiedlich ist.'
       ],
       termin: [
         contributionPrompt,
@@ -150,11 +157,11 @@
       ],
       symptome: [
         'Klicke auf die Symptome, die sich bei dir während der Behandlung verbessert haben, oder ergänze entsprechende Symptome.',
-        'Bei welchen Symptomen berichtet die Community von einer Linderung? Die Liste zeigt, zu welchen Beschwerden Erfahrungen vorliegen.'
+        'Bei welchen Beschwerden haben Patienten während der Behandlung eine Linderung erlebt? Die Community sammelt diese Erfahrungen nach Symptomen, damit du Angaben zu deinen Beschwerden leichter findest.'
       ],
       therapien: [
         'Bestätige, welche Therapien hier angeboten werden, widersprich unzutreffenden Zuordnungen oder ergänze fehlende Therapien.',
-        'Welche Therapien sind dieser Praxis zugeordnet? Die Übersicht bündelt recherchierte Zuordnungen und Rückmeldungen der Community zum Therapieangebot.'
+        'Welche Therapien bietet diese Praxis an? Die Übersicht bündelt recherchierte Zuordnungen und Rückmeldungen der Community zum Therapieangebot.'
       ],
       anreise: [
         'Auf der Karte siehst du die Praxisstandorte.',
@@ -165,21 +172,15 @@
       wirkung: [
         {
           title: 'Genesungsfortschritt', selector: '.effect-chart', answers: 'Angaben',
-          reading: 'Die Balken zeigen, wie sich die Angaben auf vier Antwortmöglichkeiten verteilen. Achte auch auf die Anzahl der Angaben.',
-          options: [
-            ['Verschlechterung', 'Der Gesamtzustand hat sich verschlechtert.'],
-            ['Neutral', 'Der Gesamtzustand ist gleich geblieben.'],
-            ['Verbesserung', 'Der Gesamtzustand hat sich verbessert.'],
-            ['Heilung', 'Der Gesamtzustand hat sich bis zur Genesung verbessert.']
-          ],
-          readingNote: 'Die Antworten beschreiben persönliche Erfahrungen. Aus ihnen lässt sich die Wirkung für einzelne Personen nicht vorhersagen.'
+          reading: communityRating.readingIntro,
+          readingNote: communityRating.readingClosing
         }
       ],
       termin: [
         {
           title: 'Long-Covid-gerechter Termin', selector: '.adaptation-matched', answers: 'Angaben',
           review: 'Hier fasst die Community zusammen, welche Belastung bei einem Termin vor Ort auf Betroffene zukommt. Die fünf Stufen bauen auf den unten nummerierten Kriterien auf. Wähle in der Abbildung die Stufe, die am besten zu deiner Erfahrung passt.',
-          reading: 'Die Verteilung zeigt, wie gut Patienten ihren Termin an ihre Belastbarkeit angepasst fanden. Die Stufen berücksichtigen diese Kriterien.',
+          reading: 'Die Community sammelt Erfahrungen dazu, wie gut Termine vor Ort an die Belastbarkeit angepasst waren. Je mehr der folgenden Kriterien erfüllt waren, desto höher ist die Stufe.',
           reviewOptions: [
             ['Hohe Belastung', '0 von 4 Kriterien erfüllt.'],
             ['Etwas belastender', '1 von 4 Kriterien erfüllt.'],
@@ -205,7 +206,7 @@
           review: 'Unter „Terminform“ sammelt die Community, ob Erst- und Folgetermine vor Ort, per Telefon oder per Video möglich sind. Klicke dazu auf die Zahl für **Möglich** oder **Nicht möglich** links oder rechts neben dem jeweiligen Balken.',
           reviewNote: 'Telefon- und Videotermine können für Long-Covid-Betroffene mit geringer Belastbarkeit eine Erleichterung sein, weil die Anfahrt entfällt.',
           reviewOptions: [],
-          reading: 'Die Tabelle zeigt für jede Terminform, wie oft sie als möglich oder als nicht möglich gemeldet wurde.',
+          reading: 'Die Community meldet, ob Termine vor Ort, per Telefon oder per Video möglich waren. Die Tabelle zeigt die Angaben getrennt für Erst- und Folgetermine.',
           options: [
             ['Ersttermin', 'Hier geht es um den ersten Termin vor Ort, per Telefon oder per Video.'],
             ['Folgetermin', 'Hier geht es um dieselben Terminformen für weitere Termine.']
@@ -222,7 +223,7 @@
             ['Komplett übernommen', 'Die Krankenkasse oder Versicherung hat die Kosten vollständig getragen.'],
             ['Kostenspannen', 'Die Stufen ordnen den ungefähr selbst bezahlten Betrag ein. Läuft deine Behandlung noch, schätze deinen gesamten Eigenanteil. Falls das schwierig ist, reicht der Betrag, den du bisher selbst bezahlt hast.']
           ],
-          reading: 'Die Auswertung zeigt die selbst getragenen Kosten für das gewählte Land und die gewählte Versicherungsart.',
+          reading: 'Die Auswertung zeigt die selbst getragenen Kosten für das gewählte Land und die gewählte Versicherungsart. Die Beträge stammen aus Angaben der Community.',
           options: [
             ['Komplett übernommen', 'Die Krankenkasse oder Versicherung hat die Kosten vollständig getragen.'],
             ['Kostenspannen', 'Die Stufen ordnen den ungefähr selbst bezahlten Betrag ein.']
@@ -232,12 +233,12 @@
         {
           title: 'Wartezeit auf den Ersttermin', selector: '[data-choice="wait"]', answers: 'Angaben',
           review: 'Unter „Wartezeit auf den Ersttermin“ sammelt die Community, wie lange Patienten auf ihren ersten Termin gewartet haben. Wähle in der Abbildung die Stufe, die zu deiner Wartezeit passt.',
-          reading: 'Die Verteilung zeigt, wie lange Patienten auf den ersten Termin gewartet haben. Die aktuelle Verfügbarkeit kann davon abweichen.'
+          reading: 'Die Balken zeigen, wie lange Patienten aus der Community auf ihren ersten Termin gewartet haben. Die aktuelle Verfügbarkeit kann davon abweichen.'
         },
         {
           title: 'Wartezeit auf Folgetermine', selector: '[data-choice="wait-followup"]', answers: 'Angaben',
           review: 'Unter „Wartezeit auf Folgetermine“ sammelt die Community, wie lange Patienten auf einen weiteren Termin gewartet haben. Wähle in der Abbildung die Stufe, die zu deiner Wartezeit passt.',
-          reading: 'Die Verteilung zeigt die berichteten Wartezeiten auf weitere Termine. Vergleiche sie mit der Wartezeit auf den Ersttermin.'
+          reading: 'Die Balken zeigen die Wartezeiten, die die Community für weitere Termine gemeldet hat. Vergleiche sie mit der Wartezeit auf den Ersttermin.'
         }
       ],
       symptome: [
@@ -245,7 +246,7 @@
           title: 'Bei welchen Symptomen hat dir die behandelnde Person geholfen?', disclosureKey: 'Symptome',
           selector: '[data-doctor-symptom-help]', answers: 'Symptome',
           review: 'Unter „Symptome“ sammelt die Community, bei welchen Beschwerden Patienten während der Behandlung eine Linderung erlebt haben. Du kannst mehrere Symptome angeben.',
-          reading: 'Die Zahl neben einem Symptom zeigt, wie viele Personen dort eine Linderung gemeldet haben. Eine Person kann mehrere Symptome angeben.',
+          reading: 'Die Zahl neben einem Symptom zeigt, wie oft die Community eine Linderung gemeldet hat. Eine Person kann mehrere Symptome angeben.',
           reviewOptions: [
             ['Vorhandene Symptome auswählen', 'Wähle die passenden Symptome in der Liste. Durch erneutes Auswählen nimmst du deine Angabe zurück.'],
             ['Weitere Symptome ergänzen', 'Suche unter „Weiteres Symptom auswählen“ nach einem passenden Eintrag.']
@@ -269,7 +270,7 @@
           title: 'Anreiseaufwand', selector: '.travel-estimate',
           review: 'Gib bei „Adresse, PLZ oder Ort“ deinen Ausgangsort ein und wähle „Standort übernehmen“. Unter „Anreiseaufwand“ siehst du dann die Luftlinienentfernung und eine grobe Einschätzung der Fahrzeit. Sind Erst- und Folgetermin online möglich, entfällt für beide die Anreise.',
           reviewOptions: [],
-          reading: 'Die Entfernungsstufe nutzt die Luftlinie von deinem Ausgangsort. Die Fahrzeit dient als grobe Orientierung.',
+          reading: 'Die Entfernungsstufe nutzt die Luftlinie von deinem Ausgangsort. Die Fahrzeit dient als grobe Orientierung. Hinweise zur Terminform findest du unter „Belastungseinschätzung“.',
           options: [
             ['Erst- und Folgetermin online', 'Wenn beide Termine online möglich sind, entfällt die Anreise zu diesen Terminen.']
           ]
@@ -495,7 +496,7 @@
         const message = sharing.invitation ?? (sharing.providers
           ? 'Kennst du jemanden, der diese Therapie schon bei einer Behandler:in gemacht hat? Leite diese Seite weiter und lade die Person ein, Angaben zu bestätigen oder zu korrigieren, fehlende Behandler:innen zu ergänzen und ihre Erfahrung im jeweiligen Praxiseintrag zu teilen.'
           : count === 0
-          ? 'Kennst du jemanden, der diese Therapie ausprobiert hat? Lade die Person ein, ihre Erfahrung zu teilen. Das hilft dir und anderen bei der Orientierung.'
+          ? 'Kennst du jemanden, der diese Therapie ausprobiert hat? Lade die Person ein, ihre Erfahrung zu teilen. Das hilft dir und Patienten bei der Orientierung.'
           : 'Kennst du jemanden, der diese Therapie ausprobiert hat? Jede weitere Erfahrung hilft, die Therapie besser einzuschätzen.');
         formatShareInvitation(sharing.message, message);
       }
@@ -622,6 +623,7 @@
           const description = make('p');
           description.append(...withHighlights(review ? topic.review : topic.reading));
           disclosure.append(description);
+          if (isEffect) disclosure.append(communityRatingOptions(false));
         }
         if (answers && !review) {
           const count = make('span', '', 'therapy-guide-answer-count');
@@ -829,7 +831,10 @@
       guide.classList.add('therapy-guide-note');
       const heading = make('h2', panel.getAttribute('aria-label'));
       const review = mode === 'review';
-      let eyebrow = review ? 'Deine Erfahrung zählt' : 'Erfahrungen verstehen';
+      let eyebrow = review ? 'Deine Erfahrung zählt' : ({
+        anreise: doctor ? 'Anreise planen' : 'Behandler:innen finden',
+        therapien: 'Therapieangebot erkunden'
+      }[panel.id] || 'Erfahrungen einordnen');
       if (!review) guide.classList.add('therapy-guide-reading');
       const body = [make('p', doctor
         ? doctorIntroductions[panel.id]?.[review ? 0 : 1]
@@ -862,7 +867,10 @@
         }
         if (!review && entries.length && profileParam === 'id') {
           sharing = shareEntry();
-          formatShareInvitation(sharing.message, 'Kennst du jemanden, der hier behandelt wurde? Lade die Person ein, ihre Erfahrung zu teilen.');
+          const question = panel.id === 'wirkung'
+            ? 'Kennst du jemanden, der bei diesem Behandler oder bei dieser Behandlerin in Therapie war?'
+            : 'Kennst du jemanden, der hier behandelt wurde?';
+          formatShareInvitation(sharing.message, question + ' Lade die Person ein, ihre Erfahrung zu teilen.');
         }
       } else if (cards.length) {
 
@@ -870,11 +878,11 @@
           sharing = shareEntry();
         }
       } else if (panel.id === 'anreise' && !review) {
-        body[0].textContent = 'Wo findest du Behandler:innen für diese Therapie? Die Community sammelt Einträge, damit du eine Auswahl hast und sehen kannst, wer die Behandlung in deiner Nähe anbietet. So kannst du Behandler:innen mit möglichst wenig Anreiseaufwand finden.';
+        body[0].textContent = 'Wer bietet diese Therapie in deiner Nähe an? Die Community sammelt Behandler:innen und ihre Standorte. Auf der Karte kannst du nach einem Ort suchen und den Anreiseaufwand vergleichen.';
         const help = [
-          ['Anreiseaufwand', 'Die hervorgehobene Stufe ordnet die nächstgelegene behandelnde Person im aktuellen Filter nach Entfernung ein. Die Kilometerangabe ist die Luftlinie; die Zeitangaben sind grobe Orientierung und keine berechnete Reiseroute. Online-Behandlung bedeutet hier, dass Erst- und Folgetermin online möglich sind.'],
-          ['Karte', 'Die Community sammelt Behandler:innen, die diese Therapie anbieten, und ihre Standorte. Mithilfe der Karte kannst du Behandler:innen für diese Therapie in deiner Nähe finden. Gib dazu eine Adresse, Postleitzahl oder einen Ort ein und übernimm den Standort.'],
-          ['Einträge ansehen und vergleichen', 'Nutze die Übersicht der Behandler:innen, die diese Therapie anbieten, um sie untereinander zu vergleichen und die für dich passendste Anlaufstelle zu finden. Öffne einen Eintrag, um mehr über das Behandlungsangebot zu erfahren. Bei Bedarf kannst du zwischen Kachel- und Tabellenansicht wechseln.'],
+          ['Anreiseaufwand', 'Die hervorgehobene Stufe bezieht sich auf den nächstgelegenen Eintrag in deiner Auswahl. Sie nutzt die Luftlinie von deinem Ausgangsort. Die Fahrzeit dient als grobe Orientierung. Sind Erst- und Folgetermin online möglich, entfällt die Anreise zu diesen Terminen.'],
+          ['Karte', 'Auf der Karte findest du Behandler:innen für diese Therapie in deiner Nähe. Gib dazu eine Adresse, Postleitzahl oder einen Ort ein und übernimm den Standort.'],
+          ['Einträge ansehen und vergleichen', 'Vergleiche die Behandler:innen in der Kachel- oder Tabellenansicht. Öffne einen Eintrag, um mehr über das Angebot der Praxis zu erfahren.'],
         ];
         help.forEach(([title, text]) => {
           const disclosure = make('details');
@@ -893,19 +901,14 @@
       cards.forEach(card => {
         const topic = topics[card.dataset.question || 'symptoms'];
         if (!topic) return;
+        const compactSymptoms = mode === 'explore' && card.matches('.ux-symptom-help, [data-question="symptoms"]');
         const readingTopics = {
           effect: {
-            intro: 'Unter „Genesungsfortschritt“ fasst die Community zusammen, wie sich der Gesundheitszustand bei Anwendung der ausgewählten Therapie verändert hat. So siehst du, welchen Effekt die Behandlung aus Sicht der Community hatte. Die Antworten werden in vier Kategorien erfasst:',
-            options: [
-              'Verschlechterung: Die Behandlung hatte einen negativen Effekt auf die Gesundheit.',
-              'Neutral: Der Gesamtzustand ist gleich geblieben.',
-              'Verbesserung: Der Gesamtzustand hat sich spürbar verbessert.',
-              'Heilung: Die Therapie hat nach eigener Einschätzung zu einer Genesung geführt.'
-            ],
-            closing: 'Die Auswertung beschreibt die Erfahrungen der Teilnehmenden und berechnet nicht deine persönliche Erfolgschance'
+            intro: communityRating.readingIntro,
+            closing: communityRating.readingClosing
           },
           gamechanger: {
-            intro: 'Als Gamechanger gilt eine Therapie, die den Genesungsprozess entscheidend vorangetrieben hat. Hier siehst du, für wie viele die ausgewählte Therapie diese Bedeutung hatte. Die Antworten werden in zwei Kategorien erfasst:',
+            intro: 'Als Gamechanger gilt eine Therapie, die den Genesungsprozess entscheidend vorangebracht hat. Hier siehst du, wie häufig die Community das für diese Therapie berichtet.',
             options: [
               'Ja: Die ausgewählte Therapie hat den Genesungsprozess entscheidend vorangetrieben.',
               'Nein: Die ausgewählte Therapie hat den Genesungsprozess leider nicht entscheidend vorangetrieben.'
@@ -915,8 +918,13 @@
         };
         Object.assign(readingTopics, {
           setting: {
-            intro: 'Hier erfasst die Community, wo und in welchem Rahmen andere Betroffene die Therapie angewendet haben. Diese Angabe hilft dir einzuschätzen, welcher Aufwand damit für dich verbunden wäre und ob der Rahmen zu dir passt. Die Antworten werden in vier Kategorien erfasst:',
-            options: [
+            intro: 'Hier erfasst die Community, wo und in welchem Rahmen Patienten die Therapie angewendet haben. Diese Angabe hilft dir einzuschätzen, welcher Aufwand damit für dich verbunden wäre und ob der Rahmen zu dir passt. Die Antworten werden in vier Kategorien erfasst:',
+            options: mode === 'explore' ? [
+              'Selbstständig zu Hause: Die Therapie findet zu Hause und ohne Fachpersonal statt.',
+              'Hausbesuch: Die Therapie findet zu Hause und mit Fachpersonal statt.',
+              'Ambulant: Die Therapie findet bei einzelnen Terminen vor Ort statt, etwa in einer Praxis.',
+              'Stationär: Die Therapie findet während eines Aufenthalts mit Übernachtung in einer Einrichtung statt.'
+            ] : [
               'Selbstständig zu Hause: Die Therapie wird eigenständig zu Hause angewendet, ohne zusätzlichen Reiseaufwand oder Unterstützung durch Fachpersonal.',
               'Hausbesuch: Die Behandlung findet mit Unterstützung durch Fachpersonal zu Hause statt.',
               'Ambulant: Die Behandlung findet bei einzelnen Terminen vor Ort statt, zum Beispiel in einer Praxis.',
@@ -935,7 +943,7 @@
             closing: 'Die Anteile beschreiben Risikoeinschätzungen, nicht die Häufigkeit tatsächlich aufgetretener Verschlechterungen. Die Antwort Keines ist keine Zusicherung für deine eigene Anwendung.'
           },
           access: {
-            intro: 'Die Zugänglichkeit beschreibt, wie aufwendig es ist, Zugang zur ausgewählten Therapie zu erhalten. Hier siehst du, welche Wege andere genutzt haben. Vier Zugangswege im Vergleich:',
+            intro: 'Die Community sammelt Erfahrungen dazu, wie Patienten Zugang zu dieser Therapie bekommen haben. Die vier Zugangswege unterscheiden sich im Aufwand.',
             options: [
               'Selbstmanagement / eigenständig umsetzbar: Du kannst die Maßnahme eigenständig umsetzen und benötigst weder Behandler:innen noch eine ärztliche Verordnung. Der Zugang ist mit geringem Aufwand verbunden.',
               'Frei erhältlich / private Behandler:innen: Du kannst das Mittel frei kaufen oder die Therapie direkt mit privaten Behandler:innen vereinbaren. Eine ärztliche Verordnung ist nicht nötig. Der Zugang ist mit mittlerem Aufwand verbunden.',
@@ -983,8 +991,12 @@
           countLabel.dataset.guideAnswerCount = '';
           disclosure.querySelector('summary').append(document.createTextNode(' '), countLabel);
         }
-        if (instructions === communityRating) {
+        if (compactSymptoms) {
+          disclosure.append(make('p', 'Hier sammelt die Community, bei welchen Symptomen Patienten eine Linderung durch diese Therapie erlebt haben. Die Zahl neben dem Symptom zeigt, wie oft eine Linderung gemeldet wurde. Eine Person kann mehrere Symptome angeben. Nennungen sind keine Erfolgsquote: Angaben zu ausgebliebener Linderung werden hier nicht erfasst.'));
+        } else if (instructions === communityRating) {
           appendCommunityRating(disclosure);
+        } else if (card.dataset.question === 'effect') {
+          disclosure.append(make('p', instructions.intro), communityRatingOptions(false), make('p', instructions.closing));
         } else if (instructions) {
           const list = make('ul', '', 'therapy-guide-options');
           if (card.dataset.question === 'access') list.classList.add('therapy-guide-access-options');
@@ -995,6 +1007,10 @@
               : option.startsWith('Wähle ') ? 'Symptome auswählen' : 'Weitere Symptome suchen';
             const explanation = separator >= 0 ? option.slice(separator + 1).trim() : option;
             const description = make('span', explanation);
+            if (card.dataset.question === 'setting' && mode === 'explore') {
+              const parts = explanation.split(/\b(zu Hause|ohne|mit Übernachtung|mit|vor Ort)\b/);
+              description.replaceChildren(...parts.map((part, index) => index % 2 ? make('u', part) : part));
+            }
             if (card.dataset.question === 'gamechanger' && label === 'Nein') {
               const parts = explanation.split(' nicht ');
               description.replaceChildren(document.createTextNode(parts[0] + ' '), make('u', 'nicht'), document.createTextNode(' ' + parts[1]));
@@ -1035,7 +1051,7 @@
           }
           disclosure.append(list, make('p', instructions.closing));
         } else disclosure.append(make('p', topic[1]));
-        const example = review ? null : make('p');
+        const example = review || compactSymptoms ? null : make('p');
         if (example) disclosure.append(example);
         body.push(disclosure);
         entries.push({card, example, disclosure});
@@ -1184,7 +1200,7 @@
           illustrated(thanks, 'Zum Abschluss', make('h2', title),
             make('p', 'Du kannst jederzeit zurückkommen, weiterlesen oder ein anderes Anliegen wählen.'), thanksActions);
         } else illustrated(thanks, 'Für heute geschafft', make('h2', 'Danke, dass du dabei bist!'),
-          make('p', 'Schön, dass du dir Zeit genommen hast, dich hier umzusehen und dein Wissen zu teilen. So wächst unser gemeinsames Wissen – und andere finden leichter ihren Weg.'),
+          make('p', 'Schön, dass du dir Zeit genommen hast, dich hier umzusehen und dein Wissen zu teilen. So wächst unser gemeinsames Wissen – und Patienten finden leichter ihren Weg.'),
           make('p', 'Du musst nicht alles ausfüllen. Für heute darf es genug sein. Du kannst jederzeit zurückkommen, etwas ergänzen oder einfach weiterlesen.'), thanksActions);
         document.body.append(thanks);
         thanks.addEventListener('close', () => thanks.remove(), {once:true});
@@ -1216,12 +1232,6 @@
       if(nextButton)navigationPair.append(nextButton);
       if(!next)navigationPair.append(changeIntent);
       actions.append(navigationPair, secondaryActions);
-      if (!doctor && !review && !['anreise', 'alternativen'].includes(panel.id)) {
-        const orientationClosing = panel.id === 'zugang'
-          ? 'Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest'
-          : 'Das kann dir eine erste Orientierung geben, was du selbst erwarten könntest – auch wenn die Wirkung von Person zu Person unterschiedlich ist.';
-        if (!body[0].textContent.includes(orientationClosing)) body[0].append(document.createTextNode(' ' + orientationClosing));
-      }
       illustrated(guide, eyebrow, heading, ...body, actions);
       if (!review && sharing) {
         sharing.block.classList.add('therapy-guide-sharing-first');
@@ -1237,13 +1247,13 @@
       ['travel', 'Anreise', 'Sieh dir die Praxisstandorte auf der Karte an und schätze die Entfernung von deinem Ausgangsort ein.', 'anreise', 'Anreise ansehen'],
       ['symptoms', 'Bei welchem Symptom berichtet die Community von einer Linderung?', 'Sieh nach, bei welchen Symptomen Patienten von einer Linderung berichten.', 'symptome', 'Symptome ansehen'],
       ['explore', 'Erfahrungen der Community ansehen', 'Lies, was Patienten über die Behandlung, die Belastung bei Terminen und die Kosten berichten.', 'wirkung', 'Erfahrungen ansehen'],
-      ['treatments', 'Therapien dieser Praxis', 'Sieh dir die zugeordneten Therapien an. Du kannst nach Kategorien filtern und findest über den Namen mehr zur jeweiligen Therapie.', 'therapien', 'Therapien ansehen']
+      ['treatments', 'Therapien dieser Praxis', 'Sieh dir recherchierte Therapieangebote und Rückmeldungen der Community an. Über den Namen gelangst du zur jeweiligen Therapieseite.', 'therapien', 'Therapien ansehen']
     ] : [
       ['review', 'Meine Erfahrung teilen', 'Berichte Schritt für Schritt, wie es dir mit der Therapie ging. Du entscheidest, welche Fragen du beantworten möchtest.', 'wirkung', 'Erfahrung teilen'],
-      ['providers', 'Behandler:innen finden (Karte)', 'Suche auf der Karte nach Behandler:innen, die diese Therapie anbieten. Wähle einen Ort aus, um Behandler:innen in der Nähe zu finden.', 'anreise', 'Behandler:innen suchen'],
-      ['symptoms', 'Bei welchem Symptom berichtet die Community von einer Linderung?', 'Sieh nach, bei welchen Symptomen andere von einer Linderung berichten.', 'symptome', 'Symptome ansehen'],
-      ['explore', 'Erfahrungen der Community ansehen', 'Sieh dir die Erfahrungen der Community zu Themen wie Wirkung, Belastung und Kosten an. Wir führen dich als Nächstes Schritt für Schritt durch alle vorhandenen Angaben der Community.', 'wirkung', 'Erfahrungen ansehen'],
-      ['alternatives', 'Therapiealternativen', 'Entdecke weitere Alternativen zur ausgewählten Therapie. Nutze das breite Wissen der Community und finde Inspiration für deinen Therapieplan.', 'alternativen', 'Alternativen ansehen']
+      ['providers', 'Behandler:innen finden (Karte)', 'Sieh auf der Karte nach, wo diese Therapie angeboten wird. Gib einen Ort ein, um Einträge in deiner Nähe zu finden und die Anreise einzuschätzen.', 'anreise', 'Behandler:innen suchen'],
+      ['symptoms', 'Bei welchem Symptom berichtet die Community von einer Linderung?', 'Sieh nach, bei welchen Symptomen Patienten von einer Linderung berichten.', 'symptome', 'Symptome ansehen'],
+      ['explore', 'Erfahrungen der Community ansehen', 'Lies Schritt für Schritt, was Patienten über die Wirkung, den Aufwand und die Kosten dieser Therapie berichten.', 'wirkung', 'Erfahrungen ansehen'],
+      ['alternatives', 'Therapiealternativen', 'Entdecke Alternativen, Anwendungsformen und Kombinationen, die die Community zu dieser Therapie zusammengetragen hat.', 'alternativen', 'Alternativen ansehen']
     ];
 
     function startView([value, , , view]) {

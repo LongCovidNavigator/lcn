@@ -4,6 +4,7 @@ require_once __DIR__ . '/_catalog_redirect.php';
 require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_editorial_treatments.php';
 require_once __DIR__ . '/_doctor_treatment_ratings.php';
+require_once __DIR__ . '/_doctor_social_profiles.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: private, no-store');
@@ -364,6 +365,7 @@ try {
     $hasCoordinates = (int)$item['has_coordinates'] === 1;
 
     $item['dr_id'] = (int)$item['dr_id'];
+    $item['social_profiles'] = lcnApprovedDoctorSocialProfiles($pdo, $item['dr_id']);
     $item['dr_is_dr'] = $item['dr_is_dr'] !== null ? (int)$item['dr_is_dr'] : null;
 
     $item['loc_id'] = $item['loc_id'] !== null ? (int)$item['loc_id'] : null;

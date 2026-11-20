@@ -171,6 +171,9 @@ async function check(browser, width) {
     await welcome.getByRole('button', {name: 'Erfahrung teilen →', exact: true}).click();
     await active('wirkung');
     await page.locator('#wirkung .effect-chart').waitFor();
+    const ratingDescriptions = () => page.locator('#wirkung .therapy-guide-note [data-disclosure-key="effect"] li > span').allTextContents();
+    const contributionDescriptions = await ratingDescriptions();
+    assert.equal(contributionDescriptions.length, 4);
     if (width > 1100) await checkIndependentDesktopScroll(page);
     assert.equal(await page.locator('#treatment-section').count(), 0);
     assert.equal(await page.locator('[data-doctor-symptom-help]').count(), 0);
@@ -295,10 +298,13 @@ async function check(browser, width) {
     await dialog.getByRole('button', {name: 'Anreise ansehen →'}).click();
     await active('anreise');
     await map.locator('.leaflet-marker-icon').first().waitFor();
-    await page.locator('#anreise .therapy-guide-note summary').getByText('Karte', {exact: true}).click();
-    assert.deepEqual(await page.locator('#anreise .therapy-guide-note details[open] u').allTextContents(), [
-      'Adresse, PLZ oder Ort', 'Standort übernehmen'
+    const travelReading = page.locator('#anreise .therapy-guide-note details');
+    assert.equal(await travelReading.count(), 1);
+    await travelReading.locator('summary').getByText('Anreiseaufwand', {exact: true}).click();
+    assert.deepEqual(await travelReading.locator('u').allTextContents(), [
+      'Anreiseaufwand', 'Adresse, PLZ oder Ort', 'Standort übernehmen', 'Belastungseinschätzung'
     ]);
+    assert.equal(await travelReading.locator('li strong').innerText(), 'Erst- und Folgetermin online:');
 
     await go('ueberblick');
     const wheel = welcome.getByRole('listbox');
@@ -310,10 +316,14 @@ async function check(browser, width) {
     const assessment = page.locator('#wirkung .therapy-guide-note details');
     await assessment.getByText('(3 Angaben)', {exact: true}).waitFor();
     await assessment.locator('summary').press('Space');
+    assert.match(await assessment.locator('p').first().innerText(), /wie sich der Gesundheitszustand während der Behandlung bei der ausgewählten Behandlerin oder dem ausgewählten Behandler verändert hat\. So siehst du, welchen Effekt die Behandlung aus Sicht der Community hatte\. Die Antworten werden in vier Kategorien erfasst:$/);
     assert.deepEqual(await assessment.locator('li strong').allTextContents(), ['Verschlechterung:', 'Neutral:', 'Verbesserung:', 'Heilung:']);
+    assert.deepEqual(await ratingDescriptions(), contributionDescriptions);
+    assert.equal(await assessment.locator('li u').count(), 4);
+    assert.equal(await noOverflow(), true);
     await page.reload();
     await assessment.and(page.locator('[open]')).waitFor();
-    await page.locator('#wirkung .therapy-guide-sharing strong').getByText('Kennst du jemanden, der hier behandelt wurde?').waitFor();
+    await page.locator('#wirkung .therapy-guide-sharing strong').getByText('Kennst du jemanden, der bei diesem Behandler oder bei dieser Behandlerin in Therapie war?', {exact: true}).waitFor();
 
     await go('termin');
     await page.locator('#termin .therapy-guide-note summary').getByText('(4 Einzelangaben)', {exact: true}).waitFor();
@@ -335,11 +345,12 @@ async function check(browser, width) {
     await wheel.press('Enter');
     await welcome.getByRole('button', {name: 'Therapien ansehen →'}).click();
     await active('therapien');
-    const assignments = page.locator('#therapien .therapy-guide-note details').last();
-    assert.equal(await therapyGuide.locator('details').count(), 2);
-    assert.equal(await therapyGuide.locator('.therapy-guide-annotation').count(), 0);
-    await assignments.locator('summary').getByText('Zuordnungen prüfen und ergänzen').click();
-    assert.deepEqual(await assignments.locator('p strong').allTextContents(), ['Zustimmen (✓)', 'Widersprechen (×)']);
+    const assignments = therapyGuide.locator('details');
+    assert.equal(await assignments.count(), 1);
+    const annotation = therapyGuide.locator('.therapy-guide-annotation');
+    assert.equal(await annotation.count(), 1);
+    await assignments.locator('summary').getByText('Therapien', {exact: true}).click();
+    assert.match(await annotation.innerText(), /Zustimmen .* und Widersprechen/);
     await page.getByRole('button', {name: 'Ich bin hier fertig', exact: true}).click();
     const finish = page.getByRole('dialog', {name: 'Danke, dass du dich umgesehen hast!'});
     await finish.getByRole('button', {name: 'Hier bleiben', exact: true}).click();

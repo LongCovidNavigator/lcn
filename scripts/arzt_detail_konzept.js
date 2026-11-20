@@ -276,12 +276,19 @@
     try {
       const response = await fetch(isSubmission ? `api/doctor_submission.php?id=${doctorId}` : `api/doctor_detail.php?id=${doctorId}`);
       let data = await response.json();
+      if (isSubmission && response.ok && data.approved_target_id) {
+        const target = new URL(location.href);
+        target.searchParams.delete('submission_id');
+        target.searchParams.set('id', data.approved_target_id);
+        location.replace(target.href);
+        return;
+      }
       if(data.merged_target_id){const target=new URL(location.href);target.searchParams.set('id',data.merged_target_id);location.replace(target.href);return;}
       if(isSubmission && response.ok && data.ok) {
         const activities=[data.primary_care?'Hausärztlich tätig':'',data.specialist_care?'Als Spezialist tätig':''].filter(Boolean).join(' · ');
         const note=document.getElementById('submission-note');
         if(note){note.hidden=false;note.querySelector('strong').textContent=data.status==='approved'?'Community-Eintrag':'Community-Eintrag · noch nicht geprüft';}
-        data={ok:true,item:{dr_display_name:data.name,dr_org_name:data.organization,dr_website:data.website,address_text:data.address,loc_label:data.organization||data.name,activities,has_coordinates:false,loc_lat:null,loc_lng:null},research:{},treatments_grouped:data.treatments_grouped||{}};
+        data={ok:true,item:{dr_display_name:data.name,dr_org_name:data.organization,dr_website:data.website,social_profiles:data.social_profiles,address_text:data.address,loc_label:data.organization||data.name,activities,has_coordinates:false,loc_lat:null,loc_lng:null},research:{},treatments_grouped:data.treatments_grouped||{}};
       }
       if (!response.ok || !data.ok || !data.item) throw new Error('Profile unavailable');
       state.data = data;
@@ -545,6 +552,70 @@
     const own = savedLocation();
     return `<section class="card location-section"><h3>Anreise</h3>${travelEstimate()}${researchedRemoteNotice()}<div class="doctor-detail-location-grid"><div class="doctor-detail-location-address top-map-location-controls"><h4 class="nd-location-title">Standortsuche</h4><form id="location-form" role="search" autocomplete="off" aria-label="Standortsuche"><div class="nd-location-heading"><label for="own-location">Adresse, PLZ oder Ort</label><button type="button" id="clear-location" aria-label="Standort entfernen"${own ? '' : ' hidden'}>×</button></div><div class="own-location-control top-map-location-input-row"><input id="own-location" name="doctor_location_query" type="search" placeholder="z. B. Musterstadt" autocomplete="off" data-lpignore="true" data-1p-ignore="true" spellcheck="false" enterkeyhint="search" maxlength="200" value="${escape(own?.label || '')}"></div><button type="submit" class="nd-location-submit">Standort übernehmen</button><div class="top-map-location-suggestions is-hidden"></div><span data-location-status role="status" aria-live="polite"></span></form>${practiceFilters()}<div class="nd-location-summary"><span>Entfernung zu deinem Standort</span><strong id="own-distance">${distanceText()}</strong><span data-doctor-map-status role="status"></span></div></div><div id="doctor-detail-map" class="doctor-detail-map" aria-label="Karte des Praxisstandorts"></div></div></section>`;
   }
+  function socialProfileLinks(doctor) {
+    const social = window.LCNDoctorSocialProfiles;
+    if (!social) return '';
+    const demo = social.demo && !isSubmission;
+    const profiles = demo ? social.examples : (doctor.social_profiles || []);
+    const links = profiles.filter(({url}) => /^https?:\/\//i.test(url)).map(({platform, url, owner, label}) => {
+      const name = platform === 'other' ? label : social.platforms[platform];
+      const ownerLabel = social.owners[owner];
+      return `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer">${escape(name)}${ownerLabel ? ' · ' + escape(ownerLabel) : ''} <span aria-hidden="true">↗</span></a>`;
+    });
+    return links.length ? `<div class="doctor-social-links"><dt>Social Media${demo ? ' · Demo' : ''}</dt><dd>${links.join('')}</dd></div>` : '';
+  }
+
+  function editSocialProfiles(trigger) {
+    const social = window.LCNDoctorSocialProfiles;
+    const dialog = document.createElement('dialog');
+    dialog.className = 'doctor-social-dialog';
+    dialog.setAttribute('aria-labelledby', 'doctor-social-dialog-title');
+    dialog.innerHTML = `<form>
+      <h2 id="doctor-social-dialog-title">Social-Media-Profile hinzufügen</h2>
+      <p>Verlinke öffentliche berufliche Profile der Person oder Einrichtung.</p>
+      <div data-social-editor></div>
+      <p role="status"></p>
+      <footer><button type="submit" class="doctor-social-action">Profile speichern</button><button type="button" class="doctor-social-action" data-close>Schließen</button></footer>
+    </form>`;
+    const profiles = social.setup(dialog.querySelector('[data-social-editor]'), [{}]);
+    const form = dialog.querySelector('form');
+    const status = dialog.querySelector('[role="status"]');
+    const save = form.querySelector('[type="submit"]');
+    dialog.querySelector('[data-close]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('close', () => {
+      dialog.remove();
+      (trigger.isConnected ? trigger : content.querySelector('[data-add-doctor-social]'))?.focus();
+    });
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (social.demo) {
+        status.textContent = 'In der Demo werden keine Profile gespeichert.';
+        return;
+      }
+      save.disabled = true;
+      status.textContent = 'Wird gespeichert …';
+      try {
+        const response = await fetch('api/create_submission.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({type: 'doctor', action: 'add_doctor_social_profiles', existing_target_id: doctorId, social_profiles: profiles()})
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || 'Die Profile konnten nicht gespeichert werden.');
+        state.data.item.social_profiles = data.social_profiles;
+        render();
+        dialog.close();
+        notify('Social-Media-Profile gespeichert.');
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        save.disabled = false;
+      }
+    });
+    document.body.append(dialog);
+    dialog.showModal();
+  }
+
   function profileFacts() {
     if (!state.data) return `<section class="card overview-facts"><h3>Überblick</h3>${dataStatus()}</section>`;
     const doctor = state.data.item;
@@ -557,8 +628,8 @@
       : `<div class="overview-organization"><span>Einrichtung</span><strong>${escape(organization) || '—'}</strong></div>`;
     const icons={person:'<circle cx="12" cy="8" r="4"/><path d="M4 22v-2a8 8 0 0 1 16 0v2"/>',medical:'<path d="M5 3v6a5 5 0 0 0 10 0V3M3 3h4M13 3h4M10 14v3a5 5 0 0 0 10 0v-3"/><circle cx="20" cy="11" r="3"/>',location:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',phone:'<path d="m7 3 3 5-3 3a16 16 0 0 0 6 6l3-3 5 3-1 4C10 22 2 14 3 4Z"/>'};
     const icon=name=>`<span class="overview-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons[name]}</svg></span>`;
-    const fields=rows=>`<dl>${rows.map(([label,value])=>`<div><dt>${label}</dt><dd${!value ? ' class="overview-missing"' : ''}>${value||'Noch keine Angabe'}</dd></div>`).join('')}</dl>`;
-    const section=(title,symbol,rows)=>`<section class="overview-group">${icon(symbol)}<div class="overview-group-content"><h3>${title}</h3>${fields(rows)}</div></section>`;
+    const fields=(rows,extra='')=>`<dl>${rows.map(([label,value])=>`<div><dt>${label}</dt><dd${!value ? ' class="overview-missing"' : ''}>${value||'Noch keine Angabe'}</dd></div>`).join('')}${extra}</dl>`;
+    const section=(title,symbol,rows,extra='',action='')=>`<section class="overview-group">${icon(symbol)}<div class="overview-group-content"><h3>${title}</h3>${fields(rows,extra)}${action}</div></section>`;
     const type=window.LCNDoctorEntryTypes?.format(doctor.dr_type)||({doctor:'Ärzt:innen',practice:'Praxis',clinic:'Klinik',other:'Anlaufstelle'})[doctor.dr_type]||doctor.dr_type||'';
     const country=window.LCNDoctorCountryLabel?.(doctor.loc_country)||({AT:'Österreich',DE:'Deutschland',CH:'Schweiz'})[doctor.loc_country]||doctor.loc_country;
     const locations=[['Adresse',escape(address())],['Land',escape(country)]];
@@ -572,7 +643,8 @@
       ['Telefon',contactLink('Telefon',doctor.loc_phone||doctor.dr_phone)],
       ['E-Mail',contactLink('E-Mail',doctor.loc_email||doctor.dr_email)],
       ['Website',contactLink('Website',doctor.loc_website||doctor.dr_website)]
-    ])}</div></div></section>`;
+    ], socialProfileLinks(doctor), isAdmin && !isSubmission && window.LCNDoctorSocialProfiles
+      ? '<div class="doctor-social-admin"><button type="button" class="doctor-social-action" data-add-doctor-social>+ Social-Media-Link hinzufügen</button></div>' : '')}</div></div></section>`;
   }
 
   function overview() {
@@ -691,7 +763,7 @@
   function symptoms() {
     if (!state.data) return '<section class="card"><h3>Symptome</h3>' + dataStatus() + '</section>';
     if (isSubmission) return '<section class="card"><h3>Symptome</h3><p>Erfahrungen zu einzelnen Symptomen können nach der Freigabe des Profils ergänzt werden.</p></section>';
-    return '<section class="card ux-symptom-help" data-doctor-symptom-help><h3>Bei welchen Symptomen hat dir die behandelnde Person geholfen?</h3><p>Klicke die Symptome an, bei denen dir die Behandlung geholfen hat. Erneutes Anklicken nimmt deine Stimme zurück.</p><ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol><div class="ux-symptom-picker" data-symptom-combobox><label for="doctor-symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="doctor-symptom-search" type="text" role="combobox" data-symptom-search placeholder="Symptom auswählen oder eintippen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="doctor-symptom-picker"><button type="button" data-symptom-toggle aria-label="Symptomliste öffnen" aria-controls="doctor-symptom-picker" aria-expanded="false">⌄</button></div><div id="doctor-symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div></section>';
+    return '<section class="card ux-symptom-help" data-doctor-symptom-help><h3><span class="doctor-symptom-contribution">Bei welchen Symptomen hat dir die behandelnde Person geholfen?</span><span class="doctor-symptom-reading" style="display:none">Symptome <span class="ux-heading-info"><button type="button" aria-label="Information zu Symptomen" aria-describedby="doctor-symptom-info">ⓘ</button><span id="doctor-symptom-info" role="tooltip">Klicke auf ein Symptom, bei dem dir die Behandlung geholfen hat. Erneutes Anklicken nimmt deine Auswahl zurück.</span></span></span></h3><p class="doctor-symptom-contribution">Klicke die Symptome an, bei denen dir die Behandlung geholfen hat. Erneutes Anklicken nimmt deine Stimme zurück.</p><div class="doctor-symptom-grid"><ol class="ux-symptom-ranking" data-symptom-ranking aria-label="Symptome nach hilfreichen Erfahrungen"></ol><div class="ux-symptom-picker" data-symptom-combobox><label for="doctor-symptom-search">Weiteres Symptom auswählen</label><div class="ux-symptom-input-wrap"><input id="doctor-symptom-search" type="text" role="combobox" data-symptom-search placeholder="Symptom auswählen oder eintippen …" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="doctor-symptom-picker"><button type="button" data-symptom-toggle aria-label="Symptomliste öffnen" aria-controls="doctor-symptom-picker" aria-expanded="false">⌄</button></div><div id="doctor-symptom-picker" role="listbox" aria-label="Weitere Symptome" data-symptom-picker hidden></div></div></div></section>';
   }
   let pendingCatalogTreatments=[],treatmentFeedback={};window.addEventListener('lcn-relation-feedback',event=>{treatmentFeedback=event.detail||{};if(state.treatmentSort==='feedback'&&document.getElementById('treatment-section'))refreshTreatmentControls();});
   window.addEventListener('lcn-pending-treatments',event=>{pendingCatalogTreatments=event.detail||[];if(document.getElementById('treatment-section'))refreshTreatmentControls();});

@@ -81,14 +81,14 @@ async function checkModeCopy(page, mode) {
     assert.match(text, /Welche Behandlungen ergeben zusammen mehr/);
     assert.equal(await topics.locator('h4').count(), 2);
     assert.equal(await guide.locator('.therapy-guide-annotation, .therapy-guide-sharing').count(), 0);
-    assert.doesNotMatch(text, /Du bist unsicher|Hier sammelt die Community frei vorgeschlagene/);
+    assert.doesNotMatch(text, /Welche Möglichkeiten gibt es rund um diese Therapie|von der Community vorgeschlagenen Alternativen/);
   } else {
-    assert.match(text, /Du bist unsicher/);
-    assert.match(text, /Hier sammelt die Community frei vorgeschlagene/);
+    assert.match(text, /Die Community sammelt Alternativen, ordnet verwandte Einträge ein und trägt Kombinationen zusammen/);
+    assert.match(text, /von der Community vorgeschlagenen Alternativen/);
     assert.match(text, /Hier sammelt die Community Kombinationen/);
     assert.equal(await guide.locator('.therapy-guide-annotation').count(), 1);
     assert.equal(await guide.locator('.therapy-guide-annotation p').innerText(),
-      'Die Zahlen neben ✓ und × zeigen, wie viele Zustimmungen und Widersprüche es zur jeweiligen Zuordnung gibt. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.');
+      'Die Zahlen neben ✓ und × zeigen, wie oft die Community der jeweiligen Zuordnung zugestimmt oder widersprochen hat. Erfahrungen zur Wirkung findest du in den einzelnen Therapieprofilen.');
     assert.equal(await guide.locator('.therapy-guide-sharing').count(), 1);
     assert.equal(await topics.locator('h4, [data-guide-stage]').count(), 0);
     assert.doesNotMatch(text, /Prüfe die vorhandenen Alternativen|Ergänze frei|Welche Behandlungen ergeben zusammen mehr/);

@@ -150,15 +150,15 @@ window.LCNTherapyAlternativesReading = ({make, classificationContext, fieldRefer
   }
 
   return {
-    eyebrow: 'Erfahrungen verstehen',
-    introduction: 'Du bist unsicher, ob diese Therapie zu dir passt, oder suchst nach etwas, das dir mehr hilft? Hier trägt die Community Alternativen und konkrete Varianten zusammen. So kannst du entdecken, wie die Behandlung aussehen könnte und welche weiteren Möglichkeiten du hast.',
+    eyebrow: 'Alternativen erkunden',
+    introduction: 'Welche Möglichkeiten gibt es rund um diese Therapie? Die Community sammelt Alternativen, ordnet verwandte Einträge ein und trägt Kombinationen zusammen. Öffne das Thema, das dich interessiert.',
     topics: {
-      alternative: {description: 'Hier sammelt die Community frei vorgeschlagene Therapiealternativen. Die Einträge beruhen auf diesen Vorschlägen; ein fachlicher Zusammenhang wird damit nicht vorausgesetzt. Scrolle seitlich und öffne die Namen für Details.'},
+      alternative: {description: 'Hier findest du die von der Community vorgeschlagenen Alternativen. Scrolle seitlich durch die Liste und öffne einen Namen, um mehr über die jeweilige Therapie zu erfahren.'},
       combination: {description: diagnostic
         ? 'Hier sammelt die Community Untersuchungen, die gemeinsam durchgeführt werden. Du siehst, welche Untersuchungen jeweils zusammengehören und welche Kombinationen die Community vorschlägt.'
         : 'Hier sammelt die Community Kombinationen aus Therapien oder Wirkstoffen, deren Zusammenspiel einen zusätzlichen oder anderen Effekt erzielen soll. Du siehst, welche Bestandteile jeweils zusammengehören und welche Kombinationen die Community vorschlägt.'}
     },
-    feedbackNote: 'Die Zahlen neben ✓ und × zeigen, wie viele Zustimmungen und Widersprüche es zur jeweiligen Zuordnung gibt. Sie bewerten weder die Wirksamkeit noch die Gleichwertigkeit der Therapien.',
+    feedbackNote: 'Die Zahlen neben ✓ und × zeigen, wie oft die Community der jeweiligen Zuordnung zugestimmt oder widersprochen hat. Erfahrungen zur Wirkung findest du in den einzelnen Therapieprofilen.',
     sharing: {
       invitation: 'Kennst du jemanden, der diese Therapie oder eine der Alternativen schon ausprobiert hat? Leite diese Seite weiter und lade die Person ein, Einträge zu bestätigen, ihnen zu widersprechen oder fehlendes Wissen zu ergänzen.',
       shareText: 'Hast du diese Therapie oder eine Alternative dazu ausprobiert? Schau dir die Alternativen, Einordnungen und Kombinationen im Long Covid Navigator an. Bestätige passende Einträge, widersprich unpassenden Zuordnungen oder ergänze, was du kennst.'

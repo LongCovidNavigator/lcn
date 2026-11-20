@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/_submission_treatments.php';
 require_once __DIR__ . '/_doctor_community_answers.php';
+require_once __DIR__ . '/_doctor_social_profiles.php';
 header('Cache-Control: private, no-store');
 try {
     $method=$_SERVER['REQUEST_METHOD']??'GET';
@@ -38,5 +39,5 @@ try {
     $pdo->commit();$payload=json_decode($row['payload'],true);
     $treatments=[];$ids=lcnSubmissionTreatmentIds($payload);
     if($ids){$query=$pdo->prepare('SELECT treat_id,behandlung,typ,unterkategorie FROM v_lcn_treatments WHERE treat_id IN ('.implode(',',array_fill(0,count($ids),'?')).')');$query->execute($ids);foreach($query as $treatment)$treatments[$treatment['typ']?:'Weitere Behandlungen'][]=$treatment;}
-    lcnSendVoteJson(['adaptation_benchmark'=>lcnDoctorAdaptationBenchmark($pdo,false),'treatments_grouped'=>(object)$treatments,'ok'=>true,'name'=>$row['name'],'website'=>$row['website'],'organization'=>$payload['organization']??'','primary_care'=>($payload['primary_care']??false)===true,'specialist_care'=>($payload['specialist_care']??false)===true,'address'=>$payload['address']??'','status'=>$row['review_status'],'questions'=>$questions]);
+    lcnSendVoteJson(['adaptation_benchmark'=>lcnDoctorAdaptationBenchmark($pdo,false),'treatments_grouped'=>(object)$treatments,'ok'=>true,'name'=>$row['name'],'website'=>$row['website'],'social_profiles'=>lcnDoctorSocialProfilesFromPayload($row['payload']),'organization'=>$payload['organization']??'','primary_care'=>($payload['primary_care']??false)===true,'specialist_care'=>($payload['specialist_care']??false)===true,'address'=>$payload['address']??'','status'=>$row['review_status'],'questions'=>$questions]);
 }catch(Throwable $error){if(isset($pdo)&&$pdo->inTransaction())$pdo->rollBack();lcnLogApiError('doctor_submission',$error);lcnSendVoteJson(['ok'=>false,'error'=>'Angaben konnten nicht geladen oder gespeichert werden.'],500);}

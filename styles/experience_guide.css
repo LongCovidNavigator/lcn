@@ -759,16 +759,20 @@ dialog.therapy-orientation { width: min(32rem, calc(100% - 2rem)); }
 }
 
 /* Compare access paths as readable cards instead of a dense two-column list. */
-.therapy-guide-note details .therapy-guide-options:is(.therapy-guide-access-options,.therapy-guide-criteria){grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 14px;padding:0}
-.therapy-guide-note details :is(.therapy-guide-access-options,.therapy-guide-criteria) li{display:flex;flex-direction:column;grid-column:auto;gap:8px;padding:14px 16px;border:1px solid #ddd1e9;border-radius:10px;background:#fffdfebb}
-:is(.therapy-guide-access-options,.therapy-guide-criteria) li::before{content:none}
-:is(.therapy-guide-access-options,.therapy-guide-criteria) li > strong{font-size:15px;line-height:1.4}
-:is(.therapy-guide-access-options,.therapy-guide-criteria) li > span:not(.therapy-guide-access-level){font-size:14px;line-height:1.55}
+.therapy-guide-note details .therapy-guide-options:is(.therapy-guide-access-options,.therapy-guide-criteria,.therapy-guide-option-cards){grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 24px 14px;padding:0}
+.therapy-guide-note details :is(.therapy-guide-access-options,.therapy-guide-criteria,.therapy-guide-option-cards) li{display:flex;flex-direction:column;grid-column:auto;gap:8px;padding:14px 16px;border:1px solid #ddd1e9;border-radius:10px;background:#fffdfebb}
+:is(.therapy-guide-access-options,.therapy-guide-criteria,.therapy-guide-option-cards) li::before{content:none}
+:is(.therapy-guide-access-options,.therapy-guide-criteria,.therapy-guide-option-cards) li > strong{font-size:15px;line-height:1.4}
+:is(.therapy-guide-access-options,.therapy-guide-criteria,.therapy-guide-option-cards) li > span:not(.therapy-guide-access-level){font-size:14px;line-height:1.55}
 .therapy-guide-access-options .therapy-guide-access-level{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#614584;order:3;margin-top:auto;padding-top:6px}
 .therapy-guide-access-meter{display:flex;gap:3px}
 .therapy-guide-access-meter i{width:13px;height:5px;border-radius:2px;background:#e5ddec}
 .therapy-guide-access-meter i.is-filled{background:#80619f}
-@media(max-width:700px){.therapy-guide-note details .therapy-guide-options:is(.therapy-guide-access-options,.therapy-guide-criteria){grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){
+  .therapy-guide-note details .therapy-guide-options:is(.therapy-guide-access-options,.therapy-guide-criteria,.therapy-guide-option-cards){grid-template-columns:minmax(0,1fr)}
+  .therapy-guide-note details .therapy-guide-options.therapy-guide-option-cards{margin-inline:16px}
+  .therapy-guide-note details .therapy-guide-option-cards li{padding:12px}
+}
 .therapy-guide-note details .therapy-guide-options.therapy-guide-criteria {
   margin-inline: .9rem;
   margin-block-end: 0;

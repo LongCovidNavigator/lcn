@@ -5,6 +5,8 @@ require_once __DIR__ . '/_doctor_hybrid.php';
 require_once __DIR__ . '/_search_normalization.php';
 require_once __DIR__ . '/_voting.php';
 require_once __DIR__ . '/_pending_treatments.php';
+require_once __DIR__ . '/_doctor_social_profiles.php';
+require_once __DIR__ . '/_site_auth.php';
 
 lcnRequireVotingRequest();
 
@@ -70,6 +72,31 @@ try {
     $experience = (string)($input['experience'] ?? '');
     $existingTargetId = filter_var($input['existing_target_id'] ?? null, FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]);
     $existingTargetId = $existingTargetId === false ? null : $existingTargetId;
+    $socialProfiles = [];
+    if ($type === 'doctor' && array_key_exists('social_profiles', $input)) {
+        try {
+            $socialProfiles = lcnDoctorSocialProfiles($input['social_profiles']);
+        } catch (InvalidArgumentException $error) {
+            lcnSendVoteJson(['ok' => false, 'error' => $error->getMessage()], 422);
+        }
+    }
+
+    if (($input['action'] ?? '') === 'add_doctor_social_profiles') {
+        lcnRequireAdminJson();
+        if ($type !== 'doctor' || !$existingTargetId || !$socialProfiles) {
+            lcnSendVoteJson(['ok' => false, 'error' => 'Bitte gib mindestens ein Social-Media-Profil an.'], 422);
+        }
+        $pdo = lcnDoctorDatabase();
+        $save = $pdo->prepare("
+            INSERT INTO community_submissions
+                (entity_type,existing_target_id,submission_kind,name,website,payload,submitter_key,triage_status,review_status,reviewed_at,approved_target_id,reviewer_note)
+            SELECT 'doctor',lcn_id,'change',anzeigename,'',?,?,'needs_review','approved',NOW(),lcn_id,'Social-Media-Profile durch Administration ergänzt.'
+            FROM tbl_entities_nd WHERE lcn_id=? AND aktiv=1
+        ");
+        $save->execute([json_encode(['social_profiles' => $socialProfiles], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR), lcnVoterKey(), $existingTargetId]);
+        if (!$save->rowCount()) lcnSendVoteJson(['ok' => false, 'error' => 'Behandler:in nicht gefunden.'], 404);
+        lcnSendVoteJson(['ok' => true, 'social_profiles' => lcnApprovedDoctorSocialProfiles($pdo, $existingTargetId)], 201);
+    }
 
     if (!in_array($type, ['doctor', 'treatment'], true) || $name === '') {
         lcnSendVoteJson(['ok' => false, 'error' => 'Bitte gib mindestens einen Namen an.'], 422);
@@ -97,6 +124,7 @@ try {
         'diagnoses_mecfs','diagnoses_long_covid','diagnoses_pots','diagnoses_mcas','diagnoses_vaccine_injury','information_source'];
     if ($type === 'doctor') $input['treatment_ids'] = lcnSubmissionTreatmentIds($input);
     $payload = array_intersect_key($input, array_flip($allowed));
+    if ($socialProfiles) $payload['social_profiles'] = $socialProfiles;
     $pdo = lcnDoctorDatabase();
     if($type==='treatment'){
         foreach(['treatment_category'=>150,'treatment_subcategory'=>150,'medication_role'=>20,'medication_parent_name'=>180] as $field=>$max)if(array_key_exists($field,$payload))$payload[$field]=submissionString($input,$field,$max);
